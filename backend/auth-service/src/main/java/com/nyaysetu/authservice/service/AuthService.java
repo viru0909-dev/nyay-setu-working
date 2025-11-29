@@ -6,7 +6,6 @@ import com.nyaysetu.authservice.dto.RegisterRequest;
 import com.nyaysetu.authservice.entity.User;
 import com.nyaysetu.authservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.var;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,4 +52,5 @@ public class AuthService {
                 .role(user.getRole())
                 .build();
     }
+
 }

@@ -6,7 +6,6 @@ import com.nyaysetu.aiservice.dto.SummarizeRequest;
 import com.nyaysetu.aiservice.dto.SummarizeResponse;
 import com.nyaysetu.aiservice.service.AiService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,11 +17,13 @@ public class AiController {
 
     @PostMapping("/summarize")
     public SummarizeResponse summarize(@RequestBody SummarizeRequest request) {
-        return aiService.summarize(request);
+        String result = aiService.summarize(request.getText());
+        return new SummarizeResponse(result);
     }
 
     @PostMapping("/chat")
     public ChatResponse chat(@RequestBody ChatRequest request) {
-        return aiService.chat(request);
+        String result = aiService.chat(request.getMessage());
+        return new ChatResponse(result);
     }
 }

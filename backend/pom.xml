@@ -1,38 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<!-- backend/pom.xml -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.nyaysetu</groupId>
     <artifactId>nyaysetu-backend</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
+    <name>NYAY-SETU Backend Parent</name>
 
-    <name>NYAY-SETU Backend</name>
-    <description>Multi-module backend for NYAY-SETU judiciary platform</description>
-
-    <!-- Spring Boot Version -->
     <properties>
         <java.version>17</java.version>
         <spring.boot.version>3.2.3</spring.boot.version>
+        <spring.cloud.version>2023.0.6</spring.cloud.version>
+        <lombok.version>1.18.30</lombok.version>
+        <spring.ai.version>0.8.1</spring.ai.version> <!-- used by ai-service -->
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
 
-    <!-- Declare all modules here -->
-    <modules>
-        <module>auth-service</module>
-        <module>user-verification-service</module>
-        <module>case-service</module>
-        <module>document-service</module>
-        <module>meeting-service</module>
-        <module>ai-service</module>
-        <module>audit-service</module>
-        <module>gateway-service</module>
-    </modules>
-
+    <!-- Reactor and Spring Boot BOM management -->
     <dependencyManagement>
         <dependencies>
+            <!-- Spring Boot BOM -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -40,18 +32,64 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!-- Spring Cloud BOM -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Optional: spring-ai BOM if present (not always available) -->
+            <!-- if you don't have a BOM, explicit versions are used in ai-service -->
         </dependencies>
     </dependencyManagement>
 
     <build>
         <pluginManagement>
             <plugins>
+                <!-- Spring Boot Maven plugin -->
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.boot.version}</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+
+                <!-- Compiler plugin -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <parameters>true</parameters>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
 
+    <!-- modules: add the directories of your microservices -->
+    <modules>
+        <module>eureka-server</module>
+        <module>gateway-service</module>
+        <module>auth-service</module>
+        <module>user-verification-service</module>
+        <module>case-service</module>
+        <module>document-service</module>
+        <module>meeting-service</module>
+        <module>audit-service</module>
+        <module>ai-service</module>
+    </modules>
 </project>

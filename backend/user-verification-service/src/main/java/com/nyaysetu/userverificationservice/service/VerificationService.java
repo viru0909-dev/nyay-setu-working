@@ -5,7 +5,6 @@ import com.nyaysetu.userverificationservice.entity.VerificationRequest;
 import com.nyaysetu.userverificationservice.entity.VerificationStatus;
 import com.nyaysetu.userverificationservice.repository.VerificationRequestRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.var;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 

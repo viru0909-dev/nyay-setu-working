@@ -1,35 +1,20 @@
 package com.nyaysetu.aiservice.service;
 
-import com.nyaysetu.aiservice.dto.ChatRequest;
-import com.nyaysetu.aiservice.dto.ChatResponse;
-import com.nyaysetu.aiservice.dto.SummarizeRequest;
-import com.nyaysetu.aiservice.dto.SummarizeResponse;
-import org.springframework.ai.ollama.OllamaChatClient;
-import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class AiService {
 
-    private final OllamaChatClient chatClient;
+    private final OllamaChatModel chatModel;
 
-    public SummarizeResponse summarize(SummarizeRequest request) {
-
-        String prompt = "Summarize this legal text:\n\n" + request.getText();
-        String result = chatClient.call(prompt);
-
-        return SummarizeResponse.builder()
-                .summary(result)
-                .build();
+    public String summarize(String text) {
+        return chatModel.call("Summarize this: " + text);
     }
 
-    public ChatResponse chat(ChatRequest request) {
-
-        String reply = chatClient.call(request.getMessage());
-
-        return ChatResponse.builder()
-                .reply(reply)
-                .build();
+    public String chat(String message) {
+        return chatModel.call(message);
     }
 }

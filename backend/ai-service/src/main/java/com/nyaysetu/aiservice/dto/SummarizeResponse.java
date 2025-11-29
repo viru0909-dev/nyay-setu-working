@@ -5,8 +5,9 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@Data
+@AllArgsConstructor
 public class SummarizeResponse {
     private String summary;
 }

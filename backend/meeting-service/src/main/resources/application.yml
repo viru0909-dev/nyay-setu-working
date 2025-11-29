@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: meeting-service
+    eureka:
+      client:
+        service-url:
+          defaultZone: http://localhost:8761/eureka
   datasource:
     url: jdbc:postgresql://localhost:5432/nyaysetu_meeting
     username: postgres

@@ -2,6 +2,13 @@ server:
   port: 8086
 
 spring:
+  application:
+    name: audit-service
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://localhost:8761/eureka
+
   datasource:
     url: jdbc:postgresql://localhost:5432/nyaysetu
     username: postgres

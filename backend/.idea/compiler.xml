@@ -7,28 +7,29 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="auth-service" />
         <module name="audit-service" />
         <module name="gateway-service" />
-        <module name="auth-service (1)" />
         <module name="case-service" />
-        <module name="auth-service (2)" />
         <module name="meeting-service" />
-        <module name="document-service" />
-      </profile>
-      <profile name="Annotation profile for NYAY-SETU Backend" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
-        </processorPath>
+        <module name="eureka-server" />
+        <module name="user-verification-service" />
         <module name="ai-service" />
+        <module name="document-service" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="ai-service" options="-parameters" />
+      <module name="audit-service" options="-parameters" />
+      <module name="auth-service" options="-parameters" />
+      <module name="case-service" options="-parameters" />
+      <module name="document-service" options="-parameters" />
+      <module name="eureka-server" options="-parameters" />
       <module name="gateway-service" options="-parameters" />
+      <module name="meeting-service" options="-parameters" />
+      <module name="user-verification-service" options="-parameters" />
     </option>
   </component>
 </project>
