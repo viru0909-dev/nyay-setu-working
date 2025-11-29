@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="case-service" />
+        <module name="meeting-service" />
+        <module name="audit-service" />
+        <module name="ai-service" />
+        <module name="gateway-service" />
+        <module name="document-service" />
+      </profile>
+      <profile name="Annotation profile for NYAY-SETU Backend" enabled="true">
+        <sourceOutputDir name="../user-verification-service/target/generated-sources/annotations" />
+        <sourceTestOutputDir name="../user-verification-service/target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="auth-service (1)" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

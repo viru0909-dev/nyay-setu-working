@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nyaysetu_auth
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  # For dev only: generate a 32-byte (256-bit) key and base64-encode it.
+  # Example generation in Java: Base64.getEncoder().encodeToString("your-32byte-secret..........".getBytes())
+  secret: "4YMH8Dj0nsCFZvejRddrFBuF6eiHihhfaTD2iJd6T1M="
