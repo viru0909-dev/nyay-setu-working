@@ -1,0 +1,37 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/auth/**
+        - id: case-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/cases/**
+        - id: document-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/documents/**
+        - id: meeting-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/meetings/**
+        - id: ai-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/ai/**
+        - id: audit-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/audit/**
+        - id: user-verification-service
+          uri: http://localhost:8087
+          predicates:
+            - Path=/verify/**

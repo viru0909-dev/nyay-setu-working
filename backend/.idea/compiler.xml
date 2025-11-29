@@ -13,9 +13,22 @@
         <module name="case-service" />
         <module name="auth-service (2)" />
         <module name="meeting-service" />
-        <module name="ai-service" />
         <module name="document-service" />
       </profile>
+      <profile name="Annotation profile for NYAY-SETU Backend" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
+        </processorPath>
+        <module name="ai-service" />
+      </profile>
     </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="gateway-service" options="-parameters" />
+    </option>
   </component>
 </project>
