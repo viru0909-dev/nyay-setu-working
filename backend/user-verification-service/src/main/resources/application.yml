@@ -1,0 +1,13 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: user-verification-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nyaysetu_verification
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
