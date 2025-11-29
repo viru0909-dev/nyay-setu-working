@@ -1,0 +1,14 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: meeting-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nyaysetu_meeting
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
