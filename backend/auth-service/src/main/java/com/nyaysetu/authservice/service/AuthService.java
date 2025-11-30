@@ -21,14 +21,18 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public JwtResponse register(RegisterRequest request) {
-        var user = User.builder()
+
+        User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .build();
+
         repository.save(user);
+
         String token = jwtService.generateToken(user);
+
         return JwtResponse.builder()
                 .token(token)
                 .email(user.getEmail())
@@ -37,20 +41,23 @@ public class AuthService {
     }
 
     public JwtResponse login(LoginRequest request) {
-        // Authenticate user credentials using Spring Security
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
         );
 
-        var user = repository.findByEmail(request.getEmail())
+        User user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
         String token = jwtService.generateToken(user);
+
         return JwtResponse.builder()
                 .token(token)
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();
     }
-
 }

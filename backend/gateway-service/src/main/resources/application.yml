@@ -4,84 +4,86 @@ server:
 spring:
   application:
     name: gateway-service
-    security:
-      oauth2:
-        resourceserver:
-          jwt:
-            jwk-set-uri: http://localhost:8081/auth/jwks
-            secret-key: "76U4Z85+zjZNNtI0fEBpON3TJxFzhsX3cyTuJbJ5wOE="
-
-  eureka:
-    client:
-      service-url:
-        defaultZone: http://localhost:8761/eureka
 
   cloud:
     gateway:
       default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
 
       globalcors:
         corsConfigurations:
           '[/**]':
             allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
+            allowedMethods: "*"
             allowedHeaders: "*"
 
       routes:
 
+        # ---------------------- AUTH SERVICE ----------------------
         - id: auth-service
           uri: http://localhost:8081
           predicates:
             - Path=/auth/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=0
 
-        - id: case-service
-          uri: http://localhost:8082
-          predicates:
-            - Path=/cases/**
-          filters:
-            - StripPrefix=1
-
-        - id: document-service
-          uri: http://localhost:8083
-          predicates:
-            - Path=/documents/**
-          filters:
-            - StripPrefix=1
-
-        - id: meeting-service
-          uri: http://localhost:8084
-          predicates:
-            - Path=/meetings/**
-          filters:
-            - StripPrefix=1
-
+        # ---------------------- AI SERVICE ----------------------
         - id: ai-service
           uri: http://localhost:8085
           predicates:
             - Path=/ai/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=0
 
+        # ---------------------- AUDIT SERVICE ----------------------
         - id: audit-service
           uri: http://localhost:8086
           predicates:
             - Path=/audit/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=0
 
+        # ---------------------- CASE SERVICE ----------------------
+        - id: case-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/cases/**
+          filters:
+            - StripPrefix=0
+
+        # ---------------------- DOCUMENT SERVICE ----------------------
+        - id: document-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/documents/**
+          filters:
+            - StripPrefix=0
+
+        # ---------------------- MEETING SERVICE ----------------------
+        - id: meeting-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/meetings/**
+          filters:
+            - StripPrefix=0
+
+        # ---------------------- USER VERIFICATION ----------------------
         - id: user-verification-service
           uri: http://localhost:8087
           predicates:
             - Path=/verify/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=0
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8081/auth/jwks
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
