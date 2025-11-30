@@ -5,5 +5,5 @@ public enum Role {
     JUDGE,
     LAWYER,
     CLIENT,
-    TECH_ADMIN
+    USER, TECH_ADMIN
 }

@@ -1,15 +1,10 @@
 package com.nyaysetu.authservice.dto;
 
-import com.nyaysetu.authservice.entity.Role;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-@Builder
 public class JwtResponse {
     private String token;
-    private String email;
-    private Role role;
 }

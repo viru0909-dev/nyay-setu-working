@@ -1,15 +1,9 @@
 package com.nyaysetu.authservice.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 public class LoginRequest {
-    @NotBlank @Email private String email;
-    @NotBlank private String password;
+    private String email;
+    private String password;
 }

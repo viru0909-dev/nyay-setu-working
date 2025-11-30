@@ -1,11 +1,11 @@
 package com.nyaysetu.caseservice.controller;
 
 import com.nyaysetu.caseservice.dto.CreateCaseRequest;
-import com.nyaysetu.caseservice.entity.CaseEntity;
+import com.nyaysetu.caseservice.dto.UpdateStatusRequest;
 import com.nyaysetu.caseservice.entity.CaseStatus;
+import com.nyaysetu.caseservice.entity.LegalCase;
 import com.nyaysetu.caseservice.service.CaseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,27 +19,25 @@ public class CaseController {
     private final CaseService caseService;
 
     @PostMapping
-    public ResponseEntity<CaseEntity> createCase(@RequestBody CreateCaseRequest request) {
-        return ResponseEntity.ok(caseService.createCase(request));
+    public LegalCase createCase(@RequestBody CreateCaseRequest request) {
+        return caseService.createCase(request);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CaseEntity> getCase(@PathVariable UUID id) {
-        return ResponseEntity.ok(caseService.getCase(id));
+    @GetMapping("/{caseId}")
+    public LegalCase getCase(@PathVariable UUID caseId) {
+        return caseService.getCase(caseId);
     }
 
-    @GetMapping("/judge/{judgeId}")
-    public ResponseEntity<List<CaseEntity>> getCasesByJudge(@PathVariable UUID judgeId) {
-        return ResponseEntity.ok(caseService.getCasesByJudge(judgeId));
+    @GetMapping
+    public List<LegalCase> getAllCases() {
+        return caseService.getAllCases();
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CaseEntity>> getCasesForUser(@PathVariable UUID userId) {
-        return ResponseEntity.ok(caseService.getCasesForUser(userId));
-    }
-
-    @PutMapping("/status/{id}")
-    public ResponseEntity<CaseEntity> updateStatus(@PathVariable UUID id, @RequestParam CaseStatus status) {
-        return ResponseEntity.ok(caseService.updateStatus(id, status));
+    @PutMapping("/{caseId}/status")
+    public LegalCase updateStatus(
+            @PathVariable UUID caseId,
+            @RequestBody UpdateStatusRequest request
+    ) {
+        return caseService.updateStatus(caseId, CaseStatus.valueOf(request.getStatus()));
     }
 }
