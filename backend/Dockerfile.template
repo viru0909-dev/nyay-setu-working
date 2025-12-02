@@ -1,0 +1,43 @@
+# Dockerfile.template - ARM64-compatible multi-platform build for Spring Boot microservices
+# Build image with Maven then run with Temurin JRE (non-alpine for best platform support)
+
+# Use build arguments for flexibility
+ARG BUILD_IMAGE=maven:3.9-eclipse-temurin-17
+ARG RUNTIME_IMAGE=eclipse-temurin:17-jre
+
+# Build stage - multi-platform compatible
+FROM --platform=$BUILDPLATFORM ${BUILD_IMAGE} AS builder
+WORKDIR /app
+
+# Configure Maven
+ARG MAVEN_CONFIG="/root/.m2"
+ENV MAVEN_CONFIG=${MAVEN_CONFIG}
+
+# Copy pom.xml and download dependencies (cached layer)
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy source code
+COPY src ./src
+
+# Build the application (skip tests for faster builds)
+RUN mvn -B -DskipTests package
+
+# Runtime stage - ARM64 optimized
+FROM --platform=linux/arm64 ${RUNTIME_IMAGE} AS runtime
+WORKDIR /app
+
+# Create non-root user for security
+RUN addgroup --system app && adduser --system --ingroup app app
+
+# Copy JAR from build stage
+COPY --from=builder /app/target/*.jar app.jar
+
+# Switch to non-root user
+USER app
+
+# Expose port (will be overridden by service-specific Dockerfile)
+EXPOSE 8080
+
+# Run the application
+ENTRYPOINT ["sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -jar /app/app.jar"]

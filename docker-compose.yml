@@ -1,0 +1,297 @@
+# docker-compose.yml - ARM64-friendly for NyaySetu
+# Optimized for M1/M2 Mac - no version field (Docker Compose v2+)
+
+name: nyay-setu
+
+# Common environment variables to reduce repetition
+x-common-env: &common-env
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_USERNAME: ${DB_USERNAME:-nyaysetu}
+  DB_PASSWORD: ${DB_PASSWORD:-nyaysetu_local}
+  SPRING_PROFILES_ACTIVE: docker
+  EUREKA_URL: http://eureka-server:8761/eureka
+
+x-backend-healthcheck: &backend-healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+
+services:
+  # ============================================================
+  # DATABASE
+  # ============================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: nyaysetu-postgres
+    platform: linux/arm64
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nyaysetu}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nyaysetu_local}
+      POSTGRES_MULTIPLE_DATABASES: nyaysetu_auth,nyaysetu_case,nyaysetu_document,nyaysetu_meeting,nyaysetu_ai,nyaysetu_audit,nyaysetu_verification
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nyaysetu"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nyaysetu-network
+
+  # ============================================================
+  # SERVICE DISCOVERY (EUREKA)
+  # ============================================================
+  eureka-server:
+    build:
+      context: ./backend/eureka-server
+      dockerfile: Dockerfile
+    container_name: nyaysetu-eureka
+    platform: linux/arm64
+    environment:
+      <<: *common-env
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
+      <<: *backend-healthcheck
+    networks:
+      - nyaysetu-network
+
+  # ============================================================
+  # BACKEND MICROSERVICES
+  # ============================================================
+  
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: nyaysetu-auth
+    platform: linux/arm64
+    environment:
+      <<: *common-env
+      DB_NAME: nyaysetu_auth
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
+      <<: *backend-healthcheck
+    networks:
+      - nyaysetu-network
+
+  case-service:
+    build:
+      context: ./backend/case-service
+      dockerfile: Dockerfile
+    container_name: nyaysetu-case
+    platform: linux/arm64
+    environment:
+      <<: *common-env
+      DB_NAME: nyaysetu_case
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
+      <<: *backend-healthcheck
+    networks:
+      - nyaysetu-network
+
+  document-service:
+    build:
+      context: ./backend/document-service
+      dockerfile: Dockerfile
+    container_name: nyaysetu-document
+    platform: linux/arm64
+    environment:
+      <<: *common-env
+      DB_NAME: nyaysetu_document
+    ports:
+      - "8083:8083"
+    volumes:
+      - document_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8083/actuator/health"]
+      <<: *backend-healthcheck
+    networks:
+      - nyaysetu-network
+
+  meeting-service:
+    build:
+      context: ./backend/meeting-service
+      dockerfile: Dockerfile
+    container_name: nyaysetu-meeting
+    platform: linux/arm64
+    environment:
+      <<: *common-env
+      DB_NAME: nyaysetu_meeting
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8084/actuator/health"]
+      <<: *backend-healthcheck
+    networks:
+      - nyaysetu-network
+
+  ai-service:
+    build:
+      context: ./backend/ai-service
+      dockerfile: Dockerfile
+    container_name: nyaysetu-ai
+    platform: linux/arm64
+    environment:
+      <<: *common-env
+      DB_NAME: nyaysetu_ai
+      AI_API_KEY: ${AI_API_KEY}
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8085/actuator/health"]
+      <<: *backend-healthcheck
+    networks:
+      - nyaysetu-network
+
+  audit-service:
+    build:
+      context: ./backend/audit-service
+      dockerfile: Dockerfile
+    container_name: nyaysetu-audit
+    platform: linux/arm64
+    environment:
+      <<: *common-env
+      DB_NAME: nyaysetu_audit
+    ports:
+      - "8086:8086"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8086/actuator/health"]
+      <<: *backend-healthcheck
+    networks:
+      - nyaysetu-network
+
+  user-verification-service:
+    build:
+      context: ./backend/user-verification-service
+      dockerfile: Dockerfile
+    container_name: nyaysetu-verification
+    platform: linux/arm64
+    environment:
+      <<: *common-env
+      DB_NAME: nyaysetu_verification
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+    ports:
+      - "8087:8087"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8087/actuator/health"]
+      <<: *backend-healthcheck
+    networks:
+      - nyaysetu-network
+
+  # ============================================================
+  # API GATEWAY
+  # ============================================================
+  gateway-service:
+    build:
+      context: ./backend/gateway-service
+      dockerfile: Dockerfile
+    container_name: nyaysetu-gateway
+    platform: linux/arm64
+    environment:
+      <<: *common-env
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
+    ports:
+      - "9000:9000"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      case-service:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9000/actuator/health"]
+      <<: *backend-healthcheck
+    networks:
+      - nyaysetu-network
+
+  # ============================================================
+  # FRONTEND
+  # ============================================================
+  frontend:
+    build:
+      context: ./frontend/nyaysetu-frontend
+      dockerfile: Dockerfile
+    container_name: nyaysetu-frontend
+    platform: linux/arm64
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:9000}
+    ports:
+      - "80:80"
+    depends_on:
+      gateway-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - nyaysetu-network
+
+# ============================================================
+# VOLUMES
+# ============================================================
+volumes:
+  postgres_data:
+    driver: local
+  document_uploads:
+    driver: local
+
+# ============================================================
+# NETWORKS
+# ============================================================
+networks:
+  nyaysetu-network:
+    driver: bridge
