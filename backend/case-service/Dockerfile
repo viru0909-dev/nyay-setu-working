@@ -21,7 +21,7 @@ RUN mvn dependency:go-offline -B || true
 COPY case-service/src ./src
 
 # Build the application
-RUN mvn -B -DskipTests package
+RUN mvn clean package -DskipTests spring-boot:repackage
 
 # Runtime stage - ARM64 optimized
 FROM --platform=linux/arm64 ${RUNTIME_IMAGE} AS runtime

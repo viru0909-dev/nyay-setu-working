@@ -20,15 +20,17 @@ RUN mvn dependency:go-offline -B || true
 # Copy source code
 COPY eureka-server/src ./src
 
-# Build the application
-RUN mvn -B -DskipTests package
+# Build the application - use clean package to ensure proper build
+RUN mvn clean package -DskipTests spring-boot:repackage
 
 # Runtime stage - ARM64 optimized
 FROM --platform=linux/arm64 ${RUNTIME_IMAGE} AS runtime
 WORKDIR /app
 
 RUN addgroup --system app && adduser --system --ingroup app app
-COPY --from=builder /build/eureka-server/target/*.jar app.jar
+
+# Copy the executable JAR - use wildcard to match versioned filename
+COPY --from=builder /build/eureka-server/target/eureka-server-*.jar app.jar
 
 USER app
 EXPOSE 8761
