@@ -7,15 +7,19 @@ ARG RUNTIME_IMAGE=eclipse-temurin:17-jre
 
 # Build stage - multi-platform compatible
 FROM --platform=$BUILDPLATFORM ${BUILD_IMAGE} AS builder
-WORKDIR /app
+WORKDIR /build
 
 # Configure Maven
 ARG MAVEN_CONFIG="/root/.m2"
 ENV MAVEN_CONFIG=${MAVEN_CONFIG}
 
-# Copy pom.xml and download dependencies (cached layer)
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
+# Copy parent POM first (needed for dependency resolution)
+COPY ../pom.xml ./pom.xml
+
+# Copy service pom.xml and download dependencies (cached layer)
+COPY pom.xml ./service/pom.xml
+WORKDIR /build/service
+RUN mvn dependency:go-offline -B || true
 
 # Copy source code
 COPY src ./src
@@ -31,7 +35,7 @@ WORKDIR /app
 RUN addgroup --system app && adduser --system --ingroup app app
 
 # Copy JAR from build stage
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /build/service/target/*.jar app.jar
 
 # Switch to non-root user
 USER app

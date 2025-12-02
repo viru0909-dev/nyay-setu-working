@@ -48,8 +48,8 @@ services:
   # ============================================================
   eureka-server:
     build:
-      context: ./backend/eureka-server
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: eureka-server/Dockerfile
     container_name: nyaysetu-eureka
     platform: linux/arm64
     environment:
@@ -68,8 +68,8 @@ services:
   
   auth-service:
     build:
-      context: ./backend/auth-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: auth-service/Dockerfile
     container_name: nyaysetu-auth
     platform: linux/arm64
     environment:
@@ -91,8 +91,8 @@ services:
 
   case-service:
     build:
-      context: ./backend/case-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: case-service/Dockerfile
     container_name: nyaysetu-case
     platform: linux/arm64
     environment:
@@ -113,8 +113,8 @@ services:
 
   document-service:
     build:
-      context: ./backend/document-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: document-service/Dockerfile
     container_name: nyaysetu-document
     platform: linux/arm64
     environment:
@@ -137,8 +137,8 @@ services:
 
   meeting-service:
     build:
-      context: ./backend/meeting-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: meeting-service/Dockerfile
     container_name: nyaysetu-meeting
     platform: linux/arm64
     environment:
@@ -159,8 +159,8 @@ services:
 
   ai-service:
     build:
-      context: ./backend/ai-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: ai-service/Dockerfile
     container_name: nyaysetu-ai
     platform: linux/arm64
     environment:
@@ -182,8 +182,8 @@ services:
 
   audit-service:
     build:
-      context: ./backend/audit-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: audit-service/Dockerfile
     container_name: nyaysetu-audit
     platform: linux/arm64
     environment:
@@ -204,8 +204,8 @@ services:
 
   user-verification-service:
     build:
-      context: ./backend/user-verification-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: user-verification-service/Dockerfile
     container_name: nyaysetu-verification
     platform: linux/arm64
     environment:
@@ -233,8 +233,8 @@ services:
   # ============================================================
   gateway-service:
     build:
-      context: ./backend/gateway-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: gateway-service/Dockerfile
     container_name: nyaysetu-gateway
     platform: linux/arm64
     environment:
