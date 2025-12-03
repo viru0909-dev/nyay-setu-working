@@ -5,12 +5,13 @@ name: nyay-setu
 
 # Common environment variables to reduce repetition
 x-common-env: &common-env
-  DB_HOST: postgres
-  DB_PORT: "5432"
-  DB_USERNAME: ${DB_USERNAME:-nyaysetu}
-  DB_PASSWORD: ${DB_PASSWORD:-nyaysetu_local}
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/
+  SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-nyaysetu}
+  SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-nyaysetu_local}
   SPRING_PROFILES_ACTIVE: docker
-  EUREKA_URL: http://eureka-server:8761/eureka
+  SPRING_CLOUD_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+  SPRING_JPA_HIBERNATE_DDL_AUTO: update
+  SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
 
 x-backend-healthcheck: &backend-healthcheck
   interval: 30s
@@ -74,7 +75,7 @@ services:
     platform: linux/arm64
     environment:
       <<: *common-env
-      DB_NAME: nyaysetu_auth
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nyaysetu_auth
       JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
     ports:
       - "8081:8081"
@@ -97,7 +98,7 @@ services:
     platform: linux/arm64
     environment:
       <<: *common-env
-      DB_NAME: nyaysetu_case
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nyaysetu_case
     ports:
       - "8082:8082"
     depends_on:
@@ -119,7 +120,7 @@ services:
     platform: linux/arm64
     environment:
       <<: *common-env
-      DB_NAME: nyaysetu_document
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nyaysetu_document
     ports:
       - "8083:8083"
     volumes:
@@ -143,7 +144,7 @@ services:
     platform: linux/arm64
     environment:
       <<: *common-env
-      DB_NAME: nyaysetu_meeting
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nyaysetu_meeting
     ports:
       - "8084:8084"
     depends_on:
@@ -165,8 +166,8 @@ services:
     platform: linux/arm64
     environment:
       <<: *common-env
-      DB_NAME: nyaysetu_ai
-      AI_API_KEY: ${AI_API_KEY}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nyaysetu_ai
+      AI_API_KEY: ${AI_API_KEY:-}
     ports:
       - "8085:8085"
     depends_on:
@@ -188,7 +189,7 @@ services:
     platform: linux/arm64
     environment:
       <<: *common-env
-      DB_NAME: nyaysetu_audit
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nyaysetu_audit
     ports:
       - "8086:8086"
     depends_on:
@@ -210,11 +211,11 @@ services:
     platform: linux/arm64
     environment:
       <<: *common-env
-      DB_NAME: nyaysetu_verification
-      SMTP_HOST: ${SMTP_HOST}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nyaysetu_verification
+      SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USERNAME: ${SMTP_USERNAME}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
     ports:
       - "8087:8087"
     depends_on:
@@ -238,7 +239,8 @@ services:
     container_name: nyaysetu-gateway
     platform: linux/arm64
     environment:
-      <<: *common-env
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
     ports:
