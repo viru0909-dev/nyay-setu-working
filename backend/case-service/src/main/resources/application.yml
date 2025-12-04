@@ -16,3 +16,12 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

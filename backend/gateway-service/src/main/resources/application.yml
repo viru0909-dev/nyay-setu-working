@@ -21,7 +21,7 @@ spring:
 
         # ---------------------- AUTH SERVICE ----------------------
         - id: auth-service
-          uri: http://localhost:8081
+          uri: lb://AUTH-SERVICE
           predicates:
             - Path=/auth/**
           filters:
@@ -29,7 +29,7 @@ spring:
 
         # ---------------------- AI SERVICE ----------------------
         - id: ai-service
-          uri: http://localhost:8085
+          uri: lb://AI-SERVICE
           predicates:
             - Path=/ai/**
           filters:
@@ -37,7 +37,7 @@ spring:
 
         # ---------------------- AUDIT SERVICE ----------------------
         - id: audit-service
-          uri: http://localhost:8086
+          uri: lb://AUDIT-SERVICE
           predicates:
             - Path=/audit/**
           filters:
@@ -45,7 +45,7 @@ spring:
 
         # ---------------------- CASE SERVICE ----------------------
         - id: case-service
-          uri: http://localhost:8082
+          uri: lb://CASE-SERVICE
           predicates:
             - Path=/cases/**
           filters:
@@ -53,7 +53,7 @@ spring:
 
         # ---------------------- DOCUMENT SERVICE ----------------------
         - id: document-service
-          uri: http://localhost:8083
+          uri: lb://DOCUMENT-SERVICE
           predicates:
             - Path=/documents/**
           filters:
@@ -61,7 +61,7 @@ spring:
 
         # ---------------------- MEETING SERVICE ----------------------
         - id: meeting-service
-          uri: http://localhost:8084
+          uri: lb://MEETING-SERVICE
           predicates:
             - Path=/meetings/**
           filters:
@@ -69,7 +69,7 @@ spring:
 
         # ---------------------- USER VERIFICATION ----------------------
         - id: user-verification-service
-          uri: http://localhost:8087
+          uri: lb://USER-VERIFICATION-SERVICE
           predicates:
             - Path=/verify/**
           filters:
@@ -79,11 +79,19 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://localhost:8081/auth/jwks
+          jwk-set-uri: http://auth-service:8081/auth/jwks
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-server:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

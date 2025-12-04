@@ -18,3 +18,11 @@ spring:
     show-sql: true
 file:
   upload-dir: uploads/documents/
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
