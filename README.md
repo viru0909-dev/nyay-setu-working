@@ -387,6 +387,7 @@ NYAY-SETU/
 1. Visit: https://aistudio.google.com/app/apikey
 2. Create new API key
 3. Add to `.env` as `GEMINI_API_KEY`
+4. Free quota: 15 requests/minute, 1500 requests/day
 
 ---
 
@@ -532,6 +533,15 @@ Democratize access to justice in India through technology, making legal proceedi
 
 ---
 
+## 👨‍💻 Author
+
+**Virendra Gadekar**
+- 📧 Email: gsdekar@gmail.com
+- 🐙 GitHub: [@viru0909-dev](https://github.com/viru0909-dev)
+- 💼 LinkedIn: [Virendra Gadekar](https://linkedin.com/in/virendra-gadekar)
+
+---
+
 **Built with ❤️ for Justice and Accessibility**
 
-*Last Updated: December 2024 - Production Ready*
+*Last Updated: January 2025 - Production Ready*
