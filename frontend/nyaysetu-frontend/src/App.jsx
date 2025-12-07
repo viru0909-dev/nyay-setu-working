@@ -1,15 +1,20 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import useAuthStore from './store/authStore';
+import { LanguageProvider } from './contexts/LanguageContext.jsx';
+import ErrorBoundary from './components/ErrorBoundary';
+import LoadingSpinner from './components/LoadingSpinner';
 
-// Pages
-import Landing from './pages/Landing';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import AdminDashboard from './pages/dashboards/AdminDashboard';
-import JudgeDashboard from './pages/dashboards/JudgeDashboard';
-import LawyerDashboard from './pages/dashboards/LawyerDashboard';
-import ClientDashboard from './pages/dashboards/ClientDashboard';
+// Lazy load pages for better performance
+const Landing = lazy(() => import('./pages/Landing'));
+const Constitution = lazy(() => import('./pages/Constitution'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const About = lazy(() => import('./pages/About'));
+const AdminDashboard = lazy(() => import('./pages/dashboards/AdminDashboard'));
+const JudgeDashboard = lazy(() => import('./pages/dashboards/JudgeDashboard'));
+const LawyerDashboard = lazy(() => import('./pages/dashboards/LawyerDashboard'));
+const ClientDashboard = lazy(() => import('./pages/dashboards/ClientDashboard'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -34,54 +39,62 @@ function App() {
     }, [initAuth]);
 
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
+        <ErrorBoundary>
+            <LanguageProvider>
+                <BrowserRouter>
+                    <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
+                        <Routes>
+                            <Route path="/" element={<Landing />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/signup" element={<Signup />} />
+                            <Route path="/constitution" element={<Constitution />} />
+                            <Route path="/about" element={<About />} />
 
-                {/* Protected Dashboards */}
-                <Route
-                    path="/admin/*"
-                    element={
-                        <ProtectedRoute allowedRoles={['ADMIN']}>
-                            <AdminDashboard />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/judge/*"
-                    element={
-                        <ProtectedRoute allowedRoles={['JUDGE']}>
-                            <JudgeDashboard />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/lawyer/*"
-                    element={
-                        <ProtectedRoute allowedRoles={['LAWYER']}>
-                            <LawyerDashboard />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/client/*"
-                    element={
-                        <ProtectedRoute allowedRoles={['CLIENT']}>
-                            <ClientDashboard />
-                        </ProtectedRoute>
-                    }
-                />
+                            {/* Protected Dashboards */}
+                            <Route
+                                path="/admin/*"
+                                element={
+                                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                                        <AdminDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/judge/*"
+                                element={
+                                    <ProtectedRoute allowedRoles={['JUDGE']}>
+                                        <JudgeDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/lawyer/*"
+                                element={
+                                    <ProtectedRoute allowedRoles={['LAWYER']}>
+                                        <LawyerDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/client/*"
+                                element={
+                                    <ProtectedRoute allowedRoles={['CLIENT']}>
+                                        <ClientDashboard />
+                                    </ProtectedRoute>
+                                }
+                            />
 
-                <Route path="/unauthorized" element={
-                    <div style={{ textAlign: 'center', padding: '3rem' }}>
-                        <h1>Unauthorized</h1>
-                        <p>You don't have permission to access this page.</p>
-                    </div>
-                } />
-            </Routes>
-        </BrowserRouter>
+                            <Route path="/unauthorized" element={
+                                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                                    <h1>Unauthorized</h1>
+                                    <p>You don't have permission to access this page.</p>
+                                </div>
+                            } />
+                        </Routes>
+                    </Suspense>
+                </BrowserRouter>
+            </LanguageProvider>
+        </ErrorBoundary>
     );
 }
 

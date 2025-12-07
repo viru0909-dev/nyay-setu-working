@@ -2,16 +2,11 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="case-service" />
-        <module name="meeting-service" />
-        <module name="audit-service" />
-        <module name="ai-service" />
-        <module name="gateway-service" />
-        <module name="document-service" />
       </profile>
       <profile name="Annotation profile for NYAY-SETU Backend" enabled="true">
         <sourceOutputDir name="../user-verification-service/target/generated-sources/annotations" />
@@ -20,5 +15,29 @@
         <module name="auth-service (1)" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ai-service" target="17" />
+      <module name="audit-service" target="17" />
+      <module name="auth-service" target="17" />
+      <module name="case-service" target="17" />
+      <module name="document-service" target="17" />
+      <module name="eureka-server" target="17" />
+      <module name="gateway-service" target="17" />
+      <module name="meeting-service" target="16" />
+      <module name="user-verification-service" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="ai-service" options="-parameters" />
+      <module name="audit-service" options="-parameters" />
+      <module name="auth-service" options="-parameters" />
+      <module name="case-service" options="-parameters" />
+      <module name="document-service" options="-parameters" />
+      <module name="eureka-server" options="-parameters" />
+      <module name="gateway-service" options="-parameters" />
+      <module name="meeting-service" options="-parameters" />
+      <module name="user-verification-service" options="-parameters" />
+    </option>
   </component>
 </project>

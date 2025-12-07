@@ -1,0 +1,51 @@
+package com.nyaysetu.backend.service;
+
+import com.nyaysetu.backend.entity.Role;
+import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
+
+    public AuthService(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User u = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(u.getEmail())
+                .password(u.getPassword())
+                .roles(u.getRole().name())
+                .build();
+    }
+
+    public void register(String email, String name, String password, Role role) {
+        User u = new User();
+        u.setEmail(email);
+        u.setName(name);
+        u.setPassword(passwordEncoder.encode(password));
+        u.setRole(role);
+        userRepository.save(u);
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+}

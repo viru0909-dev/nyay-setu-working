@@ -1,0 +1,167 @@
+/* Enhanced Mobile Responsiveness */
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+
+    /* Hero section adjustments */
+    section[id="home"] {
+        padding: 4rem 1rem 2rem !important;
+        min-height: 90vh !important;
+    }
+
+    /* Feature cards - single column on mobile */
+    .features-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Stats section - 2 columns on mobile */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem !important;
+    }
+
+    /* CTA buttons - stack vertically */
+    .cta-buttons {
+        flex-direction: column !important;
+        width: 100%;
+    }
+
+    .cta-buttons a,
+    .cta-buttons button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* Modal adjustments */
+    .modal-content {
+        max-width: 95% !important;
+        padding: 2rem 1.5rem !important;
+    }
+
+    /* News cards - stack vertically */
+    .news-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* How it works - single column */
+    .how-it-works-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Trust indicators - single column */
+    .trust-indicators-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Typography scaling */
+    h1 {
+        font-size: clamp(2rem, 8vw, 3rem) !important;
+    }
+
+    h2 {
+        font-size: clamp(1.75rem, 6vw, 2.5rem) !important;
+    }
+
+    h3 {
+        font-size: clamp(1.25rem, 4vw, 1.75rem) !important;
+    }
+
+    /* Padding adjustments */
+    section {
+        padding: 3rem 1rem !important;
+    }
+
+    /* Constitution page */
+    .constitution-layout {
+        flex-direction: column !important;
+    }
+
+    .constitution-sidebar {
+        width: 100% !important;
+        max-height: 50vh !important;
+    }
+
+    /* About page */
+    .about-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+    .features-grid,
+    .news-grid,
+    .trust-indicators-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .how-it-works-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    section {
+        padding: 4rem 2rem !important;
+    }
+}
+
+/* Large screens */
+@media (min-width: 1920px) {
+    .container {
+        max-width: 1600px !important;
+    }
+
+    h1 {
+        font-size: 5rem !important;
+    }
+
+    h2 {
+        font-size: 3.5rem !important;
+    }
+}
+
+/* Performance optimizations */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+}
+
+/* Optimize images */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Prevent layout shift */
+.loading-skeleton {
+    min-height: 200px;
+}
+
+/* Improve text readability */
+p,
+li,
+span {
+    text-rendering: optimizeLegibility;
+}
