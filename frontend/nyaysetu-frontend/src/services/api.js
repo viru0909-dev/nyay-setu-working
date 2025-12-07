@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Connect directly to auth-service to bypass gateway issues
-const API_BASE_URL = 'http://localhost:8081';
+// Unified Backend - all requests route through here
+const API_BASE_URL = 'http://localhost:8080';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
