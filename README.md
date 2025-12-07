@@ -536,7 +536,7 @@ Democratize access to justice in India through technology, making legal proceedi
 ## 👨‍💻 Author
 
 **Virendra Gadekar**
-- 📧 Email: gsdekar@gmail.com
+- 📧 Email: gadekarvirendra4@gmail.com
 - 🐙 GitHub: [@viru0909-dev](https://github.com/viru0909-dev)
 - 💼 LinkedIn: [Virendra Gadekar](https://linkedin.com/in/virendra-gadekar)
 
@@ -544,4 +544,4 @@ Democratize access to justice in India through technology, making legal proceedi
 
 **Built with ❤️ for Justice and Accessibility**
 
-*Last Updated: January 2025 - Production Ready*
+*Last Updated: December 7 2025 - Production Ready*
