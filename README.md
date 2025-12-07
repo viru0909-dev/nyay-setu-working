@@ -528,9 +528,7 @@ Democratize access to justice in India through technology, making legal proceedi
 ## 📞 Support
 
 - **GitHub Issues**: Report bugs
-- **Email**: gsdekar@gm
-
-ail.com
+- **Email**: gadekarvirendra4@gmail.com
 
 ---
 
