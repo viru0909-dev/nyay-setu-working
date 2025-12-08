@@ -1,9 +1,11 @@
 package com.nyaysetu.backend.entity;
 
 public enum Role {
-    ADMIN,
-    JUDGE,
-    LAWYER,
     CLIENT,
-    USER, TECH_ADMIN
+    LAWYER,
+    JUDGE,
+    ADMIN,
+    TECH_ADMIN,
+    SUPER_JUDGE,
+    TECHNICAL_TEAM
 }

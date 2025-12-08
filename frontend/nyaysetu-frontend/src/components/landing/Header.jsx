@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext.jsx';
 import AIAssistantModal from './AIAssistantModal';
 
-export default function Header({ onConstitutionClick }) {
+export default function Header({ hideAuthButtons = false, onConstitutionClick }) {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showAIModal, setShowAIModal] = useState(false);
@@ -188,44 +188,48 @@ export default function Header({ onConstitutionClick }) {
                         {language === 'en' ? 'हिंदी' : 'EN'}
                     </button>
 
-                    <Link to="/login" style={{
-                        padding: '0.625rem 1.5rem',
-                        color: '#e2e8f0',
-                        textDecoration: 'none',
-                        borderRadius: '0.5rem',
-                        fontWeight: '600',
-                        transition: 'all 0.2s'
-                    }}
-                        onMouseEnter={(e) => {
-                            e.target.style.background = 'rgba(139, 92, 246, 0.1)';
-                            e.target.style.color = '#8b5cf6';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.background = 'transparent';
-                            e.target.style.color = '#e2e8f0';
-                        }}>
-                        Login
-                    </Link>
-                    <Link to="/signup" style={{
-                        padding: '0.625rem 1.5rem',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                        color: 'white',
-                        textDecoration: 'none',
-                        borderRadius: '0.5rem',
-                        fontWeight: '700',
-                        boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)',
-                        transition: 'all 0.2s'
-                    }}
-                        onMouseEnter={(e) => {
-                            e.target.style.transform = 'translateY(-2px)';
-                            e.target.style.boxShadow = '0 6px 20px rgba(139, 92, 246, 0.6)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.transform = 'translateY(0)';
-                            e.target.style.boxShadow = '0 4px 15px rgba(139, 92, 246, 0.4)';
-                        }}>
-                        Get Started
-                    </Link>
+                    {!hideAuthButtons && (
+                        <>
+                            <Link to="/login" style={{
+                                padding: '0.625rem 1.5rem',
+                                color: '#e2e8f0',
+                                textDecoration: 'none',
+                                borderRadius: '0.5rem',
+                                fontWeight: '600',
+                                transition: 'all 0.2s'
+                            }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = 'rgba(139, 92, 246, 0.1)';
+                                    e.target.style.color = '#8b5cf6';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = 'transparent';
+                                    e.target.style.color = '#e2e8f0';
+                                }}>
+                                Login
+                            </Link>
+                            <Link to="/signup" style={{
+                                padding: '0.625rem 1.5rem',
+                                background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                color: 'white',
+                                textDecoration: 'none',
+                                borderRadius: '0.5rem',
+                                fontWeight: '700',
+                                boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)',
+                                transition: 'all 0.2s'
+                            }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.transform = 'translateY(-2px)';
+                                    e.target.style.boxShadow = '0 6px 20px rgba(139, 92, 246, 0.5)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.transform = 'translateY(0)';
+                                    e.target.style.boxShadow = '0 4px 15px rgba(139, 92, 246, 0.4)';
+                                }}>
+                                Get Started
+                            </Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile Menu Button */}

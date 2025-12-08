@@ -1,68 +1,74 @@
-import { X, Brain, MessageCircle, BookOpen, FileText, Shield, Sparkles } from 'lucide-react';
+import { X, Brain, MessageCircle, Send, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
 
 export default function AIAssistantModal({ isOpen, onClose }) {
     const { language } = useLanguage();
-    const navigate = useNavigate();
+    const [chatStarted, setChatStarted] = useState(false);
+    const [messages, setMessages] = useState([]);
+    const [inputMessage, setInputMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setChatStarted(false);
+            setMessages([]);
+            setInputMessage('');
+        }
+    }, [isOpen]);
+
+    const sendMessage = async (text) => {
+        if (!text.trim()) return;
+
+        const userMessage = { role: 'user', content: text };
+        setMessages(prev => [...prev, userMessage]);
+        setInputMessage('');
+        setIsLoading(true);
+
+        try {
+            const response = await fetch('http://localhost:8080/api/ai/chat/ollama', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await response.json();
+            const aiMessage = { role: 'ai', content: data.response };
+            setMessages(prev => [...prev, aiMessage]);
+        } catch (error) {
+            console.error('AI Chat Error:', error);
+            const errorMessage = {
+                role: 'ai',
+                content: language === 'en'
+                    ? 'Sorry, I encountered an error. Please try again.'
+                    : 'क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।'
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleQuestionClick = (question) => {
+        setChatStarted(true);
+        sendMessage(question);
+    };
+
+    const handleStartChat = () => {
+        setChatStarted(true);
+    };
 
     if (!isOpen) return null;
-
-    const capabilities = [
-        {
-            icon: MessageCircle,
-            title: language === 'en' ? 'Legal Guidance' : 'कानूनी मार्गदर्शन',
-            desc: language === 'en'
-                ? 'Get instant answers to legal questions 24/7'
-                : '24/7 कानूनी प्रश्नों के तत्काल उत्तर प्राप्त करें',
-            action: () => {
-                onClose();
-                navigate('/');
-                setTimeout(() => {
-                    const chatbot = document.querySelector('#chatbot');
-                    if (chatbot) chatbot.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-            }
-        },
-        {
-            icon: BookOpen,
-            title: language === 'en' ? 'Constitution Q&A' : 'संविधान प्रश्नोत्तर',
-            desc: language === 'en'
-                ? 'Ask questions about Indian Constitution articles'
-                : 'भारतीय संविधान के अनुच्छेदों के बारे में पूछें',
-            action: () => {
-                onClose();
-                navigate('/constitution');
-            }
-        },
-        {
-            icon: FileText,
-            title: language === 'en' ? 'Document Help' : 'दस्तावेज़ सहायता',
-            desc: language === 'en'
-                ? 'Assistance with legal documents and filings'
-                : 'कानूनी दस्तावेज़ों और फाइलिंग में सहायता',
-            action: () => {
-                onClose();
-                navigate('/');
-                setTimeout(() => {
-                    const chatbot = document.querySelector('#chatbot');
-                    if (chatbot) chatbot.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-            }
-        },
-        {
-            icon: Shield,
-            title: language === 'en' ? 'Rights Information' : 'अधिकार जानकारी',
-            desc: language === 'en'
-                ? 'Learn about your fundamental and legal rights'
-                : 'अपने मौलिक और कानूनी अधिकारों के बारे में जानें',
-            action: () => {
-                onClose();
-                navigate('/constitution');
-            }
-        }
-    ];
 
     const sampleQuestions = language === 'en'
         ? [
@@ -79,18 +85,6 @@ export default function AIAssistantModal({ isOpen, onClose }) {
             "जमानत क्या है और यह कैसे काम करती है?",
             "मेरे पास वकील कैसे खोजें?"
         ];
-
-    const handleQuestionClick = (question) => {
-        onClose();
-        navigate('/');
-        setTimeout(() => {
-            const chatbot = document.querySelector('#chatbot');
-            if (chatbot) {
-                chatbot.scrollIntoView({ behavior: 'smooth' });
-                window.dispatchEvent(new CustomEvent('prefillChatQuestion', { detail: question }));
-            }
-        }, 100);
-    };
 
     return (
         <AnimatePresence>
@@ -126,11 +120,12 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                             maxWidth: '900px',
                             width: '100%',
                             maxHeight: '90vh',
-                            overflow: 'auto',
                             background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
                             border: '2px solid rgba(139, 92, 246, 0.3)',
                             borderRadius: '2rem',
-                            position: 'relative'
+                            position: 'relative',
+                            display: 'flex',
+                            flexDirection: 'column'
                         }}
                     >
                         {/* Close Button */}
@@ -168,57 +163,56 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                             <X size={24} />
                         </motion.button>
 
-                        <div style={{ padding: '3rem' }}>
-                            {/* Header */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 }}
-                                style={{ textAlign: 'center', marginBottom: '3rem' }}
-                            >
+                        {!chatStarted ? (
+                            /* Welcome Screen */
+                            <div style={{ padding: '3rem', overflow: 'auto' }}>
                                 <motion.div
-                                    animate={{
-                                        rotate: [0, 5, -5, 0],
-                                        scale: [1, 1.05, 1]
-                                    }}
-                                    transition={{
-                                        duration: 2,
-                                        repeat: Infinity,
-                                        repeatType: 'reverse'
-                                    }}
-                                    style={{
-                                        display: 'inline-block',
-                                        padding: '1.5rem',
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                        borderRadius: '1.5rem',
-                                        marginBottom: '1.5rem'
-                                    }}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    style={{ textAlign: 'center', marginBottom: '3rem' }}
                                 >
-                                    <Brain size={48} color="white" />
+                                    <motion.div
+                                        animate={{
+                                            rotate: [0, 5, -5, 0],
+                                            scale: [1, 1.05, 1]
+                                        }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                            repeatType: 'reverse'
+                                        }}
+                                        style={{
+                                            display: 'inline-block',
+                                            padding: '1.5rem',
+                                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                            borderRadius: '1.5rem',
+                                            marginBottom: '1.5rem'
+                                        }}
+                                    >
+                                        <Brain size={48} color="white" />
+                                    </motion.div>
+
+                                    <h2 style={{
+                                        fontSize: '2.5rem',
+                                        fontWeight: '900',
+                                        color: 'white',
+                                        marginBottom: '1rem',
+                                        background: 'linear-gradient(135deg, #a78bfa 0%, #ec4899 100%)',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent'
+                                    }}>
+                                        {language === 'en' ? 'AI-Powered Legal Brain' : 'AI-संचालित कानूनी मस्तिष्क'}
+                                    </h2>
+
+                                    <p style={{ color: '#94a3b8', fontSize: '1.125rem', lineHeight: '1.6', maxWidth: '600px', margin: '0 auto' }}>
+                                        {language === 'en'
+                                            ? 'Your intelligent assistant that understands Indian law and provides instant answers to your legal queries.'
+                                            : 'आपका बुद्धिमान सहायक जो भारतीय कानून को समझता है और आपके कानूनी प्रश्नों के तत्काल उत्तर प्रदान करता है।'
+                                        }
+                                    </p>
                                 </motion.div>
 
-                                <h2 style={{
-                                    fontSize: '2.5rem',
-                                    fontWeight: '900',
-                                    color: 'white',
-                                    marginBottom: '1rem',
-                                    background: 'linear-gradient(135deg, #a78bfa 0%, #ec4899 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent'
-                                }}>
-                                    {language === 'en' ? 'AI-Powered Legal Brain' : 'AI-संचालित कानूनी मस्तिष्क'}
-                                </h2>
-
-                                <p style={{ color: '#94a3b8', fontSize: '1.125rem', lineHeight: '1.6', maxWidth: '600px', margin: '0 auto' }}>
-                                    {language === 'en'
-                                        ? 'Your intelligent assistant that understands Indian law, guides you through legal processes, and provides instant answers to your legal queries.'
-                                        : 'आपका बुद्धिमान सहायक जो भारतीय कानून को समझता है, कानूनी प्रक्रियाओं में आपका मार्गदर्शन करता है, और आपके कानूनी प्रश्नों के तत्काल उत्तर प्रदान करता है।'
-                                    }
-                                </p>
-                            </motion.div>
-
-                            {/* Capabilities */}
-                            <div style={{ marginBottom: '3rem' }}>
                                 <motion.h3
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
@@ -231,78 +225,16 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                         textAlign: 'center'
                                     }}
                                 >
-                                    {language === 'en' ? '🚀 What Can I Do?' : '🚀 मैं क्या कर सकता हूं?'}
-                                </motion.h3>
-
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                                    gap: '1.5rem'
-                                }}>
-                                    {capabilities.map((cap, idx) => (
-                                        <motion.div
-                                            key={idx}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.3 + idx * 0.1 }}
-                                            whileHover={{ scale: 1.05, y: -5 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={cap.action}
-                                            style={{
-                                                padding: '1.5rem',
-                                                background: 'rgba(139, 92, 246, 0.1)',
-                                                border: '1px solid rgba(139, 92, 246, 0.3)',
-                                                borderRadius: '1rem',
-                                                transition: 'all 0.3s',
-                                                cursor: 'pointer'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)';
-                                                e.currentTarget.style.borderColor = '#8b5cf6';
-                                                e.currentTarget.style.boxShadow = '0 10px 30px rgba(139, 92, 246, 0.3)';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                                                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
-                                                e.currentTarget.style.boxShadow = 'none';
-                                            }}
-                                        >
-                                            <cap.icon size={32} style={{ color: '#8b5cf6', marginBottom: '1rem' }} />
-                                            <h4 style={{ color: 'white', fontSize: '1.125rem', fontWeight: '700', marginBottom: '0.5rem' }}>
-                                                {cap.title}
-                                            </h4>
-                                            <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.5' }}>
-                                                {cap.desc}
-                                            </p>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Sample Questions */}
-                            <div style={{ marginBottom: '2rem' }}>
-                                <motion.h3
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.7 }}
-                                    style={{
-                                        fontSize: '1.75rem',
-                                        fontWeight: '800',
-                                        color: 'white',
-                                        marginBottom: '1.5rem',
-                                        textAlign: 'center'
-                                    }}
-                                >
                                     {language === 'en' ? '💡 Try Asking' : '💡 पूछने का प्रयास करें'}
                                 </motion.h3>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
                                     {sampleQuestions.map((question, idx) => (
                                         <motion.div
                                             key={idx}
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.8 + idx * 0.1 }}
+                                            transition={{ delay: 0.3 + idx * 0.1 }}
                                             whileHover={{ scale: 1.02, x: 5 }}
                                             whileTap={{ scale: 0.98 }}
                                             onClick={() => handleQuestionClick(question)}
@@ -331,74 +263,165 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                         </motion.div>
                                     ))}
                                 </div>
-                            </div>
 
-                            {/* Privacy Notice */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 1.3 }}
-                                style={{
-                                    padding: '1.5rem',
-                                    background: 'rgba(236, 72, 153, 0.1)',
-                                    border: '1px solid rgba(236, 72, 153, 0.3)',
-                                    borderRadius: '1rem'
-                                }}
-                            >
-                                <div style={{ display: 'flex', alignItems: 'start', gap: '1rem' }}>
-                                    <Shield size={24} style={{ color: '#ec4899', flexShrink: 0, marginTop: '0.25rem' }} />
-                                    <div>
-                                        <h4 style={{ color: '#ec4899', fontSize: '1.125rem', fontWeight: '700', marginBottom: '0.5rem' }}>
-                                            {language === 'en' ? 'Privacy & Security' : 'गोपनीयता और सुरक्षा'}
-                                        </h4>
-                                        <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.6', margin: 0 }}>
-                                            {language === 'en'
-                                                ? 'Your conversations are encrypted and private. We never store or share your personal information. All AI responses are for informational purposes only and should not be considered as legal advice.'
-                                                : 'आपकी बातचीत एन्क्रिप्टेड और निजी है। हम कभी भी आपकी व्यक्तिगत जानकारी संग्रहीत या साझा नहीं करते हैं। सभी AI प्रतिक्रियाएं केवल सूचनात्मक उद्देश्यों के लिए हैं और इन्हें कानूनी सलाह नहीं माना जाना चाहिए।'
-                                            }
-                                        </p>
-                                    </div>
-                                </div>
-                            </motion.div>
-
-                            {/* CTA Button */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 1.4 }}
-                                style={{ textAlign: 'center', marginTop: '2rem' }}
-                            >
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => {
-                                        onClose();
-                                        navigate('/');
-                                        setTimeout(() => {
-                                            const chatbot = document.querySelector('#chatbot');
-                                            if (chatbot) chatbot.scrollIntoView({ behavior: 'smooth' });
-                                        }, 100);
-                                    }}
-                                    style={{
-                                        padding: '1rem 2.5rem',
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                        border: 'none',
-                                        borderRadius: '0.75rem',
-                                        color: 'white',
-                                        fontSize: '1.125rem',
-                                        fontWeight: '700',
-                                        cursor: 'pointer',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        transition: 'transform 0.2s'
-                                    }}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.8 }}
+                                    style={{ textAlign: 'center' }}
                                 >
-                                    <Sparkles size={20} />
-                                    {language === 'en' ? 'Start Chatting Now!' : 'अभी चैट करना शुरू करें!'}
-                                </motion.button>
-                            </motion.div>
-                        </div>
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={handleStartChat}
+                                        style={{
+                                            padding: '1rem 2.5rem',
+                                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                            border: 'none',
+                                            borderRadius: '0.75rem',
+                                            color: 'white',
+                                            fontSize: '1.125rem',
+                                            fontWeight: '700',
+                                            cursor: 'pointer',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            transition: 'transform 0.2s'
+                                        }}
+                                    >
+                                        <Sparkles size={20} />
+                                        {language === 'en' ? 'Start Chatting Now!' : 'अभी चैट करना शुरू करें!'}
+                                    </motion.button>
+                                </motion.div>
+                            </div>
+                        ) : (
+                            /* Chat Interface */
+                            <div style={{ display: 'flex', flexDirection: 'column', height: '85vh', padding: '2rem', paddingTop: '4rem' }}>
+                                <h2 style={{
+                                    fontSize: '1.75rem',
+                                    fontWeight: '800',
+                                    color: 'white',
+                                    marginBottom: '1.5rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem'
+                                }}>
+                                    <Brain size={32} style={{ color: '#8b5cf6' }} />
+                                    {language === 'en' ? 'Legal AI Assistant' : 'कानूनी AI सहायक'}
+                                </h2>
+
+                                {/* Messages Area */}
+                                <div style={{
+                                    flex: 1,
+                                    overflow: 'auto',
+                                    marginBottom: '1.5rem',
+                                    padding: '1rem',
+                                    background: 'rgba(15, 23, 42, 0.5)',
+                                    borderRadius: '1rem',
+                                    border: '1px solid rgba(139, 92, 246, 0.2)'
+                                }}>
+                                    {messages.map((msg, idx) => (
+                                        <motion.div
+                                            key={idx}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            style={{
+                                                marginBottom: '1rem',
+                                                padding: '1rem',
+                                                borderRadius: '0.75rem',
+                                                background: msg.role === 'user'
+                                                    ? 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)'
+                                                    : 'rgba(139, 92, 246, 0.1)',
+                                                border: msg.role === 'ai' ? '1px solid rgba(139, 92, 246, 0.3)' : 'none',
+                                                marginLeft: msg.role === 'user' ? 'auto' : '0',
+                                                marginRight: msg.role === 'user' ? '0' : 'auto',
+                                                maxWidth: '85%'
+                                            }}
+                                        >
+                                            <p style={{
+                                                color: 'white',
+                                                fontSize: '0.95rem',
+                                                lineHeight: '1.6',
+                                                margin: 0,
+                                                whiteSpace: 'pre-wrap'
+                                            }}>
+                                                {msg.content}
+                                            </p>
+                                        </motion.div>
+                                    ))}
+                                    {isLoading && (
+                                        <div style={{
+                                            padding: '1rem',
+                                            borderRadius: '0.75rem',
+                                            background: 'rgba(139, 92, 246, 0.1)',
+                                            border: '1px solid rgba(139, 92, 246, 0.3)',
+                                            maxWidth: '85%'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <Loader2 size={16} style={{ color: '#8b5cf6', animation: 'spin 1s linear infinite' }} />
+                                                <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
+                                                    {language === 'en' ? 'Thinking...' : 'सोच रहा हूँ...'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div ref={messagesEndRef} />
+                                </div>
+
+                                {/* Input Area */}
+                                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                    <input
+                                        type="text"
+                                        value={inputMessage}
+                                        onChange={(e) => setInputMessage(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && sendMessage(inputMessage)}
+                                        placeholder={language === 'en' ? 'Ask me anything about Indian law...' : 'भारतीय कानून के बारे में कुछ भी पूछें...'}
+                                        style={{
+                                            flex: 1,
+                                            padding: '1rem',
+                                            background: 'rgba(30, 41, 59, 0.6)',
+                                            border: '2px solid rgba(139, 92, 246, 0.3)',
+                                            borderRadius: '0.75rem',
+                                            color: 'white',
+                                            fontSize: '1rem',
+                                            outline: 'none'
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
+                                        onBlur={(e) => e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)'}
+                                    />
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => sendMessage(inputMessage)}
+                                        disabled={isLoading || !inputMessage.trim()}
+                                        style={{
+                                            padding: '1rem 1.5rem',
+                                            background: isLoading || !inputMessage.trim()
+                                                ? 'rgba(139, 92, 246, 0.3)'
+                                                : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                            border: 'none',
+                                            borderRadius: '0.75rem',
+                                            color: 'white',
+                                            fontSize: '1rem',
+                                            fontWeight: '700',
+                                            cursor: isLoading || !inputMessage.trim() ? 'not-allowed' : 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem'
+                                        }}
+                                    >
+                                        <Send size={20} />
+                                    </motion.button>
+                                </div>
+                            </div>
+                        )}
+
+                        <style>{`
+                            @keyframes spin {
+                                from { transform: rotate(0deg); }
+                                to { transform: rotate(360deg); }
+                            }
+                        `}</style>
                     </motion.div>
                 </motion.div>
             )}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, BookOpen, Globe, Download, Bookmark, MessageCircle, Share2, X, BookmarkPlus } from 'lucide-react';
+import { Search, BookOpen, Globe, Download, Bookmark, MessageCircle, Share2, X, BookmarkPlus, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/landing/Header';
@@ -15,6 +15,8 @@ export default function Constitution() {
     const [showAIChat, setShowAIChat] = useState(false);
     const [bookmarks, setBookmarks] = useState([]);
     const [aiQuery, setAiQuery] = useState('');
+    const [aiResponse, setAiResponse] = useState('');
+    const [isAiLoading, setIsAiLoading] = useState(false);
 
     // Enhanced Constitution Data with more articles
     const constitutionData = {
@@ -227,6 +229,29 @@ export default function Constitution() {
         alert(language === 'en'
             ? 'PDF download feature coming soon! This will download the complete Constitution of India.'
             : 'PDF डाउनलोड सुविधा जल्द आ रही है! यह भारत के पूर्ण संविधान को डाउनलोड करेगी।');
+    };
+
+    const handleAIChat = async () => {
+        if (!aiQuery.trim()) return;
+
+        setIsAiLoading(true);
+        try {
+            const response = await fetch('http://localhost:8080/api/ai/chat/ollama', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: aiQuery })
+            });
+
+            const data = await response.json();
+            setAiResponse(data.response);
+        } catch (error) {
+            console.error('AI Chat Error:', error);
+            setAiResponse(language === 'en'
+                ? 'Sorry, I encountered an error. Please try again.'
+                : 'क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।');
+        } finally {
+            setIsAiLoading(false);
+        }
     };
 
     return (
@@ -706,6 +731,7 @@ export default function Constitution() {
                                         type="text"
                                         value={aiQuery}
                                         onChange={(e) => setAiQuery(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleAIChat()}
                                         placeholder={t('typeMessage')}
                                         style={{
                                             padding: '1rem',
@@ -721,26 +747,59 @@ export default function Constitution() {
                                     />
 
                                     <button
+                                        onClick={handleAIChat}
+                                        disabled={isAiLoading || !aiQuery.trim()}
                                         style={{
                                             padding: '1rem',
-                                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                            background: isAiLoading || !aiQuery.trim()
+                                                ? 'rgba(139, 92, 246, 0.3)'
+                                                : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
                                             border: 'none',
                                             borderRadius: '0.75rem',
                                             color: 'white',
                                             fontSize: '1rem',
                                             fontWeight: '700',
-                                            cursor: 'pointer',
-                                            transition: 'transform 0.2s'
+                                            cursor: isAiLoading || !aiQuery.trim() ? 'not-allowed' : 'pointer',
+                                            transition: 'all 0.2s',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '0.5rem'
                                         }}
-                                        onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                                        onMouseEnter={(e) => !isAiLoading && aiQuery.trim() && (e.target.style.transform = 'scale(1.05)')}
                                         onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                                        onClick={() => alert(language === 'en'
-                                            ? 'AI chat feature will be connected once Gemini quota resets!'
-                                            : 'AI चैट सुविधा Gemini कोटा रीसेट होने के बाद कनेक्ट होगी!'
-                                        )}
                                     >
-                                        {t('send')}
+                                        {isAiLoading ? (
+                                            <>
+                                                <Loader2 size={20} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
+                                                {language === 'en' ? 'Thinking...' : 'सोच रहा हूँ...'}
+                                            </>
+                                        ) : (
+                                            t('send')
+                                        )}
                                     </button>
+
+                                    {aiResponse && (
+                                        <div style={{
+                                            marginTop: '1rem',
+                                            padding: '1.5rem',
+                                            background: 'rgba(139, 92, 246, 0.1)',
+                                            borderRadius: '1rem',
+                                            border: '1px solid rgba(139, 92, 246, 0.3)'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'start', gap: '1rem' }}>
+                                                <MessageCircle size={24} style={{ color: '#8b5cf6', flexShrink: 0 }} />
+                                                <div>
+                                                    <h4 style={{ color: '#a78bfa', fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+                                                        {language === 'en' ? 'AI Response:' : 'AI उत्तर:'}
+                                                    </h4>
+                                                    <p style={{ color: '#e2e8f0', fontSize: '0.95rem', lineHeight: '1.6', margin: 0, whiteSpace: 'pre-wrap' }}>
+                                                        {aiResponse}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Bookmarks */}
@@ -790,6 +849,13 @@ export default function Constitution() {
             </div>
 
             <Footer />
+
+            <style>{`
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 }

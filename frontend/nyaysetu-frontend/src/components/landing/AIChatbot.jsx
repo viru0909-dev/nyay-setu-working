@@ -1,14 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MessageCircle, X, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AIChatbot() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: 'Hello! I\'m your AI legal assistant powered by Anthropic Claude. How can I help you with legal questions today?' }
+        { role: 'assistant', content: 'Hello! I\'m your AI legal assistant powered by Ollama (Mistral). How can I help you with legal questions today?' }
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [ollamaStatus, setOllamaStatus] = useState('checking');
+
+    // Check Ollama status on mount
+    useEffect(() => {
+        checkOllamaStatus();
+    }, []);
+
+    const checkOllamaStatus = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/api/ai/ollama/status');
+            const status = await response.text();
+            setOllamaStatus(status.includes('running') ? 'online' : 'offline');
+        } catch (error) {
+            console.error('Ollama status check failed:', error);
+            setOllamaStatus('offline');
+        }
+    };
 
     const handleSend = async () => {
         if (!input.trim()) return;
@@ -19,11 +36,14 @@ export default function AIChatbot() {
         setIsTyping(true);
 
         try {
-            // Call backend AI endpoint
-            const response = await fetch('/api/ai/chat', {
+            // Call Ollama backend endpoint
+            const response = await fetch('http://localhost:8080/api/ai/chat/ollama', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input })
+                body: JSON.stringify({
+                    message: input,
+                    model: 'mistral:latest'
+                })
             });
 
             if (!response.ok) throw new Error('Failed to get response');
@@ -31,9 +51,18 @@ export default function AIChatbot() {
             const data = await response.json();
             const aiResponse = {
                 role: 'assistant',
-                content: data.response || 'I apologize, but I encountered an error. Please try again.'
+                content: data.response || 'I apologize, but I encountered an error. Please try again.',
+                model: data.model,
+                fromOllama: data.fromOllama
             };
             setMessages(prev => [...prev, aiResponse]);
+
+            // Update status indicator if changed
+            if (data.status === 'fallback' && ollamaStatus !== 'offline') {
+                setOllamaStatus('offline');
+            } else if (data.status === 'success' && ollamaStatus !== 'online') {
+                setOllamaStatus('online');
+            }
         } catch (error) {
             console.error('Chat error:', error);
             const errorResponse = {
@@ -115,8 +144,15 @@ export default function AIChatbot() {
                                     <h3 style={{ color: 'white', fontSize: '1.125rem', fontWeight: '700', margin: 0 }}>
                                         AI Legal Assistant
                                     </h3>
-                                    <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.75rem', margin: 0 }}>
-                                        Powered by Anthropic Claude
+                                    <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.75rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span style={{
+                                            display: 'inline-block',
+                                            width: '8px',
+                                            height: '8px',
+                                            borderRadius: '50%',
+                                            background: ollamaStatus === 'online' ? '#10b981' : (ollamaStatus === 'offline' ? '#ef4444' : '#f59e0b')
+                                        }}></span>
+                                        Powered by Ollama (Mistral)
                                     </p>
                                 </div>
                             </div>

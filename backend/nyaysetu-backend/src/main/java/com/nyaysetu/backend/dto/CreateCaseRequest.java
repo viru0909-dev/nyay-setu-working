@@ -2,13 +2,12 @@ package com.nyaysetu.backend.dto;
 
 import lombok.*;
 
-import java.util.List;
-import java.util.UUID;
-
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class CreateCaseRequest {
     private String title;
     private String description;
-    private UUID judgeId;
-    private List<PartyDto> parties;
+    private String caseType; // CIVIL, CRIMINAL, FAMILY, PROPERTY, COMMERCIAL
+    private String petitioner;
+    private String respondent;
+    private String urgency; // NORMAL, URGENT, CRITICAL
 }

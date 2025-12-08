@@ -30,7 +30,7 @@ public class DocumentService {
     private static final List<String> ALLOWED_CONTENT_TYPES = Arrays.asList("application/pdf", "image/jpeg",
             "image/png");
 
-    public UploadDocumentResponse save(MultipartFile file, UUID caseId, UUID uploadedBy) {
+    public UploadDocumentResponse save(MultipartFile file, UUID caseId, Long uploadedBy) {
         String contentType = file.getContentType();
         if (!ALLOWED_CONTENT_TYPES.contains(contentType)) {
             throw new RuntimeException("Invalid file type. Allowed types: PDF, JPG, PNG");
