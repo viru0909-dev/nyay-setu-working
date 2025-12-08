@@ -10,11 +10,22 @@ const Landing = lazy(() => import('./pages/Landing'));
 const Constitution = lazy(() => import('./pages/Constitution'));
 const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const About = lazy(() => import('./pages/About'));
+
+// Dashboard Layout
+const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
+
+// Dashboard Pages
 const AdminDashboard = lazy(() => import('./pages/dashboards/AdminDashboard'));
 const JudgeDashboard = lazy(() => import('./pages/dashboards/JudgeDashboard'));
 const LawyerDashboard = lazy(() => import('./pages/dashboards/LawyerDashboard'));
-const ClientDashboard = lazy(() => import('./pages/dashboards/ClientDashboard'));
+const ClientDashboard = lazy(() => import('./pages/client/ClientDashboard'));
+const FileCasePage = lazy(() => import('./pages/client/FileCasePage'));
+const MyCasesPage = lazy(() => import('./pages/client/MyCasesPage'));
+const DocumentsPage = lazy(() => import('./pages/client/DocumentsPage'));
+const AIDocumentReviewPage = lazy(() => import('./pages/client/AIDocumentReviewPage'));
+const ProfilePage = lazy(() => import('./pages/client/ProfilePage'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -47,42 +58,59 @@ function App() {
                             <Route path="/" element={<Landing />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/signup" element={<Signup />} />
+                            <Route path="/reset-password/:token" element={<ResetPassword />} />
                             <Route path="/constitution" element={<Constitution />} />
                             <Route path="/about" element={<About />} />
 
                             {/* Protected Dashboards */}
                             <Route
-                                path="/admin/*"
+                                path="/client/*"
                                 element={
-                                    <ProtectedRoute allowedRoles={['ADMIN']}>
-                                        <AdminDashboard />
+                                    <ProtectedRoute allowedRoles={['CLIENT']}>
+                                        <DashboardLayout />
                                     </ProtectedRoute>
                                 }
-                            />
-                            <Route
-                                path="/judge/*"
-                                element={
-                                    <ProtectedRoute allowedRoles={['JUDGE']}>
-                                        <JudgeDashboard />
-                                    </ProtectedRoute>
-                                }
-                            />
+                            >
+                                <Route index element={<ClientDashboard />} />
+                                <Route path="file-case" element={<FileCasePage />} />
+                                <Route path="cases" element={<MyCasesPage />} />
+                                <Route path="documents" element={<DocumentsPage />} />
+                                <Route path="ai-review" element={<AIDocumentReviewPage />} />
+                                <Route path="profile" element={<ProfilePage />} />
+                            </Route>
+
                             <Route
                                 path="/lawyer/*"
                                 element={
                                     <ProtectedRoute allowedRoles={['LAWYER']}>
-                                        <LawyerDashboard />
+                                        <DashboardLayout />
                                     </ProtectedRoute>
                                 }
-                            />
+                            >
+                                <Route index element={<LawyerDashboard />} />
+                            </Route>
+
                             <Route
-                                path="/client/*"
+                                path="/judge/*"
                                 element={
-                                    <ProtectedRoute allowedRoles={['CLIENT']}>
-                                        <ClientDashboard />
+                                    <ProtectedRoute allowedRoles={['JUDGE']}>
+                                        <DashboardLayout />
                                     </ProtectedRoute>
                                 }
-                            />
+                            >
+                                <Route index element={<JudgeDashboard />} />
+                            </Route>
+
+                            <Route
+                                path="/admin/*"
+                                element={
+                                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                                        <DashboardLayout />
+                                    </ProtectedRoute>
+                                }
+                            >
+                                <Route index element={<AdminDashboard />} />
+                            </Route>
 
                             <Route path="/unauthorized" element={
                                 <div style={{ textAlign: 'center', padding: '3rem' }}>

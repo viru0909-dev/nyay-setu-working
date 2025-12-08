@@ -22,7 +22,7 @@ public class DocumentController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UploadDocumentResponse> uploadDocument(
             @RequestParam("caseId") UUID caseId,
-            @RequestParam("uploadedBy") UUID uploadedBy,
+            @RequestParam("uploadedBy") Long uploadedBy,
             @RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(documentService.save(file, caseId, uploadedBy));
     }

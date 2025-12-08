@@ -13,7 +13,8 @@ const api = axios.create({
 // Add token to requests if available
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
-    if (token) {
+    // Only add Authorization header if token exists and is not null/undefined
+    if (token && token !== 'null' && token !== 'undefined') {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -31,20 +32,29 @@ export const authAPI = {
 
 // Case API
 export const caseAPI = {
-    create: (caseData) => api.post('/cases', caseData),
-    list: () => api.get('/cases'),
-    getById: (id) => api.get(`/cases/${id}`),
-    update: (id, data) => api.put(`/cases/${id}`, data),
-    delete: (id) => api.delete(`/cases/${id}`),
+    create: (caseData) => api.post('/api/cases', caseData),
+    list: () => api.get('/api/cases'),
+    getById: (id) => api.get(`/api/cases/${id}`),
+    update: (id, data) => api.put(`/api/cases/${id}`, data),
+    delete: (id) => api.delete(`/api/cases/${id}`),
 };
 
 // Document API
 export const documentAPI = {
-    upload: (formData) => api.post('/documents/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-    }),
-    list: (caseId) => api.get(`/documents?caseId=${caseId}`),
-    download: (id) => api.get(`/documents/${id}/download`, { responseType: 'blob' }),
+    upload: (file, metadata) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (metadata.category) formData.append('category', metadata.category);
+        if (metadata.description) formData.append('description', metadata.description);
+        if (metadata.caseId) formData.append('caseId', metadata.caseId);
+        return api.post('/api/documents/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+    },
+    list: () => api.get('/api/documents'),
+    getByCase: (caseId) => api.get(`/api/documents/case/${caseId}`),
+    download: (id) => api.get(`/api/documents/${id}/download`, { responseType: 'blob' }),
+    delete: (id) => api.delete(`/api/documents/${id}`)
 };
 
 // Meeting API

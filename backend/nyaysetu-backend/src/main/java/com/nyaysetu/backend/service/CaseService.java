@@ -28,23 +28,24 @@ public class CaseService {
         LegalCase legalCase = LegalCase.builder()
                 .title(dto.getTitle())
                 .description(dto.getDescription())
-                .judgeId(dto.getJudgeId())
+                // judgeId and parties removed from CreateCaseRequest
                 .status(CaseStatus.OPEN)
                 .build();
 
         LegalCase saved = legalCaseRepository.save(legalCase);
 
-        if (dto.getParties() != null && !dto.getParties().isEmpty()) {
-            List<Party> parties = dto.getParties().stream()
-                    .map(p -> Party.builder()
-                            .legalCaseId(saved.getId())
-                            .name(p.getName())
-                            .role(p.getRole())
-                            .build())
-                    .collect(Collectors.toList());
-
-            partyRepository.saveAll(parties);
-        }
+        // Parties functionality removed from CreateCaseRequest
+        // if (dto.getParties() != null && !dto.getParties().isEmpty()) {
+        //     List<Party> parties = dto.getParties().stream()
+        //             .map(p -> Party.builder()
+        //                     .legalCaseId(saved.getId())
+        //                     .name(p.getName())
+        //                     .role(p.getRole())
+        //                     .build())
+        //             .collect(Collectors.toList());
+        //
+        //     partyRepository.saveAll(parties);
+        // }
 
         timelineService.addEvent(saved.getId(), "Case created");
 

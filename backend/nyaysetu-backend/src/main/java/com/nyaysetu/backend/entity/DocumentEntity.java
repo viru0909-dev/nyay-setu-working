@@ -28,12 +28,17 @@ public class DocumentEntity {
 
     private long size;
 
-    private UUID uploadedBy;
+    private Long uploadedBy;
 
     private LocalDateTime uploadedAt;
 
     @Enumerated(EnumType.STRING)
     private DocumentStorageType storageType;
+
+    private String category; // LEGAL, EVIDENCE, CORRESPONDENCE, IDENTITY, OTHER
+
+    @Column(length = 500)
+    private String description;
 
     @PrePersist
     protected void onCreate() {
