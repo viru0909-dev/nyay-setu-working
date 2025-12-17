@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import useAuthStore from '../store/authStore';
 import Sidebar from './Sidebar';
 import DashboardHeader from './DashboardHeader';
+import NotificationService from '../services/NotificationService';
 
 export default function DashboardLayout() {
     const { user, token } = useAuthStore();
@@ -11,7 +12,16 @@ export default function DashboardLayout() {
     useEffect(() => {
         if (!token || !user) {
             navigate('/login');
+        } else {
+            // TEMPORARILY DISABLED - WebSocket causing 403 errors
+            // TODO: Fix WebSocket authentication
+            // NotificationService.connect(token);
         }
+
+        // Cleanup on unmount
+        return () => {
+            // NotificationService.disconnect();
+        };
     }, [token, user, navigate]);
 
     return (
