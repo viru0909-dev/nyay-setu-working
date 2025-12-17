@@ -1,6 +1,7 @@
 package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.CaseDTO;
+import com.nyaysetu.backend.dto.CaseSummaryDto;
 import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
@@ -39,6 +40,13 @@ public class CaseManagementService {
         List<CaseEntity> cases = caseRepository.findByClient(user);
         return cases.stream()
                 .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<CaseSummaryDto> getUserCaseSummaries(User user) {
+        List<CaseEntity> cases = caseRepository.findByClient(user);
+        return cases.stream()
+                .map(this::convertToSummaryDto)
                 .collect(Collectors.toList());
     }
 
@@ -87,6 +95,15 @@ public class CaseManagementService {
                 .clientId(entity.getClient() != null ? entity.getClient().getId() : null)
                 .clientName(entity.getClient() != null ? entity.getClient().getName() : null)
                 .documentsCount(0) // TODO: Count from documents table
+                .build();
+    }
+
+    private CaseSummaryDto convertToSummaryDto(CaseEntity entity) {
+        return CaseSummaryDto.builder()
+                .id(entity.getId())
+                .title(entity.getTitle())
+                .caseType(entity.getCaseType())
+                .status(entity.getStatus())
                 .build();
     }
 }

@@ -52,7 +52,12 @@ function App() {
     return (
         <ErrorBoundary>
             <LanguageProvider>
-                <BrowserRouter>
+                <BrowserRouter
+                    future={{
+                        v7_startTransition: true,
+                        v7_relativeSplatPath: true
+                    }}
+                >
                     <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
                         <Routes>
                             <Route path="/" element={<Landing />} />

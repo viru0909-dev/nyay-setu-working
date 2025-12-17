@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
     Home, FileText, FolderOpen, Upload, Brain,
@@ -61,9 +61,19 @@ const roleMenuItems = {
 };
 
 export default function Sidebar({ userRole }) {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    // Initialize from localStorage with fallback to false
+    const [isCollapsed, setIsCollapsed] = useState(() => {
+        const saved = localStorage.getItem('sidebarCollapsed');
+        return saved === 'true';
+    });
+
     const location = useLocation();
     const menuItems = roleMenuItems[userRole] || roleMenuItems.CLIENT;
+
+    // Persist collapse state to localStorage
+    useEffect(() => {
+        localStorage.setItem('sidebarCollapsed', isCollapsed.toString());
+    }, [isCollapsed]);
 
     return (
         <>
@@ -186,32 +196,44 @@ export default function Sidebar({ userRole }) {
                     })}
                 </nav>
 
-                {/* Collapse Button (Desktop) */}
-                {!isCollapsed && (
-                    <button
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        style={{
-                            margin: '0 1rem',
-                            padding: '0.75rem',
-                            background: 'rgba(139, 92, 246, 0.1)',
-                            border: '1px solid rgba(139, 92, 246, 0.3)',
-                            borderRadius: '0.5rem',
-                            color: '#8b5cf6',
-                            fontSize: '0.875rem',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                        }}
-                        onMouseOver={(e) => {
-                            e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
-                        }}
-                        onMouseOut={(e) => {
-                            e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                        }}
-                    >
-                        Collapse Sidebar
-                    </button>
-                )}
+                {/* Collapse/Expand Button */}
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    style={{
+                        margin: '0 1rem',
+                        padding: isCollapsed ? '0.75rem' : '0.75rem',
+                        background: 'rgba(139, 92, 246, 0.1)',
+                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                        borderRadius: '0.5rem',
+                        color: '#8b5cf6',
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem'
+                    }}
+                    onMouseOver={(e) => {
+                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
+                    }}
+                    onMouseOut={(e) => {
+                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
+                    }}
+                    title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+                >
+                    {isCollapsed ? (
+                        <>
+                            <Menu size={20} />
+                        </>
+                    ) : (
+                        <>
+                            <X size={16} />
+                            <span>Collapse Sidebar</span>
+                        </>
+                    )}
+                </button>
             </aside>
 
             <style>{`

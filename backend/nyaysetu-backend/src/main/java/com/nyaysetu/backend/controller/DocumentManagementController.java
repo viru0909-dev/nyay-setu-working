@@ -1,9 +1,11 @@
 package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.dto.DocumentDto;
+import com.nyaysetu.backend.dto.CaseSummaryDto;
 import com.nyaysetu.backend.dto.UploadDocumentRequest;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.service.AuthService;
+import com.nyaysetu.backend.service.CaseManagementService;
 import com.nyaysetu.backend.service.DocumentManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -19,31 +21,35 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/documents")
 @RequiredArgsConstructor
 public class DocumentManagementController {
 
     private final DocumentManagementService documentManagementService;
+    private final CaseManagementService caseManagementService;
     private final AuthService authService;
 
     @PostMapping("/upload")
-    public ResponseEntity<DocumentDto> uploadDocument(
+    public ResponseEntity<?> uploadDocument(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "caseId", required = false) UUID caseId,
+            @RequestParam(value = "category", defaultValue = "OTHER") String category,
+            @RequestParam(value = "description", required = false, defaultValue = "") String description,
             Authentication authentication
     ) {
-        User user = authService.findByEmail(authentication.getName());
+        try {
+            User user = authService.findByEmail(authentication.getName());
+            
+            UploadDocumentRequest request = UploadDocumentRequest.builder()
+                    .category(category)
+                    .description(description)
+                    .caseId(null)  // Always null for now
+                    .build();
 
-        UploadDocumentRequest request = UploadDocumentRequest.builder()
-                .category(category)
-                .description(description)
-                .caseId(caseId)
-                .build();
-
-        DocumentDto document = documentManagementService.uploadDocument(file, request, user);
-        return ResponseEntity.ok(document);
+            DocumentDto document = documentManagementService.uploadDocument(file, request, user);
+            return ResponseEntity.ok(document);
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @GetMapping
@@ -51,6 +57,13 @@ public class DocumentManagementController {
         User user = authService.findByEmail(authentication.getName());
         List<DocumentDto> documents = documentManagementService.getUserDocuments(user.getId());
         return ResponseEntity.ok(documents);
+    }
+
+    @GetMapping("/user/cases")
+    public ResponseEntity<List<CaseSummaryDto>> getUserCases(Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        List<CaseSummaryDto> cases = caseManagementService.getUserCaseSummaries(user);
+        return ResponseEntity.ok(cases);
     }
 
     @GetMapping("/case/{caseId}")

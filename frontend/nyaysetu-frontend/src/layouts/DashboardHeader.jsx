@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Bell, ChevronDown, User } from 'lucide-react';
+import { LogOut, ChevronDown, User } from 'lucide-react';
 import useAuthStore from '../store/authStore';
+import NotificationBell from '../components/NotificationBell';
 
 export default function DashboardHeader({ user }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -54,41 +55,7 @@ export default function DashboardHeader({ user }) {
                 gap: '1rem'
             }}>
                 {/* Notifications */}
-                <button
-                    style={{
-                        position: 'relative',
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '12px',
-                        background: 'rgba(139, 92, 246, 0.1)',
-                        border: '1px solid rgba(139, 92, 246, 0.2)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#8b5cf6',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                    }}
-                    onMouseOver={(e) => {
-                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
-                    }}
-                    onMouseOut={(e) => {
-                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                    }}
-                >
-                    <Bell size={20} />
-                    {/* Notification Badge */}
-                    <span style={{
-                        position: 'absolute',
-                        top: '8px',
-                        right: '8px',
-                        width: '8px',
-                        height: '8px',
-                        background: '#ef4444',
-                        borderRadius: '50%',
-                        border: '2px solid #0f172a'
-                    }} />
-                </button>
+                <NotificationBell />
 
                 {/* Profile Dropdown */}
                 <div style={{ position: 'relative' }}>
