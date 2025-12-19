@@ -74,4 +74,15 @@ public class FileStorageService {
             throw new RuntimeException("Could not delete file: " + filePath, ex);
         }
     }
+
+    /**
+     * Get file as java.io.File for processing (e.g., PDF analysis)
+     */
+    public java.io.File getFile(String filePath) {
+        Path file = this.fileStorageLocation.resolve(filePath).normalize();
+        if (!Files.exists(file)) {
+            throw new RuntimeException("File not found: " + filePath);
+        }
+        return file.toFile();
+    }
 }

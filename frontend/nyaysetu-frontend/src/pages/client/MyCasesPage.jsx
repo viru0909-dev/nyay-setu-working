@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     Search, Filter, Calendar, Clock, FileText,
     Eye, Download, Plus, Grid, List as ListIcon, Loader2
@@ -443,7 +443,8 @@ export default function MyCasesPage() {
 
                                 {/* Actions */}
                                 <div style={{ display: 'flex', gap: '0.75rem', paddingTop: '1rem', borderTop: '1px solid rgba(148, 163, 184, 0.1)' }}>
-                                    <button
+                                    <Link
+                                        to={`/client/case/${caseItem.id}`}
                                         style={{
                                             flex: 1,
                                             padding: '0.75rem',
@@ -457,13 +458,15 @@ export default function MyCasesPage() {
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            gap: '0.5rem'
+                                            gap: '0.5rem',
+                                            textDecoration: 'none'
                                         }}
                                     >
                                         <Eye size={16} />
                                         View Details
-                                    </button>
-                                    <button
+                                    </Link>
+                                    <Link
+                                        to={`/client/case/${caseItem.id}`}
                                         style={{
                                             padding: '0.75rem',
                                             background: 'rgba(15, 23, 42, 0.6)',
@@ -473,11 +476,13 @@ export default function MyCasesPage() {
                                             cursor: 'pointer',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            justifyContent: 'center'
+                                            justifyContent: 'center',
+                                            textDecoration: 'none'
                                         }}
+                                        title="Download Case"
                                     >
                                         <Download size={16} />
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         );

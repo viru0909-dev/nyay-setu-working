@@ -28,6 +28,7 @@ public class DocumentManagementController {
     private final DocumentManagementService documentManagementService;
     private final CaseManagementService caseManagementService;
     private final AuthService authService;
+    private final com.nyaysetu.backend.service.DocumentAnalysisService documentAnalysisService;
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadDocument(
@@ -48,7 +49,59 @@ public class DocumentManagementController {
             DocumentDto document = documentManagementService.uploadDocument(file, request, user);
             return ResponseEntity.ok(document);
         } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Trigger AI analysis for a document
+     */
+    @PostMapping("/{id}/analyze")
+    public ResponseEntity<?> analyzeDocument(@PathVariable UUID id) {
+        try {
+            // Trigger async analysis
+            documentManagementService.triggerAnalysis(id);
+            return ResponseEntity.ok(Map.of(
+                "message", "Analysis started",
+                "documentId", id.toString()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Get AI analysis for a document
+     */
+    @GetMapping("/{id}/analysis")
+    public ResponseEntity<?> getDocumentAnalysis(@PathVariable UUID id) {
+        try {
+            if (!documentAnalysisService.hasAnalysis(id)) {
+                return ResponseEntity.status(404).body(Map.of("error", "Analysis not found"));
+            }
+            
+            com.nyaysetu.backend.entity.DocumentAnalysis analysis = 
+                documentAnalysisService.getAnalysisByDocumentId(id);
+                
+            return ResponseEntity.ok(analysis);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Check if document has analysis
+     */
+    @GetMapping("/{id}/has-analysis")
+    public ResponseEntity<?> checkAnalysis(@PathVariable UUID id) {
+        try {
+            boolean hasAnalysis = documentAnalysisService.hasAnalysis(id);
+            return ResponseEntity.ok(Map.of(
+                "documentId", id.toString(),
+                "hasAnalysis", hasAnalysis
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
 

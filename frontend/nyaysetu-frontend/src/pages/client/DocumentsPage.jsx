@@ -183,16 +183,19 @@ export default function DocumentsPage() {
     };
 
     const handleDelete = async (docId) => {
-        if (!window.confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
-            return;
-        }
-
+        // Simple direct delete - no confirmation
         try {
-            await documentAPI.delete(docId);
-            setDocuments(documents.filter(doc => doc.id !== docId));
+            const token = localStorage.getItem('token');
+
+            await axios.delete(`http://localhost:8080/api/documents/${docId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            // Remove from UI immediately
+            setDocuments(prev => prev.filter(doc => doc.id !== docId));
+
         } catch (error) {
-            console.error('Delete failed:', error);
-            alert('Delete failed: ' + (error.response?.data?.message || error.message));
+            console.error('Delete error:', error);
         }
     };
 
@@ -588,7 +591,11 @@ export default function DocumentsPage() {
                                         Download
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(doc.id)}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleDelete(doc.id);
+                                        }}
                                         style={{
                                             padding: '0.75rem',
                                             background: 'rgba(239, 68, 68, 0.1)',

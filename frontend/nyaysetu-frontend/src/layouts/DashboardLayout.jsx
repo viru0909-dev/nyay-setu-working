@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import useAuthStore from '../store/authStore';
 import Sidebar from './Sidebar';
 import DashboardHeader from './DashboardHeader';
-import NotificationService from '../services/NotificationService';
 
 export default function DashboardLayout() {
     const { user, token } = useAuthStore();
@@ -12,27 +11,21 @@ export default function DashboardLayout() {
     useEffect(() => {
         if (!token || !user) {
             navigate('/login');
-        } else {
-            // TEMPORARILY DISABLED - WebSocket causing 403 errors
-            // TODO: Fix WebSocket authentication
-            // NotificationService.connect(token);
         }
-
-        // Cleanup on unmount
-        return () => {
-            // NotificationService.disconnect();
-        };
     }, [token, user, navigate]);
 
     return (
         <div style={{
-            minHeight: '100vh',
+            height: '100vh',
+            width: '100vw',
             background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
             display: 'flex',
-            position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            position: 'fixed',
+            top: 0,
+            left: 0
         }}>
-            {/* Animated Background Orbs */}
+            {/* Background Orbs */}
             <div style={{
                 position: 'absolute',
                 width: '600px',
@@ -41,7 +34,6 @@ export default function DashboardLayout() {
                 top: '-200px',
                 right: '-200px',
                 borderRadius: '50%',
-                animation: 'pulse 8s ease-in-out infinite',
                 pointerEvents: 'none'
             }} />
             <div style={{
@@ -52,40 +44,35 @@ export default function DashboardLayout() {
                 bottom: '-150px',
                 left: '-150px',
                 borderRadius: '50%',
-                animation: 'pulse 6s ease-in-out infinite',
                 pointerEvents: 'none'
             }} />
 
-            {/* Sidebar */}
+            {/* Sidebar - Fixed Height */}
             <Sidebar userRole={user?.role} />
 
-            {/* Main Content */}
+            {/* Main Content Area */}
             <div style={{
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
+                height: '100vh',
+                overflow: 'hidden',
                 position: 'relative',
                 zIndex: 1
             }}>
-                {/* Header */}
+                {/* Header - Fixed Height */}
                 <DashboardHeader user={user} />
 
-                {/* Content Area */}
+                {/* Scrollable Content Area */}
                 <main style={{
                     flex: 1,
                     padding: '2rem',
-                    overflowY: 'auto'
+                    overflowY: 'auto',
+                    overflowX: 'hidden'
                 }}>
                     <Outlet />
                 </main>
             </div>
-
-            <style>{`
-                @keyframes pulse {
-                    0%, 100% { transform: scale(1); opacity: 0.8; }
-                    50% { transform: scale(1.1); opacity: 1; }
-                }
-            `}</style>
         </div>
     );
 }
