@@ -529,7 +529,47 @@ export default function DocumentsPage() {
                                     {doc.fileName}
                                 </h3>
 
-                                {/* Details */}
+                                {/* Verification Status Badge */}
+                                <div style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.375rem',
+                                    padding: '0.25rem 0.625rem',
+                                    background: doc.verificationStatus === 'VERIFIED'
+                                        ? 'rgba(16, 185, 129, 0.15)'
+                                        : doc.verificationStatus === 'UNDER_REVIEW'
+                                            ? 'rgba(139, 92, 246, 0.15)'
+                                            : 'rgba(245, 158, 11, 0.15)',
+                                    border: `1px solid ${doc.verificationStatus === 'VERIFIED'
+                                        ? 'rgba(16, 185, 129, 0.4)'
+                                        : doc.verificationStatus === 'UNDER_REVIEW'
+                                            ? 'rgba(139, 92, 246, 0.4)'
+                                            : 'rgba(245, 158, 11, 0.4)'}`,
+                                    borderRadius: '9999px',
+                                    marginBottom: '0.75rem'
+                                }}>
+                                    {doc.verificationStatus === 'VERIFIED' ? (
+                                        <CheckCircle2 size={12} style={{ color: '#10b981' }} />
+                                    ) : doc.verificationStatus === 'UNDER_REVIEW' ? (
+                                        <Eye size={12} style={{ color: '#8b5cf6' }} />
+                                    ) : (
+                                        <Loader size={12} style={{ color: '#f59e0b' }} />
+                                    )}
+                                    <span style={{
+                                        fontSize: '0.7rem',
+                                        fontWeight: '600',
+                                        color: doc.verificationStatus === 'VERIFIED'
+                                            ? '#10b981'
+                                            : doc.verificationStatus === 'UNDER_REVIEW'
+                                                ? '#8b5cf6'
+                                                : '#f59e0b'
+                                    }}>
+                                        {doc.verificationStatus === 'VERIFIED' ? 'AI Verified'
+                                            : doc.verificationStatus === 'UNDER_REVIEW' ? 'Under Review'
+                                                : 'Pending Review'}
+                                    </span>
+                                </div>
+
                                 <div style={{ marginBottom: '1rem' }}>
                                     {doc.caseTitle && (
                                         <div style={{

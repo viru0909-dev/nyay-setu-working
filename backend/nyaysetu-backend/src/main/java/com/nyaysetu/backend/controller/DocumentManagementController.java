@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/documents")
+@RequestMapping("/api/documents")
 @RequiredArgsConstructor
 public class DocumentManagementController {
 
@@ -35,18 +35,37 @@ public class DocumentManagementController {
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "category", defaultValue = "OTHER") String category,
             @RequestParam(value = "description", required = false, defaultValue = "") String description,
+            @RequestParam(value = "caseId", required = false) String caseIdStr,
             Authentication authentication
     ) {
         try {
             User user = authService.findByEmail(authentication.getName());
             
+            UUID caseId = null;
+            if (caseIdStr != null && !caseIdStr.isEmpty() && !caseIdStr.equals("null")) {
+                try {
+                    caseId = UUID.fromString(caseIdStr);
+                } catch (Exception e) {
+                    // Invalid UUID, ignore
+                }
+            }
+            
             UploadDocumentRequest request = UploadDocumentRequest.builder()
                     .category(category)
                     .description(description)
-                    .caseId(null)  // Always null for now
+                    .caseId(caseId)
                     .build();
 
             DocumentDto document = documentManagementService.uploadDocument(file, request, user);
+            
+            // Auto-trigger AI verification
+            try {
+                documentManagementService.triggerAnalysis(document.getId());
+            } catch (Exception e) {
+                // Log but don't fail upload if analysis fails
+                System.out.println("AI analysis trigger failed: " + e.getMessage());
+            }
+            
             return ResponseEntity.ok(document);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));

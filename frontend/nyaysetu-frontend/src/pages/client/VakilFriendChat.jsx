@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare } from 'lucide-react';
+import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, FileText, X } from 'lucide-react';
 import { vakilFriendAPI } from '../../services/api';
+import axios from 'axios';
 
 export default function VakilFriendChat() {
     const [messages, setMessages] = useState([]);
@@ -14,7 +15,10 @@ export default function VakilFriendChat() {
     const [error, setError] = useState(null);
     const [sessions, setSessions] = useState([]);
     const [showHistory, setShowHistory] = useState(false);
+    const [attachedFiles, setAttachedFiles] = useState([]); // For document attachments
+    const [uploadingFile, setUploadingFile] = useState(false);
     const messagesContainerRef = useRef(null);
+    const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
     // Scroll to bottom of messages container only (not the page)
@@ -192,6 +196,96 @@ export default function VakilFriendChat() {
             e.preventDefault();
             sendMessage();
         }
+    };
+
+    // File attachment handlers
+    const handleFileSelect = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        for (const file of files) {
+            // Validate file type
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg',
+                'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!allowedTypes.includes(file.type)) {
+                alert(`File type not supported: ${file.name}`);
+                continue;
+            }
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert(`File too large: ${file.name} (max 10MB)`);
+                continue;
+            }
+
+            // Add to attached files with pending status
+            setAttachedFiles(prev => [...prev, {
+                file,
+                name: file.name,
+                size: file.size,
+                status: 'pending',
+                id: null
+            }]);
+
+            // Upload the file
+            await uploadFile(file);
+        }
+
+        // Clear input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const uploadFile = async (file) => {
+        setUploadingFile(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('category', 'EVIDENCE');
+            formData.append('description', `Uploaded during case filing via Vakil-Friend chat`);
+            // Don't set caseId yet - will link when case is filed
+
+            const token = localStorage.getItem('token');
+            const response = await axios.post('http://localhost:8080/api/documents/upload', formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            // Update file status to uploaded
+            setAttachedFiles(prev => prev.map(f =>
+                f.name === file.name && f.status === 'pending'
+                    ? { ...f, status: 'uploaded', id: response.data.id }
+                    : f
+            ));
+
+            // Add a message about the uploaded file
+            setMessages(prev => [...prev, {
+                role: 'user',
+                content: `📎 Attached document: ${file.name}`
+            }]);
+
+        } catch (error) {
+            console.error('File upload failed:', error);
+            setAttachedFiles(prev => prev.map(f =>
+                f.name === file.name && f.status === 'pending'
+                    ? { ...f, status: 'failed' }
+                    : f
+            ));
+            alert(`Failed to upload ${file.name}`);
+        } finally {
+            setUploadingFile(false);
+        }
+    };
+
+    const removeAttachment = (fileName) => {
+        setAttachedFiles(prev => prev.filter(f => f.name !== fileName));
+    };
+
+    const formatFileSize = (bytes) => {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     };
 
     return (
@@ -565,52 +659,149 @@ export default function VakilFriendChat() {
                 {/* Input Area */}
                 <div style={{
                     padding: '1rem 1.25rem',
-                    borderTop: '1px solid rgba(139, 92, 246, 0.2)',
-                    display: 'flex',
-                    gap: '0.625rem'
+                    borderTop: '1px solid rgba(139, 92, 246, 0.2)'
                 }}>
-                    <textarea
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Describe your legal issue..."
-                        disabled={isLoading || isStarting}
-                        rows={2}
-                        style={{
-                            flex: 1,
-                            padding: '0.75rem 1rem',
-                            background: 'rgba(15, 23, 42, 0.6)',
-                            border: '2px solid rgba(139, 92, 246, 0.2)',
-                            borderRadius: '0.625rem',
-                            color: 'white',
-                            fontSize: '0.9rem',
-                            resize: 'none',
-                            outline: 'none',
-                            fontFamily: 'inherit'
-                        }}
-                    />
-                    <button
-                        onClick={sendMessage}
-                        disabled={!inputMessage.trim() || isLoading || isStarting}
-                        style={{
-                            padding: '0.75rem 1rem',
-                            background: (!inputMessage.trim() || isLoading || isStarting)
-                                ? 'rgba(139, 92, 246, 0.3)'
-                                : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                            border: 'none',
-                            borderRadius: '0.625rem',
-                            color: 'white',
-                            cursor: (!inputMessage.trim() || isLoading || isStarting) ? 'not-allowed' : 'pointer',
+                    {/* Attached Files Preview */}
+                    {attachedFiles.length > 0 && (
+                        <div style={{
                             display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: (!inputMessage.trim() || isLoading || isStarting)
-                                ? 'none'
-                                : '0 4px 15px rgba(139, 92, 246, 0.4)'
-                        }}
-                    >
-                        <Send size={20} />
-                    </button>
+                            gap: '0.5rem',
+                            flexWrap: 'wrap',
+                            marginBottom: '0.75rem'
+                        }}>
+                            {attachedFiles.map((file, index) => (
+                                <div key={index} style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.375rem',
+                                    padding: '0.375rem 0.625rem',
+                                    background: file.status === 'uploaded'
+                                        ? 'rgba(16, 185, 129, 0.15)'
+                                        : file.status === 'failed'
+                                            ? 'rgba(239, 68, 68, 0.15)'
+                                            : 'rgba(139, 92, 246, 0.15)',
+                                    border: `1px solid ${file.status === 'uploaded'
+                                        ? 'rgba(16, 185, 129, 0.3)'
+                                        : file.status === 'failed'
+                                            ? 'rgba(239, 68, 68, 0.3)'
+                                            : 'rgba(139, 92, 246, 0.3)'}`,
+                                    borderRadius: '0.5rem'
+                                }}>
+                                    <FileText size={14} style={{ color: file.status === 'uploaded' ? '#10b981' : file.status === 'failed' ? '#ef4444' : '#8b5cf6' }} />
+                                    <span style={{
+                                        fontSize: '0.75rem',
+                                        color: '#e2e8f0',
+                                        maxWidth: '120px',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
+                                    }}>
+                                        {file.name}
+                                    </span>
+                                    <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
+                                        {formatFileSize(file.size)}
+                                    </span>
+                                    {file.status === 'pending' && (
+                                        <Loader2 size={12} style={{ color: '#8b5cf6', animation: 'spin 1s linear infinite' }} />
+                                    )}
+                                    {file.status === 'uploaded' && (
+                                        <CheckCircle size={12} style={{ color: '#10b981' }} />
+                                    )}
+                                    <button
+                                        onClick={() => removeAttachment(file.name)}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            padding: '2px',
+                                            cursor: 'pointer',
+                                            color: '#94a3b8'
+                                        }}
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <div style={{ display: 'flex', gap: '0.625rem' }}>
+                        {/* Hidden file input */}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                            onChange={handleFileSelect}
+                            style={{ display: 'none' }}
+                        />
+
+                        {/* Paperclip button */}
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isLoading || isStarting || uploadingFile}
+                            title="Attach document"
+                            style={{
+                                padding: '0.75rem',
+                                background: 'rgba(139, 92, 246, 0.1)',
+                                border: '2px solid rgba(139, 92, 246, 0.2)',
+                                borderRadius: '0.625rem',
+                                color: uploadingFile ? '#94a3b8' : '#c4b5fd',
+                                cursor: (isLoading || isStarting || uploadingFile) ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            {uploadingFile ? (
+                                <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
+                            ) : (
+                                <Paperclip size={20} />
+                            )}
+                        </button>
+
+                        <textarea
+                            value={inputMessage}
+                            onChange={(e) => setInputMessage(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder="Describe your legal issue..."
+                            disabled={isLoading || isStarting}
+                            rows={2}
+                            style={{
+                                flex: 1,
+                                padding: '0.75rem 1rem',
+                                background: 'rgba(15, 23, 42, 0.6)',
+                                border: '2px solid rgba(139, 92, 246, 0.2)',
+                                borderRadius: '0.625rem',
+                                color: 'white',
+                                fontSize: '0.9rem',
+                                resize: 'none',
+                                outline: 'none',
+                                fontFamily: 'inherit'
+                            }}
+                        />
+                        <button
+                            onClick={sendMessage}
+                            disabled={!inputMessage.trim() || isLoading || isStarting}
+                            style={{
+                                padding: '0.75rem 1rem',
+                                background: (!inputMessage.trim() || isLoading || isStarting)
+                                    ? 'rgba(139, 92, 246, 0.3)'
+                                    : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                border: 'none',
+                                borderRadius: '0.625rem',
+                                color: 'white',
+                                cursor: (!inputMessage.trim() || isLoading || isStarting) ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: (!inputMessage.trim() || isLoading || isStarting)
+                                    ? 'none'
+                                    : '0 4px 15px rgba(139, 92, 246, 0.4)'
+                            }}
+                        >
+                            <Send size={20} />
+                        </button>
+                    </div>
                 </div>
             </div>
 

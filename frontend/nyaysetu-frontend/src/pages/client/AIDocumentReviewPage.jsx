@@ -63,60 +63,81 @@ export default function AIDocumentReviewPage() {
             const maxAttempts = 30;
 
             const checkAnalysis = async () => {
-                const checkResponse = await fetch(`http://localhost:8080/api/documents/${documentId}/analysis`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+                try {
+                    const checkResponse = await fetch(`http://localhost:8080/api/documents/${documentId}/analysis`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
 
-                if (checkResponse.ok) {
-                    const analysisData = await checkResponse.json();
+                    if (checkResponse.ok) {
+                        const analysisData = await checkResponse.json();
 
-                    if (analysisData.analysisSuccess) {
-                        // Parse the AI response - NEW STRUCTURE
-                        const legalPoints = JSON.parse(analysisData.legalPoints || '[]');
-                        const relevantLaws = JSON.parse(analysisData.relevantLaws || '[]');
-                        const caseLaws = JSON.parse(analysisData.caseLawSuggestions || '[]');
-                        const parties = JSON.parse(analysisData.partiesInvolved || '[]');
-                        const dates = JSON.parse(analysisData.importantDates || '[]');
+                        if (analysisData.analysisSuccess) {
+                            // Parse the AI response - NEW STRUCTURE
+                            const legalPoints = JSON.parse(analysisData.legalPoints || '[]');
+                            const relevantLaws = JSON.parse(analysisData.relevantLaws || '[]');
+                            const caseLaws = JSON.parse(analysisData.caseLawSuggestions || '[]');
+                            const parties = JSON.parse(analysisData.partiesInvolved || '[]');
+                            const dates = JSON.parse(analysisData.importantDates || '[]');
 
-                        // Transform to frontend format
-                        setAnalysis({
-                            score: 85, // Fixed score
-                            category: analysisData.suggestedCategory || 'Legal Document',
-                            summary: analysisData.summary || 'Analysis completed',
-                            completeness: {
-                                status: 'Good',
-                                percentage: 85,
-                                issues: [] // No issues in fake AI
-                            },
-                            compliance: {
-                                status: 'Compliant',
-                                checks: [
-                                    { item: 'Document structure', passed: true },
-                                    { item: 'Legal terminology', passed: true }
-                                ]
-                            },
-                            suggestions: legalPoints,
-                            keyPoints: relevantLaws,
-                            similarCases: caseLaws.map((law, idx) => ({
-                                id: `REF-${idx + 1}`,
-                                title: law,
-                                relevance: 85
-                            })),
-                            parties: parties,
-                            dates: dates,
-                            riskAssessment: analysisData.riskAssessment || 'Pending review'
-                        });
+                            // Transform to frontend format
+                            setAnalysis({
+                                score: 85, // Fixed score
+                                category: analysisData.suggestedCategory || 'Legal Document',
+                                summary: analysisData.summary || 'Analysis completed',
+                                completeness: {
+                                    status: 'Good',
+                                    percentage: 85,
+                                    issues: [] // No issues in fake AI
+                                },
+                                compliance: {
+                                    status: 'Compliant',
+                                    checks: [
+                                        { item: 'Document structure', passed: true },
+                                        { item: 'Legal terminology', passed: true }
+                                    ]
+                                },
+                                suggestions: legalPoints,
+                                keyPoints: relevantLaws,
+                                similarCases: caseLaws.map((law, idx) => ({
+                                    id: `REF-${idx + 1}`,
+                                    title: law,
+                                    relevance: 85
+                                })),
+                                parties: parties,
+                                dates: dates,
+                                riskAssessment: analysisData.riskAssessment || 'Pending review'
+                            });
+                            setAnalyzing(false);
+                        } else if (analysisData.errorMessage) {
+                            // Analysis completed but with error
+                            setAnalyzing(false);
+                            alert('Analysis Note: ' + analysisData.errorMessage + '\n\nOnly PDF files with text content can be analyzed.');
+                        }
+                    } else if (checkResponse.status === 404) {
+                        // 404 means analysis is still processing, continue polling
+                        if (attempts < maxAttempts) {
+                            attempts++;
+                            setTimeout(checkAnalysis, 2000);
+                        } else {
+                            setAnalyzing(false);
+                            alert('Analysis is taking too long. The document may still be processing in the background.');
+                        }
+                    } else {
+                        // Other error
                         setAnalyzing(false);
-                    } else if (analysisData.errorMessage) {
-                        throw new Error(analysisData.errorMessage);
+                        alert('Analysis failed. Please try again.');
                     }
-                } else if (attempts < maxAttempts) {
-                    attempts++;
-                    setTimeout(checkAnalysis, 2000);
-                } else {
-                    throw new Error('Analysis timeout');
+                } catch (err) {
+                    // Network or parsing error - continue polling
+                    if (attempts < maxAttempts) {
+                        attempts++;
+                        setTimeout(checkAnalysis, 2000);
+                    } else {
+                        setAnalyzing(false);
+                        alert('Could not complete analysis. Please try again.');
+                    }
                 }
             };
 
@@ -198,7 +219,7 @@ export default function AIDocumentReviewPage() {
                         type="file"
                         onChange={handleFileSelect}
                         style={{ display: 'none' }}
-                        accept=".pdf,.doc,.docx"
+                        accept=".pdf"
                     />
                     {selectedFile ? (
                         <>
@@ -217,7 +238,7 @@ export default function AIDocumentReviewPage() {
                                 Click to upload document
                             </p>
                             <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
-                                PDF, DOC, DOCX (max 10MB)
+                                PDF files only (max 10MB)
                             </p>
                         </>
                     )}
