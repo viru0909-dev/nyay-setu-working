@@ -1,0 +1,234 @@
+.hearings-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.page-header {
+    margin-bottom: 32px;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+}
+
+.page-header p {
+    color: #64748b;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 16px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-container p {
+    color: #64748b;
+    font-size: 1.125rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin: 0;
+}
+
+.hearings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+}
+
+.hearing-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.hearing-card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+}
+
+.hearing-top {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: white;
+}
+
+.status-scheduled {
+    color: #1e40af;
+}
+
+.status-live {
+    color: #dc2626;
+    animation: pulse 2s infinite;
+}
+
+.status-completed {
+    color: #059669;
+}
+
+.status-cancelled {
+    color: #6b7280;
+}
+
+.hearing-content {
+    padding: 24px;
+    flex: 1;
+}
+
+.hearing-content h3 {
+    font-size: 1.25rem;
+    color: #1e293b;
+    margin: 0 0 16px 0;
+    font-weight: 700;
+}
+
+.hearing-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9375rem;
+    color: #475569;
+}
+
+.detail-item .icon {
+    font-size: 1.125rem;
+}
+
+.notes {
+    margin-top: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 3px solid #667eea;
+}
+
+.notes strong {
+    display: block;
+    color: #475569;
+    font-size: 0.875rem;
+    margin-bottom: 6px;
+}
+
+.notes p {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.hearing-actions {
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.join-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.join-btn.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.join-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.join-btn.secondary {
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+.join-btn.disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .hearings-page {
+        padding: 16px;
+    }
+
+    .hearings-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+}

@@ -26,6 +26,8 @@ const MyCasesPage = lazy(() => import('./pages/client/MyCasesPage'));
 const DocumentsPage = lazy(() => import('./pages/client/DocumentsPage'));
 const AIDocumentReviewPage = lazy(() => import('./pages/client/AIDocumentReviewPage'));
 const ProfilePage = lazy(() => import('./pages/client/ProfilePage'));
+const VakilFriendChat = lazy(() => import('./pages/client/VakilFriendChat'));
+const CaseDetailPage = lazy(() => import('./pages/client/CaseDetailPage'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -82,6 +84,8 @@ function App() {
                                 <Route path="documents" element={<DocumentsPage />} />
                                 <Route path="ai-review" element={<AIDocumentReviewPage />} />
                                 <Route path="profile" element={<ProfilePage />} />
+                                <Route path="vakil-friend" element={<VakilFriendChat />} />
+                                <Route path="case/:caseId" element={<CaseDetailPage />} />
                             </Route>
 
                             <Route
@@ -104,6 +108,7 @@ function App() {
                                 }
                             >
                                 <Route index element={<JudgeDashboard />} />
+                                {/* Removed hearing/:hearingId route - VideoCallRoom deleted */}
                             </Route>
 
                             <Route

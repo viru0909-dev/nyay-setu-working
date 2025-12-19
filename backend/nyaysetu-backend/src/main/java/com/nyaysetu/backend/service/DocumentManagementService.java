@@ -27,6 +27,7 @@ public class DocumentManagementService {
     private final CaseRepository caseRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final DocumentAnalysisService documentAnalysisService;
 
     @Transactional
     public DocumentDto uploadDocument(MultipartFile file, UploadDocumentRequest request, User uploader) {
@@ -94,6 +95,20 @@ public class DocumentManagementService {
 
         // Delete from database
         documentRepository.delete(document);
+    }
+
+    /**
+     * Trigger AI analysis for a document
+     */
+    public void triggerAnalysis(UUID documentId) {
+        DocumentEntity document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+                
+        // Get the actual file from storage
+        java.io.File file = fileStorageService.getFile(document.getFileUrl());
+        
+        // Trigger async analysis
+        documentAnalysisService.analyzeDocumentAsync(document, file);
     }
 
     private DocumentDto convertToDto(DocumentEntity entity) {

@@ -1,6 +1,9 @@
-import { FolderOpen, Video, FileText, TrendingUp, Clock, CheckCircle2 } from 'lucide-react';
+import { FolderOpen, Video, FileText, TrendingUp, Clock, CheckCircle2, Bot, MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ClientDashboard() {
+    const navigate = useNavigate();
+
     // Mock data - will be replaced with API calls
     const stats = [
         { label: 'My Cases', value: '3', icon: FolderOpen, color: '#3b82f6', change: '+1 this month' },
@@ -21,6 +24,69 @@ export default function ClientDashboard() {
 
     return (
         <div>
+            {/* Vakil-Friend CTA Banner */}
+            <div
+                onClick={() => navigate('/client/vakil-friend')}
+                style={{
+                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%)',
+                    border: '2px solid rgba(139, 92, 246, 0.4)',
+                    borderRadius: '1.5rem',
+                    padding: '1.5rem 2rem',
+                    marginBottom: '2rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                }}
+                onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(139, 92, 246, 0.4)';
+                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.6)';
+                }}
+                onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <div style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 4px 20px rgba(139, 92, 246, 0.5)'
+                    }}>
+                        <Bot size={32} color="white" />
+                    </div>
+                    <div>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', marginBottom: '0.25rem' }}>
+                            🤖 File Case with Vakil-Friend AI
+                        </h2>
+                        <p style={{ fontSize: '1rem', color: '#c4b5fd' }}>
+                            Simply describe your legal issue and our AI will guide you through filing
+                        </p>
+                    </div>
+                </div>
+                <div style={{
+                    padding: '0.75rem 1.5rem',
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                    borderRadius: '0.75rem',
+                    color: 'white',
+                    fontWeight: '700',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                }}>
+                    <MessageCircle size={20} />
+                    Start Chat
+                </div>
+            </div>
+
             {/* Stats Grid */}
             <div style={{
                 display: 'grid',
@@ -94,10 +160,10 @@ export default function ClientDashboard() {
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                     {[
-                        { label: 'File New Case', icon: FileText, path: '/client/file-case' },
+                        { label: 'Traditional Filing', icon: FileText, path: '/client/file-case' },
                         { label: 'Upload Documents', icon: FileText, path: '/client/documents' },
                         { label: 'AI Document Review', icon: TrendingUp, path: '/client/ai-review' },
-                        { label: 'Join Hearing', icon: Video, path: '/client/hearings' }
+                        { label: 'My Cases', icon: FolderOpen, path: '/client/cases' }
                     ].map((action, index) => {
                         const Icon = action.icon;
                         return (

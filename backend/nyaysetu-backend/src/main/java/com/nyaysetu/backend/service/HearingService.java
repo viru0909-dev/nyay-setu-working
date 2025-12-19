@@ -1,11 +1,11 @@
 package com.nyaysetu.backend.service;
 
-import com.nyaysetu.backend.entity.Hearing;
-import com.nyaysetu.backend.entity.LegalCase;
-import com.nyaysetu.backend.exception.NotFoundException;
+import com.nyaysetu.backend.entity.*;
+import com.nyaysetu.backend.repository.CaseRepository;
+import com.nyaysetu.backend.repository.HearingParticipantRepository;
 import com.nyaysetu.backend.repository.HearingRepository;
-import com.nyaysetu.backend.repository.LegalCaseRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,33 +15,108 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class HearingService {
-
+    
     private final HearingRepository hearingRepository;
-    private final LegalCaseRepository legalCaseRepository;
-    private final CaseTimelineService timelineService;
-
+    private final HearingParticipantRepository participantRepository;
+    private final CaseRepository caseRepository;
+    
     @Transactional
-    public Hearing scheduleHearing(UUID caseId, LocalDateTime when, String location, String notes) {
-
-        LegalCase lc = legalCaseRepository.findById(caseId)
-                .orElseThrow(() -> new NotFoundException("Case not found: " + caseId));
-
+    public Hearing scheduleHearing(UUID caseId, LocalDateTime scheduledDate, Integer durationMinutes) {
+        log.info("Scheduling hearing for case: {}", caseId);
+        
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found: " + caseId));
+        
+        String videoRoomId = generateVideoRoomId();
+        
         Hearing hearing = Hearing.builder()
-                .legalCaseId(caseId)
-                .scheduledAt(when)
-                .location(location)
-                .notes(notes)
+                .caseEntity(caseEntity)
+                .scheduledDate(scheduledDate)
+                .durationMinutes(durationMinutes != null ? durationMinutes : 60)
+                .videoRoomId(videoRoomId)
+                .status(HearingStatus.SCHEDULED)
                 .build();
-
-        Hearing saved = hearingRepository.save(hearing);
-
-        timelineService.addEvent(caseId, "Hearing scheduled on " + when + " at " + location);
-
-        return saved;
+        
+        return hearingRepository.save(hearing);
     }
-
-    public List<Hearing> getHearingsForCase(UUID caseId) {
-        return hearingRepository.findByLegalCaseIdOrderByScheduledAtAsc(caseId);
+    
+    @Transactional
+    public HearingParticipant addParticipant(UUID hearingId, Long userId, ParticipantRole role) {
+        Hearing hearing = hearingRepository.findById(hearingId)
+                .orElseThrow(() -> new RuntimeException("Hearing not found"));
+        
+        if (participantRepository.existsByHearingIdAndUserId(hearingId, userId)) {
+            throw new RuntimeException("User already added to hearing");
+        }
+        
+        HearingParticipant participant = HearingParticipant.builder()
+                .hearing(hearing)
+                .user(User.builder().id(userId).build())
+                .role(role)
+                .canSpeak(true)
+                .isVideoOn(true)
+                .isAudioOn(true)
+                .build();
+        
+        return participantRepository.save(participant);
+    }
+    
+    @Transactional
+    public void joinHearing(UUID hearingId, Long userId) {
+        HearingParticipant participant = participantRepository
+                .findByHearingIdAndUserId(hearingId, userId)
+                .orElseThrow(() -> new RuntimeException("User not authorized for this hearing"));
+        
+        participant.setJoinedAt(LocalDateTime.now());
+        participantRepository.save(participant);
+        
+        Hearing hearing = hearingRepository.findById(hearingId).orElseThrow();
+        if (hearing.getStatus() == HearingStatus.SCHEDULED) {
+            hearing.setStatus(HearingStatus.IN_PROGRESS);
+            hearingRepository.save(hearing);
+        }
+    }
+    
+    @Transactional
+    public void leaveHearing(UUID hearingId, Long userId) {
+        HearingParticipant participant = participantRepository
+                .findByHearingIdAndUserId(hearingId, userId)
+                .orElseThrow(() -> new RuntimeException("Participant not found"));
+        
+        participant.setLeftAt(LocalDateTime.now());
+        participantRepository.save(participant);
+    }
+    
+    @Transactional
+    public Hearing completeHearing(UUID hearingId, String judgeNotes) {
+        Hearing hearing = hearingRepository.findById(hearingId)
+                .orElseThrow(() -> new RuntimeException("Hearing not found"));
+        
+        hearing.setStatus(HearingStatus.COMPLETED);
+        hearing.setJudgeNotes(judgeNotes);
+        return hearingRepository.save(hearing);
+    }
+    
+    public List<Hearing> getCaseHearings(UUID caseId) {
+        return hearingRepository.findByCaseEntityId(caseId);
+    }
+    
+    public List<HearingParticipant> getHearingParticipants(UUID hearingId) {
+        return participantRepository.findByHearingId(hearingId);
+    }
+    
+    public Hearing getHearing(UUID hearingId) {
+        return hearingRepository.findById(hearingId)
+                .orElseThrow(() -> new RuntimeException("Hearing not found"));
+    }
+    
+    private String generateVideoRoomId() {
+        return "hearing-" + UUID.randomUUID().toString().substring(0, 12);
+    }
+    
+    public boolean canUserJoinHearing(UUID hearingId, Long userId) {
+        return participantRepository.existsByHearingIdAndUserId(hearingId, userId);
     }
 }

@@ -46,6 +46,23 @@ public class CaseEntity {
 
     private UUID judgeId;
 
+    // ===== AI-RELATED FIELDS (Vakil-Friend System) =====
+    
+    @Column(columnDefinition = "TEXT")
+    private String aiGeneratedSummary;
+
+    @Column(columnDefinition = "TEXT")
+    private String judgeSummaryJson;
+
+    @Column(columnDefinition = "TEXT")
+    private String chatTranscript;
+
+    private String evidenceVerificationStatus; // PENDING, VERIFIED, FAILED, NEEDS_REVIEW
+
+    private Double aiConfidenceScore;
+
+    private String filingMethod; // TRADITIONAL, CHAT_AI
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

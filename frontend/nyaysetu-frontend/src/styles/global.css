@@ -82,6 +82,17 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
 /* Base Styles */
 body {
   font-family: var(--font-body);

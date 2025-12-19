@@ -17,6 +17,9 @@ export default function DashboardHeader({ user }) {
     return (
         <header style={{
             height: '80px',
+            minHeight: '80px',
+            maxHeight: '80px',
+            flexShrink: 0,
             background: 'rgba(15, 23, 42, 0.6)',
             backdropFilter: 'blur(20px)',
             borderBottom: '1px solid rgba(139, 92, 246, 0.2)',
@@ -24,8 +27,7 @@ export default function DashboardHeader({ user }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            position: 'sticky',
-            top: 0,
+            position: 'relative',
             zIndex: 100
         }}>
             {/* Page Title */}
