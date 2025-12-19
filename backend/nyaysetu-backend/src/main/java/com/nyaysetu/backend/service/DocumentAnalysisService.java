@@ -32,6 +32,12 @@ public class DocumentAnalysisService {
     public void analyzeDocumentAsync(DocumentEntity document, File file) {
         log.info("Starting async analysis for document: {}", document.getId());
         
+        // Skip if analysis already exists
+        if (analysisRepository.existsByDocumentId(document.getId())) {
+            log.info("Analysis already exists for document {}, skipping", document.getId());
+            return;
+        }
+        
         try {
             // Check if PDF
             if (!pdfExtractor.isPdf(document.getFileName())) {
@@ -82,6 +88,12 @@ public class DocumentAnalysisService {
      * Parse AI response and save to database
      */
     private DocumentAnalysis parseAndSaveAnalysis(DocumentEntity doc, String jsonResponse) {
+        // Check again in case analysis was saved by another thread
+        if (analysisRepository.existsByDocumentId(doc.getId())) {
+            log.info("Analysis already exists for document {}, returning existing", doc.getId());
+            return analysisRepository.findByDocumentId(doc.getId()).orElse(null);
+        }
+        
         try {
             // Clean JSON response (remove markdown code blocks if present)
             String cleanJson = jsonResponse.trim();
@@ -125,14 +137,24 @@ public class DocumentAnalysisService {
      * Save failed analysis record
      */
     private void saveFailedAnalysis(DocumentEntity doc, String errorMsg) {
-        DocumentAnalysis analysis = DocumentAnalysis.builder()
-            .document(doc)
-            .analyzedAt(LocalDateTime.now())
-            .analysisSuccess(false)
-            .errorMessage(errorMsg)
-            .build();
-            
-        analysisRepository.save(analysis);
+        // Skip if analysis already exists
+        if (analysisRepository.existsByDocumentId(doc.getId())) {
+            log.info("Analysis already exists for document {}, skipping failed save", doc.getId());
+            return;
+        }
+        
+        try {
+            DocumentAnalysis analysis = DocumentAnalysis.builder()
+                .document(doc)
+                .analyzedAt(LocalDateTime.now())
+                .analysisSuccess(false)
+                .errorMessage(errorMsg)
+                .build();
+                
+            analysisRepository.save(analysis);
+        } catch (Exception e) {
+            log.warn("Could not save failed analysis record: {}", e.getMessage());
+        }
     }
     
     /**

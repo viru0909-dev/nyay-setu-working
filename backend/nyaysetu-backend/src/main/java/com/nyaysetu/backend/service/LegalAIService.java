@@ -34,6 +34,15 @@ public class LegalAIService {
     @PostConstruct
     public void initializeClient() {
         log.info("Initializing Azure OpenAI Client...");
+        
+        // Check if Azure OpenAI is configured
+        if (azureOpenAIKey == null || azureOpenAIKey.isEmpty() || azureOpenAIKey.equals("${AZURE_OPENAI_API_KEY:}")) {
+            log.warn("⚠️ Azure OpenAI API key not configured. Service will use fallback responses.");
+            log.info("💡 Set AZURE_OPENAI_API_KEY environment variable to enable Azure OpenAI.");
+            this.openAIClient = null;
+            return;
+        }
+        
         try {
             this.openAIClient = new OpenAIClientBuilder()
                 .endpoint(azureOpenAIEndpoint)
@@ -41,8 +50,9 @@ public class LegalAIService {
                 .buildClient();
             log.info("✅ Azure OpenAI Client initialized successfully");
         } catch (Exception e) {
-            log.error("❌ Failed to initialize Azure OpenAI Client", e);
-            throw new RuntimeException("Azure OpenAI initialization failed", e);
+            log.error("❌ Failed to initialize Azure OpenAI Client: {}", e.getMessage());
+            log.warn("⚠️ Service will use fallback responses instead.");
+            this.openAIClient = null;
         }
     }
 
@@ -54,6 +64,12 @@ public class LegalAIService {
      */
     public String chat(String userMessage, List<ChatRequestMessage> conversationHistory) {
         log.info("Processing chat message: {}", userMessage.substring(0, Math.min(50, userMessage.length())));
+        
+        // Return fallback if Azure OpenAI is not configured
+        if (openAIClient == null) {
+            log.warn("Azure OpenAI not configured, using fallback response");
+            return getFallbackResponse(userMessage);
+        }
 
         try {
             // Build conversation with system prompt
