@@ -80,10 +80,10 @@ public class CaseAssignmentService {
     }
 
     /**
-     * Assign a lawyer to a case (client invitation)
+     * Propose a lawyer for a case (Client initiates)
      */
     @Transactional
-    public void assignLawyerToCase(UUID caseId, Long lawyerId, boolean isDefendantLawyer) {
+    public void proposeLawyerToCase(UUID caseId, Long lawyerId) {
         CaseEntity caseEntity = caseRepository.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
 
@@ -94,13 +94,33 @@ public class CaseAssignmentService {
             throw new RuntimeException("Selected user is not a lawyer");
         }
 
-        // Note: The CaseEntity already has client_lawyer_id column from V11 migration
-        // We'll use assignedJudge field temporarily to store lawyer info until we add proper fields
+        caseEntity.setLawyer(lawyer);
+        caseEntity.setLawyerProposalStatus("PENDING");
+        caseRepository.save(caseEntity);
         
-        log.info("✅ Assigned lawyer {} to case {}", lawyer.getName(), caseId);
+        log.info("📩 Lawyer {} proposed for case {}", lawyer.getName(), caseId);
+    }
+
+    /**
+     * Respond to a lawyer proposal (Lawyer responds)
+     */
+    @Transactional
+    public void respondToLawyerProposal(UUID caseId, String response) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        if ("ACCEPTED".equalsIgnoreCase(response)) {
+            caseEntity.setLawyerProposalStatus("ACCEPTED");
+            caseEntity.setStatus(CaseStatus.IN_PROGRESS);
+        } else if ("REJECTED".equalsIgnoreCase(response)) {
+            caseEntity.setLawyerProposalStatus("REJECTED");
+            caseEntity.setLawyer(null);
+        } else {
+            throw new RuntimeException("Invalid response: " + response);
+        }
         
-        // TODO: Create lawyer invitation entity and send notification
-        // For MVP, we'll directly assign
+        caseRepository.save(caseEntity);
+        log.info("⚖️ Lawyer proposal for case {} was {}", caseId, response);
     }
 
     /**
@@ -113,7 +133,7 @@ public class CaseAssignmentService {
     /**
      * Get cases assigned to a specific judge
      */
-    public List<CaseEntity> getCasesByJudge(UUID judgeId) {
+    public List<CaseEntity> getCasesByJudge(Long judgeId) {
         return caseRepository.findByJudgeId(judgeId);
     }
 
@@ -129,7 +149,7 @@ public class CaseAssignmentService {
                     workload.put("judgeId", judge.getId());
                     workload.put("judgeName", judge.getName());
                     workload.put("email", judge.getEmail());
-                    workload.put("caseCount", 0); // TODO: Implement proper count when judgeId type is fixed
+                    workload.put("caseCount", caseRepository.countByJudgeId(judge.getId()));
                     return workload;
                 })
                 .collect(Collectors.toList());

@@ -59,28 +59,27 @@ public class VakilFriendService {
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
     private static final String SYSTEM_PROMPT = """
-        You are Vakil-Friend, an AI legal assistant for Nyay-Setu, India's digital judiciary platform.
+        You are Vakil-Friend, a strict AI legal assistant for Nyay-Setu, India's digital judiciary platform.
         
-        Your role is to help citizens file legal cases by collecting information step by step.
+        CRITICAL RULE: DO NOT GIVE GENERAL LEGAL ADVICE. DO NOT SUGGEST VISITING POLICE STATIONS OR COURTS. 
+        YOUR ONLY JOB is to collect the following 7 items to file a case on this platform.
         
-        REQUIRED INFORMATION TO COLLECT (ask one at a time):
+        REQUIRED INFORMATION (ask one at a time, in order):
         1. ISSUE: What happened? (the main problem/incident)
         2. CASE_TYPE: Is this CIVIL, CRIMINAL, FAMILY, PROPERTY, or COMMERCIAL?
-        3. PETITIONER: What is your full name? (the person filing)
-        4. RESPONDENT: Who are you filing against? (name of opposing party)
+        3. PETITIONER: What is your full name?
+        4. RESPONDENT: Who are you filing against?
         5. INCIDENT_DATE: When did this happen?
-        6. EVIDENCE: Do you have any proof? (documents, photos, witnesses)
+        6. EVIDENCE: Describe any proof you have.
         7. URGENCY: How urgent is this? (NORMAL, URGENT, or CRITICAL)
         
-        CONVERSATION FLOW:
-        - Start by asking about their legal issue
-        - Ask ONE question at a time
-        - Be empathetic and supportive
-        - Use simple language (avoid legal jargon)
-        - Respond in the same language (Hindi or English)
+        CONVERSATION RULES:
+        - NEVER give advice. ONLY ask for the next missing piece of information.
+        - If the user provides multiple pieces of info, acknowledge and ask for the NEXT missing one.
+        - Be brief and professional.
         
-        WHEN ALL INFO IS COLLECTED:
-        Summarize the case with this format:
+        FINAL STEP:
+        When and ONLY when you have all 7 items, you MUST output a summary exactly in this format:
         
         **CASE SUMMARY**
         - Case Type: [TYPE]
@@ -210,7 +209,8 @@ public class VakilFriendService {
         CaseEntity savedCase = caseRepository.save(newCase);
         log.info("📋 Saved case with ID: {}", savedCase.getId());
 
-        // AUTO-ASSIGN: Automatically assign a judge to the case
+        // AUTO-ASSIGN: DISABLED - Cases now go to Unassigned Pool for Judges to claim
+        /*
         try {
             caseAssignmentService.autoAssignJudge(savedCase.getId());
             // Refresh the case to get the assigned judge
@@ -218,16 +218,16 @@ public class VakilFriendService {
             log.info("✅ Auto-assigned judge to case {}: {}", savedCase.getId(), savedCase.getAssignedJudge());
         } catch (Exception e) {
             log.warn("Could not auto-assign judge to case {}: {}", savedCase.getId(), e.getMessage());
-            // Continue without judge assignment - can be done manually by admin
         }
 
-        // AUTO-SCHEDULE: Automatically schedule first hearing
+        // AUTO-SCHEDULE: DISABLED - Judge will schedule after claiming
         try {
             savedCase = autoScheduleHearing(savedCase, caseData.get("urgency"));
             log.info("📅 Auto-scheduled hearing for case {}", savedCase.getId());
         } catch (Exception e) {
             log.warn("Could not auto-schedule hearing for case {}: {}", savedCase.getId(), e.getMessage());
         }
+        */
 
         // Mark session as completed
         session.setStatus(ChatSessionStatus.COMPLETED);
@@ -296,7 +296,9 @@ public class VakilFriendService {
             log.warn("Groq API key not configured. Get free key at: https://console.groq.com");
         }
         
-        // Fallback to OllamaService (instant local responses)
+        /* 
+        // Fallback to OllamaService (instant local responses) - DISABLED for Vakil-Friend flow
+        // The generic mock responses in OllamaService interfere with the case filing flow.
         try {
             String lastUserMessage = "";
             if (!conversation.isEmpty()) {
@@ -311,6 +313,7 @@ public class VakilFriendService {
         } catch (Exception e) {
             log.warn("OllamaService error: {}", e.getMessage());
         }
+        */
         
         // Final fallback - smart responses
         return getSmartFallbackResponse(conversation);
@@ -341,7 +344,7 @@ public class VakilFriendService {
         ObjectNode requestBody = objectMapper.createObjectNode();
         requestBody.put("model", groqModel);
         requestBody.set("messages", messagesArray);
-        requestBody.put("temperature", 0.7);
+        requestBody.put("temperature", 0.1); // Lower temperature for stricter adherence
         requestBody.put("max_tokens", 1024);
         
         // Make API call

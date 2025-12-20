@@ -43,6 +43,13 @@ public class CaseManagementService {
                 .collect(Collectors.toList());
     }
 
+    public List<CaseDTO> getCasesByLawyer(User lawyer) {
+        List<CaseEntity> cases = caseRepository.findByLawyer(lawyer);
+        return cases.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<CaseSummaryDto> getUserCaseSummaries(User user) {
         List<CaseEntity> cases = caseRepository.findByClient(user);
         return cases.stream()
@@ -95,6 +102,7 @@ public class CaseManagementService {
                 .clientId(entity.getClient() != null ? entity.getClient().getId() : null)
                 .clientName(entity.getClient() != null ? entity.getClient().getName() : null)
                 .documentsCount(0) // TODO: Count from documents table
+                .lawyerProposalStatus(entity.getLawyerProposalStatus())
                 .build();
     }
 

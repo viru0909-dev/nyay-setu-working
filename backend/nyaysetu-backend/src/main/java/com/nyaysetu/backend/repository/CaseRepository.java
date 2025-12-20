@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Repository
 public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
-    List<CaseEntity> findByJudgeId(UUID judgeId);
+    List<CaseEntity> findByJudgeId(Long judgeId);
     List<CaseEntity> findByClient(User client);
     
     // For auto-assignment - find cases without judge
@@ -22,5 +22,15 @@ public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
     List<CaseEntity> findByStatus(CaseStatus status);
     
     // Count cases assigned to a judge (for round-robin)
-    long countByJudgeId(UUID judgeId);
+    long countByJudgeId(Long judgeId);
+    
+    // Lawyer-specific queries
+    List<CaseEntity> findByLawyer(User lawyer);
+    long countByLawyer(User lawyer);
+    
+    // Find cases by assigned judge name/email
+    List<CaseEntity> findByAssignedJudge(String judgeName);
+    
+    // Find unassigned cases
+    List<CaseEntity> findByAssignedJudgeIsNull();
 }

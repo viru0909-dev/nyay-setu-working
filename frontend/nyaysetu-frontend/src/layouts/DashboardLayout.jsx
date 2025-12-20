@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import useAuthStore from '../store/authStore';
 import Sidebar from './Sidebar';
 import DashboardHeader from './DashboardHeader';
+import AIBrainWidget from '../components/ai/AIBrainWidget';
 
 export default function DashboardLayout() {
     const { user, token } = useAuthStore();
@@ -72,6 +73,9 @@ export default function DashboardLayout() {
                 }}>
                     <Outlet />
                 </main>
+
+                {/* Global AI Brain Assistant */}
+                <AIBrainWidget user={user} />
             </div>
         </div>
     );

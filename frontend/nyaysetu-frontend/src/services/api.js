@@ -91,6 +91,7 @@ export const documentAPI = {
 export const hearingAPI = {
     schedule: (hearingData) => api.post('/api/hearings/schedule', hearingData),
     getByCaseId: (caseId) => api.get(`/api/hearings/case/${caseId}`),
+    getMyHearings: () => api.get('/api/hearings/my'),
     getById: (id) => api.get(`/api/hearings/${id}`),
     join: (id) => api.post(`/api/hearings/${id}/join`),
     leave: (id) => api.post(`/api/hearings/${id}/leave`),
@@ -119,9 +120,34 @@ export const vakilFriendAPI = {
 export const caseAssignmentAPI = {
     autoAssignJudge: (caseId) => api.post(`/api/cases/${caseId}/assign-judge`),
     getAvailableLawyers: () => api.get('/api/cases/lawyers/available'),
-    assignLawyer: (caseId, lawyerId) => api.post(`/api/cases/${caseId}/assign-lawyer`, { lawyerId }),
+    proposeLawyer: (caseId, lawyerId) => api.post(`/api/cases/${caseId}/propose-lawyer`, { lawyerId }),
+    respondToProposal: (caseId, status) => api.post(`/api/cases/${caseId}/respond-proposal`, { status }),
     getPendingCases: () => api.get('/api/cases/pending-assignment'),
     getJudgeWorkload: () => api.get('/api/cases/judge-workload'),
+};
+
+// Judge API - Case management for judges
+export const judgeAPI = {
+    getCases: () => api.get('/api/judge/cases'),
+    getPendingCases: () => api.get('/api/judge/pending'),
+    getUnassignedCases: () => api.get('/api/judge/unassigned'), // Central pool
+    claimCase: (id) => api.post(`/api/judge/cases/${id}/claim`),
+    getTodaysHearings: () => api.get('/api/judge/hearings/today'),
+    getAnalytics: () => api.get('/api/judge/analytics'),
+    aiChat: (message, caseId) => api.post('/api/judge/ai-chat', { message, caseId }),
+    getAICaseSummary: (caseId) => api.get(`/api/judge/case/${caseId}/ai-summary`),
+};
+
+// Lawyer API - Case and client management for lawyers
+export const lawyerAPI = {
+    getCases: () => api.get('/api/lawyer/cases'),
+    getClients: () => api.get('/api/lawyer/clients'),
+    getStats: () => api.get('/api/lawyer/stats'),
+};
+
+// Central Brain API
+export const brainAPI = {
+    chat: (message, sessionId = null) => api.post('/api/brain/chat', { message, sessionId }),
 };
 
 export default api;

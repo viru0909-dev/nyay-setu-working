@@ -28,6 +28,27 @@ const AIDocumentReviewPage = lazy(() => import('./pages/client/AIDocumentReviewP
 const ProfilePage = lazy(() => import('./pages/client/ProfilePage'));
 const VakilFriendChat = lazy(() => import('./pages/client/VakilFriendChat'));
 const CaseDetailPage = lazy(() => import('./pages/client/CaseDetailPage'));
+const EvidenceManagerPage = lazy(() => import('./pages/client/EvidenceManagerPage'));
+const HearingsPage = lazy(() => import('./pages/client/HearingsPage'));
+
+// Judge Pages
+const PendingCasesPage = lazy(() => import('./pages/judge/PendingCasesPage'));
+const ConductHearingPage = lazy(() => import('./pages/judge/ConductHearingPage'));
+const EvidenceReviewPage = lazy(() => import('./pages/judge/EvidenceReviewPage'));
+const DraftOrdersPage = lazy(() => import('./pages/judge/DraftOrdersPage'));
+const CourtAnalyticsPage = lazy(() => import('./pages/judge/CourtAnalyticsPage'));
+const AICaseSummaryPage = lazy(() => import('./pages/judge/AICaseSummaryPage'));
+
+// Lawyer Pages
+const LawyerCasesPage = lazy(() => import('./pages/lawyer/LawyerCasesPage'));
+const MyClientsPage = lazy(() => import('./pages/lawyer/MyClientsPage'));
+const CasePreparationPage = lazy(() => import('./pages/lawyer/CasePreparationPage'));
+const EvidenceVaultPage = lazy(() => import('./pages/lawyer/EvidenceVaultPage'));
+const AILegalAssistantPage = lazy(() => import('./pages/lawyer/AILegalAssistantPage'));
+const LawyerHearingsPage = lazy(() => import('./pages/lawyer/LawyerHearingsPage'));
+const LawyerAnalyticsPage = lazy(() => import('./pages/lawyer/AnalyticsPage'));
+const ClientChatPage = lazy(() => import('./pages/lawyer/ClientChatPage'));
+const LawyerProfilePage = lazy(() => import('./pages/lawyer/LawyerProfilePage'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -86,6 +107,8 @@ function App() {
                                 <Route path="profile" element={<ProfilePage />} />
                                 <Route path="vakil-friend" element={<VakilFriendChat />} />
                                 <Route path="case/:caseId" element={<CaseDetailPage />} />
+                                <Route path="evidence" element={<EvidenceManagerPage />} />
+                                <Route path="hearings" element={<HearingsPage />} />
                             </Route>
 
                             <Route
@@ -97,6 +120,15 @@ function App() {
                                 }
                             >
                                 <Route index element={<LawyerDashboard />} />
+                                <Route path="cases" element={<LawyerCasesPage />} />
+                                <Route path="clients" element={<MyClientsPage />} />
+                                <Route path="preparation" element={<CasePreparationPage />} />
+                                <Route path="evidence" element={<EvidenceVaultPage />} />
+                                <Route path="ai-assistant" element={<AILegalAssistantPage />} />
+                                <Route path="hearings" element={<LawyerHearingsPage />} />
+                                <Route path="analytics" element={<LawyerAnalyticsPage />} />
+                                <Route path="chat" element={<ClientChatPage />} />
+                                <Route path="profile" element={<LawyerProfilePage />} />
                             </Route>
 
                             <Route
@@ -108,7 +140,14 @@ function App() {
                                 }
                             >
                                 <Route index element={<JudgeDashboard />} />
-                                {/* Removed hearing/:hearingId route - VideoCallRoom deleted */}
+                                <Route path="pending" element={<PendingCasesPage />} />
+                                <Route path="assign" element={<PendingCasesPage />} />
+                                <Route path="conduct" element={<ConductHearingPage />} />
+                                <Route path="evidence" element={<EvidenceReviewPage />} />
+                                <Route path="orders" element={<DraftOrdersPage />} />
+                                <Route path="analytics" element={<CourtAnalyticsPage />} />
+                                <Route path="ai-summary" element={<AICaseSummaryPage />} />
+                                <Route path="profile" element={<ProfilePage />} />
                             </Route>
 
                             <Route

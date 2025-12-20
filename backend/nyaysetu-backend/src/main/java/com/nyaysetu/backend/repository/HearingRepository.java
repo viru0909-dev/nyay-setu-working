@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.repository;
 
+import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.Hearing;
 import com.nyaysetu.backend.entity.HearingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,6 @@ public interface HearingRepository extends JpaRepository<Hearing, UUID> {
     
     @Query("SELECT h FROM Hearing h WHERE h.caseEntity.id = :caseId AND h.status = :status")
     List<Hearing> findByCaseEntityIdAndStatus(@Param("caseId") UUID caseId, @Param("status") HearingStatus status);
+
+    List<Hearing> findByCaseEntityInOrderByScheduledDateDesc(List<CaseEntity> cases);
 }

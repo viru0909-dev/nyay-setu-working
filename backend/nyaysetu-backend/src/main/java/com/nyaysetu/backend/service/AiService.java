@@ -8,72 +8,107 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class AiService {
 
-    @Value("${openai.api.key:}")
-    private String openaiApiKey;
+    @Value("${groq.api.key:}")
+    private String groqApiKey;
+
+    @Value("${groq.model:llama-3.1-8b-instant}")
+    private String groqModel;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+
     public String summarize(String text) {
-        return "Document summarization: " + text.substring(0, Math.min(100, text.length())) + "...";
+        try {
+            String prompt = "Please provide a concise legal summary of the following text:\n\n" + text;
+            return chat(prompt);
+        } catch (Exception e) {
+            log.error("Summarization error", e);
+            return "Document summarization: " + text.substring(0, Math.min(100, text.length())) + "...";
+        }
     }
 
     public String chat(String message) {
-        // Debug: Check if API key is loaded
-        System.out.println("Gemini API Key loaded: " + (openaiApiKey != null && !openaiApiKey.isEmpty()));
+        log.info("AI Chat request with Groq. Key present: {}", groqApiKey != null && !groqApiKey.isEmpty());
         
-        // If no Gemini key, use fallback
-        if (openaiApiKey == null || openaiApiKey.isEmpty()) {
-            System.out.println("No Gemini API key found, using fallback responses");
+        if (groqApiKey == null || groqApiKey.isEmpty()) {
+            log.warn("No Groq API key found, using fallback responses");
             return getFallbackResponse(message);
         }
 
         try {
-            System.out.println("Calling Google Gemini API...");
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-002:generateContent?key=" + openaiApiKey;
-            
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(groqApiKey);
 
-            // Build Gemini API request
+            // Build Groq API request (OpenAI compatible)
             ObjectNode requestBody = objectMapper.createObjectNode();
-            ArrayNode contents = requestBody.putArray("contents");
-            ObjectNode content = contents.addObject();
-            ArrayNode parts = content.putArray("parts");
-            ObjectNode part = parts.addObject();
+            requestBody.put("model", groqModel);
             
-            // System instruction + user message
-            String fullPrompt = "You are a helpful AI legal assistant for NyaySetu, India's virtual judiciary platform. " +
+            ArrayNode messagesArray = requestBody.putArray("messages");
+            
+            // System message
+            ObjectNode systemMsg = messagesArray.addObject();
+            systemMsg.put("role", "system");
+            systemMsg.put("content", "You are a helpful AI legal assistant for NyaySetu, India's virtual judiciary platform. " +
                 "Provide accurate, concise information about Indian law, the Constitution, legal procedures, and citizens' rights. " +
-                "Keep responses professional and under 200 words. If specific legal advice is needed, remind users to consult a lawyer.\n\n" +
-                "User question: " + message;
+                "Keep responses professional and relatively brief. If specific legal advice is needed, remind users to consult a lawyer.");
             
-            part.put("text", fullPrompt);
+            // User message
+            ObjectNode userMsg = messagesArray.addObject();
+            userMsg.put("role", "user");
+            userMsg.put("content", message);
+
+            requestBody.put("temperature", 0.7);
 
             HttpEntity<String> request = new HttpEntity<>(objectMapper.writeValueAsString(requestBody), headers);
             
-            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(GROQ_API_URL, request, String.class);
             
             if (response.getStatusCode() == HttpStatus.OK) {
                 JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-                String aiResponse = jsonResponse.path("candidates").get(0)
-                    .path("content").path("parts").get(0).path("text").asText();
+                String aiResponse = jsonResponse.path("choices").get(0)
+                    .path("message").path("content").asText();
                 
-                System.out.println("Gemini API response received!");
+                log.info("Groq API response received successfully");
                 return aiResponse;
             }
             
             return getFallbackResponse(message);
             
         } catch (Exception e) {
-            System.err.println("Gemini API error: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Groq API error: {}", e.getMessage());
             return getFallbackResponse(message);
         }
+    }
+
+    public String analyzeDocument(String text, String fileName) {
+        log.info("Analyzing document with Groq: {}", fileName);
+        
+        String prompt = "You are an expert Indian legal analyst. Analyze the following document and provide a structured JSON report.\n\n" +
+                "Document Name: " + fileName + "\n" +
+                "Document Content:\n" + (text.length() > 5000 ? text.substring(0, 5000) : text) + "\n\n" +
+                "Please respond with ONLY a JSON object containing:\n" +
+                "{\n" +
+                "  \"summary\": \"concise legal summary\",\n" +
+                "  \"legalPoints\": [\"key point 1\", \"key point 2\"],\n" +
+                "  \"relevantLaws\": [\"IPC Section X\", \"CrPC Section Y\"],\n" +
+                "  \"importantDates\": [\"2023-10-12: Filing date\"],\n" +
+                "  \"partiesInvolved\": [\"Party A vs Party B\"],\n" +
+                "  \"caseLawSuggestions\": [\"Case X vs Case Y (2010)\"],\n" +
+                "  \"suggestedCategory\": \"CIVIL/CRIMINAL/FAMILY/etc\",\n" +
+                "  \"riskAssessment\": \"Low/Medium/High with brief reasoning\"\n" +
+                "}\n\n" +
+                "Respond with the JSON only.";
+
+        return chat(prompt);
     }
 
     private String getFallbackResponse(String message) {

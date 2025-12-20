@@ -44,7 +44,13 @@ public class CaseEntity {
     @JoinColumn(name = "client_id")
     private User client;
 
-    private UUID judgeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lawyer_id")
+    private User lawyer;
+
+    private Long judgeId;
+
+    private String filingMethod; // VAKIL_FRIEND, MANUAL
 
     // ===== AI-RELATED FIELDS (Vakil-Friend System) =====
     
@@ -61,7 +67,7 @@ public class CaseEntity {
 
     private Double aiConfidenceScore;
 
-    private String filingMethod; // TRADITIONAL, CHAT_AI
+    private String lawyerProposalStatus; // PENDING, ACCEPTED, REJECTED
 
     private LocalDateTime createdAt;
 

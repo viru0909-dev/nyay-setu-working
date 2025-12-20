@@ -4,6 +4,7 @@ import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.HearingParticipantRepository;
 import com.nyaysetu.backend.repository.HearingRepository;
+import com.nyaysetu.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class HearingService {
     private final HearingRepository hearingRepository;
     private final HearingParticipantRepository participantRepository;
     private final CaseRepository caseRepository;
+    private final UserRepository userRepository;
     
     @Transactional
     public Hearing scheduleHearing(UUID caseId, LocalDateTime scheduledDate, Integer durationMinutes) {
@@ -101,6 +103,21 @@ public class HearingService {
     
     public List<Hearing> getCaseHearings(UUID caseId) {
         return hearingRepository.findByCaseEntityId(caseId);
+    }
+
+    public List<Hearing> getHearingsForUser(String userEmail) {
+        // Get user and their cases, then find hearings for those cases
+        User user = userRepository.findByEmail(userEmail).orElse(null);
+        if (user == null) {
+            return java.util.Collections.emptyList();
+        }
+        
+        List<CaseEntity> userCases = caseRepository.findByClient(user);
+        if (userCases.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        
+        return hearingRepository.findByCaseEntityInOrderByScheduledDateDesc(userCases);
     }
     
     public List<HearingParticipant> getHearingParticipants(UUID hearingId) {
