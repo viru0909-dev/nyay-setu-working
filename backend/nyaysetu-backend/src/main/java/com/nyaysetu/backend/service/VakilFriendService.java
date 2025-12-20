@@ -278,45 +278,23 @@ public class VakilFriendService {
         return caseRepository.save(caseEntity);
     }
 
-    /**
-     * Get AI response - Uses Groq API (free, fast Llama) for full conversational AI
-     */
     private String getAIResponse(List<Map<String, String>> conversation) {
-        // Try Groq API first for full GPT-like behavior
-        if (groqApiKey != null && !groqApiKey.isEmpty()) {
+        // Log key presence (safely)
+        if (groqApiKey == null || groqApiKey.trim().isEmpty()) {
+            log.warn("⚠️ Groq API key is missing or empty. Falling back to scripted responses.");
+        } else {
             try {
                 String groqResponse = callGroqAPI(conversation);
-                if (groqResponse != null && !groqResponse.isEmpty()) {
-                    log.info("✅ Groq API response received");
+                if (groqResponse != null && !groqResponse.trim().isEmpty()) {
+                    log.info("✅ Groq AI response received successfully.");
                     return groqResponse;
                 }
             } catch (Exception e) {
-                log.warn("Groq API error: {}", e.getMessage());
+                log.error("❌ Groq API error: {}. Falling back to basic assistance.", e.getMessage());
             }
-        } else {
-            log.warn("Groq API key not configured. Get free key at: https://console.groq.com");
         }
         
-        /* 
-        // Fallback to OllamaService (instant local responses) - DISABLED for Vakil-Friend flow
-        // The generic mock responses in OllamaService interfere with the case filing flow.
-        try {
-            String lastUserMessage = "";
-            if (!conversation.isEmpty()) {
-                lastUserMessage = conversation.get(conversation.size() - 1).get("content");
-            }
-            
-            var ollamaResponse = ollamaService.chat(lastUserMessage);
-            if (ollamaResponse != null && ollamaResponse.getResponse() != null) {
-                log.info("Using OllamaService fallback");
-                return ollamaResponse.getResponse();
-            }
-        } catch (Exception e) {
-            log.warn("OllamaService error: {}", e.getMessage());
-        }
-        */
-        
-        // Final fallback - smart responses
+        // Final fallback - only used if AI is offline
         return getSmartFallbackResponse(conversation);
     }
     
@@ -377,61 +355,12 @@ public class VakilFriendService {
      */
     private String getSmartFallbackResponse(List<Map<String, String>> conversation) {
         int messageCount = conversation.size();
-
-        // First message - greeting
-        if (messageCount <= 1) {
-            return "🙏 Namaste! I am Vakil-Friend, your AI legal assistant. " +
-                   "I'm here to help you file your legal case easily.\n\n" +
-                   "Please tell me about your legal issue. What happened?";
-        }
-
-        String lastMessage = conversation.get(conversation.size() - 1).get("content").toLowerCase();
-
-        // Progress through case filing
-        if (messageCount == 2) {
-            return "I understand. This seems serious. Let me help you file this case.\n\n" +
-                   "First, what type of case is this?\n" +
-                   "1️⃣ CIVIL (property, contracts, money disputes)\n" +
-                   "2️⃣ CRIMINAL (violence, theft, fraud)\n" +
-                   "3️⃣ FAMILY (divorce, custody, inheritance)\n" +
-                   "4️⃣ PROPERTY (land disputes, ownership)\n" +
-                   "5️⃣ COMMERCIAL (business, trade matters)";
-        }
-
-        if (messageCount == 3) {
-            return "Thank you. Now, please provide your full name (you will be the Petitioner in this case).";
-        }
-
-        if (messageCount == 4) {
-            return "Got it. Who is the person/organization you are filing the case against? (Respondent name)";
-        }
-
-        if (messageCount == 5) {
-            return "Now, please provide a detailed description of the incident. " +
-                   "Include dates, locations, and what exactly happened.";
-        }
-
-        if (messageCount == 6) {
-            return "Do you have any evidence or proof to support your case? " +
-                   "(documents, photos, videos, witnesses)\n\n" +
-                   "You can describe what you have, and upload files after filing.";
-        }
-
-        if (messageCount == 7) {
-            return "Finally, how urgent is this matter?\n" +
-                   "1️⃣ NORMAL - Can wait for regular court process\n" +
-                   "2️⃣ URGENT - Needs faster attention\n" +
-                   "3️⃣ CRITICAL - Immediate threat or time-sensitive";
-        }
-
-        // Ready to file
-        return "✅ I have collected all the required information!\n\n" +
-               "**Summary of your case:**\n" +
-               "- Your complaint has been documented\n" +
-               "- All parties are identified\n" +
-               "- Evidence details noted\n\n" +
-               "Click the **'Complete Filing'** button to submit your case. " +
-               "A judge will be automatically assigned, and you'll receive updates.";
+        
+        // Return a response that encourages the user while the AI service is restored
+        return "I'm currently having a bit of trouble connecting to my central legal brain, but I'm still here to help! " +
+               "Please provide the details of your case (what happened, who is involved, and any evidence you have). " +
+               "Once our connection is stronger, I will summarize everything for you to file. " +
+               "\n\n(Tip: Ensure your GROQ_API_KEY is active!)";
     }
 
     /**
