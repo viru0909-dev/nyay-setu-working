@@ -136,6 +136,13 @@
             <artifactId>flyway-core</artifactId>
         </dependency>
 
+        <!-- Dotenv for local development -->
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>dotenv-spring-boot-starter</artifactId>
+            <version>0.10.0</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
