@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/hearings")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class HearingController {
     
     private final HearingService hearingService;
     
     @PostMapping("/schedule")
-    public ResponseEntity<Hearing> scheduleHearing(
+    public ResponseEntity<Map<String, Object>> scheduleHearing(
             @RequestBody ScheduleHearingRequest request,
             Authentication authentication
     ) {
@@ -37,11 +37,23 @@ public class HearingController {
                 request.getDurationMinutes()
         );
         
-        return ResponseEntity.ok(hearing);
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", hearing.getId());
+        response.put("scheduledDate", hearing.getScheduledDate());
+        response.put("status", hearing.getStatus().name());
+        response.put("videoRoomId", hearing.getVideoRoomId());
+        response.put("durationMinutes", hearing.getDurationMinutes());
+        if (hearing.getCaseEntity() != null) {
+            response.put("caseId", hearing.getCaseEntity().getId());
+            response.put("caseTitle", hearing.getCaseEntity().getTitle());
+        }
+        response.put("message", "Hearing scheduled successfully");
+        
+        return ResponseEntity.ok(response);
     }
     
     @PostMapping("/{hearingId}/participants")
-    public ResponseEntity<HearingParticipant> addParticipant(
+    public ResponseEntity<Map<String, Object>> addParticipant(
             @PathVariable UUID hearingId,
             @RequestBody AddParticipantRequest request
     ) {
@@ -51,7 +63,14 @@ public class HearingController {
                 request.getRole()
         );
         
-        return ResponseEntity.ok(participant);
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", participant.getId());
+        response.put("hearingId", hearingId);
+        response.put("role", participant.getRole());
+        response.put("joinedAt", participant.getJoinedAt());
+        response.put("message", "Participant added successfully");
+        
+        return ResponseEntity.ok(response);
     }
     
     @PostMapping("/{hearingId}/join")
@@ -110,6 +129,38 @@ public class HearingController {
     public ResponseEntity<List<Hearing>> getCaseHearings(@PathVariable UUID caseId) {
         List<Hearing> hearings = hearingService.getCaseHearings(caseId);
         return ResponseEntity.ok(hearings);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyHearings(Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            List<Hearing> hearings = hearingService.getHearingsForUser(email);
+            
+            // Convert to response format
+            List<Map<String, Object>> response = hearings.stream().map(h -> {
+                Map<String, Object> hearingData = new java.util.HashMap<>();
+                hearingData.put("id", h.getId());
+                hearingData.put("scheduledDate", h.getScheduledDate());
+                hearingData.put("durationMinutes", h.getDurationMinutes());
+                hearingData.put("status", h.getStatus().name());
+                hearingData.put("videoRoomId", h.getVideoRoomId());
+                hearingData.put("createdAt", h.getCreatedAt());
+                
+                if (h.getCaseEntity() != null) {
+                    hearingData.put("caseId", h.getCaseEntity().getId());
+                    hearingData.put("caseNumber", h.getCaseEntity().getId().toString().substring(0, 8).toUpperCase());
+                    hearingData.put("caseTitle", h.getCaseEntity().getTitle());
+                }
+                
+                return hearingData;
+            }).toList();
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to get user hearings", e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
     
     public static class ScheduleHearingRequest {

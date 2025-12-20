@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
     Search, Filter, Calendar, Clock, FileText,
-    Eye, Download, Plus, Grid, List as ListIcon, Loader2
+    Eye, Download, Plus, Grid, List as ListIcon, Loader2,
+    Users, Scale, X, Check, Award
 } from 'lucide-react';
-import { caseAPI } from '../../services/api';
+import { caseAPI, caseAssignmentAPI } from '../../services/api';
 
 const statusColors = {
     'PENDING': { bg: '#f5930020', border: '#f59e0b', text: '#f59e0b' },
-    'IN_PROGRESS': { bg: '#3b82f620', border: '#3b82f6', text: '#3b82f6' },
+    'OPEN': { bg: '#3b82f620', border: '#3b82f6', text: '#3b82f6' },
+    'IN_PROGRESS': { bg: '#10b98120', border: '#10b981', text: '#10b981' },
     'UNDER_REVIEW': { bg: '#8b5cf620', border: '#8b5cf6', text: '#8b5cf6' },
     'AWAITING_DOCUMENTS': { bg: '#ef444420', border: '#ef4444', text: '#ef4444' },
     'COMPLETED': { bg: '#10b98120', border: '#10b981', text: '#10b981' },
@@ -33,8 +35,12 @@ export default function MyCasesPage() {
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [viewMode, setViewMode] = useState('grid');
     const [cases, setCases] = useState([]);
+    const [availableLawyers, setAvailableLawyers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [lawyerLoading, setLawyerLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [showHireModal, setShowHireModal] = useState(false);
+    const [selectedCaseForLawyer, setSelectedCaseForLawyer] = useState(null);
 
     useEffect(() => {
         fetchCases();
@@ -51,6 +57,34 @@ export default function MyCasesPage() {
             setError('Failed to load cases. Please try again.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleHireLawyer = async (caseItem) => {
+        setSelectedCaseForLawyer(caseItem);
+        setLawyerLoading(true);
+        setShowHireModal(true);
+        try {
+            const response = await caseAssignmentAPI.getAvailableLawyers();
+            setAvailableLawyers(response.data || []);
+        } catch (error) {
+            console.error('Error fetching lawyers:', error);
+            alert('Failed to load available lawyers');
+        } finally {
+            setLawyerLoading(false);
+        }
+    };
+
+    const submitProposal = async (lawyerId) => {
+        if (!selectedCaseForLawyer) return;
+        try {
+            await caseAssignmentAPI.proposeLawyer(selectedCaseForLawyer.id, lawyerId);
+            alert('✅ Proposal sent successfully! The lawyer will review and accept/decline your case.');
+            setShowHireModal(false);
+            fetchCases();
+        } catch (error) {
+            console.error('Error sending proposal:', error);
+            alert('Failed to send proposal. This case might already have a pending proposal.');
         }
     };
 
@@ -465,6 +499,35 @@ export default function MyCasesPage() {
                                         <Eye size={16} />
                                         View Details
                                     </Link>
+
+                                    {!caseItem.lawyer && (caseItem.status === 'PENDING' || caseItem.status === 'OPEN') && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleHireLawyer(caseItem);
+                                            }}
+                                            style={{
+                                                flex: 1,
+                                                padding: '0.75rem',
+                                                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                                border: 'none',
+                                                borderRadius: '0.5rem',
+                                                color: 'white',
+                                                fontSize: '0.875rem',
+                                                fontWeight: '700',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '0.5rem',
+                                                boxShadow: '0 4px 10px rgba(245, 158, 11, 0.2)'
+                                            }}
+                                        >
+                                            <Scale size={16} />
+                                            {caseItem.lawyerProposalStatus === 'PENDING' ? 'Proposal Sent' : 'Hire Lawyer'}
+                                        </button>
+                                    )}
+
                                     <Link
                                         to={`/client/case/${caseItem.id}`}
                                         style={{
@@ -487,6 +550,112 @@ export default function MyCasesPage() {
                             </div>
                         );
                     })}
+                </div>
+            )}
+
+            {/* Hire Lawyer Modal */}
+            {showHireModal && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.7)',
+                    backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }} onClick={() => setShowHireModal(false)}>
+                    <div style={{
+                        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                        borderRadius: '2rem',
+                        width: '90%', maxWidth: '800px', maxHeight: '80vh',
+                        padding: '2.5rem', overflow: 'hidden', display: 'flex', flexDirection: 'column'
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <div>
+                                <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                                    Match with Legal Experts
+                                </h2>
+                                <p style={{ color: '#94a3b8', margin: '0.25rem 0 0 0' }}>
+                                    Select the best lawyer for: <span style={{ color: '#818cf8', fontWeight: '600' }}>{selectedCaseForLawyer?.title}</span>
+                                </p>
+                            </div>
+                            <button onClick={() => setShowHireModal(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                                <X size={28} />
+                            </button>
+                        </div>
+
+                        {lawyerLoading ? (
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem' }}>
+                                <Loader2 size={48} style={{ color: '#8b5cf6', animation: 'spin 1s linear infinite' }} />
+                                <p style={{ color: '#94a3b8', marginTop: '1rem' }}>Sourcing available legal experts...</p>
+                            </div>
+                        ) : availableLawyers.length === 0 ? (
+                            <div style={{ flex: 1, textAlign: 'center', padding: '4rem' }}>
+                                <Users size={64} color="#475569" style={{ margin: '0 auto 1.5rem' }} />
+                                <h3 style={{ color: 'white', fontSize: '1.25rem' }}>No lawyers available currently</h3>
+                                <p style={{ color: '#94a3b8' }}>Our partner lawyers are currently handling other cases. Please try again shortly.</p>
+                            </div>
+                        ) : (
+                            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.25rem', padding: '0.5rem' }}>
+                                {availableLawyers.map(lawyer => (
+                                    <div key={lawyer.id} style={{
+                                        background: 'rgba(30, 41, 59, 0.5)',
+                                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                                        borderRadius: '1.25rem',
+                                        padding: '1.5rem',
+                                        transition: 'all 0.2s'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+                                            <div style={{
+                                                width: '56px', height: '56px', borderRadius: '50%',
+                                                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontWeight: '800', fontSize: '1.25rem', color: 'white'
+                                            }}>
+                                                {lawyer.name?.substring(0, 1)}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <h4 style={{ color: 'white', fontWeight: '700', fontSize: '1.1rem', margin: 0 }}>{lawyer.name}</h4>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                                                    <Award size={14} color="#f59e0b" />
+                                                    <span style={{ color: '#f59e0b', fontWeight: '700', fontSize: '0.875rem' }}>{lawyer.rating || '4.8'}</span>
+                                                    <span style={{ color: '#64748b', fontSize: '0.875rem' }}>• {lawyer.specialization}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                                            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.75rem', borderRadius: '0.75rem', textAlign: 'center' }}>
+                                                <p style={{ color: '#94a3b8', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: '700' }}>Experience</p>
+                                                <p style={{ color: 'white', fontSize: '0.9rem', fontWeight: '600' }}>8+ Years</p>
+                                            </div>
+                                            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.75rem', borderRadius: '0.75rem', textAlign: 'center' }}>
+                                                <p style={{ color: '#94a3b8', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: '700' }}>Cases</p>
+                                                <p style={{ color: 'white', fontSize: '0.9rem', fontWeight: '600' }}>{lawyer.casesHandled || '120'}+</p>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={() => submitProposal(lawyer.id)}
+                                            style={{
+                                                width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
+                                                background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                color: '#818cf8', fontWeight: '700', cursor: 'pointer',
+                                                transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
+                                            }}
+                                            onMouseOver={(e) => {
+                                                e.currentTarget.style.background = '#6366f1';
+                                                e.currentTarget.style.color = 'white';
+                                            }}
+                                            onMouseOut={(e) => {
+                                                e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)';
+                                                e.currentTarget.style.color = '#818cf8';
+                                            }}
+                                        >
+                                            <Check size={18} />
+                                            Select & Send Proposal
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         </div>

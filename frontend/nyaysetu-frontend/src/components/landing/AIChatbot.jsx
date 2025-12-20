@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function AIChatbot() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: 'Hello! I\'m your AI legal assistant powered by Google Gemini. How can I help you with legal questions today?' }
+        { role: 'assistant', content: 'Hello! I\'m your AI legal assistant powered by NyaySetu Brain (Groq). How can I help you with legal questions today?' }
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -19,7 +19,7 @@ export default function AIChatbot() {
         setIsTyping(true);
 
         try {
-            // Call Gemini backend endpoint
+            // Call AI backend endpoint
             const response = await fetch('http://localhost:8080/api/ai/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -118,7 +118,7 @@ export default function AIChatbot() {
                                         AI Legal Assistant
                                     </h3>
                                     <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.75rem', margin: 0 }}>
-                                        Powered by Google Gemini
+                                        Powered by NyaySetu Brain (Groq)
                                     </p>
                                 </div>
                             </div>
@@ -137,6 +137,7 @@ export default function AIChatbot() {
                                 <X size={20} />
                             </button>
                         </div>
+
 
                         {/* Messages */}
                         <div style={{

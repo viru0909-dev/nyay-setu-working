@@ -60,27 +60,50 @@ public class CaseAssignmentController {
     }
 
     /**
-     * Assign a lawyer to a case
+     * Propose a lawyer for a case
      */
-    @PostMapping("/{caseId}/assign-lawyer")
-    public ResponseEntity<Map<String, Object>> assignLawyer(
+    @PostMapping("/{caseId}/propose-lawyer")
+    public ResponseEntity<Map<String, Object>> proposeLawyer(
             @PathVariable UUID caseId,
             @RequestBody Map<String, Object> request
     ) {
         try {
             Long lawyerId = Long.parseLong(request.get("lawyerId").toString());
-            boolean isDefendantLawyer = Boolean.parseBoolean(
-                    request.getOrDefault("isDefendantLawyer", "false").toString());
-            
-            caseAssignmentService.assignLawyerToCase(caseId, lawyerId, isDefendantLawyer);
+            caseAssignmentService.proposeLawyerToCase(caseId, lawyerId);
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("message", "Lawyer assigned successfully");
+            response.put("message", "Proposal sent to lawyer successfully");
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("Failed to assign lawyer to case {}", caseId, e);
+            log.error("Failed to propose lawyer for case {}", caseId, e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
+     * Respond to a lawyer proposal
+     */
+    @PostMapping("/{caseId}/respond-proposal")
+    public ResponseEntity<Map<String, Object>> respondProposal(
+            @PathVariable UUID caseId,
+            @RequestBody Map<String, Object> request
+    ) {
+        try {
+            String status = request.get("status").toString();
+            caseAssignmentService.respondToLawyerProposal(caseId, status);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Response recorded successfully");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to respond to proposal for case {}", caseId, e);
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", e.getMessage());

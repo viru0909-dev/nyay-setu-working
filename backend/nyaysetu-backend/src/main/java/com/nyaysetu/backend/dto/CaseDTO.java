@@ -22,4 +22,5 @@ public class CaseDTO {
     private Long clientId; // Changed from UUID to Long
     private String clientName;
     private int documentsCount;
+    private String lawyerProposalStatus;
 }

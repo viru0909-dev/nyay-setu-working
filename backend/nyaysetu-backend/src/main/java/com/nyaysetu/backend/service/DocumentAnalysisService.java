@@ -21,7 +21,7 @@ import java.util.UUID;
 public class DocumentAnalysisService {
     
     private final PdfTextExtractorService pdfExtractor;
-    private final GeminiAIService geminiService;
+    private final AiService aiService;
     private final DocumentAnalysisRepository analysisRepository;
     private final Gson gson = new Gson();
     
@@ -56,7 +56,7 @@ public class DocumentAnalysisService {
             }
             
             // Get AI analysis
-            String aiResponse = geminiService.analyzeDocument(text, document.getFileName());
+            String aiResponse = aiService.analyzeDocument(text, document.getFileName());
             
             // Parse and save
             DocumentAnalysis analysis = parseAndSaveAnalysis(document, aiResponse);

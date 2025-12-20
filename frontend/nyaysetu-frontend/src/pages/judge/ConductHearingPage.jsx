@@ -1,0 +1,287 @@
+import { useState, useEffect } from 'react';
+import { judgeAPI, hearingAPI } from '../../services/api';
+import {
+    Video,
+    Users,
+    Mic,
+    MicOff,
+    VideoOff,
+    Phone,
+    Clock,
+    MessageSquare,
+    Loader2,
+    ArrowLeft,
+    Monitor,
+    Shield
+} from 'lucide-react';
+
+export default function ConductHearingPage() {
+    const [hearings, setHearings] = useState([]);
+    const [activeHearing, setActiveHearing] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [inCall, setInCall] = useState(false);
+
+    useEffect(() => {
+        fetchTodaysHearings();
+    }, []);
+
+    const fetchTodaysHearings = async () => {
+        try {
+            const response = await judgeAPI.getTodaysHearings();
+            setHearings(response.data || []);
+        } catch (error) {
+            console.error('Error fetching hearings:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const joinHearing = (hearing) => {
+        setActiveHearing(hearing);
+        setInCall(true);
+    };
+
+    const endCall = () => {
+        setInCall(false);
+        setActiveHearing(null);
+    };
+
+    const canJoin = (scheduledDate) => {
+        const now = new Date();
+        const hearingTime = new Date(scheduledDate);
+        const diff = (hearingTime - now) / (1000 * 60); // minutes
+        return diff <= 15; // Can join 15 minutes before
+    };
+
+    const glassStyle = {
+        background: 'rgba(30, 41, 59, 0.7)',
+        backdropFilter: 'blur(16px)',
+        border: '1px solid rgba(139, 92, 246, 0.2)',
+        borderRadius: '1.5rem',
+        padding: '1.5rem',
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+    };
+
+    const primaryButtonStyle = {
+        background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+        color: 'white',
+        border: 'none',
+        padding: '0.75rem 1.25rem',
+        borderRadius: '0.75rem',
+        fontWeight: '700',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        cursor: 'pointer',
+        boxShadow: '0 4px 15px rgba(6, 182, 212, 0.3)',
+        transition: 'all 0.2s'
+    };
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+                <Loader2 size={48} className="spin" style={{ color: '#06b6d4' }} />
+                <style>{`
+                    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                    .spin { animation: spin 1s linear infinite; }
+                `}</style>
+            </div>
+        );
+    }
+
+    // Active Video Call View
+    if (inCall && activeHearing) {
+        return (
+            <div style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {/* Video Header Area */}
+                <div style={{
+                    ...glassStyle,
+                    padding: '1rem 1.5rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: 'rgba(15, 23, 42, 0.9)',
+                    borderRadius: '1rem'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <button
+                            onClick={endCall}
+                            style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+                        <div>
+                            <h2 style={{ color: 'white', margin: 0, fontSize: '1.125rem', fontWeight: '700' }}>
+                                {activeHearing.caseTitle}
+                            </h2>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', fontSize: '0.75rem' }}>
+                                <Shield size={12} color="#4ade80" />
+                                <span>End-to-End Encrypted Secure Judicial Line</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontWeight: '800', fontSize: '0.875rem' }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', animation: 'blink 1.5s infinite' }} />
+                            SESSION LIVE
+                        </div>
+                        <div style={{ height: '24px', width: '1px', background: 'rgba(148, 163, 184, 0.2)' }} />
+                        <span style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: '600' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                </div>
+
+                {/* Jitsi Video Container */}
+                <div style={{ flex: 1, position: 'relative', borderRadius: '1.5rem', overflow: 'hidden', border: '1px solid rgba(99, 102, 241, 0.3)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+                    <iframe
+                        src={`https://meet.jit.si/${activeHearing.videoRoomId}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","closedcaptions","desktop","embedmeeting","fullscreen","fodeviceselection","hangup","profile","chat","recording","livestreaming","etherpad","sharedvideo","settings","raisehand","videoquality","filmstrip","invite","feedback","stats","shortcuts","tileview","videobackgroundblur","download","help","mute-everyone","security"]`}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            border: 'none'
+                        }}
+                        allow="camera; microphone; fullscreen; display-capture; autoplay"
+                        title="Court Hearing"
+                    />
+                </div>
+
+                {/* Bottom Control Bar */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: '0.5rem'
+                }}>
+                    <button
+                        onClick={endCall}
+                        style={{
+                            padding: '1rem 2.5rem',
+                            background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+                            border: 'none',
+                            borderRadius: '9999px',
+                            color: 'white',
+                            fontWeight: '800',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            boxShadow: '0 10px 25px rgba(239, 68, 68, 0.4)',
+                            transition: 'all 0.2s',
+                            letterSpacing: '0.5px'
+                        }}
+                        onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                        onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                        <Phone size={20} />
+                        END JUDICIAL SESSION
+                    </button>
+                </div>
+
+                <style>{`
+                    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+                `}</style>
+            </div>
+        );
+    }
+
+    // Hearings List View
+    return (
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            {/* Header */}
+            <div style={{ marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                    <div style={{
+                        width: '56px', height: '56px', borderRadius: '14px',
+                        background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 8px 16px rgba(6, 182, 212, 0.2)'
+                    }}>
+                        <Video size={28} color="white" />
+                    </div>
+                    <div>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                            Conduct Hearing
+                        </h1>
+                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                            Today's virtual court sessions • SECURE-SYNC Enabled
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Today's Hearings List */}
+            {hearings.length === 0 ? (
+                <div style={{ ...glassStyle, textAlign: 'center', padding: '5rem 2rem' }}>
+                    <Monitor size={64} color="#475569" style={{ margin: '0 auto 1.5rem' }} />
+                    <h3 style={{ color: 'white', fontSize: '1.25rem', margin: '0 0 0.5rem 0' }}>No hearings scheduled for today</h3>
+                    <p style={{ color: '#94a3b8', margin: 0 }}>You have no virtual sessions pending at this moment.</p>
+                </div>
+            ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    {hearings.map(hearing => {
+                        const canJoinNow = canJoin(hearing.scheduledDate);
+                        const time = new Date(hearing.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                        return (
+                            <div key={hearing.id} style={{ ...glassStyle, transition: 'transform 0.2s' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                                    <div style={{ flex: 1, minWidth: '300px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
+                                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                                                {hearing.caseTitle}
+                                            </h3>
+                                            <span style={{
+                                                padding: '0.25rem 0.75rem',
+                                                background: hearing.status === 'SCHEDULED' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                                border: `1px solid ${hearing.status === 'SCHEDULED' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+                                                borderRadius: '9999px',
+                                                fontSize: '0.7rem',
+                                                fontWeight: '800',
+                                                color: hearing.status === 'SCHEDULED' ? '#4ade80' : '#fbbf24',
+                                                textTransform: 'uppercase'
+                                            }}>
+                                                {hearing.status}
+                                            </span>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '2rem', fontSize: '0.875rem', color: '#94a3b8' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <Clock size={16} color="#06b6d4" />
+                                                <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{time}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <Users size={16} color="#06b6d4" />
+                                                <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{hearing.durationMinutes} minutes</span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <Shield size={16} color="#06b6d4" />
+                                                <span style={{ color: '#94a3b8' }}>Verified Session</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => joinHearing(hearing)}
+                                        disabled={!canJoinNow}
+                                        style={{
+                                            ...primaryButtonStyle,
+                                            padding: '1rem 2rem',
+                                            opacity: canJoinNow ? 1 : 0.5,
+                                            cursor: canJoinNow ? 'pointer' : 'not-allowed',
+                                            background: canJoinNow ? primaryButtonStyle.background : 'rgba(71, 85, 105, 0.4)',
+                                            boxShadow: canJoinNow ? primaryButtonStyle.boxShadow : 'none'
+                                        }}
+                                        onMouseOver={e => canJoinNow && (e.currentTarget.style.transform = 'translateY(-2px)')}
+                                        onMouseOut={e => canJoinNow && (e.currentTarget.style.transform = 'translateY(0)')}
+                                    >
+                                        <Video size={20} />
+                                        {canJoinNow ? 'START SESSION' : 'COMING UP'}
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}

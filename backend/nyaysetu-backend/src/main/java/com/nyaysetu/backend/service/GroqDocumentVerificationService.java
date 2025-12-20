@@ -57,6 +57,23 @@ public class GroqDocumentVerificationService {
         }
     }
 
+    /**
+     * General chat with AI - for judge case assistant
+     */
+    public String chatWithAI(String prompt) {
+        if (groqApiKey == null || groqApiKey.isEmpty()) {
+            log.warn("Groq API key not configured");
+            return "AI service not configured. Please configure Groq API key.";
+        }
+        
+        try {
+            return callGroqAPI(prompt);
+        } catch (Exception e) {
+            log.error("Error in AI chat: {}", e.getMessage());
+            return "I'm sorry, I couldn't process your request. Please try again.";
+        }
+    }
+
     private String buildVerificationPrompt(String documentContent, String documentName, 
                                            String category, String caseTitle, String caseType) {
         StringBuilder prompt = new StringBuilder();
