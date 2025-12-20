@@ -1,13 +1,12 @@
 # NYAY-SETU 🏛️
 
-**India's First AI-Powered Digital Judiciary Platform**
+**The Future of AI-Powered Digital Judiciary in India**
 
-Making justice accessible, transparent, and efficient through technology.
+*Democratizing Justice. Empowering Citizens. Streamlining Courts.*
 
-[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-success)]()
-[![React 18](https://img.shields.io/badge/React-18-blue)]()
-[![Spring Boot 3.2](https://img.shields.io/badge/Spring%20Boot-3.2-green)]()
-[![Java 17](https://img.shields.io/badge/Java-17-orange)]()
+[![Status](https://img.shields.io/badge/Status-Beta%20v2.0-blueviolet)]()
+[![AI Powered](https://img.shields.io/badge/AI-Groq%20LPU-orange)]()
+[![Full Stack](https://img.shields.io/badge/Stack-Spring%20Boot%20|%20React-blue)]()
 
 ---
 
@@ -24,284 +23,92 @@ Making justice accessible, transparent, and efficient through technology.
 
 ---
 
-## 🎯 Overview
+## �️ Project Vision
 
-NYAY-SETU is a comprehensive legal technology platform that combines AI-powered assistance with robust case management. The platform serves judges, lawyers, clients, and admin users with role-based access and intelligent features.
+**NyaySetu** is a revolutionary digital platform designed to bridge the gap between Indian citizens and the judiciary. By combining high-performance AI (Groq) with a deep understanding of Indian law, we provide a unified ecosystem for legal aid, case management, and judicial efficiency.
 
-### What Makes Us Different
-
-- �� **AI Legal Assistant** - Google Gemini-powered chatbot for legal guidance
-- 📜 **Interactive Constitution** - Full Indian Constitution with AI Q&A
-- 🌐 **Bilingual** - Complete English/Hindi support (100+ translations)
-- ⚖️ **Smart Case Management** - End-to-end case lifecycle tracking
-- 🔒 **Enterprise Security** - JWT authentication, audit logging
-- 📱 **Modern UI** - Responsive, accessible, beautiful design
+### High-Performance AI (Groq Integration)
+We have migrated our core intelligence from Gemini to **Groq LPU**, ensuring lightning-fast responses for legal queries, document analysis, and procedural guidance.
 
 ---
 
-## ✨ Key Features
+## 🚀 Key Modules & Innovations
 
-### Frontend Features
+### 1. 🤖 Vakil-Friend (AI Legal Aid)
+An intelligent legal companion that helps citizens understand their rights, verify documents, and prepare for filing.
+- **Actionable Advice**: Guided chat flow for case filing.
+- **Document Pre-verification**: AI-driven analysis of evidence before it reaches the court.
+- **Bilingual Interface**: Seamless support for English and Hindi.
 
-#### 🏠 Landing Page
-- **Hero Section** - Gradient text, animated CTA
-- **Statistics** - 4 key metrics with animations
-- **How It Works** - 4-step visual workflow
-- **Features Grid** - 6 capability showcases
-- **Trust Indicators** - Security badges & certifications
-- **News Section** - Latest judiciary updates
-- **Responsive** - Mobile, tablet, desktop optimized
+### 2. ⚖️ Judicial Efficiency Flow
+A modernized approach to case distribution and management.
+- **Unassigned Case Pool**: Judges can browse and "claim" cases from a transparent pool.
+- **Automated Case Summary**: AI generates concise summaries for judges to speed up review.
+- **Digital Evidence Locker**: Secure storage for all case-related documents.
 
-#### 📜 Constitution Explorer
-- Full Indian Constitution text (15 articles currently, 470 planned)
-- AI chatbot for Constitution Q&A (Google Gemini)
-- Bookmark favorite articles
-- Advanced search with keywords
-- Bilingual content (English/Hindi)
-- Part-wise navigation
-- Print/download ready
-
-#### 🤖 AI Assistant
-- Interactive modal with smooth animations
-- 4 clickable capabilities
-- 5 sample questions
-- Redirects to chatbot/Constitution
-- Animated brain icon
-- Privacy-focused
-
-#### 📄 Pages
-- **Landing** - Modern 7-section homepage
-- **About** - Interactive tabs, mission/vision
-- **Constitution** - Legal research tool
-- **Login/Signup** - Secure authentication
-- **Dashboards** - Role-specific (Judge/Lawyer/Client/Admin)
-
-### Backend Features
-
-#### Authentication & Authorization
-- JWT token-based auth
-- Role-based access control (RBAC)
-- Password encryption (BCrypt)
-- Email verification via OTP
-- Session management
-
-#### Case Management
-- Create, track, update cases
-- Party management (plaintiff/defendant)
-- Status tracking (FILED, ONGOING, CLOSED, DISMISSED)
-- Case search and filtering
-- Document attachment
-- Timeline tracking
-
-#### Document Management
-- Secure file upload/download
-- Multiple format support (PDF, DOCX, images)
-- File versioning
-- Access control
-- Metadata management
-
-#### AI Integration
-- Google Gemini API integration
-- Legal question answering
-- Constitution Q&A
-- Document summarization (planned)
-- Case precedent search (planned)
-
-#### Meeting Management
-- Virtual hearing scheduling
-- Participant management
-- Calendar integration ready
-- Status tracking
-
-#### Audit & Compliance
-- Immutable audit logging
-- User action tracking
-- Compliance reporting
-- Timestamp-based querying
-
----
-
-## 🏗️ Architecture
-
-### System Architecture
-
-**MONOLITHIC APPLICATION** with modular design:
-
-```
-┌─────────────────────────────────────┐
-│     React Frontend (Port 5173)      │
-│  - 5 Pages, 20+ Components          │
-│  - Bilingual (EN/HI)                │
-│  - Framer Motion Animations         │
-└──────────────┬──────────────────────┘
-               │ HTTP/REST
-               ▼
-┌─────────────────────────────────────┐
-│  Spring Boot Backend (Port 8080)    │
-│                                     │
-│  ┌─────────────────────────────┐   │
-│  │  Controllers (14)           │   │
-│  │  - Auth, Case, Document     │   │
-│  │  - Meeting, User, etc.      │   │
-│  └──────────┬──────────────────┘   │
-│             │                       │
-│  ┌──────────▼──────────────────┐   │
-│  │  Services (14)              │   │
-│  │  - Business Logic           │   │
-│  │  - AI Integration           │   │
-│  │  - Email, Notifications     │   │
-│  └──────────┬──────────────────┘   │
-│             │                       │
-│  ┌──────────▼──────────────────┐   │
-│  │  Repositories (16)          │   │
-│  │  - JPA/Hibernate            │   │
-│  └──────────┬──────────────────┘   │
-└─────────────┼───────────────────────┘
-              │
-              ▼
-   ┌──────────────────────┐
-   │  PostgreSQL (5432)   │
-   │  Database: nyaysetu  │
-   └──────────────────────┘
-```
-
-### Key Components
-
-#### Backend Modules
-- **Controllers** (14): REST API endpoints
-- **Services** (14): Business logic layer
-- **Repositories** (16): Data access layer
-- **Entities** (21): JPA entities
-- **DTOs** (32): Data transfer objects
-- **Config** (4): Security, CORS, etc.
-- **Filters** (1): JWT authentication filter
-- **Exceptions** (2): Global error handling
-
-#### Frontend Modules
-- **Pages** (5): Landing, About, Constitution, Login, Signup
-- **Components** (20+): Reusable UI components
-  - `landing/`: Header, Footer, AIAssistantModal, NewsSection, HowItWorks, TrustIndicators
-  - `common/`: Shared components
-  - `ErrorBoundary.jsx`: Error handling
-  - `LoadingSpinner.jsx`: Loading states
-- **Contexts**: LanguageContext (bilingual support)
-- **Services**: API client (Axios)
-- **Store**: Zustand for state management
+### 3. 🤝 Legal Marketplace (Hire a Lawyer)
+Connecting clients with vetted legal professionals.
+- **Proposal System**: Clients can send hiring proposals directly to lawyers.
+- **Lawyer Dashboard**: Professionals can manage their caseload and respond to potential clients.
+- **Direct Integration**: Once hired, lawyers gain immediate access to the digital case file.
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| React | 18.2 | UI framework |
-| Vite | 5.0 | Build tool |
-| React Router | 6.20 | Navigation |
-| Framer Motion | 12.23 | Animations |
-| Lucide React | 0.294 | Icons |
-| Axios | 1.6 | HTTP client |
-| Zustand | 4.4 | State management |
-| Three.js | 0.181 | 3D graphics |
-| AOS | 2.3 | Scroll animations |
-
-### Backend
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| Java | 17 | Programming language |
-| Spring Boot | 3.2.3 | Application framework |
-| Spring Security | 3.2 | Authentication |
-| Spring Data JPA | 3.2 | Data persistence |
-| PostgreSQL | 15 | Database |
-| JWT | 0.11 | Token auth |
-| Lombok | 1.18 | Boilerplate reduction |
-| Maven | 3.9 | Build tool |
-
-### AI/ML
-- **Google Gemini API** - Legal chatbot, Constitution Q&A
-- **Anthropic Claude** (SDK installed, not active)
+| Layer | Technologies |
+|-------|--------------|
+| **Frontend** | React 18, Vite, Framer Motion, Vanilla CSS (Royal Blue Theme) |
+| **Backend** | Spring Boot 3.2, Java 17, Spring Security (JWT) |
+| **Database** | PostgreSQL, Flyway (Migration-based schema) |
+| **AI Intelligence** | Groq (Llama-3-70B/8B), Azure Document Intelligence (Optional) |
+| **Animations** | AOS, Three.js (Backgrounds) |
 
 ---
 
-## 🚀 Quick Start
+## 📂 Project Structure
+
+```bash
+NYAY-SETU/
+├── backend/nyaysetu-backend/    # Spring Boot Enterprise Backend
+│   ├── db/migration/           # Flyway scripts (Force-fix schema support)
+│   ├── entity/                 # AI-enhanced JPA entities
+│   └── service/                # Groq/AI & Judicial business logic
+├── frontend/nyaysetu-frontend/  # Modern React Web Portal
+│   ├── components/             # Role-specific dashboard components
+│   └── pages/                  # Landing, AI Wizard, Constitution
+└── docs/                       # Project documentation & Architecture
+```
+
+---
+
+## 🚀 Quick Start (Local Development)
 
 ### Prerequisites
-```bash
-- Java 17 or higher
+- Java 17+
 - Maven 3.6+
 - Node.js 18+ and npm
-- PostgreSQL 15
-- Git
-```
+- PostgreSQL 15+
+- Groq API Key
 
-### 1. Clone Repository
-```bash
-git clone https://github.com/viru0909-dev/nyay-setu-working.git
-cd NYAY-SETU
-```
+### 1. Configure Environment
+Create a `.env` file in `backend/nyaysetu-backend` (use `.env.example` as a template).
 
-### 2. Database Setup
-```bash
-# Login to PostgreSQL
-psql -U postgres
+### 2. Initialize Database
+Create a database named `nyaysetu`. Flyway will automatically handle the schema creation including the new base schema.
 
-# Create database
-CREATE DATABASE nyaysetu;
-
-# Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE nyaysetu TO nyaysetu;
-\q
-```
-
-### 3. Environment Configuration
-
-Create `.env` file in project root:
-
-```env
-# Database
-DB_USERNAME=nyaysetu
-DB_PASSWORD=your_db_password
-
-# JWT
-JWT_SECRET=your-256-bit-secret-key-here
-JWT_EXPIRATION_MS=86400000
-
-# CORS
-CORS_ALLOWED_ORIGINS=http://localhost:5173
-
-# SMTP (Optional)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=your-email@gmail.com
-SMTP_PASSWORD=your-app-specific-password
-
-# AI Services
-GEMINI_API_KEY=your-gemini-api-key-here
-OPENAI_API_KEY=your-openai-api-key-here
-```
-
-### 4. Start Backend
+### 3. Run Backend
 ```bash
 cd backend/nyaysetu-backend
-mvn clean install
 mvn spring-boot:run
 ```
 
-Backend will start at: `http://localhost:8080`
-
-### 5. Start Frontend
+### 4. Run Frontend
 ```bash
 cd frontend/nyaysetu-frontend
 npm install
 npm run dev
 ```
-
-Frontend will start at: `http://localhost:5173`
-
-### 6. Access Application
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8080
-- **Health Check**: http://localhost:8080/actuator/health
 
 ---
 
@@ -391,51 +198,10 @@ NYAY-SETU/
 
 ---
 
-## 📡 API Documentation
-
-### Base URL
-```
-http://localhost:8080
-```
-
-### Authentication Endpoints
-```http
-POST /api/auth/register          # User registration
-POST /api/auth/login             # User login
-POST /api/auth/verify-email      # Email verification
-```
-
-### Case Management
-```http
-GET    /api/cases                # List all cases
-POST   /api/cases                # Create new case
-GET    /api/cases/{id}           # Get case details
-PUT    /api/cases/{id}           # Update case
-DELETE /api/cases/{id}           # Delete case
-```
-
-### Document Management
-```http
-POST   /api/documents/upload     # Upload document
-GET    /api/documents/{id}       # Download document
-GET    /api/documents/case/{id}  # List case documents
-DELETE /api/documents/{id}       # Delete document
-```
-
-### Meeting Management
-```http
-POST   /api/meetings             # Schedule meeting
-GET    /api/meetings/{id}        # Get meeting details
-PUT    /api/meetings/{id}        # Update meeting
-GET    /api/meetings/upcoming    # List upcoming meetings
-```
-
-### User Management
-```http
-GET    /api/users/profile        # Get user profile
-PUT    /api/users/profile        # Update profile
-GET    /api/users                # List users (Admin only)
-```
+## 🛡️ Security & Ethics
+- **Human-in-the-Loop**: AI provides guidance; Judges provide judgment.
+- **Data Privacy**: End-to-end encryption for legal documents.
+- **Immutable Logs**: Audit trailing for every case status change.
 
 ---
 
@@ -518,30 +284,13 @@ Proprietary software. All rights reserved.
 
 ---
 
-## 🎯 Vision
-
-Democratize access to justice in India through technology, making legal proceedings transparent, efficient, and accessible for all citizens.
-
-**Ethics First**: AI features are advisory. Human judges retain final authority.
-
 ---
 
-## 📞 Support
-
-- **GitHub Issues**: Report bugs
-- **Email**: gadekarvirendra4@gmail.com
-
----
-
-## 👨‍💻 Author
-
+## 👨‍💻 Author & Visionary
 **Virendra Gadekar**
-- 📧 Email: gadekarvirendra4@gmail.com
-- 🐙 GitHub: [@viru0909-dev](https://github.com/viru0909-dev)
-- 💼 LinkedIn: [Virendra Gadekar](https://linkedin.com/in/virendra-gadekar)
+[GitHub](https://github.com/viru0909-dev) | [LinkedIn](https://linkedin.com/in/virendra-gadekar)
 
 ---
+*Built with ❤️ for a more accessible Indian Judiciary.*
 
-**Built with ❤️ for Justice and Accessibility**
-
-*Last Updated: December 7 2025 - Production Ready*
+*Last Updated: December 20 2025*
