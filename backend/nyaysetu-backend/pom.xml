@@ -139,8 +139,8 @@
         <!-- Dotenv for local development -->
         <dependency>
             <groupId>me.paulschwarz</groupId>
-            <artifactId>dotenv-spring-boot-starter</artifactId>
-            <version>0.10.0</version>
+            <artifactId>spring-dotenv</artifactId>
+            <version>4.0.0</version>
         </dependency>
 
         <!-- Testing -->
