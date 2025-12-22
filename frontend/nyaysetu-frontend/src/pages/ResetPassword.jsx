@@ -1,288 +1,211 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Lock, Eye, EyeOff, ShieldCheck, CheckCircle, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Header from '../components/landing/Header';
+import '../styles/Biometrics.css';
 
 export default function ResetPassword() {
     const { token } = useParams();
     const navigate = useNavigate();
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+
+    const [formData, setFormData] = useState({
+        password: '',
+        confirmPassword: ''
+    });
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [validating, setValidating] = useState(true);
-    const [tokenValid, setTokenValid] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const [verifying, setVerifying] = useState(true);
 
     useEffect(() => {
+        const verifyToken = async () => {
+            if (!token) {
+                setError('Invalid reset link.');
+                setVerifying(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/auth/verify-reset-token?token=${token}`);
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Token verification failed');
+                }
+                setVerifying(false);
+            } catch (err) {
+                setError(err.message || 'The reset link is invalid or has expired.');
+                setVerifying(false);
+            }
+        };
+
         verifyToken();
     }, [token]);
 
-    const verifyToken = async () => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/auth/verify-reset-token?token=${token}`);
-            const data = await response.json();
-
-            if (data.valid) {
-                setTokenValid(true);
-            } else {
-                setError(data.message || 'Invalid or expired token');
-            }
-        } catch (err) {
-            setError('Failed to verify token');
-        } finally {
-            setValidating(false);
-        }
-    };
-
-    const getPasswordStrength = (pass) => {
-        if (pass.length < 6) return { label: 'Too Short', color: '#f87171', width: '25%' };
-        if (pass.length < 8) return { label: 'Weak', color: '#fb923c', width: '50%' };
-        if (!/[A-Z]/.test(pass) || !/[0-9]/.test(pass)) return { label: 'Fair', color: '#fbbf24', width: '75%' };
-        return { label: 'Strong', color: '#10b981', width: '100%' };
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-
-        if (password !== confirmPassword) {
+        if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
             return;
         }
 
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters');
+        if (formData.password.length < 8) {
+            setError('Security protocol requires at least 8 characters');
             return;
         }
 
         setLoading(true);
+        setError('');
 
         try {
             const response = await fetch('http://localhost:8080/api/auth/reset-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, newPassword: password })
+                body: JSON.stringify({
+                    token,
+                    newPassword: formData.password
+                })
             });
 
-            if (!response.ok) {
+            if (response.ok) {
+                setSuccess(true);
+                setTimeout(() => navigate('/login'), 3000);
+            } else {
                 const data = await response.json();
-                throw new Error(data.message || 'Password reset failed');
+                throw new Error(data.message || 'Failed to recalibrate security credentials');
             }
-
-            setSuccess(true);
-            setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Internal transmission error during reset');
         } finally {
             setLoading(false);
         }
     };
 
-    const strength = password ? getPasswordStrength(password) : null;
-
     return (
-        <div style={{
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '2rem'
-        }}>
-            <div style={{
-                maxWidth: '450px',
-                width: '100%',
-                background: 'rgba(30, 41, 59, 0.6)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '1.5rem',
-                border: '1px solid rgba(148, 163, 184, 0.1)',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-                padding: '3rem'
-            }}>
-                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    <div style={{
-                        display: 'inline-block',
-                        padding: '1rem',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                        borderRadius: '1rem',
-                        marginBottom: '1rem'
-                    }}>
-                        <Lock size={32} color="white" />
-                    </div>
-                    <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'white', marginBottom: '0.5rem' }}>
-                        Reset Password
-                    </h2>
-                    <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>
-                        Enter your new password
-                    </p>
-                </div>
+        <div style={{ minHeight: '100vh', background: '#020617', display: 'flex', flexDirection: 'column' }}>
+            <Header />
 
-                {validating && (
-                    <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                        <Loader2 size={40} style={{ color: '#8b5cf6', animation: 'spin 1s linear infinite', marginBottom: '1rem' }} />
-                        <p style={{ color: '#94a3b8' }}>Verifying reset token...</p>
-                    </div>
-                )}
+            <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+                <div className="biometric-modal-content" style={{ maxWidth: '500px', background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(20px)' }}>
+                    <div className="biometric-header-decor"></div>
 
-                {!validating && !tokenValid && (
-                    <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                        <AlertCircle size={64} color="#f87171" style={{ marginBottom: '1rem' }} />
-                        <h3 style={{ color: '#f87171', fontSize: '1.125rem', marginBottom: '0.5rem' }}>
-                            {error}
-                        </h3>
-                        <Link to="/login" style={{ color: '#8b5cf6', textDecoration: 'none', fontWeight: '600' }}>
-                            Back to Login
-                        </Link>
-                    </div>
-                )}
-
-                {!validating && tokenValid && !success && (
-                    <form onSubmit={handleSubmit}>
-                        {error && (
-                            <div style={{
-                                padding: '1rem',
-                                marginBottom: '1.5rem',
-                                background: 'rgba(239, 68, 68, 0.1)',
-                                color: '#f87171',
-                                borderRadius: '0.75rem',
-                                border: '1px solid rgba(239, 68, 68, 0.3)',
-                                fontSize: '0.875rem'
-                            }}>
-                                {error}
+                    <div className="biometric-body" style={{ padding: '3.5rem 2.5rem' }}>
+                        <div className="biometric-title-section">
+                            <div className="biometric-icon-wrapper" style={{ boxShadow: '0 0 20px rgba(59, 130, 246, 0.2)' }}>
+                                <ShieldCheck size={32} />
                             </div>
-                        )}
+                            <h2 className="biometric-title">Credential Reset</h2>
+                            <p className="biometric-subtitle">Update your secure encryption keys</p>
+                        </div>
 
-                        <div style={{ marginBottom: '1.25rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#e2e8f0', fontSize: '0.875rem' }}>
-                                New Password
-                            </label>
-                            <div style={{ position: 'relative' }}>
-                                <Lock size={18} style={{
-                                    position: 'absolute',
-                                    left: '1rem',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    color: '#94a3b8'
-                                }} />
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="••••••••"
-                                    required
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.875rem 3rem',
-                                        background: 'rgba(15, 23, 42, 0.5)',
-                                        border: '2px solid rgba(148, 163, 184, 0.2)',
-                                        borderRadius: '0.75rem',
-                                        color: 'white',
-                                        fontSize: '0.95rem'
-                                    }}
-                                />
+                        {verifying ? (
+                            <div style={{ textAlign: 'center', padding: '2rem' }}>
+                                <Loader2 className="animate-spin" size={40} style={{ color: '#3b82f6', margin: '0 auto 1rem ease' }} />
+                                <p className="biometric-subtitle">Authenticating reset token...</p>
+                            </div>
+                        ) : error ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                style={{ textAlign: 'center' }}
+                            >
+                                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', marginBottom: '1.5rem', border: '1px solid rgba(244, 63, 94, 0.2)' }}>
+                                    <AlertCircle size={32} />
+                                </div>
+                                <h3 style={{ color: '#fb7185', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1rem' }}>RECOVERY FAILED</h3>
+                                <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: '2rem' }}>{error}</p>
                                 <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    style={{
-                                        position: 'absolute',
-                                        right: '1rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        color: '#94a3b8'
-                                    }}
+                                    onClick={() => navigate('/login')}
+                                    className="biometric-btn btn-secondary-bio"
+                                    style={{ margin: '0 auto' }}
                                 >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    <ArrowLeft size={18} />
+                                    RETURN TO LOGIN
                                 </button>
-                            </div>
-
-                            {password && strength && (
-                                <div style={{ marginTop: '0.75rem' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Password Strength:</span>
-                                        <span style={{ fontSize: '0.75rem', color: strength.color, fontWeight: '600' }}>{strength.label}</span>
-                                    </div>
-                                    <div style={{ height: '4px', background: 'rgba(148, 163, 184, 0.2)', borderRadius: '2px', overflow: 'hidden' }}>
-                                        <div style={{ width: strength.width, height: '100%', background: strength.color, transition: 'width 0.3s' }} />
+                            </motion.div>
+                        ) : success ? (
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                style={{ textAlign: 'center' }}
+                            >
+                                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', marginBottom: '1.5rem', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                    <CheckCircle size={32} />
+                                </div>
+                                <h3 style={{ color: '#4ade80', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1rem' }}>RECALIBRATION SUCCESSFUL</h3>
+                                <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Your security credentials have been updated. <br /> Redirecting to secure login portal...</p>
+                                <div className="scanner-line" style={{ position: 'relative', height: '2px', animationDuration: '1.5s' }}></div>
+                            </motion.div>
+                        ) : (
+                            <form onSubmit={handleSubmit} className="biometric-input-group">
+                                <div>
+                                    <label className="biometric-subtitle" style={{ display: 'block', marginBottom: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        New Neural Passphrase
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            className="biometric-input"
+                                            required
+                                            placeholder="••••••••"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
                                     </div>
                                 </div>
-                            )}
-                        </div>
 
-                        <div style={{ marginBottom: '2rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#e2e8f0', fontSize: '0.875rem' }}>
-                                Confirm Password
-                            </label>
-                            <div style={{ position: 'relative' }}>
-                                <Lock size={18} style={{
-                                    position: 'absolute',
-                                    left: '1rem',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    color: '#94a3b8'
-                                }} />
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    placeholder="••••••••"
-                                    required
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.875rem 1rem 0.875rem 3rem',
-                                        background: 'rgba(15, 23, 42, 0.5)',
-                                        border: '2px solid rgba(148, 163, 184, 0.2)',
-                                        borderRadius: '0.75rem',
-                                        color: 'white',
-                                        fontSize: '0.95rem'
-                                    }}
-                                />
-                            </div>
-                        </div>
+                                <div>
+                                    <label className="biometric-subtitle" style={{ display: 'block', marginBottom: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        Confirm Passphrase
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <input
+                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            value={formData.confirmPassword}
+                                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                            className="biometric-input"
+                                            required
+                                            placeholder="••••••••"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                                        >
+                                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            style={{
-                                width: '100%',
-                                padding: '1rem',
-                                background: loading ? 'rgba(129, 140, 248, 0.5)' : 'linear-gradient(135deg, #818cf8 0%, #c084fc 100%)',
-                                border: 'none',
-                                borderRadius: '0.75rem',
-                                color: 'white',
-                                fontSize: '1.05rem',
-                                fontWeight: '700',
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                                boxShadow: '0 8px 24px rgba(129, 140, 248, 0.3)'
-                            }}
-                        >
-                            {loading ? 'Resetting Password...' : 'Reset Password'}
-                        </button>
-                    </form>
-                )}
-
-                {success && (
-                    <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                        <CheckCircle size={64} color="#10b981" style={{ marginBottom: '1rem' }} />
-                        <h3 style={{ color: '#10b981', fontSize: '1.125rem', fontWeight: '700', marginBottom: '0.5rem' }}>
-                            Password Reset Successful!
-                        </h3>
-                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                            Redirecting to login...
-                        </p>
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="biometric-btn btn-primary-bio"
+                                    style={{ width: '100%', marginTop: '1.5rem', justifyContent: 'center' }}
+                                >
+                                    {loading ? (
+                                        <Loader2 className="animate-spin" size={20} />
+                                    ) : (
+                                        <>
+                                            REPLACE CREDENTIALS
+                                            <ArrowLeft size={18} style={{ transform: 'rotate(180deg)' }} />
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+                        )}
                     </div>
-                )}
-
-                <style>{`
-                    @keyframes spin {
-                        from { transform: rotate(0deg); }
-                        to { transform: rotate(360deg); }
-                    }
-                `}</style>
-            </div>
+                </div>
+            </main>
         </div>
     );
 }

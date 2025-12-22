@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import useAuthStore from '../store/authStore';
 import Sidebar from './Sidebar';
@@ -8,6 +8,17 @@ import AIBrainWidget from '../components/ai/AIBrainWidget';
 export default function DashboardLayout() {
     const { user, token } = useAuthStore();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Pages where we want to hide the global AI brain widget to avoid clashes
+    const hideAIBrainPaths = [
+        '/client/vakil-friend',
+        '/lawyer/chat',
+        '/lawyer/ai-assistant',
+        '/ai-review'
+    ];
+
+    const shouldHideBrain = hideAIBrainPaths.some(path => location.pathname.includes(path));
 
     useEffect(() => {
         if (!token || !user) {
@@ -74,8 +85,8 @@ export default function DashboardLayout() {
                     <Outlet />
                 </main>
 
-                {/* Global AI Brain Assistant */}
-                <AIBrainWidget user={user} />
+                {/* Global AI Brain Assistant - Hidden on chat pages to avoid UI clashes */}
+                {!shouldHideBrain && <AIBrainWidget user={user} />}
             </div>
         </div>
     );

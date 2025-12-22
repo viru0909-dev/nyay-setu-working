@@ -26,6 +26,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Vakil-Friend AI Service for Chat-First Case Filing
@@ -73,7 +74,11 @@ public class VakilFriendService {
         6. EVIDENCE: A description of any physical or digital proof they possess.
         7. URGENCY: NORMAL, URGENT, or CRITICAL.
         
-        RULES:
+        FORMATTING RULES:
+        - Use Markdown for all responses.
+        - Use **bold** for emphasis and headers.
+        - Use bullet points for lists.
+        - Ensure clear spacing between paragraphs.
         - Be detailed and helpful. Acknowledge the user's input before moving to the next question.
         - If the user asks what a term means (e.g., "What is a Respondent?"), explain it clearly.
         - DO NOT provide final legal judgments, but DO provide procedural guidance.
@@ -83,11 +88,11 @@ public class VakilFriendService {
         When all 7 items are collected, provide a bold summary:
         
         **CASE SUMMARY**
-        - Case Type: [TYPE]
-        - Petitioner: [NAME]
-        - Respondent: [NAME]
-        - Issue: [DESCRIPTION]
-        - Urgency: [LEVEL]
+        - **Case Type**: [TYPE]
+        - **Petitioner**: [NAME]
+        - **Respondent**: [NAME]
+        - **Issue**: [DESCRIPTION]
+        - **Urgency**: [LEVEL]
         
         Then say: "Your case is ready to file! Click the 'Complete Filing' button to submit."
         """;
@@ -149,6 +154,11 @@ public class VakilFriendService {
         // Save updated conversation
         try {
             session.setConversationData(objectMapper.writeValueAsString(conversation));
+            
+            // Generate title after first user message if not already set
+            if (session.getTitle() == null || session.getTitle().isEmpty()) {
+                session.setTitle(generateSessionTitle(conversation));
+            }
         } catch (Exception e) {
             log.error("Failed to serialize conversation", e);
         }
@@ -457,16 +467,9 @@ public class VakilFriendService {
                 }
             }
 
-            // Generate title from first user message - TRUNCATE to 200 chars max
-            String title;
-            if (firstUserMessage.length() > 0) {
-                String[] words = firstUserMessage.split("\\s+");
-                title = String.join(" ", Arrays.copyOfRange(words, 0, Math.min(8, words.length)));
-                if (title.length() > 200) title = title.substring(0, 200);
-                title = title + "...";
-            } else {
-                title = "Case filed via Vakil-Friend";
-            }
+            // Generate title from conversation using AI
+            String title = generateCaseTitle(aiSummary, firstUserMessage);
+            if (title.length() > 200) title = title.substring(0, 200);
             caseData.put("title", title);
 
             // Use first user message as description - TRUNCATE to 1000 chars
@@ -531,6 +534,68 @@ public class VakilFriendService {
     }
 
     /**
+     * Generate a short, descriptive title for the chat session using AI
+     */
+    private String generateSessionTitle(List<Map<String, String>> conversation) {
+        try {
+            // Only use the first message from user and assistant
+            List<Map<String, String>> shortConversation = new ArrayList<>();
+            Map<String, String> systemMsg = new HashMap<>();
+            systemMsg.put("role", "system");
+            systemMsg.put("content", "Generate a very short (3-5 words) title for this legal chat based on the user's issue. Return ONLY the title text, no quotes or metadata.");
+            shortConversation.add(systemMsg);
+            
+            // Find first user message
+            boolean hasUserMessage = false;
+            for (Map<String, String> msg : conversation) {
+                if ("user".equals(msg.get("role"))) {
+                    shortConversation.add(msg);
+                    hasUserMessage = true;
+                    break;
+                }
+            }
+            
+            if (!hasUserMessage) {
+                return null; // Don't generate title for empty sessions
+            }
+            
+            String title = callGroqAPI(shortConversation);
+            String trimmedTitle = (title != null && !title.trim().isEmpty()) ? title.trim() : "Legal Discussion";
+            
+            // Safety truncate to ensure it fits even if DB wasn't updated or for other constraints
+            if (trimmedTitle.length() > 200) {
+                trimmedTitle = trimmedTitle.substring(0, 197) + "...";
+            }
+            return trimmedTitle;
+        } catch (Exception e) {
+            return "New Legal Chat";
+        }
+    }
+
+    /**
+     * Generate a professional case title using AI
+     */
+    private String generateCaseTitle(String aiSummary, String firstMessage) {
+        try {
+            List<Map<String, String>> prompt = new ArrayList<>();
+            Map<String, String> systemMsg = new HashMap<>();
+            systemMsg.put("role", "system");
+            systemMsg.put("content", "Generate a professional, formal legal case title (e.g., 'Complaint against [Respondent] for [Issue]') based on the provided summary. Return ONLY the title text.");
+            prompt.add(systemMsg);
+            
+            Map<String, String> userMsg = new HashMap<>();
+            userMsg.put("role", "user");
+            userMsg.put("content", "AI Summary: " + aiSummary + "\nUser Initial Input: " + firstMessage);
+            prompt.add(userMsg);
+            
+            String title = callGroqAPI(prompt);
+            return title != null ? title.trim() : "Case filed via Vakil-Friend";
+        } catch (Exception e) {
+            return "Case: " + (firstMessage.length() > 50 ? firstMessage.substring(0, 50) + "..." : firstMessage);
+        }
+    }
+
+    /**
      * Get session by ID
      */
     public ChatSession getSession(UUID sessionId) {
@@ -542,6 +607,14 @@ public class VakilFriendService {
      * Get user's active sessions
      */
     public List<ChatSession> getUserSessions(User user) {
-        return chatSessionRepository.findByUserOrderByCreatedAtDesc(user);
+        List<ChatSession> sessions = chatSessionRepository.findByUserOrderByCreatedAtDesc(user);
+        
+        // Filter out empty sessions (no user messages) to keep history clean
+        return sessions.stream()
+                .filter(session -> {
+                    String data = session.getConversationData();
+                    return data != null && data.contains("\"role\":\"user\"");
+                })
+                .collect(Collectors.toList());
     }
 }

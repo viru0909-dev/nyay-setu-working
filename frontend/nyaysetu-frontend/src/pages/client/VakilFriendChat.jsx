@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, FileText, X } from 'lucide-react';
 import { vakilFriendAPI } from '../../services/api';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
 
 export default function VakilFriendChat() {
     const [messages, setMessages] = useState([]);
@@ -22,15 +23,19 @@ export default function VakilFriendChat() {
     const navigate = useNavigate();
 
     // Scroll to bottom of messages container only (not the page)
-    const scrollToBottom = () => {
+    const scrollToBottom = (behavior = 'auto') => {
         if (messagesContainerRef.current) {
-            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+            messagesContainerRef.current.scrollTo({
+                top: messagesContainerRef.current.scrollHeight,
+                behavior: behavior
+            });
         }
     };
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        // Use smooth scroll when messages change, but immediate for first load
+        scrollToBottom(messages.length <= 1 ? 'auto' : 'smooth');
+    }, [messages, isLoading]);
 
     useEffect(() => {
         loadSessions();
@@ -385,8 +390,8 @@ export default function VakilFriendChat() {
                                     >
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                             <MessageSquare size={16} style={{ color: '#8b5cf6' }} />
-                                            <span style={{ color: 'white', fontSize: '0.9rem', fontWeight: '500' }}>
-                                                Session {sessions.length - idx}
+                                            <span style={{ color: 'white', fontSize: '0.9rem', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {session.title || `Session ${sessions.length - idx}`}
                                             </span>
                                         </div>
                                         <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '0.35rem', marginLeft: '1.5rem' }}>
@@ -553,10 +558,12 @@ export default function VakilFriendChat() {
                 <div
                     ref={messagesContainerRef}
                     style={{
-                        padding: '1.25rem',
-                        height: '400px',
+                        padding: '1.5rem', // Slightly more padding
+                        height: 'calc(100vh - 420px)', // Adjusted height to give more room at bottom
+                        minHeight: '400px',
                         overflowY: 'auto',
-                        overflowX: 'hidden'
+                        overflowX: 'hidden',
+                        scrollBehavior: 'smooth'
                     }}
                 >
                     {isStarting ? (
@@ -616,12 +623,17 @@ export default function VakilFriendChat() {
                                             borderRadius: msg.role === 'user'
                                                 ? '0.875rem 0.875rem 0.25rem 0.875rem'
                                                 : '0.875rem 0.875rem 0.875rem 0.25rem',
-                                            color: '#e2e8f0',
-                                            fontSize: '0.9rem',
-                                            lineHeight: '1.6',
-                                            whiteSpace: 'pre-wrap'
                                         }}>
-                                            {msg.content}
+                                            <div className="markdown-content" style={{
+                                                color: '#ffffff', // High contrast white
+                                                fontSize: '1rem', // Slightly larger
+                                                lineHeight: '1.7',
+                                                fontWeight: '500' // Increased font weight
+                                            }}>
+                                                <ReactMarkdown>
+                                                    {msg.content}
+                                                </ReactMarkdown>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

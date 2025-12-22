@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { X, Mail, Loader2, CheckCircle } from 'lucide-react';
+import { X, Mail, Loader2, CheckCircle, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import '../../styles/Biometrics.css';
 
 export default function ForgotPasswordModal({ isOpen, onClose }) {
     const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
     const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         setError('');
         setLoading(true);
 
@@ -21,15 +22,11 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to send reset email');
+                const data = await response.json();
+                throw new Error(data.message || 'Failed to send reset email');
             }
 
             setSuccess(true);
-            setTimeout(() => {
-                onClose();
-                setSuccess(false);
-                setEmail('');
-            }, 3000);
         } catch (err) {
             setError(err.message || 'Something went wrong');
         } finally {
@@ -41,162 +38,105 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
 
     return (
         <AnimatePresence>
-            {isOpen && (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="biometric-modal-overlay"
+                onClick={onClose}
+            >
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={onClose}
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0, 0, 0, 0.8)',
-                        backdropFilter: 'blur(8px)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 9999,
-                        padding: '2rem'
-                    }}
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    className="biometric-modal-content"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ maxWidth: '480px' }}
                 >
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.9, opacity: 0 }}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{
-                            maxWidth: '450px',
-                            width: '100%',
-                            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-                            border: '2px solid rgba(139, 92, 246, 0.3)',
-                            borderRadius: '1.5rem',
-                            padding: '2rem',
-                            position: 'relative'
-                        }}
-                    >
-                        <button
-                            onClick={onClose}
-                            style={{
-                                position: 'absolute',
-                                top: '1rem',
-                                right: '1rem',
-                                background: 'rgba(139, 92, 246, 0.2)',
-                                border: '2px solid rgba(139, 92, 246, 0.3)',
-                                borderRadius: '0.5rem',
-                                width: '2.5rem',
-                                height: '2.5rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                color: 'white'
-                            }}
-                        >
-                            <X size={20} />
-                        </button>
+                    <div className="biometric-header-decor"></div>
 
-                        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                            <div style={{
-                                display: 'inline-block',
-                                padding: '1rem',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                borderRadius: '1rem',
-                                marginBottom: '1rem'
-                            }}>
-                                <Mail size={32} color="white" />
+                    <button onClick={onClose} className="biometric-close-btn">
+                        <X size={20} />
+                    </button>
+
+                    <div className="biometric-body" style={{ padding: '3rem 2rem' }}>
+                        <div className="biometric-title-section">
+                            <div className="biometric-icon-wrapper" style={{ background: 'rgba(139, 92, 246, 0.2)', color: '#8b5cf6', borderColor: 'rgba(139, 92, 246, 0.3)' }}>
+                                <ShieldAlert size={32} />
                             </div>
-                            <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: '800', margin: '0 0 0.5rem 0' }}>
-                                Forgot Password?
-                            </h2>
-                            <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
-                                Enter your email to receive a reset link
-                            </p>
+                            <h2 className="biometric-title">Recovery Protocol</h2>
+                            <p className="biometric-subtitle">Initialize secure password reset sequence</p>
                         </div>
 
                         {!success ? (
-                            <form onSubmit={handleSubmit}>
-                                <div style={{ marginBottom: '1rem' }}>
+                            <form onSubmit={handleSubmit} className="biometric-input-group">
+                                <div style={{ position: 'relative' }}>
                                     <input
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="your.email@example.com"
+                                        placeholder="Identification Email"
+                                        className="biometric-input"
                                         required
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.875rem',
-                                            background: 'rgba(15, 23, 42, 0.5)',
-                                            border: '2px solid rgba(148, 163, 184, 0.2)',
-                                            borderRadius: '0.75rem',
-                                            color: 'white',
-                                            fontSize: '1rem'
-                                        }}
+                                        autoFocus
                                     />
+                                    <Mail size={18} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
                                 </div>
 
                                 {error && (
-                                    <div style={{
-                                        padding: '0.75rem',
-                                        background: 'rgba(239, 68, 68, 0.1)',
-                                        border: '1px solid rgba(239, 68, 68, 0.3)',
-                                        borderRadius: '0.5rem',
-                                        color: '#f87171',
-                                        fontSize: '0.875rem',
-                                        marginBottom: '1rem'
-                                    }}>
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="biometric-error-msg"
+                                        style={{ marginTop: '0', background: 'rgba(239, 68, 68, 0.1)', padding: '10px', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                                    >
                                         {error}
-                                    </div>
+                                    </motion.div>
                                 )}
 
                                 <button
                                     type="submit"
-                                    disabled={loading}
-                                    style={{
-                                        width: '100%',
-                                        padding: '1rem',
-                                        background: loading
-                                            ? 'rgba(139, 92, 246, 0.3)'
-                                            : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                        border: 'none',
-                                        borderRadius: '0.75rem',
-                                        color: 'white',
-                                        fontSize: '1rem',
-                                        fontWeight: '700',
-                                        cursor: loading ? 'not-allowed' : 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '0.5rem'
-                                    }}
+                                    disabled={loading || !email}
+                                    className="biometric-btn btn-primary-bio"
+                                    style={{ width: '100%', marginTop: '1rem', justifyContent: 'center' }}
                                 >
-                                    {loading && <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />}
-                                    {loading ? 'Sending...' : 'Send Reset Link'}
+                                    {loading ? (
+                                        <Loader2 className="animate-spin" size={20} />
+                                    ) : (
+                                        'TRANSMIT RESET LINK'
+                                    )}
                                 </button>
+
+                                <p className="biometric-subtitle bio-text-center" style={{ marginTop: '1.5rem', opacity: 0.6 }}>
+                                    Systems will verify your identity and transmit encrypted instructions.
+                                </p>
                             </form>
                         ) : (
-                            <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                                <CheckCircle size={64} color="#10b981" style={{ marginBottom: '1rem' }} />
-                                <h3 style={{ color: '#10b981', fontSize: '1.125rem', fontWeight: '700', marginBottom: '0.5rem' }}>
-                                    Email Sent!
-                                </h3>
-                                <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
-                                    Check your inbox for the password reset link
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                style={{ textAlign: 'center' }}
+                            >
+                                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', marginBottom: '1.5rem' }}>
+                                    <CheckCircle size={40} />
+                                </div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#10b981', marginBottom: '1rem', textTransform: 'uppercase' }}>Transmission Complete</h3>
+                                <p style={{ color: '#94a3b8', marginBottom: '2rem', lineHeight: '1.6' }}>
+                                    Recovery instructions has been dispatched to <br />
+                                    <span style={{ color: 'white', fontWeight: '700' }}>{email}</span>
                                 </p>
-                            </div>
+                                <button
+                                    onClick={onClose}
+                                    className="biometric-btn btn-secondary-bio"
+                                    style={{ margin: '0 auto' }}
+                                >
+                                    RETURN TO AUTHENTICATION
+                                </button>
+                            </motion.div>
                         )}
-
-                        <style>{`
-                            @keyframes spin {
-                                from { transform: rotate(0deg); }
-                                to { transform: rotate(360deg); }
-                            }
-                        `}</style>
-                    </motion.div>
+                    </div>
                 </motion.div>
-            )}
+            </motion.div>
         </AnimatePresence>
     );
 }

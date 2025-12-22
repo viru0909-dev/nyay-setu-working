@@ -39,12 +39,15 @@ public class HearingParticipant {
     @Column(name = "left_at")
     private LocalDateTime leftAt;
     
+    @Builder.Default
     @Column(name = "can_speak")
     private Boolean canSpeak = true;
     
+    @Builder.Default
     @Column(name = "is_video_on")
     private Boolean isVideoOn = true;
     
+    @Builder.Default
     @Column(name = "is_audio_on")
     private Boolean isAudioOn = true;
     

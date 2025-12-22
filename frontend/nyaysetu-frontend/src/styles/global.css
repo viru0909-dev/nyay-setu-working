@@ -608,3 +608,45 @@ a:hover {
     width: 100%;
   }
 }
+
+/* Vakil-Friend Markdown Styles */
+.markdown-content {
+  color: #ffffff !important;
+}
+
+.markdown-content p {
+  margin-bottom: 0.85rem;
+  color: #ffffff !important;
+  line-height: 1.7;
+  font-weight: 500;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin-bottom: 0.85rem;
+  padding-left: 1.5rem;
+  color: #ffffff;
+}
+
+.markdown-content li {
+  margin-bottom: 0.35rem;
+  color: #ffffff;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  color: #ffffff;
+  font-weight: 700;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+}

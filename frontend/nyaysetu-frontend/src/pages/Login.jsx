@@ -414,7 +414,38 @@ export default function Login() {
                                 {loading ? 'Signing in...' : 'Sign In'}
                             </button>
 
-                            {/* Face Login temporarily disabled */}
+                            {/* Face Login */}
+                            <button
+                                type="button"
+                                onClick={() => setShowFaceLogin(true)}
+                                style={{
+                                    width: '100%',
+                                    padding: '1rem',
+                                    background: 'rgba(139, 92, 246, 0.1)',
+                                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                                    borderRadius: '0.75rem',
+                                    color: '#a78bfa',
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.75rem',
+                                    transition: 'all 0.3s'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
+                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
+                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                                }}
+                            >
+                                <Camera size={20} />
+                                Login with Face
+                            </button>
                         </form>
 
                         <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(148, 163, 184, 0.1)' }}>

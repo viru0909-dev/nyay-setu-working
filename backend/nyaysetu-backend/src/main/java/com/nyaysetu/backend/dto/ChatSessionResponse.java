@@ -15,6 +15,7 @@ import java.util.UUID;
 public class ChatSessionResponse {
     private UUID sessionId;
     private String status;
+    private String title;
     private String conversationData;
     private LocalDateTime createdAt;
 }
