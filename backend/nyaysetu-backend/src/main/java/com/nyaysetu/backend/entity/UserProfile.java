@@ -26,6 +26,7 @@ public class UserProfile {
     private String country;
 
     // store face embedding id or a flag that face is registered
+    @Builder.Default
     private Boolean faceRegistered = false;
 
     @Lob

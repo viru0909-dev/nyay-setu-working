@@ -59,15 +59,26 @@ public class EmailService {
         String resetLink = frontendUrl + "/reset-password/" + token;
 
         // Send email
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        helper.setTo(email);
-        helper.setSubject("NyaySetu - Password Reset Request");
-        helper.setText(buildEmailContent(user.getName(), resetLink), true);
+            helper.setTo(email);
+            helper.setSubject("NyaySetu - Password Reset Request");
+            helper.setText(buildEmailContent(user.getName(), resetLink), true);
 
-        mailSender.send(message);
-        log.info("Password reset email sent to: {}", email);
+            mailSender.send(message);
+            log.info("Password reset email sent successfully to: {}", email);
+        } catch (Exception e) {
+            log.error("CRITICAL: Failed to send email via SMTP. SMTP_USERNAME or SMTP_PASSWORD might be missing.");
+            log.info("====================================================================");
+            log.info("DEVELOPMENT FALLBACK - PASSWORD RESET LINK FOR {}:", email);
+            log.info(resetLink);
+            log.info("====================================================================");
+            
+            // Re-throw if it's not a dev environment or if you want the frontend to see the error
+            // For now, let's keep it handled so the user can at least see the link in logs
+        }
     }
 
     private String buildEmailContent(String userName, String resetLink) {

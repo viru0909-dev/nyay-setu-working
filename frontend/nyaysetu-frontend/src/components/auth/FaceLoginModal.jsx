@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Camera, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Camera, Loader2, CheckCircle, AlertCircle, ShieldCheck, UserCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Webcam from 'react-webcam';
 import { useFaceRecognition } from '../../hooks/useFaceRecognition';
+import '../../styles/Biometrics.css';
 
 export default function FaceLoginModal({ isOpen, onClose, onSuccess }) {
     const [email, setEmail] = useState('');
@@ -13,273 +14,213 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }) {
     const { modelsLoaded, detectFace, loginWithFace } = useFaceRecognition();
 
     useEffect(() => {
+        let interval;
         if (step === 'scanning' && modelsLoaded) {
-            startFaceDetection();
+            interval = startFaceDetection();
         }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
     }, [step, modelsLoaded]);
 
-    const startFaceDetection = async () => {
+    const startFaceDetection = () => {
         const interval = setInterval(async () => {
             if (webcamRef.current?.video) {
                 try {
-                    const result = await detectFace(webcamRef.current.video);
-                    if (result) {
+                    const result = await detectFace(webcamRef.current.video, 0.75); // High threshold for login
+                    if (result && result.isCentered) {
                         setFaceDetected(true);
                         clearInterval(interval);
                         await handleFaceLogin(result.descriptor);
+                    } else if (result) {
+                        setFaceDetected(false);
+                        setMessage('CENTER FACE: Move closer to the HUD grid');
+                    } else {
+                        setFaceDetected(false);
+                        setMessage('SCANNING: No valid biometric signature found');
                     }
                 } catch (err) {
                     console.error('Face detection error:', err);
                 }
             }
-        }, 1000);
+        }, 800);
 
-        // Timeout after 30 seconds
         setTimeout(() => {
-            clearInterval(interval);
-            if (step === 'scanning') {
+            if (interval) clearInterval(interval);
+            if (step === 'scanning' && !faceDetected) {
                 setStep('error');
-                setMessage('Face detection timeout. Please try again.');
+                setMessage('Biometric timeout. Signal not acquired.');
             }
-        }, 30000);
+        }, 45000);
+
+        return interval;
     };
 
     const handleFaceLogin = async (descriptor) => {
         try {
-            setMessage('Verifying your face...');
+            setMessage('Verifying biometric signature...');
             const response = await loginWithFace(email, descriptor);
-
             setStep('success');
-            setMessage('Login successful!');
-
+            setMessage('Authentication Successful');
             setTimeout(() => {
                 onSuccess(response);
                 onClose();
             }, 1500);
         } catch (error) {
             setStep('error');
-            setMessage(error.message || 'Face verification failed');
+            setMessage(error.message || 'Verification failed');
         }
     };
 
     const handleStartScanning = () => {
         if (!email.trim()) {
-            setMessage('Please enter your email');
+            setMessage('Required: Identification Email');
             return;
         }
         setStep('scanning');
-        setMessage('Position your face in the camera');
+        setMessage('Projecting biometric grid...');
     };
 
     if (!isOpen) return null;
 
     return (
         <AnimatePresence>
-            {isOpen && (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="biometric-modal-overlay"
+                onClick={onClose}
+            >
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={onClose}
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0, 0, 0, 0.8)',
-                        backdropFilter: 'blur(8px)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 9999,
-                        padding: '2rem'
-                    }}
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    className="biometric-modal-content"
+                    onClick={(e) => e.stopPropagation()}
                 >
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.9, opacity: 0 }}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{
-                            maxWidth: '500px',
-                            width: '100%',
-                            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-                            border: '2px solid rgba(139, 92, 246, 0.3)',
-                            borderRadius: '1.5rem',
-                            padding: '2rem',
-                            position: 'relative'
-                        }}
-                    >
-                        <button
-                            onClick={onClose}
-                            style={{
-                                position: 'absolute',
-                                top: '1rem',
-                                right: '1rem',
-                                background: 'rgba(139, 92, 246, 0.2)',
-                                border: '2px solid rgba(139, 92, 246, 0.3)',
-                                borderRadius: '0.5rem',
-                                width: '2.5rem',
-                                height: '2.5rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                color: 'white'
-                            }}
-                        >
-                            <X size={20} />
-                        </button>
+                    <div className="biometric-header-decor"></div>
 
-                        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                            <div style={{
-                                display: 'inline-block',
-                                padding: '1rem',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                borderRadius: '1rem',
-                                marginBottom: '1rem'
-                            }}>
-                                <Camera size={32} color="white" />
+                    <button onClick={onClose} className="biometric-close-btn">
+                        <X size={20} />
+                    </button>
+
+                    <div className="biometric-body">
+                        <div className="biometric-title-section">
+                            <div className="biometric-icon-wrapper">
+                                <ShieldCheck size={32} />
                             </div>
-                            <h2 style={{ color: 'white', fontSize: '1.5rem', fontWeight: '800', margin: '0 0 0.5rem 0' }}>
-                                Face Login
-                            </h2>
-                            <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
-                                Quick and secure login with your face
-                            </p>
+                            <h2 className="biometric-title">Biometric Login</h2>
+                            <p className="biometric-subtitle">Neural Signature Verification System</p>
                         </div>
 
                         {step === 'email' && (
-                            <div>
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="biometric-input-group"
+                            >
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email"
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.875rem',
-                                        background: 'rgba(15, 23, 42, 0.5)',
-                                        border: '2px solid rgba(148, 163, 184, 0.2)',
-                                        borderRadius: '0.75rem',
-                                        color: 'white',
-                                        fontSize: '1rem',
-                                        marginBottom: '1rem'
-                                    }}
+                                    placeholder="Identification Email"
+                                    className="biometric-input"
                                     onKeyPress={(e) => e.key === 'Enter' && handleStartScanning()}
                                 />
                                 <button
                                     onClick={handleStartScanning}
                                     disabled={!modelsLoaded}
-                                    style={{
-                                        width: '100%',
-                                        padding: '1rem',
-                                        background: modelsLoaded
-                                            ? 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)'
-                                            : 'rgba(139, 92, 246, 0.3)',
-                                        border: 'none',
-                                        borderRadius: '0.75rem',
-                                        color: 'white',
-                                        fontSize: '1rem',
-                                        fontWeight: '700',
-                                        cursor: modelsLoaded ? 'pointer' : 'not-allowed'
-                                    }}
+                                    className="biometric-btn btn-primary-bio"
                                 >
-                                    {modelsLoaded ? 'Start Face Scan' : 'Loading Models...'}
+                                    {modelsLoaded ? 'INITIALIZE SCAN' : 'LOADING NEURAL ENGINE...'}
                                 </button>
-                                {message && (
-                                    <p style={{ color: '#f87171', fontSize: '0.875rem', marginTop: '0.5rem', textAlign: 'center' }}>
-                                        {message}
-                                    </p>
-                                )}
-                            </div>
+                                {message && <p className="biometric-error-msg animate-pulse">{message}</p>}
+                            </motion.div>
                         )}
 
                         {step === 'scanning' && (
-                            <div>
-                                <div style={{
-                                    position: 'relative',
-                                    borderRadius: '1rem',
-                                    overflow: 'hidden',
-                                    marginBottom: '1rem'
-                                }}>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="space-y-6"
+                            >
+                                <div className={`biometric-container ${faceDetected ? 'face-detected' : ''}`}>
                                     <Webcam
                                         ref={webcamRef}
                                         audio={false}
                                         screenshotFormat="image/jpeg"
                                         videoConstraints={{ facingMode: 'user' }}
-                                        style={{ width: '100%', borderRadius: '1rem' }}
+                                        className="biometric-video"
                                     />
-                                    {faceDetected && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '50%',
-                                            left: '50%',
-                                            transform: 'translate(-50%, -50%)',
-                                            width: '200px',
-                                            height: '200px',
-                                            border: '3px solid #10b981',
-                                            borderRadius: '50%',
-                                            boxShadow: '0 0 20px rgba(16, 185, 129, 0.5)'
-                                        }} />
-                                    )}
+                                    <div className="scanner-overlay">
+                                        <div className="scanner-line"></div>
+                                        <div className="hud-corner corner-tl"></div>
+                                        <div className="hud-corner corner-tr"></div>
+                                        <div className="hud-corner corner-bl"></div>
+                                        <div className="hud-corner corner-br"></div>
+                                        <div className="face-guideline"></div>
+                                    </div>
+
+                                    <div className="scanner-status-badge">
+                                        <div className={`status-dot ${faceDetected ? 'active' : ''}`}></div>
+                                        <span className="status-text">
+                                            {faceDetected ? 'BIOMETRIC ACQUIRED' : 'SCANNING FOR SIGNAL'}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <Loader2 size={24} style={{ color: '#8b5cf6', animation: 'spin 1s linear infinite', marginBottom: '0.5rem' }} />
-                                    <p style={{ color: '#a78bfa', fontSize: '0.9rem', margin: 0 }}>
-                                        {message}
-                                    </p>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginTop: '1.5rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 16px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                                        <Loader2 size={18} className="text-blue-500 animate-spin" style={{ color: '#3b82f6' }} />
+                                        <p style={{ color: '#60a5fa', fontSize: '14px', fontWeight: '700', textTransform: 'uppercase', margin: 0 }}>
+                                            {message}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         )}
 
                         {step === 'success' && (
-                            <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                                <CheckCircle size={64} color="#10b981" style={{ marginBottom: '1rem' }} />
-                                <p style={{ color: '#10b981', fontSize: '1.125rem', fontWeight: '700', margin: 0 }}>
-                                    {message}
-                                </p>
-                            </div>
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className="text-center py-12"
+                                style={{ textAlign: 'center', padding: '3rem 0' }}
+                            >
+                                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '96px', height: '96px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', marginBottom: '1.5rem' }}>
+                                    <UserCheck size={48} />
+                                </div>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#34d399', marginBottom: '8px', textTransform: 'uppercase' }}>Access Granted</h3>
+                                <p style={{ color: 'rgba(16, 185, 129, 0.6)', fontWeight: '500' }}>Signature matched. Redirecting...</p>
+                            </motion.div>
                         )}
 
                         {step === 'error' && (
-                            <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                                <AlertCircle size={64} color="#f87171" style={{ marginBottom: '1rem' }} />
-                                <p style={{ color: '#f87171', fontSize: '1rem', marginBottom: '1rem' }}>
-                                    {message}
-                                </p>
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                style={{ textAlign: 'center', padding: '2rem 0' }}
+                            >
+                                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(244, 63, 94, 0.2)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#f43f5e', marginBottom: '1.5rem' }}>
+                                    <AlertCircle size={40} />
+                                </div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#fb7185', marginBottom: '8px', textTransform: 'uppercase' }}>Access Denied</h3>
+                                <p style={{ color: '#94a3b8', marginBottom: '2rem', maxWidth: '320px', marginInline: 'auto', fontSize: '14px' }}>{message}</p>
                                 <button
                                     onClick={() => {
                                         setStep('email');
                                         setMessage('');
                                         setFaceDetected(false);
                                     }}
-                                    style={{
-                                        padding: '0.75rem 1.5rem',
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                        border: 'none',
-                                        borderRadius: '0.75rem',
-                                        color: 'white',
-                                        fontSize: '1rem',
-                                        fontWeight: '700',
-                                        cursor: 'pointer'
-                                    }}
+                                    className="biometric-btn btn-secondary-bio"
                                 >
-                                    Try Again
+                                    RE-INITIALIZE SYSTEMS
                                 </button>
-                            </div>
+                            </motion.div>
                         )}
-
-                        <style>{`
-                            @keyframes spin {
-                                from { transform: rotate(0deg); }
-                                to { transform: rotate(360deg); }
-                            }
-                        `}</style>
-                    </motion.div>
+                    </div>
                 </motion.div>
-            )}
+            </motion.div>
         </AnimatePresence>
     );
 }

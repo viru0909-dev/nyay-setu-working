@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import useAuthStore from '../store/authStore';
-import { Mail, Lock, Eye, EyeOff, User as UserIcon, Briefcase, Scale, Gavel, CheckCircle2, Shield } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User as UserIcon, Briefcase, Scale, Gavel, CheckCircle2, Shield, Camera, ArrowRight, ArrowLeft as ArrowLeftIcon } from 'lucide-react';
 import Header from '../components/landing/Header';
+import FaceCapture from '../components/auth/FaceCapture';
+import { useFaceRecognition } from '../hooks/useFaceRecognition';
+import '../styles/Biometrics.css';
 
 export default function Signup() {
     const [formData, setFormData] = useState({
@@ -17,8 +20,12 @@ export default function Signup() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [step, setStep] = useState(1); // 1: Form, 2: Face Registration
+    const [registeredUser, setRegisteredUser] = useState(null);
+    const [registeredToken, setRegisteredToken] = useState(null);
     const navigate = useNavigate();
     const { setAuth } = useAuthStore();
+    const { enrollFace } = useFaceRecognition();
 
     const roles = [
         { value: 'CLIENT', label: 'Client', icon: <Briefcase size={18} />, color: '#3b82f6', desc: 'File cases & track progress' },
@@ -58,21 +65,37 @@ export default function Signup() {
             });
 
             const { token, user } = response.data;
-            setAuth(user, token);
-
-            const roleRoutes = {
-                ADMIN: '/admin',
-                JUDGE: '/judge',
-                LAWYER: '/lawyer',
-                CLIENT: '/client'
-            };
-
-            navigate(roleRoutes[user.role] || '/');
+            setRegisteredUser(user);
+            setRegisteredToken(token);
+            setStep(2); // Move to face registration
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleFaceCapture = async (descriptor) => {
+        setLoading(true);
+        try {
+            await enrollFace(descriptor, registeredToken);
+            completeSignup();
+        } catch (err) {
+            setError('Face registration failed. You can skip this for now or try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const completeSignup = () => {
+        setAuth(registeredUser, registeredToken);
+        const roleRoutes = {
+            ADMIN: '/admin',
+            JUDGE: '/judge',
+            LAWYER: '/lawyer',
+            CLIENT: '/client'
+        };
+        navigate(roleRoutes[registeredUser.role] || '/');
     };
 
     const strength = formData.password ? getPasswordStrength(formData.password) : null;
@@ -186,316 +209,368 @@ export default function Signup() {
                         padding: '3rem',
                         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
                     }}>
-                        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                            <h2 style={{
-                                fontSize: '2rem',
-                                fontWeight: '800',
-                                color: 'white',
-                                marginBottom: '0.5rem'
-                            }}>
-                                Create Account
-                            </h2>
-                            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-                                Fill in your details to get started
-                            </p>
-                        </div>
-
-                        {error && (
-                            <div style={{
-                                padding: '1rem',
-                                marginBottom: '1.5rem',
-                                background: 'rgba(239, 68, 68, 0.1)',
-                                color: '#f87171',
-                                borderRadius: '0.75rem',
-                                border: '1px solid rgba(239, 68, 68, 0.3)',
-                                fontSize: '0.875rem',
-                                textAlign: 'center'
-                            }}>
-                                {error}
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit}>
-                            {/* Full Name */}
-                            <div style={{ marginBottom: '1.25rem' }}>
-                                <label style={{
-                                    display: 'block',
-                                    marginBottom: '0.5rem',
-                                    fontWeight: '600',
-                                    color: '#e2e8f0',
-                                    fontSize: '0.875rem'
-                                }}>
-                                    Full Name
-                                </label>
-                                <div style={{ position: 'relative' }}>
-                                    <UserIcon size={18} style={{
-                                        position: 'absolute',
-                                        left: '1rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        color: '#8b5cf6'
-                                    }} />
-                                    <input
-                                        type="text"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        placeholder="John Doe"
-                                        required
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.875rem 1rem 0.875rem 3rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.2)',
-                                            borderRadius: '0.75rem',
-                                            color: 'white',
-                                            fontSize: '1rem'
-                                        }}
-                                    />
+                        {step === 1 ? (
+                            <>
+                                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                                    <h2 style={{
+                                        fontSize: '2rem',
+                                        fontWeight: '800',
+                                        color: 'white',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        Create Account
+                                    </h2>
+                                    <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
+                                        Fill in your details to get started
+                                    </p>
                                 </div>
-                            </div>
 
-                            {/* Email */}
-                            <div style={{ marginBottom: '1.25rem' }}>
-                                <label style={{
-                                    display: 'block',
-                                    marginBottom: '0.5rem',
-                                    fontWeight: '600',
-                                    color: '#e2e8f0',
-                                    fontSize: '0.875rem'
-                                }}>
-                                    Email Address
-                                </label>
-                                <div style={{ position: 'relative' }}>
-                                    <Mail size={18} style={{
-                                        position: 'absolute',
-                                        left: '1rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        color: '#8b5cf6'
-                                    }} />
-                                    <input
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        placeholder="your.email@example.com"
-                                        required
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.875rem 1rem 0.875rem 3rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.2)',
-                                            borderRadius: '0.75rem',
-                                            color: 'white',
-                                            fontSize: '1rem'
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Role Selection - Tabs */}
-                            <div style={{ marginBottom: '1.25rem' }}>
-                                <label style={{
-                                    display: 'block',
-                                    marginBottom: '0.75rem',
-                                    fontWeight: '600',
-                                    color: '#e2e8f0',
-                                    fontSize: '0.875rem'
-                                }}>
-                                    Select Your Role
-                                </label>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(3, 1fr)',
-                                    gap: '0.75rem'
-                                }}>
-                                    {roles.map(role => (
-                                        <button
-                                            key={role.value}
-                                            type="button"
-                                            onClick={() => setFormData({ ...formData, role: role.value })}
-                                            style={{
-                                                padding: '0.875rem 0.5rem',
-                                                background: formData.role === role.value
-                                                    ? `linear-gradient(135deg, ${role.color}40 0%, ${role.color}20 100%)`
-                                                    : 'rgba(15, 23, 42, 0.6)',
-                                                border: formData.role === role.value
-                                                    ? `2px solid ${role.color}`
-                                                    : '2px solid rgba(139, 92, 246, 0.2)',
-                                                borderRadius: '0.75rem',
-                                                color: formData.role === role.value ? role.color : '#94a3b8',
-                                                fontSize: '0.85rem',
-                                                fontWeight: '600',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                gap: '0.25rem'
-                                            }}
-                                        >
-                                            {role.icon}
-                                            <span>{role.label}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Password */}
-                            <div style={{ marginBottom: '1.25rem' }}>
-                                <label style={{
-                                    display: 'block',
-                                    marginBottom: '0.5rem',
-                                    fontWeight: '600',
-                                    color: '#e2e8f0',
-                                    fontSize: '0.875rem'
-                                }}>
-                                    Password
-                                </label>
-                                <div style={{ position: 'relative' }}>
-                                    <Lock size={18} style={{
-                                        position: 'absolute',
-                                        left: '1rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        color: '#8b5cf6'
-                                    }} />
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={formData.password}
-                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                        placeholder="••••••••"
-                                        required
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.875rem 3rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.2)',
-                                            borderRadius: '0.75rem',
-                                            color: 'white',
-                                            fontSize: '1rem'
-                                        }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        style={{
-                                            position: 'absolute',
-                                            right: '1rem',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            background: 'none',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            color: '#8b5cf6'
-                                        }}
-                                    >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
-                                </div>
-                                {strength && (
-                                    <div style={{ marginTop: '0.5rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Strength:</span>
-                                            <span style={{ fontSize: '0.75rem', color: strength.color, fontWeight: '600' }}>{strength.label}</span>
-                                        </div>
-                                        <div style={{ height: '4px', background: 'rgba(148, 163, 184, 0.2)', borderRadius: '2px' }}>
-                                            <div style={{ width: strength.width, height: '100%', background: strength.color, borderRadius: '2px', transition: 'width 0.3s' }} />
-                                        </div>
+                                {error && (
+                                    <div style={{
+                                        padding: '1rem',
+                                        marginBottom: '1.5rem',
+                                        background: 'rgba(239, 68, 68, 0.1)',
+                                        color: '#f87171',
+                                        borderRadius: '0.75rem',
+                                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                                        fontSize: '0.875rem',
+                                        textAlign: 'center'
+                                    }}>
+                                        {error}
                                     </div>
                                 )}
-                            </div>
 
-                            {/* Confirm Password */}
-                            <div style={{ marginBottom: '2rem' }}>
-                                <label style={{
-                                    display: 'block',
-                                    marginBottom: '0.5rem',
-                                    fontWeight: '600',
-                                    color: '#e2e8f0',
-                                    fontSize: '0.875rem'
-                                }}>
-                                    Confirm Password
-                                </label>
-                                <div style={{ position: 'relative' }}>
-                                    <Lock size={18} style={{
-                                        position: 'absolute',
-                                        left: '1rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        color: '#8b5cf6'
-                                    }} />
-                                    <input
-                                        type={showConfirmPassword ? 'text' : 'password'}
-                                        value={formData.confirmPassword}
-                                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                        placeholder="••••••••"
-                                        required
+                                <form onSubmit={handleSubmit}>
+                                    {/* Full Name */}
+                                    <div style={{ marginBottom: '1.25rem' }}>
+                                        <label style={{
+                                            display: 'block',
+                                            marginBottom: '0.5rem',
+                                            fontWeight: '600',
+                                            color: '#e2e8f0',
+                                            fontSize: '0.875rem'
+                                        }}>
+                                            Full Name
+                                        </label>
+                                        <div style={{ position: 'relative' }}>
+                                            <UserIcon size={18} style={{
+                                                position: 'absolute',
+                                                left: '1rem',
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                color: '#8b5cf6'
+                                            }} />
+                                            <input
+                                                type="text"
+                                                value={formData.name}
+                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                placeholder="John Doe"
+                                                required
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.875rem 1rem 0.875rem 3rem',
+                                                    background: 'rgba(15, 23, 42, 0.6)',
+                                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                                    borderRadius: '0.75rem',
+                                                    color: 'white',
+                                                    fontSize: '1rem'
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Email */}
+                                    <div style={{ marginBottom: '1.25rem' }}>
+                                        <label style={{
+                                            display: 'block',
+                                            marginBottom: '0.5rem',
+                                            fontWeight: '600',
+                                            color: '#e2e8f0',
+                                            fontSize: '0.875rem'
+                                        }}>
+                                            Email Address
+                                        </label>
+                                        <div style={{ position: 'relative' }}>
+                                            <Mail size={18} style={{
+                                                position: 'absolute',
+                                                left: '1rem',
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                color: '#8b5cf6'
+                                            }} />
+                                            <input
+                                                type="email"
+                                                value={formData.email}
+                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                placeholder="your.email@example.com"
+                                                required
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.875rem 1rem 0.875rem 3rem',
+                                                    background: 'rgba(15, 23, 42, 0.6)',
+                                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                                    borderRadius: '0.75rem',
+                                                    color: 'white',
+                                                    fontSize: '1rem'
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Role Selection - Tabs */}
+                                    <div style={{ marginBottom: '1.25rem' }}>
+                                        <label style={{
+                                            display: 'block',
+                                            marginBottom: '0.75rem',
+                                            fontWeight: '600',
+                                            color: '#e2e8f0',
+                                            fontSize: '0.875rem'
+                                        }}>
+                                            Select Your Role
+                                        </label>
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'repeat(3, 1fr)',
+                                            gap: '0.75rem'
+                                        }}>
+                                            {roles.map(role => (
+                                                <button
+                                                    key={role.value}
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, role: role.value })}
+                                                    style={{
+                                                        padding: '0.875rem 0.5rem',
+                                                        background: formData.role === role.value
+                                                            ? `linear-gradient(135deg, ${role.color}40 0%, ${role.color}20 100%)`
+                                                            : 'rgba(15, 23, 42, 0.6)',
+                                                        border: formData.role === role.value
+                                                            ? `2px solid ${role.color}`
+                                                            : '2px solid rgba(139, 92, 246, 0.2)',
+                                                        borderRadius: '0.75rem',
+                                                        color: formData.role === role.value ? role.color : '#94a3b8',
+                                                        fontSize: '0.85rem',
+                                                        fontWeight: '600',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        gap: '0.25rem'
+                                                    }}
+                                                >
+                                                    {role.icon}
+                                                    <span>{role.label}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Password */}
+                                    <div style={{ marginBottom: '1.25rem' }}>
+                                        <label style={{
+                                            display: 'block',
+                                            marginBottom: '0.5rem',
+                                            fontWeight: '600',
+                                            color: '#e2e8f0',
+                                            fontSize: '0.875rem'
+                                        }}>
+                                            Password
+                                        </label>
+                                        <div style={{ position: 'relative' }}>
+                                            <Lock size={18} style={{
+                                                position: 'absolute',
+                                                left: '1rem',
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                color: '#8b5cf6'
+                                            }} />
+                                            <input
+                                                type={showPassword ? 'text' : 'password'}
+                                                value={formData.password}
+                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                                placeholder="••••••••"
+                                                required
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.875rem 3rem',
+                                                    background: 'rgba(15, 23, 42, 0.6)',
+                                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                                    borderRadius: '0.75rem',
+                                                    color: 'white',
+                                                    fontSize: '1rem'
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                style={{
+                                                    position: 'absolute',
+                                                    right: '1rem',
+                                                    top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    color: '#8b5cf6'
+                                                }}
+                                            >
+                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
+                                        </div>
+                                        {strength && (
+                                            <div style={{ marginTop: '0.5rem' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Strength:</span>
+                                                    <span style={{ fontSize: '0.75rem', color: strength.color, fontWeight: '600' }}>{strength.label}</span>
+                                                </div>
+                                                <div style={{ height: '4px', background: 'rgba(148, 163, 184, 0.2)', borderRadius: '2px' }}>
+                                                    <div style={{ width: strength.width, height: '100%', background: strength.color, borderRadius: '2px', transition: 'width 0.3s' }} />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Confirm Password */}
+                                    <div style={{ marginBottom: '2rem' }}>
+                                        <label style={{
+                                            display: 'block',
+                                            marginBottom: '0.5rem',
+                                            fontWeight: '600',
+                                            color: '#e2e8f0',
+                                            fontSize: '0.875rem'
+                                        }}>
+                                            Confirm Password
+                                        </label>
+                                        <div style={{ position: 'relative' }}>
+                                            <Lock size={18} style={{
+                                                position: 'absolute',
+                                                left: '1rem',
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                color: '#8b5cf6'
+                                            }} />
+                                            <input
+                                                type={showConfirmPassword ? 'text' : 'password'}
+                                                value={formData.confirmPassword}
+                                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                                placeholder="••••••••"
+                                                required
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.875rem 3rem',
+                                                    background: 'rgba(15, 23, 42, 0.6)',
+                                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                                    borderRadius: '0.75rem',
+                                                    color: 'white',
+                                                    fontSize: '1rem'
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                style={{
+                                                    position: 'absolute',
+                                                    right: '1rem',
+                                                    top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    color: '#8b5cf6'
+                                                }}
+                                            >
+                                                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Create Account Button */}
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
                                         style={{
                                             width: '100%',
-                                            padding: '0.875rem 3rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.2)',
+                                            padding: '1rem',
+                                            background: loading
+                                                ? 'rgba(139, 92, 246, 0.5)'
+                                                : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                            border: 'none',
                                             borderRadius: '0.75rem',
                                             color: 'white',
-                                            fontSize: '1rem'
-                                        }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        style={{
-                                            position: 'absolute',
-                                            right: '1rem',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            background: 'none',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            color: '#8b5cf6'
+                                            fontSize: '1.05rem',
+                                            fontWeight: '700',
+                                            cursor: loading ? 'not-allowed' : 'pointer',
+                                            boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)',
+                                            transition: 'all 0.3s'
                                         }}
                                     >
-                                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        {loading ? 'Creating Account...' : 'Create Account'}
+                                    </button>
+                                </form>
+
+                                <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(148, 163, 184, 0.1)' }}>
+                                    <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                                        Already have an account?{' '}
+                                        <Link to="/login" style={{
+                                            color: '#8b5cf6',
+                                            fontWeight: '600',
+                                            textDecoration: 'none'
+                                        }}>
+                                            Sign In
+                                        </Link>
+                                    </p>
+                                </div>
+                            </>
+                        ) : (
+                            <div style={{ textAlign: 'center' }}>
+                                <div className="biometric-icon-wrapper" style={{ margin: '0 auto 1.5rem auto' }}>
+                                    <Shield size={32} />
+                                </div>
+                                <h2 className="biometric-title" style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>
+                                    Biometric Identity Link
+                                </h2>
+                                <p className="biometric-subtitle" style={{ fontSize: '0.95rem', marginBottom: '2rem' }}>
+                                    Establish your digital biometric signature for rapid, ultra-secure access
+                                </p>
+
+                                {error && (
+                                    <div style={{
+                                        padding: '1rem',
+                                        marginBottom: '1.5rem',
+                                        background: 'rgba(239, 68, 68, 0.1)',
+                                        color: '#f87171',
+                                        borderRadius: '0.75rem',
+                                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                                        fontSize: '0.875rem',
+                                        textAlign: 'center'
+                                    }}>
+                                        {error}
+                                    </div>
+                                )}
+
+                                <FaceCapture onCapture={handleFaceCapture} />
+
+                                <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+                                    <button
+                                        onClick={completeSignup}
+                                        style={{
+                                            flex: 1,
+                                            padding: '1rem',
+                                            background: 'rgba(148, 163, 184, 0.1)',
+                                            border: '1px solid rgba(148, 163, 184, 0.2)',
+                                            borderRadius: '0.75rem',
+                                            color: '#94a3b8',
+                                            fontWeight: '600',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Skip for now
                                     </button>
                                 </div>
                             </div>
-
-                            {/* Create Account Button */}
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                style={{
-                                    width: '100%',
-                                    padding: '1rem',
-                                    background: loading
-                                        ? 'rgba(139, 92, 246, 0.5)'
-                                        : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                                    border: 'none',
-                                    borderRadius: '0.75rem',
-                                    color: 'white',
-                                    fontSize: '1.05rem',
-                                    fontWeight: '700',
-                                    cursor: loading ? 'not-allowed' : 'pointer',
-                                    boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)',
-                                    transition: 'all 0.3s'
-                                }}
-                            >
-                                {loading ? 'Creating Account...' : 'Create Account'}
-                            </button>
-                        </form>
-
-                        <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(148, 163, 184, 0.1)' }}>
-                            <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
-                                Already have an account?{' '}
-                                <Link to="/login" style={{
-                                    color: '#8b5cf6',
-                                    fontWeight: '600',
-                                    textDecoration: 'none'
-                                }}>
-                                    Sign In
-                                </Link>
-                            </p>
-                        </div>
+                        )}
                     </div>
+
                 </div>
 
                 <style>{`

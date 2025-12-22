@@ -1,21 +1,29 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
     User, Camera, Save, Edit2, Lock, Shield,
     Mail, Phone, MapPin, Briefcase, CheckCircle2,
-    Upload, X, Eye, EyeOff
+    ShieldCheck, X, Trash2, Eye, EyeOff, Upload
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
+import FaceCapture from '../../components/auth/FaceCapture';
+import { useFaceRecognition } from '../../hooks/useFaceRecognition';
 
 export default function ProfilePage() {
-    const { user } = useAuthStore();
+    const { user, token } = useAuthStore();
     const [editing, setEditing] = useState(false);
     const [showFaceEnrollment, setShowFaceEnrollment] = useState(false);
-    const [facePhotos, setFacePhotos] = useState([]);
+    const { enrollFace, deleteFace } = useFaceRecognition();
+    const [faceStatus, setFaceStatus] = useState('Checking...');
+    const [faceLoaded, setFaceLoaded] = useState(false);
     const [showPasswordChange, setShowPasswordChange] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const videoRef = useRef(null);
-    const [stream, setStream] = useState(null);
+    useEffect(() => {
+        // Fetch face status from backend if needed, or use profile data
+        // For now, let's assume we check the backend or use a state
+        setFaceLoaded(true);
+    }, []);
 
     const [profileData, setProfileData] = useState({
         name: user?.name || 'John Doe',
@@ -33,42 +41,27 @@ export default function ProfilePage() {
         confirm: ''
     });
 
-    const startCamera = async () => {
+    const handleEnrollFace = async (descriptor) => {
         try {
-            const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
-            if (videoRef.current) {
-                videoRef.current.srcObject = mediaStream;
-            }
-            setStream(mediaStream);
+            await enrollFace(descriptor, token);
+            setProfileData({ ...profileData, faceEnabled: true });
+            setShowFaceEnrollment(false);
+            alert('Face enrolled successfully!');
         } catch (err) {
-            console.error('Camera access denied:', err);
+            alert('Face enrollment failed: ' + err.message);
         }
     };
 
-    const stopCamera = () => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            setStream(null);
+    const handleDeleteFace = async () => {
+        if (window.confirm('Are you sure you want to disable face login? This will delete your biometric data.')) {
+            try {
+                await deleteFace(token);
+                setProfileData({ ...profileData, faceEnabled: false });
+                alert('Face data deleted.');
+            } catch (err) {
+                alert('Failed to delete face data: ' + err.message);
+            }
         }
-    };
-
-    const capturePhoto = () => {
-        if (videoRef.current && facePhotos.length < 5) {
-            const canvas = document.createElement('canvas');
-            canvas.width = videoRef.current.videoWidth;
-            canvas.height = videoRef.current.videoHeight;
-            canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
-            const photoUrl = canvas.toDataURL('image/jpeg');
-            setFacePhotos([...facePhotos, photoUrl]);
-        }
-    };
-
-    const handleEnrollFace = () => {
-        // TODO: Send face photos to backend
-        setProfileData({ ...profileData, faceEnabled: true });
-        setShowFaceEnrollment(false);
-        stopCamera();
-        setFacePhotos([]);
     };
 
     const handleSave = () => {
@@ -180,27 +173,48 @@ export default function ProfilePage() {
                             </p>
                         </div>
 
-                        <button
-                            onClick={() => setShowFaceEnrollment(true)}
-                            style={{
-                                width: '100%',
-                                padding: '0.875rem',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                                border: 'none',
-                                borderRadius: '0.75rem',
-                                color: 'white',
-                                fontSize: '0.875rem',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.5rem'
-                            }}
-                        >
-                            <Camera size={16} />
-                            {profileData.faceEnabled ? 'Update' : 'Enable'} Face Login
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                onClick={() => setShowFaceEnrollment(true)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.875rem',
+                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                    border: 'none',
+                                    borderRadius: '0.75rem',
+                                    color: 'white',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem'
+                                }}
+                            >
+                                <Camera size={16} />
+                                {profileData.faceEnabled ? 'Update' : 'Enable'} Face Login
+                            </button>
+                            {profileData.faceEnabled && (
+                                <button
+                                    onClick={handleDeleteFace}
+                                    style={{
+                                        width: '45px',
+                                        height: '45px',
+                                        background: 'rgba(239, 68, 68, 0.1)',
+                                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                                        borderRadius: '0.75rem',
+                                        color: '#f87171',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -514,206 +528,50 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            {/* Face Enrollment Modal */}
-            {showFaceEnrollment && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.9)',
-                    backdropFilter: 'blur(10px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000,
-                    padding: '2rem'
-                }}>
-                    <div style={{
-                        background: 'rgba(30, 41, 59, 0.95)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(139, 92, 246, 0.3)',
-                        borderRadius: '1.5rem',
-                        padding: '2rem',
-                        maxWidth: '700px',
-                        width: '100%'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <div>
-                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white', marginBottom: '0.5rem' }}>
-                                    Face Enrollment
-                                </h2>
-                                <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
-                                    Capture 5 photos from different angles
-                                </p>
-                            </div>
+            <AnimatePresence>
+                {showFaceEnrollment && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="biometric-modal-overlay"
+                        onClick={() => setShowFaceEnrollment(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="biometric-modal-content"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="biometric-header-decor"></div>
+
                             <button
-                                onClick={() => {
-                                    setShowFaceEnrollment(false);
-                                    stopCamera();
-                                    setFacePhotos([]);
-                                }}
-                                style={{
-                                    width: '32px',
-                                    height: '32px',
-                                    borderRadius: '8px',
-                                    background: 'rgba(148, 163, 184, 0.1)',
-                                    border: 'none',
-                                    color: '#94a3b8',
-                                    cursor: 'pointer'
-                                }}
+                                onClick={() => setShowFaceEnrollment(false)}
+                                className="biometric-close-btn"
                             >
                                 <X size={20} />
                             </button>
-                        </div>
 
-                        {/* Video Preview */}
-                        <div style={{
-                            position: 'relative',
-                            width: '100%',
-                            height: '400px',
-                            background: 'rgba(15, 23, 42, 0.8)',
-                            borderRadius: '1rem',
-                            marginBottom: '1.5rem',
-                            overflow: 'hidden'
-                        }}>
-                            <video
-                                ref={videoRef}
-                                autoPlay
-                                playsInline
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                            {!stream && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '50%',
-                                    transform: 'translate(-50%, -50%)',
-                                    textAlign: 'center'
-                                }}>
-                                    <Camera size={64} style={{ color: '#94a3b8', marginBottom: '1rem' }} />
-                                    <button
-                                        onClick={startCamera}
-                                        style={{
-                                            padding: '1rem 2rem',
-                                            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                                            border: 'none',
-                                            borderRadius: '0.75rem',
-                                            color: 'white',
-                                            fontSize: '1rem',
-                                            fontWeight: '700',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        Start Camera
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Progress */}
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                                <span style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
-                                    Photos captured: {facePhotos.length}/5
-                                </span>
-                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#8b5cf6' }}>
-                                    {Math.round((facePhotos.length / 5) * 100)}%
-                                </span>
-                            </div>
-                            <div style={{
-                                height: '8px',
-                                background: 'rgba(148, 163, 184, 0.2)',
-                                borderRadius: '9999px',
-                                overflow: 'hidden'
-                            }}>
-                                <div style={{
-                                    height: '100%',
-                                    width: `${(facePhotos.length / 5) * 100}%`,
-                                    background: 'linear-gradient(90deg, #8b5cf6 0%, #6366f1 100%)',
-                                    transition: 'width 0.3s'
-                                }} />
-                            </div>
-                        </div>
-
-                        {/* Captured Photos */}
-                        {facePhotos.length > 0 && (
-                            <div style={{
-                                display: 'flex',
-                                gap: '0.75rem',
-                                marginBottom: '1.5rem',
-                                flexWrap: 'wrap'
-                            }}>
-                                {facePhotos.map((photo, index) => (
-                                    <div
-                                        key={index}
-                                        style={{
-                                            width: '80px',
-                                            height: '80px',
-                                            borderRadius: '0.75rem',
-                                            overflow: 'hidden',
-                                            border: '2px solid rgba(139, 92, 246, 0.3)'
-                                        }}
-                                    >
-                                        <img src={photo} alt={`Face ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div className="biometric-body">
+                                <div className="biometric-title-section">
+                                    <div className="biometric-icon-wrapper">
+                                        <ShieldCheck size={32} />
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                    <h2 className="biometric-title">
+                                        Biometric Enrollment
+                                    </h2>
+                                    <p className="biometric-subtitle">
+                                        Neural Signature Registration System
+                                    </p>
+                                </div>
 
-                        {/* Actions */}
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            {stream && facePhotos.length < 5 && (
-                                <button
-                                    onClick={capturePhoto}
-                                    style={{
-                                        flex: 1,
-                                        padding: '1rem',
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                                        border: 'none',
-                                        borderRadius: '0.75rem',
-                                        color: 'white',
-                                        fontSize: '1rem',
-                                        fontWeight: '700',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '0.5rem'
-                                    }}
-                                >
-                                    <Camera size={20} />
-                                    Capture Photo
-                                </button>
-                            )}
-                            {facePhotos.length === 5 && (
-                                <button
-                                    onClick={handleEnrollFace}
-                                    style={{
-                                        flex: 1,
-                                        padding: '1rem',
-                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                        border: 'none',
-                                        borderRadius: '0.75rem',
-                                        color: 'white',
-                                        fontSize: '1rem',
-                                        fontWeight: '700',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '0.5rem'
-                                    }}
-                                >
-                                    <CheckCircle2 size={20} />
-                                    Complete Enrollment
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
+                                <FaceCapture onCapture={handleEnrollFace} />
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

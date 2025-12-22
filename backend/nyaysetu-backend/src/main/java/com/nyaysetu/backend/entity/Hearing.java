@@ -28,12 +28,14 @@ public class Hearing {
     @Column(name = "scheduled_date", nullable = false)
     private LocalDateTime scheduledDate;
     
+    @Builder.Default
     @Column(name = "duration_minutes")
     private Integer durationMinutes = 60;
     
     @Column(name = "video_room_id", unique = true, nullable = false)
     private String videoRoomId;
     
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private HearingStatus status = HearingStatus.SCHEDULED;

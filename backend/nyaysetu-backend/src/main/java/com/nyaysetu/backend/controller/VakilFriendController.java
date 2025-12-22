@@ -158,6 +158,7 @@ public class VakilFriendController {
         ChatSessionResponse response = ChatSessionResponse.builder()
                 .sessionId(session.getId())
                 .status(session.getStatus().name())
+                .title(session.getTitle())
                 .conversationData(session.getConversationData())
                 .createdAt(session.getCreatedAt())
                 .build();
@@ -177,6 +178,7 @@ public class VakilFriendController {
                 .map(s -> ChatSessionResponse.builder()
                         .sessionId(s.getId())
                         .status(s.getStatus().name())
+                        .title(s.getTitle())
                         .createdAt(s.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());

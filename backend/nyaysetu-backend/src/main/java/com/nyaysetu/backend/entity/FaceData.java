@@ -26,6 +26,7 @@ public class FaceData {
     @Column(nullable = false)
     private LocalDateTime enrolledAt;
     
+    @Builder.Default
     @Column(nullable = false)
     private boolean enabled = true;
     

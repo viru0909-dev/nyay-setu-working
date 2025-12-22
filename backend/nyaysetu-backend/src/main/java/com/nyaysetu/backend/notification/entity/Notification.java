@@ -24,7 +24,9 @@ public class Notification {
     @Column(length = 2000)
     private String message;
 
+    @Builder.Default
     private Boolean readFlag = false;
-
+    
+    @Builder.Default
     private Instant createdAt = Instant.now();
 }

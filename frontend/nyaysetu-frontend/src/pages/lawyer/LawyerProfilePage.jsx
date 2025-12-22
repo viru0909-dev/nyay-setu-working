@@ -1,25 +1,43 @@
 import { useState, useEffect } from 'react';
 import {
-    User,
-    Mail,
-    Phone,
-    MapPin,
-    Award,
-    Shield,
-    Settings,
-    LogOut,
-    Camera,
-    Save,
-    Lock,
-    Globe,
-    Briefcase,
-    ChevronRight
+    User, Mail, Phone, MapPin, Award, Shield, Settings,
+    LogOut, Camera, Save, Lock, Globe, Briefcase, ChevronRight,
+    Trash2, X, ShieldCheck
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
+import FaceCapture from '../../components/auth/FaceCapture';
+import { useFaceRecognition } from '../../hooks/useFaceRecognition';
 
 export default function LawyerProfilePage() {
-    const { user, logout } = useAuthStore();
+    const { user, token, logout } = useAuthStore();
     const [isEditing, setIsEditing] = useState(false);
+    const [showFaceEnrollment, setShowFaceEnrollment] = useState(false);
+    const { enrollFace, deleteFace } = useFaceRecognition();
+    const [faceEnabled, setFaceEnabled] = useState(false);
+
+    const handleEnrollFace = async (descriptor) => {
+        try {
+            await enrollFace(descriptor, token);
+            setFaceEnabled(true);
+            setShowFaceEnrollment(false);
+            alert('Face enrolled successfully!');
+        } catch (err) {
+            alert('Face enrollment failed: ' + err.message);
+        }
+    };
+
+    const handleDeleteFace = async () => {
+        if (window.confirm('Are you sure you want to disable face login? This will delete your biometric data.')) {
+            try {
+                await deleteFace(token);
+                setFaceEnabled(false);
+                alert('Face data deleted.');
+            } catch (err) {
+                alert('Failed to delete face data: ' + err.message);
+            }
+        }
+    };
 
     const glassStyle = {
         background: 'rgba(30, 41, 59, 0.7)',
@@ -171,7 +189,32 @@ export default function LawyerProfilePage() {
                     </div>
 
                     <div style={glassStyle}>
-                        <h3 style={{ color: 'white', margin: '0 0 1.5rem', fontSize: '1.25rem', fontWeight: '800' }}>Security Settings</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h3 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '800' }}>Security Settings</h3>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button
+                                    onClick={() => setShowFaceEnrollment(true)}
+                                    style={{
+                                        background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)',
+                                        color: '#a78bfa', borderRadius: '0.5rem', padding: '0.4rem 1rem', fontSize: '0.85rem',
+                                        fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                                    }}
+                                >
+                                    <Camera size={16} /> {faceEnabled ? 'Update Face' : 'Setup Face'}
+                                </button>
+                                {faceEnabled && (
+                                    <button
+                                        onClick={handleDeleteFace}
+                                        style={{
+                                            background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)',
+                                            color: '#ef4444', borderRadius: '0.5rem', padding: '0.4rem', cursor: 'pointer'
+                                        }}
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <button style={{
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -195,8 +238,10 @@ export default function LawyerProfilePage() {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                     <Shield size={18} color="#818cf8" />
                                     <div style={{ textAlign: 'left' }}>
-                                        <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>Two-Factor Authentication</div>
-                                        <div style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: '700' }}>ENABLED</div>
+                                        <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>Face Recognition Login</div>
+                                        <div style={{ color: faceEnabled ? '#10b981' : '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>
+                                            {faceEnabled ? 'ENABLED' : 'DISABLED'}
+                                        </div>
                                     </div>
                                 </div>
                                 <ChevronRight size={18} color="#64748b" />
@@ -205,6 +250,51 @@ export default function LawyerProfilePage() {
                     </div>
                 </div>
             </div>
+
+            <AnimatePresence>
+                {showFaceEnrollment && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="biometric-modal-overlay"
+                        onClick={() => setShowFaceEnrollment(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="biometric-modal-content"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="biometric-header-decor"></div>
+
+                            <button
+                                onClick={() => setShowFaceEnrollment(false)}
+                                className="biometric-close-btn"
+                            >
+                                <X size={20} />
+                            </button>
+
+                            <div className="biometric-body">
+                                <div className="biometric-title-section">
+                                    <div className="biometric-icon-wrapper">
+                                        <ShieldCheck size={32} />
+                                    </div>
+                                    <h2 className="biometric-title">
+                                        Lawyer Biometric Link
+                                    </h2>
+                                    <p className="biometric-subtitle">
+                                        Secure your legal identity with biometric authentication
+                                    </p>
+                                </div>
+
+                                <FaceCapture onCapture={handleEnrollFace} />
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

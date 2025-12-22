@@ -27,6 +27,8 @@ public class ChatSession {
     @Column(columnDefinition = "TEXT")
     private String conversationData;
 
+    private String title;
+
     // Legacy field - kept for backward compatibility
     @Column(columnDefinition = "TEXT")
     private String conversationHistory;

@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS face_data (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT UNIQUE NOT NULL REFERENCES ny_user(id),
+    face_descriptor TEXT NOT NULL,
+    enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    enabled BOOLEAN DEFAULT TRUE NOT NULL,
+    last_used TIMESTAMP
+);

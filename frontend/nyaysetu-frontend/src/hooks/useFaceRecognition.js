@@ -8,16 +8,15 @@ export const useFaceRecognition = () => {
 
     // Load face-api models on mount
     // TEMPORARILY DISABLED - Model compatibility issues
-    /*
     useEffect(() => {
         loadModels();
     }, []);
-    */
 
     const loadModels = async () => {
         try {
             setIsLoading(true);
-            const MODEL_URL = '/models';  // Models should be in public/models folder
+            // Using CDN for models since local models directory is empty
+            const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/';
 
             await Promise.all([
                 faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
@@ -35,14 +34,14 @@ export const useFaceRecognition = () => {
         }
     };
 
-    const detectFace = async (videoElement) => {
+    const detectFace = async (videoElement, minScore = 0.6) => {
         if (!modelsLoaded) {
             throw new Error('Models not loaded yet');
         }
 
         try {
             const detection = await faceapi
-                .detectSingleFace(videoElement, new faceapi.TinyFaceDetectorOptions())
+                .detectSingleFace(videoElement, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 }))
                 .withFaceLandmarks()
                 .withFaceDescriptor();
 
@@ -50,10 +49,36 @@ export const useFaceRecognition = () => {
                 return null;
             }
 
+            // Check confidence score
+            if (detection.detection.score < minScore) {
+                return null;
+            }
+
+            // Check centering (the face should be roughly in the middle 60% of the frame)
+            const box = detection.detection.box;
+            const videoWidth = videoElement.videoWidth || videoElement.width;
+            const videoHeight = videoElement.videoHeight || videoElement.height;
+
+            const faceCenterX = box.x + box.width / 2;
+            const faceCenterY = box.y + box.height / 2;
+
+            const isCenteredX = faceCenterX > videoWidth * 0.2 && faceCenterX < videoWidth * 0.8;
+            const isCenteredY = faceCenterY > videoHeight * 0.1 && faceCenterY < videoHeight * 0.9;
+
+            if (!isCenteredX || !isCenteredY) {
+                return {
+                    descriptor: Array.from(detection.descriptor),
+                    box: box,
+                    score: detection.detection.score,
+                    isCentered: false
+                };
+            }
+
             return {
                 descriptor: Array.from(detection.descriptor),
-                box: detection.detection.box,
-                score: detection.detection.score
+                box: box,
+                score: detection.detection.score,
+                isCentered: true
             };
         } catch (err) {
             console.error('Error detecting face:', err);
@@ -61,16 +86,15 @@ export const useFaceRecognition = () => {
         }
     };
 
-    const enrollFace = async (userId, descriptor, token) => {
+    const enrollFace = async (descriptor, token) => {
         try {
-            const response = await fetch('http://localhost:8080/api/auth/face/enroll', {
+            const response = await fetch('http://localhost:8080/api/face/enroll', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    userId,
                     faceDescriptor: JSON.stringify(descriptor)
                 })
             });
@@ -88,7 +112,7 @@ export const useFaceRecognition = () => {
 
     const loginWithFace = async (email, descriptor) => {
         try {
-            const response = await fetch('http://localhost:8080/api/auth/face/login', {
+            const response = await fetch('http://localhost:8080/api/face/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
