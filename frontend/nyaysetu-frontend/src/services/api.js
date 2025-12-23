@@ -3,7 +3,10 @@ import axios from 'axios';
 // Use explicit backend URL - Vite proxy can be unreliable
 // In development: http://localhost:8080
 // In production: Replace with actual backend URL via environment variable
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// Support both VITE_API_URL and VITE_API_BASE_URL
+// Also sanitize: if the user adds /api to the end, strip it because the code adds it below
+let rawBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = rawBaseUrl.endsWith('/api') ? rawBaseUrl.slice(0, -4) : rawBaseUrl;
 
 const api = axios.create({
     baseURL: API_BASE_URL,
