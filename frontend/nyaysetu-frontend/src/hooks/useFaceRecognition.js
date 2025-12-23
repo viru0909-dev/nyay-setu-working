@@ -86,24 +86,10 @@ export const useFaceRecognition = () => {
         }
     };
 
-    const enrollFace = async (descriptor, token) => {
+    const enrollFace = async (descriptor) => {
         try {
-            const response = await fetch('http://localhost:8080/api/face/enroll', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    faceDescriptor: JSON.stringify(descriptor)
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to enroll face');
-            }
-
-            return await response.json();
+            const { authAPI } = await import('../services/api');
+            return await authAPI.enrollFace(descriptor);
         } catch (err) {
             console.error('Error enrolling face:', err);
             throw err;
@@ -112,23 +98,21 @@ export const useFaceRecognition = () => {
 
     const loginWithFace = async (email, descriptor) => {
         try {
-            const response = await fetch('http://localhost:8080/api/face/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email,
-                    faceDescriptor: JSON.stringify(descriptor)
-                })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Face login failed');
-            }
-
-            return await response.json();
+            const { authAPI } = await import('../services/api');
+            const response = await authAPI.loginWithFace(email, descriptor);
+            return response.data;
         } catch (err) {
             console.error('Error in face login:', err);
+            throw err;
+        }
+    };
+
+    const deleteFace = async (userId) => {
+        try {
+            const { authAPI } = await import('../services/api');
+            return await authAPI.deleteFace(userId);
+        } catch (err) {
+            console.error('Error deleting face:', err);
             throw err;
         }
     };
@@ -139,6 +123,7 @@ export const useFaceRecognition = () => {
         error,
         detectFace,
         enrollFace,
-        loginWithFace
+        loginWithFace,
+        deleteFace
     };
 };

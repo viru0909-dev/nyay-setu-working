@@ -43,6 +43,21 @@ api.interceptors.request.use((config) => {
 export const authAPI = {
     login: (credentials) => api.post('/api/auth/login', credentials),
     register: (userData) => api.post('/api/auth/register', userData),
+    forgotPassword: (email) => api.post('/api/auth/forgot-password', { email }),
+    resetPassword: (resetData) => api.post('/api/auth/reset-password', resetData),
+    verifyResetToken: (token) => api.get('/api/auth/verify-reset-token', { params: { token } }),
+
+    // Face Biometrics
+    enrollFace: (descriptor) => api.post('/api/auth/face/enroll', {
+        faceDescriptor: JSON.stringify(descriptor)
+    }),
+    loginWithFace: (email, descriptor) => api.post('/api/auth/face/login', {
+        email,
+        faceDescriptor: JSON.stringify(descriptor)
+    }),
+    deleteFace: (userId) => api.delete('/api/auth/face/disable', { params: { userId } }),
+    getFaceStatus: (userId) => api.get('/api/auth/face/status', { params: { userId } }),
+
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
