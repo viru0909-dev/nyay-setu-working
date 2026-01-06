@@ -113,11 +113,11 @@ public class DocumentAnalysisService {
             DocumentAnalysis analysis = DocumentAnalysis.builder()
                 .document(doc)
                 .summary(getJsonString(data, "summary"))
-                .legalPoints(jsonArrayToString(data.getAsJsonArray("legalPoints")))
-                .relevantLaws(jsonArrayToString(data.getAsJsonArray("relevantLaws")))
-                .importantDates(jsonArrayToString(data.getAsJsonArray("importantDates")))
-                .partiesInvolved(jsonArrayToString(data.getAsJsonArray("partiesInvolved")))
-                .caseLawSuggestions(jsonArrayToString(data.getAsJsonArray("caseLawSuggestions")))
+                .legalPoints(getJsonArrayOrConvert(data, "legalPoints"))
+                .relevantLaws(getJsonArrayOrConvert(data, "relevantLaws"))
+                .importantDates(getJsonArrayOrConvert(data, "importantDates"))
+                .partiesInvolved(getJsonArrayOrConvert(data, "partiesInvolved"))
+                .caseLawSuggestions(getJsonArrayOrConvert(data, "caseLawSuggestions"))
                 .suggestedCategory(getJsonString(data, "suggestedCategory"))
                 .riskAssessment(getJsonString(data, "riskAssessment"))
                 .fullAnalysisJson(cleanJson)
@@ -171,7 +171,32 @@ public class DocumentAnalysisService {
     }
     
     /**
-     * Helper: Convert JSON array to formatted string
+     * Helper: Get JSON array from object, or convert string to array if needed
+     * This prevents ClassCastException when AI returns a single string instead of a list
+     */
+    private String getJsonArrayOrConvert(JsonObject obj, String key) {
+        if (!obj.has(key) || obj.get(key).isJsonNull()) {
+            return "[]";
+        }
+        
+        try {
+            if (obj.get(key).isJsonArray()) {
+                return gson.toJson(obj.getAsJsonArray(key));
+            } else if (obj.get(key).isJsonPrimitive()) {
+                // Wrap single string into an array
+                JsonArray array = new JsonArray();
+                array.add(obj.get(key).getAsString());
+                return gson.toJson(array);
+            }
+        } catch (Exception e) {
+            log.warn("Error parsing JSON field {}: {}", key, e.getMessage());
+        }
+        
+        return "[]";
+    }
+
+    /**
+     * Helper: Convert JSON array to formatted string (Legacy)
      */
     private String jsonArrayToString(JsonArray array) {
         if (array == null || array.size() == 0) {

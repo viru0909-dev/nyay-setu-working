@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
+import { brainAPI } from '../services/api';
 
 export default function Constitution() {
     const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Constitution() {
     const [aiQuery, setAiQuery] = useState('');
     const [aiResponse, setAiResponse] = useState('');
     const [isAiLoading, setIsAiLoading] = useState(false);
+    const [sessionId, setSessionId] = useState(null);
 
     // Enhanced Constitution Data with more articles
     const constitutionData = {
@@ -236,14 +238,9 @@ export default function Constitution() {
 
         setIsAiLoading(true);
         try {
-            const response = await fetch('http://localhost:8080/api/ai/chat/ollama', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: aiQuery })
-            });
-
-            const data = await response.json();
-            setAiResponse(data.response);
+            const response = await brainAPI.chat(aiQuery, sessionId);
+            setAiResponse(response.data.message);
+            if (response.data.sessionId) setSessionId(response.data.sessionId);
         } catch (error) {
             console.error('AI Chat Error:', error);
             setAiResponse(language === 'en'

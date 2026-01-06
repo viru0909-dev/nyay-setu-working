@@ -1,7 +1,8 @@
 /* NyaySetu Design System - Global Styles */
 
 /* Import Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+/* Fonts moved to index.html for better performance and to fix CORS cache issues */
+
 
 /* CSS Variables - Design Tokens */
 :root {

@@ -85,14 +85,15 @@ public class VakilFriendService {
         - Maintain a tone that is authoritative yet accessible.
         
         FINAL STEP:
-        When all 7 items are collected, provide a bold summary:
+        When all 7 items are collected, you MUST provide a standardized summary between three hashes (###) like this:
         
-        **CASE SUMMARY**
+        ### CASE SUMMARY START ###
         - **Case Type**: [TYPE]
         - **Petitioner**: [NAME]
         - **Respondent**: [NAME]
         - **Issue**: [DESCRIPTION]
         - **Urgency**: [LEVEL]
+        ### CASE SUMMARY END ###
         
         Then say: "Your case is ready to file! Click the 'Complete Filing' button to submit."
         """;
@@ -421,56 +422,89 @@ public class VakilFriendService {
             }
 
             String text = userText.toString().toLowerCase();
-            String aiSummary = aiText.toString();
+            String fullAiContent = aiText.toString();
 
-            // Extract case type from keywords
-            if (text.contains("criminal") || text.contains("attack") || text.contains("violence") || 
-                text.contains("murder") || text.contains("theft") || text.contains("assault")) {
-                caseData.put("caseType", "CRIMINAL");
-            } else if (text.contains("family") || text.contains("divorce") || text.contains("custody") || 
-                       text.contains("marriage") || text.contains("alimony")) {
-                caseData.put("caseType", "FAMILY");
-            } else if (text.contains("property") || text.contains("land") || text.contains("house") || 
-                       text.contains("rent") || text.contains("tenant")) {
-                caseData.put("caseType", "PROPERTY");
-            } else if (text.contains("business") || text.contains("commercial") || text.contains("company") || 
-                       text.contains("contract") || text.contains("fraud")) {
-                caseData.put("caseType", "COMMERCIAL");
+            // 1. Primary Strategy: Look for the standardized summary block (most recent one)
+            String summaryBlock = "";
+            int startIdx = fullAiContent.lastIndexOf("### CASE SUMMARY START ###");
+            int endIdx = fullAiContent.lastIndexOf("### CASE SUMMARY END ###");
+            
+            if (startIdx >= 0 && endIdx > startIdx) {
+                summaryBlock = fullAiContent.substring(startIdx, endIdx);
+                log.info("Found standardized summary block for extraction");
             } else {
-                caseData.put("caseType", "CIVIL");
-            }
-
-            // Extract urgency
-            if (text.contains("critical") || text.contains("emergency") || text.contains("immediate")) {
-                caseData.put("urgency", "CRITICAL");
-            } else if (text.contains("urgent") || text.contains("asap") || text.contains("soon")) {
-                caseData.put("urgency", "URGENT");
-            } else {
-                caseData.put("urgency", "NORMAL");
-            }
-
-            // Try to extract names from AI summary (if present)
-            if (aiSummary.contains("Petitioner:")) {
-                String petitioner = extractAfterLabel(aiSummary, "Petitioner:");
-                if (!petitioner.isEmpty()) {
-                    // Truncate petitioner to 200 chars
-                    if (petitioner.length() > 200) petitioner = petitioner.substring(0, 200);
-                    caseData.put("petitioner", petitioner);
-                }
-            }
-            if (aiSummary.contains("Respondent:")) {
-                String respondent = extractAfterLabel(aiSummary, "Respondent:");
-                if (!respondent.isEmpty()) {
-                    // Truncate respondent to 200 chars
-                    if (respondent.length() > 200) respondent = respondent.substring(0, 200);
-                    caseData.put("respondent", respondent);
+                // Fallback: search for earlier version or any bold CASE SUMMARY
+                int fallbackIdx = fullAiContent.lastIndexOf("**CASE SUMMARY**");
+                if (fallbackIdx >= 0) {
+                    summaryBlock = fullAiContent.substring(fallbackIdx, Math.min(fallbackIdx + 1000, fullAiContent.length()));
+                    log.info("Found fallback summary block for extraction");
                 }
             }
 
-            // Generate title from conversation using AI
-            String title = generateCaseTitle(aiSummary, firstUserMessage);
-            if (title.length() > 200) title = title.substring(0, 200);
-            caseData.put("title", title);
+            // 2. Extract specific fields from the summary block (or full content if block missing)
+            String sourceForExtraction = summaryBlock.isEmpty() ? fullAiContent : summaryBlock;
+            
+            String petitioner = extractAfterLabel(sourceForExtraction, "Petitioner:", "पेटिशनर:");
+            if (!petitioner.isEmpty() && !petitioner.equalsIgnoreCase("[NAME]")) {
+                caseData.put("petitioner", petitioner);
+            }
+            
+            String respondent = extractAfterLabel(sourceForExtraction, "Respondent:", "रेस्पोंडेंट:");
+            if (!respondent.isEmpty() && !respondent.equalsIgnoreCase("[NAME]")) {
+                caseData.put("respondent", respondent);
+            }
+            
+            String extractedType = extractAfterLabel(sourceForExtraction, "Case Type:", "मामले का प्रकार:");
+            if (!extractedType.isEmpty() && !extractedType.equalsIgnoreCase("[TYPE]")) {
+                String typeLower = extractedType.toLowerCase();
+                if (typeLower.contains("criminal") || typeLower.contains("क्रिमिनल")) caseData.put("caseType", "CRIMINAL");
+                else if (typeLower.contains("family") || typeLower.contains("फैमिली")) caseData.put("caseType", "FAMILY");
+                else if (typeLower.contains("property") || typeLower.contains("प्रॉपर्टी")) caseData.put("caseType", "PROPERTY");
+                else if (typeLower.contains("commercial") || typeLower.contains("कमर्शियल")) caseData.put("caseType", "COMMERCIAL");
+                else caseData.put("caseType", "CIVIL");
+            }
+
+            String extractedUrgency = extractAfterLabel(sourceForExtraction, "Urgency:", "अर्जेंसी:", "महत्व:");
+            if (!extractedUrgency.isEmpty() && !extractedUrgency.equalsIgnoreCase("[LEVEL]")) {
+                String urgLower = extractedUrgency.toLowerCase();
+                if (urgLower.contains("critical") || urgLower.contains("क्रिटिकल")) caseData.put("urgency", "CRITICAL");
+                else if (urgLower.contains("urgent") || urgLower.contains("अर्जेंट")) caseData.put("urgency", "URGENT");
+                else caseData.put("urgency", "NORMAL");
+            }
+
+            // 3. Fallback extraction from keywords if summary extraction failed
+            if (!caseData.containsKey("caseType")) {
+                if (text.contains("criminal") || text.contains("attack") || text.contains("violence") || 
+                    text.contains("murder") || text.contains("theft") || text.contains("assault")) {
+                    caseData.put("caseType", "CRIMINAL");
+                } else if (text.contains("family") || text.contains("divorce") || text.contains("custody") || 
+                           text.contains("marriage") || text.contains("alimony")) {
+                    caseData.put("caseType", "FAMILY");
+                } else if (text.contains("property") || text.contains("land") || text.contains("house") || 
+                           text.contains("rent") || text.contains("tenant")) {
+                    caseData.put("caseType", "PROPERTY");
+                } else if (text.contains("business") || text.contains("commercial") || text.contains("company") || 
+                           text.contains("contract") || text.contains("fraud")) {
+                    caseData.put("caseType", "COMMERCIAL");
+                } else {
+                    caseData.put("caseType", "CIVIL");
+                }
+            }
+
+            if (!caseData.containsKey("urgency")) {
+                if (text.contains("critical") || text.contains("emergency") || text.contains("immediate")) {
+                    caseData.put("urgency", "CRITICAL");
+                } else if (text.contains("urgent") || text.contains("asap") || text.contains("soon")) {
+                    caseData.put("urgency", "URGENT");
+                } else {
+                    caseData.put("urgency", "NORMAL");
+                }
+            }
+
+            // 4. Generate professional title using specialized AI call
+            String title = generateCaseTitle(sourceForExtraction.isEmpty() ? fullAiContent : sourceForExtraction, firstUserMessage);
+            if (title != null && title.length() > 200) title = title.substring(0, 200);
+            caseData.put("title", title != null ? title : "Case filed via Vakil-Friend");
 
             // Use first user message as description - TRUNCATE to 1000 chars
             String description = firstUserMessage;
@@ -479,27 +513,61 @@ public class VakilFriendService {
             }
             caseData.put("description", description);
 
-            // Set defaults for missing data - ensure they're also truncated
+            // Set mandatory defaults
             caseData.putIfAbsent("petitioner", "Petitioner");
             caseData.putIfAbsent("respondent", "Respondent");
+            caseData.putIfAbsent("caseType", "CIVIL");
+            caseData.putIfAbsent("urgency", "NORMAL");
+
+            // Safety truncation
+            caseData.entrySet().forEach(entry -> {
+                String val = entry.getValue();
+                if (val != null && val.length() > 2000 && !entry.getKey().equals("description")) {
+                    entry.setValue(val.substring(0, 2000));
+                }
+            });
 
         } catch (Exception e) {
-            log.error("Error extracting case data", e);
+            log.error("Serious error extracting case data", e);
         }
 
         return caseData;
     }
     
     /**
-     * Helper to extract text after a label
+     * Helper to extract text after a label (supports multiple label versions)
      */
-    private String extractAfterLabel(String text, String label) {
-        int idx = text.indexOf(label);
-        if (idx >= 0) {
-            String after = text.substring(idx + label.length());
-            int endIdx = after.indexOf("\n");
-            if (endIdx < 0) endIdx = Math.min(50, after.length());
-            return after.substring(0, endIdx).trim().replace("[", "").replace("]", "");
+    private String extractAfterLabel(String text, String... labels) {
+        for (String label : labels) {
+            // Flexible matching for labels with potential markdown bolding and colon variations
+            // e.g., "**Petitioner**:", "**Petitioner:**", "Petitioner:"
+            String cleanLabel = label.replace(":", "");
+            String[] possiblePatterns = {
+                "**" + cleanLabel + "**:",
+                "**" + cleanLabel + ":**",
+                cleanLabel + ":",
+                "**" + cleanLabel + "**",
+                cleanLabel
+            };
+
+            for (String pattern : possiblePatterns) {
+                int idx = text.indexOf(pattern);
+                if (idx >= 0) {
+                    String after = text.substring(idx + pattern.length());
+                    
+                    // If the pattern didn't include a colon, check if the next char is a colon
+                    if (!pattern.contains(":") && after.trim().startsWith(":")) {
+                        after = after.trim().substring(1);
+                    }
+                    
+                    int endIdx = after.indexOf("\n");
+                    if (endIdx < 0) endIdx = Math.min(200, after.length());
+                    
+                    String extracted = after.substring(0, endIdx).trim();
+                    // Clean up markdown markers
+                    return extracted.replaceAll("\\*\\*", "").replaceAll("\\*", "").replace("[", "").replace("]", "").trim();
+                }
+            }
         }
         return "";
     }
@@ -575,22 +643,53 @@ public class VakilFriendService {
     /**
      * Generate a professional case title using AI
      */
-    private String generateCaseTitle(String aiSummary, String firstMessage) {
+    private String generateCaseTitle(String summaryText, String firstMessage) {
         try {
+            // Clean the summary text to remove tags before sending to AI to avoid confusion
+            String cleanedSummary = summaryText
+                    .replace("### CASE SUMMARY START ###", "")
+                    .replace("### CASE SUMMARY END ###", "")
+                    .trim();
+
             List<Map<String, String>> prompt = new ArrayList<>();
             Map<String, String> systemMsg = new HashMap<>();
             systemMsg.put("role", "system");
-            systemMsg.put("content", "Generate a professional, formal legal case title (e.g., 'Complaint against [Respondent] for [Issue]') based on the provided summary. Return ONLY the title text.");
+            systemMsg.put("content", "You are a professional legal registrar. Create a formal Indian court case title (e.g., '[Petitioner] vs. [Respondent] for [Key Issue]'). " +
+                    "IMPORTANT: Return ONLY the plain text of the title. DO NOT include headers, hashtags, markdown bolding, or the word 'Title:'. " +
+                    "Keep it under 12 words.");
             prompt.add(systemMsg);
             
             Map<String, String> userMsg = new HashMap<>();
             userMsg.put("role", "user");
-            userMsg.put("content", "AI Summary: " + aiSummary + "\nUser Initial Input: " + firstMessage);
+            userMsg.put("content", "Relevant Info: " + cleanedSummary + "\nUser Input: " + firstMessage);
             prompt.add(userMsg);
             
             String title = callGroqAPI(prompt);
-            return title != null ? title.trim() : "Case filed via Vakil-Friend";
+            if (title == null || title.trim().isEmpty()) {
+                return "Case filed via Vakil-Friend";
+            }
+
+            // Post-processing cleanup
+            String cleanedTitle = title.trim()
+                    .replaceAll("(?i)^Title:\\s*", "")
+                    .replace("###", "")
+                    .replace("**", "")
+                    .replace("\"", "")
+                    .trim();
+
+            // Final safety check: if the AI still returned the full summary block (echoing)
+            if (cleanedTitle.contains("Case Type:") || cleanedTitle.contains("Petitioner:")) {
+                log.warn("AI echoed summary in title. Fallback to basic extraction.");
+                String p = extractAfterLabel(cleanedTitle, "Petitioner:", "पेटिशनर:");
+                String r = extractAfterLabel(cleanedTitle, "Respondent:", "रेस्पोंडेंट:");
+                if (p.isEmpty()) p = "Petitioner";
+                if (r.isEmpty()) r = "Respondent";
+                return p + " vs. " + r;
+            }
+
+            return cleanedTitle;
         } catch (Exception e) {
+            log.error("Title generation failed: {}", e.getMessage());
             return "Case: " + (firstMessage.length() > 50 ? firstMessage.substring(0, 50) + "..." : firstMessage);
         }
     }

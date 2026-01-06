@@ -2,6 +2,8 @@ import { X, Brain, MessageCircle, Send, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useState, useRef, useEffect } from 'react';
+import { brainAPI } from '../../services/api';
+import ReactMarkdown from 'react-markdown';
 
 export default function AIAssistantModal({ isOpen, onClose }) {
     const { language } = useLanguage();
@@ -9,6 +11,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [sessionId, setSessionId] = useState(null);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -24,6 +27,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
             setChatStarted(false);
             setMessages([]);
             setInputMessage('');
+            setSessionId(null);
         }
     }, [isOpen]);
 
@@ -36,15 +40,10 @@ export default function AIAssistantModal({ isOpen, onClose }) {
         setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:8080/api/ai/chat/ollama', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text })
-            });
-
-            const data = await response.json();
-            const aiMessage = { role: 'ai', content: data.response };
+            const response = await brainAPI.chat(text, sessionId);
+            const aiMessage = { role: 'ai', content: response.data.message };
             setMessages(prev => [...prev, aiMessage]);
+            if (response.data.sessionId) setSessionId(response.data.sessionId);
         } catch (error) {
             console.error('AI Chat Error:', error);
             const errorMessage = {
@@ -338,15 +337,11 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                                 maxWidth: '85%'
                                             }}
                                         >
-                                            <p style={{
-                                                color: 'white',
-                                                fontSize: '0.95rem',
-                                                lineHeight: '1.6',
-                                                margin: 0,
-                                                whiteSpace: 'pre-wrap'
-                                            }}>
-                                                {msg.content}
-                                            </p>
+                                            <div className="markdown-content">
+                                                <ReactMarkdown>
+                                                    {msg.content}
+                                                </ReactMarkdown>
+                                            </div>
                                         </motion.div>
                                     ))}
                                     {isLoading && (
@@ -420,6 +415,42 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                             @keyframes spin {
                                 from { transform: rotate(0deg); }
                                 to { transform: rotate(360deg); }
+                            }
+                            
+                            .markdown-content h1, 
+                            .markdown-content h2, 
+                            .markdown-content h3 {
+                                font-size: 1.1rem !important;
+                                font-weight: 700 !important;
+                                margin-top: 0.75rem !important;
+                                margin-bottom: 0.5rem !important;
+                                color: #f8fafc !important;
+                                line-height: 1.4 !important;
+                            }
+                            .markdown-content p {
+                                margin-bottom: 0.75rem !important;
+                                line-height: 1.6 !important;
+                                color: inherit !important;
+                            }
+                            .markdown-content ul, 
+                            .markdown-content ol {
+                                margin-bottom: 0.75rem !important;
+                                padding-left: 1.25rem !important;
+                                color: inherit !important;
+                            }
+                            .markdown-content li {
+                                margin-bottom: 0.35rem !important;
+                            }
+                            .markdown-content strong {
+                                color: #c4b5fd !important;
+                                font-weight: 700 !important;
+                            }
+                            .markdown-content code {
+                                background: rgba(0,0,0,0.3) !important;
+                                padding: 0.1rem 0.3rem !important;
+                                border-radius: 0.25rem !important;
+                                font-family: monospace !important;
+                                font-size: 0.85rem !important;
                             }
                         `}</style>
                     </motion.div>

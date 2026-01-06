@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { caseAPI, lawyerAPI, caseAssignmentAPI } from '../../services/api';
 import {
     Search,
@@ -26,6 +27,7 @@ export default function LawyerCasesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('ALL');
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'proposals'
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchCases();
@@ -314,20 +316,24 @@ export default function LawyerCasesPage() {
                                         </div>
 
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
-                                            <button style={{
-                                                width: '100%',
-                                                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                                                color: 'white', border: 'none', borderRadius: '0.75rem',
-                                                padding: '0.6rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer'
-                                            }}>
+                                            <button
+                                                onClick={() => navigate(`/lawyer/case/${caseItem.id}`)}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                                                    color: 'white', border: 'none', borderRadius: '0.75rem',
+                                                    padding: '0.6rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer'
+                                                }}>
                                                 Manage Case
                                             </button>
-                                            <button style={{
-                                                width: '100%',
-                                                background: 'rgba(255, 255, 255, 0.05)',
-                                                color: '#94a3b8', border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                borderRadius: '0.75rem', padding: '0.6rem', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer'
-                                            }}>
+                                            <button
+                                                onClick={() => navigate('/lawyer/evidence', { state: { caseId: caseItem.id } })}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'rgba(255, 255, 255, 0.05)',
+                                                    color: '#94a3b8', border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    borderRadius: '0.75rem', padding: '0.6rem', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer'
+                                                }}>
                                                 View Evidence
                                             </button>
                                         </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { judgeAPI } from '../../services/api';
 import {
     Brain,
@@ -269,19 +270,21 @@ export default function AICaseSummaryPage() {
                                 </div>
                             </div>
 
-                            <div style={{
-                                color: '#cbd5e1',
-                                lineHeight: '1.8',
-                                fontSize: '0.95rem',
-                                whiteSpace: 'pre-wrap',
-                                padding: '1.5rem',
-                                background: 'rgba(15, 23, 42, 0.3)',
-                                borderRadius: '1rem',
-                                border: '1px solid rgba(255, 255, 255, 0.05)',
-                                maxHeight: '500px',
-                                overflowY: 'auto'
-                            }}>
-                                {summary.summary}
+                            <div
+                                className="markdown-content"
+                                style={{
+                                    color: '#cbd5e1',
+                                    lineHeight: '1.8',
+                                    fontSize: '0.95rem',
+                                    padding: '1.5rem',
+                                    background: 'rgba(15, 23, 42, 0.3)',
+                                    borderRadius: '1rem',
+                                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                                    maxHeight: '500px',
+                                    overflowY: 'auto'
+                                }}
+                            >
+                                <ReactMarkdown>{summary.summary}</ReactMarkdown>
                             </div>
 
                             <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -307,6 +310,42 @@ export default function AICaseSummaryPage() {
                 @keyframes progress {
                     0% { transform: translateX(-100%); }
                     100% { transform: translateX(200%); }
+                }
+
+                /* Markdown Content Styling for Judge Dashboard */
+                .markdown-content h1, 
+                .markdown-content h2, 
+                .markdown-content h3 {
+                    font-size: 1.15rem !important;
+                    font-weight: 700 !important;
+                    margin-top: 1.25rem !important;
+                    margin-bottom: 0.75rem !important;
+                    color: #f1f5f9 !important;
+                    border-bottom: 1px solid rgba(236, 72, 153, 0.2);
+                    padding-bottom: 0.25rem;
+                }
+                .markdown-content p {
+                    margin-bottom: 1rem !important;
+                }
+                .markdown-content ul, 
+                .markdown-content ol {
+                    margin-bottom: 1rem !important;
+                    padding-left: 1.5rem !important;
+                }
+                .markdown-content li {
+                    margin-bottom: 0.5rem !important;
+                }
+                .markdown-content strong {
+                    color: #ec4899 !important;
+                    font-weight: 700 !important;
+                }
+                .markdown-content code {
+                    background: rgba(0,0,0,0.4) !important;
+                    padding: 0.15rem 0.4rem !important;
+                    border-radius: 0.35rem !important;
+                    font-family: inherit !important;
+                    font-size: 0.9rem !important;
+                    color: #ec4899 !important;
                 }
             `}</style>
         </div>

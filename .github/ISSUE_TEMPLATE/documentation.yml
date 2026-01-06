@@ -1,0 +1,26 @@
+name: Documentation Update
+description: Suggest improvements or report errors in documentation.
+title: "[DOCS]: "
+labels: ["documentation"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What part of the documentation needs improvement?
+      placeholder: The deployment guide is missing...
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: Link to the relevant documentation page (if applicable).
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Changes
+      description: What specifically should be changed or added?
+      placeholder: Add a section about...
+    validations:
+      required: true

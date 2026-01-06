@@ -1,0 +1,42 @@
+name: Security Issue
+description: Report a security vulnerability or concern.
+title: "[SECURITY]: "
+labels: ["security", "high-priority"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** Please do not reveal critical vulnerabilities in public issues if they can be exploited immediately. Consider emailing the maintainer first if available.
+  - type: textarea
+    id: vulnerability
+    attributes:
+      label: Vulnerability Description
+      description: Describe the nature of the security vulnerability.
+      placeholder: Found a potential SQL injection in...
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: What is the potential impact of this vulnerability?
+      placeholder: This allows attackers to...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+      description: How can we reproduce this issue (safely)?
+      placeholder: Send a payload to...
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity Level
+      options:
+        - Critical
+        - High
+        - Moderate
+        - Low

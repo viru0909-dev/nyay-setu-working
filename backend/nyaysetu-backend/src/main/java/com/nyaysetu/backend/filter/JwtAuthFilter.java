@@ -42,7 +42,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // Check if authHeader is not null before calling startsWith
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
-            username = jwtService.extractUsername(jwt);
+            try {
+                username = jwtService.extractUsername(jwt);
+            } catch (Exception e) {
+                // If token is expired or invalid, just proceed without setting authentication
+                logger.warn("JWT validation failed: " + e.getMessage());
+            }
         } else {
             filterChain.doFilter(request, response);
             return;

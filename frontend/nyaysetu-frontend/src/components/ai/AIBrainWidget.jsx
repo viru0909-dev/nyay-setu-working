@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, User, ChevronDown, Minimize2, Maximize2, Sparkles, Loader2 } from 'lucide-react';
 import { brainAPI } from '../../services/api';
+import ReactMarkdown from 'react-markdown';
 
 export default function AIBrainWidget({ user }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -152,10 +153,11 @@ export default function AIBrainWidget({ user }) {
                                         color: msg.role === 'user' ? '#c7d2fe' : '#94a3b8',
                                         border: msg.role === 'user' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
                                         borderBottomRightRadius: msg.role === 'user' ? '0.2rem' : '1rem',
-                                        borderBottomLeftRadius: msg.role === 'assistant' ? '0.2rem' : '1rem',
-                                        whiteSpace: 'pre-wrap'
-                                    }}>
-                                        {msg.content}
+                                        borderBottomLeftRadius: msg.role === 'assistant' ? '0.2rem' : '1rem'
+                                    }} className="markdown-content">
+                                        <ReactMarkdown>
+                                            {msg.content}
+                                        </ReactMarkdown>
                                     </div>
                                 </div>
                             ))}
@@ -228,6 +230,28 @@ export default function AIBrainWidget({ user }) {
                     ::-webkit-scrollbar { width: 4px; }
                     ::-webkit-scrollbar-track { background: transparent; }
                     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); borderRadius: 10px; }
+                    
+                    /* Markdown Styling */
+                    .markdown-content h1, 
+                    .markdown-content h2, 
+                    .markdown-content h3 {
+                        font-size: 1.05rem !important;
+                        font-weight: 700 !important;
+                        margin-top: 0.5rem !important;
+                        margin-bottom: 0.4rem !important;
+                        color: #f1f5f slate !important;
+                    }
+                    .markdown-content p {
+                        margin-bottom: 0.6rem !important;
+                    }
+                    .markdown-content ul, 
+                    .markdown-content ol {
+                        margin-bottom: 0.6rem !important;
+                        padding-left: 1.2rem !important;
+                    }
+                    .markdown-content li {
+                        margin-bottom: 0.25rem !important;
+                    }
                 `}</style>
             </div>
 

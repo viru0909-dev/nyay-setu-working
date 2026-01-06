@@ -228,7 +228,10 @@ NYAY-SETU SECURE SIGNED`;
                             }}
                             style={{
                                 width: '100%', background: 'transparent', border: 'none', color: 'white',
-                                fontSize: '1.125rem', fontWeight: '600', outline: 'none', cursor: 'pointer'
+                                fontSize: '1.125rem', fontWeight: '600', outline: 'none', cursor: 'pointer',
+                                WebkitAppearance: 'none',
+                                MozAppearance: 'none',
+                                appearance: 'none'
                             }}
                         >
                             <option value="" style={{ background: '#0f172a' }}>-- Select a case to view orders --</option>
@@ -407,7 +410,7 @@ NYAY-SETU SECURE SIGNED`;
                                     onBlur={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'}
                                 />
                             </div>
-                            <div>
+                            <div style={{ position: 'relative' }}>
                                 <label style={{ display: 'block', color: '#94a3b8', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase' }}>
                                     Classification
                                 </label>
@@ -417,7 +420,10 @@ NYAY-SETU SECURE SIGNED`;
                                     style={{
                                         width: '100%', padding: '0.75rem 1rem', background: 'rgba(15,23,42,0.6)',
                                         border: '1px solid rgba(99,102,241,0.2)', borderRadius: '0.75rem', color: 'white',
-                                        outline: 'none', cursor: 'pointer'
+                                        outline: 'none', cursor: 'pointer',
+                                        WebkitAppearance: 'none',
+                                        MozAppearance: 'none',
+                                        appearance: 'none'
                                     }}
                                 >
                                     <option value="INTERIM">Interim Order</option>
@@ -426,6 +432,7 @@ NYAY-SETU SECURE SIGNED`;
                                     <option value="DIRECTION">Direction</option>
                                     <option value="JUDGMENT">Judgment</option>
                                 </select>
+                                <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '1rem', bottom: '1rem', pointerEvents: 'none' }} />
                             </div>
                         </div>
 

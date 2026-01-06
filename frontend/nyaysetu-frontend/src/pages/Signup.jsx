@@ -78,7 +78,7 @@ export default function Signup() {
     const handleFaceCapture = async (descriptor) => {
         setLoading(true);
         try {
-            await enrollFace(descriptor);
+            await enrollFace(descriptor, registeredToken);
             completeSignup();
         } catch (err) {
             setError('Face registration failed. You can skip this for now or try again.');

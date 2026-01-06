@@ -836,6 +836,40 @@ export default function VakilFriendChat() {
                     0%, 100% { opacity: 0.4; }
                     50% { opacity: 1; }
                 }
+                
+                /* Markdown Styling Fixes */
+                .markdown-content h1, 
+                .markdown-content h2, 
+                .markdown-content h3 {
+                    font-size: 1.1rem !important;
+                    font-weight: 700 !important;
+                    margin-top: 0.75rem !important;
+                    margin-bottom: 0.5rem !important;
+                    color: #f8fafc !important;
+                }
+                .markdown-content p {
+                    margin-bottom: 0.75rem !important;
+                    line-height: 1.6 !important;
+                }
+                .markdown-content ul, 
+                .markdown-content ol {
+                    margin-bottom: 0.75rem !important;
+                    padding-left: 1.25rem !important;
+                }
+                .markdown-content li {
+                    margin-bottom: 0.35rem !important;
+                }
+                .markdown-content strong {
+                    color: #c4b5fd !important;
+                    font-weight: 700 !important;
+                }
+                .markdown-content code {
+                    background: rgba(0,0,0,0.3) !important;
+                    padding: 0.1rem 0.3rem !important;
+                    border-radius: 0.25rem !important;
+                    font-family: monospace !important;
+                    font-size: 0.9rem !important;
+                }
             `}</style>
         </div>
     );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     FileText,
     Sparkles,
@@ -10,13 +10,45 @@ import {
     Search,
     Clock,
     CheckCircle2,
-    Loader2
+    Loader2,
+    Briefcase
 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { caseAPI, lawyerAPI } from '../../services/api';
 
 export default function CasePreparationPage() {
+    const location = useLocation();
+    const [selectedCaseId, setSelectedCaseId] = useState(location.state?.caseId || null);
+    const [caseDetails, setCaseDetails] = useState(null);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [draftContent, setDraftContent] = useState('');
     const [isDrafting, setIsDrafting] = useState(false);
+    const [cases, setCases] = useState([]);
+
+    useEffect(() => {
+        if (selectedCaseId) {
+            fetchCaseDetails(selectedCaseId);
+        }
+        fetchCases();
+    }, [selectedCaseId]);
+
+    const fetchCases = async () => {
+        try {
+            const response = await lawyerAPI.getCases();
+            setCases(response.data || []);
+        } catch (error) {
+            console.error('Error fetching cases:', error);
+        }
+    };
+
+    const fetchCaseDetails = async (id) => {
+        try {
+            const response = await caseAPI.getById(id);
+            setCaseDetails(response.data);
+        } catch (error) {
+            console.error('Error fetching case details:', error);
+        }
+    };
 
     const templates = [
         { id: 1, name: 'Civil Writ Petition', category: 'High Court', complexity: 'High' },
@@ -35,12 +67,21 @@ export default function CasePreparationPage() {
         boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
     };
 
-    const handleAutoDraft = () => {
+    const handleAutoDraft = async () => {
+        if (!selectedTemplate || !selectedCaseId) {
+            alert('Please select BOTH a case and a template first.');
+            return;
+        }
         setIsDrafting(true);
-        setTimeout(() => {
-            setDraftContent(`IN THE COURT OF THE DISTRICT JUDGE, NEW DELHI\n\nIN THE MATTER OF:\nPetitioner\nVERSUS\nRespondent\n\nPETITION UNDER SECTION...`);
+        try {
+            const response = await lawyerAPI.generateDraft(selectedCaseId, selectedTemplate.name);
+            setDraftContent(response.data.draft);
+        } catch (error) {
+            console.error('Error generating draft:', error);
+            alert('AI Drafting failed. Please try again.');
+        } finally {
             setIsDrafting(false);
-        }, 2000);
+        }
     };
 
     return (
@@ -118,6 +159,37 @@ export default function CasePreparationPage() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+
+                    <div style={{ ...glassStyle, padding: '1.25rem' }}>
+                        <h3 style={{ color: 'white', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Briefcase size={18} color="#818cf8" /> Link to Case
+                        </h3>
+                        <select
+                            value={selectedCaseId || ''}
+                            onChange={(e) => setSelectedCaseId(e.target.value)}
+                            style={{
+                                width: '100%',
+                                background: 'rgba(15, 23, 42, 0.4)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '0.6rem',
+                                padding: '0.75rem',
+                                color: 'white',
+                                fontSize: '0.85rem',
+                                outline: 'none'
+                            }}
+                        >
+                            <option value="">Select an Active Case...</option>
+                            {cases.map(c => (
+                                <option key={c.id} value={c.id}>{c.title}</option>
+                            ))}
+                        </select>
+                        {caseDetails && (
+                            <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '800' }}>PETITIONER</div>
+                                <div style={{ fontSize: '0.85rem', color: 'white' }}>{caseDetails.petitioner}</div>
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ ...glassStyle, padding: '1.25rem', background: 'rgba(99, 102, 241, 0.1)' }}>

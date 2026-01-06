@@ -43,7 +43,7 @@ export default function ProfilePage() {
 
     const handleEnrollFace = async (descriptor) => {
         try {
-            await enrollFace(descriptor);
+            await enrollFace(descriptor, token);
             setProfileData({ ...profileData, faceEnabled: true });
             setShowFaceEnrollment(false);
             alert('Face enrolled successfully!');
@@ -55,7 +55,7 @@ export default function ProfilePage() {
     const handleDeleteFace = async () => {
         if (window.confirm('Are you sure you want to disable face login? This will delete your biometric data.')) {
             try {
-                await deleteFace(user.id);
+                await deleteFace(token);
                 setProfileData({ ...profileData, faceEnabled: false });
                 alert('Face data deleted.');
             } catch (err) {
