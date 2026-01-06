@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { MessageCircle, X, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { brainAPI } from '../../services/api';
+import ReactMarkdown from 'react-markdown';
 
 export default function AIChatbot() {
     const [isOpen, setIsOpen] = useState(false);
@@ -9,6 +11,7 @@ export default function AIChatbot() {
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [sessionId, setSessionId] = useState(null);
 
     const handleSend = async () => {
         if (!input.trim()) return;
@@ -19,23 +22,13 @@ export default function AIChatbot() {
         setIsTyping(true);
 
         try {
-            // Call AI backend endpoint
-            const response = await fetch('http://localhost:8080/api/ai/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: input
-                })
-            });
-
-            if (!response.ok) throw new Error('Failed to get response');
-
-            const data = await response.json();
+            const response = await brainAPI.chat(input, sessionId);
             const aiResponse = {
                 role: 'assistant',
-                content: data.response || 'I apologize, but I encountered an error. Please try again.'
+                content: response.data.message || 'I apologize, but I encountered an error. Please try again.'
             };
             setMessages(prev => [...prev, aiResponse]);
+            if (response.data.sessionId) setSessionId(response.data.sessionId);
         } catch (error) {
             console.error('Chat error:', error);
             const errorResponse = {
@@ -166,8 +159,10 @@ export default function AIChatbot() {
                                         color: 'white',
                                         fontSize: '0.9rem',
                                         lineHeight: '1.5'
-                                    }}>
-                                        {msg.content}
+                                    }} className="markdown-content">
+                                        <ReactMarkdown>
+                                            {msg.content}
+                                        </ReactMarkdown>
                                     </div>
                                 </div>
                             ))}
@@ -241,6 +236,36 @@ export default function AIChatbot() {
                             @keyframes bounce {
                                 0%, 60%, 100% { transform: translateY(0); }
                                 30% { transform: translateY(-4px); }
+                            }
+                            
+                            /* Markdown Styling Fixes */
+                            .markdown-content h1, 
+                            .markdown-content h2, 
+                            .markdown-content h3 {
+                                font-size: 1.1rem !important;
+                                font-weight: 700 !important;
+                                margin-top: 0.75rem !important;
+                                margin-bottom: 0.5rem !important;
+                                color: #f8fafc !important;
+                                line-height: 1.4 !important;
+                            }
+                            .markdown-content p {
+                                margin-bottom: 0.75rem !important;
+                                line-height: 1.6 !important;
+                                color: inherit !important;
+                            }
+                            .markdown-content ul, 
+                            .markdown-content ol {
+                                margin-bottom: 0.75rem !important;
+                                padding-left: 1.25rem !important;
+                                color: inherit !important;
+                            }
+                            .markdown-content li {
+                                margin-bottom: 0.35rem !important;
+                            }
+                            .markdown-content strong {
+                                color: #c4b5fd !important;
+                                font-weight: 700 !important;
                             }
                         `}</style>
                     </motion.div>

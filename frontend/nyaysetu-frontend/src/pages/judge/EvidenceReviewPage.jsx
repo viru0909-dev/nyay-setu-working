@@ -13,7 +13,8 @@ import {
     ChevronDown,
     Search,
     Database,
-    Binary
+    Binary,
+    Clock
 } from 'lucide-react';
 
 export default function EvidenceReviewPage() {
@@ -163,7 +164,10 @@ export default function EvidenceReviewPage() {
                                 fontWeight: '600',
                                 outline: 'none',
                                 cursor: 'pointer',
-                                padding: '0.25rem 0'
+                                padding: '0.25rem 0',
+                                WebkitAppearance: 'none',
+                                MozAppearance: 'none',
+                                appearance: 'none'
                             }}
                         >
                             <option value="" style={{ background: '#0f172a' }}>-- Choose a case file to review --</option>

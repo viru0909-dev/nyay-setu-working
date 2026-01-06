@@ -98,15 +98,15 @@ public class AiService {
                 "Please respond with ONLY a JSON object containing:\n" +
                 "{\n" +
                 "  \"summary\": \"concise legal summary\",\n" +
-                "  \"legalPoints\": [\"key point 1\", \"key point 2\"],\n" +
-                "  \"relevantLaws\": [\"IPC Section X\", \"CrPC Section Y\"],\n" +
-                "  \"importantDates\": [\"2023-10-12: Filing date\"],\n" +
-                "  \"partiesInvolved\": [\"Party A vs Party B\"],\n" +
-                "  \"caseLawSuggestions\": [\"Case X vs Case Y (2010)\"],\n" +
+                "  \"legalPoints\": [\"key point 1\", \"key point 2\"], // MUST be a JSON array (list), even if only one item\n" +
+                "  \"relevantLaws\": [\"IPC Section X\", \"CrPC Section Y\"], // MUST be a JSON array\n" +
+                "  \"importantDates\": [\"2023-10-12: Filing date\"], // MUST be a JSON array\n" +
+                "  \"partiesInvolved\": [\"Party A vs Party B\"], // MUST be a JSON array\n" +
+                "  \"caseLawSuggestions\": [\"Case X vs Case Y (2010)\"], // MUST be a JSON array\n" +
                 "  \"suggestedCategory\": \"CIVIL/CRIMINAL/FAMILY/etc\",\n" +
                 "  \"riskAssessment\": \"Low/Medium/High with brief reasoning\"\n" +
                 "}\n\n" +
-                "Respond with the JSON only.";
+                "Respond with valid JSON only. Do not add markdown backticks outside the JSON.";
 
         return chat(prompt);
     }

@@ -54,6 +54,71 @@ Connecting clients with vetted legal professionals.
 
 ---
 
+## 🏗️ Architecture & Technical Flow
+
+The following diagram illustrates the high-level architecture and data flow of the NYAY-SETU platform, showcasing the interaction between the frontend, backend, AI services, and database.
+
+```mermaid
+graph TD
+    subgraph "Client Layer (React Frontend)"
+        Citizen["Citizen Portal"]
+        Lawyer["Lawyer Dashboard"]
+        Judge["Judge Dashboard"]
+    end
+
+    subgraph "API & Security Layer"
+        Gateway["REST API Gateway (Spring Boot)"]
+        Auth["Spring Security / JWT"]
+    end
+
+    subgraph "Business Logic Layer (Services)"
+        CaseSvc["Case Management Service"]
+        DocSvc["Document & Evidence Service"]
+        AIEngine["AI Intelligence Engine (Vakil-Friend)"]
+        HearingSvc{"Hearing & Video Svc"}
+        NotifSvc["Notification Service (SMTP)"]
+    end
+
+    subgraph "Intelligence Layer"
+        Groq["Groq LPU (Llama-3)"]
+        Gemini["Google Gemini API"]
+    end
+
+    subgraph "Data & Infrastructure"
+        DB[("PostgreSQL Database")]
+        Storage["Local/Cloud Storage (Evidence)"]
+        Signaling["WebRTC Signaling Server"]
+    end
+
+    %% Flow interactions
+    Citizen --> Gateway
+    Lawyer --> Gateway
+    Judge --> Gateway
+
+    Gateway --> Auth
+    Auth --> CaseSvc
+    Auth --> DocSvc
+    Auth --> AIEngine
+    Auth --> HearingSvc
+
+    CaseSvc --> DB
+    DocSvc --> Storage
+    DocSvc --> DB
+    
+    AIEngine --> Groq
+    AIEngine --> Gemini
+    
+    HearingSvc --> Signaling
+    
+    NotifSvc --> Citizen
+    NotifSvc --> Lawyer
+    
+    Judge -- "Review AI Summary" --> AIEngine
+    Citizen -- "Legal Aid Chat" --> AIEngine
+```
+
+---
+
 ## 🛠️ Technology Stack
 
 | Layer | Technologies |

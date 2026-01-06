@@ -7,13 +7,17 @@ import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.service.AuthService;
 import com.nyaysetu.backend.service.CaseManagementService;
 import com.nyaysetu.backend.service.HearingService;
+import com.nyaysetu.backend.service.LawyerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.UUID;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +34,18 @@ public class LawyerController {
     private final AuthService authService;
     private final CaseRepository caseRepository;
     private final HearingService hearingService;
+    private final LawyerService lawyerService;
+
+    @PostMapping("/draft")
+    public ResponseEntity<Map<String, String>> generateDraft(
+            @RequestBody Map<String, String> request,
+            Authentication authentication
+    ) {
+        UUID caseId = UUID.fromString(request.get("caseId"));
+        String template = request.get("template");
+        String draft = lawyerService.generateDraft(caseId, template);
+        return ResponseEntity.ok(Map.of("draft", draft));
+    }
 
     @GetMapping("/cases")
     public ResponseEntity<List<CaseDTO>> getMyCases(Authentication authentication) {
@@ -62,23 +78,14 @@ public class LawyerController {
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats(Authentication authentication) {
         User lawyer = authService.findByEmail(authentication.getName());
-        
-        long totalCases = caseRepository.countByLawyer(lawyer);
-        long activeClients = caseRepository.findByLawyer(lawyer).stream()
-                .map(CaseEntity::getClient)
-                .filter(java.util.Objects::nonNull)
-                .distinct()
-                .count();
+        Map<String, Object> stats = lawyerService.getLawyerStats(lawyer);
         
         // Mocking upcoming hearings count for now or fetching from hearingService
         int upcomingHearings = hearingService.getHearingsForUser(lawyer.getEmail()).size();
+        
+        Map<String, Object> response = new HashMap<>(stats);
+        response.put("upcomingHearings", upcomingHearings);
 
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalCases", totalCases);
-        stats.put("activeClients", activeClients);
-        stats.put("upcomingHearings", upcomingHearings);
-        stats.put("resolvedCases", 0); // TODO: Add resolved logic
-
-        return ResponseEntity.ok(stats);
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,0 +1,18 @@
+# CODEOWNERS
+# This file is used to define who owns what parts of the repository.
+# GitHub uses this to automatically request reviews.
+
+# Global owner
+* @viru0909-dev
+
+# Backend
+/backend/ @viru0909-dev
+
+# Frontend
+/frontend/ @viru0909-dev
+
+# Infrastructure & DevOps
+/infra/ @viru0909-dev
+/.github/ @viru0909-dev
+/Dockerfile @viru0909-dev
+/setup.sh @viru0909-dev

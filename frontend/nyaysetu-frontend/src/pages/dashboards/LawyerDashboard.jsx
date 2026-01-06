@@ -262,16 +262,18 @@ export default function LawyerDashboard() {
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                    <button style={{
-                                        background: 'rgba(99, 102, 241, 0.1)',
-                                        border: '1px solid rgba(99, 102, 241, 0.2)',
-                                        borderRadius: '0.75rem',
-                                        padding: '0.5rem 1rem',
-                                        color: '#818cf8',
-                                        fontWeight: '700',
-                                        fontSize: '0.8rem',
-                                        cursor: 'pointer'
-                                    }}>
+                                    <button
+                                        onClick={() => navigate(`/lawyer/case/${caseItem.id}`)}
+                                        style={{
+                                            background: 'rgba(99, 102, 241, 0.1)',
+                                            border: '1px solid rgba(99, 102, 241, 0.2)',
+                                            borderRadius: '0.75rem',
+                                            padding: '0.5rem 1rem',
+                                            color: '#818cf8',
+                                            fontWeight: '700',
+                                            fontSize: '0.8rem',
+                                            cursor: 'pointer'
+                                        }}>
                                         View Dossier
                                     </button>
                                     <button style={{

@@ -3,10 +3,7 @@ import axios from 'axios';
 // Use explicit backend URL - Vite proxy can be unreliable
 // In development: http://localhost:8080
 // In production: Replace with actual backend URL via environment variable
-// Support both VITE_API_URL and VITE_API_BASE_URL
-// Also sanitize: if the user adds /api to the end, strip it because the code adds it below
-let rawBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-const API_BASE_URL = rawBaseUrl.endsWith('/api') ? rawBaseUrl.slice(0, -4) : rawBaseUrl;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -43,21 +40,6 @@ api.interceptors.request.use((config) => {
 export const authAPI = {
     login: (credentials) => api.post('/api/auth/login', credentials),
     register: (userData) => api.post('/api/auth/register', userData),
-    forgotPassword: (email) => api.post('/api/auth/forgot-password', { email }),
-    resetPassword: (resetData) => api.post('/api/auth/reset-password', resetData),
-    verifyResetToken: (token) => api.get('/api/auth/verify-reset-token', { params: { token } }),
-
-    // Face Biometrics
-    enrollFace: (descriptor) => api.post('/api/auth/face/enroll', {
-        faceDescriptor: JSON.stringify(descriptor)
-    }),
-    loginWithFace: (email, descriptor) => api.post('/api/auth/face/login', {
-        email,
-        faceDescriptor: JSON.stringify(descriptor)
-    }),
-    deleteFace: (userId) => api.delete('/api/auth/face/disable', { params: { userId } }),
-    getFaceStatus: (userId) => api.get('/api/auth/face/status', { params: { userId } }),
-
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -161,6 +143,7 @@ export const lawyerAPI = {
     getCases: () => api.get('/api/lawyer/cases'),
     getClients: () => api.get('/api/lawyer/clients'),
     getStats: () => api.get('/api/lawyer/stats'),
+    generateDraft: (caseId, template) => api.post('/api/lawyer/draft', { caseId, template }),
 };
 
 // Central Brain API

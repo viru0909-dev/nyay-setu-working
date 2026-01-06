@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Archive,
     Search,
@@ -13,18 +13,36 @@ import {
     Eye,
     CheckCircle2,
     AlertCircle,
-    Database
+    Database,
+    Loader2
 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { documentAPI } from '../../services/api';
 
 export default function EvidenceVaultPage() {
+    const location = useLocation();
+    const filterCaseId = location.state?.caseId || null;
     const [searchTerm, setSearchTerm] = useState('');
+    const [evidenceItems, setEvidenceItems] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const evidenceItems = [
-        { id: 1, name: 'Property_Sale_Deed_2023.pdf', type: 'PDF', case: 'Kumar vs State', status: 'Verified', date: '2023-11-15', blockchain: true },
-        { id: 2, name: 'CCTV_Footage_Front_Gate.mp4', type: 'VIDEO', case: 'Sharma Case', status: 'Pending', date: '2023-11-20', blockchain: true },
-        { id: 3, name: 'Bank_Statement_Q3.xlsx', type: 'XLSX', case: 'Corporate Dispute', status: 'Verified', date: '2023-12-01', blockchain: false },
-        { id: 4, name: 'Witness_Statement_Signed.pdf', type: 'PDF', case: 'Family Dispute', status: 'Verified', date: '2023-12-05', blockchain: true },
-    ];
+    useEffect(() => {
+        fetchEvidence();
+    }, [filterCaseId]);
+
+    const fetchEvidence = async () => {
+        setLoading(true);
+        try {
+            const response = filterCaseId
+                ? await documentAPI.getByCase(filterCaseId)
+                : await documentAPI.list();
+            setEvidenceItems(response.data || []);
+        } catch (error) {
+            console.error('Error fetching evidence:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const glassStyle = {
         background: 'rgba(30, 41, 59, 0.7)',
@@ -138,7 +156,7 @@ export default function EvidenceVaultPage() {
                         <thead>
                             <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
                                 <th style={{ textAlign: 'left', padding: '1rem', color: '#64748b', fontSize: '0.75rem', fontWeight: '800' }}>ITEM NAME</th>
-                                <th style={{ textAlign: 'left', padding: '1rem', color: '#64748b', fontSize: '0.75rem', fontWeight: '800' }}>CASE ASSOCIATION</th>
+                                <th style={{ textAlign: 'left', padding: '1rem', color: '#64748b', fontSize: '0.75rem', fontWeight: '800' }}>CATEGORY</th>
                                 <th style={{ textAlign: 'left', padding: '1rem', color: '#64748b', fontSize: '0.75rem', fontWeight: '800' }}>DATE ADDED</th>
                                 <th style={{ textAlign: 'left', padding: '1rem', color: '#64748b', fontSize: '0.75rem', fontWeight: '800' }}>VERIFICATION</th>
                                 <th style={{ textAlign: 'center', padding: '1rem', color: '#64748b', fontSize: '0.75rem', fontWeight: '800' }}>ACTIONS</th>
@@ -160,13 +178,13 @@ export default function EvidenceVaultPage() {
                                                 <File size={18} />
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{item.name}</div>
-                                                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{item.type} File</div>
+                                                <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{item.fileName}</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{item.contentType}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td style={{ padding: '1rem', fontSize: '0.85rem', color: '#94a3b8' }}>{item.case}</td>
-                                    <td style={{ padding: '1rem', fontSize: '0.85rem', color: '#94a3b8' }}>{new Date(item.date).toLocaleDateString()}</td>
+                                    <td style={{ padding: '1rem', fontSize: '0.85rem', color: '#94a3b8' }}>{item.category || 'General'}</td>
+                                    <td style={{ padding: '1rem', fontSize: '0.85rem', color: '#94a3b8' }}>{new Date(item.uploadDate).toLocaleDateString()}</td>
                                     <td style={{ padding: '1rem' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                             <div style={{

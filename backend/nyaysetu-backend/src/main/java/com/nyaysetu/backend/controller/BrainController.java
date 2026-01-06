@@ -37,10 +37,13 @@ public class BrainController {
         String sessionIdStr = request.get("sessionId");
         UUID sessionId = (sessionIdStr != null && !sessionIdStr.isEmpty()) ? UUID.fromString(sessionIdStr) : null;
 
-        User user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = null;
+        if (userDetails != null) {
+            user = userRepository.findByEmail(userDetails.getUsername())
+                    .orElse(null);
+        }
 
-        log.info("🧠 Brain request from role: {}, msg: {}", user.getRole(), message);
+        log.info("🧠 Brain request from role: {}, msg: {}", (user != null ? user.getRole() : "GUEST"), message);
         
         Map<String, Object> response = brainService.process(sessionId, message, user);
         return ResponseEntity.ok(response);

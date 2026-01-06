@@ -88,7 +88,7 @@ public class NyaySetuBrainService {
         ChatSession session;
         if (sessionId == null) {
             session = ChatSession.builder()
-                .user(user)
+                .user(user) // Can be null for guests
                 .status(ChatSessionStatus.ACTIVE)
                 .conversationData("[]")
                 .createdAt(LocalDateTime.now())
@@ -109,8 +109,9 @@ public class NyaySetuBrainService {
         userMsg.put("content", userMessage);
         conversation.add(userMsg);
 
-        // Get AI Response based on Role
-        String aiResponse = getAIResponse(conversation, user.getRole());
+        // Get AI Response based on Role (Default to CLIENT for guest users)
+        Role role = (user != null) ? user.getRole() : Role.CLIENT;
+        String aiResponse = getAIResponse(conversation, role);
 
         // Add assistant message
         Map<String, String> assistantMsg = new HashMap<>();
@@ -130,7 +131,7 @@ public class NyaySetuBrainService {
         Map<String, Object> response = new HashMap<>();
         response.put("sessionId", session.getId());
         response.put("message", aiResponse);
-        response.put("role", user.getRole());
+        response.put("role", role);
         
         return response;
     }
