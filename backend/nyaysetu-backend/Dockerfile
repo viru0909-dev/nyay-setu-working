@@ -14,4 +14,5 @@ COPY --from=build /app/target/*.jar app.jar
 # Port for Render
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Use exec form to allow signal passing and argument appending
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
