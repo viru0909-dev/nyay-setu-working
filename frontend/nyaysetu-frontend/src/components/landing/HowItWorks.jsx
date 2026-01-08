@@ -68,7 +68,7 @@ export default function HowItWorks() {
     return (
         <section style={{
             padding: '6rem 2rem',
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(30, 41, 59, 0.8) 100%)'
+            background: 'transparent' // Let body background show through
         }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                 {/* Header */}
@@ -86,7 +86,7 @@ export default function HowItWorks() {
                             marginBottom: '1.5rem'
                         }}
                     >
-                        <span style={{ color: '#8b5cf6', fontSize: '0.95rem', fontWeight: '700' }}>
+                        <span style={{ color: 'var(--color-accent)', fontSize: '0.95rem', fontWeight: '700' }}>
                             {language === 'en' ? '⚡ SIMPLE PROCESS' : '⚡ सरल प्रक्रिया'}
                         </span>
                     </motion.div>
@@ -99,13 +99,13 @@ export default function HowItWorks() {
                         style={{
                             fontSize: 'clamp(2rem, 4vw, 3rem)',
                             fontWeight: '900',
-                            color: 'white',
+                            color: 'var(--text-main)',
                             marginBottom: '1rem'
                         }}
                     >
                         {language === 'en' ? 'How ' : 'यह कैसे '}
                         <span style={{
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                            background: 'linear-gradient(135deg, var(--color-accent) 0%, #ec4899 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>
@@ -120,7 +120,7 @@ export default function HowItWorks() {
                         transition={{ delay: 0.2 }}
                         style={{
                             fontSize: '1.25rem',
-                            color: '#94a3b8',
+                            color: 'var(--text-secondary)',
                             maxWidth: '700px',
                             margin: '0 auto',
                             lineHeight: '1.6'
@@ -192,7 +192,8 @@ export default function HowItWorks() {
                                         width: '120px',
                                         height: '120px',
                                         margin: '0 auto 2rem',
-                                        background: `linear-gradient(135deg, ${step.color}20 0%, ${step.color}10 100%)`,
+                                        background: 'var(--bg-glass-strong)', // Glass effect
+                                        backdropFilter: 'var(--glass-blur)',
                                         border: `3px solid ${step.color}40`,
                                         borderRadius: '2rem',
                                         display: 'flex',
@@ -200,7 +201,7 @@ export default function HowItWorks() {
                                         justifyContent: 'center',
                                         position: 'relative',
                                         zIndex: 1,
-                                        boxShadow: `0 20px 60px ${step.color}20`
+                                        boxShadow: 'var(--shadow-glass)'
                                     }}
                                 >
                                     <step.icon size={48} style={{ color: step.color }} />
@@ -210,8 +211,8 @@ export default function HowItWorks() {
                                 <div style={{
                                     display: 'inline-block',
                                     padding: '0.5rem 1rem',
-                                    background: `${step.color}20`,
-                                    border: `2px solid ${step.color}40`,
+                                    background: `${step.color}10`,
+                                    border: `2px solid ${step.color}30`,
                                     borderRadius: '2rem',
                                     color: step.color,
                                     fontWeight: '900',
@@ -226,7 +227,7 @@ export default function HowItWorks() {
                                 <h3 style={{
                                     fontSize: '1.5rem',
                                     fontWeight: '800',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     marginBottom: '1rem'
                                 }}>
                                     {step.title}
@@ -234,7 +235,7 @@ export default function HowItWorks() {
 
                                 {/* Description */}
                                 <p style={{
-                                    color: '#94a3b8',
+                                    color: 'var(--text-secondary)',
                                     fontSize: '1rem',
                                     lineHeight: '1.6',
                                     maxWidth: '300px',
@@ -273,7 +274,7 @@ export default function HowItWorks() {
                     }}
                 >
                     <p style={{
-                        color: '#94a3b8',
+                        color: 'var(--text-secondary)',
                         fontSize: '1.125rem',
                         marginBottom: '2rem',
                         fontWeight: '600'
@@ -316,3 +317,4 @@ export default function HowItWorks() {
         </section>
     );
 }
+

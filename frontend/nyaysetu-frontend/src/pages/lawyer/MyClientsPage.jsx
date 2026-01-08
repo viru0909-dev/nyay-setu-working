@@ -44,18 +44,18 @@ export default function MyClientsPage() {
     };
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass-strong)'
     };
 
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                <Loader2 size={48} className="spin" style={{ color: '#6366f1' }} />
+                <Loader2 size={48} className="spin" style={{ color: 'var(--color-accent)' }} />
             </div>
         );
     }
@@ -67,27 +67,27 @@ export default function MyClientsPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{
                         width: '56px', height: '56px', borderRadius: '14px',
-                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        background: 'var(--color-accent)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 8px 16px rgba(99, 102, 241, 0.2)'
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         <Users size={28} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Client Directory
                         </h1>
-                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Manage your professional relationships and client profiles
                         </p>
                     </div>
                 </div>
                 <button style={{
                     display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                    color: 'white', border: 'none', borderRadius: '0.75rem',
+                    background: 'var(--color-accent)',
+                    color: 'var(--text-main)', border: 'none', borderRadius: '0.75rem',
                     padding: '0.8rem 1.5rem', fontWeight: '700', cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)'
+                    boxShadow: 'var(--shadow-glass)'
                 }}>
                     <Plus size={18} /> Add New Client
                 </button>
@@ -103,7 +103,7 @@ export default function MyClientsPage() {
                 alignItems: 'center'
             }}>
                 <div style={{ position: 'relative', flex: 1 }}>
-                    <Search size={18} color="#64748b" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+                    <Search size={18} color="var(--text-secondary)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                     <input
                         type="text"
                         placeholder="Search clients by name, email, or location..."
@@ -111,22 +111,22 @@ export default function MyClientsPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         style={{
                             width: '100%',
-                            background: 'rgba(15, 23, 42, 0.4)',
-                            border: '1px solid rgba(255, 255, 255, 0.05)',
+                            background: 'var(--bg-glass)',
+                            border: 'var(--border-glass)',
                             borderRadius: '0.75rem',
                             padding: '0.8rem 1rem 0.8rem 3rem',
-                            color: 'white',
+                            color: 'var(--text-main)',
                             outline: 'none',
                             fontSize: '0.95rem'
                         }}
                     />
                 </div>
                 <button style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: 'var(--bg-glass)',
+                    border: 'var(--border-glass)',
                     borderRadius: '0.75rem',
                     padding: '0.8rem 1.25rem',
-                    color: 'white',
+                    color: 'var(--text-main)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
@@ -153,18 +153,18 @@ export default function MyClientsPage() {
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                 <div style={{
                                     width: '50px', height: '50px', borderRadius: '50%',
-                                    background: 'rgba(99, 102, 241, 0.1)',
+                                    background: 'var(--bg-glass-subtle)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: '1.25rem', fontWeight: '800', color: '#818cf8',
-                                    border: '1px solid rgba(139, 92, 246, 0.2)'
+                                    fontSize: '1.25rem', fontWeight: '800', color: 'var(--color-accent)',
+                                    border: 'var(--border-glass-subtle)'
                                 }}>
                                     {client.name.charAt(0)}
                                 </div>
                                 <div>
-                                    <h3 style={{ color: 'white', margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>{client.name}</h3>
+                                    <h3 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>{client.name}</h3>
                                     <span style={{
                                         fontSize: '0.75rem',
-                                        color: client.status === 'Active' ? '#10b981' : '#64748b',
+                                        color: client.status === 'Active' ? 'var(--color-success)' : 'var(--text-secondary)',
                                         fontWeight: '700',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -174,19 +174,19 @@ export default function MyClientsPage() {
                                     </span>
                                 </div>
                             </div>
-                            <button style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+                            <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                                 <MoreVertical size={20} />
                             </button>
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#94a3b8', fontSize: '0.9rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 <Mail size={16} /> {client.email}
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#94a3b8', fontSize: '0.9rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 <Phone size={16} /> {client.phone}
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#94a3b8', fontSize: '0.9rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 <MapPin size={16} /> {client.location}
                             </div>
                         </div>
@@ -195,17 +195,17 @@ export default function MyClientsPage() {
                             display: 'flex',
                             justifyContent: 'space-between',
                             paddingTop: '1rem',
-                            borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                            borderTop: 'var(--border-glass-subtle)',
                             alignItems: 'center'
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Briefcase size={16} color="#818cf8" />
-                                <span style={{ color: 'white', fontWeight: '600', fontSize: '0.85rem' }}>{client.cases} Active Cases</span>
+                                <Briefcase size={16} color="var(--color-accent)" />
+                                <span style={{ color: 'var(--text-main)', fontWeight: '600', fontSize: '0.85rem' }}>{client.cases} Active Cases</span>
                             </div>
                             <button style={{
-                                background: 'rgba(99, 102, 241, 0.1)',
-                                color: '#818cf8',
-                                border: '1px solid rgba(99, 102, 241, 0.2)',
+                                background: 'var(--bg-glass)',
+                                color: 'var(--color-accent)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.5rem',
                                 padding: '0.4rem 0.8rem',
                                 fontSize: '0.8rem',

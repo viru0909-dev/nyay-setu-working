@@ -33,7 +33,8 @@ export default function EvidenceManagerPage() {
     const fetchCases = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8080/api/cases', {
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+            const response = await axios.get(`${API_BASE_URL}/api/cases`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setCases(response.data || []);
@@ -46,7 +47,8 @@ export default function EvidenceManagerPage() {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:8080/api/evidence/case/${caseId}`, {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+            const response = await axios.get(`${API_BASE_URL}/api/evidence/case/${caseId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEvidence(response.data.evidence || []);
@@ -74,7 +76,9 @@ export default function EvidenceManagerPage() {
             formData.append('description', uploadDescription);
             formData.append('evidenceType', uploadType);
 
-            await axios.post('http://localhost:8080/api/evidence/upload', formData, {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+            await axios.post(`${API_BASE_URL}/api/evidence/upload`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -100,8 +104,9 @@ export default function EvidenceManagerPage() {
         setVerifying(true);
         try {
             const token = localStorage.getItem('token');
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
             const response = await axios.get(
-                `http://localhost:8080/api/evidence/case/${selectedCase}/verify-chain`,
+                `${API_BASE_URL}/api/evidence/case/${selectedCase}/verify-chain`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setChainStatus(response.data);
@@ -115,8 +120,9 @@ export default function EvidenceManagerPage() {
     const verifySingle = async (evidenceId) => {
         try {
             const token = localStorage.getItem('token');
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
             const response = await axios.get(
-                `http://localhost:8080/api/evidence/${evidenceId}/verify`,
+                `${API_BASE_URL}/api/evidence/${evidenceId}/verify`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             alert(response.data.isValid
@@ -152,15 +158,16 @@ export default function EvidenceManagerPage() {
                         background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         <Shield size={24} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Evidence Manager
                         </h1>
-                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Blockchain-secured evidence storage • Tamper-proof records
                         </p>
                     </div>
@@ -169,13 +176,15 @@ export default function EvidenceManagerPage() {
 
             {/* Case Selector */}
             <div style={{
-                background: 'rgba(30, 41, 59, 0.8)',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
+                background: 'var(--bg-glass-strong)',
+                backdropFilter: 'var(--glass-blur)',
+                border: 'var(--border-glass-strong)',
                 borderRadius: '1rem',
                 padding: '1.5rem',
-                marginBottom: '1.5rem'
+                marginBottom: '1.5rem',
+                boxShadow: 'var(--shadow-glass)'
             }}>
-                <label style={{ fontSize: '0.875rem', fontWeight: '600', color: '#94a3b8', display: 'block', marginBottom: '0.5rem' }}>
+                <label style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.5rem' }}>
                     Select Case
                 </label>
                 <select
@@ -184,10 +193,10 @@ export default function EvidenceManagerPage() {
                     style={{
                         width: '100%',
                         padding: '0.75rem 1rem',
-                        background: 'rgba(15, 23, 42, 0.6)',
-                        border: '2px solid rgba(16, 185, 129, 0.2)',
+                        background: 'var(--bg-glass)',
+                        border: 'var(--border-glass)',
                         borderRadius: '0.5rem',
-                        color: 'white',
+                        color: 'var(--text-main)',
                         fontSize: '1rem'
                     }}
                 >
@@ -204,22 +213,24 @@ export default function EvidenceManagerPage() {
                 <>
                     {/* Upload Section */}
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '1rem',
                         padding: '1.5rem',
-                        marginBottom: '1.5rem'
+                        marginBottom: '1.5rem',
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
                             <Upload size={20} color="#10b981" />
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                 Upload New Evidence
                             </h2>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                             <div>
-                                <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#94a3b8', display: 'block', marginBottom: '0.375rem' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.375rem' }}>
                                     Evidence Title *
                                 </label>
                                 <input
@@ -230,16 +241,16 @@ export default function EvidenceManagerPage() {
                                     style={{
                                         width: '100%',
                                         padding: '0.625rem',
-                                        background: 'rgba(15, 23, 42, 0.6)',
-                                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
                                         borderRadius: '0.5rem',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         fontSize: '0.875rem'
                                     }}
                                 />
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#94a3b8', display: 'block', marginBottom: '0.375rem' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.375rem' }}>
                                     Evidence Type
                                 </label>
                                 <select
@@ -248,10 +259,10 @@ export default function EvidenceManagerPage() {
                                     style={{
                                         width: '100%',
                                         padding: '0.625rem',
-                                        background: 'rgba(15, 23, 42, 0.6)',
-                                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
                                         borderRadius: '0.5rem',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         fontSize: '0.875rem'
                                     }}
                                 >
@@ -265,7 +276,7 @@ export default function EvidenceManagerPage() {
                         </div>
 
                         <div style={{ marginBottom: '1rem' }}>
-                            <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#94a3b8', display: 'block', marginBottom: '0.375rem' }}>
+                            <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.375rem' }}>
                                 Description
                             </label>
                             <textarea
@@ -276,10 +287,10 @@ export default function EvidenceManagerPage() {
                                 style={{
                                     width: '100%',
                                     padding: '0.625rem',
-                                    background: 'rgba(15, 23, 42, 0.6)',
-                                    border: '1px solid rgba(16, 185, 129, 0.2)',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     borderRadius: '0.5rem',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.875rem',
                                     resize: 'none'
                                 }}
@@ -287,7 +298,7 @@ export default function EvidenceManagerPage() {
                         </div>
 
                         <div style={{ marginBottom: '1rem' }}>
-                            <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#94a3b8', display: 'block', marginBottom: '0.375rem' }}>
+                            <label style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.375rem' }}>
                                 File *
                             </label>
                             <input
@@ -296,10 +307,10 @@ export default function EvidenceManagerPage() {
                                 style={{
                                     width: '100%',
                                     padding: '0.625rem',
-                                    background: 'rgba(15, 23, 42, 0.6)',
-                                    border: '1px solid rgba(16, 185, 129, 0.2)',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     borderRadius: '0.5rem',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.875rem'
                                 }}
                             />
@@ -311,16 +322,17 @@ export default function EvidenceManagerPage() {
                             style={{
                                 padding: '0.75rem 1.5rem',
                                 background: (uploading || !uploadFile || !uploadTitle)
-                                    ? 'rgba(16, 185, 129, 0.3)'
+                                    ? 'var(--bg-glass)'
                                     : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                                 border: 'none',
                                 borderRadius: '0.5rem',
-                                color: 'white',
+                                color: (uploading || !uploadFile || !uploadTitle) ? 'var(--text-secondary)' : 'white',
                                 fontWeight: '700',
                                 cursor: (uploading || !uploadFile || !uploadTitle) ? 'not-allowed' : 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.5rem'
+                                gap: '0.5rem',
+                                boxShadow: (uploading || !uploadFile || !uploadTitle) ? 'none' : 'var(--shadow-glass-strong)'
                             }}
                         >
                             {uploading ? (
@@ -339,16 +351,18 @@ export default function EvidenceManagerPage() {
 
                     {/* Chain Verification */}
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '1rem',
                         padding: '1.5rem',
-                        marginBottom: '1.5rem'
+                        marginBottom: '1.5rem',
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                 <Link2 size={20} color="#10b981" />
-                                <h2 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                                <h2 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                     Evidence Chain Integrity
                                 </h2>
                             </div>
@@ -404,12 +418,14 @@ export default function EvidenceManagerPage() {
 
                     {/* Evidence List */}
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '1rem',
-                        padding: '1.5rem'
+                        padding: '1.5rem',
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '1.5rem' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
                             Evidence Records ({evidence.length})
                         </h2>
 
@@ -426,7 +442,7 @@ export default function EvidenceManagerPage() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 {evidence.map((item, index) => (
                                     <div key={item.id} style={{
-                                        background: 'rgba(15, 23, 42, 0.6)',
+                                        background: 'var(--bg-glass)',
                                         border: `1px solid ${item.isVerified ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.3)'}`,
                                         borderRadius: '0.75rem',
                                         padding: '1.25rem'
@@ -448,7 +464,7 @@ export default function EvidenceManagerPage() {
                                                     }}>
                                                         #{item.blockIndex}
                                                     </span>
-                                                    <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                                                    <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                                         {item.title}
                                                     </h3>
                                                     <span style={{
@@ -465,7 +481,7 @@ export default function EvidenceManagerPage() {
                                                 </div>
 
                                                 {item.description && (
-                                                    <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: '0.5rem 0' }}>
+                                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: '0.5rem 0' }}>
                                                         {item.description}
                                                     </p>
                                                 )}

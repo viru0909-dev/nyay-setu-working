@@ -96,18 +96,18 @@ export default function EvidenceReviewPage() {
     };
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass)'
     };
 
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                <Loader2 size={48} className="spin" style={{ color: '#10b981' }} />
+                <Loader2 size={48} className="spin" style={{ color: 'var(--color-accent)' }} />
                 <style>{`
                     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                     .spin { animation: spin 1s linear infinite; }
@@ -130,10 +130,10 @@ export default function EvidenceReviewPage() {
                         <Shield size={28} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Evidence Vault
                         </h1>
-                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Blockchain-secured evidence verification • Tamper-proof records
                         </p>
                     </div>
@@ -144,12 +144,12 @@ export default function EvidenceReviewPage() {
             <div style={{
                 ...glassStyle,
                 marginBottom: '1.5rem',
-                border: '1px solid rgba(16, 185, 129, 0.2)'
+                border: 'var(--border-glass-strong)'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <Search size={20} color="#64748b" />
                     <div style={{ flex: 1 }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '0.25rem', display: 'block' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem', display: 'block' }}>
                             Select Judicial Case File
                         </label>
                         <select
@@ -159,7 +159,7 @@ export default function EvidenceReviewPage() {
                                 width: '100%',
                                 background: 'transparent',
                                 border: 'none',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 fontSize: '1.125rem',
                                 fontWeight: '600',
                                 outline: 'none',
@@ -170,9 +170,9 @@ export default function EvidenceReviewPage() {
                                 appearance: 'none'
                             }}
                         >
-                            <option value="" style={{ background: '#0f172a' }}>-- Choose a case file to review --</option>
+                            <option value="" style={{ background: 'var(--bg-glass-strong)', color: 'var(--text-main)' }}>-- Choose a case file to review --</option>
                             {cases.map(c => (
-                                <option key={c.id} value={c.id} style={{ background: '#0f172a' }}>
+                                <option key={c.id} value={c.id} style={{ background: 'var(--bg-glass-strong)', color: 'var(--text-main)' }}>
                                     {c.title} ({c.caseType})
                                 </option>
                             ))}
@@ -188,7 +188,7 @@ export default function EvidenceReviewPage() {
                     <div style={{
                         ...glassStyle,
                         marginBottom: '1.5rem',
-                        border: '1px solid rgba(99, 102, 241, 0.2)'
+                        border: 'var(--border-glass-strong)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -200,10 +200,10 @@ export default function EvidenceReviewPage() {
                                     <Database size={20} color="#818cf8" />
                                 </div>
                                 <div>
-                                    <h3 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                                    <h3 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                         Blockchain Ledger Integrity
                                     </h3>
-                                    <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>Verify complete cryptographic chain sequence</p>
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>Verify complete cryptographic chain sequence</p>
                                 </div>
                             </div>
                             <button
@@ -211,7 +211,7 @@ export default function EvidenceReviewPage() {
                                 disabled={verifying}
                                 style={{
                                     padding: '0.75rem 1.5rem',
-                                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                     border: 'none',
                                     borderRadius: '0.75rem',
                                     color: 'white',
@@ -220,7 +220,7 @@ export default function EvidenceReviewPage() {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '0.5rem',
-                                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)'
+                                    boxShadow: 'var(--shadow-glass)'
                                 }}
                             >
                                 <RefreshCw size={18} className={verifying ? "spin" : ""} />
@@ -255,8 +255,8 @@ export default function EvidenceReviewPage() {
                                     }}>
                                         {chainStatus.message}
                                     </h4>
-                                    <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: '0.25rem 0 0 0' }}>
-                                        Total verified blocks in sequence: <strong style={{ color: '#e2e8f0' }}>{chainStatus.totalRecords}</strong>
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                                        Total verified blocks in sequence: <strong style={{ color: 'var(--text-main)' }}>{chainStatus.totalRecords}</strong>
                                     </p>
                                 </div>
                             </div>
@@ -266,7 +266,7 @@ export default function EvidenceReviewPage() {
                     {/* Evidence List */}
                     <div style={{ ...glassStyle }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                 Evidence Records
                             </h3>
                             <span style={{
@@ -279,15 +279,15 @@ export default function EvidenceReviewPage() {
 
                         {evidence.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '4rem' }}>
-                                <FileText size={64} color="#334155" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
-                                <h4 style={{ color: '#94a3b8', margin: 0 }}>No evidence found in this case</h4>
-                                <p style={{ color: '#64748b', marginTop: '0.5rem' }}>Blockchain verification is pending upload</p>
+                                <FileText size={64} color="var(--text-secondary)" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                                <h4 style={{ color: 'var(--text-secondary)', margin: 0 }}>No evidence found in this case</h4>
+                                <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Blockchain verification is pending upload</p>
                             </div>
                         ) : (
                             <div style={{ display: 'grid', gap: '1.25rem' }}>
                                 {evidence.map((item) => (
                                     <div key={item.id} style={{
-                                        background: 'rgba(15, 23, 42, 0.4)',
+                                        background: 'var(--bg-glass)',
                                         border: `1px solid ${item.isVerified ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
                                         borderRadius: '1.25rem',
                                         padding: '1.5rem',
@@ -314,24 +314,24 @@ export default function EvidenceReviewPage() {
                                         <div style={{ display: 'flex', gap: '1.5rem' }}>
                                             <div style={{
                                                 width: '56px', height: '56px', borderRadius: '12px',
-                                                background: 'rgba(30, 41, 59, 0.8)', display: 'flex',
+                                                background: 'var(--bg-glass-strong)', display: 'flex',
                                                 alignItems: 'center', justifyContent: 'center', flexShrink: 0
                                             }}>
-                                                <FileText size={28} color="#94a3b8" />
+                                                <FileText size={28} color="var(--text-secondary)" />
                                             </div>
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                                                     <span style={{ color: '#6366f1', fontFamily: 'monospace', fontSize: '0.75rem', fontWeight: '700' }}>BLOCK #{item.blockIndex}</span>
-                                                    <h4 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                                                    <h4 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                                         {item.title}
                                                     </h4>
                                                 </div>
 
-                                                <p style={{ fontSize: '0.9rem', color: '#94a3b8', lineHeight: '1.5', margin: '0.5rem 0' }}>
+                                                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: '0.5rem 0' }}>
                                                     {item.description}
                                                 </p>
 
-                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginTop: '1rem', color: '#64748b', fontSize: '0.8rem' }}>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                         <Binary size={14} />
                                                         <span>{item.evidenceType}</span>

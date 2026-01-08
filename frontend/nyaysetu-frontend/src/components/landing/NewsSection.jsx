@@ -86,7 +86,7 @@ export default function NewsSection() {
     };
 
     return (
-        <section style={{ padding: '6rem 2rem', background: 'rgba(15, 23, 42, 0.5)' }}>
+        <section style={{ padding: '6rem 2rem', background: 'var(--bg-glass)' }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
@@ -109,7 +109,7 @@ export default function NewsSection() {
                     <h2 style={{
                         fontSize: 'clamp(2rem, 4vw, 3rem)',
                         fontWeight: '900',
-                        color: 'white',
+                        color: 'var(--text-main)',
                         marginBottom: '1rem'
                     }}>
                         {language === 'en' ? 'Judiciary ' : 'न्यायपालिका '}
@@ -122,7 +122,7 @@ export default function NewsSection() {
                         </span>
                     </h2>
 
-                    <p style={{ fontSize: '1.25rem', color: '#94a3b8', maxWidth: '600px', margin: '0 auto' }}>
+                    <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
                         {language === 'en'
                             ? 'Stay informed with the latest developments in Indian judiciary'
                             : 'भारतीय न्यायपालिका में नवीनतम विकास के बारे में सूचित रहें'}
@@ -145,23 +145,24 @@ export default function NewsSection() {
                             whileHover={{ y: -8 }}
                             style={{
                                 padding: '2rem',
-                                background: 'rgba(30, 41, 59, 0.6)',
-                                backdropFilter: 'blur(20px)',
+                                background: 'var(--bg-glass-strong)',
+                                backdropFilter: 'var(--glass-blur)',
                                 borderRadius: '1.5rem',
-                                border: '2px solid rgba(139, 92, 246, 0.2)',
+                                border: 'var(--border-glass)',
                                 cursor: 'pointer',
                                 transition: 'all 0.3s',
                                 height: '100%',
                                 display: 'flex',
-                                flexDirection: 'column'
+                                flexDirection: 'column',
+                                boxShadow: 'var(--shadow-glass)'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.borderColor = categoryColors[news.category] || '#8b5cf6';
                                 e.currentTarget.style.boxShadow = `0 20px 40px ${categoryColors[news.category] || '#8b5cf6'}30`;
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
-                                e.currentTarget.style.boxShadow = 'none';
+                                e.currentTarget.style.borderColor = 'var(--border-glass)'; // Fixed border color on leave
+                                e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
                             }}
                         >
                             {/* Category & Time */}
@@ -180,7 +181,7 @@ export default function NewsSection() {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '0.4rem',
-                                    color: '#64748b',
+                                    color: 'var(--text-secondary)',
                                     fontSize: '0.85rem'
                                 }}>
                                     <Clock size={14} />
@@ -190,7 +191,7 @@ export default function NewsSection() {
 
                             {/* Title */}
                             <h3 style={{
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 fontSize: '1.375rem',
                                 fontWeight: '800',
                                 marginBottom: '1rem',
@@ -213,7 +214,7 @@ export default function NewsSection() {
 
                             {/* Excerpt */}
                             <p style={{
-                                color: '#94a3b8',
+                                color: 'var(--text-secondary)',
                                 fontSize: '1rem',
                                 lineHeight: '1.6',
                                 marginBottom: '1.5rem',
@@ -270,3 +271,4 @@ export default function NewsSection() {
         </section>
     );
 }
+

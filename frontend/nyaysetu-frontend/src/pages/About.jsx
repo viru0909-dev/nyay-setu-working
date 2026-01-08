@@ -12,17 +12,17 @@ export default function About() {
     const [activeTab, setActiveTab] = useState('problem');
 
     const problems = [
-        { icon: Clock, title: 'Long Delays', desc: 'Cases take years to resolve', color: '#ef4444' },
-        { icon: FileText, title: 'Complex Paperwork', desc: 'Difficult documentation process', color: '#f59e0b' },
-        { icon: Users, title: 'Lack of Awareness', desc: 'Citizens unaware of rights', color: '#eab308' },
-        { icon: TrendingUp, title: 'High Costs', desc: 'Expensive legal procedures', color: '#f97316' }
+        { icon: Clock, title: 'Long Delays', desc: 'Cases take years to resolve', color: 'var(--color-error)' },
+        { icon: FileText, title: 'Complex Paperwork', desc: 'Difficult documentation process', color: 'var(--color-warning)' },
+        { icon: Users, title: 'Lack of Awareness', desc: 'Citizens unaware of rights', color: 'var(--color-text-secondary)' },
+        { icon: TrendingUp, title: 'High Costs', desc: 'Expensive legal procedures', color: 'var(--color-accent)' }
     ];
 
     const solutions = [
-        { icon: Zap, title: 'Instant Filing', desc: 'File cases online in minutes', color: '#8b5cf6' },
-        { icon: Brain, title: 'AI Assistance', desc: 'Smart legal guidance 24/7', color: '#a855f7' },
-        { icon: Scale, title: 'Transparency', desc: 'Track case status in real-time', color: '#c084fc' },
-        { icon: Shield, title: 'Secure Platform', desc: 'Bank-grade data protection', color: '#9333ea' }
+        { icon: Zap, title: 'Instant Filing', desc: 'File cases online in minutes', color: 'var(--color-primary)' },
+        { icon: Brain, title: 'AI Assistance', desc: 'Smart legal guidance 24/7', color: 'var(--color-accent)' },
+        { icon: Scale, title: 'Transparency', desc: 'Track case status in real-time', color: 'var(--color-accent-light)' },
+        { icon: Shield, title: 'Secure Platform', desc: 'Bank-grade data protection', color: 'var(--color-primary)' }
     ];
 
     const howItWorks = [
@@ -42,7 +42,7 @@ export default function About() {
     ];
 
     return (
-        <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #1e293b 100%)' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-gradient)' }}>
             <Header />
 
             {/* Hero Section */}
@@ -55,12 +55,12 @@ export default function About() {
                     <div style={{
                         display: 'inline-block',
                         padding: '0.5rem 1.5rem',
-                        background: 'rgba(139, 92, 246, 0.1)',
-                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                        background: 'var(--bg-glass)',
+                        border: 'var(--border-glass)',
                         borderRadius: '2rem',
                         marginBottom: '1.5rem'
                     }}>
-                        <span style={{ color: '#a78bfa', fontSize: '0.9rem', fontWeight: '600' }}>
+                        <span style={{ color: 'var(--color-accent)', fontSize: '0.9rem', fontWeight: '600' }}>
                             ⚡ India's First AI-Powered Judiciary Platform
                         </span>
                     </div>
@@ -68,12 +68,12 @@ export default function About() {
                     <h1 style={{
                         fontSize: 'clamp(2.5rem, 5vw, 4rem)',
                         fontWeight: '800',
-                        color: '#fff',
+                        color: 'var(--text-main)',
                         marginBottom: '1.5rem',
                         lineHeight: '1.2'
                     }}>
                         Revolutionizing <span style={{
-                            background: 'linear-gradient(135deg, #a78bfa 0%, #ec4899 100%)',
+                            background: 'var(--gradient-primary)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>Justice</span> for Every Citizen
@@ -81,7 +81,7 @@ export default function About() {
 
                     <p style={{
                         fontSize: '1.25rem',
-                        color: '#94a3b8',
+                        color: 'var(--text-secondary)',
                         maxWidth: '800px',
                         margin: '0 auto 2rem',
                         lineHeight: '1.8'
@@ -107,17 +107,18 @@ export default function About() {
                             transition={{ delay: i * 0.1 }}
                             style={{
                                 padding: '2rem',
-                                background: 'rgba(139, 92, 246, 0.05)',
-                                border: '1px solid rgba(139, 92, 246, 0.2)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '1rem',
-                                textAlign: 'center'
+                                textAlign: 'center',
+                                boxShadow: 'var(--shadow-glass)'
                             }}
                         >
-                            <stat.icon size={32} style={{ color: '#8b5cf6', margin: '0 auto 1rem' }} />
-                            <h3 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#fff', marginBottom: '0.5rem' }}>
+                            <stat.icon size={32} style={{ color: 'var(--color-accent)', margin: '0 auto 1rem' }} />
+                            <h3 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>
                                 {stat.value}
                             </h3>
-                            <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{stat.label}</p>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{stat.label}</p>
                         </motion.div>
                     ))}
                 </div>
@@ -126,10 +127,10 @@ export default function About() {
             {/* Problem vs Solution */}
             <section style={{ padding: '4rem 2rem', maxWidth: '1400px', margin: '0 auto' }}>
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#fff', marginBottom: '1rem' }}>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem' }}>
                         The Problem & Our Solution
                     </h2>
-                    <p style={{ color: '#94a3b8', fontSize: '1.1rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
                         Understanding the challenges and how we solve them
                     </p>
                 </div>
@@ -142,10 +143,10 @@ export default function About() {
                             onClick={() => setActiveTab(tab)}
                             style={{
                                 padding: '1rem 2rem',
-                                background: activeTab === tab ? 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)' : 'rgba(139, 92, 246, 0.1)',
-                                border: activeTab === tab ? 'none' : '1px solid rgba(139, 92, 246, 0.3)',
+                                background: activeTab === tab ? 'var(--color-accent)' : 'var(--bg-glass)',
+                                border: activeTab === tab ? 'none' : 'var(--border-glass)',
                                 borderRadius: '0.75rem',
-                                color: '#fff',
+                                color: 'var(--text-main)',
                                 fontSize: '1rem',
                                 fontWeight: '600',
                                 cursor: 'pointer',
@@ -179,33 +180,32 @@ export default function About() {
                             whileHover={{ y: -8, scale: 1.02 }}
                             style={{
                                 padding: '2rem',
-                                background: activeTab === 'problem'
-                                    ? 'rgba(239, 68, 68, 0.05)'
-                                    : 'rgba(139, 92, 246, 0.05)',
-                                border: `1px solid ${activeTab === 'problem' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(139, 92, 246, 0.2)'}`,
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '1rem',
                                 cursor: 'pointer',
-                                transition: 'all 0.3s'
+                                transition: 'all 0.3s',
+                                boxShadow: 'var(--shadow-glass)'
                             }}
                         >
                             <item.icon size={40} style={{ color: item.color, marginBottom: '1rem' }} />
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#fff', marginBottom: '0.5rem' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                                 {item.title}
                             </h3>
-                            <p style={{ color: '#94a3b8', lineHeight: '1.6' }}>{item.desc}</p>
+                            <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>{item.desc}</p>
                         </motion.div>
                     ))}
                 </motion.div>
             </section>
 
             {/* How It Works */}
-            <section style={{ padding: '4rem 2rem', background: 'rgba(139, 92, 246, 0.02)' }}>
+            <section style={{ padding: '4rem 2rem', background: 'var(--bg-glass-strong)' }}>
                 <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#fff', marginBottom: '1rem' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem' }}>
                             How NyaySetu Works
                         </h2>
-                        <p style={{ color: '#94a3b8', fontSize: '1.1rem' }}>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
                             A simple, streamlined process from start to finish
                         </p>
                     </div>
@@ -232,23 +232,24 @@ export default function About() {
                                         transform: 'translateY(-50%)',
                                         display: window.innerWidth > 768 ? 'block' : 'none'
                                     }}>
-                                        <ArrowRight size={24} style={{ color: '#8b5cf6', opacity: 0.3 }} />
+                                        <ArrowRight size={24} style={{ color: 'var(--color-accent)', opacity: 0.3 }} />
                                     </div>
                                 )}
                                 <div style={{
                                     padding: '2rem',
-                                    background: 'rgba(139, 92, 246, 0.05)',
-                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     borderRadius: '1rem',
                                     position: 'relative',
-                                    height: '100%'
+                                    height: '100%',
+                                    boxShadow: 'var(--shadow-glass)'
                                 }}>
                                     <div style={{
                                         position: 'absolute',
                                         top: '-1rem',
                                         left: '1.5rem',
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                        color: '#fff',
+                                        background: 'var(--color-accent)',
+                                        color: 'white',
                                         width: '3rem',
                                         height: '3rem',
                                         borderRadius: '50%',
@@ -261,11 +262,11 @@ export default function About() {
                                         {step.step}
                                     </div>
                                     <div style={{ marginTop: '2rem' }}>
-                                        <step.icon size={32} style={{ color: '#8b5cf6', marginBottom: '1rem' }} />
-                                        <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff', marginBottom: '0.5rem' }}>
+                                        <step.icon size={32} style={{ color: 'var(--color-accent)', marginBottom: '1rem' }} />
+                                        <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                                             {step.title}
                                         </h3>
-                                        <p style={{ color: '#94a3b8', lineHeight: '1.6' }}>{step.desc}</p>
+                                        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>{step.desc}</p>
                                     </div>
                                 </div>
                             </motion.div>
@@ -287,16 +288,17 @@ export default function About() {
                         viewport={{ once: true }}
                         style={{
                             padding: '3rem',
-                            background: 'rgba(139, 92, 246, 0.05)',
-                            border: '1px solid rgba(139, 92, 246, 0.2)',
-                            borderRadius: '1.5rem'
+                            background: 'var(--bg-glass-strong)',
+                            border: 'var(--border-glass)',
+                            borderRadius: '1.5rem',
+                            boxShadow: 'var(--shadow-glass)'
                         }}
                     >
-                        <Target size={48} style={{ color: '#8b5cf6', marginBottom: '1.5rem' }} />
-                        <h3 style={{ fontSize: '2rem', fontWeight: '800', color: '#fff', marginBottom: '1rem' }}>
+                        <Target size={48} style={{ color: 'var(--color-accent)', marginBottom: '1.5rem' }} />
+                        <h3 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem' }}>
                             Our Mission
                         </h3>
-                        <p style={{ color: '#94a3b8', lineHeight: '1.8', fontSize: '1.1rem' }}>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.8', fontSize: '1.1rem' }}>
                             To democratize access to justice by leveraging AI and technology, making legal
                             processes transparent, efficient, and accessible to every Indian citizen,
                             regardless of their location or economic background.
@@ -309,16 +311,17 @@ export default function About() {
                         viewport={{ once: true }}
                         style={{
                             padding: '3rem',
-                            background: 'rgba(236, 72, 153, 0.05)',
-                            border: '1px solid rgba(236, 72, 153, 0.2)',
-                            borderRadius: '1.5rem'
+                            background: 'var(--bg-glass-strong)',
+                            border: 'var(--border-glass)',
+                            borderRadius: '1.5rem',
+                            boxShadow: 'var(--shadow-glass)'
                         }}
                     >
-                        <Award size={48} style={{ color: '#ec4899', marginBottom: '1.5rem' }} />
-                        <h3 style={{ fontSize: '2rem', fontWeight: '800', color: '#fff', marginBottom: '1rem' }}>
+                        <Award size={48} style={{ color: 'var(--color-accent-light)', marginBottom: '1.5rem' }} />
+                        <h3 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem' }}>
                             Our Vision
                         </h3>
-                        <p style={{ color: '#94a3b8', lineHeight: '1.8', fontSize: '1.1rem' }}>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.8', fontSize: '1.1rem' }}>
                             To create a future where justice is not delayed, where legal rights are
                             universally understood, and where technology empowers citizens to navigate
                             the judicial system with confidence and ease.
@@ -337,25 +340,27 @@ export default function About() {
                         maxWidth: '800px',
                         margin: '0 auto',
                         padding: '4rem 3rem',
-                        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)',
-                        border: '1px solid rgba(139, 92, 246, 0.3)',
-                        borderRadius: '2rem'
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
+                        borderRadius: '2rem',
+                        boxShadow: 'var(--shadow-glass-strong)'
                     }}
                 >
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#fff', marginBottom: '1rem' }}>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem' }}>
                         Ready to Experience Justice Reimagined?
                     </h2>
-                    <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '2rem', lineHeight: '1.8' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '2rem', lineHeight: '1.8' }}>
                         Join thousands of citizens who have already simplified their legal journey with NyaySetu
                     </p>
                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <Link to="/signup" style={{ textDecoration: 'none' }}>
                             <button style={{
                                 padding: '1rem 2.5rem',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                background: 'var(--color-accent)',
                                 border: 'none',
                                 borderRadius: '0.75rem',
-                                color: '#fff',
+                                color: 'var(--text-main)',
                                 fontSize: '1.1rem',
                                 fontWeight: '700',
                                 cursor: 'pointer',
@@ -373,22 +378,22 @@ export default function About() {
                         <Link to="/" style={{ textDecoration: 'none' }}>
                             <button style={{
                                 padding: '1rem 2.5rem',
-                                background: 'rgba(139, 92, 246, 0.1)',
-                                border: '2px solid rgba(139, 92, 246, 0.3)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.75rem',
-                                color: '#fff',
+                                color: 'var(--text-main)',
                                 fontSize: '1.1rem',
                                 fontWeight: '700',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s'
                             }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.background = 'rgba(139, 92, 246, 0.2)';
-                                    e.target.style.borderColor = '#8b5cf6';
+                                    e.target.style.background = 'var(--bg-glass-hover)';
+                                    e.target.style.borderColor = 'var(--color-accent)';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.target.style.background = 'rgba(139, 92, 246, 0.1)';
-                                    e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                                    e.target.style.background = 'var(--bg-glass)';
+                                    e.target.style.borderColor = 'var(--border-glass)';
                                 }}
                             >
                                 Learn More

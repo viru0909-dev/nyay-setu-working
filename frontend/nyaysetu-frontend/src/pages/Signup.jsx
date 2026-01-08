@@ -101,7 +101,7 @@ export default function Signup() {
     const strength = formData.password ? getPasswordStrength(formData.password) : null;
 
     return (
-        <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)' }}>
+        <div style={{ minHeight: '100vh', background: 'transparent' }}>
             {/* Header */}
             <Header hideAuthButtons={true} />
 
@@ -120,7 +120,7 @@ export default function Signup() {
                     position: 'absolute',
                     width: '800px',
                     height: '800px',
-                    background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
                     top: '-200px',
                     right: '-200px',
                     borderRadius: '50%',
@@ -148,13 +148,13 @@ export default function Signup() {
                     zIndex: 1
                 }}>
                     {/* Left Side - Benefits */}
-                    <div style={{ color: 'white' }}>
+                    <div style={{ color: 'var(--text-main)' }}>
                         <div style={{ marginBottom: '3rem' }}>
                             <h1 style={{
                                 fontSize: '3.5rem',
                                 fontWeight: '900',
                                 marginBottom: '1rem',
-                                background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 100%)',
+                                background: 'linear-gradient(135deg, var(--color-accent) 0%, #c084fc 100%)',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
                                 lineHeight: '1.2'
@@ -163,7 +163,7 @@ export default function Signup() {
                             </h1>
                             <p style={{
                                 fontSize: '1.25rem',
-                                color: '#94a3b8',
+                                color: 'var(--text-secondary)',
                                 lineHeight: '1.8',
                                 maxWidth: '500px'
                             }}>
@@ -192,7 +192,7 @@ export default function Signup() {
                                     }}>
                                         {item.icon}
                                     </div>
-                                    <span style={{ fontSize: '1.05rem', color: '#e2e8f0', fontWeight: '500' }}>
+                                    <span style={{ fontSize: '1.05rem', color: 'var(--text-main)', fontWeight: '500' }}>
                                         {item.text}
                                     </span>
                                 </div>
@@ -202,12 +202,12 @@ export default function Signup() {
 
                     {/* Right Side - Form */}
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        backdropFilter: 'blur(20px)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
                         borderRadius: '2rem',
-                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                        border: 'var(--border-glass-strong)',
                         padding: '3rem',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         {step === 1 ? (
                             <>
@@ -215,12 +215,12 @@ export default function Signup() {
                                     <h2 style={{
                                         fontSize: '2rem',
                                         fontWeight: '800',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         marginBottom: '0.5rem'
                                     }}>
                                         Create Account
                                     </h2>
-                                    <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
                                         Fill in your details to get started
                                     </p>
                                 </div>
@@ -230,7 +230,7 @@ export default function Signup() {
                                         padding: '1rem',
                                         marginBottom: '1.5rem',
                                         background: 'rgba(239, 68, 68, 0.1)',
-                                        color: '#f87171',
+                                        color: '#ef4444',
                                         borderRadius: '0.75rem',
                                         border: '1px solid rgba(239, 68, 68, 0.3)',
                                         fontSize: '0.875rem',
@@ -247,7 +247,7 @@ export default function Signup() {
                                             display: 'block',
                                             marginBottom: '0.5rem',
                                             fontWeight: '600',
-                                            color: '#e2e8f0',
+                                            color: 'var(--text-main)',
                                             fontSize: '0.875rem'
                                         }}>
                                             Full Name
@@ -258,7 +258,7 @@ export default function Signup() {
                                                 left: '1rem',
                                                 top: '50%',
                                                 transform: 'translateY(-50%)',
-                                                color: '#8b5cf6'
+                                                color: 'var(--color-accent)'
                                             }} />
                                             <input
                                                 type="text"
@@ -269,10 +269,10 @@ export default function Signup() {
                                                 style={{
                                                     width: '100%',
                                                     padding: '0.875rem 1rem 0.875rem 3rem',
-                                                    background: 'rgba(15, 23, 42, 0.6)',
-                                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                                    background: 'var(--bg-glass)',
+                                                    border: 'var(--border-glass)',
                                                     borderRadius: '0.75rem',
-                                                    color: 'white',
+                                                    color: 'var(--text-main)',
                                                     fontSize: '1rem'
                                                 }}
                                             />
@@ -285,7 +285,7 @@ export default function Signup() {
                                             display: 'block',
                                             marginBottom: '0.5rem',
                                             fontWeight: '600',
-                                            color: '#e2e8f0',
+                                            color: 'var(--text-main)',
                                             fontSize: '0.875rem'
                                         }}>
                                             Email Address
@@ -296,7 +296,7 @@ export default function Signup() {
                                                 left: '1rem',
                                                 top: '50%',
                                                 transform: 'translateY(-50%)',
-                                                color: '#8b5cf6'
+                                                color: 'var(--color-accent)'
                                             }} />
                                             <input
                                                 type="email"
@@ -307,10 +307,10 @@ export default function Signup() {
                                                 style={{
                                                     width: '100%',
                                                     padding: '0.875rem 1rem 0.875rem 3rem',
-                                                    background: 'rgba(15, 23, 42, 0.6)',
-                                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                                    background: 'var(--bg-glass)',
+                                                    border: 'var(--border-glass)',
                                                     borderRadius: '0.75rem',
-                                                    color: 'white',
+                                                    color: 'var(--text-main)',
                                                     fontSize: '1rem'
                                                 }}
                                             />
@@ -323,7 +323,7 @@ export default function Signup() {
                                             display: 'block',
                                             marginBottom: '0.75rem',
                                             fontWeight: '600',
-                                            color: '#e2e8f0',
+                                            color: 'var(--text-main)',
                                             fontSize: '0.875rem'
                                         }}>
                                             Select Your Role
@@ -341,13 +341,13 @@ export default function Signup() {
                                                     style={{
                                                         padding: '0.875rem 0.5rem',
                                                         background: formData.role === role.value
-                                                            ? `linear-gradient(135deg, ${role.color}40 0%, ${role.color}20 100%)`
-                                                            : 'rgba(15, 23, 42, 0.6)',
+                                                            ? `${role.color}15`
+                                                            : 'var(--bg-glass)',
                                                         border: formData.role === role.value
                                                             ? `2px solid ${role.color}`
-                                                            : '2px solid rgba(139, 92, 246, 0.2)',
+                                                            : 'var(--border-glass)',
                                                         borderRadius: '0.75rem',
-                                                        color: formData.role === role.value ? role.color : '#94a3b8',
+                                                        color: formData.role === role.value ? role.color : 'var(--text-secondary)',
                                                         fontSize: '0.85rem',
                                                         fontWeight: '600',
                                                         cursor: 'pointer',
@@ -371,7 +371,7 @@ export default function Signup() {
                                             display: 'block',
                                             marginBottom: '0.5rem',
                                             fontWeight: '600',
-                                            color: '#e2e8f0',
+                                            color: 'var(--text-main)',
                                             fontSize: '0.875rem'
                                         }}>
                                             Password
@@ -382,7 +382,7 @@ export default function Signup() {
                                                 left: '1rem',
                                                 top: '50%',
                                                 transform: 'translateY(-50%)',
-                                                color: '#8b5cf6'
+                                                color: 'var(--color-accent)'
                                             }} />
                                             <input
                                                 type={showPassword ? 'text' : 'password'}
@@ -393,10 +393,10 @@ export default function Signup() {
                                                 style={{
                                                     width: '100%',
                                                     padding: '0.875rem 3rem',
-                                                    background: 'rgba(15, 23, 42, 0.6)',
-                                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                                    background: 'var(--bg-glass)',
+                                                    border: 'var(--border-glass)',
                                                     borderRadius: '0.75rem',
-                                                    color: 'white',
+                                                    color: 'var(--text-main)',
                                                     fontSize: '1rem'
                                                 }}
                                             />
@@ -411,7 +411,7 @@ export default function Signup() {
                                                     background: 'none',
                                                     border: 'none',
                                                     cursor: 'pointer',
-                                                    color: '#8b5cf6'
+                                                    color: 'var(--text-secondary)'
                                                 }}
                                             >
                                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -420,7 +420,7 @@ export default function Signup() {
                                         {strength && (
                                             <div style={{ marginTop: '0.5rem' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Strength:</span>
+                                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Strength:</span>
                                                     <span style={{ fontSize: '0.75rem', color: strength.color, fontWeight: '600' }}>{strength.label}</span>
                                                 </div>
                                                 <div style={{ height: '4px', background: 'rgba(148, 163, 184, 0.2)', borderRadius: '2px' }}>
@@ -436,7 +436,7 @@ export default function Signup() {
                                             display: 'block',
                                             marginBottom: '0.5rem',
                                             fontWeight: '600',
-                                            color: '#e2e8f0',
+                                            color: 'var(--text-main)',
                                             fontSize: '0.875rem'
                                         }}>
                                             Confirm Password
@@ -447,7 +447,7 @@ export default function Signup() {
                                                 left: '1rem',
                                                 top: '50%',
                                                 transform: 'translateY(-50%)',
-                                                color: '#8b5cf6'
+                                                color: 'var(--color-accent)'
                                             }} />
                                             <input
                                                 type={showConfirmPassword ? 'text' : 'password'}
@@ -458,10 +458,10 @@ export default function Signup() {
                                                 style={{
                                                     width: '100%',
                                                     padding: '0.875rem 3rem',
-                                                    background: 'rgba(15, 23, 42, 0.6)',
-                                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                                    background: 'var(--bg-glass)',
+                                                    border: 'var(--border-glass)',
                                                     borderRadius: '0.75rem',
-                                                    color: 'white',
+                                                    color: 'var(--text-main)',
                                                     fontSize: '1rem'
                                                 }}
                                             />
@@ -476,7 +476,7 @@ export default function Signup() {
                                                     background: 'none',
                                                     border: 'none',
                                                     cursor: 'pointer',
-                                                    color: '#8b5cf6'
+                                                    color: 'var(--text-secondary)'
                                                 }}
                                             >
                                                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -493,7 +493,7 @@ export default function Signup() {
                                             padding: '1rem',
                                             background: loading
                                                 ? 'rgba(139, 92, 246, 0.5)'
-                                                : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                                : 'linear-gradient(135deg, var(--color-accent) 0%, #6366f1 100%)',
                                             border: 'none',
                                             borderRadius: '0.75rem',
                                             color: 'white',
@@ -508,11 +508,11 @@ export default function Signup() {
                                     </button>
                                 </form>
 
-                                <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(148, 163, 184, 0.1)' }}>
-                                    <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                                <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                         Already have an account?{' '}
                                         <Link to="/login" style={{
-                                            color: '#8b5cf6',
+                                            color: 'var(--color-accent)',
                                             fontWeight: '600',
                                             textDecoration: 'none'
                                         }}>
@@ -526,10 +526,10 @@ export default function Signup() {
                                 <div className="biometric-icon-wrapper" style={{ margin: '0 auto 1.5rem auto' }}>
                                     <Shield size={32} />
                                 </div>
-                                <h2 className="biometric-title" style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>
+                                <h2 className="biometric-title" style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
                                     Biometric Identity Link
                                 </h2>
-                                <p className="biometric-subtitle" style={{ fontSize: '0.95rem', marginBottom: '2rem' }}>
+                                <p className="biometric-subtitle" style={{ fontSize: '0.95rem', marginBottom: '2rem', color: 'var(--text-secondary)' }}>
                                     Establish your digital biometric signature for rapid, ultra-secure access
                                 </p>
 
@@ -538,7 +538,7 @@ export default function Signup() {
                                         padding: '1rem',
                                         marginBottom: '1.5rem',
                                         background: 'rgba(239, 68, 68, 0.1)',
-                                        color: '#f87171',
+                                        color: '#ef4444',
                                         borderRadius: '0.75rem',
                                         border: '1px solid rgba(239, 68, 68, 0.3)',
                                         fontSize: '0.875rem',
@@ -559,7 +559,7 @@ export default function Signup() {
                                             background: 'rgba(148, 163, 184, 0.1)',
                                             border: '1px solid rgba(148, 163, 184, 0.2)',
                                             borderRadius: '0.75rem',
-                                            color: '#94a3b8',
+                                            color: 'var(--text-secondary)',
                                             fontWeight: '600',
                                             cursor: 'pointer'
                                         }}

@@ -54,12 +54,12 @@ export default function ConductHearingPage() {
     };
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass)'
     };
 
     const primaryButtonStyle = {
@@ -80,7 +80,7 @@ export default function ConductHearingPage() {
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                <Loader2 size={48} className="spin" style={{ color: '#06b6d4' }} />
+                <Loader2 size={48} className="spin" style={{ color: 'var(--color-accent)' }} />
                 <style>{`
                     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                     .spin { animation: spin 1s linear infinite; }
@@ -94,13 +94,14 @@ export default function ConductHearingPage() {
         return (
             <div style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {/* Video Header Area */}
+                {/* Video Header Area */}
                 <div style={{
                     ...glassStyle,
                     padding: '1rem 1.5rem',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    background: 'rgba(15, 23, 42, 0.9)',
+                    background: 'var(--bg-glass-strong)',
                     borderRadius: '1rem'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -111,10 +112,10 @@ export default function ConductHearingPage() {
                             <ArrowLeft size={20} />
                         </button>
                         <div>
-                            <h2 style={{ color: 'white', margin: 0, fontSize: '1.125rem', fontWeight: '700' }}>
+                            <h2 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.125rem', fontWeight: '700' }}>
                                 {activeHearing.caseTitle}
                             </h2>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', fontSize: '0.75rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
                                 <Shield size={12} color="#4ade80" />
                                 <span>End-to-End Encrypted Secure Judicial Line</span>
                             </div>
@@ -125,13 +126,13 @@ export default function ConductHearingPage() {
                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', animation: 'blink 1.5s infinite' }} />
                             SESSION LIVE
                         </div>
-                        <div style={{ height: '24px', width: '1px', background: 'rgba(148, 163, 184, 0.2)' }} />
-                        <span style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: '600' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <div style={{ height: '24px', width: '1px', background: 'var(--border-glass)' }} />
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: '600' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                 </div>
 
                 {/* Jitsi Video Container */}
-                <div style={{ flex: 1, position: 'relative', borderRadius: '1.5rem', overflow: 'hidden', border: '1px solid rgba(99, 102, 241, 0.3)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+                <div style={{ flex: 1, position: 'relative', borderRadius: '1.5rem', overflow: 'hidden', border: 'var(--border-glass-strong)', boxShadow: 'var(--shadow-glass)' }}>
                     <iframe
                         src={`https://meet.jit.si/${activeHearing.videoRoomId}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","closedcaptions","desktop","embedmeeting","fullscreen","fodeviceselection","hangup","profile","chat","recording","livestreaming","etherpad","sharedvideo","settings","raisehand","videoquality","filmstrip","invite","feedback","stats","shortcuts","tileview","videobackgroundblur","download","help","mute-everyone","security"]`}
                         style={{
@@ -198,10 +199,10 @@ export default function ConductHearingPage() {
                         <Video size={28} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Conduct Hearing
                         </h1>
-                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Today's virtual court sessions • SECURE-SYNC Enabled
                         </p>
                     </div>
@@ -212,8 +213,8 @@ export default function ConductHearingPage() {
             {hearings.length === 0 ? (
                 <div style={{ ...glassStyle, textAlign: 'center', padding: '5rem 2rem' }}>
                     <Monitor size={64} color="#475569" style={{ margin: '0 auto 1.5rem' }} />
-                    <h3 style={{ color: 'white', fontSize: '1.25rem', margin: '0 0 0.5rem 0' }}>No hearings scheduled for today</h3>
-                    <p style={{ color: '#94a3b8', margin: 0 }}>You have no virtual sessions pending at this moment.</p>
+                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', margin: '0 0 0.5rem 0' }}>No hearings scheduled for today</h3>
+                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>You have no virtual sessions pending at this moment.</p>
                 </div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -226,7 +227,7 @@ export default function ConductHearingPage() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                                     <div style={{ flex: 1, minWidth: '300px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
-                                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                                 {hearing.caseTitle}
                                             </h3>
                                             <span style={{
@@ -243,18 +244,18 @@ export default function ConductHearingPage() {
                                             </span>
                                         </div>
 
-                                        <div style={{ display: 'flex', gap: '2rem', fontSize: '0.875rem', color: '#94a3b8' }}>
+                                        <div style={{ display: 'flex', gap: '2rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <Clock size={16} color="#06b6d4" />
-                                                <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{time}</span>
+                                                <Clock size={16} color="var(--color-accent)" />
+                                                <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{time}</span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <Users size={16} color="#06b6d4" />
-                                                <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{hearing.durationMinutes} minutes</span>
+                                                <Users size={16} color="var(--color-accent)" />
+                                                <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{hearing.durationMinutes} minutes</span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <Shield size={16} color="#06b6d4" />
-                                                <span style={{ color: '#94a3b8' }}>Verified Session</span>
+                                                <Shield size={16} color="var(--color-accent)" />
+                                                <span style={{ color: 'var(--text-secondary)' }}>Verified Session</span>
                                             </div>
                                         </div>
                                     </div>

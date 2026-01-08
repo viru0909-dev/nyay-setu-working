@@ -8,18 +8,18 @@ import {
 import { caseAPI, lawyerAPI } from '../../services/api';
 
 const statusColors = {
-    'PENDING': { bg: '#f5930020', border: '#f59e0b', text: '#f59e0b' },
-    'IN_PROGRESS': { bg: '#3b82f620', border: '#3b82f6', text: '#3b82f6' },
-    'UNDER_REVIEW': { bg: '#8b5cf620', border: '#8b5cf6', text: '#8b5cf6' },
-    'AWAITING_DOCUMENTS': { bg: '#ef444420', border: '#ef4444', text: '#ef4444' },
-    'COMPLETED': { bg: '#10b98120', border: '#10b981', text: '#10b981' },
-    'CLOSED': { bg: '#64748b20', border: '#64748b', text: '#64748b' }
+    'PENDING': { bg: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.2)', text: 'var(--color-warning)' },
+    'IN_PROGRESS': { bg: 'rgba(59, 130, 246, 0.1)', border: 'rgba(59, 130, 246, 0.2)', text: '#3b82f6' },
+    'UNDER_REVIEW': { bg: 'rgba(139, 92, 246, 0.1)', border: 'rgba(139, 92, 246, 0.2)', text: 'var(--color-accent)' },
+    'AWAITING_DOCUMENTS': { bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.2)', text: 'var(--color-error)' },
+    'COMPLETED': { bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.2)', text: 'var(--color-success)' },
+    'CLOSED': { bg: 'var(--bg-glass)', border: 'var(--border-glass)', text: 'var(--text-secondary)' }
 };
 
 const urgencyColors = {
-    'NORMAL': { bg: '#10b98120', text: '#10b981' },
-    'URGENT': { bg: '#f5930020', text: '#f59e0b' },
-    'CRITICAL': { bg: '#ef444420', text: '#ef4444' }
+    'NORMAL': { bg: 'rgba(16, 185, 129, 0.1)', text: 'var(--color-success)' },
+    'URGENT': { bg: 'rgba(245, 158, 11, 0.1)', text: 'var(--color-warning)' },
+    'CRITICAL': { bg: 'rgba(239, 68, 68, 0.1)', text: 'var(--color-error)' }
 };
 
 export default function LawyerCaseDetailsPage() {
@@ -57,7 +57,7 @@ export default function LawyerCaseDetailsPage() {
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-                <Loader2 size={48} className="spin" style={{ color: '#8b5cf6' }} />
+                <Loader2 size={48} className="spin" style={{ color: 'var(--color-accent)' }} />
                 <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .spin { animation: spin 1s linear infinite; }`}</style>
             </div>
         );
@@ -66,12 +66,12 @@ export default function LawyerCaseDetailsPage() {
     if (error || !caseData) {
         return (
             <div style={{ textAlign: 'center', padding: '3rem' }}>
-                <AlertCircle size={64} style={{ color: '#ef4444', marginBottom: '1rem' }} />
-                <h2 style={{ color: 'white' }}>{error || 'Case not found'}</h2>
+                <AlertCircle size={64} style={{ color: 'var(--color-error)', marginBottom: '1rem' }} />
+                <h2 style={{ color: 'var(--text-main)' }}>{error || 'Case not found'}</h2>
                 <button onClick={() => navigate('/lawyer/cases')} style={{
                     marginTop: '1rem', padding: '0.75rem 1.5rem',
-                    background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-                    border: 'none', borderRadius: '0.5rem', color: 'white', cursor: 'pointer'
+                    background: 'var(--color-accent)',
+                    border: 'none', borderRadius: '0.5rem', color: 'var(--text-main)', cursor: 'pointer'
                 }}>Back to My Cases</button>
             </div>
         );
@@ -81,12 +81,12 @@ export default function LawyerCaseDetailsPage() {
     const urgencyStyle = urgencyColors[caseData.urgency] || urgencyColors['NORMAL'];
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '2rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass-strong)'
     };
 
     return (
@@ -95,17 +95,17 @@ export default function LawyerCaseDetailsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <button onClick={() => navigate('/lawyer/cases')} style={{
-                        background: 'rgba(139, 92, 246, 0.1)',
-                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                        background: 'var(--bg-glass)',
+                        border: 'var(--border-glass)',
                         borderRadius: '0.5rem', padding: '0.5rem',
-                        cursor: 'pointer', color: '#c4b5fd', display: 'flex', alignItems: 'center'
+                        cursor: 'pointer', color: 'var(--color-accent-light)', display: 'flex', alignItems: 'center'
                     }}><ArrowLeft size={20} /></button>
                     <div>
-                        <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'white', marginBottom: '0.25rem' }}>
+                        <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
                             Case Overview (Lawyer View)
                         </h1>
-                        <p style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
-                            Managing case for client: <span style={{ color: '#c4b5fd', fontWeight: '600' }}>{caseData.clientName}</span>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                            Managing case for client: <span style={{ color: 'var(--color-accent-light)', fontWeight: '600' }}>{caseData.clientName}</span>
                         </p>
                     </div>
                 </div>
@@ -115,9 +115,9 @@ export default function LawyerCaseDetailsPage() {
                         style={{
                             display: 'flex', alignItems: 'center', gap: '0.5rem',
                             padding: '0.75rem 1.25rem',
-                            background: 'rgba(139, 92, 246, 0.15)',
-                            border: '1px solid rgba(139, 92, 246, 0.3)',
-                            borderRadius: '0.75rem', color: '#c4b5fd',
+                            background: 'var(--bg-glass)',
+                            border: 'var(--border-glass)',
+                            borderRadius: '0.75rem', color: 'var(--color-accent-light)',
                             fontWeight: '600', cursor: 'pointer'
                         }}
                     >
@@ -128,8 +128,8 @@ export default function LawyerCaseDetailsPage() {
                         style={{
                             display: 'flex', alignItems: 'center', gap: '0.5rem',
                             padding: '0.75rem 1.25rem',
-                            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                            border: 'none', borderRadius: '0.75rem', color: 'white',
+                            background: 'var(--color-accent)',
+                            border: 'none', borderRadius: '0.75rem', color: 'var(--text-main)',
                             fontWeight: '600', cursor: 'pointer'
                         }}
                     >
@@ -143,7 +143,7 @@ export default function LawyerCaseDetailsPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div style={glassStyle}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                 {caseData.title}
                             </h2>
                             <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -159,22 +159,22 @@ export default function LawyerCaseDetailsPage() {
                             </div>
                         </div>
 
-                        <p style={{ fontSize: '1rem', color: '#cbd5e1', lineHeight: '1.7', marginBottom: '2rem' }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2rem' }}>
                             {caseData.description}
                         </p>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: '#10b981' }}>
+                            <div style={{ background: 'var(--bg-glass-subtle)', padding: '1.25rem', borderRadius: '1rem', border: 'var(--border-glass-subtle)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'var(--color-success)' }}>
                                     <User size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>PETITIONER</span>
                                 </div>
-                                <p style={{ color: 'white', fontSize: '1.1rem', fontWeight: '600', margin: 0 }}>{caseData.petitioner}</p>
+                                <p style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: '600', margin: 0 }}>{caseData.petitioner}</p>
                             </div>
-                            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: '#ef4444' }}>
+                            <div style={{ background: 'var(--bg-glass-subtle)', padding: '1.25rem', borderRadius: '1rem', border: 'var(--border-glass-subtle)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'var(--color-error)' }}>
                                     <Scale size={16} /> <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>RESPONDENT</span>
                                 </div>
-                                <p style={{ color: 'white', fontSize: '1.1rem', fontWeight: '600', margin: 0 }}>{caseData.respondent}</p>
+                                <p style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: '600', margin: 0 }}>{caseData.respondent}</p>
                             </div>
                         </div>
                     </div>
@@ -182,11 +182,11 @@ export default function LawyerCaseDetailsPage() {
                     {caseData.aiGeneratedSummary && (
                         <div style={{ ...glassStyle, background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                                <Sparkles size={20} style={{ color: '#818cf8' }} />
-                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#c7d2fe', margin: 0 }}>Vakil-Friend Extraction</h3>
+                                <Sparkles size={20} style={{ color: 'var(--color-accent-light)' }} />
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--color-accent-light)', margin: 0 }}>Vakil-Friend Extraction</h3>
                             </div>
                             <pre style={{
-                                color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6',
+                                color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.6',
                                 whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0
                             }}>{caseData.aiGeneratedSummary}</pre>
                         </div>
@@ -196,33 +196,33 @@ export default function LawyerCaseDetailsPage() {
                 {/* Right Column: Sidebar Stats */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div style={glassStyle}>
-                        <h3 style={{ color: 'white', fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: '700' }}>Timeline & Schedule</h3>
+                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: '700' }}>Timeline & Schedule</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '0.6rem', borderRadius: '0.5rem', color: '#10b981' }}>
+                                <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '0.6rem', borderRadius: '0.5rem', color: 'var(--color-success)' }}>
                                     <Calendar size={18} />
                                 </div>
                                 <div>
-                                    <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>FILED DATE</div>
-                                    <div style={{ color: 'white', fontSize: '0.95rem' }}>{formatDate(caseData.filedDate)}</div>
+                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '700' }}>FILED DATE</div>
+                                    <div style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>{formatDate(caseData.filedDate)}</div>
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '0.6rem', borderRadius: '0.5rem', color: '#f59e0b' }}>
+                                <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '0.6rem', borderRadius: '0.5rem', color: 'var(--color-warning)' }}>
                                     <Gavel size={18} />
                                 </div>
                                 <div>
-                                    <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>JUDGE</div>
-                                    <div style={{ color: 'white', fontSize: '0.95rem' }}>{caseData.assignedJudge || 'Awaiting Assignment'}</div>
+                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '700' }}>JUDGE</div>
+                                    <div style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>{caseData.assignedJudge || 'Awaiting Assignment'}</div>
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '0.6rem', borderRadius: '0.5rem', color: '#818cf8' }}>
+                                <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '0.6rem', borderRadius: '0.5rem', color: 'var(--color-accent-light)' }}>
                                     <Clock size={18} />
                                 </div>
                                 <div>
-                                    <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>NEXT HEARING</div>
-                                    <div style={{ color: 'white', fontSize: '0.95rem' }}>{formatDate(caseData.nextHearing) || 'Not Scheduled'}</div>
+                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '700' }}>NEXT HEARING</div>
+                                    <div style={{ color: 'var(--text-main)', fontSize: '0.95rem' }}>{formatDate(caseData.nextHearing) || 'Not Scheduled'}</div>
                                 </div>
                             </div>
                         </div>
@@ -233,7 +233,7 @@ export default function LawyerCaseDetailsPage() {
                         border: '1px solid rgba(16, 185, 129, 0.3)',
                         borderRadius: '1.5rem', padding: '1.5rem'
                     }}>
-                        <h3 style={{ color: '#34d399', fontSize: '1rem', marginBottom: '0.75rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <h3 style={{ color: 'var(--color-success)', fontSize: '1rem', marginBottom: '0.75rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <CheckCircle size={18} /> Lawyer Quick Checklist
                         </h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -244,8 +244,8 @@ export default function LawyerCaseDetailsPage() {
                                 'Upload POA (Power of Attorney)',
                                 'Schedule client briefing'
                             ].map((item, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#a7f3d0', fontSize: '0.85rem' }}>
-                                    <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#10b981' }} />
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '0.85rem' }}>
+                                    <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--color-success)' }} />
                                     {item}
                                 </div>
                             ))}

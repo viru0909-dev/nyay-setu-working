@@ -31,7 +31,9 @@ export default function AIDocumentReviewPage() {
             formData.append('category', 'LEGAL_DOCUMENTS');
             formData.append('description', 'AI Analysis Document');
 
-            const uploadResponse = await fetch('http://localhost:8080/api/documents/upload', {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+            const uploadResponse = await fetch(`${API_BASE_URL}/api/documents/upload`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -47,7 +49,7 @@ export default function AIDocumentReviewPage() {
             const documentId = uploadedDoc.id;
 
             // Step 2: Trigger AI analysis
-            const analyzeResponse = await fetch(`http://localhost:8080/api/documents/${documentId}/analyze`, {
+            const analyzeResponse = await fetch(`${API_BASE_URL}/api/documents/${documentId}/analyze`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -64,7 +66,7 @@ export default function AIDocumentReviewPage() {
 
             const checkAnalysis = async () => {
                 try {
-                    const checkResponse = await fetch(`http://localhost:8080/api/documents/${documentId}/analysis`, {
+                    const checkResponse = await fetch(`${API_BASE_URL}/api/documents/${documentId}/analysis`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
@@ -155,29 +157,30 @@ export default function AIDocumentReviewPage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             {/* Header */}
             <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'white', marginBottom: '0.5rem' }}>
+                <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                     AI Document Review
                 </h1>
-                <p style={{ fontSize: '1rem', color: '#94a3b8' }}>
+                <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
                     Upload legal documents for AI-powered analysis and recommendations
                 </p>
             </div>
 
             {/* Upload Section */}
             <div style={{
-                background: 'rgba(30, 41, 59, 0.8)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
+                background: 'var(--bg-glass-strong)',
+                backdropFilter: 'var(--glass-blur)',
+                border: 'var(--border-glass-strong)',
                 borderRadius: '1.5rem',
                 padding: '2rem',
-                marginBottom: '2rem'
+                marginBottom: '2rem',
+                boxShadow: 'var(--shadow-glass-strong)'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
                     <div style={{
                         width: '56px',
                         height: '56px',
                         borderRadius: '14px',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
@@ -185,10 +188,10 @@ export default function AIDocumentReviewPage() {
                         <Brain size={28} color="white" />
                     </div>
                     <div>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white', marginBottom: '0.25rem' }}>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
                             Document Analysis
                         </h2>
-                        <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                             Powered by AI • Get instant insights
                         </p>
                     </div>
@@ -198,8 +201,8 @@ export default function AIDocumentReviewPage() {
                 <label style={{
                     display: 'block',
                     padding: '3rem',
-                    background: 'rgba(15, 23, 42, 0.6)',
-                    border: selectedFile ? '2px dashed #8b5cf6' : '2px dashed rgba(139, 92, 246, 0.3)',
+                    background: 'var(--bg-glass)',
+                    border: selectedFile ? '2px dashed var(--color-accent)' : '2px dashed var(--border-glass)',
                     borderRadius: '1rem',
                     textAlign: 'center',
                     cursor: 'pointer',
@@ -207,12 +210,12 @@ export default function AIDocumentReviewPage() {
                     marginBottom: '1.5rem'
                 }}
                     onMouseOver={(e) => {
-                        e.currentTarget.style.borderColor = '#8b5cf6';
-                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
+                        e.currentTarget.style.borderColor = 'var(--color-accent)';
+                        e.currentTarget.style.background = 'var(--bg-glass-hover)';
                     }}
                     onMouseOut={(e) => {
-                        e.currentTarget.style.borderColor = selectedFile ? '#8b5cf6' : 'rgba(139, 92, 246, 0.3)';
-                        e.currentTarget.style.background = 'rgba(15, 23, 42, 0.6)';
+                        e.currentTarget.style.borderColor = selectedFile ? 'var(--color-accent)' : 'var(--border-glass)';
+                        e.currentTarget.style.background = 'var(--bg-glass)';
                     }}
                 >
                     <input
@@ -223,21 +226,21 @@ export default function AIDocumentReviewPage() {
                     />
                     {selectedFile ? (
                         <>
-                            <FileText size={48} style={{ color: '#8b5cf6', margin: '0 auto 1rem' }} />
-                            <p style={{ fontSize: '1.125rem', fontWeight: '600', color: 'white', marginBottom: '0.5rem' }}>
+                            <FileText size={48} style={{ color: 'var(--color-accent)', margin: '0 auto 1rem' }} />
+                            <p style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                                 {selectedFile.name}
                             </p>
-                            <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • Click to change
                             </p>
                         </>
                     ) : (
                         <>
-                            <Upload size={48} style={{ color: '#8b5cf6', margin: '0 auto 1rem' }} />
-                            <p style={{ fontSize: '1.125rem', fontWeight: '600', color: 'white', marginBottom: '0.5rem' }}>
+                            <Upload size={48} style={{ color: 'var(--color-accent)', margin: '0 auto 1rem' }} />
+                            <p style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                                 Click to upload document
                             </p>
-                            <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                                 PDF files only (max 10MB)
                             </p>
                         </>
@@ -252,11 +255,11 @@ export default function AIDocumentReviewPage() {
                         width: '100%',
                         padding: '1rem',
                         background: (!selectedFile || analyzing)
-                            ? 'rgba(148, 163, 184, 0.2)'
-                            : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                            ? 'var(--bg-glass)'
+                            : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                         border: 'none',
                         borderRadius: '0.75rem',
-                        color: (!selectedFile || analyzing) ? '#64748b' : 'white',
+                        color: (!selectedFile || analyzing) ? 'var(--text-secondary)' : 'white',
                         fontSize: '1.05rem',
                         fontWeight: '700',
                         cursor: (!selectedFile || analyzing) ? 'not-allowed' : 'pointer',
@@ -264,7 +267,7 @@ export default function AIDocumentReviewPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '0.5rem',
-                        boxShadow: (!selectedFile || analyzing) ? 'none' : '0 4px 15px rgba(139, 92, 246, 0.4)'
+                        boxShadow: (!selectedFile || analyzing) ? 'none' : 'var(--shadow-glass-strong)'
                     }}
                 >
                     {analyzing ? (
@@ -286,18 +289,19 @@ export default function AIDocumentReviewPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     {/* Overall Score */}
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '1.5rem',
-                        padding: '2rem'
+                        padding: '2rem',
+                        boxShadow: 'var(--shadow-glass-strong)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                             <div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '0.5rem' }}>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                                     Document Quality Score
                                 </h3>
-                                <p style={{ fontSize: '0.875rem', color: '#8b5cf6', fontWeight: '600' }}>
+                                <p style={{ fontSize: '0.875rem', color: 'var(--color-accent)', fontWeight: '600' }}>
                                     {analysis.category}
                                 </p>
                             </div>
@@ -305,7 +309,7 @@ export default function AIDocumentReviewPage() {
                                 width: '120px',
                                 height: '120px',
                                 borderRadius: '50%',
-                                background: `conic-gradient(#8b5cf6 ${analysis.score * 3.6}deg, rgba(148, 163, 184, 0.2) 0deg)`,
+                                background: `conic-gradient(var(--color-accent) ${analysis.score * 3.6}deg, var(--bg-glass) 0deg)`,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -315,16 +319,16 @@ export default function AIDocumentReviewPage() {
                                     width: '100px',
                                     height: '100px',
                                     borderRadius: '50%',
-                                    background: 'rgba(15, 23, 42, 0.9)',
+                                    background: 'var(--bg-glass-strong)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     flexDirection: 'column'
                                 }}>
-                                    <span style={{ fontSize: '2rem', fontWeight: '800', color: 'white' }}>
+                                    <span style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)' }}>
                                         {analysis.score}
                                     </span>
-                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                                         / 100
                                     </span>
                                 </div>
@@ -371,13 +375,14 @@ export default function AIDocumentReviewPage() {
 
                     {/* Compliance Check */}
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '1.5rem',
-                        padding: '2rem'
+                        padding: '2rem',
+                        boxShadow: 'var(--shadow-glass-strong)'
                     }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
                             Compliance Check
                         </h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -389,14 +394,14 @@ export default function AIDocumentReviewPage() {
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
                                         padding: '1rem',
-                                        background: 'rgba(15, 23, 42, 0.6)',
+                                        background: 'var(--bg-glass)',
                                         borderRadius: '0.75rem',
                                         border: check.passed
                                             ? '1px solid rgba(16, 185, 129, 0.2)'
                                             : '1px solid rgba(239, 68, 68, 0.2)'
                                     }}
                                 >
-                                    <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#e2e8f0' }}>
+                                    <span style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-main)' }}>
                                         {check.item}
                                     </span>
                                     {check.passed ? (
@@ -411,14 +416,15 @@ export default function AIDocumentReviewPage() {
 
                     {/* AI Suggestions */}
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '1.5rem',
-                        padding: '2rem'
+                        padding: '2rem',
+                        boxShadow: 'var(--shadow-glass-strong)'
                     }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Sparkles size={20} color="#8b5cf6" />
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Sparkles size={20} color="var(--color-accent)" />
                             AI Recommendations
                         </h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -430,8 +436,8 @@ export default function AIDocumentReviewPage() {
                                         alignItems: 'start',
                                         gap: '0.75rem',
                                         padding: '1rem',
-                                        background: 'rgba(139, 92, 246, 0.1)',
-                                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
                                         borderRadius: '0.75rem'
                                     }}
                                 >
@@ -446,11 +452,11 @@ export default function AIDocumentReviewPage() {
                                         flexShrink: 0,
                                         fontSize: '0.75rem',
                                         fontWeight: '700',
-                                        color: '#8b5cf6'
+                                        color: 'var(--color-accent)'
                                     }}>
                                         {index + 1}
                                     </div>
-                                    <p style={{ fontSize: '0.875rem', color: '#e2e8f0', lineHeight: '1.6' }}>
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
                                         {suggestion}
                                     </p>
                                 </div>
@@ -462,13 +468,14 @@ export default function AIDocumentReviewPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                         {/* Key Points */}
                         <div style={{
-                            background: 'rgba(30, 41, 59, 0.8)',
-                            backdropFilter: 'blur(20px)',
-                            border: '1px solid rgba(139, 92, 246, 0.2)',
+                            background: 'var(--bg-glass-strong)',
+                            backdropFilter: 'var(--glass-blur)',
+                            border: 'var(--border-glass-strong)',
                             borderRadius: '1.5rem',
-                            padding: '2rem'
+                            padding: '2rem',
+                            boxShadow: 'var(--shadow-glass-strong)'
                         }}>
-                            <h3 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'white', marginBottom: '1.5rem' }}>
+                            <h3 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
                                 Key Points Extracted
                             </h3>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -477,7 +484,7 @@ export default function AIDocumentReviewPage() {
                                         key={index}
                                         style={{
                                             fontSize: '0.875rem',
-                                            color: '#94a3b8',
+                                            color: 'var(--text-secondary)',
                                             paddingLeft: '1.5rem',
                                             position: 'relative'
                                         }}
@@ -489,7 +496,7 @@ export default function AIDocumentReviewPage() {
                                             width: '6px',
                                             height: '6px',
                                             borderRadius: '50%',
-                                            background: '#8b5cf6'
+                                            background: 'var(--color-accent)'
                                         }} />
                                         {point}
                                     </li>
@@ -499,13 +506,14 @@ export default function AIDocumentReviewPage() {
 
                         {/* Similar Cases */}
                         <div style={{
-                            background: 'rgba(30, 41, 59, 0.8)',
-                            backdropFilter: 'blur(20px)',
-                            border: '1px solid rgba(139, 92, 246, 0.2)',
+                            background: 'var(--bg-glass-strong)',
+                            backdropFilter: 'var(--glass-blur)',
+                            border: 'var(--border-glass-strong)',
                             borderRadius: '1.5rem',
-                            padding: '2rem'
+                            padding: '2rem',
+                            boxShadow: 'var(--shadow-glass-strong)'
                         }}>
-                            <h3 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'white', marginBottom: '1.5rem' }}>
+                            <h3 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
                                 Similar Cases
                             </h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -514,20 +522,20 @@ export default function AIDocumentReviewPage() {
                                         key={index}
                                         style={{
                                             padding: '1rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
+                                            background: 'var(--bg-glass)',
                                             borderRadius: '0.75rem',
                                             cursor: 'pointer',
                                             transition: 'all 0.2s'
                                         }}
                                         onMouseOver={(e) => {
-                                            e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
+                                            e.currentTarget.style.background = 'var(--bg-glass-hover)';
                                         }}
                                         onMouseOut={(e) => {
-                                            e.currentTarget.style.background = 'rgba(15, 23, 42, 0.6)';
+                                            e.currentTarget.style.background = 'var(--bg-glass)';
                                         }}
                                     >
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#8b5cf6' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-accent)' }}>
                                                 {caseItem.id}
                                             </span>
                                             <span style={{
@@ -541,7 +549,7 @@ export default function AIDocumentReviewPage() {
                                                 {caseItem.relevance}% match
                                             </span>
                                         </div>
-                                        <p style={{ fontSize: '0.875rem', color: '#e2e8f0' }}>
+                                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                                             {caseItem.title}
                                         </p>
                                     </div>
@@ -560,10 +568,10 @@ export default function AIDocumentReviewPage() {
                             style={{
                                 flex: 1,
                                 padding: '1rem',
-                                background: 'rgba(148, 163, 184, 0.1)',
-                                border: '1px solid rgba(148, 163, 184, 0.2)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.75rem',
-                                color: '#94a3b8',
+                                color: 'var(--text-secondary)',
                                 fontSize: '1rem',
                                 fontWeight: '600',
                                 cursor: 'pointer'

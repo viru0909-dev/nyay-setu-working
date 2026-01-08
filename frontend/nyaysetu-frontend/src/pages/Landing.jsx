@@ -68,7 +68,7 @@ export default function Landing() {
         <div style={{
             position: 'relative',
             minHeight: '100vh',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #1e293b 100%)'
+            background: 'var(--bg-main)',
         }}>
             {/* Temporarily comment out 3D background */}
             {/* <AnimatedBackground /> */}
@@ -78,28 +78,39 @@ export default function Landing() {
             <main style={{ position: 'relative', zIndex: 1 }}>
                 {/* Hero Section */}
                 <section id="home" style={{
-                    minHeight: '100vh',
+                    minHeight: 'calc(100vh - 80px)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: '6rem 2rem 4rem',
+                    padding: '2rem',
                     textAlign: 'center'
                 }}>
-                    <div className="container" style={{ maxWidth: '1200px' }}>
+                    <div className="container" style={{ maxWidth: '1200px', width: '100%' }}>
                         <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.8 }}
+                            style={{
+                                background: 'var(--bg-glass-strong)',
+                                backdropFilter: 'var(--glass-blur)',
+                                WebkitBackdropFilter: 'var(--glass-blur)',
+                                borderRadius: '32px',
+                                border: 'var(--border-glass-strong)',
+                                boxShadow: 'var(--shadow-glass)',
+                                padding: '4rem 2rem',
+                                maxWidth: '1000px',
+                                margin: '0 auto'
+                            }}
                         >
                             <div style={{
                                 display: 'inline-block',
                                 padding: '0.5rem 1.5rem',
-                                background: 'rgba(139, 92, 246, 0.1)',
-                                border: '1px solid rgba(139, 92, 246, 0.3)',
+                                background: 'rgba(37, 99, 235, 0.1)',
+                                border: '1px solid rgba(37, 99, 235, 0.2)',
                                 borderRadius: '2rem',
                                 marginBottom: '2rem'
                             }}>
-                                <span style={{ color: '#8b5cf6', fontSize: '0.95rem', fontWeight: '600' }}>
+                                <span style={{ color: 'var(--color-accent)', fontSize: '0.95rem', fontWeight: '600' }}>
                                     ⚡ {t('aboutHeroTag')}
                                 </span>
                             </div>
@@ -107,13 +118,13 @@ export default function Landing() {
                             <h1 style={{
                                 fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
                                 fontWeight: '900',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 marginBottom: '1.5rem',
                                 lineHeight: '1.1'
                             }}>
                                 {t('heroTitle')}{' '}
                                 <span style={{
-                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, #ec4899 100%)',
                                     WebkitBackgroundClip: 'text',
                                     WebkitTextFillColor: 'transparent'
                                 }}>
@@ -123,7 +134,7 @@ export default function Landing() {
 
                             <p style={{
                                 fontSize: 'clamp(1.125rem, 2vw, 1.5rem)',
-                                color: '#94a3b8',
+                                color: 'var(--text-secondary)',
                                 maxWidth: '800px',
                                 margin: '0 auto 3rem',
                                 lineHeight: '1.6'
@@ -132,53 +143,24 @@ export default function Landing() {
                             </p>
 
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                                <Link to="/signup" style={{
-                                    padding: '1rem 2.5rem',
-                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                                    color: 'white',
+                                <Link to="/signup" className="btn btn-primary btn-lg" style={{
                                     textDecoration: 'none',
-                                    borderRadius: '0.75rem',
-                                    fontWeight: '700',
                                     fontSize: '1.125rem',
-                                    boxShadow: '0 8px 30px rgba(139, 92, 246, 0.4)',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    transition: 'all 0.3s'
-                                }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-3px)';
-                                        e.currentTarget.style.boxShadow = '0 12px 40px rgba(139, 92, 246, 0.6)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                        e.currentTarget.style.boxShadow = '0 8px 30px rgba(139, 92, 246, 0.4)';
-                                    }}>
+                                    padding: '1rem 2.5rem'
+                                }}>
                                     {t('getStartedFree')} <ArrowRight size={20} />
                                 </Link>
 
-                                <a href="#features" style={{
-                                    padding: '1rem 2.5rem',
-                                    background: 'rgba(139, 92, 246, 0.1)',
-                                    color: '#8b5cf6',
-                                    textDecoration: 'none',
-                                    border: '2px solid rgba(139, 92, 246, 0.3)',
-                                    borderRadius: '0.75rem',
-                                    fontWeight: '700',
+                                <a href="#features" className="btn" style={{
+                                    background: 'var(--bg-glass)',
+                                    color: 'var(--color-accent)',
+                                    border: 'var(--border-glass-strong)',
                                     fontSize: '1.125rem',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    transition: 'all 0.3s'
-                                }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
-                                        e.currentTarget.style.transform = 'translateY(-3px)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                    }}>
+                                    padding: '1rem 2.5rem',
+                                    textDecoration: 'none',
+                                    fontWeight: '700',
+                                    borderRadius: '0.75rem'
+                                }}>
                                     {t('watchDemo')}
                                 </a>
                             </div>
@@ -187,7 +169,8 @@ export default function Landing() {
                 </section>
 
                 {/* Stats Section */}
-                <section style={{ padding: '4rem 2rem', background: 'rgba(15, 23, 42, 0.5)' }}>
+                {/* Stats Section - Floating Glass Cards */}
+                <section style={{ padding: '0 2rem 4rem' }}>
                     <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <div style={{
                             display: 'grid',
@@ -195,21 +178,32 @@ export default function Landing() {
                             gap: '2rem'
                         }}>
                             {stats.map((stat, idx) => (
-                                <div key={idx} style={{ textAlign: 'center' }}>
+                                <motion.div
+                                    key={idx}
+                                    className="card"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    style={{
+                                        textAlign: 'center',
+                                        padding: '2rem'
+                                    }}
+                                >
                                     <div style={{
                                         fontSize: 'clamp(2.5rem, 4vw, 3.5rem)',
                                         fontWeight: '900',
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, #ec4899 100%)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
                                         marginBottom: '0.5rem'
                                     }}>
                                         {stat.number}
                                     </div>
-                                    <div style={{ color: '#94a3b8', fontSize: '1.125rem', fontWeight: '600' }}>
+                                    <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', fontWeight: '600' }}>
                                         {stat.label}
                                     </div>
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
                     </div>
@@ -225,19 +219,19 @@ export default function Landing() {
                             <h2 style={{
                                 fontSize: 'clamp(2rem, 4vw, 3rem)',
                                 fontWeight: '900',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 marginBottom: '1rem'
                             }}>
                                 {t('featuresTitle')}{' '}
                                 <span style={{
-                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, #6366f1 100%)',
                                     WebkitBackgroundClip: 'text',
                                     WebkitTextFillColor: 'transparent'
                                 }}>
                                     {t('featuresTitleHighlight')}
                                 </span>
                             </h2>
-                            <p style={{ fontSize: '1.25rem', color: '#94a3b8', maxWidth: '600px', margin: '0 auto' }}>
+                            <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
                                 {t('featuresSubtitle')}
                             </p>
                         </div>
@@ -248,26 +242,16 @@ export default function Landing() {
                             gap: '2rem'
                         }}>
                             {features.map((feature, idx) => (
-                                <div
+                                <motion.div
                                     key={idx}
+                                    className="card"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    whileHover={{ y: -8 }}
                                     style={{
                                         padding: '2rem',
-                                        background: 'rgba(30, 41, 59, 0.6)',
-                                        backdropFilter: 'blur(20px)',
-                                        borderRadius: '1.5rem',
-                                        border: '1px solid rgba(139, 92, 246, 0.2)',
-                                        transition: 'all 0.3s',
                                         cursor: 'pointer'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-8px)';
-                                        e.currentTarget.style.borderColor = feature.color;
-                                        e.currentTarget.style.boxShadow = `0 20px 40px ${feature.color}30`;
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                        e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
-                                        e.currentTarget.style.boxShadow = 'none';
                                     }}
                                 >
                                     <div style={{
@@ -283,13 +267,13 @@ export default function Landing() {
                                     }}>
                                         {feature.icon}
                                     </div>
-                                    <h3 style={{ color: 'white', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                                         {feature.title}
                                     </h3>
-                                    <p style={{ color: '#94a3b8', fontSize: '1rem', lineHeight: '1.6' }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.6' }}>
                                         {feature.description}
                                     </p>
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
                     </div>
@@ -302,37 +286,36 @@ export default function Landing() {
                 <NewsSection />
 
                 {/* CTA Section */}
+                {/* CTA Section */}
                 <section style={{
                     padding: '6rem 2rem',
-                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)'
+                    marginBottom: '4rem'
                 }}>
-                    <div className="container" style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
-                        <h2 style={{
-                            fontSize: 'clamp(2rem, 4vw, 3rem)',
-                            fontWeight: '900',
-                            color: 'white',
-                            marginBottom: '1.5rem'
+                    <div className="container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                        <div className="card" style={{
+                            padding: '4rem 2rem',
+                            textAlign: 'center',
+                            borderRadius: '32px',
+                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%)'
                         }}>
-                            {t('ctaTitle')}
-                        </h2>
-                        <p style={{ fontSize: '1.25rem', color: '#94a3b8', marginBottom: '2.5rem' }}>
-                            {t('ctaSubtitle')}
-                        </p>
-                        <Link to="/signup" style={{
-                            padding: '1.25rem 3rem',
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                            color: 'white',
-                            textDecoration: 'none',
-                            borderRadius: '0.75rem',
-                            fontWeight: '700',
-                            fontSize: '1.25rem',
-                            boxShadow: '0 8px 30px rgba(139, 92, 246, 0.4)',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.75rem'
-                        }}>
-                            {t('createAccount')} <ArrowRight size={24} />
-                        </Link>
+                            <h2 style={{
+                                fontSize: 'clamp(2rem, 4vw, 3rem)',
+                                fontWeight: '900',
+                                color: 'var(--text-main)',
+                                marginBottom: '1.5rem'
+                            }}>
+                                {t('ctaTitle')}
+                            </h2>
+                            <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>
+                                {t('ctaSubtitle')}
+                            </p>
+                            <Link to="/signup" className="btn btn-primary btn-lg" style={{
+                                textDecoration: 'none',
+                                fontSize: '1.25rem'
+                            }}>
+                                {t('createAccount')} <ArrowRight size={24} />
+                            </Link>
+                        </div>
                     </div>
                 </section>
             </main>

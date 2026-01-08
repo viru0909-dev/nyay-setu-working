@@ -59,12 +59,12 @@ export default function CasePreparationPage() {
     ];
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass-strong)'
     };
 
     const handleAutoDraft = async () => {
@@ -91,17 +91,17 @@ export default function CasePreparationPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{
                         width: '56px', height: '56px', borderRadius: '14px',
-                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        background: 'var(--color-accent)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 8px 16px rgba(99, 102, 241, 0.2)'
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         <FileText size={28} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Case Preparation & Drafting
                         </h1>
-                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Generate, refine, and manage legal petitions and pleadings with AI assistance
                         </p>
                     </div>
@@ -112,21 +112,21 @@ export default function CasePreparationPage() {
                 {/* Left: Templates Sidebar */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div style={{ ...glassStyle, padding: '1.25rem' }}>
-                        <h3 style={{ color: 'white', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Layers size={18} color="#818cf8" /> Document Templates
+                        <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Layers size={18} color="var(--color-accent)" /> Document Templates
                         </h3>
                         <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
-                            <Search size={16} color="#64748b" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
+                            <Search size={16} color="var(--text-secondary)" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
                             <input
                                 type="text"
                                 placeholder="Search templates..."
                                 style={{
                                     width: '100%',
-                                    background: 'rgba(15, 23, 42, 0.4)',
-                                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     borderRadius: '0.6rem',
                                     padding: '0.6rem 0.6rem 0.6rem 2.2rem',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.85rem'
                                 }}
                             />
@@ -138,22 +138,22 @@ export default function CasePreparationPage() {
                                     onClick={() => setSelectedTemplate(t)}
                                     style={{
                                         padding: '0.875rem',
-                                        background: selectedTemplate?.id === t.id ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.02)',
-                                        border: `1px solid ${selectedTemplate?.id === t.id ? 'rgba(99, 102, 241, 0.4)' : 'rgba(255, 255, 255, 0.05)'}`,
+                                        background: selectedTemplate?.id === t.id ? 'var(--bg-glass-subtle)' : 'transparent',
+                                        border: `1px solid ${selectedTemplate?.id === t.id ? 'var(--color-accent)' : 'var(--border-glass-subtle)'}`,
                                         borderRadius: '0.75rem',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s'
                                     }}
                                 >
-                                    <div style={{ color: 'white', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.2rem' }}>{t.name}</div>
+                                    <div style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.2rem' }}>{t.name}</div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>{t.category}</span>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t.category}</span>
                                         <span style={{
                                             fontSize: '0.65rem',
                                             padding: '0.1rem 0.4rem',
                                             borderRadius: '4px',
-                                            background: 'rgba(255,255,255,0.05)',
-                                            color: '#94a3b8'
+                                            background: 'var(--bg-glass-subtle)',
+                                            color: 'var(--text-secondary)'
                                         }}>{t.complexity}</span>
                                     </div>
                                 </div>
@@ -162,19 +162,19 @@ export default function CasePreparationPage() {
                     </div>
 
                     <div style={{ ...glassStyle, padding: '1.25rem' }}>
-                        <h3 style={{ color: 'white', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Briefcase size={18} color="#818cf8" /> Link to Case
+                        <h3 style={{ color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Briefcase size={18} color="var(--color-accent)" /> Link to Case
                         </h3>
                         <select
                             value={selectedCaseId || ''}
                             onChange={(e) => setSelectedCaseId(e.target.value)}
                             style={{
                                 width: '100%',
-                                background: 'rgba(15, 23, 42, 0.4)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.6rem',
                                 padding: '0.75rem',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 fontSize: '0.85rem',
                                 outline: 'none'
                             }}
@@ -192,11 +192,11 @@ export default function CasePreparationPage() {
                         )}
                     </div>
 
-                    <div style={{ ...glassStyle, padding: '1.25rem', background: 'rgba(99, 102, 241, 0.1)' }}>
-                        <h4 style={{ color: '#818cf8', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ ...glassStyle, padding: '1.25rem', background: 'var(--bg-glass-subtle)' }}>
+                        <h4 style={{ color: 'var(--color-accent)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <Sparkles size={16} /> AI Assistant Tip
                         </h4>
-                        <p style={{ color: '#94a3b8', fontSize: '0.85rem', lineHeight: '1.5', margin: 0 }}>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.5', margin: 0 }}>
                             To get the best draft, ensure you have linked the relevant case file from your dashboard. Our AI will automatically analyze the facts of the case to populate the template.
                         </p>
                     </div>
@@ -210,17 +210,17 @@ export default function CasePreparationPage() {
                         alignItems: 'center',
                         marginBottom: '1.5rem',
                         paddingBottom: '1rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+                        borderBottom: 'var(--border-glass-subtle)'
                     }}>
                         <div>
-                            <h3 style={{ color: 'white', margin: 0, fontSize: '1.25rem' }}>
+                            <h3 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.25rem' }}>
                                 {selectedTemplate ? selectedTemplate.name : 'Choose a Template to Begin'}
                             </h3>
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
-                                <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                                     <Clock size={12} /> Last edited: Never
                                 </span>
-                                <span style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                                     <CheckCircle2 size={12} /> Auto-saved
                                 </span>
                             </div>
@@ -231,8 +231,8 @@ export default function CasePreparationPage() {
                                 disabled={!selectedTemplate || isDrafting}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    background: 'rgba(99, 102, 241, 0.15)',
-                                    color: '#818cf8', border: '1px solid rgba(99, 102, 241, 0.3)',
+                                    background: 'var(--bg-glass-subtle)',
+                                    color: 'var(--color-accent)', border: 'var(--border-glass-subtle)',
                                     padding: '0.6rem 1rem', borderRadius: '0.75rem', fontWeight: '700',
                                     fontSize: '0.85rem', cursor: (selectedTemplate && !isDrafting) ? 'pointer' : 'not-allowed'
                                 }}
@@ -242,7 +242,7 @@ export default function CasePreparationPage() {
                             </button>
                             <button style={{
                                 display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                background: '#334155', color: 'white', border: 'none',
+                                background: 'var(--bg-glass)', color: 'var(--text-main)', border: 'var(--border-glass)',
                                 padding: '0.6rem 1rem', borderRadius: '0.75rem', fontWeight: '700',
                                 fontSize: '0.85rem', cursor: 'pointer'
                             }}>
@@ -250,8 +250,8 @@ export default function CasePreparationPage() {
                             </button>
                             <button style={{
                                 display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                                color: 'white', border: 'none',
+                                background: 'var(--color-accent)',
+                                color: 'var(--text-main)', border: 'none',
                                 padding: '0.6rem 1rem', borderRadius: '0.75rem', fontWeight: '700',
                                 fontSize: '0.85rem', cursor: 'pointer'
                             }}>
@@ -264,13 +264,13 @@ export default function CasePreparationPage() {
                         {!selectedTemplate && (
                             <div style={{
                                 position: 'absolute', inset: 0, zIndex: 10,
-                                background: 'rgba(15, 23, 42, 0.6)', borderRadius: '1rem',
+                                background: 'var(--bg-glass-strong)', borderRadius: '1rem',
                                 display: 'flex', flexDirection: 'column', alignItems: 'center',
                                 justifyContent: 'center', textAlign: 'center', padding: '2rem'
                             }}>
-                                <Type size={48} color="#1e293b" style={{ marginBottom: '1rem' }} />
-                                <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>No Template Selected</h3>
-                                <p style={{ color: '#64748b', fontSize: '0.9rem', maxWidth: '300px' }}>
+                                <Type size={48} color="var(--text-secondary)" style={{ marginBottom: '1rem' }} />
+                                <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>No Template Selected</h3>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '300px' }}>
                                     Please select a document type from the sidebar to begin your professional draft.
                                 </p>
                             </div>
@@ -282,11 +282,11 @@ export default function CasePreparationPage() {
                             style={{
                                 width: '100%',
                                 height: '500px',
-                                background: 'rgba(15, 23, 42, 0.4)',
-                                border: '1px solid rgba(255, 255, 255, 0.05)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '1rem',
                                 padding: '2rem',
-                                color: '#e2e8f0',
+                                color: 'var(--text-main)',
                                 fontFamily: '"Inter", "Courier New", monospace',
                                 fontSize: '1rem',
                                 lineHeight: '1.8',

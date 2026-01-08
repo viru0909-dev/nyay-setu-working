@@ -79,10 +79,10 @@ export default function ProfilePage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             {/* Header */}
             <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'white', marginBottom: '0.5rem' }}>
+                <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                     Profile Settings
                 </h1>
-                <p style={{ fontSize: '1rem', color: '#94a3b8' }}>
+                <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
                     Manage your account information and security settings
                 </p>
             </div>
@@ -91,12 +91,13 @@ export default function ProfilePage() {
                 {/* Left Column - Profile Card */}
                 <div>
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '1.5rem',
                         padding: '2rem',
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         {/* Profile Photo */}
                         <div style={{ position: 'relative', display: 'inline-block', marginBottom: '1.5rem' }}>
@@ -104,14 +105,15 @@ export default function ProfilePage() {
                                 width: '120px',
                                 height: '120px',
                                 borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontSize: '3rem',
                                 fontWeight: '800',
                                 color: 'white',
-                                border: '4px solid rgba(139, 92, 246, 0.3)'
+                                border: '4px solid rgba(139, 92, 246, 0.3)',
+                                boxShadow: 'var(--shadow-glass-strong)'
                             }}>
                                 {profileData.name.charAt(0).toUpperCase()}
                             </div>
@@ -123,8 +125,8 @@ export default function ProfilePage() {
                                     width: '40px',
                                     height: '40px',
                                     borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                                    border: '3px solid rgba(15, 23, 42, 0.9)',
+                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                    border: '3px solid var(--bg-glass-strong)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -136,13 +138,13 @@ export default function ProfilePage() {
                             </button>
                         </div>
 
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white', marginBottom: '0.5rem' }}>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                             {profileData.name}
                         </h2>
-                        <p style={{ fontSize: '0.875rem', color: '#8b5cf6', fontWeight: '600', marginBottom: '0.25rem' }}>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--color-accent)', fontWeight: '600', marginBottom: '0.25rem' }}>
                             {user?.role?.replace('_', ' ')}
                         </p>
-                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginBottom: '1.5rem' }}>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
                             {profileData.email}
                         </p>
 
@@ -159,16 +161,16 @@ export default function ProfilePage() {
                             marginBottom: '1rem'
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                                <Shield size={16} style={{ color: profileData.faceEnabled ? '#10b981' : '#94a3b8' }} />
+                                <Shield size={16} style={{ color: profileData.faceEnabled ? '#10b981' : 'var(--text-secondary)' }} />
                                 <span style={{
                                     fontSize: '0.875rem',
                                     fontWeight: '600',
-                                    color: profileData.faceEnabled ? '#10b981' : '#94a3b8'
+                                    color: profileData.faceEnabled ? '#10b981' : 'var(--text-secondary)'
                                 }}>
                                     Face Login
                                 </span>
                             </div>
-                            <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                                 {profileData.faceEnabled ? 'Enabled' : 'Not configured'}
                             </p>
                         </div>
@@ -179,7 +181,7 @@ export default function ProfilePage() {
                                 style={{
                                     flex: 1,
                                     padding: '0.875rem',
-                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                     border: 'none',
                                     borderRadius: '0.75rem',
                                     color: 'white',
@@ -189,7 +191,8 @@ export default function ProfilePage() {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    gap: '0.5rem'
+                                    gap: '0.5rem',
+                                    boxShadow: 'var(--shadow-glass-strong)'
                                 }}
                             >
                                 <Camera size={16} />
@@ -222,14 +225,15 @@ export default function ProfilePage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     {/* Personal Information */}
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '1.5rem',
-                        padding: '2rem'
+                        padding: '2rem',
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>
                                 Personal Information
                             </h3>
                             <button
@@ -241,10 +245,10 @@ export default function ProfilePage() {
                                     padding: '0.75rem 1.25rem',
                                     background: editing
                                         ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                                        : 'rgba(139, 92, 246, 0.2)',
-                                    border: editing ? 'none' : '1px solid rgba(139, 92, 246, 0.3)',
+                                        : 'var(--bg-glass)',
+                                    border: editing ? 'none' : 'var(--border-glass)',
                                     borderRadius: '0.5rem',
-                                    color: editing ? 'white' : '#c4b5fd',
+                                    color: editing ? 'white' : 'var(--color-accent)',
                                     fontSize: '0.875rem',
                                     fontWeight: '600',
                                     cursor: 'pointer'
@@ -256,7 +260,7 @@ export default function ProfilePage() {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: '#94a3b8', fontWeight: '600' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
                                     Full Name
                                 </label>
                                 <div style={{
@@ -264,11 +268,11 @@ export default function ProfilePage() {
                                     alignItems: 'center',
                                     gap: '0.75rem',
                                     padding: '0.875rem 1rem',
-                                    background: 'rgba(15, 23, 42, 0.6)',
-                                    border: editing ? '2px solid rgba(139, 92, 246, 0.3)' : '2px solid rgba(139, 92, 246, 0.1)',
+                                    background: 'var(--bg-glass)',
+                                    border: editing ? '2px solid var(--color-accent)' : 'var(--border-glass)',
                                     borderRadius: '0.75rem'
                                 }}>
-                                    <User size={18} style={{ color: '#8b5cf6' }} />
+                                    <User size={18} style={{ color: 'var(--color-accent)' }} />
                                     {editing ? (
                                         <input
                                             type="text"
@@ -277,20 +281,20 @@ export default function ProfilePage() {
                                             style={{
                                                 background: 'none',
                                                 border: 'none',
-                                                color: 'white',
+                                                color: 'var(--text-main)',
                                                 fontSize: '1rem',
                                                 flex: 1,
                                                 outline: 'none'
                                             }}
                                         />
                                     ) : (
-                                        <span style={{ color: 'white', fontSize: '1rem' }}>{profileData.name}</span>
+                                        <span style={{ color: 'var(--text-main)', fontSize: '1rem' }}>{profileData.name}</span>
                                     )}
                                 </div>
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: '#94a3b8', fontWeight: '600' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
                                     Email
                                 </label>
                                 <div style={{
@@ -298,17 +302,17 @@ export default function ProfilePage() {
                                     alignItems: 'center',
                                     gap: '0.75rem',
                                     padding: '0.875rem 1rem',
-                                    background: 'rgba(15, 23, 42, 0.6)',
-                                    border: '2px solid rgba(139, 92, 246, 0.1)',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     borderRadius: '0.75rem'
                                 }}>
-                                    <Mail size={18} style={{ color: '#8b5cf6' }} />
-                                    <span style={{ color: '#94a3b8', fontSize: '1rem' }}>{profileData.email}</span>
+                                    <Mail size={18} style={{ color: 'var(--color-accent)' }} />
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>{profileData.email}</span>
                                 </div>
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: '#94a3b8', fontWeight: '600' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
                                     Phone
                                 </label>
                                 <div style={{
@@ -316,11 +320,11 @@ export default function ProfilePage() {
                                     alignItems: 'center',
                                     gap: '0.75rem',
                                     padding: '0.875rem 1rem',
-                                    background: 'rgba(15, 23, 42, 0.6)',
-                                    border: editing ? '2px solid rgba(139, 92, 246, 0.3)' : '2px solid rgba(139, 92, 246, 0.1)',
+                                    background: 'var(--bg-glass)',
+                                    border: editing ? '2px solid var(--color-accent)' : 'var(--border-glass)',
                                     borderRadius: '0.75rem'
                                 }}>
-                                    <Phone size={18} style={{ color: '#8b5cf6' }} />
+                                    <Phone size={18} style={{ color: 'var(--color-accent)' }} />
                                     {editing ? (
                                         <input
                                             type="text"
@@ -329,20 +333,20 @@ export default function ProfilePage() {
                                             style={{
                                                 background: 'none',
                                                 border: 'none',
-                                                color: 'white',
+                                                color: 'var(--text-main)',
                                                 fontSize: '1rem',
                                                 flex: 1,
                                                 outline: 'none'
                                             }}
                                         />
                                     ) : (
-                                        <span style={{ color: 'white', fontSize: '1rem' }}>{profileData.phone}</span>
+                                        <span style={{ color: 'var(--text-main)', fontSize: '1rem' }}>{profileData.phone}</span>
                                     )}
                                 </div>
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: '#94a3b8', fontWeight: '600' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
                                     Profession
                                 </label>
                                 <div style={{
@@ -350,11 +354,11 @@ export default function ProfilePage() {
                                     alignItems: 'center',
                                     gap: '0.75rem',
                                     padding: '0.875rem 1rem',
-                                    background: 'rgba(15, 23, 42, 0.6)',
-                                    border: editing ? '2px solid rgba(139, 92, 246, 0.3)' : '2px solid rgba(139, 92, 246, 0.1)',
+                                    background: 'var(--bg-glass)',
+                                    border: editing ? '2px solid var(--color-accent)' : 'var(--border-glass)',
                                     borderRadius: '0.75rem'
                                 }}>
-                                    <Briefcase size={18} style={{ color: '#8b5cf6' }} />
+                                    <Briefcase size={18} style={{ color: 'var(--color-accent)' }} />
                                     {editing ? (
                                         <input
                                             type="text"
@@ -363,21 +367,21 @@ export default function ProfilePage() {
                                             style={{
                                                 background: 'none',
                                                 border: 'none',
-                                                color: 'white',
+                                                color: 'var(--text-main)',
                                                 fontSize: '1rem',
                                                 flex: 1,
                                                 outline: 'none'
                                             }}
                                         />
                                     ) : (
-                                        <span style={{ color: 'white', fontSize: '1rem' }}>{profileData.profession}</span>
+                                        <span style={{ color: 'var(--text-main)', fontSize: '1rem' }}>{profileData.profession}</span>
                                     )}
                                 </div>
                             </div>
                         </div>
 
                         <div style={{ marginTop: '1.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: '#94a3b8', fontWeight: '600' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
                                 Address
                             </label>
                             <div style={{
@@ -385,11 +389,11 @@ export default function ProfilePage() {
                                 alignItems: 'center',
                                 gap: '0.75rem',
                                 padding: '0.875rem 1rem',
-                                background: 'rgba(15, 23, 42, 0.6)',
-                                border: editing ? '2px solid rgba(139, 92, 246, 0.3)' : '2px solid rgba(139, 92, 246, 0.1)',
+                                background: 'var(--bg-glass)',
+                                border: editing ? '2px solid var(--color-accent)' : 'var(--border-glass)',
                                 borderRadius: '0.75rem'
                             }}>
-                                <MapPin size={18} style={{ color: '#8b5cf6' }} />
+                                <MapPin size={18} style={{ color: 'var(--color-accent)' }} />
                                 {editing ? (
                                     <input
                                         type="text"
@@ -398,14 +402,14 @@ export default function ProfilePage() {
                                         style={{
                                             background: 'none',
                                             border: 'none',
-                                            color: 'white',
+                                            color: 'var(--text-main)',
                                             fontSize: '1rem',
                                             flex: 1,
                                             outline: 'none'
                                         }}
                                     />
                                 ) : (
-                                    <span style={{ color: 'white', fontSize: '1rem' }}>{profileData.address}</span>
+                                    <span style={{ color: 'var(--text-main)', fontSize: '1rem' }}>{profileData.address}</span>
                                 )}
                             </div>
                         </div>
@@ -413,13 +417,14 @@ export default function ProfilePage() {
 
                     {/* Security Settings */}
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '1.5rem',
-                        padding: '2rem'
+                        padding: '2rem',
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
                             Security Settings
                         </h3>
 
@@ -428,10 +433,10 @@ export default function ProfilePage() {
                             style={{
                                 width: '100%',
                                 padding: '1rem',
-                                background: 'rgba(139, 92, 246, 0.1)',
-                                border: '1px solid rgba(139, 92, 246, 0.3)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.75rem',
-                                color: '#c4b5fd',
+                                color: 'var(--color-accent)',
                                 fontSize: '0.875rem',
                                 fontWeight: '600',
                                 cursor: 'pointer',
@@ -448,7 +453,7 @@ export default function ProfilePage() {
                         {showPasswordChange && (
                             <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: '#94a3b8', fontWeight: '600' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
                                         Current Password
                                     </label>
                                     <input
@@ -458,17 +463,17 @@ export default function ProfilePage() {
                                         style={{
                                             width: '100%',
                                             padding: '0.875rem 1rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.2)',
+                                            background: 'var(--bg-glass)',
+                                            border: 'var(--border-glass)',
                                             borderRadius: '0.75rem',
-                                            color: 'white',
+                                            color: 'var(--text-main)',
                                             fontSize: '1rem'
                                         }}
                                     />
                                 </div>
 
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: '#94a3b8', fontWeight: '600' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
                                         New Password
                                     </label>
                                     <input
@@ -478,17 +483,17 @@ export default function ProfilePage() {
                                         style={{
                                             width: '100%',
                                             padding: '0.875rem 1rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.2)',
+                                            background: 'var(--bg-glass)',
+                                            border: 'var(--border-glass)',
                                             borderRadius: '0.75rem',
-                                            color: 'white',
+                                            color: 'var(--text-main)',
                                             fontSize: '1rem'
                                         }}
                                     />
                                 </div>
 
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: '#94a3b8', fontWeight: '600' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
                                         Confirm New Password
                                     </label>
                                     <input
@@ -498,10 +503,10 @@ export default function ProfilePage() {
                                         style={{
                                             width: '100%',
                                             padding: '0.875rem 1rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.2)',
+                                            background: 'var(--bg-glass)',
+                                            border: 'var(--border-glass)',
                                             borderRadius: '0.75rem',
-                                            color: 'white',
+                                            color: 'var(--text-main)',
                                             fontSize: '1rem'
                                         }}
                                     />
@@ -511,13 +516,14 @@ export default function ProfilePage() {
                                     onClick={handlePasswordChange}
                                     style={{
                                         padding: '0.875rem',
-                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                         border: 'none',
                                         borderRadius: '0.75rem',
                                         color: 'white',
                                         fontSize: '0.875rem',
                                         fontWeight: '700',
-                                        cursor: 'pointer'
+                                        cursor: 'pointer',
+                                        boxShadow: 'var(--shadow-glass-strong)'
                                     }}
                                 >
                                     Update Password

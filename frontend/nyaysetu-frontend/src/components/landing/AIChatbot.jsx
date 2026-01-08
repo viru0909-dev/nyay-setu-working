@@ -85,11 +85,11 @@ export default function AIChatbot() {
                             maxWidth: 'calc(100vw - 4rem)',
                             height: '600px',
                             maxHeight: 'calc(100vh - 140px)',
-                            background: 'rgba(15, 23, 42, 0.98)',
+                            background: 'var(--bg-glass-strong)',
                             backdropFilter: 'blur(20px)',
                             borderRadius: '1rem',
-                            border: '1px solid rgba(139, 92, 246, 0.3)',
-                            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
+                            border: 'var(--border-glass-strong)',
+                            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)', // Lighter shadow
                             zIndex: 1001,
                             display: 'flex',
                             flexDirection: 'column',
@@ -155,10 +155,12 @@ export default function AIChatbot() {
                                         borderRadius: '1rem',
                                         background: msg.role === 'user'
                                             ? 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)'
-                                            : 'rgba(51, 65, 85, 0.6)',
-                                        color: 'white',
+                                            : 'white', // Light background for bot
+                                        color: msg.role === 'user' ? 'white' : 'var(--text-main)',
                                         fontSize: '0.9rem',
-                                        lineHeight: '1.5'
+                                        lineHeight: '1.5',
+                                        boxShadow: msg.role === 'assistant' ? '0 2px 10px rgba(0,0,0,0.05)' : 'none',
+                                        border: msg.role === 'assistant' ? '1px solid rgba(0,0,0,0.05)' : 'none'
                                     }} className="markdown-content">
                                         <ReactMarkdown>
                                             {msg.content}
@@ -171,9 +173,11 @@ export default function AIChatbot() {
                                     <div style={{
                                         padding: '0.875rem 1.125rem',
                                         borderRadius: '1rem',
-                                        background: 'rgba(51, 65, 85, 0.6)',
-                                        color: 'white',
-                                        fontSize: '0.9rem'
+                                        background: 'white',
+                                        color: 'var(--text-main)',
+                                        fontSize: '0.9rem',
+                                        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                                        border: '1px solid rgba(0,0,0,0.05)'
                                     }}>
                                         <div style={{ display: 'flex', gap: '0.25rem' }}>
                                             <span style={{ animation: 'bounce 1.4s infinite' }}>●</span>
@@ -188,8 +192,8 @@ export default function AIChatbot() {
                         {/* Input */}
                         <div style={{
                             padding: '1.25rem',
-                            borderTop: '1px solid rgba(139, 92, 246, 0.2)',
-                            background: 'rgba(30, 41, 59, 0.5)'
+                            borderTop: 'var(--border-glass)',
+                            background: 'rgba(255, 255, 255, 0.5)'
                         }}>
                             <div style={{ display: 'flex', gap: '0.75rem' }}>
                                 <input
@@ -201,10 +205,10 @@ export default function AIChatbot() {
                                     style={{
                                         flex: 1,
                                         padding: '0.75rem 1rem',
-                                        background: 'rgba(15, 23, 42, 0.5)',
-                                        border: '2px solid rgba(139, 92, 246, 0.2)',
+                                        background: 'white',
+                                        border: '1px solid rgba(0, 0, 0, 0.1)',
                                         borderRadius: '0.75rem',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         fontSize: '0.95rem',
                                         outline: 'none'
                                     }}
@@ -246,7 +250,7 @@ export default function AIChatbot() {
                                 font-weight: 700 !important;
                                 margin-top: 0.75rem !important;
                                 margin-bottom: 0.5rem !important;
-                                color: #f8fafc !important;
+                                color: inherit !important;
                                 line-height: 1.4 !important;
                             }
                             .markdown-content p {
@@ -264,7 +268,6 @@ export default function AIChatbot() {
                                 margin-bottom: 0.35rem !important;
                             }
                             .markdown-content strong {
-                                color: #c4b5fd !important;
                                 font-weight: 700 !important;
                             }
                         `}</style>
@@ -274,3 +277,4 @@ export default function AIChatbot() {
         </>
     );
 }
+
