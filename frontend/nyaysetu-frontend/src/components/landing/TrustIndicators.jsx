@@ -84,9 +84,10 @@ export default function TrustIndicators() {
     return (
         <section style={{
             padding: '5rem 2rem',
-            background: 'rgba(15, 23, 42, 0.8)',
-            borderTop: '1px solid rgba(139, 92, 246, 0.2)',
-            borderBottom: '1px solid rgba(139, 92, 246, 0.2)'
+            background: 'var(--bg-glass-strong)', // Use variable
+            backdropFilter: 'var(--glass-blur)',
+            borderTop: 'var(--border-glass)',
+            borderBottom: 'var(--border-glass)'
         }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                 {/* Header */}
@@ -99,7 +100,7 @@ export default function TrustIndicators() {
                     <h2 style={{
                         fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
                         fontWeight: '900',
-                        color: 'white',
+                        color: 'var(--text-main)',
                         marginBottom: '1rem'
                     }}>
                         {language === 'en' ? '🔒 ' : '🔒 '}
@@ -111,7 +112,7 @@ export default function TrustIndicators() {
                             {language === 'en' ? 'Trusted by Thousands' : 'हजारों द्वारा विश्वसनीय'}
                         </span>
                     </h2>
-                    <p style={{ color: '#94a3b8', fontSize: '1.125rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>
                         {language === 'en'
                             ? 'Your security and privacy are our top priorities'
                             : 'आपकी सुरक्षा और गोपनीयता हमारी सर्वोच्च प्राथमिकताएं हैं'
@@ -135,21 +136,24 @@ export default function TrustIndicators() {
                             whileHover={{ y: -5 }}
                             style={{
                                 padding: '2rem',
-                                background: 'rgba(30, 41, 59, 0.5)',
+                                background: 'rgba(255, 255, 255, 0.4)', // Light glass
                                 backdropFilter: 'blur(10px)',
                                 borderRadius: '1.25rem',
-                                border: '1px solid rgba(139, 92, 246, 0.2)',
+                                border: 'var(--border-glass)',
                                 textAlign: 'center',
                                 transition: 'all 0.3s',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                boxShadow: 'var(--shadow-glass)'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.borderColor = item.color;
                                 e.currentTarget.style.boxShadow = `0 15px 40px ${item.color}20`;
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
-                                e.currentTarget.style.boxShadow = 'none';
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                                e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)';
                             }}
                         >
                             {/* Icon */}
@@ -169,7 +173,7 @@ export default function TrustIndicators() {
 
                             {/* Title */}
                             <h3 style={{
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 fontSize: '1.25rem',
                                 fontWeight: '800',
                                 marginBottom: '0.75rem'
@@ -179,7 +183,7 @@ export default function TrustIndicators() {
 
                             {/* Description */}
                             <p style={{
-                                color: '#94a3b8',
+                                color: 'var(--text-secondary)',
                                 fontSize: '0.95rem',
                                 lineHeight: '1.5'
                             }}>
@@ -192,3 +196,4 @@ export default function TrustIndicators() {
         </section>
     );
 }
+

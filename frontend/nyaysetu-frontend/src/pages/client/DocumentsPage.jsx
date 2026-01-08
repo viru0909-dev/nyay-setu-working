@@ -59,7 +59,8 @@ export default function DocumentsPage() {
     const fetchDocuments = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8080/api/documents', {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+            const response = await axios.get(`${API_BASE_URL}/api/documents`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -78,7 +79,8 @@ export default function DocumentsPage() {
     const fetchUserCases = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8080/api/documents/user/cases', {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+            const response = await axios.get(`${API_BASE_URL}/api/documents/user/cases`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -142,7 +144,8 @@ export default function DocumentsPage() {
             }
 
             const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:8080/api/documents/upload', formData, {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+            const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -186,8 +189,9 @@ export default function DocumentsPage() {
         // Simple direct delete - no confirmation
         try {
             const token = localStorage.getItem('token');
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-            await axios.delete(`http://localhost:8080/api/documents/${docId}`, {
+            await axios.delete(`${API_BASE_URL}/api/documents/${docId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -233,10 +237,10 @@ export default function DocumentsPage() {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'white', marginBottom: '0.5rem' }}>
+                    <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                         Documents
                     </h1>
-                    <p style={{ fontSize: '1rem', color: '#94a3b8' }}>
+                    <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
                         Upload and manage your case documents
                     </p>
                 </div>
@@ -247,14 +251,14 @@ export default function DocumentsPage() {
                         alignItems: 'center',
                         gap: '0.5rem',
                         padding: '0.875rem 1.5rem',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                         border: 'none',
                         borderRadius: '0.75rem',
                         color: 'white',
                         fontSize: '1rem',
                         fontWeight: '700',
                         cursor: 'pointer',
-                        boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)'
+                        boxShadow: 'var(--shadow-glass-strong)'
                     }}
                 >
                     <Upload size={20} />
@@ -279,13 +283,14 @@ export default function DocumentsPage() {
                         key={index}
                         style={{
                             padding: '1.25rem',
-                            background: 'rgba(30, 41, 59, 0.6)',
-                            backdropFilter: 'blur(20px)',
-                            border: '1px solid rgba(139, 92, 246, 0.2)',
-                            borderRadius: '1rem'
+                            background: 'var(--bg-glass)',
+                            backdropFilter: 'var(--glass-blur)',
+                            border: 'var(--border-glass)',
+                            borderRadius: '1rem',
+                            boxShadow: 'var(--shadow-glass)'
                         }}
                     >
-                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                             {stat.label}
                         </p>
                         <p style={{ fontSize: '2rem', fontWeight: '800', color: stat.color }}>
@@ -297,12 +302,13 @@ export default function DocumentsPage() {
 
             {/* Search and Filters */}
             <div style={{
-                background: 'rgba(30, 41, 59, 0.8)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
+                background: 'var(--bg-glass-strong)',
+                backdropFilter: 'var(--glass-blur)',
+                border: 'var(--border-glass-strong)',
                 borderRadius: '1.5rem',
                 padding: '1.5rem',
-                marginBottom: '2rem'
+                marginBottom: '2rem',
+                boxShadow: 'var(--shadow-glass)'
             }}>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     {/* Search */}
@@ -322,10 +328,10 @@ export default function DocumentsPage() {
                             style={{
                                 width: '100%',
                                 padding: '0.875rem 1rem 0.875rem 3rem',
-                                background: 'rgba(15, 23, 42, 0.6)',
-                                border: '2px solid rgba(139, 92, 246, 0.2)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.75rem',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 fontSize: '1rem'
                             }}
                         />
@@ -380,11 +386,11 @@ export default function DocumentsPage() {
                             style={{
                                 padding: '0.5rem 1rem',
                                 background: selectedCategory === cat
-                                    ? 'rgba(139, 92, 246, 0.2)'
-                                    : 'rgba(15, 23, 42, 0.6)',
+                                    ? 'var(--color-accent-light)'
+                                    : 'var(--bg-glass)',
                                 border: selectedCategory === cat
-                                    ? '2px solid #8b5cf6'
-                                    : '2px solid rgba(139, 92, 246, 0.2)',
+                                    ? '2px solid var(--color-accent)'
+                                    : '2px solid var(--border-glass)',
                                 borderRadius: '0.5rem',
                                 color: selectedCategory === cat ? '#c4b5fd' : '#94a3b8',
                                 fontSize: '0.875rem',
@@ -405,10 +411,10 @@ export default function DocumentsPage() {
                             onClick={() => setSelectedCaseFilter('All')}
                             style={{
                                 padding: '0.5rem 1rem',
-                                background: selectedCaseFilter === 'All' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(15, 23, 42, 0.6)',
-                                border: selectedCaseFilter === 'All' ? '2px solid #8b5cf6' : '2px solid rgba(139, 92, 246, 0.2)',
+                                background: selectedCaseFilter === 'All' ? 'var(--color-accent-light)' : 'var(--bg-glass)',
+                                border: selectedCaseFilter === 'All' ? '2px solid var(--color-accent)' : '2px solid var(--border-glass)',
                                 borderRadius: '0.5rem',
-                                color: selectedCaseFilter === 'All' ? '#c4b5fd' : '#94a3b8',
+                                color: selectedCaseFilter === 'All' ? '#c4b5fd' : 'var(--text-secondary)',
                                 fontSize: '0.875rem',
                                 fontWeight: '600',
                                 cursor: 'pointer'
@@ -420,10 +426,10 @@ export default function DocumentsPage() {
                             onClick={() => setSelectedCaseFilter('No Case')}
                             style={{
                                 padding: '0.5rem 1rem',
-                                background: selectedCaseFilter === 'No Case' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(15, 23, 42, 0.6)',
-                                border: selectedCaseFilter === 'No Case' ? '2px solid #8b5cf6' : '2px solid rgba(139, 92, 246, 0.2)',
+                                background: selectedCaseFilter === 'No Case' ? 'var(--color-accent-light)' : 'var(--bg-glass)',
+                                border: selectedCaseFilter === 'No Case' ? '2px solid var(--color-accent)' : '2px solid var(--border-glass)',
                                 borderRadius: '0.5rem',
-                                color: selectedCaseFilter === 'No Case' ? '#c4b5fd' : '#94a3b8',
+                                color: selectedCaseFilter === 'No Case' ? '#c4b5fd' : 'var(--text-secondary)',
                                 fontSize: '0.875rem',
                                 fontWeight: '600',
                                 cursor: 'pointer'
@@ -437,14 +443,18 @@ export default function DocumentsPage() {
                                 onClick={() => setSelectedCaseFilter(caseItem.id)}
                                 style={{
                                     padding: '0.5rem 1rem',
-                                    background: selectedCaseFilter === caseItem.id ? 'rgba(139, 92, 246, 0.2)' : 'rgba(15, 23, 42, 0.6)',
-                                    border: selectedCaseFilter === caseItem.id ? '2px solid #8b5cf6' : '2px solid rgba(139, 92, 246, 0.2)',
+                                    background: selectedCaseFilter === caseItem.id ? 'var(--color-accent-light)' : 'var(--bg-glass)',
+                                    border: selectedCaseFilter === caseItem.id ? '2px solid var(--color-accent)' : '2px solid var(--border-glass)',
                                     borderRadius: '0.5rem',
-                                    color: selectedCaseFilter === caseItem.id ? '#c4b5fd' : '#94a3b8',
-                                    fontSize: '0.875rem',
+                                    color: selectedCaseFilter === caseItem.id ? '#c4b5fd' : 'var(--text-secondary)',
                                     fontWeight: '600',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    maxWidth: '250px',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
                                 }}
+                                title={caseItem.title}
                             >
                                 {caseItem.title}
                             </button>
@@ -458,13 +468,13 @@ export default function DocumentsPage() {
                 <div style={{
                     textAlign: 'center',
                     padding: '4rem 2rem',
-                    background: 'rgba(30, 41, 59, 0.6)',
+                    background: 'var(--bg-glass)',
                     borderRadius: '1.5rem',
-                    border: '1px solid rgba(139, 92, 246, 0.2)'
+                    border: 'var(--border-glass)'
                 }}>
-                    <FileText size={64} style={{ color: '#94a3b8', margin: '0 auto 1rem' }} />
-                    <h3 style={{ color: 'white', fontSize: '1.25rem', marginBottom: '0.5rem' }}>No documents found</h3>
-                    <p style={{ color: '#94a3b8' }}>
+                    <FileText size={64} style={{ color: 'var(--text-secondary)', margin: '0 auto 1rem' }} />
+                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>No documents found</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>
                         {searchQuery || selectedCategory !== 'All'
                             ? 'Try adjusting your filters'
                             : 'Upload your first document to get started'}
@@ -484,21 +494,22 @@ export default function DocumentsPage() {
                             <div
                                 key={doc.id}
                                 style={{
-                                    background: 'rgba(30, 41, 59, 0.8)',
-                                    backdropFilter: 'blur(20px)',
-                                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                                    background: 'var(--bg-glass-strong)',
+                                    backdropFilter: 'var(--glass-blur)',
+                                    border: 'var(--border-glass-strong)',
                                     borderRadius: '1.5rem',
                                     padding: '1.5rem',
                                     cursor: 'pointer',
-                                    transition: 'all 0.3s'
+                                    transition: 'all 0.3s',
+                                    boxShadow: 'var(--shadow-glass)'
                                 }}
                                 onMouseOver={(e) => {
                                     e.currentTarget.style.transform = 'translateY(-4px)';
-                                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(139, 92, 246, 0.3)';
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-glass-strong)';
                                 }}
                                 onMouseOut={(e) => {
                                     e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = 'none';
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
                                 }}
                             >
                                 {/* File Icon */}
@@ -520,7 +531,7 @@ export default function DocumentsPage() {
                                 <h3 style={{
                                     fontSize: '1rem',
                                     fontWeight: '700',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     marginBottom: '0.5rem',
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
@@ -662,8 +673,8 @@ export default function DocumentsPage() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.8)',
-                    backdropFilter: 'blur(10px)',
+                    background: 'rgba(0, 0, 0, 0.6)',
+                    backdropFilter: 'blur(5px)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -671,16 +682,17 @@ export default function DocumentsPage() {
                     padding: '2rem'
                 }}>
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.95)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '1.5rem',
                         padding: '2rem',
                         maxWidth: '600px',
-                        width: '100%'
+                        width: '100%',
+                        boxShadow: 'var(--shadow-glass-strong)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)' }}>
                                 Upload Document
                             </h2>
                             <button
@@ -706,7 +718,7 @@ export default function DocumentsPage() {
                         {/* Case Selection (NEW!) */}
                         {userCases.length > 0 && (
                             <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#e2e8f0', fontSize: '0.875rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)', fontSize: '0.875rem' }}>
                                     Link to Case (Optional)
                                 </label>
                                 <select
@@ -715,10 +727,10 @@ export default function DocumentsPage() {
                                     style={{
                                         width: '100%',
                                         padding: '0.875rem 1rem',
-                                        background: 'rgba(15, 23, 42, 0.6)',
-                                        border: '2px solid rgba(139, 92, 246, 0.2)',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
                                         borderRadius: '0.75rem',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         fontSize: '1rem'
                                     }}
                                 >
@@ -741,8 +753,8 @@ export default function DocumentsPage() {
                             style={{
                                 display: 'block',
                                 padding: '3rem',
-                                background: dragActive ? 'rgba(139, 92, 246, 0.2)' : 'rgba(15, 23, 42, 0.6)',
-                                border: `2px dashed ${dragActive ? '#8b5cf6' : 'rgba(139, 92, 246, 0.3)'}`,
+                                background: dragActive ? 'var(--bg-glass-hover)' : 'var(--bg-glass)',
+                                border: `2px dashed ${dragActive ? 'var(--color-accent)' : 'var(--border-glass)'}`,
                                 borderRadius: '1rem',
                                 textAlign: 'center',
                                 cursor: 'pointer',
@@ -773,10 +785,10 @@ export default function DocumentsPage() {
                                 style={{
                                     width: '100%',
                                     padding: '0.875rem 1rem',
-                                    background: 'rgba(15, 23, 42, 0.6)',
-                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     borderRadius: '0.75rem',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     fontSize: '1rem'
                                 }}
                             >
@@ -788,7 +800,7 @@ export default function DocumentsPage() {
 
                         {/* Description */}
                         <div style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#e2e8f0', fontSize: '0.875rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)', fontSize: '0.875rem' }}>
                                 Description (Optional)
                             </label>
                             <textarea
@@ -798,10 +810,10 @@ export default function DocumentsPage() {
                                 style={{
                                     width: '100%',
                                     padding: '0.875rem 1rem',
-                                    background: 'rgba(15, 23, 42, 0.6)',
-                                    border: '2px solid rgba(139, 92, 246, 0.2)',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     borderRadius: '0.75rem',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     fontSize: '1rem',
                                     resize: 'vertical',
                                     minHeight: '80px'
@@ -825,7 +837,7 @@ export default function DocumentsPage() {
                                     <div style={{
                                         height: '100%',
                                         width: `${uploadProgress}%`,
-                                        background: 'linear-gradient(90deg, #8b5cf6 0%, #6366f1 100%)',
+                                        background: 'linear-gradient(90deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                         transition: 'width 0.3s'
                                     }} />
                                 </div>
@@ -840,18 +852,19 @@ export default function DocumentsPage() {
                                 width: '100%',
                                 padding: '1rem',
                                 background: (!selectedFile || uploading)
-                                    ? 'rgba(148, 163, 184, 0.2)'
-                                    : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                    ? 'var(--bg-glass)'
+                                    : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                 border: 'none',
                                 borderRadius: '0.75rem',
-                                color: (!selectedFile || uploading) ? '#64748b' : 'white',
+                                color: (!selectedFile || uploading) ? 'var(--text-secondary)' : 'white',
                                 fontSize: '1rem',
                                 fontWeight: '700',
                                 cursor: (!selectedFile || uploading) ? 'not-allowed' : 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '0.5rem'
+                                gap: '0.5rem',
+                                boxShadow: (!selectedFile || uploading) ? 'none' : 'var(--shadow-glass-strong)'
                             }}
                         >
                             {uploading ? (

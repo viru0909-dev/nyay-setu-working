@@ -50,18 +50,18 @@ export default function CourtAnalyticsPage() {
     const maxByType = Math.max(...Object.values(analytics?.byType || { default: 1 }));
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass)'
     };
 
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                <Loader2 size={48} className="spin" style={{ color: '#6366f1' }} />
+                <Loader2 size={48} className="spin" style={{ color: 'var(--color-accent)' }} />
                 <style>{`
                     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                     .spin { animation: spin 1s linear infinite; }
@@ -84,10 +84,10 @@ export default function CourtAnalyticsPage() {
                         <BarChart3 size={28} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Judicial Intelligence
                         </h1>
-                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Real-time courtroom analytics and case distribution metrics
                         </p>
                     </div>
@@ -133,7 +133,7 @@ export default function CourtAnalyticsPage() {
                         <div style={{ padding: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '0.75rem' }}>
                             <Activity size={20} color="#818cf8" />
                         </div>
-                        <h3 style={{ color: 'white', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
+                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
                             Lifecycle Distribution
                         </h3>
                     </div>
@@ -142,10 +142,10 @@ export default function CourtAnalyticsPage() {
                             <div key={status}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'center' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: statusColors[status] || '#6366f1' }} />
-                                        <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600', textTransform: 'uppercase' }}>{status.replace('_', ' ')}</span>
+                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: statusColors[status] || 'var(--color-accent)' }} />
+                                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600', textTransform: 'uppercase' }}>{status.replace('_', ' ')}</span>
                                     </div>
-                                    <span style={{ color: 'white', fontWeight: '700' }}>{count}</span>
+                                    <span style={{ color: 'var(--text-main)', fontWeight: '700' }}>{count}</span>
                                 </div>
                                 <div style={{
                                     height: '10px',
@@ -173,7 +173,7 @@ export default function CourtAnalyticsPage() {
                         <div style={{ padding: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '0.75rem' }}>
                             <PieChart size={20} color="#818cf8" />
                         </div>
-                        <h3 style={{ color: 'white', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
+                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
                             Judicial Classification
                         </h3>
                     </div>
@@ -186,7 +186,7 @@ export default function CourtAnalyticsPage() {
                                     borderRadius: '0.4rem',
                                     marginBottom: '0.5rem'
                                 }}>
-                                    <span style={{ color: 'white', fontWeight: '800', fontSize: '0.8rem' }}>{count}</span>
+                                    <span style={{ color: 'var(--text-main)', fontWeight: '800', fontSize: '0.8rem' }}>{count}</span>
                                 </div>
                                 <div style={{
                                     width: '100%',
@@ -197,7 +197,7 @@ export default function CourtAnalyticsPage() {
                                     boxShadow: `0 4px 12px ${typeColors[i % typeColors.length]}33`
                                 }} />
                                 <span style={{
-                                    color: '#64748b',
+                                    color: 'var(--text-secondary)',
                                     fontSize: '0.65rem',
                                     fontWeight: '700',
                                     marginTop: '0.75rem',
@@ -224,14 +224,14 @@ export default function CourtAnalyticsPage() {
                     <div style={{ padding: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '0.75rem' }}>
                         <TrendingUp size={20} color="#818cf8" />
                     </div>
-                    <h3 style={{ color: 'white', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
+                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
                         Temporal Case Progression (6 Months)
                     </h3>
                 </div>
                 {Object.keys(analytics?.monthlyTrend || {}).length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '4rem' }}>
-                        <FileBarChart size={48} color="#334155" style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                        <p style={{ color: '#64748b', fontSize: '1rem' }}>No historical data available for trend analysis</p>
+                        <FileBarChart size={48} color="var(--text-secondary)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>No historical data available for trend analysis</p>
                     </div>
                 ) : (
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2.5rem', height: '180px', justifyContent: 'center', paddingBottom: '1rem' }}>
@@ -239,7 +239,7 @@ export default function CourtAnalyticsPage() {
                             const maxMonth = Math.max(...Object.values(analytics?.monthlyTrend || { default: 1 }));
                             return (
                                 <div key={month} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: '80px' }}>
-                                    <div style={{ color: 'white', fontWeight: '800', marginBottom: '0.75rem', fontSize: '0.9rem' }}>{count}</div>
+                                    <div style={{ color: 'var(--text-main)', fontWeight: '800', marginBottom: '0.75rem', fontSize: '0.9rem' }}>{count}</div>
                                     <div style={{
                                         width: '100%',
                                         height: `${(count / (maxMonth || 1)) * 120}px`,
@@ -249,7 +249,7 @@ export default function CourtAnalyticsPage() {
                                         border: '1px solid rgba(99, 102, 241, 0.3)',
                                         transition: 'height 1s cubic-bezier(0.4, 0, 0.2, 1)'
                                     }} />
-                                    <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: '700', marginTop: '1rem', textTransform: 'uppercase' }}>{month}</span>
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '700', marginTop: '1rem', textTransform: 'uppercase' }}>{month}</span>
                                 </div>
                             );
                         })}
@@ -263,16 +263,16 @@ export default function CourtAnalyticsPage() {
 function StatCard({ icon, value, label, color, description }) {
     return (
         <div style={{
-            background: 'rgba(30, 41, 59, 0.7)',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255, 255, 255, 0.05)',
+            background: 'var(--bg-glass-strong)',
+            backdropFilter: 'var(--glass-blur)',
+            border: 'var(--border-glass-strong)',
             borderRadius: '1.25rem',
             padding: '1.25rem',
             display: 'flex',
             alignItems: 'center',
             gap: '1.25rem',
             transition: 'transform 0.2s',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
+            boxShadow: 'var(--shadow-glass)'
         }}
             onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
             onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
@@ -287,9 +287,9 @@ function StatCard({ icon, value, label, color, description }) {
                 {icon}
             </div>
             <div>
-                <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'white', lineHeight: '1' }}>{value}</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'white', marginTop: '0.35rem' }}>{label}</div>
-                <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.15rem' }}>{description}</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-main)', lineHeight: '1' }}>{value}</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)', marginTop: '0.35rem' }}>{label}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>{description}</div>
             </div>
         </div>
     );

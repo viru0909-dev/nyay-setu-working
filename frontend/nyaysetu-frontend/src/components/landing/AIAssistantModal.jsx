@@ -100,8 +100,8 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'rgba(0, 0, 0, 0.8)',
-                        backdropFilter: 'blur(8px)',
+                        background: 'rgba(0, 0, 0, 0.4)',
+                        backdropFilter: 'var(--glass-blur)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -119,8 +119,8 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                             maxWidth: '900px',
                             width: '100%',
                             maxHeight: '90vh',
-                            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-                            border: '2px solid rgba(139, 92, 246, 0.3)',
+                            background: 'var(--bg-glass-strong)',
+                            border: 'var(--border-glass-strong)',
                             borderRadius: '2rem',
                             position: 'relative',
                             display: 'flex',
@@ -137,8 +137,8 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                 position: 'absolute',
                                 top: '1.5rem',
                                 right: '1.5rem',
-                                background: 'rgba(139, 92, 246, 0.2)',
-                                border: '2px solid rgba(139, 92, 246, 0.3)',
+                                background: 'rgba(139, 92, 246, 0.1)',
+                                border: '1px solid rgba(139, 92, 246, 0.2)',
                                 borderRadius: '0.75rem',
                                 width: '3rem',
                                 height: '3rem',
@@ -146,7 +146,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 cursor: 'pointer',
-                                color: 'white',
+                                color: 'var(--color-accent)',
                                 transition: 'all 0.3s',
                                 zIndex: 10
                             }}
@@ -195,16 +195,16 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                     <h2 style={{
                                         fontSize: '2.5rem',
                                         fontWeight: '900',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         marginBottom: '1rem',
-                                        background: 'linear-gradient(135deg, #a78bfa 0%, #ec4899 100%)',
+                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, #ec4899 100%)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent'
                                     }}>
                                         {language === 'en' ? 'AI-Powered Legal Brain' : 'AI-संचालित कानूनी मस्तिष्क'}
                                     </h2>
 
-                                    <p style={{ color: '#94a3b8', fontSize: '1.125rem', lineHeight: '1.6', maxWidth: '600px', margin: '0 auto' }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.6', maxWidth: '600px', margin: '0 auto' }}>
                                         {language === 'en'
                                             ? 'Your intelligent assistant that understands Indian law and provides instant answers to your legal queries.'
                                             : 'आपका बुद्धिमान सहायक जो भारतीय कानून को समझता है और आपके कानूनी प्रश्नों के तत्काल उत्तर प्रदान करता है।'
@@ -219,7 +219,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                     style={{
                                         fontSize: '1.75rem',
                                         fontWeight: '800',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         marginBottom: '1.5rem',
                                         textAlign: 'center'
                                     }}
@@ -239,23 +239,23 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                             onClick={() => handleQuestionClick(question)}
                                             style={{
                                                 padding: '1rem 1.5rem',
-                                                background: 'rgba(30, 41, 59, 0.6)',
-                                                border: '1px solid rgba(139, 92, 246, 0.2)',
+                                                background: 'var(--bg-glass)',
+                                                border: 'var(--border-glass)',
                                                 borderRadius: '0.75rem',
-                                                color: '#94a3b8',
+                                                color: 'var(--text-secondary)',
                                                 fontSize: '0.95rem',
                                                 cursor: 'pointer',
                                                 transition: 'all 0.3s'
                                             }}
                                             onMouseEnter={(e) => {
-                                                e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)';
-                                                e.currentTarget.style.borderColor = '#8b5cf6';
-                                                e.currentTarget.style.color = '#a78bfa';
+                                                e.currentTarget.style.background = 'var(--bg-glass-hover)';
+                                                e.currentTarget.style.borderColor = 'var(--color-accent)';
+                                                e.currentTarget.style.color = 'var(--color-accent)';
                                             }}
                                             onMouseLeave={(e) => {
-                                                e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)';
-                                                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
-                                                e.currentTarget.style.color = '#94a3b8';
+                                                e.currentTarget.style.background = 'var(--bg-glass)';
+                                                e.currentTarget.style.borderColor = 'var(--border-glass)';
+                                                e.currentTarget.style.color = 'var(--text-secondary)';
                                             }}
                                         >
                                             "{question}"
@@ -299,7 +299,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                 <h2 style={{
                                     fontSize: '1.75rem',
                                     fontWeight: '800',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     marginBottom: '1.5rem',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -315,9 +315,9 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                     overflow: 'auto',
                                     marginBottom: '1.5rem',
                                     padding: '1rem',
-                                    background: 'rgba(15, 23, 42, 0.5)',
+                                    background: 'var(--bg-glass)',
                                     borderRadius: '1rem',
-                                    border: '1px solid rgba(139, 92, 246, 0.2)'
+                                    border: 'var(--border-glass)'
                                 }}>
                                     {messages.map((msg, idx) => (
                                         <motion.div
@@ -329,9 +329,9 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                                 padding: '1rem',
                                                 borderRadius: '0.75rem',
                                                 background: msg.role === 'user'
-                                                    ? 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)'
-                                                    : 'rgba(139, 92, 246, 0.1)',
-                                                border: msg.role === 'ai' ? '1px solid rgba(139, 92, 246, 0.3)' : 'none',
+                                                    ? 'linear-gradient(135deg, var(--color-accent) 0%, #ec4899 100%)'
+                                                    : 'var(--bg-glass-strong)',
+                                                border: msg.role === 'ai' ? 'var(--border-glass)' : 'none',
                                                 marginLeft: msg.role === 'user' ? 'auto' : '0',
                                                 marginRight: msg.role === 'user' ? '0' : 'auto',
                                                 maxWidth: '85%'
@@ -374,10 +374,10 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                         style={{
                                             flex: 1,
                                             padding: '1rem',
-                                            background: 'rgba(30, 41, 59, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.3)',
+                                            background: 'var(--bg-glass)',
+                                            border: 'var(--border-glass)',
                                             borderRadius: '0.75rem',
-                                            color: 'white',
+                                            color: 'var(--text-main)',
                                             fontSize: '1rem',
                                             outline: 'none'
                                         }}
@@ -424,7 +424,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                 font-weight: 700 !important;
                                 margin-top: 0.75rem !important;
                                 margin-bottom: 0.5rem !important;
-                                color: #f8fafc !important;
+                                color: var(--text-main) !important;
                                 line-height: 1.4 !important;
                             }
                             .markdown-content p {
@@ -442,11 +442,11 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                 margin-bottom: 0.35rem !important;
                             }
                             .markdown-content strong {
-                                color: #c4b5fd !important;
+                                color: var(--color-accent) !important;
                                 font-weight: 700 !important;
                             }
                             .markdown-content code {
-                                background: rgba(0,0,0,0.3) !important;
+                                background: var(--bg-glass-strong) !important;
                                 padding: 0.1rem 0.3rem !important;
                                 border-radius: 0.25rem !important;
                                 font-family: monospace !important;

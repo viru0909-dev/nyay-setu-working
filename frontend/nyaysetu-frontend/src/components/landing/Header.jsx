@@ -42,12 +42,12 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                 right: 0,
                 zIndex: 1000,
                 background: isScrolled
-                    ? 'rgba(15, 23, 42, 0.95)'
+                    ? 'var(--bg-glass-strong)'
                     : 'transparent',
-                backdropFilter: isScrolled ? 'blur(20px)' : 'none',
-                borderBottom: isScrolled ? '1px solid rgba(139, 92, 246, 0.2)' : 'none',
+                backdropFilter: isScrolled ? 'var(--glass-blur)' : 'none',
+                borderBottom: isScrolled ? 'var(--border-glass)' : 'none',
                 transition: 'all 0.3s ease',
-                boxShadow: isScrolled ? '0 4px 30px rgba(0, 0, 0, 0.1)' : 'none'
+                boxShadow: isScrolled ? 'var(--shadow-glass)' : 'none'
             }}
         >
             <div className="container" style={{
@@ -64,7 +64,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                     alignItems: 'center',
                     gap: '0.75rem',
                     textDecoration: 'none',
-                    color: 'white',
+                    color: 'var(--text-main)',
                     fontSize: '1.5rem',
                     fontWeight: '900'
                 }}>
@@ -80,7 +80,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                             justifyContent: 'center'
                         }}
                     >
-                        <Scale size={28} />
+                        <Scale size={28} color="white" />
                     </motion.div>
                     <span style={{
                         background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
@@ -104,15 +104,15 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 key={item.label}
                                 to={item.href}
                                 style={{
-                                    color: '#e2e8f0',
+                                    color: 'var(--text-main)',
                                     textDecoration: 'none',
                                     fontSize: '1rem',
                                     fontWeight: '600',
                                     transition: 'color 0.2s',
                                     cursor: 'pointer'
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = '#8b5cf6'}
-                                onMouseLeave={(e) => e.target.style.color = '#e2e8f0'}
+                                onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
+                                onMouseLeave={(e) => e.target.style.color = 'var(--text-main)'}
                             >
                                 {item.label}
                             </Link>
@@ -123,15 +123,15 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 style={{
                                     background: 'none',
                                     border: 'none',
-                                    color: '#e2e8f0',
+                                    color: 'var(--text-main)',
                                     fontSize: '1rem',
                                     fontWeight: '600',
                                     transition: 'color 0.2s',
                                     cursor: 'pointer',
                                     padding: 0
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = '#8b5cf6'}
-                                onMouseLeave={(e) => e.target.style.color = '#e2e8f0'}
+                                onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
+                                onMouseLeave={(e) => e.target.style.color = 'var(--text-main)'}
                             >
                                 {item.label}
                             </button>
@@ -140,15 +140,15 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 key={item.label}
                                 href={item.href}
                                 style={{
-                                    color: '#e2e8f0',
+                                    color: 'var(--text-main)',
                                     textDecoration: 'none',
                                     fontSize: '1rem',
                                     fontWeight: '600',
                                     transition: 'color 0.2s',
                                     position: 'relative'
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = '#8b5cf6'}
-                                onMouseLeave={(e) => e.target.style.color = '#e2e8f0'}
+                                onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
+                                onMouseLeave={(e) => e.target.style.color = 'var(--text-main)'}
                             >
                                 {item.label}
                             </a>
@@ -192,7 +192,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                         <>
                             <Link to="/login" style={{
                                 padding: '0.625rem 1.5rem',
-                                color: '#e2e8f0',
+                                color: 'var(--text-main)',
                                 textDecoration: 'none',
                                 borderRadius: '0.5rem',
                                 fontWeight: '600',

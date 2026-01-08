@@ -98,12 +98,12 @@ export default function PendingCasesPage() {
     };
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass)'
     };
 
     const primaryButtonStyle = {
@@ -124,7 +124,7 @@ export default function PendingCasesPage() {
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                <Loader2 size={48} className="spin" style={{ color: '#6366f1' }} />
+                <Loader2 size={48} className="spin" style={{ color: 'var(--color-accent)' }} />
                 <style>{`
                     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                     .spin { animation: spin 1s linear infinite; }
@@ -149,10 +149,10 @@ export default function PendingCasesPage() {
                         <Clock size={28} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Judicial Queue
                         </h1>
-                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Review pending cases and manage the judicial pool
                         </p>
                     </div>
@@ -164,10 +164,10 @@ export default function PendingCasesPage() {
                         onClick={() => setActiveTab('my_pending')}
                         style={{
                             ...primaryButtonStyle,
-                            background: activeTab === 'my_pending' ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'rgba(255,255,255,0.05)',
-                            boxShadow: activeTab === 'my_pending' ? '0 4px 15px rgba(99, 102, 241, 0.4)' : 'none',
-                            color: activeTab === 'my_pending' ? 'white' : '#94a3b8',
-                            border: activeTab === 'my_pending' ? 'none' : '1px solid rgba(255,255,255,0.1)'
+                            background: activeTab === 'my_pending' ? 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)' : 'var(--bg-glass)',
+                            boxShadow: activeTab === 'my_pending' ? 'var(--shadow-glass)' : 'none',
+                            color: activeTab === 'my_pending' ? 'white' : 'var(--text-secondary)',
+                            border: activeTab === 'my_pending' ? 'none' : 'var(--border-glass)'
                         }}
                     >
                         <User size={18} />
@@ -177,10 +177,10 @@ export default function PendingCasesPage() {
                         onClick={() => setActiveTab('pool')}
                         style={{
                             ...primaryButtonStyle,
-                            background: activeTab === 'pool' ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'rgba(255,255,255,0.05)',
+                            background: activeTab === 'pool' ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'var(--bg-glass)',
                             boxShadow: activeTab === 'pool' ? '0 4px 15px rgba(245, 158, 11, 0.4)' : 'none',
-                            color: activeTab === 'pool' ? 'white' : '#94a3b8',
-                            border: activeTab === 'pool' ? 'none' : '1px solid rgba(255,255,255,0.1)'
+                            color: activeTab === 'pool' ? 'white' : 'var(--text-secondary)',
+                            border: activeTab === 'pool' ? 'none' : 'var(--border-glass)'
                         }}
                     >
                         <Users size={18} />
@@ -193,10 +193,10 @@ export default function PendingCasesPage() {
             {currentCases.length === 0 ? (
                 <div style={{ ...glassStyle, textAlign: 'center', padding: '5rem 2rem' }}>
                     <Scale size={64} color="#475569" style={{ margin: '0 auto 1.5rem' }} />
-                    <h3 style={{ color: 'white', fontSize: '1.25rem', margin: '0 0 0.5rem 0' }}>
+                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', margin: '0 0 0.5rem 0' }}>
                         {activeTab === 'my_pending' ? 'No assigned cases' : 'Central pool is empty'}
                     </h3>
-                    <p style={{ color: '#94a3b8', margin: 0 }}>
+                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
                         {activeTab === 'my_pending' ? 'Check the unassigned pool to find new cases to claim.' : 'Check back later for new filings.'}
                     </p>
                 </div>
@@ -209,7 +209,7 @@ export default function PendingCasesPage() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexWrap: 'wrap', gap: '1rem' }}>
                                     <div style={{ flex: 1, minWidth: '300px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                                 {caseItem.title}
                                             </h3>
                                             <span style={{
@@ -237,7 +237,7 @@ export default function PendingCasesPage() {
                                             </span>
                                         </div>
 
-                                        <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.6', margin: '0.75rem 0 1.25rem 0' }}>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6', margin: '0.75rem 0 1.25rem 0' }}>
                                             {caseItem.description?.substring(0, 200)}
                                             {caseItem.description?.length > 200 ? '...' : ''}
                                         </p>
@@ -250,17 +250,17 @@ export default function PendingCasesPage() {
                                             borderTop: '1px solid rgba(148, 163, 184, 0.1)',
                                             fontSize: '0.875rem'
                                         }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8' }}>
-                                                <User size={14} color="#64748b" />
-                                                <span><strong>Petitioner:</strong> <span style={{ color: '#e2e8f0' }}>{caseItem.petitioner}</span></span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+                                                <User size={14} color="var(--text-secondary)" />
+                                                <span><strong>Petitioner:</strong> <span style={{ color: 'var(--text-main)' }}>{caseItem.petitioner}</span></span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8' }}>
-                                                <Users size={14} color="#64748b" />
-                                                <span><strong>Respondent:</strong> <span style={{ color: '#e2e8f0' }}>{caseItem.respondent}</span></span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+                                                <Users size={14} color="var(--text-secondary)" />
+                                                <span><strong>Respondent:</strong> <span style={{ color: 'var(--text-main)' }}>{caseItem.respondent}</span></span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8' }}>
-                                                <Calendar size={14} color="#64748b" />
-                                                <span><strong>Filed:</strong> <span style={{ color: '#e2e8f0' }}>{caseItem.filedDate ? new Date(caseItem.filedDate).toLocaleDateString(undefined, { dateStyle: 'medium' }) : 'N/A'}</span></span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+                                                <Calendar size={14} color="var(--text-secondary)" />
+                                                <span><strong>Filed:</strong> <span style={{ color: 'var(--text-main)' }}>{caseItem.filedDate ? new Date(caseItem.filedDate).toLocaleDateString(undefined, { dateStyle: 'medium' }) : 'N/A'}</span></span>
                                             </div>
                                         </div>
                                     </div>
@@ -302,36 +302,36 @@ export default function PendingCasesPage() {
                 }} onClick={() => setShowScheduleModal(false)}>
                     <div style={{
                         ...glassStyle, width: '100%', maxWidth: '480px', padding: '2rem',
-                        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-                        border: '1px solid rgba(139, 92, 246, 0.3)'
+                        background: 'var(--bg-glass-strong)',
+                        border: 'var(--border-glass-strong)'
                     }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                 📅 Schedule Hearing
                             </h2>
-                            <button onClick={() => setShowScheduleModal(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                            <button onClick={() => setShowScheduleModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                                 <X size={24} />
                             </button>
                         </div>
 
                         <div style={{ display: 'grid', gap: '1.5rem' }}>
                             <div>
-                                <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Case</label>
+                                <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Case</label>
                                 <input
                                     type="text"
                                     value={selectedCase?.title || ''}
                                     disabled
                                     style={{
                                         width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
-                                        background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(99, 102, 241, 0.1)',
-                                        color: '#64748b', cursor: 'not-allowed'
+                                        background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                        color: 'var(--text-secondary)', cursor: 'not-allowed'
                                     }}
                                 />
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Date</label>
+                                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Date</label>
                                     <input
                                         type="date"
                                         value={hearingData.scheduledDate}
@@ -339,35 +339,38 @@ export default function PendingCasesPage() {
                                         min={new Date().toISOString().split('T')[0]}
                                         style={{
                                             width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
-                                            background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(99, 102, 241, 0.2)',
-                                            color: 'white'
+                                            background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                            color: 'var(--text-main)',
+                                            outline: 'none'
                                         }}
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Time</label>
+                                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Time</label>
                                     <input
                                         type="time"
                                         value={hearingData.scheduledTime}
                                         onChange={e => setHearingData({ ...hearingData, scheduledTime: e.target.value })}
                                         style={{
                                             width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
-                                            background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(99, 102, 241, 0.2)',
-                                            color: 'white'
+                                            background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                            color: 'var(--text-main)',
+                                            outline: 'none'
                                         }}
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Duration</label>
+                                <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Duration</label>
                                 <select
                                     value={hearingData.durationMinutes}
                                     onChange={e => setHearingData({ ...hearingData, durationMinutes: parseInt(e.target.value) })}
                                     style={{
                                         width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
-                                        background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(99, 102, 241, 0.2)',
-                                        color: 'white'
+                                        background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                        color: 'var(--text-main)',
+                                        outline: 'none'
                                     }}
                                 >
                                     <option value={30}>30 minutes</option>
@@ -382,8 +385,8 @@ export default function PendingCasesPage() {
                                     onClick={() => setShowScheduleModal(false)}
                                     style={{
                                         flex: 1, padding: '0.875rem', borderRadius: '0.75rem',
-                                        background: 'rgba(71, 85, 105, 0.2)', border: '1px solid rgba(71, 85, 105, 0.3)',
-                                        color: '#94a3b8', fontWeight: '600', cursor: 'pointer'
+                                        background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                        color: 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer'
                                     }}
                                 >
                                     Cancel

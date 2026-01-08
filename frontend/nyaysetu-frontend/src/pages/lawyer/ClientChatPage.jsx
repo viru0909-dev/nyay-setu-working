@@ -31,34 +31,34 @@ export default function ClientChatPage() {
     ];
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass-strong)'
     };
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', height: 'calc(100vh - 160px)', display: 'flex', gap: '2rem' }}>
             {/* Contacts Sidebar */}
             <div style={{ ...glassStyle, width: '350px', padding: 0, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                    <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <MessageSquare size={24} color="#6366f1" /> Client Messages
+                <div style={{ padding: '1.5rem', borderBottom: 'var(--border-glass-subtle)' }}>
+                    <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <MessageSquare size={24} color="var(--color-accent)" /> Client Messages
                     </h2>
                     <div style={{ position: 'relative' }}>
-                        <Search size={18} color="#64748b" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+                        <Search size={18} color="var(--text-secondary)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                         <input
                             type="text"
                             placeholder="Search conversations..."
                             style={{
                                 width: '100%',
-                                background: 'rgba(15, 23, 42, 0.4)',
-                                border: '1px solid rgba(255, 255, 255, 0.05)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.75rem',
                                 padding: '0.7rem 1rem 0.7rem 3rem',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 outline: 'none',
                                 fontSize: '0.9rem'
                             }}
@@ -74,24 +74,24 @@ export default function ClientChatPage() {
                             style={{
                                 padding: '1rem',
                                 borderRadius: '1rem',
-                                background: selectedContact?.id === contact.id ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-                                border: `1px solid ${selectedContact?.id === contact.id ? 'rgba(99, 102, 241, 0.2)' : 'transparent'}`,
+                                background: selectedContact?.id === contact.id ? 'var(--bg-glass-subtle)' : 'transparent',
+                                border: `1px solid ${selectedContact?.id === contact.id ? 'var(--color-accent)' : 'transparent'}`,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 gap: '1rem',
                                 transition: 'all 0.2s',
                                 marginBottom: '0.5rem'
                             }}
-                            onMouseOver={e => !selectedContact?.id === contact.id && (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)')}
+                            onMouseOver={e => !selectedContact?.id === contact.id && (e.currentTarget.style.background = 'var(--bg-glass-subtle)')}
                             onMouseOut={e => !selectedContact?.id === contact.id && (e.currentTarget.style.background = 'transparent')}
                         >
                             <div style={{ position: 'relative' }}>
                                 <div style={{
                                     width: '52px', height: '52px', borderRadius: '15px',
-                                    background: 'rgba(255, 255, 255, 0.05)',
+                                    background: 'var(--bg-glass-subtle)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                    fontSize: '1.2rem', fontWeight: '800', color: '#c7d2fe'
+                                    border: 'var(--border-glass-subtle)',
+                                    fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-main)'
                                 }}>
                                     {contact.name.charAt(0)}
                                 </div>
@@ -136,33 +136,33 @@ export default function ClientChatPage() {
                 {!selectedContact ? (
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem' }}>
                         <div style={{
-                            width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.1)',
+                            width: '80px', height: '80px', borderRadius: '50%', background: 'var(--bg-glass-subtle)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem'
                         }}>
-                            <MessageSquare size={40} color="#6366f1" />
+                            <MessageSquare size={40} color="var(--color-accent)" />
                         </div>
-                        <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>Select a Conversation</h3>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem', maxWidth: '300px' }}>
+                        <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>Select a Conversation</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '300px' }}>
                             Choose a client from the sidebar to start messaging and manage their legal inquiries.
                         </p>
                     </div>
                 ) : (
                     <>
                         {/* Chat Header */}
-                        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ padding: '1rem 1.5rem', borderBottom: 'var(--border-glass-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c7d2fe', fontWeight: '800' }}>
+                                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--bg-glass-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-main)', fontWeight: '800' }}>
                                     {selectedContact.name.charAt(0)}
                                 </div>
                                 <div>
-                                    <div style={{ color: 'white', fontWeight: '700' }}>{selectedContact.name}</div>
-                                    <div style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: '600' }}>Active Now</div>
+                                    <div style={{ color: 'var(--text-main)', fontWeight: '700' }}>{selectedContact.name}</div>
+                                    <div style={{ color: 'var(--color-success)', fontSize: '0.75rem', fontWeight: '600' }}>Active Now</div>
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer' }}><Phone size={20} /></button>
-                                <button style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer' }}><Video size={20} /></button>
-                                <button style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer' }}><MoreVertical size={20} /></button>
+                                <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Phone size={20} /></button>
+                                <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Video size={20} /></button>
+                                <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><MoreVertical size={20} /></button>
                             </div>
                         </div>
 
@@ -176,12 +176,12 @@ export default function ClientChatPage() {
                                     <div style={{
                                         padding: '0.75rem 1rem',
                                         borderRadius: '1rem',
-                                        background: msg.sender === 'me' ? '#4f46e5' : 'rgba(255, 255, 255, 0.05)',
-                                        color: 'white',
+                                        background: msg.sender === 'me' ? 'var(--color-accent)' : 'var(--bg-glass-subtle)',
+                                        color: 'var(--text-main)',
                                         fontSize: '0.95rem',
                                         borderBottomRightRadius: msg.sender === 'me' ? '0.2rem' : '1rem',
                                         borderBottomLeftRadius: msg.sender === 'client' ? '0.2rem' : '1rem',
-                                        boxShadow: msg.sender === 'me' ? '0 4px 12px rgba(79, 70, 229, 0.2)' : 'none'
+                                        boxShadow: msg.sender === 'me' ? 'var(--shadow-glass)' : 'none'
                                     }}>
                                         {msg.text}
                                     </div>
@@ -196,9 +196,9 @@ export default function ClientChatPage() {
                         </div>
 
                         {/* Input Area */}
-                        <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                        <div style={{ padding: '1.5rem', borderTop: 'var(--border-glass-subtle)' }}>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                <button style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer' }}><Paperclip size={22} /></button>
+                                <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Paperclip size={22} /></button>
                                 <div style={{ position: 'relative', flex: 1 }}>
                                     <input
                                         type="text"
@@ -207,17 +207,17 @@ export default function ClientChatPage() {
                                         onChange={e => setMessage(e.target.value)}
                                         style={{
                                             width: '100%',
-                                            background: 'rgba(15, 23, 42, 0.4)',
-                                            border: '1px solid rgba(255, 255, 255, 0.05)',
+                                            background: 'var(--bg-glass)',
+                                            border: 'var(--border-glass)',
                                             borderRadius: '0.75rem',
                                             padding: '0.75rem 1rem',
-                                            color: 'white',
+                                            color: 'var(--text-main)',
                                             outline: 'none'
                                         }}
                                     />
                                     <button style={{
                                         position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)',
-                                        background: 'rgba(99, 102, 241, 0.1)', color: '#818cf8', border: 'none',
+                                        background: 'var(--bg-glass-subtle)', color: 'var(--color-accent)', border: 'none',
                                         borderRadius: '0.5rem', padding: '0.3rem 0.6rem', fontSize: '0.7rem',
                                         fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer'
                                     }}>
@@ -226,9 +226,9 @@ export default function ClientChatPage() {
                                 </div>
                                 <button style={{
                                     width: '44px', height: '44px', borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                                    color: 'white', border: 'none', display: 'flex', alignItems: 'center',
-                                    justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)'
+                                    background: 'var(--color-accent)',
+                                    color: 'var(--text-main)', border: 'none', display: 'flex', alignItems: 'center',
+                                    justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-glass)'
                                 }}>
                                     <Send size={20} />
                                 </button>

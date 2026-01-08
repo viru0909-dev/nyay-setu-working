@@ -30,34 +30,15 @@ export default function DashboardLayout() {
         <div style={{
             height: '100vh',
             width: '100vw',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
+            background: 'transparent', /* Allow body background to show */
             display: 'flex',
+            gap: '1rem',
             overflow: 'hidden',
             position: 'fixed',
             top: 0,
             left: 0
         }}>
-            {/* Background Orbs */}
-            <div style={{
-                position: 'absolute',
-                width: '600px',
-                height: '600px',
-                background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
-                top: '-200px',
-                right: '-200px',
-                borderRadius: '50%',
-                pointerEvents: 'none'
-            }} />
-            <div style={{
-                position: 'absolute',
-                width: '500px',
-                height: '500px',
-                background: 'radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%)',
-                bottom: '-150px',
-                left: '-150px',
-                borderRadius: '50%',
-                pointerEvents: 'none'
-            }} />
+
 
             {/* Sidebar - Fixed Height */}
             <Sidebar userRole={user?.role} />

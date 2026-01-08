@@ -102,10 +102,10 @@ export default function MyCasesPage() {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'white', marginBottom: '0.5rem' }}>
+                    <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                         My Cases
                     </h1>
-                    <p style={{ fontSize: '1rem', color: '#94a3b8' }}>
+                    <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
                         Manage and track all your legal cases
                     </p>
                 </div>
@@ -116,14 +116,14 @@ export default function MyCasesPage() {
                         alignItems: 'center',
                         gap: '0.5rem',
                         padding: '0.875rem 1.5rem',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                         border: 'none',
                         borderRadius: '0.75rem',
                         color: 'white',
                         fontSize: '1rem',
                         fontWeight: '700',
                         textDecoration: 'none',
-                        boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)',
+                        boxShadow: 'var(--shadow-glass)',
                         transition: 'all 0.2s'
                     }}
                     onMouseOver={(e) => {
@@ -132,7 +132,7 @@ export default function MyCasesPage() {
                     }}
                     onMouseOut={(e) => {
                         e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 4px 15px rgba(139, 92, 246, 0.4)';
+                        e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
                     }}
                 >
                     <Plus size={20} />
@@ -157,13 +157,14 @@ export default function MyCasesPage() {
                         key={index}
                         style={{
                             padding: '1.25rem',
-                            background: 'rgba(30, 41, 59, 0.6)',
-                            backdropFilter: 'blur(20px)',
-                            border: '1px solid rgba(139, 92, 246, 0.2)',
-                            borderRadius: '1rem'
+                            background: 'var(--bg-glass-strong)',
+                            backdropFilter: 'var(--glass-blur)',
+                            border: 'var(--border-glass-strong)',
+                            borderRadius: '1rem',
+                            boxShadow: 'var(--shadow-glass)'
                         }}
                     >
-                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                             {stat.label}
                         </p>
                         <p style={{ fontSize: '2rem', fontWeight: '800', color: stat.color }}>
@@ -175,12 +176,13 @@ export default function MyCasesPage() {
 
             {/* Search and Filters */}
             <div style={{
-                background: 'rgba(30, 41, 59, 0.8)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
+                background: 'var(--bg-glass-strong)',
+                backdropFilter: 'var(--glass-blur)',
+                border: 'var(--border-glass-strong)',
                 borderRadius: '1.5rem',
                 padding: '1.5rem',
-                marginBottom: '2rem'
+                marginBottom: '2rem',
+                boxShadow: 'var(--shadow-glass)'
             }}>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     {/* Search Bar */}
@@ -190,7 +192,7 @@ export default function MyCasesPage() {
                             left: '1rem',
                             top: '50%',
                             transform: 'translateY(-50%)',
-                            color: '#94a3b8'
+                            color: 'var(--text-secondary)'
                         }} />
                         <input
                             type="text"
@@ -200,11 +202,12 @@ export default function MyCasesPage() {
                             style={{
                                 width: '100%',
                                 padding: '0.875rem 1rem 0.875rem 3rem',
-                                background: 'rgba(15, 23, 42, 0.6)',
-                                border: '2px solid rgba(139, 92, 246, 0.2)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.75rem',
-                                color: 'white',
-                                fontSize: '1rem'
+                                color: 'var(--text-main)',
+                                fontSize: '1rem',
+                                outline: 'none'
                             }}
                         />
                     </div>
@@ -219,12 +222,12 @@ export default function MyCasesPage() {
                                     padding: '0.75rem 1.25rem',
                                     background: selectedStatus === status
                                         ? 'rgba(139, 92, 246, 0.2)'
-                                        : 'rgba(15, 23, 42, 0.6)',
+                                        : 'var(--bg-glass)',
                                     border: selectedStatus === status
-                                        ? '2px solid #8b5cf6'
-                                        : '2px solid rgba(139, 92, 246, 0.2)',
+                                        ? '2px solid var(--color-accent)'
+                                        : 'var(--border-glass)',
                                     borderRadius: '0.75rem',
-                                    color: selectedStatus === status ? '#c4b5fd' : '#94a3b8',
+                                    color: selectedStatus === status ? 'var(--color-accent)' : 'var(--text-secondary)',
                                     fontSize: '0.875rem',
                                     fontWeight: '600',
                                     cursor: 'pointer',
@@ -245,9 +248,9 @@ export default function MyCasesPage() {
                                 width: '40px',
                                 height: '40px',
                                 borderRadius: '8px',
-                                background: viewMode === 'grid' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(15, 23, 42, 0.6)',
-                                border: viewMode === 'grid' ? '2px solid #8b5cf6' : '2px solid rgba(139, 92, 246, 0.2)',
-                                color: viewMode === 'grid' ? '#8b5cf6' : '#94a3b8',
+                                background: viewMode === 'grid' ? 'rgba(139, 92, 246, 0.2)' : 'var(--bg-glass)',
+                                border: viewMode === 'grid' ? '2px solid var(--color-accent)' : 'var(--border-glass)',
+                                color: viewMode === 'grid' ? 'var(--color-accent)' : 'var(--text-secondary)',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -262,9 +265,9 @@ export default function MyCasesPage() {
                                 width: '40px',
                                 height: '40px',
                                 borderRadius: '8px',
-                                background: viewMode === 'list' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(15, 23, 42, 0.6)',
-                                border: viewMode === 'list' ? '2px solid #8b5cf6' : '2px solid rgba(139, 92, 246, 0.2)',
-                                color: viewMode === 'list' ? '#8b5cf6' : '#94a3b8',
+                                background: viewMode === 'list' ? 'rgba(139, 92, 246, 0.2)' : 'var(--bg-glass)',
+                                border: viewMode === 'list' ? '2px solid var(--color-accent)' : 'var(--border-glass)',
+                                color: viewMode === 'list' ? 'var(--color-accent)' : 'var(--text-secondary)',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -280,18 +283,18 @@ export default function MyCasesPage() {
             {/* Cases Display */}
             {loading ? (
                 <div style={{
-                    background: 'rgba(30, 41, 59, 0.8)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                    background: 'var(--bg-glass-strong)',
+                    backdropFilter: 'var(--glass-blur)',
+                    border: 'var(--border-glass-strong)',
                     borderRadius: '1.5rem',
                     padding: '4rem',
                     textAlign: 'center'
                 }}>
                     <Loader2 size={64} style={{ color: '#8b5cf6', margin: '0 auto 1rem', animation: 'spin 1s linear infinite' }} />
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'white', marginBottom: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                         Loading cases...
                     </h3>
-                    <p style={{ fontSize: '1rem', color: '#94a3b8' }}>
+                    <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
                         Please wait while we fetch your cases
                     </p>
                     <style>{`
@@ -303,15 +306,15 @@ export default function MyCasesPage() {
                 </div>
             ) : error ? (
                 <div style={{
-                    background: 'rgba(30, 41, 59, 0.8)',
-                    backdropFilter: 'blur(20px)',
+                    background: 'var(--bg-glass-strong)',
+                    backdropFilter: 'var(--glass-blur)',
                     border: '1px solid rgba(239, 68, 68, 0.2)',
                     borderRadius: '1.5rem',
                     padding: '4rem',
                     textAlign: 'center'
                 }}>
                     <FileText size={64} style={{ color: '#ef4444', margin: '0 auto 1rem' }} />
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'white', marginBottom: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                         {error}
                     </h3>
                     <button
@@ -332,18 +335,18 @@ export default function MyCasesPage() {
                 </div>
             ) : filteredCases.length === 0 ? (
                 <div style={{
-                    background: 'rgba(30, 41, 59, 0.8)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                    background: 'var(--bg-glass-strong)',
+                    backdropFilter: 'var(--glass-blur)',
+                    border: 'var(--border-glass-strong)',
                     borderRadius: '1.5rem',
                     padding: '4rem',
                     textAlign: 'center'
                 }}>
-                    <FileText size={64} style={{ color: '#64748b', margin: '0 auto 1rem' }} />
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'white', marginBottom: '0.5rem' }}>
+                    <FileText size={64} style={{ color: 'var(--text-secondary)', margin: '0 auto 1rem' }} />
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                         No cases found
                     </h3>
-                    <p style={{ fontSize: '1rem', color: '#94a3b8' }}>
+                    <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
                         {searchQuery || selectedStatus !== 'all'
                             ? 'Try adjusting your search or filters'
                             : 'File your first case to get started'}
@@ -384,13 +387,14 @@ export default function MyCasesPage() {
                             <div
                                 key={caseItem.id}
                                 style={{
-                                    background: 'rgba(30, 41, 59, 0.8)',
-                                    backdropFilter: 'blur(20px)',
-                                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                                    background: 'var(--bg-glass-strong)',
+                                    backdropFilter: 'var(--glass-blur)',
+                                    border: 'var(--border-glass-strong)',
                                     borderRadius: '1.5rem',
                                     padding: '1.5rem',
                                     cursor: 'pointer',
-                                    transition: 'all 0.3s'
+                                    transition: 'all 0.3s',
+                                    boxShadow: 'var(--shadow-glass)'
                                 }}
                                 onMouseOver={(e) => {
                                     e.currentTarget.style.transform = 'translateY(-4px)';
@@ -398,7 +402,7 @@ export default function MyCasesPage() {
                                 }}
                                 onMouseOut={(e) => {
                                     e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = 'none';
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
                                 }}
                             >
                                 {/* Case Header */}
@@ -430,46 +434,46 @@ export default function MyCasesPage() {
                                 </div>
 
                                 {/* Case Title */}
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '0.75rem' }}>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
                                     {caseItem.title || 'Untitled Case'}
                                 </h3>
 
                                 {/* Description */}
-                                <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginBottom: '1rem', lineHeight: '1.6' }}>
+                                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: '1.6' }}>
                                     {caseItem.description || 'No description provided'}
                                 </p>
 
                                 {/* Case Details Grid */}
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
                                     <div>
-                                        <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                                             Filed Date
                                         </p>
-                                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#e2e8f0' }}>
+                                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-main)' }}>
                                             {formatDate(caseItem.filedDate)}
                                         </p>
                                     </div>
                                     <div>
-                                        <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                                             Next Hearing
                                         </p>
-                                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#8b5cf6' }}>
+                                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--color-accent)' }}>
                                             {formatDate(caseItem.nextHearing)}
                                         </p>
                                     </div>
                                     <div>
-                                        <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                                             Assigned Judge
                                         </p>
-                                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#e2e8f0' }}>
+                                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-main)' }}>
                                             {caseItem.assignedJudge || 'Not assigned'}
                                         </p>
                                     </div>
                                     <div>
-                                        <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                                             Documents
                                         </p>
-                                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#e2e8f0' }}>
+                                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-main)' }}>
                                             {caseItem.documentsCount || 0} files
                                         </p>
                                     </div>
@@ -532,10 +536,10 @@ export default function MyCasesPage() {
                                         to={`/client/case/${caseItem.id}`}
                                         style={{
                                             padding: '0.75rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
-                                            border: '1px solid rgba(139, 92, 246, 0.2)',
+                                            background: 'var(--bg-glass)',
+                                            border: 'var(--border-glass)',
                                             borderRadius: '0.5rem',
-                                            color: '#94a3b8',
+                                            color: 'var(--text-secondary)',
                                             cursor: 'pointer',
                                             display: 'flex',
                                             alignItems: 'center',
@@ -560,22 +564,24 @@ export default function MyCasesPage() {
                     backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
                 }} onClick={() => setShowHireModal(false)}>
                     <div style={{
-                        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
                         borderRadius: '2rem',
                         width: '90%', maxWidth: '800px', maxHeight: '80vh',
-                        padding: '2.5rem', overflow: 'hidden', display: 'flex', flexDirection: 'column'
+                        padding: '2.5rem', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                        boxShadow: 'var(--shadow-glass-strong)'
                     }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <div>
-                                <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                                <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                                     Match with Legal Experts
                                 </h2>
-                                <p style={{ color: '#94a3b8', margin: '0.25rem 0 0 0' }}>
-                                    Select the best lawyer for: <span style={{ color: '#818cf8', fontWeight: '600' }}>{selectedCaseForLawyer?.title}</span>
+                                <p style={{ color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                                    Select the best lawyer for: <span style={{ color: 'var(--color-accent)', fontWeight: '600' }}>{selectedCaseForLawyer?.title}</span>
                                 </p>
                             </div>
-                            <button onClick={() => setShowHireModal(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                            <button onClick={() => setShowHireModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                                 <X size={28} />
                             </button>
                         </div>
@@ -587,19 +593,20 @@ export default function MyCasesPage() {
                             </div>
                         ) : availableLawyers.length === 0 ? (
                             <div style={{ flex: 1, textAlign: 'center', padding: '4rem' }}>
-                                <Users size={64} color="#475569" style={{ margin: '0 auto 1.5rem' }} />
-                                <h3 style={{ color: 'white', fontSize: '1.25rem' }}>No lawyers available currently</h3>
-                                <p style={{ color: '#94a3b8' }}>Our partner lawyers are currently handling other cases. Please try again shortly.</p>
+                                <Users size={64} style={{ color: 'var(--text-secondary)', margin: '0 auto 1.5rem' }} />
+                                <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem' }}>No lawyers available currently</h3>
+                                <p style={{ color: 'var(--text-secondary)' }}>Our partner lawyers are currently handling other cases. Please try again shortly.</p>
                             </div>
                         ) : (
                             <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.25rem', padding: '0.5rem' }}>
                                 {availableLawyers.map(lawyer => (
                                     <div key={lawyer.id} style={{
-                                        background: 'rgba(30, 41, 59, 0.5)',
-                                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
                                         borderRadius: '1.25rem',
                                         padding: '1.5rem',
-                                        transition: 'all 0.2s'
+                                        transition: 'all 0.2s',
+                                        boxShadow: 'var(--shadow-glass)'
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
                                             <div style={{
@@ -611,23 +618,23 @@ export default function MyCasesPage() {
                                                 {lawyer.name?.substring(0, 1)}
                                             </div>
                                             <div style={{ flex: 1 }}>
-                                                <h4 style={{ color: 'white', fontWeight: '700', fontSize: '1.1rem', margin: 0 }}>{lawyer.name}</h4>
+                                                <h4 style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '1.1rem', margin: 0 }}>{lawyer.name}</h4>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
                                                     <Award size={14} color="#f59e0b" />
                                                     <span style={{ color: '#f59e0b', fontWeight: '700', fontSize: '0.875rem' }}>{lawyer.rating || '4.8'}</span>
-                                                    <span style={{ color: '#64748b', fontSize: '0.875rem' }}>• {lawyer.specialization}</span>
+                                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>• {lawyer.specialization}</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                                            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.75rem', borderRadius: '0.75rem', textAlign: 'center' }}>
-                                                <p style={{ color: '#94a3b8', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: '700' }}>Experience</p>
-                                                <p style={{ color: 'white', fontSize: '0.9rem', fontWeight: '600' }}>8+ Years</p>
+                                            <div style={{ background: 'var(--bg-glass-strong)', padding: '0.75rem', borderRadius: '0.75rem', textAlign: 'center' }}>
+                                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: '700' }}>Experience</p>
+                                                <p style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '600' }}>8+ Years</p>
                                             </div>
-                                            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.75rem', borderRadius: '0.75rem', textAlign: 'center' }}>
-                                                <p style={{ color: '#94a3b8', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: '700' }}>Cases</p>
-                                                <p style={{ color: 'white', fontSize: '0.9rem', fontWeight: '600' }}>{lawyer.casesHandled || '120'}+</p>
+                                            <div style={{ background: 'var(--bg-glass-strong)', padding: '0.75rem', borderRadius: '0.75rem', textAlign: 'center' }}>
+                                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: '700' }}>Cases</p>
+                                                <p style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '600' }}>{lawyer.casesHandled || '120'}+</p>
                                             </div>
                                         </div>
 
@@ -635,17 +642,17 @@ export default function MyCasesPage() {
                                             onClick={() => submitProposal(lawyer.id)}
                                             style={{
                                                 width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
-                                                background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.3)',
-                                                color: '#818cf8', fontWeight: '700', cursor: 'pointer',
+                                                background: 'var(--bg-glass-strong)', border: '1px solid var(--color-accent)',
+                                                color: 'var(--color-accent)', fontWeight: '700', cursor: 'pointer',
                                                 transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
                                             }}
                                             onMouseOver={(e) => {
-                                                e.currentTarget.style.background = '#6366f1';
+                                                e.currentTarget.style.background = 'var(--color-accent)';
                                                 e.currentTarget.style.color = 'white';
                                             }}
                                             onMouseOut={(e) => {
-                                                e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)';
-                                                e.currentTarget.style.color = '#818cf8';
+                                                e.currentTarget.style.background = 'var(--bg-glass-strong)';
+                                                e.currentTarget.style.color = 'var(--color-accent)';
                                             }}
                                         >
                                             <Check size={18} />

@@ -74,12 +74,12 @@ const JudgeDashboard = () => {
     };
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass)'
     };
 
     const statCardStyle = {
@@ -93,7 +93,7 @@ const JudgeDashboard = () => {
     };
 
     const primaryButtonStyle = {
-        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
         color: 'white',
         border: 'none',
         padding: '0.75rem 1.5rem',
@@ -126,17 +126,17 @@ const JudgeDashboard = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
                     <div style={{
                         width: '56px', height: '56px', borderRadius: '14px',
-                        background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+                        background: 'linear-gradient(135deg, var(--color-accent) 0%, #4f46e5 100%)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         boxShadow: '0 8px 16px rgba(37, 99, 235, 0.2)'
                     }}>
                         <Gavel size={28} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Judge Dashboard
                         </h1>
-                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Manage your judicial caseload and schedule
                         </p>
                     </div>
@@ -159,8 +159,8 @@ const JudgeDashboard = () => {
                         <Scale size={24} color="#818cf8" />
                     </div>
                     <div>
-                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>Total Assigned Cases</p>
-                        <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'white', margin: 0 }}>{cases.length}</h2>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>Total Assigned Cases</p>
+                        <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{cases.length}</h2>
                     </div>
                 </div>
 
@@ -173,8 +173,8 @@ const JudgeDashboard = () => {
                         <Clock size={24} color="#fbbf24" />
                     </div>
                     <div>
-                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>Pending Actions</p>
-                        <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'white', margin: 0 }}>{cases.filter(c => c.status === 'PENDING').length}</h2>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>Pending Actions</p>
+                        <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{cases.filter(c => c.status === 'PENDING').length}</h2>
                     </div>
                 </div>
 
@@ -187,8 +187,8 @@ const JudgeDashboard = () => {
                         <Video size={24} color="#34d399" />
                     </div>
                     <div>
-                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>Hearings Today</p>
-                        <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'white', margin: 0 }}>0</h2>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>Hearings Today</p>
+                        <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>0</h2>
                     </div>
                 </div>
             </div>
@@ -196,12 +196,12 @@ const JudgeDashboard = () => {
             {/* Cases Section */}
             <div style={{ marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                         📋 Assigned Cases
                     </h2>
                     <button
                         onClick={() => navigate('/judge/pending')}
-                        style={{ background: 'transparent', border: 'none', color: '#818cf8', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--color-accent)', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                     >
                         View All Pending <ChevronRight size={18} />
                     </button>
@@ -209,16 +209,16 @@ const JudgeDashboard = () => {
 
                 {cases.length === 0 ? (
                     <div style={{ ...glassStyle, textAlign: 'center', padding: '4rem' }}>
-                        <FileText size={64} color="#475569" style={{ margin: '0 auto 1.5rem' }} />
-                        <h3 style={{ color: 'white', margin: '0 0 0.5rem 0' }}>No cases assigned</h3>
-                        <p style={{ color: '#94a3b8', margin: 0 }}>You don't have any cases assigned to your bench yet.</p>
+                        <FileText size={64} color="var(--text-secondary)" style={{ margin: '0 auto 1.5rem' }} />
+                        <h3 style={{ color: 'var(--text-main)', margin: '0 0 0.5rem 0' }}>No cases assigned</h3>
+                        <p style={{ color: 'var(--text-secondary)', margin: 0 }}>You don't have any cases assigned to your bench yet.</p>
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '1.5rem' }}>
                         {cases.map(caseItem => (
                             <div key={caseItem.id} style={{ ...glassStyle, padding: '1.5rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1.25rem' }}>
-                                    <h3 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'white', margin: 0 }}>{caseItem.title}</h3>
+                                    <h3 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>{caseItem.title}</h3>
                                     <span style={{
                                         padding: '0.25rem 0.75rem',
                                         background: caseItem.status === 'PENDING' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(37, 99, 235, 0.1)',
@@ -235,20 +235,20 @@ const JudgeDashboard = () => {
 
                                 <div style={{ display: 'grid', gap: '0.75rem', marginBottom: '1.5rem' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                                        <span style={{ color: '#64748b' }}>Type:</span>
-                                        <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{caseItem.caseType}</span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Type:</span>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{caseItem.caseType}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                                        <span style={{ color: '#64748b' }}>Filed:</span>
-                                        <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{new Date(caseItem.filedDate).toLocaleDateString()}</span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Filed:</span>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{new Date(caseItem.filedDate).toLocaleDateString()}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                                        <span style={{ color: '#64748b' }}>Petitioner:</span>
-                                        <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{caseItem.petitioner}</span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Petitioner:</span>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{caseItem.petitioner}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                                        <span style={{ color: '#64748b' }}>Respondent:</span>
-                                        <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{caseItem.respondent}</span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Respondent:</span>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{caseItem.respondent}</span>
                                     </div>
                                 </div>
 
@@ -275,41 +275,42 @@ const JudgeDashboard = () => {
             {/* Modal Overlay */}
             {showModal && (
                 <div style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.7)',
-                    backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                    position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.4)',
+                    backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
                 }} onClick={() => setShowModal(false)}>
                     <div style={{
                         ...glassStyle, width: '100%', maxWidth: '480px', padding: '2rem',
-                        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-                        border: '1px solid rgba(139, 92, 246, 0.3)'
+                        background: 'var(--bg-glass-strong)',
+                        border: 'var(--border-glass-strong)',
+                        boxShadow: 'var(--shadow-glass-strong)'
                     }} onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                                 📅 Schedule Hearing
                             </h2>
-                            <button onClick={() => setShowModal(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                            <button onClick={() => setShowModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                                 <X size={24} />
                             </button>
                         </div>
 
                         <div style={{ display: 'grid', gap: '1.5rem' }}>
                             <div>
-                                <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Case Title</label>
+                                <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Case Title</label>
                                 <input
                                     type="text"
                                     value={selectedCase?.title || ''}
                                     disabled
                                     style={{
                                         width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
-                                        background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(99, 102, 241, 0.1)',
-                                        color: '#64748b', cursor: 'not-allowed'
+                                        background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                        color: 'var(--text-secondary)', cursor: 'not-allowed'
                                     }}
                                 />
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Date</label>
+                                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Date</label>
                                     <input
                                         type="date"
                                         value={hearingData.scheduledDate}
@@ -318,35 +319,35 @@ const JudgeDashboard = () => {
                                         style={{
                                             width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
                                             paddingRight: '0.5rem',
-                                            background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(99, 102, 241, 0.2)',
-                                            color: 'white'
+                                            background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                            color: 'var(--text-main)'
                                         }}
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Time</label>
+                                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Time</label>
                                     <input
                                         type="time"
                                         value={hearingData.scheduledTime}
                                         onChange={(e) => setHearingData({ ...hearingData, scheduledTime: e.target.value })}
                                         style={{
                                             width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
-                                            background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(99, 102, 241, 0.2)',
-                                            color: 'white'
+                                            background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                            color: 'var(--text-main)'
                                         }}
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Duration</label>
+                                <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Duration</label>
                                 <select
                                     value={hearingData.durationMinutes}
                                     onChange={(e) => setHearingData({ ...hearingData, durationMinutes: parseInt(e.target.value) })}
                                     style={{
                                         width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
-                                        background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(99, 102, 241, 0.2)',
-                                        color: 'white'
+                                        background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                        color: 'var(--text-main)'
                                     }}
                                 >
                                     <option value={30}>30 minutes</option>
@@ -362,7 +363,7 @@ const JudgeDashboard = () => {
                                     style={{
                                         flex: 1, padding: '0.875rem', borderRadius: '0.75rem',
                                         background: 'rgba(71, 85, 105, 0.2)', border: '1px solid rgba(71, 85, 105, 0.3)',
-                                        color: '#94a3b8', fontWeight: '600', cursor: 'pointer'
+                                        color: 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer'
                                     }}
                                 >
                                     Cancel
@@ -371,7 +372,7 @@ const JudgeDashboard = () => {
                                     onClick={scheduleHearing}
                                     style={{
                                         flex: 2, padding: '0.875rem', borderRadius: '0.75rem',
-                                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                         border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer',
                                         boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
                                     }}

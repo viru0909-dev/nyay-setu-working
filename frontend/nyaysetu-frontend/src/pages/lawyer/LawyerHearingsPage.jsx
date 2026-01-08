@@ -11,7 +11,8 @@ import {
     MoreVertical,
     Activity,
     CheckCircle2,
-    Briefcase
+    Briefcase,
+    Loader2
 } from 'lucide-react';
 import { hearingAPI } from '../../services/api';
 
@@ -49,12 +50,12 @@ export default function LawyerHearingsPage() {
     };
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass-strong)'
     };
 
     return (
@@ -63,19 +64,19 @@ export default function LawyerHearingsPage() {
             <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{
-                        width: '56px', height: '56px', borderRadius: '14px',
-                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        width: '56px', height: '56px', borderRadius: '16px',
+                        background: 'var(--color-accent)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 8px 16px rgba(99, 102, 241, 0.2)'
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         <Video size={28} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Hearing Schedule
                         </h1>
-                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
-                            Track your court appearances and session details
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
+                            Upcoming court dates and virtual sessions
                         </p>
                     </div>
                 </div>
@@ -86,21 +87,17 @@ export default function LawyerHearingsPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <div style={{ ...glassStyle, padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ position: 'relative', flex: 1 }}>
-                            <Search size={18} color="#64748b" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                             <input
                                 type="text"
-                                placeholder="Search by case or party name..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search hearings..."
                                 style={{
-                                    width: '100%',
-                                    background: 'rgba(15, 23, 42, 0.4)',
-                                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     borderRadius: '0.75rem',
-                                    padding: '0.7rem 1rem 0.7rem 3rem',
-                                    color: 'white',
+                                    padding: '0.6rem 1rem 0.6rem 2.5rem',
+                                    color: 'var(--text-main)',
                                     outline: 'none',
-                                    fontSize: '0.9rem'
+                                    width: '300px'
                                 }}
                             />
                         </div>
@@ -124,31 +121,37 @@ export default function LawyerHearingsPage() {
                                 display: 'flex', flexDirection: 'column', alignItems: 'center',
                                 justifyContent: 'center', flexShrink: 0
                             }}>
-                                <span style={{ color: '#818cf8', fontSize: '0.75rem', fontWeight: '800' }}>{hearing.date.split(' ')[0]}</span>
-                                <span style={{ color: 'white', fontSize: '1.25rem', fontWeight: '800' }}>{hearing.date.split(' ')[1]}</span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--color-accent)', fontWeight: '600', textTransform: 'uppercase' }}>
+                                    {hearing.date === 'TBD' ? 'TBD' : new Date(hearing.date).toLocaleString('default', { month: 'short' })}
+                                </span>
+                                <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', lineHeight: 1 }}>
+                                    {hearing.date === 'TBD' ? '-' : new Date(hearing.date).getDate()}
+                                </span>
                             </div>
 
                             <div style={{ flex: 1 }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                                    <h3 style={{ color: 'white', fontSize: '1.1rem', fontWeight: '700', margin: 0 }}>{hearing.caseTitle}</h3>
-                                    <div style={{
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)', fontSize: '1.25rem' }}>
+                                        {hearing.caseTitle}
+                                    </h3>
+                                    <span style={{
                                         padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.65rem', fontWeight: '800',
                                         background: hearing.status === 'Urgent' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(99, 102, 241, 0.1)',
-                                        color: hearing.status === 'Urgent' ? '#ef4444' : '#818cf8',
+                                        color: hearing.status === 'Urgent' ? 'var(--color-error)' : 'var(--color-accent)',
                                         border: `1px solid ${hearing.status === 'Urgent' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(99, 102, 241, 0.2)'}`
                                     }}>
-                                        {hearing.status.toUpperCase()}
-                                    </div>
+                                        {hearing.status}
+                                    </span>
                                 </div>
-                                <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.85rem' }}>
-                                        <Clock size={14} color="#6366f1" /> {hearing.time}
+                                <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                        <Clock size={14} /> {hearing.time}
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.85rem' }}>
-                                        <MapPin size={14} color="#6366f1" /> {hearing.type}: {hearing.room}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                        <MapPin size={14} /> {hearing.type}: {hearing.room}
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.85rem' }}>
-                                        <User size={14} color="#6366f1" /> Client: {hearing.party}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                        <User size={14} /> Client: {hearing.party}
                                     </div>
                                 </div>
                             </div>
@@ -156,18 +159,18 @@ export default function LawyerHearingsPage() {
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 {hearing.type === 'Virtual' ? (
                                     <button style={{
-                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                        color: 'white', border: 'none', borderRadius: '0.75rem',
+                                        background: 'var(--color-primary)',
+                                        color: 'var(--text-main)', border: 'none', borderRadius: '0.75rem',
                                         padding: '0.6rem 1.25rem', fontWeight: '700', fontSize: '0.85rem',
                                         cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)'
+                                        boxShadow: 'var(--shadow-primary)'
                                     }}>
                                         <Video size={16} /> Join Room
                                     </button>
                                 ) : (
                                     <button style={{
-                                        background: 'rgba(255, 255, 255, 0.05)',
-                                        color: 'white', border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        background: 'var(--bg-glass-subtle)',
+                                        color: 'var(--text-main)', border: 'var(--border-glass-subtle)',
                                         borderRadius: '0.75rem', padding: '0.6rem 1.25rem', fontWeight: '700',
                                         fontSize: '0.85rem', cursor: 'pointer'
                                     }}>
@@ -205,9 +208,12 @@ export default function LawyerHearingsPage() {
                                 <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Today's Sessions</span>
                                 <span style={{ color: 'white', fontWeight: '700' }}>2</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>This Week</span>
-                                <span style={{ color: 'white', fontWeight: '700' }}>8</span>
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+                                <Loader2 size={48} className="spin" style={{ color: 'var(--color-primary)' }} />
+                                <style>{`
+                    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                    .spin { animation: spin 1s linear infinite; }
+                `}</style>
                             </div>
                         </div>
                     </div>
