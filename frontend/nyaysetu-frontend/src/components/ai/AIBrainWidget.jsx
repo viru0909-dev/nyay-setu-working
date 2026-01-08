@@ -69,11 +69,11 @@ export default function AIBrainWidget({ user }) {
     const chatPanelStyle = {
         width: '400px',
         height: isMinimized ? '60px' : '550px',
-        background: 'rgba(15, 23, 42, 0.9)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(139, 92, 246, 0.3)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
-        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
+        boxShadow: 'var(--shadow-glass-strong)',
         display: isOpen ? 'flex' : 'none',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -100,7 +100,7 @@ export default function AIBrainWidget({ user }) {
                             <div style={{
                                 position: 'absolute', bottom: -2, right: -2,
                                 width: '10px', height: '10px', background: '#10b981',
-                                border: '2px solid white', borderRadius: '50%'
+                                border: '2px solid rgba(255, 255, 255, 0.8)', borderRadius: '50%'
                             }} />
                         </div>
                         <div>
@@ -149,9 +149,9 @@ export default function AIBrainWidget({ user }) {
                                         borderRadius: '1rem',
                                         fontSize: '0.9rem',
                                         lineHeight: '1.5',
-                                        background: msg.role === 'user' ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                                        color: msg.role === 'user' ? '#c7d2fe' : '#94a3b8',
-                                        border: msg.role === 'user' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                                        background: msg.role === 'user' ? 'var(--color-accent-light)' : 'var(--bg-glass)',
+                                        color: msg.role === 'user' ? 'var(--color-accent)' : 'var(--text-secondary)',
+                                        border: msg.role === 'user' ? '1px solid var(--color-accent)' : 'var(--border-glass)',
                                         borderBottomRightRadius: msg.role === 'user' ? '0.2rem' : '1rem',
                                         borderBottomLeftRadius: msg.role === 'assistant' ? '0.2rem' : '1rem'
                                     }} className="markdown-content">
@@ -166,11 +166,11 @@ export default function AIBrainWidget({ user }) {
                                     <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <Loader2 size={14} className="spin" color="#6366f1" />
                                     </div>
-                                    <div style={{ padding: '0.75rem 1rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '1rem', borderBottomLeftRadius: '0.2rem' }}>
+                                    <div style={{ padding: '0.75rem 1rem', background: 'var(--bg-glass)', borderRadius: '1rem', borderBottomLeftRadius: '0.2rem' }}>
                                         <div style={{ display: 'flex', gap: '4px' }}>
-                                            <div style={{ width: '6px', height: '6px', background: '#64748b', borderRadius: '50%', animation: 'bounce 1s infinite' }} />
-                                            <div style={{ width: '6px', height: '6px', background: '#64748b', borderRadius: '50%', animation: 'bounce 1s infinite 0.2s' }} />
-                                            <div style={{ width: '6px', height: '6px', background: '#64748b', borderRadius: '50%', animation: 'bounce 1s infinite 0.4s' }} />
+                                            <div style={{ width: '6px', height: '6px', background: 'var(--text-secondary)', borderRadius: '50%', animation: 'bounce 1s infinite' }} />
+                                            <div style={{ width: '6px', height: '6px', background: 'var(--text-secondary)', borderRadius: '50%', animation: 'bounce 1s infinite 0.2s' }} />
+                                            <div style={{ width: '6px', height: '6px', background: 'var(--text-secondary)', borderRadius: '50%', animation: 'bounce 1s infinite 0.4s' }} />
                                         </div>
                                     </div>
                                 </div>
@@ -178,7 +178,7 @@ export default function AIBrainWidget({ user }) {
                         </div>
 
                         {/* Input Area */}
-                        <div style={{ padding: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                        <div style={{ padding: '1.25rem', borderTop: 'var(--border-glass)' }}>
                             <div style={{ position: 'relative' }}>
                                 <input
                                     type="text"
@@ -188,11 +188,11 @@ export default function AIBrainWidget({ user }) {
                                     onKeyPress={e => e.key === 'Enter' && handleSend()}
                                     style={{
                                         width: '100%',
-                                        background: 'rgba(15, 23, 42, 0.5)',
-                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
                                         borderRadius: '0.75rem',
                                         padding: '0.75rem 3rem 0.75rem 1rem',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         outline: 'none',
                                         fontSize: '0.9rem'
                                     }}
@@ -239,7 +239,7 @@ export default function AIBrainWidget({ user }) {
                         font-weight: 700 !important;
                         margin-top: 0.5rem !important;
                         margin-bottom: 0.4rem !important;
-                        color: #f1f5f slate !important;
+                        color: var(--text-main) !important;
                     }
                     .markdown-content p {
                         margin-bottom: 0.6rem !important;

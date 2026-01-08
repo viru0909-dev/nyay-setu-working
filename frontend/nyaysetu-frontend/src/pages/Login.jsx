@@ -62,7 +62,7 @@ export default function Login() {
     };
 
     return (
-        <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)' }}>
+        <div style={{ minHeight: '100vh', background: 'transparent' }}>
             {/* Header */}
             <Header hideAuthButtons={true} />
 
@@ -76,12 +76,12 @@ export default function Login() {
                 position: 'relative',
                 overflow: 'hidden'
             }}>
-                {/* Animated Background Elements */}
+                {/* Visual Decorative Blobs (Updated colors for light theme) */}
                 <div style={{
                     position: 'absolute',
                     width: '800px',
                     height: '800px',
-                    background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
                     top: '-200px',
                     right: '-200px',
                     borderRadius: '50%',
@@ -109,13 +109,13 @@ export default function Login() {
                     zIndex: 1
                 }}>
                     {/* Left Side - Welcome */}
-                    <div style={{ color: 'white' }}>
+                    <div style={{ color: 'var(--text-main)' }}>
                         <div style={{ marginBottom: '3rem' }}>
                             <h1 style={{
                                 fontSize: '3.5rem',
                                 fontWeight: '900',
                                 marginBottom: '1rem',
-                                background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 100%)',
+                                background: 'linear-gradient(135deg, var(--color-accent) 0%, #8b5cf6 100%)',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
                                 lineHeight: '1.2'
@@ -124,7 +124,7 @@ export default function Login() {
                             </h1>
                             <p style={{
                                 fontSize: '1.25rem',
-                                color: '#94a3b8',
+                                color: 'var(--text-secondary)',
                                 lineHeight: '1.8',
                                 maxWidth: '500px'
                             }}>
@@ -153,7 +153,7 @@ export default function Login() {
                                     }}>
                                         {item.icon}
                                     </div>
-                                    <span style={{ fontSize: '1.05rem', color: '#e2e8f0', fontWeight: '500' }}>
+                                    <span style={{ fontSize: '1.05rem', color: 'var(--text-main)', fontWeight: '500' }}>
                                         {item.text}
                                     </span>
                                 </div>
@@ -163,23 +163,23 @@ export default function Login() {
 
                     {/* Right Side - Form */}
                     <div style={{
-                        background: 'rgba(30, 41, 59, 0.8)',
-                        backdropFilter: 'blur(20px)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
                         borderRadius: '2rem',
-                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                        border: 'var(--border-glass-strong)',
                         padding: '3rem',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                             <h2 style={{
                                 fontSize: '2rem',
                                 fontWeight: '800',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 marginBottom: '0.5rem'
                             }}>
                                 Sign In
                             </h2>
-                            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
                                 Enter your credentials to continue
                             </p>
                         </div>
@@ -189,7 +189,7 @@ export default function Login() {
                                 padding: '1rem',
                                 marginBottom: '1.5rem',
                                 background: 'rgba(239, 68, 68, 0.1)',
-                                color: '#f87171',
+                                color: '#ef4444',
                                 borderRadius: '0.75rem',
                                 border: '1px solid rgba(239, 68, 68, 0.3)',
                                 fontSize: '0.875rem',
@@ -206,7 +206,7 @@ export default function Login() {
                                     display: 'block',
                                     marginBottom: '0.5rem',
                                     fontWeight: '600',
-                                    color: '#e2e8f0',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.875rem'
                                 }}>
                                     Email Address
@@ -217,7 +217,7 @@ export default function Login() {
                                         left: '1rem',
                                         top: '50%',
                                         transform: 'translateY(-50%)',
-                                        color: '#8b5cf6'
+                                        color: 'var(--color-accent)'
                                     }} />
                                     <input
                                         type="email"
@@ -228,15 +228,21 @@ export default function Login() {
                                         style={{
                                             width: '100%',
                                             padding: '0.875rem 1rem 0.875rem 3rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.2)',
+                                            background: 'var(--bg-glass)',
+                                            border: 'var(--border-glass)',
                                             borderRadius: '0.75rem',
-                                            color: 'white',
+                                            color: 'var(--text-main)',
                                             fontSize: '1rem',
                                             transition: 'all 0.2s'
                                         }}
-                                        onFocus={(e) => e.target.style.borderColor = 'rgba(139, 92, 246, 0.5)'}
-                                        onBlur={(e) => e.target.style.borderColor = 'rgba(139, 92, 246, 0.2)'}
+                                        onFocus={(e) => {
+                                            e.target.style.borderColor = 'var(--color-accent)';
+                                            e.target.style.background = 'rgba(255,255,255,0.8)';
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.borderColor = 'rgba(255,255,255,0.5)';
+                                            e.target.style.background = 'rgba(255,255,255,0.35)';
+                                        }}
                                     />
                                 </div>
                             </div>
@@ -247,7 +253,7 @@ export default function Login() {
                                     display: 'block',
                                     marginBottom: '0.5rem',
                                     fontWeight: '600',
-                                    color: '#e2e8f0',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.875rem'
                                 }}>
                                     Password
@@ -258,7 +264,7 @@ export default function Login() {
                                         left: '1rem',
                                         top: '50%',
                                         transform: 'translateY(-50%)',
-                                        color: '#8b5cf6'
+                                        color: 'var(--color-accent)'
                                     }} />
                                     <input
                                         type={showPassword ? 'text' : 'password'}
@@ -269,15 +275,21 @@ export default function Login() {
                                         style={{
                                             width: '100%',
                                             padding: '0.875rem 3rem',
-                                            background: 'rgba(15, 23, 42, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.2)',
+                                            background: 'var(--bg-glass)',
+                                            border: 'var(--border-glass)',
                                             borderRadius: '0.75rem',
-                                            color: 'white',
+                                            color: 'var(--text-main)',
                                             fontSize: '1rem',
                                             transition: 'all 0.2s'
                                         }}
-                                        onFocus={(e) => e.target.style.borderColor = 'rgba(139, 92, 246, 0.5)'}
-                                        onBlur={(e) => e.target.style.borderColor = 'rgba(139, 92, 246, 0.2)'}
+                                        onFocus={(e) => {
+                                            e.target.style.borderColor = 'var(--color-accent)';
+                                            e.target.style.background = 'rgba(255,255,255,0.8)';
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.borderColor = 'rgba(255,255,255,0.5)';
+                                            e.target.style.background = 'rgba(255,255,255,0.35)';
+                                        }}
                                     />
                                     <button
                                         type="button"
@@ -290,7 +302,7 @@ export default function Login() {
                                             background: 'none',
                                             border: 'none',
                                             cursor: 'pointer',
-                                            color: '#8b5cf6'
+                                            color: 'var(--text-secondary)'
                                         }}
                                     >
                                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -304,7 +316,7 @@ export default function Login() {
                                     display: 'block',
                                     marginBottom: '0.75rem',
                                     fontWeight: '600',
-                                    color: '#e2e8f0',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.875rem'
                                 }}>
                                     Select Your Role
@@ -322,13 +334,13 @@ export default function Login() {
                                             style={{
                                                 padding: '0.875rem 1rem',
                                                 background: selectedRole === role.value
-                                                    ? `linear-gradient(135deg, ${role.color}40 0%, ${role.color}20 100%)`
-                                                    : 'rgba(15, 23, 42, 0.6)',
+                                                    ? `${role.color}15` // 15 = low opacity hex
+                                                    : 'var(--bg-glass)',
                                                 border: selectedRole === role.value
                                                     ? `2px solid ${role.color}`
-                                                    : '2px solid rgba(139, 92, 246, 0.2)',
+                                                    : 'var(--border-glass)',
                                                 borderRadius: '0.75rem',
-                                                color: selectedRole === role.value ? role.color : '#94a3b8',
+                                                color: selectedRole === role.value ? role.color : 'var(--text-secondary)',
                                                 fontSize: '0.9rem',
                                                 fontWeight: '600',
                                                 cursor: 'pointer',
@@ -340,12 +352,12 @@ export default function Login() {
                                             }}
                                             onMouseOver={(e) => {
                                                 if (selectedRole !== role.value) {
-                                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+                                                    e.currentTarget.style.borderColor = role.color;
                                                 }
                                             }}
                                             onMouseOut={(e) => {
                                                 if (selectedRole !== role.value) {
-                                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
+                                                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)';
                                                 }
                                             }}
                                         >
@@ -369,7 +381,7 @@ export default function Login() {
                                     gap: '0.5rem',
                                     cursor: 'pointer',
                                     fontSize: '0.875rem',
-                                    color: '#94a3b8'
+                                    color: 'var(--text-secondary)'
                                 }}>
                                     <input type="checkbox" style={{ cursor: 'pointer' }} />
                                     Remember me
@@ -380,7 +392,7 @@ export default function Login() {
                                     style={{
                                         background: 'none',
                                         border: 'none',
-                                        color: '#8b5cf6',
+                                        color: 'var(--color-accent)',
                                         fontSize: '0.875rem',
                                         fontWeight: '600',
                                         cursor: 'pointer'
@@ -398,15 +410,15 @@ export default function Login() {
                                     width: '100%',
                                     padding: '1rem',
                                     background: loading
-                                        ? 'rgba(139, 92, 246, 0.5)'
-                                        : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                        ? 'var(--bg-glass-hover)'
+                                        : 'linear-gradient(135deg, var(--color-accent) 0%, #8b5cf6 100%)',
                                     border: 'none',
                                     borderRadius: '0.75rem',
                                     color: 'white',
                                     fontSize: '1.05rem',
                                     fontWeight: '700',
                                     cursor: loading ? 'not-allowed' : 'pointer',
-                                    boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)',
+                                    boxShadow: '0 10px 30px rgba(37, 99, 235, 0.2)',
                                     transition: 'all 0.3s',
                                     marginBottom: '1rem'
                                 }}
@@ -424,7 +436,7 @@ export default function Login() {
                                     background: 'rgba(139, 92, 246, 0.1)',
                                     border: '1px solid rgba(139, 92, 246, 0.3)',
                                     borderRadius: '0.75rem',
-                                    color: '#a78bfa',
+                                    color: '#8b5cf6',
                                     fontSize: '1rem',
                                     fontWeight: '600',
                                     cursor: 'pointer',
@@ -448,11 +460,11 @@ export default function Login() {
                             </button>
                         </form>
 
-                        <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(148, 163, 184, 0.1)' }}>
-                            <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                        <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 Don't have an account?{' '}
                                 <Link to="/signup" style={{
-                                    color: '#8b5cf6',
+                                    color: 'var(--color-accent)',
                                     fontWeight: '600',
                                     textDecoration: 'none'
                                 }}>

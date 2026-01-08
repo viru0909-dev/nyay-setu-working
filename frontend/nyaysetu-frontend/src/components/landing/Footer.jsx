@@ -48,20 +48,20 @@ export default function Footer() {
 
     return (
         <footer style={{
-            background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 1) 100%)',
-            borderTop: '1px solid rgba(139, 92, 246, 0.2)',
+            background: 'var(--bg-glass-strong)',
+            borderTop: 'var(--border-glass)',
             padding: '4rem 0 2rem',
             position: 'relative',
             overflow: 'hidden'
         }}>
-            {/* Gradient overlay */}
+            {/* Gradient overlay - Removed for cleaner glass look, or kept subtle */}
             <div style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
                 height: '1px',
-                background: 'linear-gradient(90deg, transparent 0%, #8b5cf6 50%, transparent 100%)'
+                background: 'linear-gradient(90deg, transparent 0%, var(--color-accent) 50%, transparent 100%)'
             }} />
 
             <div className="container" style={{
@@ -103,7 +103,7 @@ export default function Footer() {
                             </span>
                         </div>
                         <p style={{
-                            color: '#94a3b8',
+                            color: 'var(--text-secondary)',
                             fontSize: '0.95rem',
                             lineHeight: '1.6',
                             marginBottom: '1.5rem'
@@ -123,12 +123,12 @@ export default function Footer() {
                                         width: '40px',
                                         height: '40px',
                                         borderRadius: '10px',
-                                        background: 'rgba(139, 92, 246, 0.1)',
-                                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                                        background: 'var(--bg-glass-strong)',
+                                        border: 'var(--border-glass)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        color: '#8b5cf6',
+                                        color: 'var(--color-accent)',
                                         transition: 'all 0.3s'
                                     }}
                                     onMouseEnter={(e) => {
@@ -137,9 +137,9 @@ export default function Footer() {
                                         e.currentTarget.style.borderColor = link.color;
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                                        e.currentTarget.style.color = '#8b5cf6';
-                                        e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
+                                        e.currentTarget.style.background = 'var(--bg-glass-strong)';
+                                        e.currentTarget.style.color = 'var(--color-accent)';
+                                        e.currentTarget.style.borderColor = 'var(--border-glass)';
                                     }}
                                 >
                                     {link.icon}
@@ -151,7 +151,7 @@ export default function Footer() {
                     {/* Quick Links */}
                     <div>
                         <h3 style={{
-                            color: 'white',
+                            color: 'var(--text-main)',
                             fontSize: '1.125rem',
                             fontWeight: '700',
                             marginBottom: '1.5rem'
@@ -164,13 +164,13 @@ export default function Footer() {
                                     <a
                                         href={link.href}
                                         style={{
-                                            color: '#94a3b8',
+                                            color: 'var(--text-secondary)',
                                             textDecoration: 'none',
                                             fontSize: '0.95rem',
                                             transition: 'color 0.2s'
                                         }}
-                                        onMouseEnter={(e) => e.target.style.color = '#8b5cf6'}
-                                        onMouseLeave={(e) => e.target.style.color = '#94a3b8'}
+                                        onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
+                                        onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
                                     >
                                         {link.label}
                                     </a>
@@ -182,7 +182,7 @@ export default function Footer() {
                     {/* Legal */}
                     <div>
                         <h3 style={{
-                            color: 'white',
+                            color: 'var(--text-main)',
                             fontSize: '1.125rem',
                             fontWeight: '700',
                             marginBottom: '1.5rem'
@@ -195,13 +195,13 @@ export default function Footer() {
                                     <Link
                                         to={link.href}
                                         style={{
-                                            color: '#94a3b8',
+                                            color: 'var(--text-secondary)',
                                             textDecoration: 'none',
                                             fontSize: '0.95rem',
                                             transition: 'color 0.2s'
                                         }}
-                                        onMouseEnter={(e) => e.target.style.color = '#8b5cf6'}
-                                        onMouseLeave={(e) => e.target.style.color = '#94a3b8'}
+                                        onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
+                                        onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
                                     >
                                         {link.label}
                                     </Link>
@@ -213,7 +213,7 @@ export default function Footer() {
                     {/* Contact Info */}
                     <div>
                         <h3 style={{
-                            color: 'white',
+                            color: 'var(--text-main)',
                             fontSize: '1.125rem',
                             fontWeight: '700',
                             marginBottom: '1.5rem'
@@ -224,15 +224,15 @@ export default function Footer() {
                             <a
                                 href="mailto:gadekarvidera4@gmail.com"
                                 style={{
-                                    color: '#94a3b8',
+                                    color: 'var(--text-secondary)',
                                     textDecoration: 'none',
                                     fontSize: '0.95rem',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '0.5rem'
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = '#8b5cf6'}
-                                onMouseLeave={(e) => e.target.style.color = '#94a3b8'}
+                                onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
+                                onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
                             >
                                 <FaEnvelope size={16} />
                                 gadekarvidera4@gmail.com
@@ -242,15 +242,15 @@ export default function Footer() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{
-                                    color: '#94a3b8',
+                                    color: 'var(--text-secondary)',
                                     textDecoration: 'none',
                                     fontSize: '0.95rem',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '0.5rem'
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = '#8b5cf6'}
-                                onMouseLeave={(e) => e.target.style.color = '#94a3b8'}
+                                onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
+                                onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
                             >
                                 <FaGithub size={16} />
                                 View Repository
@@ -261,7 +261,7 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div style={{
-                    borderTop: '1px solid rgba(139, 92, 246, 0.1)',
+                    borderTop: 'var(--border-glass)',
                     paddingTop: '2rem',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -270,17 +270,17 @@ export default function Footer() {
                     gap: '1rem'
                 }}>
                     <p style={{
-                        color: '#64748b',
+                        color: 'var(--text-muted)',
                         fontSize: '0.875rem',
                         margin: 0,
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem'
                     }}>
-                        © {currentYear} NyaySetu. Made with <FaHeart color="#8b5cf6" size={14} /> by Virendra Gadekar
+                        © {currentYear} NyaySetu. Made with <FaHeart color="var(--color-accent)" size={14} /> by Virendra Gadekar
                     </p>
                     <p style={{
-                        color: '#64748b',
+                        color: 'var(--text-muted)',
                         fontSize: '0.875rem',
                         margin: 0
                     }}>

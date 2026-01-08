@@ -252,19 +252,19 @@ export default function Constitution() {
     };
 
     return (
-        <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #1e293b 100%)' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-gradient)' }}>
             <Header />
 
             <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '6rem 2rem 4rem' }}>
                 {/* Enhanced Page Header */}
                 <div style={{
                     padding: '3rem',
-                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%)',
-                    backdropFilter: 'blur(10px)',
-                    border: '2px solid rgba(139, 92, 246, 0.3)',
+                    background: 'var(--bg-glass-strong)',
+                    backdropFilter: 'var(--glass-blur)',
+                    border: 'var(--border-glass-strong)',
                     borderRadius: '2rem',
                     marginBottom: '3rem',
-                    boxShadow: '0 20px 60px rgba(139, 92, 246, 0.2)'
+                    boxShadow: 'var(--shadow-glass-strong)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -276,10 +276,10 @@ export default function Constitution() {
                                 <BookOpen size={48} color="white" />
                             </div>
                             <div>
-                                <h1 style={{ color: 'white', fontSize: '2.5rem', fontWeight: '900', margin: '0 0 0.5rem 0' }}>
+                                <h1 style={{ color: 'var(--color-primary)', fontSize: '2.5rem', fontWeight: '900', margin: '0 0 0.5rem 0' }}>
                                     {t('constitutionOfIndia')}
                                 </h1>
-                                <p style={{ color: '#94a3b8', fontSize: '1.1rem', margin: 0 }}>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: 0 }}>
                                     {language === 'en' ? 'The Supreme Law of India' : 'भारत का सर्वोच्च कानून'}
                                 </p>
                             </div>
@@ -290,10 +290,10 @@ export default function Constitution() {
                                 onClick={toggleLanguage}
                                 style={{
                                     padding: '0.75rem 1.5rem',
-                                    background: 'rgba(139, 92, 246, 0.2)',
-                                    border: '2px solid rgba(139, 92, 246, 0.4)',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     borderRadius: '0.75rem',
-                                    color: 'white',
+                                    color: 'var(--text-main)',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -303,12 +303,12 @@ export default function Constitution() {
                                     transition: 'all 0.3s'
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.background = 'rgba(139, 92, 246, 0.3)';
-                                    e.target.style.borderColor = '#8b5cf6';
+                                    e.target.style.background = 'var(--bg-glass-hover)';
+                                    e.target.style.borderColor = 'var(--color-accent)';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.target.style.background = 'rgba(139, 92, 246, 0.2)';
-                                    e.target.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+                                    e.target.style.background = 'var(--bg-glass)';
+                                    e.target.style.borderColor = 'var(--border-glass)';
                                 }}
                             >
                                 <Globe size={20} />
@@ -342,8 +342,8 @@ export default function Constitution() {
                                 onClick={() => setShowAIChat(!showAIChat)}
                                 style={{
                                     padding: '0.75rem 1.5rem',
-                                    background: showAIChat ? '#ec4899' : 'rgba(236, 72, 153, 0.2)',
-                                    border: '2px solid rgba(236, 72, 153, 0.4)',
+                                    background: showAIChat ? 'var(--color-accent)' : 'var(--bg-glass)',
+                                    border: showAIChat ? '2px solid var(--color-accent)' : 'var(--border-glass)',
                                     borderRadius: '0.75rem',
                                     color: 'white',
                                     cursor: 'pointer',
@@ -370,7 +370,7 @@ export default function Constitution() {
                             left: '1.5rem',
                             top: '50%',
                             transform: 'translateY(-50%)',
-                            color: '#8b5cf6'
+                            color: 'var(--color-accent)'
                         }} />
                         <input
                             type="text"
@@ -380,17 +380,17 @@ export default function Constitution() {
                             style={{
                                 width: '100%',
                                 padding: '1.5rem 1.5rem 1.5rem 4.5rem',
-                                background: 'rgba(30, 41, 59, 0.6)',
-                                backdropFilter: 'blur(10px)',
-                                border: '2px solid rgba(139, 92, 246, 0.3)',
+                                background: 'var(--bg-glass)',
+                                backdropFilter: 'var(--glass-blur)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '1.5rem',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 fontSize: '1.125rem',
                                 outline: 'none',
                                 transition: 'all 0.3s'
                             }}
-                            onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
-                            onBlur={(e) => e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)'}
+                            onFocus={(e) => e.target.style.borderColor = 'var(--color-accent)'}
+                            onBlur={(e) => e.target.style.borderColor = 'var(--border-glass)'}
                         />
                     </div>
                 </div>
@@ -423,10 +423,11 @@ export default function Constitution() {
 
                                 <div style={{
                                     padding: '3rem',
-                                    background: 'rgba(30, 41, 59, 0.6)',
-                                    backdropFilter: 'blur(10px)',
+                                    background: 'var(--bg-glass-strong)',
+                                    backdropFilter: 'var(--glass-blur)',
                                     borderRadius: '2rem',
-                                    border: '2px solid rgba(139, 92, 246, 0.3)'
+                                    border: 'var(--border-glass-strong)',
+                                    boxShadow: 'var(--shadow-glass-strong)'
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '2rem' }}>
                                         <span style={{
@@ -445,8 +446,8 @@ export default function Constitution() {
                                                 onClick={() => toggleBookmark(selectedArticle)}
                                                 style={{
                                                     padding: '0.75rem',
-                                                    background: bookmarks.find(b => b.number === selectedArticle.number) ? '#8b5cf6' : 'rgba(139, 92, 246, 0.2)',
-                                                    border: 'none',
+                                                    background: bookmarks.find(b => b.number === selectedArticle.number) ? 'var(--color-accent)' : 'var(--bg-glass)',
+                                                    border: 'var(--border-glass)',
                                                     borderRadius: '0.75rem',
                                                     color: 'white',
                                                     cursor: 'pointer',
@@ -459,8 +460,8 @@ export default function Constitution() {
                                                 onClick={() => alert('Share feature coming soon!')}
                                                 style={{
                                                     padding: '0.75rem',
-                                                    background: 'rgba(139, 92, 246, 0.2)',
-                                                    border: 'none',
+                                                    background: 'var(--bg-glass)',
+                                                    border: 'var(--border-glass)',
                                                     borderRadius: '0.75rem',
                                                     color: 'white',
                                                     cursor: 'pointer'
@@ -471,11 +472,11 @@ export default function Constitution() {
                                         </div>
                                     </div>
 
-                                    <h2 style={{ color: 'white', fontSize: '2.5rem', fontWeight: '800', marginBottom: '1.5rem', lineHeight: '1.3' }}>
+                                    <h2 style={{ color: 'var(--color-primary)', fontSize: '2.5rem', fontWeight: '800', marginBottom: '1.5rem', lineHeight: '1.3' }}>
                                         {selectedArticle.title}
                                     </h2>
 
-                                    <p style={{ color: '#94a3b8', fontSize: '1.25rem', lineHeight: '2', marginBottom: '2rem' }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem', lineHeight: '2', marginBottom: '2rem' }}>
                                         {selectedArticle.content}
                                     </p>
 
@@ -484,10 +485,10 @@ export default function Constitution() {
                                             {selectedArticle.keywords.map((keyword, idx) => (
                                                 <span key={idx} style={{
                                                     padding: '0.5rem 1rem',
-                                                    background: 'rgba(139, 92, 246, 0.1)',
-                                                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                                                    background: 'var(--bg-glass)',
+                                                    border: 'var(--border-glass)',
                                                     borderRadius: '0.5rem',
-                                                    color: '#a78bfa',
+                                                    color: 'var(--color-accent)',
                                                     fontSize: '0.9rem',
                                                     fontWeight: '600'
                                                 }}>
@@ -505,10 +506,10 @@ export default function Constitution() {
                                     onClick={() => setSelectedPart(null)}
                                     style={{
                                         padding: '0.75rem 1.5rem',
-                                        background: 'rgba(139, 92, 246, 0.2)',
-                                        border: '2px solid rgba(139, 92, 246, 0.3)',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
                                         borderRadius: '0.75rem',
-                                        color: '#8b5cf6',
+                                        color: 'var(--color-accent)',
                                         cursor: 'pointer',
                                         marginBottom: '2rem',
                                         fontWeight: '700',
@@ -520,14 +521,16 @@ export default function Constitution() {
 
                                 <div style={{
                                     padding: '2rem',
-                                    background: 'rgba(139, 92, 246, 0.1)',
+                                    background: 'var(--bg-glass-strong)',
                                     borderRadius: '1.5rem',
-                                    marginBottom: '2rem'
+                                    marginBottom: '2rem',
+                                    border: 'var(--border-glass-strong)',
+                                    boxShadow: 'var(--shadow-glass)'
                                 }}>
-                                    <h2 style={{ color: 'white', fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem' }}>
+                                    <h2 style={{ color: 'var(--color-primary)', fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem' }}>
                                         {selectedPart.title}
                                     </h2>
-                                    <p style={{ color: '#94a3b8', fontSize: '1.125rem' }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>
                                         {selectedPart.description}
                                     </p>
                                 </div>
@@ -543,20 +546,21 @@ export default function Constitution() {
                                             whileHover={{ x: 8 }}
                                             style={{
                                                 padding: '2rem',
-                                                background: 'rgba(30, 41, 59, 0.6)',
-                                                backdropFilter: 'blur(10px)',
+                                                background: 'var(--bg-glass-strong)',
+                                                backdropFilter: 'var(--glass-blur)',
                                                 borderRadius: '1.5rem',
-                                                border: '2px solid rgba(139, 92, 246, 0.2)',
+                                                border: 'var(--border-glass)',
                                                 cursor: 'pointer',
-                                                transition: 'all 0.3s'
+                                                transition: 'all 0.3s',
+                                                boxShadow: 'var(--shadow-glass)'
                                             }}
                                             onMouseEnter={(e) => {
-                                                e.currentTarget.style.borderColor = '#8b5cf6';
-                                                e.currentTarget.style.boxShadow = '0 10px 30px rgba(139, 92, 246, 0.3)';
+                                                e.currentTarget.style.borderColor = 'var(--color-accent)';
+                                                e.currentTarget.style.boxShadow = 'var(--shadow-glass-strong)';
                                             }}
                                             onMouseLeave={(e) => {
-                                                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
-                                                e.currentTarget.style.boxShadow = 'none';
+                                                e.currentTarget.style.borderColor = 'var(--border-glass)';
+                                                e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
                                             }}
                                         >
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
@@ -586,11 +590,11 @@ export default function Constitution() {
                                                 </button>
                                             </div>
 
-                                            <h3 style={{ color: 'white', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                                            <h3 style={{ color: 'var(--text-main)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                                                 {article.title}
                                             </h3>
 
-                                            <p style={{ color: '#94a3b8', fontSize: '1.05rem', lineHeight: '1.7' }}>
+                                            <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', lineHeight: '1.7' }}>
                                                 {article.content.substring(0, 150)}...
                                             </p>
                                         </motion.div>
@@ -614,14 +618,15 @@ export default function Constitution() {
                                         onClick={() => setSelectedPart(part)}
                                         style={{
                                             padding: '2.5rem',
-                                            background: 'rgba(30, 41, 59, 0.6)',
-                                            backdropFilter: 'blur(10px)',
+                                            background: 'var(--bg-glass-strong)',
+                                            backdropFilter: 'var(--glass-blur)',
                                             borderRadius: '1.5rem',
-                                            border: '2px solid rgba(139, 92, 246, 0.2)',
+                                            border: 'var(--border-glass-strong)',
                                             cursor: 'pointer',
                                             transition: 'all 0.3s',
                                             position: 'relative',
-                                            overflow: 'hidden'
+                                            overflow: 'hidden',
+                                            boxShadow: 'var(--shadow-glass)'
                                         }}
                                         onMouseEnter={(e) => {
                                             e.currentTarget.style.borderColor = '#8b5cf6';
@@ -646,11 +651,11 @@ export default function Constitution() {
                                             {part.articles.length} {t('articles')}
                                         </div>
 
-                                        <h3 style={{ color: 'white', fontSize: '1.5rem', fontWeight: '800', marginBottom: '1rem', lineHeight: '1.3', paddingRight: '3rem' }}>
+                                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.5rem', fontWeight: '800', marginBottom: '1rem', lineHeight: '1.3', paddingRight: '3rem' }}>
                                             {part.title}
                                         </h3>
 
-                                        <p style={{ color: '#94a3b8', fontSize: '1rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
                                             {part.description}
                                         </p>
 
@@ -681,13 +686,14 @@ export default function Constitution() {
                             >
                                 <div style={{
                                     padding: '2rem',
-                                    background: 'rgba(30, 41, 59, 0.8)',
-                                    backdropFilter: 'blur(20px)',
+                                    background: 'var(--bg-glass-strong)',
+                                    backdropFilter: 'var(--glass-blur)',
                                     borderRadius: '1.5rem',
-                                    border: '2px solid rgba(139, 92, 246, 0.3)',
+                                    border: 'var(--border-glass-strong)',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    gap: '1.5rem'
+                                    gap: '1.5rem',
+                                    boxShadow: 'var(--shadow-glass-strong)'
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <h3 style={{ color: 'white', fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>
@@ -732,15 +738,15 @@ export default function Constitution() {
                                         placeholder={t('typeMessage')}
                                         style={{
                                             padding: '1rem',
-                                            background: 'rgba(30, 41, 59, 0.6)',
-                                            border: '2px solid rgba(139, 92, 246, 0.3)',
+                                            background: 'var(--bg-glass)',
+                                            border: 'var(--border-glass)',
                                             borderRadius: '0.75rem',
-                                            color: 'white',
+                                            color: 'var(--text-main)',
                                             fontSize: '1rem',
                                             outline: 'none'
                                         }}
-                                        onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
-                                        onBlur={(e) => e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)'}
+                                        onFocus={(e) => e.target.style.borderColor = 'var(--color-accent)'}
+                                        onBlur={(e) => e.target.style.borderColor = 'var(--border-glass)'}
                                     />
 
                                     <button
@@ -780,17 +786,17 @@ export default function Constitution() {
                                         <div style={{
                                             marginTop: '1rem',
                                             padding: '1.5rem',
-                                            background: 'rgba(139, 92, 246, 0.1)',
+                                            background: 'var(--bg-glass)',
                                             borderRadius: '1rem',
-                                            border: '1px solid rgba(139, 92, 246, 0.3)'
+                                            border: 'var(--border-glass)'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'start', gap: '1rem' }}>
-                                                <MessageCircle size={24} style={{ color: '#8b5cf6', flexShrink: 0 }} />
+                                                <MessageCircle size={24} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
                                                 <div>
-                                                    <h4 style={{ color: '#a78bfa', fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+                                                    <h4 style={{ color: 'var(--color-accent-light)', fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem' }}>
                                                         {language === 'en' ? 'AI Response:' : 'AI उत्तर:'}
                                                     </h4>
-                                                    <p style={{ color: '#e2e8f0', fontSize: '0.95rem', lineHeight: '1.6', margin: 0, whiteSpace: 'pre-wrap' }}>
+                                                    <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: '1.6', margin: 0, whiteSpace: 'pre-wrap' }}>
                                                         {aiResponse}
                                                     </p>
                                                 </div>

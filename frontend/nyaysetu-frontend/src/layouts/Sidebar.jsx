@@ -77,25 +77,25 @@ export default function Sidebar({ userRole }) {
     const sidebarWidth = isCollapsed ? '80px' : '280px';
 
     return (
-        <aside style={{
-            width: sidebarWidth,
-            minWidth: sidebarWidth,
-            maxWidth: sidebarWidth,
-            height: '100vh',
-            background: 'rgba(15, 23, 42, 0.95)',
-            backdropFilter: 'blur(20px)',
-            borderRight: '1px solid rgba(139, 92, 246, 0.2)',
-            display: 'flex',
-            flexDirection: 'column',
-            transition: 'width 0.3s, min-width 0.3s, max-width 0.3s',
-            position: 'relative',
-            zIndex: 100,
-            flexShrink: 0
-        }}>
+        <aside
+            className="sidebar"
+            style={{
+                width: sidebarWidth,
+                minWidth: sidebarWidth,
+                maxWidth: sidebarWidth,
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'width 0.3s, min-width 0.3s, max-width 0.3s',
+                position: 'relative',
+                zIndex: 100,
+                flexShrink: 0
+            }}
+        >
             {/* Logo Section - Fixed at top */}
             <div style={{
                 padding: '1.5rem',
-                borderBottom: '1px solid rgba(139, 92, 246, 0.1)',
+                borderBottom: 'var(--border-glass)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem',
@@ -105,7 +105,7 @@ export default function Sidebar({ userRole }) {
                     width: '40px',
                     height: '40px',
                     minWidth: '40px',
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                    background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                     borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
@@ -117,9 +117,7 @@ export default function Sidebar({ userRole }) {
                     <span style={{
                         fontSize: '1.5rem',
                         fontWeight: '800',
-                        background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
+                        color: 'var(--color-primary)',
                         whiteSpace: 'nowrap'
                     }}>
                         NyaySetu
@@ -150,12 +148,12 @@ export default function Sidebar({ userRole }) {
                                 marginBottom: '0.5rem',
                                 borderRadius: '0.75rem',
                                 background: isActive
-                                    ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%)'
+                                    ? 'var(--bg-glass-strong)'
                                     : 'transparent',
                                 border: isActive
-                                    ? '1px solid rgba(139, 92, 246, 0.5)'
+                                    ? 'var(--border-glass-strong)'
                                     : '1px solid transparent',
-                                color: isActive ? '#c4b5fd' : '#94a3b8',
+                                color: isActive ? 'var(--color-accent)' : 'var(--text-secondary)',
                                 textDecoration: 'none',
                                 fontSize: '0.95rem',
                                 fontWeight: isActive ? '600' : '500',
@@ -165,14 +163,14 @@ export default function Sidebar({ userRole }) {
                             }}
                             onMouseOver={(e) => {
                                 if (!isActive) {
-                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                                    e.currentTarget.style.color = '#c4b5fd';
+                                    e.currentTarget.style.background = 'var(--bg-glass-hover)';
+                                    e.currentTarget.style.color = 'var(--text-main)';
                                 }
                             }}
                             onMouseOut={(e) => {
                                 if (!isActive) {
                                     e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = '#94a3b8';
+                                    e.currentTarget.style.color = 'var(--text-secondary)';
                                 }
                             }}
                         >
@@ -186,7 +184,7 @@ export default function Sidebar({ userRole }) {
             {/* Collapse Button - Fixed at bottom */}
             <div style={{
                 padding: '1rem',
-                borderTop: '1px solid rgba(139, 92, 246, 0.1)',
+                borderTop: 'var(--border-glass)',
                 flexShrink: 0
             }}>
                 <button
@@ -194,10 +192,10 @@ export default function Sidebar({ userRole }) {
                     style={{
                         width: '100%',
                         padding: '0.75rem',
-                        background: 'rgba(139, 92, 246, 0.1)',
-                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                        background: 'var(--bg-glass-strong)',
+                        border: 'var(--border-glass)',
                         borderRadius: '0.5rem',
-                        color: '#8b5cf6',
+                        color: 'var(--color-accent)',
                         fontSize: '0.875rem',
                         fontWeight: '600',
                         cursor: 'pointer',
@@ -208,10 +206,10 @@ export default function Sidebar({ userRole }) {
                         gap: '0.5rem'
                     }}
                     onMouseOver={(e) => {
-                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
+                        e.currentTarget.style.background = 'var(--bg-glass-hover)';
                     }}
                     onMouseOut={(e) => {
-                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
+                        e.currentTarget.style.background = 'var(--bg-glass-strong)';
                     }}
                 >
                     {isCollapsed ? (

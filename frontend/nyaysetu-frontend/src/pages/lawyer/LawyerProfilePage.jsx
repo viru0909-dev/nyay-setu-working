@@ -40,12 +40,12 @@ export default function LawyerProfilePage() {
     };
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass-strong)'
     };
 
     const sections = [
@@ -64,31 +64,31 @@ export default function LawyerProfilePage() {
                         <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 1.5rem' }}>
                             <div style={{
                                 width: '100%', height: '100%', borderRadius: '35px',
-                                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                                background: 'var(--color-accent)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: 'white', fontSize: '3rem', fontWeight: '800',
-                                boxShadow: '0 12px 24px rgba(99, 102, 241, 0.3)'
+                                color: 'var(--text-main)', fontSize: '3rem', fontWeight: '800',
+                                boxShadow: 'var(--shadow-glass)'
                             }}>
                                 {user?.name?.charAt(0) || 'L'}
                             </div>
                             <button style={{
                                 position: 'absolute', bottom: -5, right: -5,
                                 width: '36px', height: '36px', borderRadius: '12px',
-                                background: '#1e293b', border: '2px solid rgba(255,255,255,0.1)',
-                                color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                background: 'var(--bg-glass-strong)', border: 'var(--border-glass)',
+                                color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 cursor: 'pointer'
                             }}>
                                 <Camera size={18} />
                             </button>
                         </div>
-                        <h2 style={{ color: 'white', margin: 0, fontSize: '1.5rem', fontWeight: '800' }}>{user?.name || 'Vakil Sahib'}</h2>
-                        <p style={{ color: '#818cf8', fontSize: '0.9rem', fontWeight: '700', marginTop: '0.25rem' }}>Senior Advocate</p>
+                        <h2 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.5rem', fontWeight: '800' }}>{user?.name || 'Vakil Sahib'}</h2>
+                        <p style={{ color: 'var(--color-accent)', fontSize: '0.9rem', fontWeight: '700', marginTop: '0.25rem' }}>Senior Advocate</p>
 
                         <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <button style={{
                                 width: '100%', padding: '0.8rem', borderRadius: '0.75rem',
-                                background: 'rgba(99, 102, 241, 0.1)', color: '#818cf8',
-                                border: '1px solid rgba(99, 102, 241, 0.2)', fontWeight: '700',
+                                background: 'var(--bg-glass)', color: 'var(--color-accent)',
+                                border: 'var(--border-glass)', fontWeight: '700',
                                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
                             }}>
                                 <Settings size={18} /> Account Settings
@@ -97,7 +97,7 @@ export default function LawyerProfilePage() {
                                 onClick={logout}
                                 style={{
                                     width: '100%', padding: '0.8rem', borderRadius: '0.75rem',
-                                    background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444',
+                                    background: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-error)',
                                     border: '1px solid rgba(239, 68, 68, 0.2)', fontWeight: '700',
                                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
                                 }}
@@ -108,19 +108,19 @@ export default function LawyerProfilePage() {
                     </div>
 
                     <div style={{ ...glassStyle, padding: '1.5rem' }}>
-                        <h3 style={{ color: 'white', fontSize: '1rem', fontWeight: '700', marginBottom: '1.25rem' }}>Digital Verification</h3>
+                        <h3 style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: '700', marginBottom: '1.25rem' }}>Digital Verification</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-                                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Identity Verified</span>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-success)' }} />
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Identity Verified</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-                                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Bar Council Synced</span>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-success)' }} />
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Bar Council Synced</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-                                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Blockchain Auth Active</span>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-success)' }} />
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Blockchain Auth Active</span>
                             </div>
                         </div>
                     </div>
@@ -130,12 +130,12 @@ export default function LawyerProfilePage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div style={glassStyle}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ color: 'white', margin: 0, fontSize: '1.25rem', fontWeight: '800' }}>Personal Information</h3>
+                            <h3 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.25rem', fontWeight: '800' }}>Personal Information</h3>
                             <button
                                 onClick={() => setIsEditing(!isEditing)}
                                 style={{
-                                    background: 'rgba(255, 255, 255, 0.05)', color: 'white',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '0.5rem',
+                                    background: 'var(--bg-glass-subtle)', color: 'var(--text-main)',
+                                    border: 'var(--border-glass-subtle)', borderRadius: '0.5rem',
                                     padding: '0.4rem 1rem', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer'
                                 }}
                             >
@@ -145,28 +145,28 @@ export default function LawyerProfilePage() {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <label style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Full Name</label>
-                                <div style={{ color: 'white', fontWeight: '600' }}>{user?.name || 'Adv. Unknown'}</div>
+                                <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Full Name</label>
+                                <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>{user?.name || 'Adv. Unknown'}</div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <label style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Email Address</label>
-                                <div style={{ color: 'white', fontWeight: '600' }}>{user?.email || 'lawyer@nyaysetu.gov.in'}</div>
+                                <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Email Address</label>
+                                <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>{user?.email || 'lawyer@nyaysetu.gov.in'}</div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <label style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Phone Number</label>
-                                <div style={{ color: 'white', fontWeight: '600' }}>+91 98765 43210</div>
+                                <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Phone Number</label>
+                                <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>+91 98765 43210</div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <label style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Role</label>
-                                <div style={{ color: '#818cf8', fontWeight: '800', fontSize: '0.85rem' }}>{user?.role}</div>
+                                <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Role</label>
+                                <div style={{ color: 'var(--color-accent)', fontWeight: '800', fontSize: '0.85rem' }}>{user?.role}</div>
                             </div>
                         </div>
 
                         {isEditing && (
-                            <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', display: 'flex', justifyContent: 'flex-end' }}>
+                            <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: 'var(--border-glass)', display: 'flex', justifyContent: 'flex-end' }}>
                                 <button style={{
-                                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                                    color: 'white', border: 'none', borderRadius: '0.75rem',
+                                    background: 'var(--color-accent)',
+                                    color: 'var(--text-main)', border: 'none', borderRadius: '0.75rem',
                                     padding: '0.7rem 1.75rem', fontWeight: '700', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', gap: '0.5rem'
                                 }}>
@@ -180,10 +180,10 @@ export default function LawyerProfilePage() {
                         {sections.map((sec, i) => (
                             <div key={i} style={glassStyle}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                                    <div style={{ color: '#818cf8' }}><sec.icon size={20} /></div>
-                                    <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>{sec.title}</span>
+                                    <div style={{ color: 'var(--color-accent)' }}><sec.icon size={20} /></div>
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>{sec.title}</span>
                                 </div>
-                                <div style={{ color: 'white', fontWeight: '700', fontSize: '1.1rem' }}>{sec.value}</div>
+                                <div style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '1.1rem' }}>{sec.value}</div>
                             </div>
                         ))}
                     </div>
@@ -196,7 +196,7 @@ export default function LawyerProfilePage() {
                                     onClick={() => setShowFaceEnrollment(true)}
                                     style={{
                                         background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)',
-                                        color: '#a78bfa', borderRadius: '0.5rem', padding: '0.4rem 1rem', fontSize: '0.85rem',
+                                        color: 'var(--color-accent-light)', borderRadius: '0.5rem', padding: '0.4rem 1rem', fontSize: '0.85rem',
                                         fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem'
                                     }}
                                 >
@@ -207,7 +207,7 @@ export default function LawyerProfilePage() {
                                         onClick={handleDeleteFace}
                                         style={{
                                             background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)',
-                                            color: '#ef4444', borderRadius: '0.5rem', padding: '0.4rem', cursor: 'pointer'
+                                            color: 'var(--color-error)', borderRadius: '0.5rem', padding: '0.4rem', cursor: 'pointer'
                                         }}
                                     >
                                         <Trash2 size={16} />
@@ -218,33 +218,33 @@ export default function LawyerProfilePage() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <button style={{
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                padding: '1rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.03)',
-                                border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', color: 'white'
+                                padding: '1rem', borderRadius: '0.75rem', background: 'var(--bg-glass-subtle)',
+                                border: 'var(--border-glass-subtle)', cursor: 'pointer', color: 'var(--text-main)'
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                    <Lock size={18} color="#818cf8" />
+                                    <Lock size={18} color="var(--color-accent)" />
                                     <div style={{ textAlign: 'left' }}>
                                         <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>Change Password</div>
-                                        <div style={{ color: '#64748b', fontSize: '0.75rem' }}>Last changed 4 months ago</div>
+                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>Last changed 4 months ago</div>
                                     </div>
                                 </div>
-                                <ChevronRight size={18} color="#64748b" />
+                                <ChevronRight size={18} color="var(--text-secondary)" />
                             </button>
                             <button style={{
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                padding: '1rem', borderRadius: '0.75rem', background: 'rgba(255,255,255,0.03)',
-                                border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', color: 'white'
+                                padding: '1rem', borderRadius: '0.75rem', background: 'var(--bg-glass-subtle)',
+                                border: 'var(--border-glass-subtle)', cursor: 'pointer', color: 'var(--text-main)'
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                    <Shield size={18} color="#818cf8" />
+                                    <Shield size={18} color="var(--color-accent)" />
                                     <div style={{ textAlign: 'left' }}>
                                         <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>Face Recognition Login</div>
-                                        <div style={{ color: faceEnabled ? '#10b981' : '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>
+                                        <div style={{ color: faceEnabled ? 'var(--color-success)' : 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '700' }}>
                                             {faceEnabled ? 'ENABLED' : 'DISABLED'}
                                         </div>
                                     </div>
                                 </div>
-                                <ChevronRight size={18} color="#64748b" />
+                                <ChevronRight size={18} color="var(--text-secondary)" />
                             </button>
                         </div>
                     </div>

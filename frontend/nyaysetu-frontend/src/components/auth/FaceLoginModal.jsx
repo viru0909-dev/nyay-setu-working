@@ -170,9 +170,9 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }) {
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginTop: '1.5rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 16px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                                        <Loader2 size={18} className="text-blue-500 animate-spin" style={{ color: '#3b82f6' }} />
-                                        <p style={{ color: '#60a5fa', fontSize: '14px', fontWeight: '700', textTransform: 'uppercase', margin: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 16px', borderRadius: '12px', background: 'var(--bg-glass)', border: 'var(--border-glass)' }}>
+                                        <Loader2 size={18} className="animate-spin" style={{ color: 'var(--color-accent)' }} />
+                                        <p style={{ color: 'var(--color-accent)', fontSize: '14px', fontWeight: '700', textTransform: 'uppercase', margin: 0 }}>
                                             {message}
                                         </p>
                                     </div>
@@ -187,11 +187,11 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }) {
                                 className="text-center py-12"
                                 style={{ textAlign: 'center', padding: '3rem 0' }}
                             >
-                                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '96px', height: '96px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '96px', height: '96px', borderRadius: '50%', background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)', color: 'var(--color-primary)', marginBottom: '1.5rem' }}>
                                     <UserCheck size={48} />
                                 </div>
-                                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#34d399', marginBottom: '8px', textTransform: 'uppercase' }}>Access Granted</h3>
-                                <p style={{ color: 'rgba(16, 185, 129, 0.6)', fontWeight: '500' }}>Signature matched. Redirecting...</p>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '8px', textTransform: 'uppercase' }}>Access Granted</h3>
+                                <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Signature matched. Redirecting...</p>
                             </motion.div>
                         )}
 
@@ -201,11 +201,11 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }) {
                                 animate={{ scale: 1, opacity: 1 }}
                                 style={{ textAlign: 'center', padding: '2rem 0' }}
                             >
-                                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(244, 63, 94, 0.2)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#f43f5e', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '80px', height: '80px', borderRadius: '50%', background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)', color: 'var(--color-error)', marginBottom: '1.5rem' }}>
                                     <AlertCircle size={40} />
                                 </div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#fb7185', marginBottom: '8px', textTransform: 'uppercase' }}>Access Denied</h3>
-                                <p style={{ color: '#94a3b8', marginBottom: '2rem', maxWidth: '320px', marginInline: 'auto', fontSize: '14px' }}>{message}</p>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-error)', marginBottom: '8px', textTransform: 'uppercase' }}>Access Denied</h3>
+                                <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', maxWidth: '320px', marginInline: 'auto', fontSize: '14px' }}>{message}</p>
                                 <button
                                     onClick={() => {
                                         setStep('email');

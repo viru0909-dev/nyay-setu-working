@@ -106,7 +106,7 @@ export default function FaceCapture({ onCapture, mode = 'enroll' }) {
             <div className="bio-loading-container">
                 <div className="bio-spinner">
                     <Loader2 className="bio-spinner-svg" />
-                    <ShieldCheck style={{ width: '32px', height: '32px', color: '#60a5fa', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+                    <ShieldCheck style={{ width: '32px', height: '32px', color: 'var(--color-accent)', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
                 </div>
                 <h3 className="biometric-title bio-mb-2">Systems Initialization</h3>
                 <p className="biometric-subtitle">Loading encrypted neural networks and biometric modules...</p>
@@ -144,8 +144,8 @@ export default function FaceCapture({ onCapture, mode = 'enroll' }) {
                 </div>
 
                 {/* Mode Indicator */}
-                <div style={{ position: 'absolute', top: '24px', right: '24px', padding: '6px 12px', borderRadius: '9999px', background: 'rgba(37, 99, 235, 0.2)', backdropFilter: 'blur(8px)', border: '1px solid rgba(96, 165, 250, 0.3)' }}>
-                    <span className="status-text" style={{ color: '#60a5fa' }}>
+                <div style={{ position: 'absolute', top: '24px', right: '24px', padding: '6px 12px', borderRadius: '9999px', background: 'var(--bg-glass-strong)', backdropFilter: 'var(--glass-blur)', border: 'var(--border-glass)' }}>
+                    <span className="status-text" style={{ color: 'var(--color-accent)' }}>
                         {mode === 'enroll' ? 'ENROLLMENT MODE' : 'VERIFICATION MODE'}
                     </span>
                 </div>
@@ -173,13 +173,13 @@ export default function FaceCapture({ onCapture, mode = 'enroll' }) {
                         )}
                         {status === 'success' && (
                             <>
-                                <CheckCircle size={16} style={{ color: '#10b981' }} />
-                                <span style={{ fontSize: '14px', fontWeight: '500', color: '#10b981' }}>{message}</span>
+                                <CheckCircle size={16} style={{ color: 'var(--color-primary)' }} />
+                                <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--color-primary)' }}>{message}</span>
                             </>
                         )}
                         {status === 'error' && (
                             <>
-                                <AlertCircle size={16} style={{ color: '#f43f5e' }} />
+                                <AlertCircle size={16} style={{ color: 'var(--color-error)' }} />
                                 <span className="pulse-red" style={{ fontSize: '14px', fontWeight: '500' }}>{message}</span>
                             </>
                         )}
@@ -205,7 +205,7 @@ export default function FaceCapture({ onCapture, mode = 'enroll' }) {
                         onClick={capture}
                         disabled={!faceDetected || isCapturing}
                         className={`biometric-btn ${faceDetected ? 'btn-primary-bio' : ''}`}
-                        style={!faceDetected || isCapturing ? { background: '#1e293b', color: '#64748b', border: '1px solid #334155', cursor: 'not-allowed' } : {}}
+                        style={!faceDetected || isCapturing ? { background: 'var(--bg-glass)', color: 'var(--text-secondary)', border: 'var(--border-glass)', cursor: 'not-allowed' } : {}}
                     >
                         <ShieldCheck size={20} />
                         Capture Biometric

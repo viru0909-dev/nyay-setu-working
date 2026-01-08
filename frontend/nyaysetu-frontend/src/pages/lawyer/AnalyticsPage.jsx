@@ -16,19 +16,19 @@ import {
 
 export default function LawyerAnalyticsPage() {
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass-strong)'
     };
 
     const stats = [
-        { label: 'Success Rate', value: '84%', change: '+5.2%', trend: 'up', icon: Target, color: '#10b981' },
-        { label: 'Active Clients', value: '48', change: '+12%', trend: 'up', icon: Users, color: '#6366f1' },
-        { label: 'Avg. Case Duration', value: '142 Days', change: '-8.4%', trend: 'up', icon: Clock, color: '#f59e0b' },
-        { label: 'Revenue Growth', value: '₹12.4L', change: '+18.5%', trend: 'up', icon: TrendingUp, color: '#ec4899' },
+        { label: 'Success Rate', value: '84%', change: '+5.2%', trend: 'up', icon: Target, color: 'var(--color-success)' },
+        { label: 'Active Clients', value: '48', change: '+12%', trend: 'up', icon: Users, color: 'var(--color-accent)' },
+        { label: 'Avg. Case Duration', value: '142 Days', change: '-8.4%', trend: 'up', icon: Clock, color: 'var(--color-warning)' },
+        { label: 'Revenue Growth', value: '₹12.4L', change: '+18.5%', trend: 'up', icon: TrendingUp, color: 'var(--color-error)' },
     ];
 
     return (
@@ -38,25 +38,25 @@ export default function LawyerAnalyticsPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{
                         width: '56px', height: '56px', borderRadius: '14px',
-                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        background: 'var(--color-accent)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 8px 16px rgba(99, 102, 241, 0.2)'
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         <BarChart3 size={28} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Practice Analytics
                         </h1>
-                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Performance monitoring and strategic practice insights
                         </p>
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
                     <button style={{
-                        background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)',
-                        borderRadius: '0.75rem', padding: '0.75rem 1.25rem', color: 'white',
+                        background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                        borderRadius: '0.75rem', padding: '0.75rem 1.25rem', color: 'var(--text-main)',
                         display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem'
                     }}>
                         <Calendar size={18} /> Last 30 Days <ChevronDown size={14} />
@@ -78,15 +78,15 @@ export default function LawyerAnalyticsPage() {
                             </div>
                             <div style={{
                                 display: 'flex', alignItems: 'center', gap: '0.25rem',
-                                color: stat.trend === 'up' ? '#10b981' : '#ef4444',
+                                color: stat.trend === 'up' ? 'var(--color-success)' : 'var(--color-error)',
                                 fontSize: '0.75rem', fontWeight: '800'
                             }}>
                                 {stat.trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                                 {stat.change}
                             </div>
                         </div>
-                        <h2 style={{ fontSize: '1.85rem', fontWeight: '800', color: 'white', margin: 0 }}>{stat.value}</h2>
-                        <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: '0.25rem 0 0', fontWeight: '500' }}>{stat.label}</p>
+                        <h2 style={{ fontSize: '1.85rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{stat.value}</h2>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0', fontWeight: '500' }}>{stat.label}</p>
                     </div>
                 ))}
             </div>
@@ -95,13 +95,13 @@ export default function LawyerAnalyticsPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
                 <div style={{ ...glassStyle, minHeight: '350px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h3 style={{ color: 'white', margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Case Load Distribution</h3>
+                        <h3 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Case Load Distribution</h3>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                             {['Month', 'Quarter', 'Year'].map(t => (
                                 <button key={t} style={{
                                     fontSize: '0.7rem', fontWeight: '800', padding: '0.3rem 0.75rem', borderRadius: '4px',
-                                    background: t === 'Month' ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
-                                    color: t === 'Month' ? '#818cf8' : '#64748b',
+                                    background: t === 'Month' ? 'var(--bg-glass-subtle)' : 'transparent',
+                                    color: t === 'Month' ? 'var(--color-accent)' : 'var(--text-secondary)',
                                     border: 'none', cursor: 'pointer'
                                 }}>{t.toUpperCase()}</button>
                             ))}
@@ -117,14 +117,14 @@ export default function LawyerAnalyticsPage() {
                                     borderRadius: '6px',
                                     boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
                                 }} />
-                                <span style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: '700' }}>W{i + 1}</span>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: '700' }}>W{i + 1}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 <div style={glassStyle}>
-                    <h3 style={{ color: 'white', margin: 0, fontSize: '1.1rem', fontWeight: '700', marginBottom: '2rem' }}>Case Categories</h3>
+                    <h3 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.1rem', fontWeight: '700', marginBottom: '2rem' }}>Case Categories</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                         {[
                             { label: 'Criminal Law', count: 18, pct: 45, color: '#ef4444' },
@@ -134,10 +134,10 @@ export default function LawyerAnalyticsPage() {
                         ].map((cat, i) => (
                             <div key={i}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                                    <span style={{ color: '#e2e8f0', fontWeight: '600' }}>{cat.label}</span>
-                                    <span style={{ color: '#94a3b8' }}>{cat.count} Cases</span>
+                                    <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{cat.label}</span>
+                                    <span style={{ color: 'var(--text-secondary)' }}>{cat.count} Cases</span>
                                 </div>
-                                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                                <div style={{ width: '100%', height: '8px', background: 'var(--bg-glass-subtle)', borderRadius: '4px', overflow: 'hidden' }}>
                                     <div style={{ width: `${cat.pct}%`, height: '100%', background: cat.color, borderRadius: '4px' }} />
                                 </div>
                             </div>
@@ -154,10 +154,10 @@ export default function LawyerAnalyticsPage() {
                     { title: 'New Leads', value: '7', desc: 'Last 48 hours', color: '#10b981' },
                 ].map((item, i) => (
                     <div key={i} style={{ ...glassStyle, borderLeft: `4px solid ${item.color}` }}>
-                        <h4 style={{ color: '#94a3b8', margin: '0 0 0.5rem', fontSize: '0.85rem', fontWeight: '600' }}>{item.title}</h4>
+                        <h4 style={{ color: 'var(--text-secondary)', margin: '0 0 0.5rem', fontSize: '0.85rem', fontWeight: '600' }}>{item.title}</h4>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white' }}>{item.value}</span>
-                            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.desc}</span>
+                            <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)' }}>{item.value}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{item.desc}</span>
                         </div>
                     </div>
                 ))}
