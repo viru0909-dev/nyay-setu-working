@@ -28,8 +28,8 @@ function Stars(props) {
             <Points ref={ref} positions={positions} stride={3} frustumCulled={false} {...props}>
                 <PointMaterial
                     transparent
-                    color="#8b5cf6"
-                    size={0.005}
+                    color="#6366f1" // Primary Blue
+                    size={0.005} // Increased size slightly for visibility against light bg
                     sizeAttenuation={true}
                     depthWrite={false}
                 />
@@ -47,7 +47,7 @@ export default function AnimatedBackground() {
             width: '100%',
             height: '100%',
             zIndex: -1,
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #1e293b 100%)'
+            background: 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)' // Light theme background
         }}>
             <Canvas camera={{ position: [0, 0, 1] }}>
                 <Stars />

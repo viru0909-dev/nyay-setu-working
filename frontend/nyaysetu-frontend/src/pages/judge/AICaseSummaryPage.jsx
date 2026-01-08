@@ -56,18 +56,18 @@ export default function AICaseSummaryPage() {
     };
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass)'
     };
 
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                <Loader2 size={48} className="spin" style={{ color: '#6366f1' }} />
+                <Loader2 size={48} className="spin" style={{ color: 'var(--color-accent)' }} />
                 <style>{`
                     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                     .spin { animation: spin 1s linear infinite; }
@@ -90,10 +90,10 @@ export default function AICaseSummaryPage() {
                         <Brain size={28} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             AI Judicial Assistant
                         </h1>
-                        <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Intelligent case summarization and legal research automation • Powered by Nyay-Setu Intelligence
                         </p>
                     </div>
@@ -105,13 +105,13 @@ export default function AICaseSummaryPage() {
                 <div style={glassStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
                         <Database size={20} color="#6366f1" />
-                        <h3 style={{ color: 'white', fontSize: '1.125rem', fontWeight: '700', margin: 0 }}>Active Judicial Files</h3>
+                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.125rem', fontWeight: '700', margin: 0 }}>Active Judicial Files</h3>
                     </div>
 
                     {cases.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '3rem', background: 'rgba(15, 23, 42, 0.3)', borderRadius: '1rem' }}>
-                            <FileText size={40} color="#334155" style={{ marginBottom: '1rem' }} />
-                            <p style={{ color: '#64748b' }}>No case files available</p>
+                        <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--bg-glass)', borderRadius: '1rem' }}>
+                            <FileText size={40} color="var(--text-secondary)" style={{ marginBottom: '1rem' }} />
+                            <p style={{ color: 'var(--text-secondary)' }}>No case files available</p>
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHieght: '600px', overflowY: 'auto', paddingRight: '0.5rem' }}>
@@ -123,10 +123,10 @@ export default function AICaseSummaryPage() {
                                         padding: '1.25rem',
                                         background: selectedCase?.id === caseItem.id
                                             ? 'rgba(99, 102, 241, 0.15)'
-                                            : 'rgba(15, 23, 42, 0.4)',
-                                        border: `1px solid ${selectedCase?.id === caseItem.id ? 'rgba(99, 102, 241, 0.4)' : 'rgba(255, 255, 255, 0.05)'}`,
+                                            : 'var(--bg-glass)',
+                                        border: `1px solid ${selectedCase?.id === caseItem.id ? 'var(--color-accent)' : 'var(--border-glass)'}`,
                                         borderRadius: '1rem',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         textAlign: 'left',
                                         cursor: 'pointer',
                                         display: 'flex',
@@ -136,14 +136,14 @@ export default function AICaseSummaryPage() {
                                         gap: '1rem'
                                     }}
                                     onMouseOver={e => {
-                                        if (selectedCase?.id !== caseItem.id) e.currentTarget.style.background = 'rgba(15, 23, 42, 0.6)';
+                                        if (selectedCase?.id !== caseItem.id) e.currentTarget.style.background = 'var(--bg-glass-strong)';
                                     }}
                                     onMouseOut={e => {
-                                        if (selectedCase?.id !== caseItem.id) e.currentTarget.style.background = 'rgba(15, 23, 42, 0.4)';
+                                        if (selectedCase?.id !== caseItem.id) e.currentTarget.style.background = 'var(--bg-glass)';
                                     }}
                                 >
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontWeight: '700', fontSize: '0.95rem', marginBottom: '0.35rem', color: selectedCase?.id === caseItem.id ? '#818cf8' : 'white' }}>
+                                        <div style={{ fontWeight: '700', fontSize: '0.95rem', marginBottom: '0.35rem', color: selectedCase?.id === caseItem.id ? 'var(--color-accent)' : 'var(--text-main)' }}>
                                             {caseItem.title}
                                         </div>
                                         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
@@ -160,7 +160,7 @@ export default function AICaseSummaryPage() {
                                             </span>
                                         </div>
                                     </div>
-                                    <ChevronRight size={18} color={selectedCase?.id === caseItem.id ? '#818cf8' : '#334155'} />
+                                    <ChevronRight size={18} color={selectedCase?.id === caseItem.id ? 'var(--color-accent)' : 'var(--text-secondary)'} />
                                 </button>
                             ))}
                         </div>
@@ -180,7 +180,7 @@ export default function AICaseSummaryPage() {
                             <div style={{ padding: '0.5rem', background: 'rgba(236, 72, 153, 0.1)', borderRadius: '0.75rem' }}>
                                 <Sparkles size={20} color="#ec4899" />
                             </div>
-                            <h3 style={{ color: 'white', fontSize: '1.125rem', fontWeight: '700', margin: 0 }}>
+                            <h3 style={{ color: 'var(--text-main)', fontSize: '1.125rem', fontWeight: '700', margin: 0 }}>
                                 AI Case Synthesis
                             </h3>
                         </div>
@@ -215,8 +215,8 @@ export default function AICaseSummaryPage() {
                             }}>
                                 <Cpu size={40} color="#6366f1" style={{ opacity: 0.5 }} />
                             </div>
-                            <h4 style={{ color: 'white', fontSize: '1.25rem', marginBottom: '0.5rem' }}>Awaiting File Selection</h4>
-                            <p style={{ color: '#64748b', fontSize: '0.9rem', maxWidth: '300px' }}>
+                            <h4 style={{ color: 'var(--text-main)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>Awaiting File Selection</h4>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '300px' }}>
                                 Select a judicial case from the repository to initiate AI-powered analysis and summarization.
                             </p>
                         </div>
@@ -226,8 +226,8 @@ export default function AICaseSummaryPage() {
                                 <Loader2 size={64} className="spin" style={{ color: '#ec4899' }} />
                                 <Zap size={24} color="#ec4899" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
                             </div>
-                            <h4 style={{ color: 'white', fontSize: '1.25rem', marginBottom: '0.5rem' }}>Analyzing Docket</h4>
-                            <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Our AI models are processing legal documents and synthesizing information...</p>
+                            <h4 style={{ color: 'var(--text-main)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>Analyzing Docket</h4>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Our AI models are processing legal documents and synthesizing information...</p>
                             <div style={{ width: '200px', height: '4px', background: 'rgba(236, 72, 153, 0.1)', borderRadius: '2px', marginTop: '1.5rem', overflow: 'hidden' }}>
                                 <div style={{ width: '60%', height: '100%', background: '#ec4899', borderRadius: '2px', animation: 'progress 2s infinite ease-in-out' }} />
                             </div>
@@ -240,7 +240,7 @@ export default function AICaseSummaryPage() {
                     ) : summary ? (
                         <div style={{ flex: 1 }}>
                             <div style={{
-                                background: 'rgba(15, 23, 42, 0.4)',
+                                background: 'var(--bg-glass)',
                                 border: '1px solid rgba(236, 72, 153, 0.2)',
                                 borderRadius: '1rem',
                                 padding: '1.25rem',
@@ -257,15 +257,15 @@ export default function AICaseSummaryPage() {
                                     <Shield size={22} color="#ec4899" />
                                 </div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
                                         Synthetic Insight Report
                                     </div>
-                                    <div style={{ fontSize: '0.8rem', color: 'white', fontWeight: '600' }}>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '600' }}>
                                         {selectedCase.title.substring(0, 40)}{selectedCase.title.length > 40 ? '...' : ''}
                                     </div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: '700' }}>PRECISION</div>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: '700' }}>PRECISION</div>
                                     <div style={{ fontSize: '0.8rem', color: '#ec4899', fontWeight: '800' }}>98.4%</div>
                                 </div>
                             </div>
@@ -273,13 +273,13 @@ export default function AICaseSummaryPage() {
                             <div
                                 className="markdown-content"
                                 style={{
-                                    color: '#cbd5e1',
+                                    color: 'var(--text-secondary)',
                                     lineHeight: '1.8',
                                     fontSize: '0.95rem',
                                     padding: '1.5rem',
-                                    background: 'rgba(15, 23, 42, 0.3)',
+                                    background: 'var(--bg-glass)',
                                     borderRadius: '1rem',
-                                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                                    border: 'var(--border-glass-strong)',
                                     maxHeight: '500px',
                                     overflowY: 'auto'
                                 }}
@@ -288,7 +288,7 @@ export default function AICaseSummaryPage() {
                             </div>
 
                             <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: '600' }}>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
                                     Report Timestamp: {new Date(summary.generatedAt).toLocaleString()}
                                 </div>
                                 <button style={{
@@ -320,7 +320,7 @@ export default function AICaseSummaryPage() {
                     font-weight: 700 !important;
                     margin-top: 1.25rem !important;
                     margin-bottom: 0.75rem !important;
-                    color: #f1f5f9 !important;
+                    color: var(--text-main) !important;
                     border-bottom: 1px solid rgba(236, 72, 153, 0.2);
                     padding-bottom: 0.25rem;
                 }

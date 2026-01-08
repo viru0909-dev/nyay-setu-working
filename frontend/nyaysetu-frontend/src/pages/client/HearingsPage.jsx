@@ -18,7 +18,8 @@ export default function HearingsPage() {
     const fetchHearings = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8080/api/hearings/my', {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+            const response = await axios.get(`${API_BASE_URL}/api/hearings/my`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setHearings(response.data || []);
@@ -182,18 +183,19 @@ export default function HearingsPage() {
                         width: '48px',
                         height: '48px',
                         borderRadius: '12px',
-                        background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        boxShadow: 'var(--shadow-glass)'
                     }}>
                         <Video size={24} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                        <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                             Hearings
                         </h1>
-                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>
                             Virtual court hearings • Jitsi Meet video conferencing
                         </p>
                     </div>
@@ -207,15 +209,16 @@ export default function HearingsPage() {
                 </div>
             ) : hearings.length === 0 ? (
                 <div style={{
-                    background: 'rgba(30, 41, 59, 0.8)',
-                    border: '1px solid rgba(59, 130, 246, 0.2)',
+                    background: 'var(--bg-glass-strong)',
+                    border: 'var(--border-glass-strong)',
                     borderRadius: '1rem',
                     padding: '4rem',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    boxShadow: 'var(--shadow-glass)'
                 }}>
-                    <Calendar size={48} style={{ color: '#64748b', margin: '0 auto 1rem' }} />
-                    <h3 style={{ color: 'white', margin: '0 0 0.5rem' }}>No Hearings Scheduled</h3>
-                    <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>
+                    <Calendar size={48} style={{ color: 'var(--text-secondary)', margin: '0 auto 1rem' }} />
+                    <h3 style={{ color: 'var(--text-main)', margin: '0 0 0.5rem' }}>No Hearings Scheduled</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                         When your case is scheduled for a hearing, it will appear here.
                     </p>
                 </div>
@@ -224,7 +227,7 @@ export default function HearingsPage() {
                     {/* Upcoming Hearings */}
                     {upcomingHearings.length > 0 && (
                         <div style={{ marginBottom: '2rem' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '1rem' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>
                                 Upcoming Hearings ({upcomingHearings.length})
                             </h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -234,17 +237,18 @@ export default function HearingsPage() {
 
                                     return (
                                         <div key={hearing.id} style={{
-                                            background: 'rgba(30, 41, 59, 0.8)',
-                                            border: '1px solid rgba(59, 130, 246, 0.2)',
+                                            background: 'var(--bg-glass-strong)',
+                                            border: 'var(--border-glass-strong)',
                                             borderRadius: '1rem',
                                             padding: '1.5rem',
                                             display: 'flex',
                                             justifyContent: 'space-between',
-                                            alignItems: 'center'
+                                            alignItems: 'center',
+                                            boxShadow: 'var(--shadow-glass)'
                                         }}>
                                             <div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                                    <h3 style={{ color: 'white', margin: 0, fontSize: '1.125rem', fontWeight: '700' }}>
+                                                    <h3 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.125rem', fontWeight: '700' }}>
                                                         {hearing.caseTitle || 'Case Hearing'}
                                                     </h3>
                                                     <span style={{
@@ -260,11 +264,11 @@ export default function HearingsPage() {
                                                     </span>
                                                 </div>
 
-                                                <p style={{ color: '#94a3b8', margin: '0.25rem 0', fontSize: '0.875rem' }}>
+                                                <p style={{ color: 'var(--text-secondary)', margin: '0.25rem 0', fontSize: '0.875rem' }}>
                                                     Case: {hearing.caseNumber || 'N/A'}
                                                 </p>
 
-                                                <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.875rem', color: '#64748b' }}>
+                                                <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                                                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                                                         <Calendar size={14} />
                                                         {formatDate(hearing.scheduledDate)}
@@ -286,17 +290,17 @@ export default function HearingsPage() {
                                                 style={{
                                                     padding: '0.75rem 1.5rem',
                                                     background: joinable
-                                                        ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                                                        : 'rgba(148, 163, 184, 0.2)',
+                                                        ? 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)'
+                                                        : 'var(--bg-glass)',
                                                     border: 'none',
                                                     borderRadius: '0.5rem',
-                                                    color: joinable ? 'white' : '#64748b',
+                                                    color: joinable ? 'white' : 'var(--text-secondary)',
                                                     fontWeight: '700',
                                                     cursor: joinable ? 'pointer' : 'not-allowed',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     gap: '0.5rem',
-                                                    boxShadow: joinable ? '0 4px 12px rgba(16, 185, 129, 0.3)' : 'none'
+                                                    boxShadow: joinable ? 'var(--shadow-glass-strong)' : 'none'
                                                 }}
                                             >
                                                 {joining === hearing.id ? (
@@ -316,7 +320,7 @@ export default function HearingsPage() {
                     {/* Past Hearings */}
                     {pastHearings.length > 0 && (
                         <div>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '1rem' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>
                                 Past Hearings ({pastHearings.length})
                             </h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -325,14 +329,13 @@ export default function HearingsPage() {
 
                                     return (
                                         <div key={hearing.id} style={{
-                                            background: 'rgba(30, 41, 59, 0.5)',
-                                            border: '1px solid rgba(148, 163, 184, 0.1)',
+                                            background: 'var(--bg-glass)',
+                                            border: 'var(--border-glass)',
                                             borderRadius: '1rem',
-                                            padding: '1.25rem',
-                                            opacity: 0.8
+                                            padding: '1.25rem'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                                <h3 style={{ color: 'white', margin: 0, fontSize: '1rem', fontWeight: '600' }}>
+                                                <h3 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1rem', fontWeight: '600' }}>
                                                     {hearing.caseTitle || 'Case Hearing'}
                                                 </h3>
                                                 <span style={{
@@ -348,7 +351,7 @@ export default function HearingsPage() {
                                                 </span>
                                             </div>
 
-                                            <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem', color: '#64748b' }}>
+                                            <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                                                 <span>Case: {hearing.caseNumber || 'N/A'}</span>
                                                 <span>{formatDateTime(hearing.scheduledDate)}</span>
                                             </div>

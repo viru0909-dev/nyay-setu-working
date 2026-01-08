@@ -68,18 +68,18 @@ export default function LawyerCasesPage() {
     });
 
     const glassStyle = {
-        background: 'rgba(30, 41, 59, 0.7)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(139, 92, 246, 0.2)',
+        background: 'var(--bg-glass-strong)',
+        backdropFilter: 'var(--glass-blur)',
+        border: 'var(--border-glass-strong)',
         borderRadius: '1.5rem',
         padding: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+        boxShadow: 'var(--shadow-glass-strong)'
     };
 
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                <Loader2 size={48} className="spin" style={{ color: '#6366f1' }} />
+                <Loader2 size={48} className="spin" style={{ color: 'var(--color-primary)' }} />
                 <style>{`
                     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                     .spin { animation: spin 1s linear infinite; }
@@ -96,17 +96,17 @@ export default function LawyerCasesPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{
                             width: '56px', height: '56px', borderRadius: '14px',
-                            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                            background: 'var(--color-accent)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            boxShadow: '0 8px 16px rgba(99, 102, 241, 0.2)'
+                            boxShadow: 'var(--shadow-glass)'
                         }}>
                             <Briefcase size={28} color="white" />
                         </div>
                         <div>
-                            <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'white', margin: 0 }}>
+                            <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                                 Professional Console
                             </h1>
-                            <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>
+                            <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
                                 Manage your litigation portfolio and evaluate new client proposals
                             </p>
                         </div>
@@ -126,10 +126,10 @@ export default function LawyerCasesPage() {
                             alignItems: 'center',
                             gap: '0.6rem',
                             transition: 'all 0.2s',
-                            background: activeTab === 'active' ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'rgba(255,255,255,0.05)',
-                            color: activeTab === 'active' ? 'white' : '#94a3b8',
-                            border: activeTab === 'active' ? 'none' : '1px solid rgba(255,255,255,0.1)',
-                            boxShadow: activeTab === 'active' ? '0 4px 15px rgba(99, 102, 241, 0.4)' : 'none'
+                            background: activeTab === 'active' ? 'var(--color-accent)' : 'var(--bg-glass)',
+                            color: activeTab === 'active' ? 'var(--text-main)' : 'var(--text-secondary)',
+                            border: activeTab === 'active' ? 'none' : 'var(--border-glass)',
+                            boxShadow: activeTab === 'active' ? 'var(--shadow-glass)' : 'none'
                         }}
                     >
                         <Activity size={18} />
@@ -146,10 +146,10 @@ export default function LawyerCasesPage() {
                             alignItems: 'center',
                             gap: '0.6rem',
                             transition: 'all 0.2s',
-                            background: activeTab === 'proposals' ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'rgba(255,255,255,0.05)',
-                            color: activeTab === 'proposals' ? 'white' : '#94a3b8',
-                            border: activeTab === 'proposals' ? 'none' : '1px solid rgba(255,255,255,0.1)',
-                            boxShadow: activeTab === 'proposals' ? '0 4px 15px rgba(245, 158, 11, 0.4)' : 'none'
+                            background: activeTab === 'proposals' ? 'var(--color-warning)' : 'var(--bg-glass)',
+                            color: activeTab === 'proposals' ? 'var(--text-main)' : 'var(--text-secondary)',
+                            border: activeTab === 'proposals' ? 'none' : 'var(--border-glass)',
+                            boxShadow: activeTab === 'proposals' ? 'var(--shadow-glass)' : 'none'
                         }}
                     >
                         <AlertCircle size={18} />
@@ -186,11 +186,11 @@ export default function LawyerCasesPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         style={{
                             width: '100%',
-                            background: 'rgba(15, 23, 42, 0.4)',
-                            border: '1px solid rgba(255, 255, 255, 0.05)',
+                            background: 'var(--bg-glass)',
+                            border: 'var(--border-glass)',
                             borderRadius: '0.75rem',
                             padding: '0.8rem 1rem 0.8rem 3rem',
-                            color: 'white',
+                            color: 'var(--text-main)',
                             outline: 'none',
                             fontSize: '0.95rem'
                         }}
@@ -203,11 +203,11 @@ export default function LawyerCasesPage() {
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
                             style={{
-                                background: 'rgba(15, 23, 42, 0.4)',
-                                border: '1px solid rgba(255, 255, 255, 0.05)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.75rem',
                                 padding: '0.8rem 1rem',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 outline: 'none',
                                 fontSize: '0.9rem',
                                 cursor: 'pointer'
@@ -227,11 +227,11 @@ export default function LawyerCasesPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {filteredCases.length === 0 ? (
                     <div style={{ ...glassStyle, textAlign: 'center', padding: '5rem' }}>
-                        <Briefcase size={64} color="#1e293b" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
-                        <h3 style={{ color: 'white', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+                        <Briefcase size={64} color="var(--text-secondary)" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
                             {activeTab === 'active' ? 'No Case Entries Found' : 'No New Proposals'}
                         </h3>
-                        <p style={{ color: '#64748b' }}>
+                        <p style={{ color: 'var(--text-secondary)' }}>
                             {activeTab === 'active' ? 'Your active portfolio is currently clear.' : 'Client proposals will appear here for your review.'}
                         </p>
                     </div>
@@ -255,41 +255,41 @@ export default function LawyerCasesPage() {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
                                     <div style={{
                                         width: '40px', height: '40px', borderRadius: '10px',
-                                        background: activeTab === 'proposals' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(99, 102, 241, 0.1)',
+                                        background: activeTab === 'proposals' ? 'rgba(245, 158, 11, 0.1)' : 'var(--bg-glass)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: activeTab === 'proposals' ? '#f59e0b' : '#818cf8'
+                                        color: activeTab === 'proposals' ? 'var(--color-warning)' : 'var(--color-accent)'
                                     }}>
                                         {activeTab === 'proposals' ? <AlertCircle size={20} /> : <Scale size={20} />}
                                     </div>
                                     <div>
-                                        <h3 style={{ color: 'white', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
+                                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
                                             {caseItem.title}
                                         </h3>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
                                             <span style={{
                                                 fontSize: '0.7rem',
-                                                color: '#64748b',
+                                                color: 'var(--text-secondary)',
                                                 fontWeight: '800',
                                                 textTransform: 'uppercase',
                                                 letterSpacing: '0.05em'
                                             }}>
                                                 ID: {caseItem.id.substring(0, 8)}
                                             </span>
-                                            <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#334155' }} />
-                                            <span style={{ fontSize: '0.75rem', color: '#818cf8', fontWeight: '700' }}>
+                                            <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--text-secondary)' }} />
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--color-accent)', fontWeight: '700' }}>
                                                 {caseItem.caseType || 'General Litigation'}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-                                <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.6', margin: '1rem 0' }}>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6', margin: '1rem 0' }}>
                                     {caseItem.description ? (caseItem.description.substring(0, 200) + (caseItem.description.length > 200 ? '...' : '')) : 'No case brief provided.'}
                                 </p>
                                 <div style={{ display: 'flex', gap: '2rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '0.8rem', fontWeight: '600' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: '600' }}>
                                         <Calendar size={14} /> Filed: {new Date(caseItem.filedDate || caseItem.createdAt).toLocaleDateString()}
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '0.8rem', fontWeight: '600' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: '600' }}>
                                         <User size={14} /> Petitioner: {caseItem.petitioner || 'Anonymous'}
                                     </div>
                                 </div>
@@ -308,7 +308,7 @@ export default function LawyerCasesPage() {
                                             alignItems: 'center',
                                             gap: '0.5rem',
                                             background: caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                                            color: caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? '#10b981' : '#f59e0b',
+                                            color: caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? 'var(--color-success)' : 'var(--color-warning)',
                                             border: `1px solid ${caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'}`
                                         }}>
                                             {caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? <Activity size={12} /> : <Clock size={12} />}
@@ -320,8 +320,8 @@ export default function LawyerCasesPage() {
                                                 onClick={() => navigate(`/lawyer/case/${caseItem.id}`)}
                                                 style={{
                                                     width: '100%',
-                                                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                                                    color: 'white', border: 'none', borderRadius: '0.75rem',
+                                                    background: 'var(--color-accent)',
+                                                    color: 'var(--text-main)', border: 'none', borderRadius: '0.75rem',
                                                     padding: '0.6rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer'
                                                 }}>
                                                 Manage Case
@@ -330,8 +330,8 @@ export default function LawyerCasesPage() {
                                                 onClick={() => navigate('/lawyer/evidence', { state: { caseId: caseItem.id } })}
                                                 style={{
                                                     width: '100%',
-                                                    background: 'rgba(255, 255, 255, 0.05)',
-                                                    color: '#94a3b8', border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    background: 'var(--bg-glass)',
+                                                    color: 'var(--text-secondary)', border: 'var(--border-glass)',
                                                     borderRadius: '0.75rem', padding: '0.6rem', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer'
                                                 }}>
                                                 View Evidence
@@ -342,7 +342,7 @@ export default function LawyerCasesPage() {
                                     <>
                                         <div style={{
                                             padding: '0.4rem 1rem', borderRadius: '2rem', fontSize: '0.75rem', fontWeight: '800',
-                                            background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.2)'
+                                            background: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-warning)', border: '1px solid rgba(245, 158, 11, 0.2)'
                                         }}>
                                             NEW PROPOSAL
                                         </div>
@@ -352,7 +352,7 @@ export default function LawyerCasesPage() {
                                                 onClick={() => handleRespondProposal(caseItem.id, 'ACCEPTED')}
                                                 style={{
                                                     width: '100%',
-                                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                                    background: 'var(--color-success)',
                                                     color: 'white', border: 'none', borderRadius: '0.75rem',
                                                     padding: '0.6rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer'
                                                 }}
@@ -364,7 +364,7 @@ export default function LawyerCasesPage() {
                                                 style={{
                                                     width: '100%',
                                                     background: 'rgba(239, 68, 68, 0.1)',
-                                                    color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.2)',
+                                                    color: 'var(--color-error)', border: '1px solid rgba(239, 68, 68, 0.2)',
                                                     borderRadius: '0.75rem', padding: '0.6rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer'
                                                 }}
                                             >

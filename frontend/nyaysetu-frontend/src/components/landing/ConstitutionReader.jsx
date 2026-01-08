@@ -94,9 +94,9 @@ export default function ConstitutionReader({ isOpen, onClose }) {
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            background: 'rgba(0, 0, 0, 0.8)',
+                            background: 'rgba(0, 0, 0, 0.4)',
                             zIndex: 2000,
-                            backdropFilter: 'blur(4px)'
+                            backdropFilter: 'var(--glass-blur)'
                         }}
                     />
 
@@ -115,11 +115,11 @@ export default function ConstitutionReader({ isOpen, onClose }) {
                             maxWidth: '1200px',
                             height: '85vh',
                             maxHeight: '800px',
-                            background: 'rgba(15, 23, 42, 0.98)',
-                            backdropFilter: 'blur(20px)',
+                            background: 'var(--bg-glass-strong)',
+                            backdropFilter: 'var(--glass-blur)',
                             borderRadius: '1.5rem',
-                            border: '1px solid rgba(139, 92, 246, 0.3)',
-                            boxShadow: '0 25px 80px rgba(0, 0, 0, 0.5)',
+                            border: 'var(--border-glass-strong)',
+                            boxShadow: 'var(--shadow-glass-strong)',
                             zIndex: 2001,
                             display: 'flex',
                             flexDirection: 'column',
@@ -130,7 +130,7 @@ export default function ConstitutionReader({ isOpen, onClose }) {
                         {/* Header */}
                         <div style={{
                             padding: '1.5rem 2rem',
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
@@ -184,14 +184,14 @@ export default function ConstitutionReader({ isOpen, onClose }) {
                         </div>
 
                         {/* Search Bar */}
-                        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                        <div style={{ padding: '1.5rem 2rem', borderBottom: 'var(--border-glass)' }}>
                             <div style={{ position: 'relative' }}>
                                 <Search size={20} style={{
                                     position: 'absolute',
                                     left: '1rem',
                                     top: '50%',
                                     transform: 'translateY(-50%)',
-                                    color: '#94a3b8'
+                                    color: 'var(--text-secondary)'
                                 }} />
                                 <input
                                     type="text"
@@ -201,10 +201,10 @@ export default function ConstitutionReader({ isOpen, onClose }) {
                                     style={{
                                         width: '100%',
                                         padding: '0.875rem 1rem 0.875rem 3rem',
-                                        background: 'rgba(30, 41, 59, 0.6)',
-                                        border: '2px solid rgba(139, 92, 246, 0.2)',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
                                         borderRadius: '0.75rem',
-                                        color: 'white',
+                                        color: 'var(--text-main)',
                                         fontSize: '1rem',
                                         outline: 'none'
                                     }}
@@ -220,10 +220,10 @@ export default function ConstitutionReader({ isOpen, onClose }) {
                                         onClick={() => setSelectedPart(null)}
                                         style={{
                                             padding: '0.5rem 1rem',
-                                            background: 'rgba(139, 92, 246, 0.2)',
-                                            border: '1px solid rgba(139, 92, 246, 0.3)',
+                                            background: 'rgba(139, 92, 246, 0.1)',
+                                            border: '1px solid rgba(139, 92, 246, 0.2)',
                                             borderRadius: '0.5rem',
-                                            color: '#8b5cf6',
+                                            color: 'var(--color-accent)',
                                             cursor: 'pointer',
                                             marginBottom: '1.5rem',
                                             fontWeight: '600'
@@ -232,16 +232,16 @@ export default function ConstitutionReader({ isOpen, onClose }) {
                                         ← {language === 'en' ? 'Back to Parts' : 'भागों पर वापस जाएं'}
                                     </button>
 
-                                    <h3 style={{ color: 'white', fontSize: '1.75rem', fontWeight: '800', marginBottom: '2rem' }}>
+                                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.75rem', fontWeight: '800', marginBottom: '2rem' }}>
                                         {selectedPart.title}
                                     </h3>
 
                                     {selectedPart.articles.map((article, idx) => (
                                         <div key={idx} style={{
                                             padding: '1.5rem',
-                                            background: 'rgba(30, 41, 59, 0.6)',
+                                            background: 'var(--bg-glass)',
                                             borderRadius: '1rem',
-                                            border: '1px solid rgba(139, 92, 246, 0.2)',
+                                            border: 'var(--border-glass)',
                                             marginBottom: '1.5rem'
                                         }}>
                                             <div style={{
@@ -252,7 +252,7 @@ export default function ConstitutionReader({ isOpen, onClose }) {
                                             }}>
                                                 <span style={{
                                                     padding: '0.5rem 1rem',
-                                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                                     borderRadius: '0.5rem',
                                                     color: 'white',
                                                     fontWeight: '700',
@@ -261,10 +261,10 @@ export default function ConstitutionReader({ isOpen, onClose }) {
                                                     {language === 'en' ? 'Article' : 'अनुच्छेद'} {article.number}
                                                 </span>
                                             </div>
-                                            <h4 style={{ color: 'white', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                                            <h4 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                                                 {article.title}
                                             </h4>
-                                            <p style={{ color: '#94a3b8', fontSize: '1rem', lineHeight: '1.7' }}>
+                                            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.7' }}>
                                                 {article.content}
                                             </p>
                                         </div>
@@ -282,27 +282,27 @@ export default function ConstitutionReader({ isOpen, onClose }) {
                                             onClick={() => setSelectedPart(part)}
                                             style={{
                                                 padding: '1.5rem',
-                                                background: 'rgba(30, 41, 59, 0.6)',
+                                                background: 'var(--bg-glass)',
                                                 borderRadius: '1rem',
-                                                border: '1px solid rgba(139, 92, 246, 0.2)',
+                                                border: 'var(--border-glass)',
                                                 cursor: 'pointer',
                                                 transition: 'all 0.3s'
                                             }}
                                             onMouseEnter={(e) => {
                                                 e.currentTarget.style.transform = 'translateY(-4px)';
-                                                e.currentTarget.style.borderColor = '#8b5cf6';
-                                                e.currentTarget.style.boxShadow = '0 12px 30px rgba(139, 92, 246, 0.3)';
+                                                e.currentTarget.style.borderColor = 'var(--color-accent)';
+                                                e.currentTarget.style.boxShadow = 'var(--shadow-glass-strong)';
                                             }}
                                             onMouseLeave={(e) => {
                                                 e.currentTarget.style.transform = 'translateY(0)';
-                                                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
+                                                e.currentTarget.style.borderColor = 'var(--border-glass)';
                                                 e.currentTarget.style.boxShadow = 'none';
                                             }}
                                         >
-                                            <h3 style={{ color: 'white', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                                            <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                                                 {part.title}
                                             </h3>
-                                            <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                                 {part.articles.length} {language === 'en' ? 'Articles' : 'अनुच्छेद'}
                                             </p>
                                         </div>

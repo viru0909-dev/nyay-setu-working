@@ -251,7 +251,8 @@ export default function VakilFriendChat() {
             // Don't set caseId yet - will link when case is filed
 
             const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:8080/api/documents/upload', formData, {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+            const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -304,12 +305,13 @@ export default function VakilFriendChat() {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'rgba(0,0,0,0.8)',
+                        background: 'rgba(0,0,0,0.4)', // Lighter backdrop
                         zIndex: 999999,
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'flex-start',
-                        paddingTop: '3rem'
+                        paddingTop: '3rem',
+                        backdropFilter: 'var(--glass-blur)'
                     }}
                     onClick={() => setShowHistory(false)}
                 >
@@ -318,25 +320,25 @@ export default function VakilFriendChat() {
                             width: '400px',
                             maxWidth: '90vw',
                             maxHeight: '80vh',
-                            background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)',
+                            background: 'var(--bg-glass-strong)',
                             borderRadius: '1rem',
                             padding: '1.5rem',
                             overflowY: 'auto',
-                            border: '1px solid rgba(139, 92, 246, 0.3)',
-                            boxShadow: '0 20px 60px rgba(0,0,0,0.5)'
+                            border: 'var(--border-glass-strong)',
+                            boxShadow: 'var(--shadow-glass-strong)'
                         }}
                         onClick={e => e.stopPropagation()}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ color: 'white', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>💬 Chat History</h3>
+                            <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>💬 Chat History</h3>
                             <button
                                 onClick={() => setShowHistory(false)}
                                 style={{
-                                    background: 'rgba(239, 68, 68, 0.2)',
-                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    border: '1px solid rgba(239, 68, 68, 0.2)',
                                     borderRadius: '0.5rem',
                                     padding: '0.5rem',
-                                    color: '#ef4444',
+                                    color: 'var(--color-error)',
                                     cursor: 'pointer',
                                     fontSize: '0.9rem'
                                 }}
@@ -347,7 +349,7 @@ export default function VakilFriendChat() {
                             onClick={() => { startNewSession(); setShowHistory(false); }}
                             style={{
                                 width: '100%',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                 border: 'none',
                                 borderRadius: '0.75rem',
                                 padding: '0.75rem 1rem',
@@ -359,17 +361,18 @@ export default function VakilFriendChat() {
                                 gap: '0.5rem',
                                 fontSize: '0.95rem',
                                 fontWeight: '600',
-                                marginBottom: '1.5rem'
+                                marginBottom: '1.5rem',
+                                boxShadow: 'var(--shadow-glass)'
                             }}
                         >
                             <Plus size={18} /> New Chat
                         </button>
 
                         {sessions.length === 0 ? (
-                            <p style={{ color: '#94a3b8', textAlign: 'center', padding: '2rem 0' }}>No chat history yet</p>
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem 0' }}>No chat history yet</p>
                         ) : (
                             <div>
-                                <p style={{ color: '#64748b', fontSize: '0.8rem', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Recent Sessions</p>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Recent Sessions</p>
                                 {sessions.map((session, idx) => (
                                     <div
                                         key={session.sessionId}
@@ -377,24 +380,24 @@ export default function VakilFriendChat() {
                                         style={{
                                             padding: '0.875rem',
                                             background: session.sessionId === sessionId
-                                                ? 'rgba(139, 92, 246, 0.3)'
-                                                : 'rgba(30, 27, 75, 0.5)',
+                                                ? 'rgba(139, 92, 246, 0.1)'
+                                                : 'var(--bg-glass)',
                                             borderRadius: '0.75rem',
                                             marginBottom: '0.5rem',
                                             cursor: 'pointer',
                                             border: session.sessionId === sessionId
-                                                ? '1px solid rgba(139, 92, 246, 0.5)'
-                                                : '1px solid rgba(139, 92, 246, 0.1)',
+                                                ? '1px solid var(--color-accent)'
+                                                : 'var(--border-glass)',
                                             transition: 'all 0.2s ease'
                                         }}
                                     >
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <MessageSquare size={16} style={{ color: '#8b5cf6' }} />
-                                            <span style={{ color: 'white', fontSize: '0.9rem', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            <MessageSquare size={16} style={{ color: 'var(--color-accent)' }} />
+                                            <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                 {session.title || `Session ${sessions.length - idx}`}
                                             </span>
                                         </div>
-                                        <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '0.35rem', marginLeft: '1.5rem' }}>
+                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '0.35rem', marginLeft: '1.5rem' }}>
                                             {session.status} • {new Date(session.createdAt).toLocaleDateString()}
                                         </div>
                                     </div>
@@ -412,12 +415,12 @@ export default function VakilFriendChat() {
                     <button
                         onClick={() => navigate('/client')}
                         style={{
-                            background: 'rgba(139, 92, 246, 0.1)',
-                            border: '1px solid rgba(139, 92, 246, 0.3)',
+                            background: 'var(--bg-glass)',
+                            border: 'var(--border-glass)',
                             borderRadius: '0.5rem',
                             padding: '0.5rem',
                             cursor: 'pointer',
-                            color: '#c4b5fd',
+                            color: 'var(--text-secondary)',
                             display: 'flex',
                             alignItems: 'center'
                         }}
@@ -430,12 +433,12 @@ export default function VakilFriendChat() {
                             setShowHistory(true);
                         }}
                         style={{
-                            background: showHistory ? 'rgba(139, 92, 246, 0.3)' : 'rgba(139, 92, 246, 0.1)',
-                            border: '1px solid rgba(139, 92, 246, 0.3)',
+                            background: showHistory ? 'rgba(139, 92, 246, 0.1)' : 'var(--bg-glass)',
+                            border: showHistory ? '1px solid var(--color-accent)' : 'var(--border-glass)',
                             borderRadius: '0.5rem',
                             padding: '0.5rem 0.75rem',
                             cursor: 'pointer',
-                            color: '#c4b5fd',
+                            color: showHistory ? 'var(--color-accent)' : 'var(--text-secondary)',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
@@ -451,11 +454,11 @@ export default function VakilFriendChat() {
                         onClick={startNewSession}
                         style={{
                             background: 'rgba(16, 185, 129, 0.1)',
-                            border: '1px solid rgba(16, 185, 129, 0.3)',
+                            border: '1px solid rgba(16, 185, 129, 0.2)',
                             borderRadius: '0.5rem',
                             padding: '0.5rem',
                             cursor: 'pointer',
-                            color: '#34d399',
+                            color: '#10b981',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem'
@@ -465,10 +468,10 @@ export default function VakilFriendChat() {
                         <Plus size={20} />
                     </button>
                     <div>
-                        <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'white', marginBottom: '0.25rem' }}>
+                        <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>
                             Vakil-Friend AI
                         </h1>
-                        <p style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                             Chat with our AI to file your legal case
                         </p>
                     </div>
@@ -503,10 +506,10 @@ export default function VakilFriendChat() {
                 <div style={{
                     padding: '0.875rem 1.25rem',
                     background: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
                     borderRadius: '0.75rem',
                     marginBottom: '1rem',
-                    color: '#fca5a5',
+                    color: 'var(--color-error)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
@@ -518,16 +521,17 @@ export default function VakilFriendChat() {
 
             {/* Chat Container */}
             <div style={{
-                background: 'rgba(30, 41, 59, 0.8)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
+                background: 'var(--bg-glass-strong)',
+                backdropFilter: 'var(--glass-blur)',
+                border: 'var(--border-glass-strong)',
                 borderRadius: '1rem',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                boxShadow: 'var(--shadow-glass)'
             }}>
                 {/* Chat Header */}
                 <div style={{
                     padding: '1rem 1.25rem',
-                    borderBottom: '1px solid rgba(139, 92, 246, 0.2)',
+                    borderBottom: 'var(--border-glass)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.75rem'
@@ -536,7 +540,7 @@ export default function VakilFriendChat() {
                         width: '44px',
                         height: '44px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -545,7 +549,7 @@ export default function VakilFriendChat() {
                         <Bot size={24} color="white" />
                     </div>
                     <div>
-                        <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'white', margin: 0 }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
                             AI Legal Assistant
                         </h3>
                         <p style={{ fontSize: '0.8rem', color: sessionId ? '#10b981' : '#f59e0b', margin: 0 }}>
@@ -558,8 +562,8 @@ export default function VakilFriendChat() {
                 <div
                     ref={messagesContainerRef}
                     style={{
-                        padding: '1.5rem', // Slightly more padding
-                        height: 'calc(100vh - 420px)', // Adjusted height to give more room at bottom
+                        padding: '1.5rem',
+                        height: 'calc(100vh - 420px)',
                         minHeight: '400px',
                         overflowY: 'auto',
                         overflowX: 'hidden',
@@ -573,9 +577,9 @@ export default function VakilFriendChat() {
                             justifyContent: 'center',
                             alignItems: 'center',
                             height: '100%',
-                            color: '#94a3b8'
+                            color: 'var(--text-secondary)'
                         }}>
-                            <Loader2 size={36} style={{ marginBottom: '1rem', animation: 'spin 1s linear infinite' }} />
+                            <Loader2 size={36} style={{ marginBottom: '1rem', animation: 'spin 1s linear infinite', color: 'var(--color-accent)' }} />
                             <p>Connecting to Vakil-Friend...</p>
                         </div>
                     ) : (
@@ -601,11 +605,12 @@ export default function VakilFriendChat() {
                                             borderRadius: '50%',
                                             background: msg.role === 'user'
                                                 ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
-                                                : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                                : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            flexShrink: 0
+                                            flexShrink: 0,
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                                         }}>
                                             {msg.role === 'user' ?
                                                 <User size={16} color="white" /> :
@@ -615,20 +620,20 @@ export default function VakilFriendChat() {
                                         <div style={{
                                             padding: '0.875rem 1rem',
                                             background: msg.role === 'user'
-                                                ? 'rgba(59, 130, 246, 0.2)'
-                                                : 'rgba(139, 92, 246, 0.15)',
+                                                ? 'rgba(59, 130, 246, 0.1)'
+                                                : 'var(--bg-glass)',
                                             border: msg.role === 'user'
-                                                ? '1px solid rgba(59, 130, 246, 0.3)'
-                                                : '1px solid rgba(139, 92, 246, 0.2)',
+                                                ? '1px solid rgba(59, 130, 246, 0.2)'
+                                                : 'var(--border-glass)',
                                             borderRadius: msg.role === 'user'
                                                 ? '0.875rem 0.875rem 0.25rem 0.875rem'
                                                 : '0.875rem 0.875rem 0.875rem 0.25rem',
+                                            boxShadow: 'var(--shadow-glass-sm)'
                                         }}>
                                             <div className="markdown-content" style={{
-                                                color: '#ffffff', // High contrast white
-                                                fontSize: '1rem', // Slightly larger
-                                                lineHeight: '1.7',
-                                                fontWeight: '500' // Increased font weight
+                                                color: 'var(--text-main)',
+                                                fontSize: '0.95rem',
+                                                lineHeight: '1.6',
                                             }}>
                                                 <ReactMarkdown>
                                                     {msg.content}
@@ -644,7 +649,7 @@ export default function VakilFriendChat() {
                                         width: '32px',
                                         height: '32px',
                                         borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center'
@@ -653,10 +658,10 @@ export default function VakilFriendChat() {
                                     </div>
                                     <div style={{
                                         padding: '0.875rem 1rem',
-                                        background: 'rgba(139, 92, 246, 0.15)',
-                                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
                                         borderRadius: '0.875rem 0.875rem 0.875rem 0.25rem',
-                                        color: '#94a3b8'
+                                        color: 'var(--text-secondary)'
                                     }}>
                                         <span className="typing-dot">●</span>
                                         <span className="typing-dot"> ●</span>
@@ -671,7 +676,8 @@ export default function VakilFriendChat() {
                 {/* Input Area */}
                 <div style={{
                     padding: '1rem 1.25rem',
-                    borderTop: '1px solid rgba(139, 92, 246, 0.2)'
+                    borderTop: 'var(--border-glass)',
+                    background: 'var(--bg-glass)'
                 }}>
                     {/* Attached Files Preview */}
                     {attachedFiles.length > 0 && (
@@ -688,21 +694,21 @@ export default function VakilFriendChat() {
                                     gap: '0.375rem',
                                     padding: '0.375rem 0.625rem',
                                     background: file.status === 'uploaded'
-                                        ? 'rgba(16, 185, 129, 0.15)'
+                                        ? 'rgba(16, 185, 129, 0.1)'
                                         : file.status === 'failed'
-                                            ? 'rgba(239, 68, 68, 0.15)'
-                                            : 'rgba(139, 92, 246, 0.15)',
+                                            ? 'rgba(239, 68, 68, 0.1)'
+                                            : 'var(--bg-glass)',
                                     border: `1px solid ${file.status === 'uploaded'
-                                        ? 'rgba(16, 185, 129, 0.3)'
+                                        ? 'rgba(16, 185, 129, 0.2)'
                                         : file.status === 'failed'
-                                            ? 'rgba(239, 68, 68, 0.3)'
-                                            : 'rgba(139, 92, 246, 0.3)'}`,
+                                            ? 'rgba(239, 68, 68, 0.2)'
+                                            : 'var(--border-glass)'}`,
                                     borderRadius: '0.5rem'
                                 }}>
-                                    <FileText size={14} style={{ color: file.status === 'uploaded' ? '#10b981' : file.status === 'failed' ? '#ef4444' : '#8b5cf6' }} />
+                                    <FileText size={14} style={{ color: file.status === 'uploaded' ? '#10b981' : file.status === 'failed' ? '#ef4444' : 'var(--color-accent)' }} />
                                     <span style={{
                                         fontSize: '0.75rem',
-                                        color: '#e2e8f0',
+                                        color: 'var(--text-main)',
                                         maxWidth: '120px',
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis',
@@ -710,11 +716,11 @@ export default function VakilFriendChat() {
                                     }}>
                                         {file.name}
                                     </span>
-                                    <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
+                                    <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
                                         {formatFileSize(file.size)}
                                     </span>
                                     {file.status === 'pending' && (
-                                        <Loader2 size={12} style={{ color: '#8b5cf6', animation: 'spin 1s linear infinite' }} />
+                                        <Loader2 size={12} style={{ color: 'var(--color-accent)', animation: 'spin 1s linear infinite' }} />
                                     )}
                                     {file.status === 'uploaded' && (
                                         <CheckCircle size={12} style={{ color: '#10b981' }} />
@@ -726,7 +732,7 @@ export default function VakilFriendChat() {
                                             border: 'none',
                                             padding: '2px',
                                             cursor: 'pointer',
-                                            color: '#94a3b8'
+                                            color: 'var(--text-secondary)'
                                         }}
                                     >
                                         <X size={12} />
@@ -754,15 +760,18 @@ export default function VakilFriendChat() {
                             title="Attach document"
                             style={{
                                 padding: '0.75rem',
-                                background: 'rgba(139, 92, 246, 0.1)',
-                                border: '2px solid rgba(139, 92, 246, 0.2)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.625rem',
-                                color: uploadingFile ? '#94a3b8' : '#c4b5fd',
+                                color: uploadingFile ? 'var(--text-secondary)' : 'var(--color-accent)',
                                 cursor: (isLoading || isStarting || uploadingFile) ? 'not-allowed' : 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
                             }}
+                            onMouseOver={e => !isLoading && (e.currentTarget.style.background = 'var(--bg-glass-hover)')}
+                            onMouseOut={e => !isLoading && (e.currentTarget.style.background = 'var(--bg-glass)')}
                         >
                             {uploadingFile ? (
                                 <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
@@ -781,15 +790,18 @@ export default function VakilFriendChat() {
                             style={{
                                 flex: 1,
                                 padding: '0.75rem 1rem',
-                                background: 'rgba(15, 23, 42, 0.6)',
-                                border: '2px solid rgba(139, 92, 246, 0.2)',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '0.625rem',
-                                color: 'white',
+                                color: 'var(--text-main)',
                                 fontSize: '0.9rem',
                                 resize: 'none',
                                 outline: 'none',
-                                fontFamily: 'inherit'
+                                fontFamily: 'inherit',
+                                transition: 'all 0.2s'
                             }}
+                            onFocus={e => e.currentTarget.style.borderColor = 'var(--color-accent)'}
+                            onBlur={e => e.currentTarget.style.borderColor = 'var(--border-glass)'}
                         />
                         <button
                             onClick={sendMessage}
@@ -797,18 +809,19 @@ export default function VakilFriendChat() {
                             style={{
                                 padding: '0.75rem 1rem',
                                 background: (!inputMessage.trim() || isLoading || isStarting)
-                                    ? 'rgba(139, 92, 246, 0.3)'
-                                    : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                    ? 'var(--bg-glass-strong)'
+                                    : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                 border: 'none',
                                 borderRadius: '0.625rem',
-                                color: 'white',
+                                color: (!inputMessage.trim() || isLoading || isStarting) ? 'var(--text-secondary)' : 'white',
                                 cursor: (!inputMessage.trim() || isLoading || isStarting) ? 'not-allowed' : 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 boxShadow: (!inputMessage.trim() || isLoading || isStarting)
                                     ? 'none'
-                                    : '0 4px 15px rgba(139, 92, 246, 0.4)'
+                                    : '0 4px 15px rgba(139, 92, 246, 0.4)',
+                                transition: 'all 0.2s'
                             }}
                         >
                             <Send size={20} />
@@ -845,7 +858,7 @@ export default function VakilFriendChat() {
                     font-weight: 700 !important;
                     margin-top: 0.75rem !important;
                     margin-bottom: 0.5rem !important;
-                    color: #f8fafc !important;
+                    color: var(--text-main) !important;
                 }
                 .markdown-content p {
                     margin-bottom: 0.75rem !important;
@@ -860,11 +873,11 @@ export default function VakilFriendChat() {
                     margin-bottom: 0.35rem !important;
                 }
                 .markdown-content strong {
-                    color: #c4b5fd !important;
+                    color: var(--color-accent) !important;
                     font-weight: 700 !important;
                 }
                 .markdown-content code {
-                    background: rgba(0,0,0,0.3) !important;
+                    background: var(--bg-glass-strong) !important;
                     padding: 0.1rem 0.3rem !important;
                     border-radius: 0.25rem !important;
                     font-family: monospace !important;

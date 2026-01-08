@@ -1,12 +1,14 @@
 import { FolderOpen, Video, FileText, TrendingUp, Clock, CheckCircle2, Bot, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function ClientDashboard() {
     const navigate = useNavigate();
+    const { t } = useLanguage();
 
     // Mock data - will be replaced with API calls
     const stats = [
-        { label: 'My Cases', value: '3', icon: FolderOpen, color: '#3b82f6', change: '+1 this month' },
+        { label: 'My Cases', value: '3', icon: FolderOpen, color: 'var(--color-primary)', change: '+1 this month' },
         { label: 'Upcoming Hearings', value: '2', icon: Video, color: '#8b5cf6', change: 'Next: Dec 15' },
         { label: 'Documents', value: '15', icon: FileText, color: '#10b981', change: '5 pending review' }
     ];
@@ -28,8 +30,8 @@ export default function ClientDashboard() {
             <div
                 onClick={() => navigate('/client/vakil-friend')}
                 style={{
-                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%)',
-                    border: '2px solid rgba(139, 92, 246, 0.4)',
+                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
+                    border: 'var(--border-glass)',
                     borderRadius: '1.5rem',
                     padding: '1.5rem 2rem',
                     marginBottom: '2rem',
@@ -37,17 +39,20 @@ export default function ClientDashboard() {
                     transition: 'all 0.3s',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between'
+                    justifyContent: 'space-between',
+                    boxShadow: 'var(--shadow-glass)'
                 }}
                 onMouseOver={(e) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(139, 92, 246, 0.4)';
-                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.6)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-glass-strong)';
+                    e.currentTarget.style.borderColor = 'var(--color-accent)';
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)';
                 }}
                 onMouseOut={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+                    e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
+                    e.currentTarget.style.borderColor = 'var(--border-glass)';
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)';
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -55,35 +60,36 @@ export default function ClientDashboard() {
                         width: '64px',
                         height: '64px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxShadow: '0 4px 20px rgba(139, 92, 246, 0.5)'
+                        boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)'
                     }}>
                         <Bot size={32} color="white" />
                     </div>
                     <div>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white', marginBottom: '0.25rem' }}>
-                            🤖 File Case with Vakil-Friend AI
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
+                            🤖 {t('File Case with Vakil-Friend AI')}
                         </h2>
-                        <p style={{ fontSize: '1rem', color: '#c4b5fd' }}>
-                            Simply describe your legal issue and our AI will guide you through filing
+                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
+                            {t('Simply describe your legal issue and our AI will guide you through filing')}
                         </p>
                     </div>
                 </div>
                 <div style={{
                     padding: '0.75rem 1.5rem',
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                    background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                     borderRadius: '0.75rem',
                     color: 'white',
                     fontWeight: '700',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem'
+                    gap: '0.5rem',
+                    boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
                 }}>
                     <MessageCircle size={20} />
-                    Start Chat
+                    {t('Start Chat')}
                 </div>
             </div>
 
@@ -100,28 +106,29 @@ export default function ClientDashboard() {
                         <div
                             key={index}
                             style={{
-                                background: 'rgba(30, 41, 59, 0.8)',
-                                backdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(139, 92, 246, 0.2)',
+                                background: 'var(--bg-glass-strong)',
+                                backdropFilter: 'var(--glass-blur)',
+                                border: 'var(--border-glass-strong)',
                                 borderRadius: '1.5rem',
                                 padding: '1.5rem',
-                                transition: 'all 0.3s'
+                                transition: 'all 0.3s',
+                                boxShadow: 'var(--shadow-glass)'
                             }}
                             onMouseOver={(e) => {
                                 e.currentTarget.style.transform = 'translateY(-4px)';
-                                e.currentTarget.style.boxShadow = '0 10px 30px rgba(139, 92, 246, 0.3)';
+                                e.currentTarget.style.boxShadow = 'var(--shadow-glass-strong)';
                             }}
                             onMouseOut={(e) => {
                                 e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = 'none';
+                                e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
                             }}
                         >
                             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
                                 <div>
-                                    <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
-                                        {stat.label}
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                                        {t(stat.label)}
                                     </p>
-                                    <h3 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white' }}>
+                                    <h3 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)' }}>
                                         {stat.value}
                                     </h3>
                                 </div>
@@ -129,8 +136,8 @@ export default function ClientDashboard() {
                                     width: '56px',
                                     height: '56px',
                                     borderRadius: '14px',
-                                    background: `${stat.color}20`,
-                                    border: `2px solid ${stat.color}40`,
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center'
@@ -138,7 +145,7 @@ export default function ClientDashboard() {
                                     <Icon size={28} color={stat.color} />
                                 </div>
                             </div>
-                            <p style={{ fontSize: '0.875rem', color: '#8b5cf6', fontWeight: '500' }}>
+                            <p style={{ fontSize: '0.875rem', color: stat.color, fontWeight: '600' }}>
                                 {stat.change}
                             </p>
                         </div>
@@ -148,15 +155,16 @@ export default function ClientDashboard() {
 
             {/* Quick Actions */}
             <div style={{
-                background: 'rgba(30, 41, 59, 0.8)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
+                background: 'var(--bg-glass-strong)',
+                backdropFilter: 'var(--glass-blur)',
+                border: 'var(--border-glass-strong)',
                 borderRadius: '1.5rem',
                 padding: '1.5rem',
-                marginBottom: '2rem'
+                marginBottom: '2rem',
+                boxShadow: 'var(--shadow-glass)'
             }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '1rem' }}>
-                    Quick Actions
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>
+                    {t('Quick Actions')}
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                     {[
@@ -172,10 +180,10 @@ export default function ClientDashboard() {
                                 onClick={() => window.location.href = action.path}
                                 style={{
                                     padding: '1rem',
-                                    background: 'rgba(139, 92, 246, 0.1)',
-                                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
                                     borderRadius: '0.75rem',
-                                    color: '#c4b5fd',
+                                    color: 'var(--text-secondary)',
                                     fontWeight: '600',
                                     cursor: 'pointer',
                                     transition: 'all 0.2s',
@@ -184,16 +192,18 @@ export default function ClientDashboard() {
                                     gap: '0.75rem'
                                 }}
                                 onMouseOver={(e) => {
-                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
-                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+                                    e.currentTarget.style.background = 'var(--bg-glass-hover)';
+                                    e.currentTarget.style.borderColor = 'var(--color-accent)';
+                                    e.currentTarget.style.color = 'var(--color-accent)';
                                 }}
                                 onMouseOut={(e) => {
-                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
+                                    e.currentTarget.style.background = 'var(--bg-glass)';
+                                    e.currentTarget.style.borderColor = 'var(--border-glass)';
+                                    e.currentTarget.style.color = 'var(--text-secondary)';
                                 }}
                             >
                                 <Icon size={20} />
-                                {action.label}
+                                {t(action.label)}
                             </button>
                         );
                     })}
@@ -204,14 +214,15 @@ export default function ClientDashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
                 {/* Recent Cases */}
                 <div style={{
-                    background: 'rgba(30, 41, 59, 0.8)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                    background: 'var(--bg-glass-strong)',
+                    backdropFilter: 'var(--glass-blur)',
+                    border: 'var(--border-glass-strong)',
                     borderRadius: '1.5rem',
-                    padding: '1.5rem'
+                    padding: '1.5rem',
+                    boxShadow: 'var(--shadow-glass)'
                 }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '1.5rem' }}>
-                        Recent Cases
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
+                        {t('Recent Cases')}
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {recentCases.map((caseItem, index) => (
@@ -219,42 +230,44 @@ export default function ClientDashboard() {
                                 key={index}
                                 style={{
                                     padding: '1rem',
-                                    background: 'rgba(15, 23, 42, 0.6)',
+                                    background: 'var(--bg-glass)',
                                     borderRadius: '0.75rem',
-                                    border: '1px solid rgba(139, 92, 246, 0.1)',
+                                    border: 'var(--border-glass)',
                                     cursor: 'pointer',
                                     transition: 'all 0.2s'
                                 }}
                                 onMouseOver={(e) => {
-                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
-                                    e.currentTarget.style.background = 'rgba(15, 23, 42, 0.8)';
+                                    e.currentTarget.style.borderColor = 'var(--color-accent)';
+                                    e.currentTarget.style.background = 'var(--bg-glass-hover)';
                                 }}
                                 onMouseOut={(e) => {
-                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.1)';
-                                    e.currentTarget.style.background = 'rgba(15, 23, 42, 0.6)';
+                                    e.currentTarget.style.borderColor = 'var(--border-glass)';
+                                    e.currentTarget.style.background = 'var(--bg-glass)';
                                 }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                                    <span style={{ fontSize: '0.75rem', color: '#8b5cf6', fontWeight: '600' }}>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-accent)', fontWeight: '600' }}>
                                         {caseItem.id}
                                     </span>
                                     <span style={{
                                         fontSize: '0.75rem',
                                         padding: '0.25rem 0.75rem',
                                         borderRadius: '9999px',
-                                        background: caseItem.status === 'Pending' ? '#f5930020' :
-                                            caseItem.status === 'In Progress' ? '#3b82f620' : '#10b98120',
+                                        background: caseItem.status === 'Pending' ? 'rgba(245, 158, 11, 0.1)' :
+                                            caseItem.status === 'In Progress' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
                                         color: caseItem.status === 'Pending' ? '#f59e0b' :
                                             caseItem.status === 'In Progress' ? '#3b82f6' : '#10b981',
+                                        border: `1px solid ${caseItem.status === 'Pending' ? 'rgba(245, 158, 11, 0.2)' :
+                                            caseItem.status === 'In Progress' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`,
                                         fontWeight: '600'
                                     }}>
                                         {caseItem.status}
                                     </span>
                                 </div>
-                                <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'white', marginBottom: '0.5rem' }}>
+                                <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                                     {caseItem.title}
                                 </h4>
-                                <p style={{ fontSize: '0.875rem', color: '#94a3b8' }}>
+                                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                                     Filed: {caseItem.date}
                                 </p>
                             </div>
@@ -264,14 +277,15 @@ export default function ClientDashboard() {
 
                 {/* Upcoming Hearings */}
                 <div style={{
-                    background: 'rgba(30, 41, 59, 0.8)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                    background: 'var(--bg-glass-strong)',
+                    backdropFilter: 'var(--glass-blur)',
+                    border: 'var(--border-glass-strong)',
                     borderRadius: '1.5rem',
-                    padding: '1.5rem'
+                    padding: '1.5rem',
+                    boxShadow: 'var(--shadow-glass)'
                 }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'white', marginBottom: '1.5rem' }}>
-                        Upcoming Hearings
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
+                        {t('Upcoming Hearings')}
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {upcomingHearings.map((hearing, index) => (
@@ -279,9 +293,9 @@ export default function ClientDashboard() {
                                 key={index}
                                 style={{
                                     padding: '1rem',
-                                    background: 'rgba(15, 23, 42, 0.6)',
+                                    background: 'var(--bg-glass)',
                                     borderRadius: '0.75rem',
-                                    border: '1px solid rgba(139, 92, 246, 0.1)'
+                                    border: 'var(--border-glass)'
                                 }}
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
@@ -289,7 +303,7 @@ export default function ClientDashboard() {
                                         width: '40px',
                                         height: '40px',
                                         borderRadius: '10px',
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center'
@@ -297,17 +311,17 @@ export default function ClientDashboard() {
                                         <Video size={20} color="white" />
                                     </div>
                                     <div style={{ flex: 1 }}>
-                                        <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'white', marginBottom: '0.25rem' }}>
+                                        <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
                                             {hearing.title}
                                         </h4>
-                                        <p style={{ fontSize: '0.75rem', color: '#8b5cf6' }}>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--color-accent)' }}>
                                             {hearing.caseId}
                                         </p>
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
-                                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginBottom: '0.25rem' }}>
+                                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                                             <Clock size={14} style={{ display: 'inline', marginRight: '0.5rem' }} />
                                             {hearing.date} at {hearing.time}
                                         </p>
@@ -315,24 +329,26 @@ export default function ClientDashboard() {
                                             fontSize: '0.75rem',
                                             padding: '0.25rem 0.75rem',
                                             borderRadius: '9999px',
-                                            background: '#8b5cf620',
-                                            color: '#8b5cf6',
-                                            fontWeight: '600'
+                                            background: 'rgba(139, 92, 246, 0.1)',
+                                            color: 'var(--color-accent)',
+                                            fontWeight: '600',
+                                            border: '1px solid rgba(139, 92, 246, 0.2)'
                                         }}>
                                             {hearing.type}
                                         </span>
                                     </div>
                                     <button style={{
                                         padding: '0.5rem 1rem',
-                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                                         border: 'none',
                                         borderRadius: '0.5rem',
                                         color: 'white',
                                         fontSize: '0.875rem',
                                         fontWeight: '600',
-                                        cursor: 'pointer'
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
                                     }}>
-                                        Join
+                                        {t('Join')}
                                     </button>
                                 </div>
                             </div>
