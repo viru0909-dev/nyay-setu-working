@@ -115,7 +115,7 @@ export default function LawyerDashboard() {
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
                         <div style={{
@@ -180,7 +180,7 @@ export default function LawyerDashboard() {
                 padding: '1.5rem',
                 boxShadow: 'var(--shadow-glass)'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <FileText size={24} color="var(--color-accent)" /> Active Litigation Files
                     </h3>
@@ -198,7 +198,8 @@ export default function LawyerDashboard() {
                                     borderRadius: '0.75rem',
                                     padding: '0.6rem 1rem 0.6rem 3rem',
                                     color: 'var(--text-main)',
-                                    width: '250px',
+                                    width: '100%',
+                                    maxWidth: '250px',
                                     outline: 'none',
                                     fontSize: '0.9rem'
                                 }}

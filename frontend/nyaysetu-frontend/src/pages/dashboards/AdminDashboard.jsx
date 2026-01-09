@@ -21,7 +21,7 @@ export default function AdminDashboard() {
         <div style={{ minHeight: '100vh', background: '#f7fafc' }}>
             {/* Header */}
             <div style={{ background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1rem 0' }}>
-                <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
                         <h1 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Admin Dashboard</h1>
                         <p style={{ color: '#718096', fontSize: '0.875rem' }}>Welcome, {user?.name || 'Admin'}</p>
