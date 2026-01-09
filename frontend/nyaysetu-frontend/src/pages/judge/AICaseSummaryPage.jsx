@@ -170,8 +170,6 @@ export default function AICaseSummaryPage() {
                 {/* AI Summary */}
                 <div style={{
                     ...glassStyle,
-                    border: selectedCase ? '1px solid rgba(236, 72, 153, 0.3)' : glassStyle.border,
-                    background: selectedCase ? 'rgba(30, 41, 59, 0.8)' : glassStyle.background,
                     display: 'flex',
                     flexDirection: 'column'
                 }}>
@@ -340,7 +338,7 @@ export default function AICaseSummaryPage() {
                     font-weight: 700 !important;
                 }
                 .markdown-content code {
-                    background: rgba(0,0,0,0.4) !important;
+                    background: rgba(0,0,0,0.06) !important;
                     padding: 0.15rem 0.4rem !important;
                     border-radius: 0.35rem !important;
                     font-family: inherit !important;
