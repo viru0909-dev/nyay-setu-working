@@ -7,7 +7,13 @@ import axios from 'axios';
 // In development: http://localhost:8080
 // In production: Replace with actual backend URL via environment variable
 // Check multiple variable names to be safe
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// Smart Base URL detection
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const PROD_BACKEND = 'https://nyaysetubackend.onrender.com';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_API_URL ||
+    (isLocalhost ? 'http://localhost:8080' : PROD_BACKEND);
 
 const api = axios.create({
     baseURL: API_BASE_URL,
