@@ -137,10 +137,13 @@ public class VakilFriendController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Failed to complete session: {}", e.getMessage(), e);
+            String stackTrace = java.util.Arrays.toString(java.util.Arrays.copyOf(e.getStackTrace(), 5));
             return ResponseEntity.status(500).body(Map.of(
                 "success", false,
                 "error", "Failed to file case",
-                "message", e.getMessage() != null ? e.getMessage() : "Unknown error"
+                "message", e.getMessage() != null ? e.getMessage() : "Unknown error",
+                "debug_cause", e.toString(),
+                "debug_stack", stackTrace
             ));
         }
     }
