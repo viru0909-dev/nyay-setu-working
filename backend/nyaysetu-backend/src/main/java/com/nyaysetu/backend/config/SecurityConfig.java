@@ -47,15 +47,8 @@ public class SecurityConfig {
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
         
-        // Parse the comma-separated string from environment variable
-        java.util.List<String> origins = java.util.Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .collect(java.util.stream.Collectors.toList());
-        
-        // Add a wildcard pattern for vercel.app to make it more resilient
-        origins.add("https://*.vercel.app");
-        
-        configuration.setAllowedOriginPatterns(origins);
+        // DEBUGGING: Allow ALL origins
+        configuration.setAllowedOriginPatterns(java.util.Collections.singletonList("*"));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
         configuration.setAllowCredentials(true);
