@@ -69,6 +69,11 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
         System.out.println("DEBUG: LOGIN ENDPOINT REACHED for email: " + req.getEmail());
