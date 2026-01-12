@@ -273,21 +273,21 @@ NYAY-SETU/
 ## 🎨 Design System
 
 ### Color Palette
-- **Primary**: Royal Blue (#2563eb)
-- **Secondary**: Purple (#8b5cf6)
-- **Accent**: Pink (#ec4899)
-- **Background**: Dark (#0f172a)
-- **Text**: White (#ffffff), Gray (#94a3b8)
+- **Primary**: Deep Slate (#0F172A)
+- **Accent**: Royal Blue (#2563EB)
+- **Background**: Light (#D2D6C8) with Glassmorphism
+- **Surface**: Glass White (rgba 255, 255, 255, 0.35)
+- **Text**: Slate (#1E293B, #475569)
 
 ### Typography
-- **Font**: System fonts (San Francisco, Segoe UI, etc.)
-- **Headings**: 900 weight, gradient text
-- **Body**: 400-600 weight
+- **Font**: Manrope (Headings), Inter (Body)
+- **Headings**: 700 weight, Deep Slate
+- **Body**: 400-600 weight, Slate
 
 ### Animations
 - **Framer Motion** for page transitions
 - **AOS** for scroll animations
-- Spring physics for smooth interactions
+- **Spring physics** for smooth interactions
 
 ---
 
