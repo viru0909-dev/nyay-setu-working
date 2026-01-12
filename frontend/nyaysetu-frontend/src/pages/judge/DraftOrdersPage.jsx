@@ -373,7 +373,7 @@ NYAY-SETU SECURE SIGNED`;
                         boxShadow: 'var(--shadow-glass)',
                         position: 'relative'
                     }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2rem', position: 'relative' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                 <div style={{
                                     width: '48px', height: '48px', borderRadius: '12px',
@@ -386,7 +386,11 @@ NYAY-SETU SECURE SIGNED`;
                             </div>
                             <button
                                 onClick={() => setShowDraftModal(false)}
-                                style={{ background: 'var(--bg-glass)', border: 'none', color: 'var(--text-secondary)', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
+                                style={{
+                                    background: 'var(--bg-glass)', border: 'none', color: 'var(--text-secondary)',
+                                    padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer',
+                                    position: 'absolute', right: 0, top: 0
+                                }}
                             >
                                 <X size={20} />
                             </button>
@@ -475,7 +479,7 @@ NYAY-SETU SECURE SIGNED`;
                             />
                         </div>
 
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                             <button
                                 onClick={() => setShowDraftModal(false)}
                                 style={{
