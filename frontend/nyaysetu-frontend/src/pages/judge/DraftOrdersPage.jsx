@@ -361,15 +361,16 @@ NYAY-SETU SECURE SIGNED`;
                     padding: '2rem'
                 }} onClick={() => setShowDraftModal(false)}>
                     <div style={{
-                        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
                         borderRadius: '1.5rem',
                         padding: '2rem',
                         width: '100%',
                         maxWidth: '900px',
                         maxHeight: '90vh',
                         overflow: 'auto',
-                        border: '1px solid rgba(99, 102, 241, 0.3)',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                        border: 'var(--border-glass-strong)',
+                        boxShadow: 'var(--shadow-glass)',
                         position: 'relative'
                     }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '2rem' }}>
