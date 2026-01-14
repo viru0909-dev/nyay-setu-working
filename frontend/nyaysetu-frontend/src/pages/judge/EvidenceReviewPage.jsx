@@ -16,6 +16,7 @@ import {
     Binary,
     Clock
 } from 'lucide-react';
+import CaseChatWidget from '../../components/CaseChatWidget';
 
 export default function EvidenceReviewPage() {
     const [cases, setCases] = useState([]);
@@ -377,6 +378,14 @@ export default function EvidenceReviewPage() {
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 .spin { animation: spin 1s linear infinite; }
             `}</style>
+
+            {/* Case Assistance Widget for Judges */}
+            {selectedCase && (
+                <CaseChatWidget
+                    caseId={selectedCase}
+                    caseTitle={cases.find(c => c.id === selectedCase)?.title || 'Case File'}
+                />
+            )}
         </div>
     );
 }

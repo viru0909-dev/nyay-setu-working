@@ -6,6 +6,7 @@ import {
     Gavel, MessageSquare, Sparkles, ShieldCheck
 } from 'lucide-react';
 import { caseAPI, lawyerAPI } from '../../services/api';
+import CaseChatWidget from '../../components/CaseChatWidget';
 
 const statusColors = {
     'PENDING': { bg: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.2)', text: 'var(--color-warning)' },
@@ -253,6 +254,8 @@ export default function LawyerCaseDetailsPage() {
                     </div>
                 </div>
             </div>
+            {/* Case Assistance Widget */}
+            <CaseChatWidget caseId={caseId} caseTitle={caseData.title} />
         </div>
     );
 }
