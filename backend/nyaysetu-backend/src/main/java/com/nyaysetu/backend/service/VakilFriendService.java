@@ -14,6 +14,8 @@ import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.ChatSessionRepository;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.HearingRepository;
+import com.nyaysetu.backend.repository.DocumentRepository;
+import com.nyaysetu.backend.entity.DocumentEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,7 @@ public class VakilFriendService {
     private final ChatSessionRepository chatSessionRepository;
     private final CaseRepository caseRepository;
     private final HearingRepository hearingRepository;
+    private final DocumentRepository documentRepository;
     private final OllamaService ollamaService;
     
     // Lazy injection to avoid circular dependency
@@ -97,6 +100,104 @@ public class VakilFriendService {
         
         Then say: "Your case is ready to file! Click the 'Complete Filing' button to submit."
         """;
+
+    /**
+     * Start a new case assistance session with context
+     */
+    @Transactional
+    public ChatSession startCaseAssistanceSession(User user, UUID caseId) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        String caseContext = buildCaseContext(caseEntity);
+        
+        List<Map<String, String>> conversation = new ArrayList<>();
+        
+        String systemPrompt = "You are an AI legal assistant helping with a specific case. " +
+                "Here is the case context:\n" + caseContext + 
+                "\n\nAnswer the user's questions based on this context.";
+
+        if (user.getRole() == com.nyaysetu.backend.entity.Role.JUDGE || user.getRole() == com.nyaysetu.backend.entity.Role.SUPER_JUDGE) {
+             systemPrompt += "\n\nROLE: You are a Judicial Assistant. Your goal is to be impartial, focus on facts, contradictions in evidence, and timeline analysis. Do not take sides. Provide objective summaries.";
+        } else if (user.getRole() == com.nyaysetu.backend.entity.Role.LAWYER) {
+             systemPrompt += "\n\nROLE: You are a Legal Associate. Your goal is to help the lawyer with case strategy, identify gaps in evidence, and suggest legal precedents. Be strategic and professional.";
+        } else {
+             systemPrompt += "\n\nROLE: You are a helpful assistant for the client. Explain legal terms simply and guide them through the process. Be empathetic.";
+        }
+        
+        systemPrompt += "\nDo not ask for case details again. Be helpful and specific.";
+
+        Map<String, String> systemMsg = new HashMap<>();
+        systemMsg.put("role", "system");
+        systemMsg.put("content", systemPrompt);
+        conversation.add(systemMsg);
+        
+        Map<String, String> aiMsg = new HashMap<>();
+        aiMsg.put("role", "assistant");
+        aiMsg.put("content", "I have reviewed your case details for **" + caseEntity.getTitle() + "**. How can I assist you with this case today?");
+        conversation.add(aiMsg);
+
+        try {
+            ChatSession session = ChatSession.builder()
+                .user(user)
+                .status(ChatSessionStatus.ACTIVE)
+                .conversationData(objectMapper.writeValueAsString(conversation))
+                .caseEntity(caseEntity)
+                .title("Assistance: " + caseEntity.getTitle())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+            
+            return chatSessionRepository.save(session);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to start session", e);
+        }
+    }
+
+    private String buildCaseContext(CaseEntity caseEntity) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Case Title: ").append(caseEntity.getTitle()).append("\n");
+        sb.append("Case Type: ").append(caseEntity.getCaseType()).append("\n");
+        sb.append("Status: ").append(caseEntity.getStatus()).append("\n");
+        sb.append("Description: ").append(caseEntity.getDescription()).append("\n");
+        sb.append("Petitioner: ").append(caseEntity.getPetitioner()).append("\n");
+        sb.append("Respondent: ").append(caseEntity.getRespondent()).append("\n");
+        
+        if (caseEntity.getNextHearing() != null) {
+            sb.append("Next Hearing: ").append(caseEntity.getNextHearing()).append("\n");
+        }
+        if (caseEntity.getAssignedJudge() != null) {
+            sb.append("Judge: ").append(caseEntity.getAssignedJudge()).append("\n");
+        }
+        
+        // Evidence
+        try {
+            List<DocumentEntity> docs = documentRepository.findByCaseId(caseEntity.getId());
+            if (!docs.isEmpty()) {
+                sb.append("\nEvidence/Documents:\n");
+                for (DocumentEntity doc : docs) {
+                    sb.append("- ").append(doc.getFileName()).append(" (").append(doc.getCategory()).append(")\n");
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch documents for context", e);
+        }
+        
+        // Hearings
+        try {
+            List<Hearing> hearings = hearingRepository.findByCaseEntityId(caseEntity.getId());
+            if (hearings != null && !hearings.isEmpty()) {
+                 sb.append("\nHearings History:\n");
+                 for (Hearing h : hearings) {
+                     sb.append("- ").append(h.getScheduledDate()).append(": ").append(h.getStatus()).append("\n");
+                 }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch hearings for context", e);
+        }
+        
+        return sb.toString();
+    }
 
     /**
      * Start a new chat session for case filing

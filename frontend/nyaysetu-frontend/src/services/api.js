@@ -120,6 +120,7 @@ export const meetingAPI = {
 // Vakil-Friend Chat API (Chat-First Case Filing)
 export const vakilFriendAPI = {
     startSession: () => api.post('/api/vakil-friend/start'),
+    startCaseSession: (caseId) => api.post(`/api/vakil-friend/case/${caseId}/start`),
     sendMessage: (sessionId, message) => api.post(`/api/vakil-friend/chat/${sessionId}`, { message }),
     completeSession: (sessionId) => api.post(`/api/vakil-friend/complete/${sessionId}`),
     getSession: (sessionId) => api.get(`/api/vakil-friend/session/${sessionId}`),

@@ -4,6 +4,9 @@ import com.nyaysetu.backend.entity.Hearing;
 import com.nyaysetu.backend.entity.HearingParticipant;
 import com.nyaysetu.backend.entity.ParticipantRole;
 import com.nyaysetu.backend.service.HearingService;
+import com.nyaysetu.backend.notification.service.NotificationService;
+import com.nyaysetu.backend.notification.entity.Notification;
+import com.nyaysetu.backend.entity.CaseEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,7 @@ import java.util.UUID;
 public class HearingController {
     
     private final HearingService hearingService;
+    private final NotificationService notificationService;
     
     @PostMapping("/schedule")
     public ResponseEntity<Map<String, Object>> scheduleHearing(
@@ -36,6 +40,34 @@ public class HearingController {
                 request.getScheduledDate(),
                 request.getDurationMinutes()
         );
+        
+        // Send Notifications
+        try {
+            if (hearing.getCaseEntity() != null) {
+                CaseEntity caseObj = hearing.getCaseEntity();
+                String notifTitle = "New Hearing Scheduled";
+                String msg = "A hearing for case " + caseObj.getTitle() + " has been scheduled on " + hearing.getScheduledDate().toString().replace("T", " at ");
+                
+                // Notify Client
+                if (caseObj.getClient() != null) {
+                    notificationService.save(Notification.builder()
+                            .userId(caseObj.getClient().getId())
+                            .title(notifTitle)
+                            .message(msg)
+                            .build());
+                }
+                // Notify Lawyer
+                if (caseObj.getLawyer() != null) {
+                    notificationService.save(Notification.builder()
+                            .userId(caseObj.getLawyer().getId())
+                            .title(notifTitle)
+                            .message(msg)
+                            .build());
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to send hearing notifications", e);
+        }
         
         Map<String, Object> response = new HashMap<>();
         response.put("id", hearing.getId());
