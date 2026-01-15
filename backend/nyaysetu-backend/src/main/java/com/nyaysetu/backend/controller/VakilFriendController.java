@@ -32,6 +32,59 @@ public class VakilFriendController {
     private final UserRepository userRepository;
 
     /**
+     * Start a new chat session for case assistance (linked to a specific case)
+     */
+    @PostMapping("/case/{caseId}/start")
+    public ResponseEntity<Map<String, Object>> startCaseSession(
+            @PathVariable UUID caseId,
+            Authentication auth
+    ) {
+        try {
+            User user = getCurrentUser(auth);
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of(
+                    "error", "Not authenticated",
+                    "message", "Please login to use Vakil-Friend"
+                ));
+            }
+            
+            ChatSession session = vakilFriendService.startCaseAssistanceSession(user, caseId);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("sessionId", session.getId());
+            // Get initial message from conversation data
+            String initialMessage = "I have reviewed your case. How can I help?";
+            try {
+                // Parse conversation to get the last message (which is the AI greeting)
+                List<Map<String, Object>> msgs = new com.fasterxml.jackson.databind.ObjectMapper().readValue(
+                    session.getConversationData(), List.class
+                );
+                if (!msgs.isEmpty()) {
+                    Map<String, Object> lastMsg = msgs.get(msgs.size() - 1);
+                    if ("assistant".equals(lastMsg.get("role"))) {
+                        initialMessage = (String) lastMsg.get("content");
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to parse initial message", e);
+            }
+            
+            response.put("message", initialMessage);
+            response.put("status", "ACTIVE");
+            
+            log.info("Started Vakil-Friend Case Assistance session {} for user {} on case {}", 
+                    session.getId(), user.getEmail(), caseId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to start Vakil-Friend case session", e);
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "Failed to start session",
+                "message", e.getMessage() != null ? e.getMessage() : "Unknown error"
+            ));
+        }
+    }
+
+    /**
      * Start a new chat session for case filing
      */
     @PostMapping("/start")
