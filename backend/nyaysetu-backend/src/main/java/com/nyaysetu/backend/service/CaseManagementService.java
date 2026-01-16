@@ -103,6 +103,7 @@ public class CaseManagementService {
                 .clientName(entity.getClient() != null ? entity.getClient().getName() : null)
                 .documentsCount(0) // TODO: Count from documents table
                 .lawyerProposalStatus(entity.getLawyerProposalStatus())
+                .draftPetition(entity.getDraftPetition())
                 .build();
     }
 
