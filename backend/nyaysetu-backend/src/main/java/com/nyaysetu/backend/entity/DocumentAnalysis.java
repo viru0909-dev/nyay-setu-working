@@ -43,6 +43,9 @@ public class DocumentAnalysis {
     @Column(columnDefinition = "TEXT")
     private String caseLawSuggestions;
     
+    private Integer score;
+    private String complianceStatus;
+    
     private String suggestedCategory;
     
     @Column(columnDefinition = "TEXT")

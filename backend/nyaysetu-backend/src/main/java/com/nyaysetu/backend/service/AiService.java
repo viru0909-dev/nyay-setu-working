@@ -104,7 +104,9 @@ public class AiService {
                 "  \"partiesInvolved\": [\"Party A vs Party B\"], // MUST be a JSON array\n" +
                 "  \"caseLawSuggestions\": [\"Case X vs Case Y (2010)\"], // MUST be a JSON array\n" +
                 "  \"suggestedCategory\": \"CIVIL/CRIMINAL/FAMILY/etc\",\n" +
-                "  \"riskAssessment\": \"Low/Medium/High with brief reasoning\"\n" +
+                "  \"riskAssessment\": \"Low/Medium/High with brief reasoning\",\n" +
+                "  \"score\": 0, // Integer between 0-100 representing document completeness/quality (Calculate based on content)\n" +
+                "  \"complianceStatus\": \"Compliant/Non-Compliant/Review Needed\"\n" +
                 "}\n\n" +
                 "Respond with valid JSON only. Do not add markdown backticks outside the JSON.";
 
