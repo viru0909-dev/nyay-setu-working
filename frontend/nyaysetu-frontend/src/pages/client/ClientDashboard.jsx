@@ -177,7 +177,7 @@ export default function ClientDashboard() {
                         return (
                             <button
                                 key={index}
-                                onClick={() => window.location.href = action.path}
+                                onClick={() => navigate(action.path)}
                                 style={{
                                     padding: '1rem',
                                     background: 'var(--bg-glass)',
