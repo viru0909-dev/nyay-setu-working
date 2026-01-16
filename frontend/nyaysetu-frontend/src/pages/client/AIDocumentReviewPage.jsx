@@ -48,17 +48,8 @@ export default function AIDocumentReviewPage() {
             const uploadedDoc = await uploadResponse.json();
             const documentId = uploadedDoc.id;
 
-            // Step 2: Trigger AI analysis
-            const analyzeResponse = await fetch(`${API_BASE_URL}/api/documents/${documentId}/analyze`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!analyzeResponse.ok) {
-                throw new Error('Failed to start analysis');
-            }
+            // Step 2: Skip explicit trigger (handled by backend on upload)
+            // const analyzeResponse = await fetch(`${API_BASE_URL}/api/documents/${documentId}/analyze`, { ... });
 
             // Step 3: Poll for analysis results (check every 2 seconds for up to 60 seconds)
             let attempts = 0;
@@ -85,19 +76,19 @@ export default function AIDocumentReviewPage() {
 
                             // Transform to frontend format
                             setAnalysis({
-                                score: 85, // Fixed score
+                                score: analysisData.score || 75, // Fallback to 75 if 0/null
                                 category: analysisData.suggestedCategory || 'Legal Document',
                                 summary: analysisData.summary || 'Analysis completed',
                                 completeness: {
-                                    status: 'Good',
-                                    percentage: 85,
-                                    issues: [] // No issues in fake AI
+                                    status: (analysisData.score >= 80) ? 'Excellent' : (analysisData.score >= 60) ? 'Good' : 'Needs Review',
+                                    percentage: analysisData.score || 75,
+                                    issues: []
                                 },
                                 compliance: {
-                                    status: 'Compliant',
+                                    status: analysisData.complianceStatus || 'Pending Review',
                                     checks: [
-                                        { item: 'Document structure', passed: true },
-                                        { item: 'Legal terminology', passed: true }
+                                        { item: 'Document structure', passed: (analysisData.score >= 50) },
+                                        { item: 'Legal terminology', passed: (analysisData.score >= 60) }
                                     ]
                                 },
                                 suggestions: legalPoints,
