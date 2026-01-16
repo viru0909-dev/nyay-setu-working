@@ -174,7 +174,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                         flex: 1,
                         padding: '1rem',
                         overflowY: 'auto',
-                        background: 'rgba(0,0,0,0.2)',
+                        background: 'transparent',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '1rem'
@@ -188,7 +188,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                                 <div key={idx} style={{
                                     alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
                                     maxWidth: '85%',
-                                    background: msg.role === 'user' ? 'var(--color-accent)' : 'var(--bg-card)',
+                                    background: msg.role === 'user' ? 'var(--color-accent)' : 'var(--bg-white)',
                                     color: msg.role === 'user' ? 'white' : 'var(--text-main)',
                                     padding: '0.75rem 1rem',
                                     borderRadius: '1rem',
@@ -196,14 +196,14 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                                     borderBottomLeftRadius: msg.role === 'user' ? '1rem' : '0.25rem',
                                     fontSize: '0.9rem',
                                     lineHeight: '1.5',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
                                 }}>
                                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                                 </div>
                             ))
                         )}
                         {isLoading && (
-                            <div style={{ alignSelf: 'flex-start', background: 'var(--bg-card)', padding: '0.75rem 1rem', borderRadius: '1rem', borderBottomLeftRadius: '0.25rem' }}>
+                            <div style={{ alignSelf: 'flex-start', background: 'var(--bg-white)', padding: '0.75rem 1rem', borderRadius: '1rem', borderBottomLeftRadius: '0.25rem', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                                 <Loader2 size={16} style={{ animation: 'spin 1s linear infinite', color: 'var(--text-secondary)' }} />
                             </div>
                         )}
@@ -214,7 +214,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                     <div style={{
                         padding: '1rem',
                         borderTop: 'var(--border-glass)',
-                        background: 'var(--bg-glass)',
+                        background: 'var(--bg-glass-strong)',
                         display: 'flex',
                         gap: '0.5rem'
                     }}>
@@ -230,7 +230,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                                 padding: '0.75rem',
                                 borderRadius: '0.5rem',
                                 border: 'var(--border-glass)',
-                                background: 'rgba(255,255,255,0.05)',
+                                background: 'var(--bg-white)',
                                 color: 'var(--text-main)',
                                 outline: 'none'
                             }}
