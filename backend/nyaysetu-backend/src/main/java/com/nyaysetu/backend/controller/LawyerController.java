@@ -47,6 +47,17 @@ public class LawyerController {
         return ResponseEntity.ok(Map.of("draft", draft));
     }
 
+    @PostMapping("/draft/save")
+    public ResponseEntity<Void> saveDraft(
+            @RequestBody Map<String, String> request,
+            Authentication authentication
+    ) {
+        UUID caseId = UUID.fromString(request.get("caseId"));
+        String draft = request.get("draft");
+        lawyerService.saveDraft(caseId, draft);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/cases")
     public ResponseEntity<List<CaseDTO>> getMyCases(Authentication authentication) {
         User lawyer = authService.findByEmail(authentication.getName());

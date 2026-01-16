@@ -58,6 +58,9 @@ public class CaseEntity {
     private String aiGeneratedSummary;
 
     @Column(columnDefinition = "TEXT")
+    private String draftPetition;
+
+    @Column(columnDefinition = "TEXT")
     private String judgeSummaryJson;
 
     @Column(columnDefinition = "TEXT")

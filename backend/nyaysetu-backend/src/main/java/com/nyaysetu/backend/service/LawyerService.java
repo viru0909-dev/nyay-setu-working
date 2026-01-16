@@ -50,6 +50,13 @@ public class LawyerService {
         return aiService.chat(prompt);
     }
 
+    public void saveDraft(UUID caseId, String draftContent) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+        caseEntity.setDraftPetition(draftContent);
+        caseRepository.save(caseEntity);
+    }
+
     public Map<String, Object> getLawyerStats(User lawyer) {
         long totalCases = caseRepository.countByLawyer(lawyer);
         long activeClients = caseRepository.findByLawyer(lawyer).stream()

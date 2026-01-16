@@ -155,6 +155,7 @@ export const lawyerAPI = {
     getClients: () => api.get('/api/lawyer/clients'),
     getStats: () => api.get('/api/lawyer/stats'),
     generateDraft: (caseId, template) => api.post('/api/lawyer/draft', { caseId, template }),
+    saveDraft: (caseId, draft) => api.post('/api/lawyer/draft/save', { caseId, draft }),
 };
 
 // Central Brain API
