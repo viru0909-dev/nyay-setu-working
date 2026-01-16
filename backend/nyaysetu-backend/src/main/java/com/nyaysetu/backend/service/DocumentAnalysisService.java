@@ -120,6 +120,8 @@ public class DocumentAnalysisService {
                 .caseLawSuggestions(getJsonArrayOrConvert(data, "caseLawSuggestions"))
                 .suggestedCategory(getJsonString(data, "suggestedCategory"))
                 .riskAssessment(getJsonString(data, "riskAssessment"))
+                .score(getJsonInteger(data, "score"))
+                .complianceStatus(getJsonString(data, "complianceStatus"))
                 .fullAnalysisJson(cleanJson)
                 .analyzedAt(LocalDateTime.now())
                 .analysisSuccess(true)
@@ -203,5 +205,18 @@ public class DocumentAnalysisService {
             return "[]";
         }
         return gson.toJson(array);
+    }
+    
+    /**
+     * Helper: Get integer from JSON object
+     */
+    private Integer getJsonInteger(JsonObject obj, String key) {
+        try {
+            return obj.has(key) && !obj.get(key).isJsonNull() 
+                ? obj.get(key).getAsInt() 
+                : 0;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }
