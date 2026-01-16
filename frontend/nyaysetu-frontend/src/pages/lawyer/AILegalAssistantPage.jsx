@@ -197,7 +197,7 @@ export default function AILegalAssistantPage() {
                 {/* Sidebar Column */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div style={{ ...glassStyle, padding: '1.25rem' }}>
-                        <h3 style={{ color: 'white', fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: '700' }}>Quick Actions</h3>
+                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: '700' }}>Quick Actions</h3>
                         <div style={{ display: 'grid', gap: '0.75rem' }}>
                             {researchTools.map((tool, i) => (
                                 <button key={i} style={{
