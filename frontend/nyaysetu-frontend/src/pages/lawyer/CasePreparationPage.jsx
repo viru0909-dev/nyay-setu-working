@@ -25,6 +25,8 @@ export default function CasePreparationPage() {
     const [isDrafting, setIsDrafting] = useState(false);
     const [cases, setCases] = useState([]);
 
+    const [isSaving, setIsSaving] = useState(false);
+
     useEffect(() => {
         if (selectedCaseId) {
             fetchCaseDetails(selectedCaseId);
@@ -45,6 +47,10 @@ export default function CasePreparationPage() {
         try {
             const response = await caseAPI.getById(id);
             setCaseDetails(response.data);
+            if (response.data.draftPetition) {
+                setDraftContent(response.data.draftPetition);
+                // Try to infer template from content or just verify it's loaded
+            }
         } catch (error) {
             console.error('Error fetching case details:', error);
         }
@@ -76,12 +82,46 @@ export default function CasePreparationPage() {
         try {
             const response = await lawyerAPI.generateDraft(selectedCaseId, selectedTemplate.name);
             setDraftContent(response.data.draft);
+            // Auto-save after generation
+            await lawyerAPI.saveDraft(selectedCaseId, response.data.draft);
         } catch (error) {
             console.error('Error generating draft:', error);
             alert('AI Drafting failed. Please try again.');
         } finally {
             setIsDrafting(false);
         }
+    };
+
+    const handleSave = async () => {
+        if (!selectedCaseId) {
+            alert('Please select a case first.');
+            return;
+        }
+        setIsSaving(true);
+        try {
+            await lawyerAPI.saveDraft(selectedCaseId, draftContent);
+            // Optional: Show toast success
+        } catch (error) {
+            console.error('Error saving draft:', error);
+            alert('Failed to save draft.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleExport = () => {
+        if (!draftContent) {
+            alert('No content to export.');
+            return;
+        }
+        const printWindow = window.open('', '', 'height=600,width=800');
+        printWindow.document.write('<html><head><title>Legal Draft</title>');
+        printWindow.document.write('<style>body { font-family: "Times New Roman", Times, serif; padding: 40px; line-height: 1.6; white-space: pre-wrap; }</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(draftContent);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
     };
 
     return (
@@ -240,21 +280,27 @@ export default function CasePreparationPage() {
                                 {isDrafting ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />}
                                 {isDrafting ? 'Drafting...' : 'AI Auto-Draft'}
                             </button>
-                            <button style={{
-                                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                background: 'var(--bg-glass)', color: 'var(--text-main)', border: 'var(--border-glass)',
-                                padding: '0.6rem 1rem', borderRadius: '0.75rem', fontWeight: '700',
-                                fontSize: '0.85rem', cursor: 'pointer'
-                            }}>
-                                <Save size={16} /> Save
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving || !selectedCaseId}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                    background: 'var(--bg-glass)', color: 'var(--text-main)', border: 'var(--border-glass)',
+                                    padding: '0.6rem 1rem', borderRadius: '0.75rem', fontWeight: '700',
+                                    fontSize: '0.85rem', cursor: (isSaving || !selectedCaseId) ? 'not-allowed' : 'pointer'
+                                }}>
+                                {isSaving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
+                                {isSaving ? 'Saving...' : 'Save'}
                             </button>
-                            <button style={{
-                                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                background: 'var(--color-accent)',
-                                color: 'var(--text-main)', border: 'none',
-                                padding: '0.6rem 1rem', borderRadius: '0.75rem', fontWeight: '700',
-                                fontSize: '0.85rem', cursor: 'pointer'
-                            }}>
+                            <button
+                                onClick={handleExport}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                    background: 'var(--color-accent)',
+                                    color: 'var(--text-main)', border: 'none',
+                                    padding: '0.6rem 1rem', borderRadius: '0.75rem', fontWeight: '700',
+                                    fontSize: '0.85rem', cursor: 'pointer'
+                                }}>
                                 <Download size={16} /> Export
                             </button>
                         </div>

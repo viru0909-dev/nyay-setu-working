@@ -23,4 +23,5 @@ public class CaseDTO {
     private String clientName;
     private int documentsCount;
     private String lawyerProposalStatus;
+    private String draftPetition;
 }
