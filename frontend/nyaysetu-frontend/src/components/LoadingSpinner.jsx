@@ -44,7 +44,7 @@ export default function LoadingSpinner({ size = 'medium', fullScreen = false, me
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'rgba(15, 23, 42, 0.95)',
+                background: 'var(--bg-glass-strong)',
                 backdropFilter: 'blur(10px)',
                 display: 'flex',
                 alignItems: 'center',
@@ -66,15 +66,15 @@ export function SkeletonLoader({ type = 'card', count = 1 }) {
     const cardSkeleton = (
         <div style={{
             padding: '2rem',
-            background: 'rgba(30, 41, 59, 0.6)',
+            background: 'var(--bg-glass)',
             borderRadius: '1.5rem',
-            border: '1px solid rgba(139, 92, 246, 0.2)'
+            border: 'var(--border-glass)'
         }}>
             {/* Icon placeholder */}
             <div style={{
                 width: '60px',
                 height: '60px',
-                background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(139, 92, 246, 0.1) 100%)',
+                background: 'linear-gradient(90deg, rgba(203, 213, 225, 0.4) 0%, rgba(203, 213, 225, 0.6) 50%, rgba(203, 213, 225, 0.4) 100%)',
                 backgroundSize: '200% 100%',
                 animation: 'shimmer 1.5s infinite',
                 borderRadius: '1rem',
@@ -85,7 +85,7 @@ export function SkeletonLoader({ type = 'card', count = 1 }) {
             <div style={{
                 width: '70%',
                 height: '24px',
-                background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(139, 92, 246, 0.1) 100%)',
+                background: 'linear-gradient(90deg, rgba(203, 213, 225, 0.4) 0%, rgba(203, 213, 225, 0.6) 50%, rgba(203, 213, 225, 0.4) 100%)',
                 backgroundSize: '200% 100%',
                 animation: 'shimmer 1.5s infinite',
                 borderRadius: '0.5rem',
@@ -96,7 +96,7 @@ export function SkeletonLoader({ type = 'card', count = 1 }) {
             <div style={{
                 width: '100%',
                 height: '16px',
-                background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(139, 92, 246, 0.1) 100%)',
+                background: 'linear-gradient(90deg, rgba(203, 213, 225, 0.4) 0%, rgba(203, 213, 225, 0.6) 50%, rgba(203, 213, 225, 0.4) 100%)',
                 backgroundSize: '200% 100%',
                 animation: 'shimmer 1.5s infinite',
                 borderRadius: '0.5rem',
@@ -105,7 +105,7 @@ export function SkeletonLoader({ type = 'card', count = 1 }) {
             <div style={{
                 width: '85%',
                 height: '16px',
-                background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(139, 92, 246, 0.1) 100%)',
+                background: 'linear-gradient(90deg, rgba(203, 213, 225, 0.4) 0%, rgba(203, 213, 225, 0.6) 50%, rgba(203, 213, 225, 0.4) 100%)',
                 backgroundSize: '200% 100%',
                 animation: 'shimmer 1.5s infinite',
                 borderRadius: '0.5rem'
