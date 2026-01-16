@@ -357,5 +357,3 @@ Proprietary software. All rights reserved.
 
 ---
 *Built with ❤️ for a more accessible Indian Judiciary.*
-
-*Last Updated: December 20 2025*
