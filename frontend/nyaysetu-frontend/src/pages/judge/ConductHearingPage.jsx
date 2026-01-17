@@ -232,7 +232,7 @@ export default function ConductHearingPage() {
                             Conduct Hearing
                         </h1>
                         <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
-                            Today's virtual court sessions • SECURE-SYNC Enabled
+                            Upcoming virtual court sessions (Next 7 Days) • SECURE-SYNC Enabled
                         </p>
                     </div>
                 </div>
