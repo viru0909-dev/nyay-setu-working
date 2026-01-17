@@ -143,7 +143,6 @@ function App() {
                             >
                                 <Route index element={<JudgeDashboard />} />
                                 <Route path="pending" element={<PendingCasesPage />} />
-                                <Route path="assign" element={<PendingCasesPage />} />
                                 <Route path="conduct" element={<ConductHearingPage />} />
                                 <Route path="evidence" element={<EvidenceReviewPage />} />
                                 <Route path="orders" element={<DraftOrdersPage />} />
