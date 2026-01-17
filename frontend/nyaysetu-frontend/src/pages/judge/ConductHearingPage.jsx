@@ -8,7 +8,7 @@ import {
     VideoOff,
     Phone,
     Clock,
-    MessageSquare,
+    MessageCircle,
     Loader2,
     ArrowLeft,
     Monitor,
@@ -28,9 +28,15 @@ export default function ConductHearingPage() {
     const fetchTodaysHearings = async () => {
         try {
             const response = await judgeAPI.getTodaysHearings();
-            setHearings(response.data || []);
+            if (Array.isArray(response.data)) {
+                setHearings(response.data);
+            } else {
+                console.error('Invalid hearings data:', response.data);
+                setHearings([]);
+            }
         } catch (error) {
             console.error('Error fetching hearings:', error);
+            setHearings([]);
         } finally {
             setLoading(false);
         }
@@ -247,7 +253,7 @@ export default function ConductHearingPage() {
                         transition: 'all 0.2s'
                     }}
                 >
-                    <MessageSquare size={18} />
+                    <MessageCircle size={18} />
                     {showAiScheduler ? 'Close Assistant' : 'AI Scheduler'}
                 </button>
             </div>
@@ -295,7 +301,7 @@ export default function ConductHearingPage() {
                                 </>
                             ) : (
                                 <>
-                                    <MessageSquare size={20} />
+                                    <MessageCircle size={20} />
                                     Process Request
                                 </>
                             )}
