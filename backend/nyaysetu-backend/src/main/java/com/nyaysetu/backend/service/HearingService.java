@@ -112,7 +112,16 @@ public class HearingService {
             return java.util.Collections.emptyList();
         }
         
-        List<CaseEntity> userCases = caseRepository.findByClient(user);
+        List<CaseEntity> userCases = new java.util.ArrayList<>();
+        
+        if (user.getRole() == Role.CLIENT) {
+            userCases = caseRepository.findByClient(user);
+        } else if (user.getRole() == Role.LAWYER) {
+            userCases = caseRepository.findByLawyer(user);
+        } else if (user.getRole() == Role.JUDGE) {
+            userCases = caseRepository.findByAssignedJudge(user.getName());
+        }
+        
         if (userCases.isEmpty()) {
             return java.util.Collections.emptyList();
         }
