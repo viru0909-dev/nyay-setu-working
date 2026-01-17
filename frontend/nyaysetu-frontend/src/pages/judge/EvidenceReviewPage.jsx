@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { judgeAPI } from '../../services/api';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/apiConfig';
 import {
     Shield,
     CheckCircle2,
@@ -50,7 +51,7 @@ export default function EvidenceReviewPage() {
     const fetchEvidence = async (caseId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:8080/api/evidence/case/${caseId}`, {
+            const response = await axios.get(`${API_BASE_URL}/api/evidence/case/${caseId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEvidence(response.data.evidence || []);
@@ -68,7 +69,7 @@ export default function EvidenceReviewPage() {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(
-                `http://localhost:8080/api/evidence/case/${selectedCase}/verify-chain`,
+                `${API_BASE_URL}/api/evidence/case/${selectedCase}/verify-chain`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setChainStatus(response.data);
@@ -84,7 +85,7 @@ export default function EvidenceReviewPage() {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(
-                `http://localhost:8080/api/evidence/${evidenceId}/verify`,
+                `${API_BASE_URL}/api/evidence/${evidenceId}/verify`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             alert(response.data.isValid

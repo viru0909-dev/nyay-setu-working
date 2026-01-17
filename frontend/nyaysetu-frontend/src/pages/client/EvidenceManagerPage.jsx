@@ -4,6 +4,7 @@ import {
     Lock, Link2, Eye, Download, Loader, RefreshCw, ChevronDown
 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function EvidenceManagerPage() {
     const [cases, setCases] = useState([]);
@@ -33,7 +34,6 @@ export default function EvidenceManagerPage() {
     const fetchCases = async () => {
         try {
             const token = localStorage.getItem('token');
-            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
             const response = await axios.get(`${API_BASE_URL}/api/cases`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -47,7 +47,6 @@ export default function EvidenceManagerPage() {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
             const response = await axios.get(`${API_BASE_URL}/api/evidence/case/${caseId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -76,9 +75,9 @@ export default function EvidenceManagerPage() {
             formData.append('description', uploadDescription);
             formData.append('evidenceType', uploadType);
 
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+            const API_BASE_URL_LOCAL = API_BASE_URL;
 
-            await axios.post(`${API_BASE_URL}/api/evidence/upload`, formData, {
+            await axios.post(`${API_BASE_URL_LOCAL}/api/evidence/upload`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -104,7 +103,6 @@ export default function EvidenceManagerPage() {
         setVerifying(true);
         try {
             const token = localStorage.getItem('token');
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
             const response = await axios.get(
                 `${API_BASE_URL}/api/evidence/case/${selectedCase}/verify-chain`,
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -120,7 +118,6 @@ export default function EvidenceManagerPage() {
     const verifySingle = async (evidenceId) => {
         try {
             const token = localStorage.getItem('token');
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
             const response = await axios.get(
                 `${API_BASE_URL}/api/evidence/${evidenceId}/verify`,
                 { headers: { Authorization: `Bearer ${token}` } }

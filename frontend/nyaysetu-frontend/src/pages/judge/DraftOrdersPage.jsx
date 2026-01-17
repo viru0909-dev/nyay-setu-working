@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { judgeAPI } from '../../services/api';
+import { API_BASE_URL } from '../../config/apiConfig';
 import {
     FileText,
     Download,
@@ -50,7 +51,7 @@ export default function DraftOrdersPage() {
     const fetchOrders = async (caseId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:8080/api/orders/case/${caseId}`, {
+            const response = await axios.get(`${API_BASE_URL}/api/orders/case/${caseId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setOrders(response.data || []);
@@ -69,7 +70,7 @@ export default function DraftOrdersPage() {
         setSaving(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:8080/api/orders', {
+            await axios.post(`${API_BASE_URL}/api/orders`, {
                 caseId: selectedCase,
                 ...draftContent
             }, {
