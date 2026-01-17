@@ -159,11 +159,11 @@ export default function LawyerHearingsPage() {
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 {hearing.type === 'Virtual' ? (
                                     <button style={{
-                                        background: 'var(--color-primary)',
-                                        color: 'var(--text-main)', border: 'none', borderRadius: '0.75rem',
+                                        background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
+                                        color: 'white', border: 'none', borderRadius: '0.75rem',
                                         padding: '0.6rem 1.25rem', fontWeight: '700', fontSize: '0.85rem',
                                         cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                        boxShadow: 'var(--shadow-primary)'
+                                        boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
                                     }}>
                                         <Video size={16} /> Join Room
                                     </button>
@@ -208,13 +208,21 @@ export default function LawyerHearingsPage() {
                                 <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Today's Sessions</span>
                                 <span style={{ color: 'white', fontWeight: '700' }}>2</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                                <Loader2 size={48} className="spin" style={{ color: 'var(--color-primary)' }} />
-                                <style>{`
-                    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                    .spin { animation: spin 1s linear infinite; }
-                `}</style>
-                            </div>
+                            {hearings.filter(h => h.date !== 'TBD' && new Date(h.date).toDateString() === new Date().toDateString()).length === 0 ? (
+                                <div style={{ padding: '2rem 0', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>
+                                    No hearings today
+                                </div>
+                            ) : (
+                                <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {hearings.filter(h => h.date !== 'TBD' && new Date(h.date).toDateString() === new Date().toDateString()).map(h => (
+                                        <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: '#e2e8f0' }}>
+                                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80' }}></div>
+                                            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.caseTitle}</span>
+                                            <span style={{ color: '#94a3b8' }}>{h.time}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
