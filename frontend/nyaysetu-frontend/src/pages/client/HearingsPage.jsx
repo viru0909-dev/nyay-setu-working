@@ -12,7 +12,7 @@ import {
     CheckCircle2,
     AlertCircle
 } from 'lucide-react';
-import axios from 'axios';
+import { hearingAPI } from '../../services/api';
 
 export default function HearingsPage() {
     const [hearings, setHearings] = useState([]);
@@ -25,11 +25,7 @@ export default function HearingsPage() {
 
     const fetchHearings = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-            const response = await axios.get(`${API_BASE_URL}/api/hearings/my`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await hearingAPI.getMyHearings();
 
             // Sort hearings: Upcoming first, then by date
             const sortedHearings = (response.data || []).sort((a, b) =>
