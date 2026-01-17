@@ -1,19 +1,29 @@
+import axios from 'axios';
+
 class NotificationService {
     constructor() {
         this.ws = null;
         this.listeners = [];
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
+        this.API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
     }
 
+    /**
+     * Connects to the WebSocket for real-time notifications
+     */
     connect(token) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             return; // Already connected
         }
 
-        const wsUrl = `ws://localhost:8080/api/ws/notifications?token=${token}`;
+        // Use standard WebSocket URL
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = new URL(this.API_BASE_URL).host;
+        const wsUrl = `${protocol}//${host}/api/ws/notifications?token=${token}`;
 
         try {
+            console.log('Connecting to WebSocket:', wsUrl);
             this.ws = new WebSocket(wsUrl);
 
             this.ws.onopen = () => {
@@ -31,7 +41,7 @@ class NotificationService {
             };
 
             this.ws.onerror = (error) => {
-                console.error(' WebSocket error:', error);
+                console.error('WebSocket error:', error);
             };
 
             this.ws.onclose = () => {
@@ -43,6 +53,9 @@ class NotificationService {
         }
     }
 
+    /**
+     * Reconnection logic with exponential backoff
+     */
     attemptReconnect(token) {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
@@ -81,11 +94,35 @@ class NotificationService {
         this.reconnectAttempts = 0;
     }
 
-    send(data) {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(data));
-        } else {
-            console.warn('WebSocket not connected');
+    // --- REST API Methods ---
+
+    /**
+     * Fetch past notifications for the user
+     */
+    async fetchNotifications(userId) {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${this.API_BASE_URL}/api/notifications/user/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Mark a notification as read
+     */
+    async markRead(id) {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${this.API_BASE_URL}/api/notifications/${id}/read`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch (error) {
+            console.error('Failed to mark notification as read:', error);
         }
     }
 }
