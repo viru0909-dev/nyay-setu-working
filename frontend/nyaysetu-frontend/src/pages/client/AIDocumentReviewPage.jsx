@@ -3,6 +3,7 @@ import {
     Upload, Brain, CheckCircle2, AlertCircle, Info,
     FileText, Loader, Sparkles, TrendingUp, X, Download
 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function AIDocumentReviewPage() {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -30,8 +31,6 @@ export default function AIDocumentReviewPage() {
             formData.append('file', selectedFile);
             formData.append('category', 'LEGAL_DOCUMENTS');
             formData.append('description', 'AI Analysis Document');
-
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
             const uploadResponse = await fetch(`${API_BASE_URL}/api/documents/upload`, {
                 method: 'POST',

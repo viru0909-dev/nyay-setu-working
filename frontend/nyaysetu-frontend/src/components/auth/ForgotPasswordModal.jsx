@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Mail, Loader2, CheckCircle, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../../styles/Biometrics.css';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function ForgotPasswordModal({ isOpen, onClose }) {
     const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:8080/api/auth/forgot-password', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
