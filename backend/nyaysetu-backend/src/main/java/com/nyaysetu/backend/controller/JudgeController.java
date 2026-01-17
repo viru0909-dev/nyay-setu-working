@@ -106,7 +106,7 @@ public class JudgeController {
             User judge = authService.findByEmail(authentication.getName());
             String judgeName = judge.getName();
             LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-            LocalDateTime endOfDay = startOfDay.plusDays(1);
+            LocalDateTime endOfDay = startOfDay.plusDays(7);
             
             List<Hearing> allHearings = hearingRepository.findByScheduledDateBetween(startOfDay, endOfDay);
             
