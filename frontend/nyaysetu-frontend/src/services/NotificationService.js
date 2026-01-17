@@ -1,34 +1,58 @@
 import axios from 'axios';
 
+// Inline API base URL detection (same logic as apiConfig.js)
+const PROD_BACKEND = 'https://nyaysetubackend.onrender.com';
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_API_URL ||
+    (isLocalhost ? 'http://localhost:8080' : PROD_BACKEND);
+
 class NotificationService {
     constructor() {
         this.ws = null;
         this.listeners = [];
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 5;
-        this.API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+        this.maxReconnectAttempts = 3;
+        this.API_BASE_URL = API_BASE_URL;
+        this.isConnecting = false;
+        this.connectionFailed = false;
     }
 
     /**
      * Connects to the WebSocket for real-time notifications
+     * Silently fails if WebSocket is not available
      */
     connect(token) {
+        // Skip if already connected, connecting, or permanently failed
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            return; // Already connected
+            return;
+        }
+        if (this.isConnecting || this.connectionFailed) {
+            return;
         }
 
-        // Use standard WebSocket URL
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = new URL(this.API_BASE_URL).host;
-        const wsUrl = `${protocol}//${host}/api/ws/notifications?token=${token}`;
+        const isProduction = !isLocalhost;
 
         try {
-            console.log('Connecting to WebSocket:', wsUrl);
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = new URL(this.API_BASE_URL).host;
+            const wsUrl = `${protocol}//${host}/api/ws/notifications?token=${token}`;
+
+            this.isConnecting = true;
+
+            // Only log in development
+            if (!isProduction) {
+                console.log('Connecting to WebSocket:', wsUrl);
+            }
+
             this.ws = new WebSocket(wsUrl);
 
             this.ws.onopen = () => {
-                console.log('✅ WebSocket connected');
+                if (!isProduction) {
+                    console.log('✅ WebSocket connected');
+                }
                 this.reconnectAttempts = 0;
+                this.isConnecting = false;
             };
 
             this.ws.onmessage = (event) => {
@@ -36,20 +60,25 @@ class NotificationService {
                     const notification = JSON.parse(event.data);
                     this.notifyListeners(notification);
                 } catch (error) {
-                    console.error('Failed to parse notification:', error);
+                    // Silent fail on parse errors
                 }
             };
 
-            this.ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
+            this.ws.onerror = () => {
+                // Suppress error logs
+                this.isConnecting = false;
             };
 
             this.ws.onclose = () => {
-                console.log('WebSocket disconnected');
-                this.attemptReconnect(token);
+                this.isConnecting = false;
+                if (!this.connectionFailed) {
+                    this.attemptReconnect(token);
+                }
             };
         } catch (error) {
-            console.error('Failed to create WebSocket:', error);
+            // Silent fail
+            this.isConnecting = false;
+            this.connectionFailed = true;
         }
     }
 
@@ -60,11 +89,13 @@ class NotificationService {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
             const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-            console.log(`Reconnecting in ${delay}ms... (attempt ${this.reconnectAttempts})`);
 
             setTimeout(() => {
                 this.connect(token);
             }, delay);
+        } else {
+            // Stop trying after max attempts
+            this.connectionFailed = true;
         }
     }
 
@@ -80,7 +111,7 @@ class NotificationService {
             try {
                 callback(notification);
             } catch (error) {
-                console.error('Listener error:', error);
+                // Silent fail
             }
         });
     }
@@ -92,13 +123,12 @@ class NotificationService {
         }
         this.listeners = [];
         this.reconnectAttempts = 0;
+        this.isConnecting = false;
+        this.connectionFailed = false;
     }
 
     // --- REST API Methods ---
 
-    /**
-     * Fetch past notifications for the user
-     */
     async fetchNotifications(userId) {
         try {
             const token = localStorage.getItem('token');
@@ -107,14 +137,10 @@ class NotificationService {
             });
             return response.data;
         } catch (error) {
-            console.error('Failed to fetch notifications:', error);
             return [];
         }
     }
 
-    /**
-     * Mark a notification as read
-     */
     async markRead(id) {
         try {
             const token = localStorage.getItem('token');
@@ -122,7 +148,7 @@ class NotificationService {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch (error) {
-            console.error('Failed to mark notification as read:', error);
+            // Silent fail
         }
     }
 }
