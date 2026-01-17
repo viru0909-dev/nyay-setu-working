@@ -20,6 +20,27 @@ export default function ConductHearingPage() {
     const [activeHearing, setActiveHearing] = useState(null);
     const [loading, setLoading] = useState(true);
     const [inCall, setInCall] = useState(false);
+    const [aiPrompt, setAiPrompt] = useState('');
+    const [aiLoading, setAiLoading] = useState(false);
+    const [showAiScheduler, setShowAiScheduler] = useState(false);
+
+    const handleAiSchedule = async (e) => {
+        e.preventDefault();
+        if (!aiPrompt.trim()) return;
+
+        setAiLoading(true);
+        try {
+            await judgeAPI.scheduleHearingAI(aiPrompt);
+            setAiPrompt('');
+            setShowAiScheduler(false);
+            fetchTodaysHearings(); // Refresh list
+        } catch (error) {
+            console.error('Error scheduling hearing:', error);
+            alert('Failed to schedule hearing. Please try again.');
+        } finally {
+            setAiLoading(false);
+        }
+    };
 
     useEffect(() => {
         fetchTodaysHearings();
@@ -190,28 +211,7 @@ export default function ConductHearingPage() {
         );
     }
 
-    const [aiPrompt, setAiPrompt] = useState('');
-    const [aiLoading, setAiLoading] = useState(false);
-    const [showAiScheduler, setShowAiScheduler] = useState(false);
 
-    const handleAiSchedule = async (e) => {
-        e.preventDefault();
-        if (!aiPrompt.trim()) return;
-
-        setAiLoading(true);
-        try {
-            await judgeAPI.scheduleHearingAI(aiPrompt);
-            setAiPrompt('');
-            setShowAiScheduler(false);
-            fetchTodaysHearings(); // Refresh list
-            // Ideally show success toast
-        } catch (error) {
-            console.error('Error scheduling hearing:', error);
-            alert('Failed to schedule hearing. Please try again.');
-        } finally {
-            setAiLoading(false);
-        }
-    };
 
     // Hearings List View
     return (
