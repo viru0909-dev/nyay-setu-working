@@ -24,6 +24,7 @@ public class JudgeController {
 
     private final CaseRepository caseRepository;
     private final HearingRepository hearingRepository;
+    private final com.nyaysetu.backend.service.HearingService hearingService;
     private final AuthService authService;
     private final UserRepository userRepository;
     private final DocumentRepository documentRepository;
@@ -347,6 +348,72 @@ public class JudgeController {
         } catch (Exception e) {
             log.error("Error claiming case", e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    /**
+     * AI-Assisted Hearing Scheduling
+     * Parses natural language request to schedule a hearing
+     */
+    @PostMapping("/hearings/schedule-ai")
+    public ResponseEntity<?> scheduleHearingAI(
+            @RequestBody Map<String, String> request,
+            Authentication authentication
+    ) {
+        try {
+            String prompt = request.get("prompt");
+            if (prompt == null || prompt.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Prompt is required"));
+            }
+
+            User judge = authService.findByEmail(authentication.getName());
+            List<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName());
+
+            if (judgeCases.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "No cases assigned to you"));
+            }
+
+            // Build context for AI
+            StringBuilder context = new StringBuilder();
+            context.append("You are a legal assistant scheduling hearings. Parse the user's request into specific hearing details.\n");
+            context.append("Current Date: ").append(LocalDateTime.now()).append("\n");
+            context.append("Available Cases for this Judge:\n");
+            
+            for (CaseEntity c : judgeCases) {
+                context.append(String.format("- ID: %s, Title: %s\n", c.getId(), c.getTitle()));
+            }
+
+            context.append("\nUser Request: ").append(prompt);
+            context.append("\n\nRespond ONLY in this JSON format (no markdown):\n");
+            context.append("{\n");
+            context.append("  \"caseId\": \"UUID of the matching case\",\n");
+            context.append("  \"scheduledDate\": \"YYYY-MM-DDTHH:mm:ss (ISO 8601)\",\n");
+            context.append("  \"durationMinutes\": 30\n");
+            context.append("}");
+
+            String aiResponse = groqService.chatWithAI(context.toString());
+            
+            // Clean response
+            String jsonStr = aiResponse.replaceAll("```json", "").replaceAll("```", "").trim();
+            
+            // Parse JSON
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(jsonStr);
+            
+            UUID caseId = UUID.fromString(root.get("caseId").asText());
+            LocalDateTime date = LocalDateTime.parse(root.get("scheduledDate").asText());
+            int duration = root.get("durationMinutes").asInt(60);
+            
+            // Schedule the hearing
+            Hearing hearing = hearingService.scheduleHearing(caseId, date, duration);
+            
+            return ResponseEntity.ok(Map.of(
+                "message", "Hearing scheduled successfully via AI",
+                "hearing", hearing
+            ));
+
+        } catch (Exception e) {
+            log.error("Error in AI scheduling", e);
+            return ResponseEntity.badRequest().body(Map.of("error", "Failed to schedule: " + e.getMessage()));
         }
     }
 }
