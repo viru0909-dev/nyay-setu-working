@@ -55,15 +55,15 @@
 
     /* Typography scaling */
     h1 {
-        font-size: clamp(2rem, 8vw, 3rem) !important;
+        font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
     }
 
     h2 {
-        font-size: clamp(1.75rem, 6vw, 2.5rem) !important;
+        font-size: clamp(1.25rem, 5vw, 2rem) !important;
     }
 
     h3 {
-        font-size: clamp(1.25rem, 4vw, 1.75rem) !important;
+        font-size: clamp(1.1rem, 4vw, 1.5rem) !important;
     }
 
     /* Padding adjustments */
@@ -84,6 +84,114 @@
     /* About page */
     .about-grid {
         grid-template-columns: 1fr !important;
+    }
+
+    /* ===== DASHBOARD MOBILE STYLES ===== */
+
+    /* Dashboard cards - full width on mobile */
+    .card {
+        padding: 1rem !important;
+    }
+
+    /* Dashboard stat cards grid */
+    div[style*="grid-template-columns: repeat(4"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    div[style*="grid-template-columns: repeat(3"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    div[style*="grid-template-columns: repeat(2"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Improve touch targets - minimum 44px */
+    button,
+    a,
+    [role="button"] {
+        min-height: 44px;
+    }
+
+    /* Tables - horizontal scroll on mobile */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    /* Forms - full width inputs */
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+        /* Prevents iOS zoom */
+    }
+
+    /* Flex layouts that should stack */
+    div[style*="display: flex"][style*="gap"] {
+        flex-wrap: wrap !important;
+    }
+
+    /* Wide cards/containers - prevent overflow */
+    div[style*="max-width: 1200px"],
+    div[style*="max-width: 1000px"] {
+        max-width: 100% !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    /* ===== AUTH PAGES MOBILE STYLES (Login/Signup) ===== */
+
+    /* Main grid container - stack vertically on mobile */
+    div[style*="gridTemplateColumns: '1fr 1fr'"],
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+    }
+
+    /* Hide left side welcome content on mobile */
+    div[style*="gridTemplateColumns: '1fr 1fr'"]>div:first-child,
+    div[style*="grid-template-columns: 1fr 1fr"]>div:first-child {
+        display: none !important;
+    }
+
+    /* Auth form container */
+    div[style*="padding: '3rem'"],
+    div[style*="padding: 3rem"] {
+        padding: 1.5rem !important;
+        border-radius: 1rem !important;
+    }
+
+    /* Role selection grid on auth pages */
+    div[style*="gridTemplateColumns: 'repeat(2, 1fr)'"],
+    div[style*="grid-template-columns: repeat(2, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Auth page heading sizing */
+    h1[style*="fontSize: '3.5rem'"],
+    h1[style*="font-size: 3.5rem"] {
+        font-size: 2rem !important;
+    }
+
+    h2[style*="fontSize: '2rem'"],
+    h2[style*="font-size: 2rem"] {
+        font-size: 1.5rem !important;
+    }
+
+    /* Auth page main padding */
+    div[style*="padding: '100px 2rem 2rem 2rem'"],
+    div[style*="padding: 100px 2rem 2rem 2rem"] {
+        padding: 80px 1rem 1rem 1rem !important;
+    }
+
+    /* Decorative blobs - hide on mobile */
+    div[style*="position: 'absolute'"][style*="width: '800px'"],
+    div[style*="position: 'absolute'"][style*="width: '600px'"],
+    div[style*="position: absolute"][style*="width: 800px"],
+    div[style*="position: absolute"][style*="width: 600px"] {
+        display: none !important;
     }
 }
 
