@@ -147,6 +147,7 @@ export const judgeAPI = {
     getAnalytics: () => api.get('/api/judge/analytics'),
     aiChat: (message, caseId) => api.post('/api/judge/ai-chat', { message, caseId }),
     getAICaseSummary: (caseId) => api.get(`/api/judge/case/${caseId}/ai-summary`),
+    scheduleHearingAI: (prompt) => api.post('/api/judge/hearings/schedule-ai', { prompt }),
 };
 
 // Lawyer API - Case and client management for lawyers

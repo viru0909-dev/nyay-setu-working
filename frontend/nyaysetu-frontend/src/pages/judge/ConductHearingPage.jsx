@@ -8,7 +8,7 @@ import {
     VideoOff,
     Phone,
     Clock,
-    MessageSquare,
+    MessageCircle,
     Loader2,
     ArrowLeft,
     Monitor,
@@ -20,6 +20,27 @@ export default function ConductHearingPage() {
     const [activeHearing, setActiveHearing] = useState(null);
     const [loading, setLoading] = useState(true);
     const [inCall, setInCall] = useState(false);
+    const [aiPrompt, setAiPrompt] = useState('');
+    const [aiLoading, setAiLoading] = useState(false);
+    const [showAiScheduler, setShowAiScheduler] = useState(false);
+
+    const handleAiSchedule = async (e) => {
+        e.preventDefault();
+        if (!aiPrompt.trim()) return;
+
+        setAiLoading(true);
+        try {
+            await judgeAPI.scheduleHearingAI(aiPrompt);
+            setAiPrompt('');
+            setShowAiScheduler(false);
+            fetchTodaysHearings(); // Refresh list
+        } catch (error) {
+            console.error('Error scheduling hearing:', error);
+            alert('Failed to schedule hearing. Please try again.');
+        } finally {
+            setAiLoading(false);
+        }
+    };
 
     useEffect(() => {
         fetchTodaysHearings();
@@ -28,9 +49,15 @@ export default function ConductHearingPage() {
     const fetchTodaysHearings = async () => {
         try {
             const response = await judgeAPI.getTodaysHearings();
-            setHearings(response.data || []);
+            if (Array.isArray(response.data)) {
+                setHearings(response.data);
+            } else {
+                console.error('Invalid hearings data:', response.data);
+                setHearings([]);
+            }
         } catch (error) {
             console.error('Error fetching hearings:', error);
+            setHearings([]);
         } finally {
             setLoading(false);
         }
@@ -184,11 +211,13 @@ export default function ConductHearingPage() {
         );
     }
 
+
+
     // Hearings List View
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             {/* Header */}
-            <div style={{ marginBottom: '2.5rem' }}>
+            <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
                     <div style={{
                         width: '56px', height: '56px', borderRadius: '14px',
@@ -203,11 +232,86 @@ export default function ConductHearingPage() {
                             Conduct Hearing
                         </h1>
                         <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
-                            Today's virtual court sessions • SECURE-SYNC Enabled
+                            Upcoming virtual court sessions (Next 7 Days) • SECURE-SYNC Enabled
                         </p>
                     </div>
                 </div>
+
+                <button
+                    onClick={() => setShowAiScheduler(!showAiScheduler)}
+                    style={{
+                        padding: '0.75rem 1.5rem',
+                        background: showAiScheduler ? 'var(--bg-glass)' : 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+                        border: showAiScheduler ? '1px solid var(--border-glass)' : 'none',
+                        borderRadius: '0.75rem',
+                        color: showAiScheduler ? 'var(--text-main)' : 'white',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    <MessageCircle size={18} />
+                    {showAiScheduler ? 'Close Assistant' : 'AI Scheduler'}
+                </button>
             </div>
+
+            {/* AI Scheduler Section */}
+            {showAiScheduler && (
+                <div style={{ ...glassStyle, marginBottom: '2rem', animation: 'slideDown 0.3s ease-out' }}>
+                    <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
+                        <span style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                            AI Judicial Assistant
+                        </span>
+                    </h3>
+                    <form onSubmit={handleAiSchedule} style={{ display: 'flex', gap: '1rem' }}>
+                        <input
+                            type="text"
+                            value={aiPrompt}
+                            onChange={(e) => setAiPrompt(e.target.value)}
+                            placeholder="e.g., Schedule a hearing for case 101 next Friday at 10 AM for 45 minutes..."
+                            style={{
+                                flex: 1,
+                                padding: '1rem',
+                                borderRadius: '0.75rem',
+                                border: 'var(--border-glass)',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                color: 'var(--text-main)',
+                                fontSize: '1rem',
+                                outline: 'none'
+                            }}
+                            disabled={aiLoading}
+                        />
+                        <button
+                            type="submit"
+                            disabled={aiLoading || !aiPrompt.trim()}
+                            style={{
+                                ...primaryButtonStyle,
+                                background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+                                boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)',
+                                opacity: aiLoading || !aiPrompt.trim() ? 0.7 : 1
+                            }}
+                        >
+                            {aiLoading ? (
+                                <>
+                                    <Loader2 size={20} className="spin" />
+                                    Scheduling...
+                                </>
+                            ) : (
+                                <>
+                                    <MessageCircle size={20} />
+                                    Process Request
+                                </>
+                            )}
+                        </button>
+                    </form>
+                    <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                        * Intelligent parsing of case references, dates, and durations.
+                    </p>
+                </div>
+            )}
 
             {/* Today's Hearings List */}
             {hearings.length === 0 ? (
