@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { judgeAPI, hearingAPI } from '../../services/api';
 import {
     Clock,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 
 export default function PendingCasesPage() {
+    const navigate = useNavigate();
     const [cases, setCases] = useState([]);
     const [unassignedCases, setUnassignedCases] = useState([]);
     const [activeTab, setActiveTab] = useState('my_pending'); // 'my_pending' or 'pool'
@@ -267,11 +269,11 @@ export default function PendingCasesPage() {
 
                                     {activeTab === 'my_pending' ? (
                                         <button
-                                            onClick={() => openScheduleModal(caseItem)}
+                                            onClick={() => navigate(`/judge/case/${caseItem.id}`)}
                                             style={primaryButtonStyle}
                                         >
-                                            <Calendar size={18} />
-                                            Schedule Hearing
+                                            <FileText size={18} />
+                                            Manage Case
                                         </button>
                                     ) : (
                                         <button
