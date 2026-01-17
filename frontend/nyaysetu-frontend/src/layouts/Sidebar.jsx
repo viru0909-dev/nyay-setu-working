@@ -35,7 +35,6 @@ const roleMenuItems = {
         { icon: Home, label: 'Dashboard', path: '/judge' },
         { icon: FolderOpen, label: 'Pending Cases', path: '/judge/pending' },
         { icon: Brain, label: 'AI Case Summary', path: '/judge/ai-summary' },
-        { icon: Calendar, label: 'Assign Hearings', path: '/judge/assign' },
         { icon: Video, label: 'Conduct Hearing', path: '/judge/conduct' },
         { icon: Archive, label: 'Evidence Review', path: '/judge/evidence' },
         { icon: FileText, label: 'Draft Orders', path: '/judge/orders' },
