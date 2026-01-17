@@ -41,6 +41,10 @@ public class HearingService {
                 .status(HearingStatus.SCHEDULED)
                 .build();
         
+        // Update next hearing date on case
+        caseEntity.setNextHearing(scheduledDate);
+        caseRepository.save(caseEntity);
+        
         return hearingRepository.save(hearing);
     }
     
