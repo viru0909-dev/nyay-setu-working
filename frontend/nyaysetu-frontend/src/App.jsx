@@ -38,6 +38,7 @@ const EvidenceReviewPage = lazy(() => import('./pages/judge/EvidenceReviewPage')
 const DraftOrdersPage = lazy(() => import('./pages/judge/DraftOrdersPage'));
 const CourtAnalyticsPage = lazy(() => import('./pages/judge/CourtAnalyticsPage'));
 const AICaseSummaryPage = lazy(() => import('./pages/judge/AICaseSummaryPage'));
+const JudgeCaseDetailsPage = lazy(() => import('./pages/judge/JudgeCaseDetailsPage'));
 
 // Lawyer Pages
 const LawyerCasesPage = lazy(() => import('./pages/lawyer/LawyerCasesPage'));
@@ -145,6 +146,7 @@ function App() {
                                 <Route path="pending" element={<PendingCasesPage />} />
                                 <Route path="conduct" element={<ConductHearingPage />} />
                                 <Route path="evidence" element={<EvidenceReviewPage />} />
+                                <Route path="case/:caseId" element={<JudgeCaseDetailsPage />} />
                                 <Route path="orders" element={<DraftOrdersPage />} />
                                 <Route path="analytics" element={<CourtAnalyticsPage />} />
                                 <Route path="ai-summary" element={<AICaseSummaryPage />} />
