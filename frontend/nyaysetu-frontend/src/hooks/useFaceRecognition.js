@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import * as faceapi from 'face-api.js';
 
+// Smart Base URL detection - same pattern as api.js
+const isLocalhost = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const PROD_BACKEND = 'https://nyaysetubackend.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_API_URL ||
+    (isLocalhost ? 'http://localhost:8080' : PROD_BACKEND);
+
 export const useFaceRecognition = () => {
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -88,7 +96,7 @@ export const useFaceRecognition = () => {
 
     const enrollFace = async (descriptor, token) => {
         try {
-            const response = await fetch('http://localhost:8080/api/face/enroll', {
+            const response = await fetch(`${API_BASE_URL}/api/face/enroll`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -112,7 +120,7 @@ export const useFaceRecognition = () => {
 
     const loginWithFace = async (email, descriptor) => {
         try {
-            const response = await fetch('http://localhost:8080/api/face/verify', {
+            const response = await fetch(`${API_BASE_URL}/api/face/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
