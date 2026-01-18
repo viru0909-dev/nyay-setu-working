@@ -240,7 +240,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                         display: 'none',
                         background: 'none',
                         border: 'none',
-                        color: 'white',
+                        color: 'var(--text-main)',
                         cursor: 'pointer',
                         padding: '0.5rem'
                     }}
@@ -258,51 +258,101 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                         exit={{ opacity: 0, height: 0 }}
                         className="mobile-menu"
                         style={{
-                            background: 'rgba(15, 23, 42, 0.98)',
-                            backdropFilter: 'blur(20px)',
-                            borderTop: '1px solid rgba(139, 92, 246, 0.2)',
-                            padding: '1.5rem'
+                            background: 'var(--bg-glass-strong)',
+                            backdropFilter: 'var(--glass-blur)',
+                            borderTop: 'var(--border-glass)',
+                            padding: '1.5rem',
+                            boxShadow: 'var(--shadow-glass)'
                         }}
                     >
                         {navItems.map((item) => (
-                            <a
-                                key={item.label}
-                                href={item.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                style={{
-                                    display: 'block',
-                                    padding: '0.75rem 0',
-                                    color: '#e2e8f0',
-                                    textDecoration: 'none',
-                                    fontSize: '1.125rem',
-                                    fontWeight: '600',
-                                    borderBottom: '1px solid rgba(226, 232, 240, 0.1)'
-                                }}
-                            >
-                                {item.label}
-                            </a>
+                            item.isRoute ? (
+                                <Link
+                                    key={item.label}
+                                    to={item.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    style={{
+                                        display: 'block',
+                                        padding: '0.75rem 0',
+                                        color: 'var(--text-main)',
+                                        textDecoration: 'none',
+                                        fontSize: '1.125rem',
+                                        fontWeight: '600',
+                                        borderBottom: 'var(--border-glass)'
+                                    }}
+                                >
+                                    {item.label}
+                                </Link>
+                            ) : item.label === 'AI Assistant' ? (
+                                <button
+                                    key={item.label}
+                                    onClick={() => {
+                                        setShowAIModal(true);
+                                        setIsMobileMenuOpen(false);
+                                    }}
+                                    style={{
+                                        display: 'block',
+                                        width: '100%',
+                                        textAlign: 'left',
+                                        padding: '0.75rem 0',
+                                        color: 'var(--text-main)',
+                                        background: 'none',
+                                        border: 'none',
+                                        fontSize: '1.125rem',
+                                        fontWeight: '600',
+                                        borderBottom: 'var(--border-glass)',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {item.label}
+                                </button>
+                            ) : (
+                                <a
+                                    key={item.label}
+                                    href={item.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    style={{
+                                        display: 'block',
+                                        padding: '0.75rem 0',
+                                        color: 'var(--text-main)',
+                                        textDecoration: 'none',
+                                        fontSize: '1.125rem',
+                                        fontWeight: '600',
+                                        borderBottom: 'var(--border-glass)'
+                                    }}
+                                >
+                                    {item.label}
+                                </a>
+                            )
                         ))}
                         <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <Link to="/login" style={{
-                                padding: '0.75rem',
-                                textAlign: 'center',
-                                color: '#e2e8f0',
-                                textDecoration: 'none',
-                                border: '2px solid #8b5cf6',
-                                borderRadius: '0.5rem',
-                                fontWeight: '700'
-                            }}>
+                            <Link
+                                to="/login"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                style={{
+                                    padding: '0.75rem',
+                                    textAlign: 'center',
+                                    color: 'var(--color-accent)',
+                                    textDecoration: 'none',
+                                    border: '2px solid var(--color-accent)',
+                                    borderRadius: '0.5rem',
+                                    fontWeight: '700',
+                                    background: 'transparent'
+                                }}>
                                 Login
                             </Link>
-                            <Link to="/signup" style={{
-                                padding: '0.75rem',
-                                textAlign: 'center',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                                color: 'white',
-                                textDecoration: 'none',
-                                borderRadius: '0.5rem',
-                                fontWeight: '700'
-                            }}>
+                            <Link
+                                to="/signup"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                style={{
+                                    padding: '0.75rem',
+                                    textAlign: 'center',
+                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                    color: 'white',
+                                    textDecoration: 'none',
+                                    borderRadius: '0.5rem',
+                                    fontWeight: '700'
+                                }}>
                                 Get Started
                             </Link>
                         </div>

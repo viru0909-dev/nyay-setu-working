@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ChevronDown, User } from 'lucide-react';
+import { LogOut, ChevronDown, User, Menu } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import NotificationBell from '../components/NotificationBell';
 
-export default function DashboardHeader({ user }) {
+export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const { logout } = useAuthStore();
     const navigate = useNavigate();
@@ -18,41 +18,72 @@ export default function DashboardHeader({ user }) {
         <header
             className="navbar"
             style={{
-                height: '80px',
-                minHeight: '80px',
-                maxHeight: '80px',
+                height: isMobile ? '70px' : '80px',
+                minHeight: isMobile ? '70px' : '80px',
+                maxHeight: isMobile ? '70px' : '80px',
                 flexShrink: 0,
-                padding: '0 2rem',
+                padding: isMobile ? '0 1rem' : '0 2rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 position: 'relative',
-                zIndex: 100
+                zIndex: 100,
+                gap: '0.75rem'
             }}
         >
-            {/* Page Title */}
-            <div>
-                <h1 style={{
-                    fontSize: '1.75rem',
-                    fontWeight: '700',
-                    color: 'var(--color-primary)',
-                    marginBottom: '0.25rem'
-                }}>
-                    {user?.role?.replace('_', ' ')} Dashboard
-                </h1>
-                <p style={{
-                    fontSize: '0.875rem',
-                    color: 'var(--text-secondary)'
-                }}>
-                    Welcome back, {user?.name || 'User'}!
-                </p>
+            {/* Left side: Hamburger + Title */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+                {/* Mobile hamburger menu */}
+                {isMobile && (
+                    <button
+                        onClick={onMobileMenuToggle}
+                        style={{
+                            background: 'var(--bg-glass-strong)',
+                            border: 'var(--border-glass)',
+                            borderRadius: '10px',
+                            padding: '0.625rem',
+                            cursor: 'pointer',
+                            color: 'var(--color-accent)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                        }}
+                    >
+                        <Menu size={22} />
+                    </button>
+                )}
+
+                {/* Page Title */}
+                <div style={{ minWidth: 0 }}>
+                    <h1 style={{
+                        fontSize: isMobile ? '1.25rem' : '1.75rem',
+                        fontWeight: '700',
+                        color: 'var(--color-primary)',
+                        marginBottom: isMobile ? 0 : '0.25rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                    }}>
+                        {isMobile ? 'Dashboard' : `${user?.role?.replace('_', ' ')} Dashboard`}
+                    </h1>
+                    {!isMobile && (
+                        <p style={{
+                            fontSize: '0.875rem',
+                            color: 'var(--text-secondary)'
+                        }}>
+                            Welcome back, {user?.name || 'User'}!
+                        </p>
+                    )}
+                </div>
             </div>
 
             {/* Right Side Actions */}
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem'
+                gap: isMobile ? '0.5rem' : '1rem',
+                flexShrink: 0
             }}>
                 {/* Notifications */}
                 <NotificationBell />
@@ -64,8 +95,8 @@ export default function DashboardHeader({ user }) {
                         style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '0.75rem',
-                            padding: '0.5rem 1rem',
+                            gap: isMobile ? '0.5rem' : '0.75rem',
+                            padding: isMobile ? '0.375rem 0.5rem' : '0.5rem 1rem',
                             borderRadius: '12px',
                             background: 'var(--bg-glass-strong)',
                             border: 'var(--border-glass)',
@@ -81,28 +112,32 @@ export default function DashboardHeader({ user }) {
                         }}
                     >
                         <div style={{
-                            width: '36px',
-                            height: '36px',
+                            width: isMobile ? '32px' : '36px',
+                            height: isMobile ? '32px' : '36px',
                             borderRadius: '50%',
                             background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontWeight: '700',
-                            fontSize: '0.875rem',
+                            fontSize: isMobile ? '0.75rem' : '0.875rem',
                             color: 'white'
                         }}>
                             {user?.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
-                        <div style={{ textAlign: 'left' }}>
-                            <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>
-                                {user?.name || 'User'}
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                {user?.role?.replace('_', ' ')}
-                            </div>
-                        </div>
-                        <ChevronDown size={16} />
+                        {!isMobile && (
+                            <>
+                                <div style={{ textAlign: 'left' }}>
+                                    <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>
+                                        {user?.name || 'User'}
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                        {user?.role?.replace('_', ' ')}
+                                    </div>
+                                </div>
+                                <ChevronDown size={16} />
+                            </>
+                        )}
                     </button>
 
                     {/* Dropdown Menu */}
@@ -118,7 +153,8 @@ export default function DashboardHeader({ user }) {
                             border: 'var(--border-glass)',
                             borderRadius: '12px',
                             padding: '0.5rem',
-                            boxShadow: 'var(--shadow-glass)'
+                            boxShadow: 'var(--shadow-glass)',
+                            zIndex: 200
                         }}>
                             <button
                                 onClick={() => {
