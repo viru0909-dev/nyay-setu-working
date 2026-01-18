@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import useAuthStore from '../store/authStore';
@@ -18,6 +18,14 @@ export default function Login() {
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const navigate = useNavigate();
     const { setAuth } = useAuthStore();
+
+    // Mobile detection
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const roles = [
         { value: '', label: 'All Roles', icon: <User size={18} />, color: '#64748b' },
@@ -72,103 +80,110 @@ export default function Login() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '100px 2rem 2rem 2rem',
+                padding: isMobile ? '80px 1rem 1rem 1rem' : '100px 2rem 2rem 2rem',
                 position: 'relative',
                 overflow: 'hidden'
             }}>
-                {/* Visual Decorative Blobs (Updated colors for light theme) */}
-                <div style={{
-                    position: 'absolute',
-                    width: '800px',
-                    height: '800px',
-                    background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
-                    top: '-200px',
-                    right: '-200px',
-                    borderRadius: '50%',
-                    animation: 'pulse 8s ease-in-out infinite'
-                }} />
-                <div style={{
-                    position: 'absolute',
-                    width: '600px',
-                    height: '600px',
-                    background: 'radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%)',
-                    bottom: '-150px',
-                    left: '-150px',
-                    borderRadius: '50%',
-                    animation: 'pulse 6s ease-in-out infinite'
-                }} />
+                {/* Visual Decorative Blobs - hidden on mobile */}
+                {!isMobile && (
+                    <>
+                        <div style={{
+                            position: 'absolute',
+                            width: '800px',
+                            height: '800px',
+                            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
+                            top: '-200px',
+                            right: '-200px',
+                            borderRadius: '50%',
+                            animation: 'pulse 8s ease-in-out infinite'
+                        }} />
+                        <div style={{
+                            position: 'absolute',
+                            width: '600px',
+                            height: '600px',
+                            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%)',
+                            bottom: '-150px',
+                            left: '-150px',
+                            borderRadius: '50%',
+                            animation: 'pulse 6s ease-in-out infinite'
+                        }} />
+                    </>
+                )}
 
                 <div style={{
                     width: '100%',
-                    maxWidth: '1200px',
+                    maxWidth: isMobile ? '100%' : '1200px',
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '4rem',
+                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                    gap: isMobile ? '1.5rem' : '4rem',
                     alignItems: 'center',
                     position: 'relative',
                     zIndex: 1
                 }}>
-                    {/* Left Side - Welcome */}
-                    <div style={{ color: 'var(--text-main)' }}>
-                        <div style={{ marginBottom: '3rem' }}>
-                            <h1 style={{
-                                fontSize: '3.5rem',
-                                fontWeight: '900',
-                                marginBottom: '1rem',
-                                background: 'linear-gradient(135deg, var(--color-accent) 0%, #8b5cf6 100%)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                lineHeight: '1.2'
-                            }}>
-                                Welcome Back
-                            </h1>
-                            <p style={{
-                                fontSize: '1.25rem',
-                                color: 'var(--text-secondary)',
-                                lineHeight: '1.8',
-                                maxWidth: '500px'
-                            }}>
-                                Sign in to access your dashboard and manage your cases on India's most advanced virtual judiciary platform
-                            </p>
-                        </div>
+                    {/* Left Side - Welcome (hidden on mobile) */}
+                    {!isMobile && (
+                        <div style={{ color: 'var(--text-main)' }}>
+                            <div style={{ marginBottom: '3rem' }}>
+                                <h1 style={{
+                                    fontSize: '3.5rem',
+                                    fontWeight: '900',
+                                    marginBottom: '1rem',
+                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, #8b5cf6 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    lineHeight: '1.2'
+                                }}>
+                                    Welcome Back
+                                </h1>
+                                <p style={{
+                                    fontSize: '1.25rem',
+                                    color: 'var(--text-secondary)',
+                                    lineHeight: '1.8',
+                                    maxWidth: '500px'
+                                }}>
+                                    Sign in to access your dashboard and manage your cases on India's most advanced virtual judiciary platform
+                                </p>
+                            </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            {[
-                                { icon: <Shield size={24} />, text: 'Secure encrypted authentication', color: '#10b981' },
-                                { icon: <CheckCircle2 size={24} />, text: 'Real-time case status updates', color: '#3b82f6' },
-                                { icon: <Scale size={24} />, text: 'Instant access to hearings', color: '#8b5cf6' },
-                                { icon: <Camera size={24} />, text: 'Face recognition login', color: '#ec4899' }
-                            ].map((item, idx) => (
-                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{
-                                        width: '48px',
-                                        height: '48px',
-                                        borderRadius: '12px',
-                                        background: `${item.color}20`,
-                                        border: `2px solid ${item.color}40`,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        color: item.color
-                                    }}>
-                                        {item.icon}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                {[
+                                    { icon: <Shield size={24} />, text: 'Secure encrypted authentication', color: '#10b981' },
+                                    { icon: <CheckCircle2 size={24} />, text: 'Real-time case status updates', color: '#3b82f6' },
+                                    { icon: <Scale size={24} />, text: 'Instant access to hearings', color: '#8b5cf6' },
+                                    { icon: <Camera size={24} />, text: 'Face recognition login', color: '#ec4899' }
+                                ].map((item, idx) => (
+                                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{
+                                            width: '48px',
+                                            height: '48px',
+                                            borderRadius: '12px',
+                                            background: `${item.color}20`,
+                                            border: `2px solid ${item.color}40`,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: item.color
+                                        }}>
+                                            {item.icon}
+                                        </div>
+                                        <span style={{ fontSize: '1.05rem', color: 'var(--text-main)', fontWeight: '500' }}>
+                                            {item.text}
+                                        </span>
                                     </div>
-                                    <span style={{ fontSize: '1.05rem', color: 'var(--text-main)', fontWeight: '500' }}>
-                                        {item.text}
-                                    </span>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Right Side - Form */}
                     <div style={{
                         background: 'var(--bg-glass-strong)',
                         backdropFilter: 'var(--glass-blur)',
-                        borderRadius: '2rem',
+                        borderRadius: isMobile ? '1rem' : '2rem',
                         border: 'var(--border-glass-strong)',
-                        padding: '3rem',
-                        boxShadow: 'var(--shadow-glass)'
+                        padding: isMobile ? '1.5rem' : '3rem',
+                        boxShadow: 'var(--shadow-glass)',
+                        width: '100%'
                     }}>
                         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                             <h2 style={{

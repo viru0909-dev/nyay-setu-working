@@ -1,11 +1,5 @@
 import axios from 'axios';
-
-// Inline API base URL detection (same logic as apiConfig.js)
-const PROD_BACKEND = 'https://nyaysetubackend.onrender.com';
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
-    import.meta.env.VITE_API_URL ||
-    (isLocalhost ? 'http://localhost:8080' : PROD_BACKEND);
+import { API_BASE_URL } from '../config/apiConfig';
 
 class NotificationService {
     constructor() {
@@ -31,7 +25,8 @@ class NotificationService {
             return;
         }
 
-        const isProduction = !isLocalhost;
+        // Detect production environment
+        const isProduction = !window.location.hostname.includes('localhost');
 
         try {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';

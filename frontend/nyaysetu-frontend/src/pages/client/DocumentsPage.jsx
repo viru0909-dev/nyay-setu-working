@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { documentAPI } from '../../services/api';
 import useAuthStore from '../../store/authStore';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 const categories = ['All', 'LEGAL_DOCUMENTS', 'CONTRACTS', 'EVIDENCE', 'STATEMENTS', 'FINANCIAL', 'OFFICIAL', 'OTHER'];
 
@@ -59,7 +60,6 @@ export default function DocumentsPage() {
     const fetchDocuments = async () => {
         try {
             const token = localStorage.getItem('token');
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
             const response = await axios.get(`${API_BASE_URL}/api/documents`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -79,7 +79,6 @@ export default function DocumentsPage() {
     const fetchUserCases = async () => {
         try {
             const token = localStorage.getItem('token');
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
             const response = await axios.get(`${API_BASE_URL}/api/documents/user/cases`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -144,7 +143,6 @@ export default function DocumentsPage() {
             }
 
             const token = localStorage.getItem('token');
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
             const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -189,7 +187,6 @@ export default function DocumentsPage() {
         // Simple direct delete - no confirmation
         try {
             const token = localStorage.getItem('token');
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
             await axios.delete(`${API_BASE_URL}/api/documents/${docId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
