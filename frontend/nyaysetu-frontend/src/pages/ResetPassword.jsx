@@ -4,6 +4,7 @@ import { Lock, Eye, EyeOff, ShieldCheck, CheckCircle, AlertCircle, Loader2, Arro
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from '../components/landing/Header';
 import '../styles/Biometrics.css';
+import { API_BASE_URL } from '../config/apiConfig';
 
 export default function ResetPassword() {
     const { token } = useParams();
@@ -29,7 +30,7 @@ export default function ResetPassword() {
             }
 
             try {
-                const response = await fetch(`http://localhost:8080/api/auth/verify-reset-token?token=${token}`);
+                const response = await fetch(`${API_BASE_URL}/api/auth/verify-reset-token?token=${token}`);
                 if (!response.ok) {
                     const data = await response.json();
                     throw new Error(data.message || 'Token verification failed');
@@ -60,7 +61,7 @@ export default function ResetPassword() {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:8080/api/auth/reset-password', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
