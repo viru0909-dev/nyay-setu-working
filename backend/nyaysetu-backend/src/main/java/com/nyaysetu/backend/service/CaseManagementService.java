@@ -14,14 +14,20 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.nyaysetu.backend.repository.HearingRepository;
+import com.nyaysetu.backend.entity.Hearing;
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class CaseManagementService {
 
     private final CaseRepository caseRepository;
+    private final HearingRepository hearingRepository;
 
     @Transactional
     public CaseDTO createCase(CreateCaseRequest request, User client) {
+        // ... (unchanged)
         CaseEntity caseEntity = CaseEntity.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -35,6 +41,7 @@ public class CaseManagementService {
         CaseEntity saved = caseRepository.save(caseEntity);
         return convertToDTO(saved);
     }
+    
 
     public List<CaseDTO> getCasesByUser(User user) {
         List<CaseEntity> cases = caseRepository.findByClient(user);
@@ -87,6 +94,18 @@ public class CaseManagementService {
     }
 
     private CaseDTO convertToDTO(CaseEntity entity) {
+        LocalDateTime nextHearing = entity.getNextHearing();
+        
+        // Fallback: If nextHearing is null on entity, try to find upcoming hearing
+        if (nextHearing == null) {
+            Hearing upcoming = hearingRepository.findTopByCaseEntityIdAndScheduledDateAfterOrderByScheduledDateAsc(
+                entity.getId(), LocalDateTime.now()
+            );
+            if (upcoming != null) {
+                nextHearing = upcoming.getScheduledDate();
+            }
+        }
+
         return CaseDTO.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
@@ -97,7 +116,7 @@ public class CaseManagementService {
                 .petitioner(entity.getPetitioner())
                 .respondent(entity.getRespondent())
                 .filedDate(entity.getFiledDate())
-                .nextHearing(entity.getNextHearing())
+                .nextHearing(nextHearing)
                 .assignedJudge(entity.getAssignedJudge())
                 .clientId(entity.getClient() != null ? entity.getClient().getId() : null)
                 .clientName(entity.getClient() != null ? entity.getClient().getName() : null)

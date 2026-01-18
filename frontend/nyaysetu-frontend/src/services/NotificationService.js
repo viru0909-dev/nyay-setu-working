@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/apiConfig';
 
 class NotificationService {
     constructor() {
@@ -6,7 +7,7 @@ class NotificationService {
         this.listeners = [];
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
-        this.API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+        this.API_BASE_URL = API_BASE_URL;
     }
 
     /**

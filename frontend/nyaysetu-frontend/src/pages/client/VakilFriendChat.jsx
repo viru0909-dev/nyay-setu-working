@@ -4,6 +4,7 @@ import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, Messag
 import { vakilFriendAPI } from '../../services/api';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function VakilFriendChat() {
     const [messages, setMessages] = useState([]);
@@ -251,7 +252,6 @@ export default function VakilFriendChat() {
             // Don't set caseId yet - will link when case is filed
 
             const token = localStorage.getItem('token');
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
             const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
