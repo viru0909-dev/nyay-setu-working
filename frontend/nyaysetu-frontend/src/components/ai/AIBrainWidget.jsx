@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, User, ChevronDown, Minimize2, Maximize2, Sparkles, Loader2 } from 'lucide-react';
 import { brainAPI } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function AIBrainWidget({ user }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -155,7 +156,7 @@ export default function AIBrainWidget({ user }) {
                                         borderBottomRightRadius: msg.role === 'user' ? '0.2rem' : '1rem',
                                         borderBottomLeftRadius: msg.role === 'assistant' ? '0.2rem' : '1rem'
                                     }} className="markdown-content">
-                                        <ReactMarkdown>
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                             {msg.content}
                                         </ReactMarkdown>
                                     </div>

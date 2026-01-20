@@ -4,6 +4,7 @@ import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, Messag
 import { vakilFriendAPI } from '../../services/api';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function VakilFriendChat() {
@@ -635,7 +636,7 @@ export default function VakilFriendChat() {
                                                 fontSize: '0.95rem',
                                                 lineHeight: '1.6',
                                             }}>
-                                                <ReactMarkdown>
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                                     {msg.content}
                                                 </ReactMarkdown>
                                             </div>
