@@ -1,4 +1,4 @@
-import { FolderOpen, Video, FileText, TrendingUp, Clock, CheckCircle2, Bot, MessageCircle } from 'lucide-react';
+import { FolderOpen, Video, FileText, TrendingUp, Clock, CheckCircle2, Bot, MessageCircle, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -8,9 +8,10 @@ export default function ClientDashboard() {
 
     // Mock data - will be replaced with API calls
     const stats = [
-        { label: 'My Cases', value: '3', icon: FolderOpen, color: 'var(--color-primary)', change: '+1 this month' },
-        { label: 'Upcoming Hearings', value: '2', icon: Video, color: '#8b5cf6', change: 'Next: Dec 15' },
-        { label: 'Documents', value: '15', icon: FileText, color: '#10b981', change: '5 pending review' }
+        { label: 'My Cases', value: '3', icon: FolderOpen, color: 'var(--color-primary)', change: '+1 this month', link: '/client/cases' },
+        { label: 'Upcoming Hearings', value: '2', icon: Video, color: '#8b5cf6', change: 'Next: Dec 15', link: '/client/hearings' },
+        { label: 'Documents', value: '15', icon: FileText, color: '#10b981', change: '5 pending review', link: '/client/documents' },
+        { label: 'Legal Chat', value: 'Active', icon: MessageSquare, color: '#f59e0b', change: 'Chat with Lawyer', link: '/client/chat' }
     ];
 
     const recentCases = [
@@ -105,6 +106,7 @@ export default function ClientDashboard() {
                     return (
                         <div
                             key={index}
+                            onClick={() => stat.link && navigate(stat.link)}
                             style={{
                                 background: 'var(--bg-glass-strong)',
                                 backdropFilter: 'var(--glass-blur)',
@@ -112,7 +114,8 @@ export default function ClientDashboard() {
                                 borderRadius: '1.5rem',
                                 padding: '1.5rem',
                                 transition: 'all 0.3s',
-                                boxShadow: 'var(--shadow-glass)'
+                                boxShadow: 'var(--shadow-glass)',
+                                cursor: 'pointer'
                             }}
                             onMouseOver={(e) => {
                                 e.currentTarget.style.transform = 'translateY(-4px)';

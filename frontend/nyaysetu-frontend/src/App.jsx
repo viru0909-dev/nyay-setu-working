@@ -30,6 +30,7 @@ const VakilFriendChat = lazy(() => import('./pages/client/VakilFriendChat'));
 const CaseDetailPage = lazy(() => import('./pages/client/CaseDetailPage'));
 const EvidenceManagerPage = lazy(() => import('./pages/client/EvidenceManagerPage'));
 const HearingsPage = lazy(() => import('./pages/client/HearingsPage'));
+const LawyerChatPage = lazy(() => import('./pages/client/LawyerChatPage'));
 
 // Judge Pages
 const PendingCasesPage = lazy(() => import('./pages/judge/PendingCasesPage'));
@@ -111,6 +112,7 @@ function App() {
                                 <Route path="case/:caseId" element={<CaseDetailPage />} />
                                 <Route path="evidence" element={<EvidenceManagerPage />} />
                                 <Route path="hearings" element={<HearingsPage />} />
+                                <Route path="chat" element={<LawyerChatPage />} />
                             </Route>
 
                             <Route
