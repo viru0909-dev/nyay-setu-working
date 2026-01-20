@@ -3,6 +3,7 @@ import { MessageCircle, X, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { brainAPI } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function AIChatbot() {
     const [isOpen, setIsOpen] = useState(false);
@@ -162,7 +163,7 @@ export default function AIChatbot() {
                                         boxShadow: msg.role === 'assistant' ? '0 2px 10px rgba(0,0,0,0.05)' : 'none',
                                         border: msg.role === 'assistant' ? '1px solid rgba(0,0,0,0.05)' : 'none'
                                     }} className="markdown-content">
-                                        <ReactMarkdown>
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                             {msg.content}
                                         </ReactMarkdown>
                                     </div>

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, X, MessageSquare, Loader2, MinusCircle, Maximize2, Minimize2 } from 'lucide-react';
 import { vakilFriendAPI } from '../services/api';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function CaseChatWidget({ caseId, caseTitle }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -198,7 +199,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                                     lineHeight: '1.5',
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
                                 }}>
-                                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                                 </div>
                             ))
                         )}
