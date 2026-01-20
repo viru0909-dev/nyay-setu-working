@@ -135,8 +135,13 @@ export const assignmentAPI = {
 };
 
 // Message API
+// Message API
 export const messageAPI = {
-    send: (caseId, message) => api.post(`/cases/${caseId}/messages`, { message }),
+    send: (caseId, message) => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const senderId = user?.id;
+        return api.post(`/cases/${caseId}/messages`, { message, senderId });
+    },
     getMessages: (caseId) => api.get(`/cases/${caseId}/messages`),
 };
 export const caseAssignmentAPI = {
