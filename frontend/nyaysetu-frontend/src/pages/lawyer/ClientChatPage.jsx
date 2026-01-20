@@ -55,20 +55,47 @@ export default function ClientChatPage() {
 
     const fetchContacts = async () => {
         try {
-            // In a real app, this would fetch chats/cases. For now using lawyer's cases
             const response = await lawyerAPI.getCases();
             const cases = response.data || [];
 
-            // Transform cases into chat contacts
-            const chatContacts = cases.map(c => ({
-                id: c.id,
-                caseId: c.id,
-                name: c.clientName || 'Client',
-                lastMsg: `Case: ${c.title}`, // Placeholder
-                time: new Date(c.createdAt).toLocaleDateString(),
-                unread: 0,
-                status: 'offline'
-            }));
+            // Group cases by Client to ensure unique client entries
+            const clientMap = new Map();
+
+            cases.forEach(c => {
+                if (!c.clientId) return; // Skip if no client attached
+
+                const existing = clientMap.get(c.clientId);
+                const caseDate = new Date(c.updatedAt || c.createdAt || c.filedDate || Date.now());
+
+                // If client exists, update if this case is more recent
+                if (existing) {
+                    if (caseDate > existing.dateObj) {
+                        clientMap.set(c.clientId, {
+                            ...existing,
+                            caseId: c.id, // Switch context to latest case
+                            lastMsg: `Case: ${c.title}`,
+                            time: caseDate.toLocaleDateString(),
+                            dateObj: caseDate
+                        });
+                    }
+                } else {
+                    // Add new client entry
+                    clientMap.set(c.clientId, {
+                        id: c.clientId, // Use Client ID as Contact ID
+                        caseId: c.id,   // Store Case ID for messaging context
+                        name: c.clientName || 'Client',
+                        lastMsg: `Case: ${c.title}`,
+                        time: caseDate.toLocaleDateString(),
+                        dateObj: caseDate,
+                        unread: 0,
+                        status: 'offline'
+                    });
+                }
+            });
+
+            // Convert map to array and sort by date descending
+            const chatContacts = Array.from(clientMap.values())
+                .sort((a, b) => b.dateObj - a.dateObj);
 
             setContacts(chatContacts);
             setLoading(false);
@@ -83,7 +110,14 @@ export default function ClientChatPage() {
             const response = await messageAPI.getMessages(caseId);
             const fetchedMessages = response.data.map(msg => ({
                 id: msg.id,
-                sender: msg.senderId === selectedContact.id ? 'client' : 'me', // Logic needs adjustment based on user ID
+                // Fix sender logic: Check if sender is NOT me (i.e. is the client)
+                // Since we don't have straightforward MyUserID, we assume if sender != current user context, it is client?
+                // Actually, backend should flag 'isMe'. For now, assuming senderId match logic needs to be:
+                // If I am lawyer, and msg.senderId == clientId, then it is 'client'.
+                // We have selectedContact.id which is clientId.
+                // So: msg.senderId === selectedContact.id ? 'client' : 'me' 
+                // (Assuming selectedContact.id holds the UUID matches msg.senderId)
+                sender: (msg.senderId == selectedContact?.id) ? 'client' : 'me',
                 text: msg.message,
                 time: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 attachments: msg.attachments || []
