@@ -4,9 +4,11 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Table(name = "case_entity")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,8 +25,15 @@ public class LegalCase {
 
     private String description;
 
-    private UUID judgeId;
+    private Long judgeId;
 
     @Enumerated(EnumType.STRING)
     private CaseStatus status;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "lawyer_id")
+    private User lawyer;
 }
