@@ -123,6 +123,8 @@ public class CaseManagementService {
                 .documentsCount(0) // TODO: Count from documents table
                 .lawyerProposalStatus(entity.getLawyerProposalStatus())
                 .draftPetition(entity.getDraftPetition())
+                .lawyerId(entity.getLawyer() != null ? entity.getLawyer().getId() : null)
+                .lawyerName(entity.getLawyer() != null ? entity.getLawyer().getName() : null)
                 .build();
     }
 
