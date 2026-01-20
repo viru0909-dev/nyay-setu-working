@@ -15,8 +15,8 @@ import {
     FileText,
     Bot
 } from 'lucide-react';
-import { messageAPI, lawyerAPI, vakilFriendAPI, documentAPI, meetingAPI } from '../../services/api';
-import toast from 'react-hot-toast';
+import { messageAPI, lawyerAPI, vakilFriendAPI, documentAPI } from '../../services/api';
+// import toast from 'react-hot-toast';
 
 export default function ClientChatPage() {
     const [selectedContact, setSelectedContact] = useState(null);
@@ -26,7 +26,6 @@ export default function ClientChatPage() {
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [fileUploading, setFileUploading] = useState(false);
-    const [showMeetingModal, setShowMeetingModal] = useState(false);
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
 
@@ -116,7 +115,7 @@ export default function ClientChatPage() {
             fetchMessages(selectedContact.caseId); // confirm send
         } catch (error) {
             console.error('Error sending message:', error);
-            toast.error('Failed to send message');
+            // toast.error('Failed to send message');
         } finally {
             setSending(false);
         }
@@ -138,11 +137,11 @@ export default function ClientChatPage() {
             const fileMsg = `Shared file: ${file.name}`;
             await messageAPI.send(selectedContact.caseId, fileMsg);
 
-            toast.success('File shared successfully');
+            // toast.success('File shared successfully');
             fetchMessages(selectedContact.caseId);
         } catch (error) {
             console.error('Error uploading file:', error);
-            toast.error('Failed to upload file');
+            // toast.error('Failed to upload file');
         } finally {
             setFileUploading(false);
         }

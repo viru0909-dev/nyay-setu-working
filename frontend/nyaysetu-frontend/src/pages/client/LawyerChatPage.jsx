@@ -15,7 +15,7 @@ import {
     ArrowLeft
 } from 'lucide-react';
 import { messageAPI, caseAPI, vakilFriendAPI, documentAPI } from '../../services/api';
-import toast from 'react-hot-toast';
+// import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 export default function LawyerChatPage() {
@@ -111,7 +111,7 @@ export default function LawyerChatPage() {
             fetchMessages(selectedCase.id);
         } catch (error) {
             console.error('Error sending message:', error);
-            toast.error('Failed to send message');
+            // toast.error('Failed to send message');
         } finally {
             setSending(false);
         }
@@ -132,11 +132,11 @@ export default function LawyerChatPage() {
             const fileMsg = `Shared file: ${file.name}`;
             await messageAPI.send(selectedCase.id, fileMsg);
 
-            toast.success('File shared successfully');
+            // toast.success('File shared successfully');
             fetchMessages(selectedCase.id);
         } catch (error) {
             console.error('Error uploading file:', error);
-            toast.error('Failed to upload file');
+            // toast.error('Failed to upload file');
         } finally {
             setFileUploading(false);
         }
