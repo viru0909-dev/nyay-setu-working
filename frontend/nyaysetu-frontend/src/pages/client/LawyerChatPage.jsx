@@ -12,7 +12,8 @@ import {
     CheckCheck,
     Loader2,
     Calendar,
-    ArrowLeft
+    ArrowLeft,
+    ChevronDown
 } from 'lucide-react';
 import { messageAPI, caseAPI, vakilFriendAPI, documentAPI } from '../../services/api';
 // import toast from 'react-hot-toast';
@@ -67,8 +68,11 @@ export default function LawyerChatPage() {
 
                 const existing = lawyerMap.get(c.lawyerId);
                 const caseDate = new Date(c.updatedAt || c.createdAt || c.filedDate || Date.now());
+                const caseInfo = { id: c.id, title: c.title, date: caseDate };
 
                 if (existing) {
+                    existing.allCases.push(caseInfo);
+                    // Update to latest context if newer
                     if (caseDate > existing.dateObj) {
                         lawyerMap.set(c.lawyerId, {
                             ...existing,
@@ -76,7 +80,8 @@ export default function LawyerChatPage() {
                             caseId: c.id,
                             subtitle: `Case: ${c.title}`,
                             time: caseDate.toLocaleDateString(),
-                            dateObj: caseDate
+                            dateObj: caseDate,
+                            // Keep allCases reference
                         });
                     }
                 } else {
@@ -89,7 +94,8 @@ export default function LawyerChatPage() {
                         dateObj: caseDate,
                         status: 'online',
                         lawyerAssigned: true,
-                        lawyerId: c.lawyerId
+                        lawyerId: c.lawyerId,
+                        allCases: [caseInfo]
                     });
                 }
             });
@@ -112,10 +118,12 @@ export default function LawyerChatPage() {
 
     const fetchMessages = async (caseId) => {
         try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const myId = user?.id;
             const response = await messageAPI.getMessages(caseId);
             const fetchedMessages = response.data.map(msg => ({
                 id: msg.id,
-                sender: msg.senderId === selectedCase.id ? 'lawyer' : 'me', // simplistic logic
+                sender: msg.senderId === myId ? 'me' : 'lawyer',
                 text: msg.message,
                 time: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 attachments: msg.attachments || []
@@ -176,7 +184,8 @@ export default function LawyerChatPage() {
         }
 
         try {
-            const response = await vakilFriendAPI.sendMessage('temp-session', `Refine this message to my lawyer to be more professional: "${message}"`);
+            const context = selectedCase ? ` regarding Case "${selectedCase.subtitle}"` : '';
+            const response = await vakilFriendAPI.sendMessage('temp-session', `Refine this message to my lawyer${context} to be more professional: "${message}"`);
             setMessage(response.data.reply);
         } catch (error) {
             console.error('Error generating AI help:', error);
@@ -267,7 +276,38 @@ export default function LawyerChatPage() {
                                 </div>
                                 <div>
                                     <div style={{ color: 'var(--text-main)', fontWeight: '700' }}>{selectedCase.name}</div>
-                                    <div style={{ color: 'var(--color-success)', fontSize: '0.75rem', fontWeight: '600' }}>{selectedCase.subtitle}</div>
+
+                                    {/* Case Selector Dropdown */}
+                                    {selectedCase.allCases && selectedCase.allCases.length > 1 ? (
+                                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <select
+                                                value={selectedCase.caseId}
+                                                onChange={(e) => {
+                                                    const newCaseId = e.target.value;
+                                                    const caseInfo = selectedCase.allCases.find(c => c.id === newCaseId);
+                                                    if (caseInfo) {
+                                                        setSelectedCase(prev => ({
+                                                            ...prev,
+                                                            caseId: newCaseId,
+                                                            subtitle: `Case: ${caseInfo.title}`
+                                                        }));
+                                                    }
+                                                }}
+                                                style={{
+                                                    background: 'transparent', border: 'none', color: 'var(--color-success)',
+                                                    fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', outline: 'none',
+                                                    appearance: 'none', paddingRight: '1rem'
+                                                }}
+                                            >
+                                                {selectedCase.allCases.map(c => (
+                                                    <option key={c.id} value={c.id} style={{ color: 'black' }}>Case: {c.title.substring(0, 30)}...</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={12} color="var(--color-success)" style={{ position: 'absolute', right: 0, pointerEvents: 'none' }} />
+                                        </div>
+                                    ) : (
+                                        <div style={{ color: 'var(--color-success)', fontSize: '0.75rem', fontWeight: '600' }}>{selectedCase.subtitle}</div>
+                                    )}
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>

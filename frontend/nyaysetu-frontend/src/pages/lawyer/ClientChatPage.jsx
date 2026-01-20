@@ -13,7 +13,8 @@ import {
     Loader2,
     Calendar,
     FileText,
-    Bot
+    Bot,
+    ChevronDown
 } from 'lucide-react';
 import { messageAPI, lawyerAPI, vakilFriendAPI, documentAPI } from '../../services/api';
 // import toast from 'react-hot-toast';
@@ -66,9 +67,11 @@ export default function ClientChatPage() {
 
                 const existing = clientMap.get(c.clientId);
                 const caseDate = new Date(c.updatedAt || c.createdAt || c.filedDate || Date.now());
+                const caseInfo = { id: c.id, title: c.title, date: caseDate };
 
                 // If client exists, update if this case is more recent
                 if (existing) {
+                    existing.allCases.push(caseInfo);
                     if (caseDate > existing.dateObj) {
                         clientMap.set(c.clientId, {
                             ...existing,
@@ -88,7 +91,8 @@ export default function ClientChatPage() {
                         time: caseDate.toLocaleDateString(),
                         dateObj: caseDate,
                         unread: 0,
-                        status: 'offline'
+                        status: 'offline',
+                        allCases: [caseInfo]
                     });
                 }
             });
@@ -107,17 +111,12 @@ export default function ClientChatPage() {
 
     const fetchMessages = async (caseId) => {
         try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const myId = user?.id;
             const response = await messageAPI.getMessages(caseId);
             const fetchedMessages = response.data.map(msg => ({
                 id: msg.id,
-                // Fix sender logic: Check if sender is NOT me (i.e. is the client)
-                // Since we don't have straightforward MyUserID, we assume if sender != current user context, it is client?
-                // Actually, backend should flag 'isMe'. For now, assuming senderId match logic needs to be:
-                // If I am lawyer, and msg.senderId == clientId, then it is 'client'.
-                // We have selectedContact.id which is clientId.
-                // So: msg.senderId === selectedContact.id ? 'client' : 'me' 
-                // (Assuming selectedContact.id holds the UUID matches msg.senderId)
-                sender: (msg.senderId == selectedContact?.id) ? 'client' : 'me',
+                sender: (msg.senderId == selectedContact?.id) ? 'client' : (msg.senderId === myId ? 'me' : 'client'), // Fallback to client if not me
                 text: msg.message,
                 time: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 attachments: msg.attachments || []
@@ -318,7 +317,40 @@ export default function ClientChatPage() {
                                 </div>
                                 <div>
                                     <div style={{ color: 'var(--text-main)', fontWeight: '700' }}>{selectedContact.name}</div>
-                                    <div style={{ color: 'var(--color-success)', fontSize: '0.75rem', fontWeight: '600' }}>Active Now</div>
+
+                                    {/* Case Selector Dropdown */}
+                                    {selectedContact.allCases && selectedContact.allCases.length > 1 ? (
+                                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <select
+                                                value={selectedContact.caseId}
+                                                onChange={(e) => {
+                                                    const newCaseId = e.target.value;
+                                                    const caseInfo = selectedContact.allCases.find(c => c.id === newCaseId);
+                                                    if (caseInfo) {
+                                                        setSelectedContact(prev => ({
+                                                            ...prev,
+                                                            caseId: newCaseId,
+                                                            // lastMsg: `Case: ${caseInfo.title}` // Don't update lastMsg in sidebar, just local context? 
+                                                            // Actually sidebar updates on re-render if I update state. But sidebar uses different source?
+                                                            // setSelectedContact updates the selected state only.
+                                                        }));
+                                                    }
+                                                }}
+                                                style={{
+                                                    background: 'transparent', border: 'none', color: 'var(--color-success)',
+                                                    fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', outline: 'none',
+                                                    appearance: 'none', paddingRight: '1rem'
+                                                }}
+                                            >
+                                                {selectedContact.allCases.map(c => (
+                                                    <option key={c.id} value={c.id} style={{ color: 'black' }}>Case: {c.title.substring(0, 30)}...</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={12} color="var(--color-success)" style={{ position: 'absolute', right: 0, pointerEvents: 'none' }} />
+                                        </div>
+                                    ) : (
+                                        <div style={{ color: 'var(--color-success)', fontSize: '0.75rem', fontWeight: '600' }}>Active Now</div>
+                                    )}
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
