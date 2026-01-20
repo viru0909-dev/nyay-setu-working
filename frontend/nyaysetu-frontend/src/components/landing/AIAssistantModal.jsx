@@ -4,6 +4,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useState, useRef, useEffect } from 'react';
 import { brainAPI } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function AIAssistantModal({ isOpen, onClose }) {
     const { language } = useLanguage();
@@ -338,7 +339,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                             }}
                                         >
                                             <div className="markdown-content">
-                                                <ReactMarkdown>
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                                     {msg.content}
                                                 </ReactMarkdown>
                                             </div>
