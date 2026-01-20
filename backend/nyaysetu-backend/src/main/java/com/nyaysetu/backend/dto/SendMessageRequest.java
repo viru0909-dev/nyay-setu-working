@@ -8,6 +8,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class SendMessageRequest {
-    private UUID senderId;
+    private Long senderId;
     private String message;
 }

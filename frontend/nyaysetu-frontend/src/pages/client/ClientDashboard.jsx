@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FolderOpen, Video, FileText, TrendingUp, Clock, CheckCircle2, Bot, MessageCircle, Loader2 } from 'lucide-react';
+import { FolderOpen, Video, FileText, TrendingUp, Clock, CheckCircle2, Bot, MessageCircle, MessageSquare, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { caseAPI, hearingAPI, documentAPI } from '../../services/api';
@@ -15,7 +15,8 @@ export default function ClientDashboard() {
     const [stats, setStats] = useState([
         { label: 'My Cases', value: '0', icon: FolderOpen, color: 'var(--color-primary)', change: 'Loading...' },
         { label: 'Upcoming Hearings', value: '0', icon: Video, color: '#8b5cf6', change: 'Loading...' },
-        { label: 'Documents', value: '0', icon: FileText, color: '#10b981', change: 'Loading...' }
+        { label: 'Documents', value: '0', icon: FileText, color: '#10b981', change: 'Loading...' },
+        { label: 'Legal Chat', value: 'Active', icon: MessageSquare, color: '#f59e0b', change: 'Chat with Lawyer', link: '/client/chat' }
     ]);
 
     // Fetch real data on mount
@@ -97,6 +98,14 @@ export default function ClientDashboard() {
                         icon: FileText,
                         color: '#10b981',
                         change: docCount > 0 ? 'All accessible' : 'No documents'
+                    },
+                    {
+                        label: 'Legal Chat',
+                        value: 'Active',
+                        icon: MessageSquare,
+                        color: '#f59e0b',
+                        change: 'Chat with Lawyer',
+                        link: '/client/chat'
                     }
                 ]);
 
@@ -193,6 +202,7 @@ export default function ClientDashboard() {
                     return (
                         <div
                             key={index}
+                            onClick={() => stat.link && navigate(stat.link)}
                             style={{
                                 background: 'var(--bg-glass-strong)',
                                 backdropFilter: 'var(--glass-blur)',
@@ -200,7 +210,8 @@ export default function ClientDashboard() {
                                 borderRadius: '1.5rem',
                                 padding: '1.5rem',
                                 transition: 'all 0.3s',
-                                boxShadow: 'var(--shadow-glass)'
+                                boxShadow: 'var(--shadow-glass)',
+                                cursor: 'pointer'
                             }}
                             onMouseOver={(e) => {
                                 e.currentTarget.style.transform = 'translateY(-4px)';

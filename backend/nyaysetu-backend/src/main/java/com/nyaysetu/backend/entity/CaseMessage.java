@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Table(name = "case_messages")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,7 +20,7 @@ public class CaseMessage {
     private UUID id;
 
     private UUID legalCaseId;
-    private UUID senderId;
+    private Long senderId;
 
     private String message;
 
