@@ -128,6 +128,17 @@ export const vakilFriendAPI = {
 };
 
 // Case Assignment API (Auto-assign judges, lawyer selection)
+export const assignmentAPI = {
+    autoAssign: (caseId) => api.post(`/api/assignments/case/${caseId}/auto-assign`),
+    assignLawyer: (caseId, lawyerId) => api.post(`/api/assignments/case/${caseId}/assign-lawyer`, { lawyerId }),
+    getLawyers: () => api.get('/api/users/lawyers'),
+};
+
+// Message API
+export const messageAPI = {
+    send: (caseId, message) => api.post(`/cases/${caseId}/messages`, { message }),
+    getMessages: (caseId) => api.get(`/cases/${caseId}/messages`),
+};
 export const caseAssignmentAPI = {
     autoAssignJudge: (caseId) => api.post(`/api/cases/${caseId}/assign-judge`),
     getAvailableLawyers: () => api.get('/api/cases/lawyers/available'),

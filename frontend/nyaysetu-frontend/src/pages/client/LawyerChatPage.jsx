@@ -12,38 +12,38 @@ import {
     CheckCheck,
     Loader2,
     Calendar,
-    FileText,
-    Bot
+    ArrowLeft
 } from 'lucide-react';
-import { messageAPI, lawyerAPI, vakilFriendAPI, documentAPI, meetingAPI } from '../../services/api';
+import { messageAPI, caseAPI, vakilFriendAPI, documentAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
-export default function ClientChatPage() {
-    const [selectedContact, setSelectedContact] = useState(null);
+export default function LawyerChatPage() {
+    const navigate = useNavigate();
+    const [selectedCase, setSelectedCase] = useState(null);
     const [message, setMessage] = useState('');
-    const [contacts, setContacts] = useState([]);
+    const [cases, setCases] = useState([]);
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [fileUploading, setFileUploading] = useState(false);
-    const [showMeetingModal, setShowMeetingModal] = useState(false);
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    // Fetch clients on mount
+    // Fetch client's cases on mount
     useEffect(() => {
-        fetchContacts();
+        fetchCases();
     }, []);
 
-    // Fetch messages when contact selected
+    // Fetch messages when case selected
     useEffect(() => {
-        if (selectedContact?.caseId) {
-            fetchMessages(selectedContact.caseId);
+        if (selectedCase?.id) {
+            fetchMessages(selectedCase.id);
             // Poll for new messages every 10 seconds
-            const interval = setInterval(() => fetchMessages(selectedContact.caseId), 10000);
+            const interval = setInterval(() => fetchMessages(selectedCase.id), 10000);
             return () => clearInterval(interval);
         }
-    }, [selectedContact]);
+    }, [selectedCase]);
 
     // Scroll to bottom on new message
     useEffect(() => {
@@ -54,27 +54,32 @@ export default function ClientChatPage() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    const fetchContacts = async () => {
+    const fetchCases = async () => {
         try {
-            // In a real app, this would fetch chats/cases. For now using lawyer's cases
-            const response = await lawyerAPI.getCases();
-            const cases = response.data || [];
+            const response = await caseAPI.list(); // Current user's cases
+            const myCases = response.data || [];
 
-            // Transform cases into chat contacts
-            const chatContacts = cases.map(c => ({
+            // Transform cases into chat contacts (Lawyers)
+            const chatContacts = myCases.map(c => ({
                 id: c.id,
                 caseId: c.id,
-                name: c.clientName || 'Client',
-                lastMsg: `Case: ${c.title}`, // Placeholder
-                time: new Date(c.createdAt).toLocaleDateString(),
-                unread: 0,
-                status: 'offline'
-            }));
+                name: c.lawyerName || 'Assigned Lawyer', // Fallback if no lawyer assigned yet
+                subtitle: `Case: ${c.title}`,
+                time: new Date(c.updatedAt).toLocaleDateString(),
+                status: 'online',
+                lawyerAssigned: !!c.lawyerId
+            })).filter(c => c.lawyerAssigned); // Only show cases with assigned lawyers
 
-            setContacts(chatContacts);
+            setCases(chatContacts);
+
+            // Auto-select first case if available
+            if (chatContacts.length > 0) {
+                setSelectedCase(chatContacts[0]);
+            }
+
             setLoading(false);
         } catch (error) {
-            console.error('Error fetching contacts:', error);
+            console.error('Error fetching cases:', error);
             setLoading(false);
         }
     };
@@ -84,13 +89,12 @@ export default function ClientChatPage() {
             const response = await messageAPI.getMessages(caseId);
             const fetchedMessages = response.data.map(msg => ({
                 id: msg.id,
-                sender: msg.senderId === selectedContact.id ? 'client' : 'me', // Logic needs adjustment based on user ID
+                sender: msg.senderId === selectedCase.id ? 'lawyer' : 'me', // simplistic logic
                 text: msg.message,
                 time: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 attachments: msg.attachments || []
             }));
 
-            // Filter duplicates or optimize update
             setMessages(fetchedMessages);
         } catch (error) {
             console.error('Error fetching messages:', error);
@@ -98,22 +102,13 @@ export default function ClientChatPage() {
     };
 
     const handleSendMessage = async () => {
-        if (!message.trim() || !selectedContact) return;
+        if (!message.trim() || !selectedCase) return;
 
         setSending(true);
         try {
-            // Optimistic UI update
-            const newMessage = {
-                id: Date.now(),
-                sender: 'me',
-                text: message,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            };
-            setMessages(prev => [...prev, newMessage]);
-
-            await messageAPI.send(selectedContact.caseId, message);
+            await messageAPI.send(selectedCase.id, message);
             setMessage('');
-            fetchMessages(selectedContact.caseId); // confirm send
+            fetchMessages(selectedCase.id);
         } catch (error) {
             console.error('Error sending message:', error);
             toast.error('Failed to send message');
@@ -124,22 +119,21 @@ export default function ClientChatPage() {
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
-        if (!file || !selectedContact) return;
+        if (!file || !selectedCase) return;
 
         setFileUploading(true);
         try {
-            const response = await documentAPI.upload(file, {
-                caseId: selectedContact.caseId,
+            await documentAPI.upload(file, {
+                caseId: selectedCase.id,
                 category: 'EVIDENCE',
-                description: `Shared via chat`
+                description: `Shared via chat by client`
             });
 
-            // Send message with attachment link
             const fileMsg = `Shared file: ${file.name}`;
-            await messageAPI.send(selectedContact.caseId, fileMsg);
+            await messageAPI.send(selectedCase.id, fileMsg);
 
             toast.success('File shared successfully');
-            fetchMessages(selectedContact.caseId);
+            fetchMessages(selectedCase.id);
         } catch (error) {
             console.error('Error uploading file:', error);
             toast.error('Failed to upload file');
@@ -148,20 +142,18 @@ export default function ClientChatPage() {
         }
     };
 
-    const handleAIReply = async () => {
-        if (!messages.length) return;
-
-        // Get last message from client
-        const lastClientMsg = [...messages].reverse().find(m => m.sender === 'client');
-        if (!lastClientMsg) return;
+    // AI Helper specialized for client queries
+    const handleAIHelp = async () => {
+        if (!message) {
+            setMessage("Can you update me on the status of my case?");
+            return;
+        }
 
         try {
-            // Using Vakil-Friend API to generate suggestion
-            const response = await vakilFriendAPI.sendMessage('temp-session', `Suggest a professional lawyer reply to this client message: "${lastClientMsg.text}"`);
-            setMessage(response.data.reply); // Adjust based on actual API response structure
+            const response = await vakilFriendAPI.sendMessage('temp-session', `Refine this message to my lawyer to be more professional: "${message}"`);
+            setMessage(response.data.reply);
         } catch (error) {
-            console.error('Error generating AI reply:', error);
-            setMessage("Thank you for your message. I have received it and will review it shortly.");
+            console.error('Error generating AI help:', error);
         }
     };
 
@@ -176,28 +168,16 @@ export default function ClientChatPage() {
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', height: 'calc(100vh - 160px)', display: 'flex', gap: '2rem' }}>
-            {/* Contacts Sidebar */}
+            {/* Sidebar - My Lawyers/Cases */}
             <div style={{ ...glassStyle, width: '350px', padding: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ padding: '1.5rem', borderBottom: 'var(--border-glass-subtle)' }}>
-                    <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <MessageSquare size={24} color="var(--color-accent)" /> Client Messages
-                    </h2>
-                    <div style={{ position: 'relative' }}>
-                        <Search size={18} color="var(--text-secondary)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-                        <input
-                            type="text"
-                            placeholder="Search conversations..."
-                            style={{
-                                width: '100%',
-                                background: 'var(--bg-glass)',
-                                border: 'var(--border-glass)',
-                                borderRadius: '0.75rem',
-                                padding: '0.7rem 1rem 0.7rem 3rem',
-                                color: 'var(--text-main)',
-                                outline: 'none',
-                                fontSize: '0.9rem'
-                            }}
-                        />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+                        <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer' }}>
+                            <ArrowLeft size={24} />
+                        </button>
+                        <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <MessageSquare size={24} color="var(--color-accent)" /> My Lawyers
+                        </h2>
                     </div>
                 </div>
 
@@ -206,53 +186,36 @@ export default function ClientChatPage() {
                         <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
                             <Loader2 className="animate-spin" color="var(--color-accent)" />
                         </div>
-                    ) : contacts.map(contact => (
+                    ) : cases.length === 0 ? (
+                        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                            <p>No lawyers assigned to your cases yet.</p>
+                        </div>
+                    ) : cases.map(c => (
                         <div
-                            key={contact.id}
-                            onClick={() => setSelectedContact(contact)}
+                            key={c.id}
+                            onClick={() => setSelectedCase(c)}
                             style={{
                                 padding: '1rem',
                                 borderRadius: '1rem',
-                                background: selectedContact?.id === contact.id ? 'var(--bg-glass-subtle)' : 'transparent',
-                                border: `1px solid ${selectedContact?.id === contact.id ? 'var(--color-accent)' : 'transparent'}`,
+                                background: selectedCase?.id === c.id ? 'var(--bg-glass-subtle)' : 'transparent',
+                                border: `1px solid ${selectedCase?.id === c.id ? 'var(--color-accent)' : 'transparent'}`,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 gap: '1rem',
                                 transition: 'all 0.2s',
                                 marginBottom: '0.5rem'
                             }}
-                            onMouseOver={e => !selectedContact?.id === contact.id && (e.currentTarget.style.background = 'var(--bg-glass-subtle)')}
-                            onMouseOut={e => !selectedContact?.id === contact.id && (e.currentTarget.style.background = 'transparent')}
                         >
-                            <div style={{ position: 'relative' }}>
-                                <div style={{
-                                    width: '52px', height: '52px', borderRadius: '15px',
-                                    background: 'var(--bg-glass-subtle)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    border: 'var(--border-glass-subtle)',
-                                    fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-main)'
-                                }}>
-                                    {contact.name.charAt(0)}
-                                </div>
-                                <div style={{
-                                    position: 'absolute', bottom: -2, right: -2,
-                                    width: '14px', height: '14px', borderRadius: '50%',
-                                    background: contact.status === 'online' ? '#10b981' : '#64748b',
-                                    border: '3px solid #0f172a'
-                                }} />
+                            <div style={{ width: '52px', height: '52px', borderRadius: '15px', background: 'var(--bg-glass-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-main)' }}>
+                                {c.name.charAt(0)}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span style={{ color: 'white', fontWeight: '700', fontSize: '0.95rem' }}>{contact.name}</span>
-                                    <span style={{ color: '#64748b', fontSize: '0.75rem' }}>{contact.time}</span>
+                                    <span style={{ color: 'white', fontWeight: '700', fontSize: '0.95rem' }}>{c.name}</span>
+                                    <span style={{ color: '#64748b', fontSize: '0.75rem' }}>{c.time}</span>
                                 </div>
-                                <p style={{
-                                    color: contact.unread > 0 ? '#e2e8f0' : '#94a3b8',
-                                    fontSize: '0.85rem', margin: 0,
-                                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                                    fontWeight: contact.unread > 0 ? '600' : '400'
-                                }}>
-                                    {contact.lastMsg}
+                                <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {c.subtitle}
                                 </p>
                             </div>
                         </div>
@@ -262,41 +225,32 @@ export default function ClientChatPage() {
 
             {/* Chat Window */}
             <div style={{ ...glassStyle, flex: 1, padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                {!selectedContact ? (
+                {!selectedCase ? (
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem' }}>
-                        <div style={{
-                            width: '80px', height: '80px', borderRadius: '50%', background: 'var(--bg-glass-subtle)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem'
-                        }}>
-                            <MessageSquare size={40} color="var(--color-accent)" />
-                        </div>
-                        <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>Select a Conversation</h3>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '300px' }}>
-                            Choose a client from the sidebar to start messaging and manage their legal inquiries.
-                        </p>
+                        <MessageSquare size={48} color="var(--color-accent)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                        <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>Select a Lawyer</h3>
+                        <p style={{ color: 'var(--text-secondary)' }}>Select a conversation to start chatting with your lawyer.</p>
                     </div>
                 ) : (
                     <>
-                        {/* Chat Header */}
+                        {/* Header */}
                         <div style={{ padding: '1rem 1.5rem', borderBottom: 'var(--border-glass-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                 <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--bg-glass-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-main)', fontWeight: '800' }}>
-                                    {selectedContact.name.charAt(0)}
+                                    {selectedCase.name.charAt(0)}
                                 </div>
                                 <div>
-                                    <div style={{ color: 'var(--text-main)', fontWeight: '700' }}>{selectedContact.name}</div>
-                                    <div style={{ color: 'var(--color-success)', fontSize: '0.75rem', fontWeight: '600' }}>Active Now</div>
+                                    <div style={{ color: 'var(--text-main)', fontWeight: '700' }}>{selectedCase.name}</div>
+                                    <div style={{ color: 'var(--color-success)', fontSize: '0.75rem', fontWeight: '600' }}>{selectedCase.subtitle}</div>
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button title="Schedule Meeting" style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Calendar size={20} /></button>
+                                <button title="Request Meeting" style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Calendar size={20} /></button>
                                 <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Phone size={20} /></button>
-                                <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Video size={20} /></button>
-                                <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><MoreVertical size={20} /></button>
                             </div>
                         </div>
 
-                        {/* Messages Area */}
+                        {/* Messages */}
                         <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {messages.map((msg, idx) => (
                                 <div key={msg.id || idx} style={{
@@ -310,15 +264,11 @@ export default function ClientChatPage() {
                                         color: 'var(--text-main)',
                                         fontSize: '0.95rem',
                                         borderBottomRightRadius: msg.sender === 'me' ? '0.2rem' : '1rem',
-                                        borderBottomLeftRadius: msg.sender === 'client' ? '0.2rem' : '1rem',
-                                        boxShadow: msg.sender === 'me' ? 'var(--shadow-glass)' : 'none'
+                                        borderBottomLeftRadius: msg.sender === 'client' ? '0.2rem' : '1rem'
                                     }}>
                                         {msg.text}
                                     </div>
-                                    <div style={{
-                                        display: 'flex', justifyContent: msg.sender === 'me' ? 'flex-end' : 'flex-start',
-                                        gap: '0.4rem', marginTop: '0.25rem', color: '#64748b', fontSize: '0.7rem'
-                                    }}>
+                                    <div style={{ display: 'flex', justifyContent: msg.sender === 'me' ? 'flex-end' : 'flex-start', gap: '0.4rem', marginTop: '0.25rem', color: '#64748b', fontSize: '0.7rem' }}>
                                         {msg.time} {msg.sender === 'me' && <CheckCheck size={14} color="#10b981" />}
                                     </div>
                                 </div>
@@ -326,7 +276,7 @@ export default function ClientChatPage() {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input Area */}
+                        {/* Input */}
                         <div style={{ padding: '1.5rem', borderTop: 'var(--border-glass-subtle)' }}>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                 <input
@@ -361,7 +311,7 @@ export default function ClientChatPage() {
                                         }}
                                     />
                                     <button
-                                        onClick={handleAIReply}
+                                        onClick={handleAIHelp}
                                         style={{
                                             position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)',
                                             background: 'var(--bg-glass-subtle)', color: 'var(--color-accent)', border: 'none',
@@ -369,7 +319,7 @@ export default function ClientChatPage() {
                                             fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer'
                                         }}
                                     >
-                                        <Bot size={14} /> AI REPLY
+                                        <Sparkles size={14} /> AI HELP
                                     </button>
                                 </div>
                                 <button
