@@ -1,28 +1,116 @@
-import { FolderOpen, Video, FileText, TrendingUp, Clock, CheckCircle2, Bot, MessageCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FolderOpen, Video, FileText, TrendingUp, Clock, CheckCircle2, Bot, MessageCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { caseAPI, hearingAPI, documentAPI } from '../../services/api';
 
 export default function ClientDashboard() {
     const navigate = useNavigate();
     const { t } = useLanguage();
 
-    // Mock data - will be replaced with API calls
-    const stats = [
-        { label: 'My Cases', value: '3', icon: FolderOpen, color: 'var(--color-primary)', change: '+1 this month' },
-        { label: 'Upcoming Hearings', value: '2', icon: Video, color: '#8b5cf6', change: 'Next: Dec 15' },
-        { label: 'Documents', value: '15', icon: FileText, color: '#10b981', change: '5 pending review' }
-    ];
+    // State for real data
+    const [recentCases, setRecentCases] = useState([]);
+    const [upcomingHearings, setUpcomingHearings] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState([
+        { label: 'My Cases', value: '0', icon: FolderOpen, color: 'var(--color-primary)', change: 'Loading...' },
+        { label: 'Upcoming Hearings', value: '0', icon: Video, color: '#8b5cf6', change: 'Loading...' },
+        { label: 'Documents', value: '0', icon: FileText, color: '#10b981', change: 'Loading...' }
+    ]);
 
-    const recentCases = [
-        { id: 'CS-2024-001', title: 'Property Dispute Case', status: 'Pending', date: 'Dec 1, 2024' },
-        { id: 'CS-2024-002', title: 'Contract Breach', status: 'In Progress', date: 'Nov 28, 2024' },
-        { id: 'CS-2024-003', title: 'Family Matter', status: 'Under Review', date: 'Nov 20, 2024' }
-    ];
+    // Fetch real data on mount
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
 
-    const upcomingHearings = [
-        { caseId: 'CS-2024-001', title: 'Property Dispute Hearing', date: 'Dec 15, 2024', time: '10:00 AM', type: 'Virtual' },
-        { caseId: 'CS-2024-002', title: 'Contract Case Review', date: 'Dec 20, 2024', time: '2:30 PM', type: 'Virtual' }
-    ];
+                // Fetch cases
+                const casesResponse = await caseAPI.list();
+                const cases = casesResponse.data || [];
+
+                // Sort by date and take recent 3
+                const sortedCases = cases.sort((a, b) =>
+                    new Date(b.filedDate || b.createdAt) - new Date(a.filedDate || a.createdAt)
+                ).slice(0, 3);
+
+                setRecentCases(sortedCases.map(c => ({
+                    id: c.id?.substring(0, 8) || 'CS-' + Math.random().toString(36).substr(2, 6),
+                    fullId: c.id,
+                    title: c.title || 'Untitled Case',
+                    status: c.status || 'PENDING',
+                    date: c.filedDate ? new Date(c.filedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'
+                })));
+
+                // Fetch hearings
+                const hearingsResponse = await hearingAPI.getMyHearings();
+                const hearings = hearingsResponse.data || [];
+
+                // Filter upcoming hearings (future dates)
+                const now = new Date();
+                const upcoming = hearings.filter(h => new Date(h.scheduledAt) > now)
+                    .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
+                    .slice(0, 2);
+
+                setUpcomingHearings(upcoming.map(h => ({
+                    caseId: h.caseId?.substring(0, 8) || 'N/A',
+                    fullCaseId: h.caseId,
+                    title: h.title || 'Hearing',
+                    date: new Date(h.scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                    time: new Date(h.scheduledAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+                    type: h.type || 'Virtual',
+                    meetingLink: h.meetingLink
+                })));
+
+                // Fetch documents count
+                let docCount = 0;
+                try {
+                    const docsResponse = await documentAPI.list();
+                    docCount = (docsResponse.data || []).length;
+                } catch (e) {
+                    console.log('Documents API not available');
+                }
+
+                // Calculate next hearing date
+                const nextHearing = upcoming.length > 0
+                    ? new Date(upcoming[0].scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                    : 'None scheduled';
+
+                // Update stats with real data
+                setStats([
+                    {
+                        label: 'My Cases',
+                        value: String(cases.length),
+                        icon: FolderOpen,
+                        color: 'var(--color-primary)',
+                        change: cases.length > 0 ? `${cases.filter(c => c.status === 'OPEN' || c.status === 'PENDING').length} active` : 'No cases yet'
+                    },
+                    {
+                        label: 'Upcoming Hearings',
+                        value: String(upcoming.length),
+                        icon: Video,
+                        color: '#8b5cf6',
+                        change: `Next: ${nextHearing}`
+                    },
+                    {
+                        label: 'Documents',
+                        value: String(docCount),
+                        icon: FileText,
+                        color: '#10b981',
+                        change: docCount > 0 ? 'All accessible' : 'No documents'
+                    }
+                ]);
+
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                // Keep empty arrays on error
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
 
     return (
         <div>
@@ -225,53 +313,80 @@ export default function ClientDashboard() {
                         {t('Recent Cases')}
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {recentCases.map((caseItem, index) => (
-                            <div
-                                key={index}
-                                style={{
-                                    padding: '1rem',
-                                    background: 'var(--bg-glass)',
-                                    borderRadius: '0.75rem',
-                                    border: 'var(--border-glass)',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s'
-                                }}
-                                onMouseOver={(e) => {
-                                    e.currentTarget.style.borderColor = 'var(--color-accent)';
-                                    e.currentTarget.style.background = 'var(--bg-glass-hover)';
-                                }}
-                                onMouseOut={(e) => {
-                                    e.currentTarget.style.borderColor = 'var(--border-glass)';
-                                    e.currentTarget.style.background = 'var(--bg-glass)';
-                                }}
-                            >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                                    <span style={{ fontSize: '0.75rem', color: 'var(--color-accent)', fontWeight: '600' }}>
-                                        {caseItem.id}
-                                    </span>
-                                    <span style={{
-                                        fontSize: '0.75rem',
-                                        padding: '0.25rem 0.75rem',
-                                        borderRadius: '9999px',
-                                        background: caseItem.status === 'Pending' ? 'rgba(245, 158, 11, 0.1)' :
-                                            caseItem.status === 'In Progress' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                                        color: caseItem.status === 'Pending' ? '#f59e0b' :
-                                            caseItem.status === 'In Progress' ? '#3b82f6' : '#10b981',
-                                        border: `1px solid ${caseItem.status === 'Pending' ? 'rgba(245, 158, 11, 0.2)' :
-                                            caseItem.status === 'In Progress' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`,
-                                        fontWeight: '600'
-                                    }}>
-                                        {caseItem.status}
-                                    </span>
-                                </div>
-                                <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                                    {caseItem.title}
-                                </h4>
-                                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                                    Filed: {caseItem.date}
-                                </p>
+                        {loading ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                                <Loader2 size={24} style={{ color: 'var(--color-accent)', animation: 'spin 1s linear infinite' }} />
                             </div>
-                        ))}
+                        ) : recentCases.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                                <FolderOpen size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
+                                <p>No cases filed yet</p>
+                                <button
+                                    onClick={() => navigate('/client/file-case')}
+                                    style={{
+                                        marginTop: '0.75rem',
+                                        padding: '0.5rem 1rem',
+                                        background: 'var(--color-accent)',
+                                        border: 'none',
+                                        borderRadius: '0.5rem',
+                                        color: 'white',
+                                        fontWeight: '600',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    File Your First Case
+                                </button>
+                            </div>
+                        ) : (
+                            recentCases.map((caseItem, index) => (
+                                <div
+                                    key={index}
+                                    onClick={() => navigate(`/client/case/${caseItem.fullId}`)}
+                                    style={{
+                                        padding: '1rem',
+                                        background: 'var(--bg-glass)',
+                                        borderRadius: '0.75rem',
+                                        border: 'var(--border-glass)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.currentTarget.style.borderColor = 'var(--color-accent)';
+                                        e.currentTarget.style.background = 'var(--bg-glass-hover)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget.style.borderColor = 'var(--border-glass)';
+                                        e.currentTarget.style.background = 'var(--bg-glass)';
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-accent)', fontWeight: '600' }}>
+                                            {caseItem.id}
+                                        </span>
+                                        <span style={{
+                                            fontSize: '0.75rem',
+                                            padding: '0.25rem 0.75rem',
+                                            borderRadius: '9999px',
+                                            background: caseItem.status === 'PENDING' ? 'rgba(245, 158, 11, 0.1)' :
+                                                caseItem.status === 'OPEN' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                                            color: caseItem.status === 'PENDING' ? '#f59e0b' :
+                                                caseItem.status === 'OPEN' ? '#3b82f6' : '#10b981',
+                                            border: `1px solid ${caseItem.status === 'PENDING' ? 'rgba(245, 158, 11, 0.2)' :
+                                                caseItem.status === 'OPEN' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`,
+                                            fontWeight: '600'
+                                        }}>
+                                            {caseItem.status}
+                                        </span>
+                                    </div>
+                                    <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                        {caseItem.title}
+                                    </h4>
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                        Filed: {caseItem.date}
+                                    </p>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 
@@ -288,74 +403,94 @@ export default function ClientDashboard() {
                         {t('Upcoming Hearings')}
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {upcomingHearings.map((hearing, index) => (
-                            <div
-                                key={index}
-                                style={{
-                                    padding: '1rem',
-                                    background: 'var(--bg-glass)',
-                                    borderRadius: '0.75rem',
-                                    border: 'var(--border-glass)'
-                                }}
-                            >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                                    <div style={{
-                                        width: '40px',
-                                        height: '40px',
-                                        borderRadius: '10px',
-                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
-                                        <Video size={20} color="white" />
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
-                                            {hearing.title}
-                                        </h4>
-                                        <p style={{ fontSize: '0.75rem', color: 'var(--color-accent)' }}>
-                                            {hearing.caseId}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div>
-                                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                                            <Clock size={14} style={{ display: 'inline', marginRight: '0.5rem' }} />
-                                            {hearing.date} at {hearing.time}
-                                        </p>
-                                        <span style={{
-                                            fontSize: '0.75rem',
-                                            padding: '0.25rem 0.75rem',
-                                            borderRadius: '9999px',
-                                            background: 'rgba(139, 92, 246, 0.1)',
-                                            color: 'var(--color-accent)',
-                                            fontWeight: '600',
-                                            border: '1px solid rgba(139, 92, 246, 0.2)'
-                                        }}>
-                                            {hearing.type}
-                                        </span>
-                                    </div>
-                                    <button style={{
-                                        padding: '0.5rem 1rem',
-                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
-                                        border: 'none',
-                                        borderRadius: '0.5rem',
-                                        color: 'white',
-                                        fontSize: '0.875rem',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
-                                    }}>
-                                        {t('Join')}
-                                    </button>
-                                </div>
+                        {loading ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                                <Loader2 size={24} style={{ color: 'var(--color-accent)', animation: 'spin 1s linear infinite' }} />
                             </div>
-                        ))}
+                        ) : upcomingHearings.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                                <Video size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
+                                <p>No upcoming hearings</p>
+                                <p style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>Hearings will appear here once scheduled</p>
+                            </div>
+                        ) : (
+                            upcomingHearings.map((hearing, index) => (
+                                <div
+                                    key={index}
+                                    style={{
+                                        padding: '1rem',
+                                        background: 'var(--bg-glass)',
+                                        borderRadius: '0.75rem',
+                                        border: 'var(--border-glass)'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                                        <div style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            borderRadius: '10px',
+                                            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            <Video size={20} color="white" />
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
+                                                {hearing.title}
+                                            </h4>
+                                            <p style={{ fontSize: '0.75rem', color: 'var(--color-accent)' }}>
+                                                {hearing.caseId}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div>
+                                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                                                <Clock size={14} style={{ display: 'inline', marginRight: '0.5rem' }} />
+                                                {hearing.date} at {hearing.time}
+                                            </p>
+                                            <span style={{
+                                                fontSize: '0.75rem',
+                                                padding: '0.25rem 0.75rem',
+                                                borderRadius: '9999px',
+                                                background: 'rgba(139, 92, 246, 0.1)',
+                                                color: 'var(--color-accent)',
+                                                fontWeight: '600',
+                                                border: '1px solid rgba(139, 92, 246, 0.2)'
+                                            }}>
+                                                {hearing.type}
+                                            </span>
+                                        </div>
+                                        <button style={{
+                                            padding: '0.5rem 1rem',
+                                            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                            border: 'none',
+                                            borderRadius: '0.5rem',
+                                            color: 'white',
+                                            fontSize: '0.875rem',
+                                            fontWeight: '600',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+                                        }}>
+                                            {t('Join')}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
+
+            {/* CSS for loading animation */}
+            <style>{`
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 }
