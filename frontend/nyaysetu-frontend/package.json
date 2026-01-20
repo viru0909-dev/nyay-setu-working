@@ -25,6 +25,7 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^6.20.0",
     "react-webcam": "^7.2.0",
+    "remark-gfm": "^4.0.1",
     "simple-peer": "^9.11.1",
     "socket.io-client": "^4.8.1",
     "three": "^0.181.2",

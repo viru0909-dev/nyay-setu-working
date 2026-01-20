@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { judgeAPI } from '../../services/api';
 import {
     Brain,
@@ -282,7 +283,7 @@ export default function AICaseSummaryPage() {
                                     overflowY: 'auto'
                                 }}
                             >
-                                <ReactMarkdown>{summary.summary}</ReactMarkdown>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary.summary}</ReactMarkdown>
                             </div>
 
                             <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
