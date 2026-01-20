@@ -25,7 +25,7 @@ public class LegalCase {
 
     private String description;
 
-    private UUID judgeId;
+    private Long judgeId;
 
     @Enumerated(EnumType.STRING)
     private CaseStatus status;
