@@ -276,7 +276,7 @@ export default function ClientChatPage() {
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span style={{ color: 'white', fontWeight: '700', fontSize: '0.95rem' }}>{contact.name}</span>
+                                    <span style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem' }}>{contact.name}</span>
                                     <span style={{ color: '#64748b', fontSize: '0.75rem' }}>{contact.time}</span>
                                 </div>
                                 <p style={{

@@ -59,20 +59,46 @@ export default function LawyerChatPage() {
             const response = await caseAPI.list(); // Current user's cases
             const myCases = response.data || [];
 
-            // Transform cases into chat contacts (Lawyers)
-            const chatContacts = myCases.map(c => ({
-                id: c.id,
-                caseId: c.id,
-                name: c.lawyerName || 'Assigned Lawyer', // Fallback if no lawyer assigned yet
-                subtitle: `Case: ${c.title}`,
-                time: new Date(c.updatedAt).toLocaleDateString(),
-                status: 'online',
-                lawyerAssigned: !!c.lawyerId
-            })).filter(c => c.lawyerAssigned); // Only show cases with assigned lawyers
+            // Group cases by Lawyer
+            const lawyerMap = new Map();
+
+            myCases.forEach(c => {
+                if (!c.lawyerId) return;
+
+                const existing = lawyerMap.get(c.lawyerId);
+                const caseDate = new Date(c.updatedAt || c.createdAt || c.filedDate || Date.now());
+
+                if (existing) {
+                    if (caseDate > existing.dateObj) {
+                        lawyerMap.set(c.lawyerId, {
+                            ...existing,
+                            id: c.id,
+                            caseId: c.id,
+                            subtitle: `Case: ${c.title}`,
+                            time: caseDate.toLocaleDateString(),
+                            dateObj: caseDate
+                        });
+                    }
+                } else {
+                    lawyerMap.set(c.lawyerId, {
+                        id: c.id,
+                        caseId: c.id,
+                        name: c.lawyerName || 'Lawyer',
+                        subtitle: `Case: ${c.title}`,
+                        time: caseDate.toLocaleDateString(),
+                        dateObj: caseDate,
+                        status: 'online',
+                        lawyerAssigned: true,
+                        lawyerId: c.lawyerId
+                    });
+                }
+            });
+
+            const chatContacts = Array.from(lawyerMap.values())
+                .sort((a, b) => b.dateObj - a.dateObj);
 
             setCases(chatContacts);
 
-            // Auto-select first case if available
             if (chatContacts.length > 0) {
                 setSelectedCase(chatContacts[0]);
             }
@@ -211,7 +237,7 @@ export default function LawyerChatPage() {
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span style={{ color: 'white', fontWeight: '700', fontSize: '0.95rem' }}>{c.name}</span>
+                                    <span style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem' }}>{c.name}</span>
                                     <span style={{ color: '#64748b', fontSize: '0.75rem' }}>{c.time}</span>
                                 </div>
                                 <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
