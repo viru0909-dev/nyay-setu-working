@@ -19,7 +19,7 @@ public class CaseMessage {
     private UUID id;
 
     private UUID legalCaseId;
-    private UUID senderId;
+    private Long senderId;
 
     private String message;
 

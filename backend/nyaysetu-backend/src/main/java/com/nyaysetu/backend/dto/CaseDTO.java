@@ -26,4 +26,5 @@ public class CaseDTO {
     private String draftPetition;
     private Long lawyerId;
     private String lawyerName;
+    private LocalDateTime updatedAt;
 }

@@ -37,6 +37,10 @@ public class MessageService {
 
         timelineService.addEvent(caseId, "Message sent");
 
+        // Update case timestamp so it bubbles up in chat list
+        lc.setUpdatedAt(LocalDateTime.now());
+        legalCaseRepository.save(lc);
+
         return msg;
     }
 

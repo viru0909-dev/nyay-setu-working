@@ -125,6 +125,7 @@ public class CaseManagementService {
                 .draftPetition(entity.getDraftPetition())
                 .lawyerId(entity.getLawyer() != null ? entity.getLawyer().getId() : null)
                 .lawyerName(entity.getLawyer() != null ? entity.getLawyer().getName() : null)
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
