@@ -5,7 +5,7 @@ import {
     CheckCircle2, Scale, Users, Home as HomeIcon, Briefcase,
     AlertCircle
 } from 'lucide-react';
-import { caseAPI } from '../../services/api';
+import { caseAPI, documentAPI } from '../../services/api';
 
 const caseTypes = [
     { id: 'civil', name: 'Civil Case', icon: Scale, desc: 'Property, contracts, disputes', color: '#3b82f6' },
@@ -66,10 +66,29 @@ export default function FileCasePage() {
             const response = await caseAPI.create(caseData);
             console.log('Case created:', response.data);
 
-            // TODO: Upload documents separately
-            // for (const doc of formData.documents) {
-            //     await documentAPI.upload(doc.file, response.data.id);
-            // }
+            // Upload documents with the newly created case ID
+            if (formData.documents.length > 0) {
+                const caseId = response.data.id;
+                let uploadErrors = [];
+
+                for (const doc of formData.documents) {
+                    try {
+                        await documentAPI.upload(doc.file, {
+                            caseId: caseId,
+                            category: 'CASE_DOCUMENT',
+                            description: `Document uploaded during case filing: ${doc.name}`
+                        });
+                        console.log('Document uploaded:', doc.name);
+                    } catch (uploadError) {
+                        console.error('Error uploading document:', doc.name, uploadError);
+                        uploadErrors.push(doc.name);
+                    }
+                }
+
+                if (uploadErrors.length > 0) {
+                    alert(`Case created but some documents failed to upload: ${uploadErrors.join(', ')}. You can upload them later from the Documents section.`);
+                }
+            }
 
             navigate('/client/cases');
         } catch (error) {
