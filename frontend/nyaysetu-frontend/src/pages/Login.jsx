@@ -56,6 +56,7 @@ export default function Login() {
                 JUDGE: '/judge',
                 LAWYER: '/lawyer',
                 CLIENT: '/client',
+                POLICE: '/police',
                 TECH_ADMIN: '/admin',
                 TECHNICAL_TEAM: '/admin',
                 SUPER_JUDGE: '/admin'

@@ -7,5 +7,6 @@ public enum Role {
     ADMIN,
     TECH_ADMIN,
     SUPER_JUDGE,
-    TECHNICAL_TEAM
+    TECHNICAL_TEAM,
+    POLICE
 }
