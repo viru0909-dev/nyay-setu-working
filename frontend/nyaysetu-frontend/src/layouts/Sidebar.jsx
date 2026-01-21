@@ -12,6 +12,7 @@ const roleMenuItems = {
         { icon: Home, label: 'Dashboard', path: '/client' },
         { icon: Bot, label: 'Vakil-Friend AI', path: '/client/vakil-friend' },
         { icon: FileText, label: 'File New Case', path: '/client/file-case' },
+        { icon: Scale, label: 'File FIR', path: '/client/file-fir' },
         { icon: FolderOpen, label: 'My Cases', path: '/client/cases' },
         { icon: Upload, label: 'Documents', path: '/client/documents' },
         { icon: Brain, label: 'AI Document Review', path: '/client/ai-review' },
