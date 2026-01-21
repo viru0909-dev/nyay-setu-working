@@ -180,4 +180,15 @@ export const brainAPI = {
     chat: (message, sessionId = null) => api.post('/api/brain/chat', { message, sessionId }),
 };
 
+// Police API - FIR management for police officers
+export const policeAPI = {
+    uploadFir: (formData) => api.post('/api/police/fir/upload', formData),
+    listFirs: () => api.get('/api/police/fir/list'),
+    getFir: (id) => api.get(`/api/police/fir/${id}`),
+    verifyFir: (id, formData) => api.post(`/api/police/fir/${id}/verify`, formData),
+    getStats: () => api.get('/api/police/stats'),
+    health: () => api.get('/api/police/health'),
+};
+
 export default api;
+
