@@ -53,6 +53,11 @@ const LawyerCaseDetailsPage = lazy(() => import('./pages/lawyer/LawyerCaseDetail
 const ClientChatPage = lazy(() => import('./pages/lawyer/ClientChatPage'));
 const LawyerProfilePage = lazy(() => import('./pages/lawyer/LawyerProfilePage'));
 
+// Police Pages
+const PoliceDashboard = lazy(() => import('./pages/police/PoliceDashboard'));
+const UploadFirPage = lazy(() => import('./pages/police/UploadFirPage'));
+const MyFirsPage = lazy(() => import('./pages/police/MyFirsPage'));
+
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { isAuthenticated, user } = useAuthStore();
@@ -164,6 +169,20 @@ function App() {
                                 }
                             >
                                 <Route index element={<AdminDashboard />} />
+                            </Route>
+
+                            <Route
+                                path="/police/*"
+                                element={
+                                    <ProtectedRoute allowedRoles={['POLICE']}>
+                                        <DashboardLayout />
+                                    </ProtectedRoute>
+                                }
+                            >
+                                <Route index element={<PoliceDashboard />} />
+                                <Route path="upload" element={<UploadFirPage />} />
+                                <Route path="firs" element={<MyFirsPage />} />
+                                <Route path="profile" element={<ProfilePage />} />
                             </Route>
 
                             <Route path="/unauthorized" element={

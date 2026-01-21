@@ -57,6 +57,12 @@ const roleMenuItems = {
         { icon: BarChart3, label: 'Logs', path: '/tech-admin/logs' },
         { icon: Settings, label: 'Configuration', path: '/tech-admin/config' },
         { icon: User, label: 'Profile', path: '/tech-admin/profile' }
+    ],
+    POLICE: [
+        { icon: Home, label: 'Dashboard', path: '/police' },
+        { icon: Upload, label: 'Upload FIR', path: '/police/upload' },
+        { icon: FolderOpen, label: 'My FIRs', path: '/police/firs' },
+        { icon: User, label: 'Profile', path: '/police/profile' }
     ]
 };
 
