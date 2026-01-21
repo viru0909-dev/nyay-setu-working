@@ -23,6 +23,7 @@ public class DataLoader implements CommandLineRunner {
         createIfMissing("lawyer@nyay.com", "Lawyer Y", "lawyer123", Role.LAWYER);
         createIfMissing("client@nyay.com", "Client Z", "client123", Role.CLIENT);
         createIfMissing("tech@nyay.com", "Tech Admin", "tech123", Role.TECH_ADMIN);
+        createIfMissing("police@nyay.com", "Officer P", "police123", Role.POLICE);
     }
 
     private void createIfMissing(String email, String name, String pass, Role role) {
