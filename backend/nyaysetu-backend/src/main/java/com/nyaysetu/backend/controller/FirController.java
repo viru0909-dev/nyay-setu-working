@@ -114,9 +114,41 @@ public class FirController {
         ));
     }
 
+    /**
+     * Get all FIRs pending police review (client-filed FIRs)
+     */
+    @GetMapping("/fir/pending")
+    public ResponseEntity<List<FirUploadResponse>> getPendingFirs() {
+        List<FirUploadResponse> firs = firService.getPendingReviewFirs();
+        return ResponseEntity.ok(firs);
+    }
+
+    /**
+     * Update FIR status (REGISTERED or REJECTED)
+     */
+    @PutMapping("/fir/{id}/status")
+    public ResponseEntity<FirUploadResponse> updateFirStatus(
+            @PathVariable Long id,
+            @RequestParam("status") String status,
+            @RequestParam(value = "reviewNotes", required = false) String reviewNotes,
+            Authentication auth) {
+        
+        User user = getCurrentUser(auth);
+        
+        if (!status.equals("REGISTERED") && !status.equals("REJECTED")) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        FirUploadResponse response = firService.updateFirStatus(id, status, reviewNotes, user);
+        log.info("FIR {} status updated to {} by {}", response.getFirNumber(), status, user.getName());
+        
+        return ResponseEntity.ok(response);
+    }
+
     private User getCurrentUser(Authentication auth) {
         String email = auth.getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found: " + email));
     }
 }
+
