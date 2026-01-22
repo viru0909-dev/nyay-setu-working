@@ -58,6 +58,8 @@ const LawyerProfilePage = lazy(() => import('./pages/lawyer/LawyerProfilePage'))
 const PoliceDashboard = lazy(() => import('./pages/police/PoliceDashboard'));
 const UploadFirPage = lazy(() => import('./pages/police/UploadFirPage'));
 const MyFirsPage = lazy(() => import('./pages/police/MyFirsPage'));
+const PoliceInvestigationsPage = lazy(() => import('./pages/police/PoliceInvestigationsPage'));
+const InvestigationDetailsPage = lazy(() => import('./pages/police/InvestigationDetailsPage'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -184,6 +186,8 @@ function App() {
                                 <Route index element={<PoliceDashboard />} />
                                 <Route path="upload" element={<UploadFirPage />} />
                                 <Route path="firs" element={<MyFirsPage />} />
+                                <Route path="investigations" element={<PoliceInvestigationsPage />} />
+                                <Route path="investigation/:id" element={<InvestigationDetailsPage />} />
                                 <Route path="profile" element={<ProfilePage />} />
                             </Route>
 

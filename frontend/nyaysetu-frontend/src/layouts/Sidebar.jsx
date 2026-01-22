@@ -4,7 +4,7 @@ import {
     Home, FileText, FolderOpen, Upload, Brain,
     Archive, Video, User, Users, Briefcase,
     Gavel, BarChart3, Settings, Menu, X,
-    Scale, MessageSquare, Calendar, Bot
+    Scale, MessageSquare, Calendar, Bot, TrendingUp
 } from 'lucide-react';
 
 const roleMenuItems = {
@@ -61,6 +61,7 @@ const roleMenuItems = {
     ],
     POLICE: [
         { icon: Home, label: 'Dashboard', path: '/police' },
+        { icon: TrendingUp, label: 'Investigation Unit', path: '/police/investigations' },
         { icon: Upload, label: 'Upload FIR', path: '/police/upload' },
         { icon: FolderOpen, label: 'My FIRs', path: '/police/firs' },
         { icon: User, label: 'Profile', path: '/police/profile' }
