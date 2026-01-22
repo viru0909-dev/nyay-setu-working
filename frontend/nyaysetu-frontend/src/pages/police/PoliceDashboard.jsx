@@ -12,25 +12,62 @@ export default function PoliceDashboard() {
     const { t } = useLanguage();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [pendingFirs, setPendingFirs] = useState([]);
+    const [activeInvestigations, setActiveInvestigations] = useState([]);
+    const [selectedFir, setSelectedFir] = useState(null);
+    const [findings, setFindings] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                setLoading(true);
-                const response = await policeAPI.getStats();
-                setStats(response.data);
-            } catch (error) {
-                console.error('Error fetching stats:', error);
-                // Set default stats on error
-                setStats({ totalFirs: 0, sealedFirs: 0, linkedFirs: 0, firsToday: 0 });
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchStats();
+        fetchDashboardData();
     }, []);
 
+    const fetchDashboardData = async () => {
+        try {
+            setLoading(true);
+            const [statsRes, pendingRes, activeRes] = await Promise.all([
+                policeAPI.getStats(),
+                policeAPI.getPendingFirs(),
+                policeAPI.getInvestigations()
+            ]);
+            setStats(statsRes.data);
+            setPendingFirs(pendingRes.data);
+            setActiveInvestigations(activeRes.data);
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            setStats({ totalFirs: 0, sealedFirs: 0, linkedFirs: 0, firsToday: 0 });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleStartInvestigation = async (firId) => {
+        try {
+            await policeAPI.startInvestigation(firId);
+            fetchDashboardData(); // Refresh lists
+        } catch (error) {
+            console.error('Error starting investigation:', error);
+        }
+    };
+
+    const handleSubmitToCourt = async () => {
+        if (!selectedFir || !findings.trim()) return;
+
+        try {
+            setIsSubmitting(true);
+            await policeAPI.submitInvestigation(selectedFir.id, findings);
+            setSelectedFir(null);
+            setFindings('');
+            fetchDashboardData(); // Refresh lists
+        } catch (error) {
+            console.error('Error submitting to court:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const statCards = [
+        // ... (existing stat cards code)
         {
             label: 'Total FIRs',
             value: stats?.totalFirs || 0,
@@ -63,7 +100,7 @@ export default function PoliceDashboard() {
 
     return (
         <div>
-            {/* Hero Banner */}
+            {/* Hero Banner (existing) */}
             <div
                 onClick={() => navigate('/police/upload')}
                 style={{
@@ -126,7 +163,7 @@ export default function PoliceDashboard() {
                 </div>
             </div>
 
-            {/* Stats Grid */}
+            {/* Stats Grid (existing) */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
@@ -184,7 +221,79 @@ export default function PoliceDashboard() {
                 )}
             </div>
 
-            {/* Quick Actions */}
+            {/* ACTION CENTER: Incoming FIRs */}
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <AlertTriangle size={20} color="#f59e0b" /> Incoming FIRs ({pendingFirs.length})
+            </h3>
+            <div style={{ display: 'grid', gap: '1rem', marginBottom: '2rem' }}>
+                {pendingFirs.length === 0 ? (
+                    <p style={{ color: 'var(--text-secondary)' }}>No pending FIRs for review.</p>
+                ) : pendingFirs.map(fir => (
+                    <div key={fir.id} style={{ background: 'var(--bg-glass)', padding: '1rem', borderRadius: '1rem', border: 'var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h4 style={{ margin: 0, color: 'var(--text-main)' }}>{fir.title}</h4>
+                            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Filed by: {fir.filedByName || 'Unknown'} | Date: {new Date(fir.uploadedAt).toLocaleDateString()}</p>
+                        </div>
+                        <button
+                            onClick={() => handleStartInvestigation(fir.id)}
+                            style={{ background: 'var(--color-primary)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                            Accept Investigation
+                        </button>
+                    </div>
+                ))}
+            </div>
+
+            {/* ACTIVE INVESTIGATIONS */}
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <TrendingUp size={20} color="#3b82f6" /> Active Investigations ({activeInvestigations.length})
+            </h3>
+            <div style={{ display: 'grid', gap: '1rem', marginBottom: '2rem' }}>
+                {activeInvestigations.length === 0 ? (
+                    <p style={{ color: 'var(--text-secondary)' }}>No active investigations.</p>
+                ) : activeInvestigations.map(fir => (
+                    <div key={fir.id} style={{ background: 'var(--bg-glass)', padding: '1rem', borderRadius: '1rem', border: 'var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h4 style={{ margin: 0, color: 'var(--text-main)' }}>{fir.title}</h4>
+                            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>FIR #: {fir.firNumber}</p>
+                        </div>
+                        <button
+                            onClick={() => setSelectedFir(fir)}
+                            style={{ background: '#10b981', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                            Submit to Court
+                        </button>
+                    </div>
+                ))}
+            </div>
+
+            {/* CASE DIARY MODAL */}
+            {selectedFir && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', width: '500px', maxWidth: '90%' }}>
+                        <h3 style={{ marginTop: 0 }}>Final Case Diary</h3>
+                        <p style={{ color: '#666' }}>Submit investigation findings for <strong>{selectedFir.firNumber}</strong> to the Court.</p>
+                        <textarea
+                            value={findings}
+                            onChange={(e) => setFindings(e.target.value)}
+                            placeholder="Enter detailed investigation findings..."
+                            style={{ width: '100%', height: '150px', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ddd', marginBottom: '1rem' }}
+                        />
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <button onClick={() => setSelectedFir(null)} style={{ background: 'none', border: '1px solid #ddd', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer' }}>Cancel</button>
+                            <button
+                                onClick={handleSubmitToCourt}
+                                disabled={isSubmitting || !findings.trim()}
+                                style={{ background: '#10b981', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', opacity: (isSubmitting || !findings.trim()) ? 0.7 : 1 }}
+                            >
+                                {isSubmitting ? 'Submitting...' : 'Submit to Judge'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Quick Actions (existing) */}
             <div style={{
                 background: 'var(--bg-glass-strong)',
                 backdropFilter: 'var(--glass-blur)',
@@ -240,7 +349,7 @@ export default function PoliceDashboard() {
                 </div>
             </div>
 
-            {/* Info Banner */}
+            {/* Info Banner (existing) */}
             <div style={{
                 background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
                 border: 'var(--border-glass)',

@@ -79,6 +79,15 @@ public class FirRecord {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewed_by")
     private User reviewedBy;
+
+    // Investigation Fields
+    @Column(columnDefinition = "TEXT")
+    private String investigationDetails;
+
+    private LocalDateTime submittedToCourtAt;
+
+    @Builder.Default
+    private Boolean isSubmittedToCourt = false;
     
     @PrePersist
     protected void onCreate() {
