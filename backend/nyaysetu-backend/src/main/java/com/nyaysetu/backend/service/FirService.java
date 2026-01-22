@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.service;
 
+import com.nyaysetu.backend.dto.ClientFirRequest;
 import com.nyaysetu.backend.dto.FirUploadRequest;
 import com.nyaysetu.backend.dto.FirUploadResponse;
 import com.nyaysetu.backend.entity.FirRecord;
@@ -171,6 +172,129 @@ public class FirService {
                 .build();
     }
 
+    // ==================== CLIENT FIR METHODS ====================
+
+    /**
+     * Client files an FIR (with optional evidence file)
+     */
+    public FirUploadResponse fileClientFir(ClientFirRequest request, MultipartFile file, User filedBy) {
+        try {
+            String fileHash = null;
+            String filePath = null;
+            String fileName = null;
+            String fileType = null;
+            Long fileSize = null;
+
+            // Handle optional file upload
+            if (file != null && !file.isEmpty()) {
+                Path uploadDir = Paths.get(firUploadPath);
+                if (!Files.exists(uploadDir)) {
+                    Files.createDirectories(uploadDir);
+                }
+
+                String originalFilename = file.getOriginalFilename();
+                String extension = originalFilename != null && originalFilename.contains(".") 
+                    ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+                    : "";
+                String uniqueFilename = UUID.randomUUID().toString() + extension;
+                Path savedPath = uploadDir.resolve(uniqueFilename);
+                file.transferTo(savedPath.toFile());
+
+                fileHash = blockchainService.calculateFileHash(savedPath.toFile());
+                filePath = savedPath.toString();
+                fileName = originalFilename;
+                fileType = file.getContentType();
+                fileSize = file.getSize();
+                log.info("Client FIR evidence hashed: {}", fileHash.substring(0, 16) + "...");
+            }
+
+            String firNumber = generateFirNumber();
+
+            FirRecord firRecord = FirRecord.builder()
+                    .firNumber(firNumber)
+                    .title(request.getTitle())
+                    .description(request.getDescription())
+                    .incidentDate(request.getIncidentDate())
+                    .incidentLocation(request.getIncidentLocation())
+                    .aiGenerated(request.getAiGenerated() != null ? request.getAiGenerated() : false)
+                    .aiSessionId(request.getAiSessionId())
+                    .fileHash(fileHash)
+                    .filePath(filePath)
+                    .fileName(fileName)
+                    .fileType(fileType)
+                    .fileSize(fileSize)
+                    .filedBy(filedBy)
+                    .uploadedAt(LocalDateTime.now())
+                    .caseId(request.getCaseId())
+                    .status("PENDING_POLICE_REVIEW")
+                    .build();
+
+            FirRecord saved = firRecordRepository.save(firRecord);
+            log.info("Client FIR {} filed by {} - Status: PENDING_POLICE_REVIEW", firNumber, filedBy.getName());
+
+            return mapToResponse(saved);
+
+        } catch (IOException e) {
+            log.error("Failed to file client FIR", e);
+            throw new RuntimeException("Failed to file FIR: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get all FIRs filed by a specific client
+     */
+    public List<FirUploadResponse> getClientFirs(Long userId) {
+        return firRecordRepository.findByFiledByIdOrderByUploadedAtDesc(userId)
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get all FIRs pending police review
+     */
+    public List<FirUploadResponse> getPendingReviewFirs() {
+        return firRecordRepository.findByStatusOrderByUploadedAtDesc("PENDING_POLICE_REVIEW")
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Police updates FIR status (REGISTERED or REJECTED)
+     */
+    public FirUploadResponse updateFirStatus(Long firId, String status, String reviewNotes, User reviewedBy) {
+        FirRecord fir = firRecordRepository.findById(firId)
+                .orElseThrow(() -> new RuntimeException("FIR not found with ID: " + firId));
+
+        fir.setStatus(status);
+        fir.setReviewNotes(reviewNotes);
+        fir.setReviewedAt(LocalDateTime.now());
+        fir.setReviewedBy(reviewedBy);
+
+        FirRecord saved = firRecordRepository.save(fir);
+        log.info("FIR {} status updated to {} by {}", fir.getFirNumber(), status, reviewedBy.getName());
+
+        return mapToResponse(saved);
+    }
+
+    /**
+     * Get client FIR stats for dashboard
+     */
+    public ClientFirStatsResponse getClientStats(Long userId) {
+        long pending = firRecordRepository.countByFiledByIdAndStatus(userId, "PENDING_POLICE_REVIEW");
+        long registered = firRecordRepository.countByFiledByIdAndStatus(userId, "REGISTERED");
+        long rejected = firRecordRepository.countByFiledByIdAndStatus(userId, "REJECTED");
+        long total = pending + registered + rejected;
+
+        return ClientFirStatsResponse.builder()
+                .totalFirs(total)
+                .pendingFirs(pending)
+                .registeredFirs(registered)
+                .rejectedFirs(rejected)
+                .build();
+    }
+
     private String generateFirNumber() {
         String datePrefix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String randomSuffix = String.format("%06d", (int) (Math.random() * 1000000));
@@ -190,11 +314,16 @@ public class FirService {
                 .status(fir.getStatus())
                 .caseId(fir.getCaseId())
                 .uploadedByName(fir.getUploadedBy() != null ? fir.getUploadedBy().getName() : null)
-                .verified(true) // Default to true for existing records
+                .filedByName(fir.getFiledBy() != null ? fir.getFiledBy().getName() : null)
+                .incidentDate(fir.getIncidentDate())
+                .incidentLocation(fir.getIncidentLocation())
+                .aiGenerated(fir.getAiGenerated())
+                .reviewNotes(fir.getReviewNotes())
+                .verified(true)
                 .build();
     }
 
-    // Inner class for stats response
+    // Inner class for police stats response
     @lombok.Getter
     @lombok.Setter
     @lombok.NoArgsConstructor
@@ -206,4 +335,18 @@ public class FirService {
         private long linkedFirs;
         private long firsToday;
     }
+
+    // Inner class for client stats response
+    @lombok.Getter
+    @lombok.Setter
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
+    @lombok.Builder
+    public static class ClientFirStatsResponse {
+        private long totalFirs;
+        private long pendingFirs;
+        private long registeredFirs;
+        private long rejectedFirs;
+    }
 }
+

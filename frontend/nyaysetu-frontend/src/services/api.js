@@ -187,8 +187,21 @@ export const policeAPI = {
     getFir: (id) => api.get(`/api/police/fir/${id}`),
     verifyFir: (id, formData) => api.post(`/api/police/fir/${id}/verify`, formData),
     getStats: () => api.get('/api/police/stats'),
+    getPendingFirs: () => api.get('/api/police/fir/pending'),
+    updateFirStatus: (id, status, reviewNotes) => api.put(`/api/police/fir/${id}/status`, null, {
+        params: { status, reviewNotes }
+    }),
     health: () => api.get('/api/police/health'),
 };
 
+// Client FIR API - For citizens to file FIRs
+export const clientFirAPI = {
+    fileFir: (formData) => api.post('/api/client/fir', formData),
+    listFirs: () => api.get('/api/client/fir/list'),
+    getFir: (id) => api.get(`/api/client/fir/${id}`),
+    getStats: () => api.get('/api/client/fir/stats'),
+};
+
 export default api;
+
 

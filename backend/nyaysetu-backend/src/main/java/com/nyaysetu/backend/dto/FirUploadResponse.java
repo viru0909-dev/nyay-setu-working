@@ -2,6 +2,7 @@ package com.nyaysetu.backend.dto;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -22,5 +23,11 @@ public class FirUploadResponse {
     private String status;
     private UUID caseId;
     private String uploadedByName;
+    private String filedByName;
+    private LocalDate incidentDate;
+    private String incidentLocation;
+    private Boolean aiGenerated;
+    private String reviewNotes;
     private boolean verified;
 }
+
