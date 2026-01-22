@@ -145,6 +145,81 @@ public class FirController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Start investigation on an FIR
+     */
+    @PostMapping("/investigation/{id}/start")
+    public ResponseEntity<FirUploadResponse> startInvestigation(
+            @PathVariable Long id,
+            Authentication auth) {
+        
+        User user = getCurrentUser(auth);
+        FirUploadResponse response = firService.startInvestigation(id, user);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Submit investigation findings to court
+     */
+    @PostMapping("/investigation/{id}/submit")
+    public ResponseEntity<FirUploadResponse> submitInvestigation(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request,
+            Authentication auth) {
+        
+        User user = getCurrentUser(auth);
+        String findings = request.get("findings");
+        
+        if (findings == null || findings.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        FirUploadResponse response = firService.submitToCourt(id, findings, user);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get FIRs currently under investigation
+     */
+    @GetMapping("/investigation/list")
+    public ResponseEntity<List<FirUploadResponse>> getFirsUnderInvestigation() {
+        List<FirUploadResponse> firs = firService.getFirsUnderInvestigation();
+        return ResponseEntity.ok(firs);
+    }
+
+    /**
+     * Upload additional evidence to FIR
+     */
+    @PostMapping(value = "/investigation/{id}/evidence", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<FirUploadResponse> uploadeEvidence(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("description") String description,
+            Authentication auth) {
+        
+        User user = getCurrentUser(auth);
+        FirUploadResponse response = firService.addEvidence(id, file, description, user);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Generate AI Summary using Groq
+     */
+    @GetMapping("/investigation/{id}/summary")
+    public ResponseEntity<Map<String, String>> generateSummary(@PathVariable Long id) {
+        String summary = firService.generateSummary(id);
+        return ResponseEntity.ok(Map.of("summary", summary));
+    }
+
+    /**
+     * Draft Court Submission using Groq (Charge Sheet)
+     */
+    @GetMapping("/investigation/{id}/draft-submission")
+    public ResponseEntity<Map<String, String>> draftSubmission(@PathVariable Long id) {
+        String draft = firService.draftCourtSubmission(id);
+        return ResponseEntity.ok(Map.of("draft", draft));
+    }
+
     private User getCurrentUser(Authentication auth) {
         String email = auth.getName();
         return userRepository.findByEmail(email)

@@ -74,6 +74,55 @@ public class GroqDocumentVerificationService {
         }
     }
 
+    /**
+     * Generate an investigation summary for the Police Dashboard
+     */
+    public String generateInvestigationSummary(String firDetails, String evidenceList) {
+        String prompt = String.format("""
+            You are a senior police investigator assistant. Summarize the following FIR and Evidence for an ongoing investigation.
+            Focus on key facts, missing links, and recommended next steps.
+            
+            FIR Details:
+            %s
+            
+            Evidence:
+            %s
+            
+            Keep the summary concise (under 200 words) and actionable.
+            """, firDetails, evidenceList);
+            
+        return chatWithAI(prompt);
+    }
+
+    /**
+     * Draft a formal court submission (Case Diary / Charge Sheet)
+     */
+    public String generateCourtSubmission(String firDetails, String investigationFindings, String evidenceList) {
+        String prompt = String.format("""
+            You are a legal assistant for the Police Department. Draft a formal "Final Report" (Charge Sheet) for submission to the Magistrate/Judge.
+            
+            Case Context:
+            %s
+            
+            Investigation Findings:
+            %s
+            
+            Evidence Collected:
+            %s
+            
+            Format the output with:
+            1. Title: FINAL REPORT U/S 173 CrPC
+            2. Brief Facts of the Case
+            3. Investigation Details
+            4. List of Evidence & Witnesses
+            5. Conclusion / Prayer
+            
+            Use formal legal language suitable for Indian Courts.
+            """, firDetails, investigationFindings, evidenceList);
+            
+        return chatWithAI(prompt);
+    }
+
     private String buildVerificationPrompt(String documentContent, String documentName, 
                                            String category, String caseTitle, String caseType) {
         StringBuilder prompt = new StringBuilder();
