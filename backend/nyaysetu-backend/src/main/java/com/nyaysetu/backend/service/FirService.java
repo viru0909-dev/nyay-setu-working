@@ -5,6 +5,8 @@ import com.nyaysetu.backend.dto.FirUploadRequest;
 import com.nyaysetu.backend.dto.FirUploadResponse;
 import com.nyaysetu.backend.entity.FirRecord;
 import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.entity.CaseEntity;
+import com.nyaysetu.backend.entity.CaseStatus;
 import com.nyaysetu.backend.repository.FirRecordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +32,14 @@ public class FirService {
 
     private final FirRecordRepository firRecordRepository;
     private final BlockchainService blockchainService;
+    private final com.nyaysetu.backend.repository.CaseRepository caseRepository;
+    private final GroqDocumentVerificationService groqService;
 
     @Value("${app.upload.fir-path:uploads/fir}")
     private String firUploadPath;
+
+    @Value("${app.upload.evidence-path:uploads/evidence}")
+    private String evidenceUploadPath;
 
     /**
      * Upload FIR document, calculate SHA-256 hash, and store record
@@ -40,7 +47,7 @@ public class FirService {
     public FirUploadResponse uploadFir(MultipartFile file, FirUploadRequest request, User uploadedBy) {
         try {
             // Create upload directory if not exists
-            Path uploadDir = Paths.get(firUploadPath);
+            Path uploadDir = Paths.get(firUploadPath).toAbsolutePath().normalize();
             if (!Files.exists(uploadDir)) {
                 Files.createDirectories(uploadDir);
             }
@@ -187,7 +194,7 @@ public class FirService {
 
             // Handle optional file upload
             if (file != null && !file.isEmpty()) {
-                Path uploadDir = Paths.get(firUploadPath);
+                Path uploadDir = Paths.get(firUploadPath).toAbsolutePath().normalize();
                 if (!Files.exists(uploadDir)) {
                     Files.createDirectories(uploadDir);
                 }
@@ -255,6 +262,146 @@ public class FirService {
      */
     public List<FirUploadResponse> getPendingReviewFirs() {
         return firRecordRepository.findByStatusOrderByUploadedAtDesc("PENDING_POLICE_REVIEW")
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Start investigation on an FIR
+     */
+    public FirUploadResponse startInvestigation(Long firId, User policeOfficer) {
+        FirRecord fir = firRecordRepository.findById(firId)
+                .orElseThrow(() -> new RuntimeException("FIR not found with ID: " + firId));
+
+        fir.setStatus("UNDER_INVESTIGATION");
+        fir.setReviewedBy(policeOfficer);
+        fir.setReviewedAt(LocalDateTime.now());
+        
+        FirRecord saved = firRecordRepository.save(fir);
+        log.info("Investigation started for FIR {} by {}", fir.getFirNumber(), policeOfficer.getName());
+        return mapToResponse(saved);
+    }
+
+    /**
+     * Submit FIR findings to Court (Creates a Case)
+     */
+    public FirUploadResponse submitToCourt(Long firId, String investigationFindings, User policeOfficer) {
+        FirRecord fir = firRecordRepository.findById(firId)
+                .orElseThrow(() -> new RuntimeException("FIR not found with ID: " + firId));
+
+        // update FIR details
+        fir.setInvestigationDetails(investigationFindings);
+        fir.setSubmittedToCourtAt(LocalDateTime.now());
+        fir.setIsSubmittedToCourt(true);
+        fir.setStatus("COURT_REVIEW_PENDING");
+        
+        // Create new Case Entity
+        CaseEntity newCase = CaseEntity.builder()
+                .title("State vs " + (fir.getDescription().length() > 20 ? fir.getDescription().substring(0, 20) + "..." : fir.getDescription()))
+                .description(fir.getDescription())
+                .caseType("CRIMINAL") // Defaulting to criminal for FIRs
+                .status(CaseStatus.PENDING) // Initial status in court
+                .petitioner("State (Police)")
+                .respondent("Unknown (Investigation On-going)") // or extract from FIR if structure allows
+                .filedDate(LocalDateTime.now())
+                .urgency("HIGH")
+                .judgeId(null) // Unassigned
+                .assignedJudge(null)
+                .build();
+        
+        CaseEntity savedCase = caseRepository.save(newCase);
+        
+        // Link FIR to Case
+        fir.setCaseId(savedCase.getId());
+        FirRecord savedFir = firRecordRepository.save(fir);
+        
+        log.info("FIR {} submitted to Court. Created Case ID: {}", fir.getFirNumber(), savedCase.getId());
+        
+        return mapToResponse(savedFir);
+    }
+    
+    /**
+     * Generate AI Summary for FIR
+     */
+    public String generateSummary(Long firId) {
+        FirRecord fir = firRecordRepository.findById(firId)
+                .orElseThrow(() -> new RuntimeException("FIR not found"));
+        
+        // Fetch evidence (mock logic for now as we don't have direct link yet, or use description)
+        String evidence = fir.getInvestigationDetails() != null ? fir.getInvestigationDetails() : "No additional evidence recorded.";
+        
+        return groqService.generateInvestigationSummary(fir.getDescription(), evidence);
+    }
+
+    /**
+     * Generate AI Draft for Court Submission
+     */
+    public String draftCourtSubmission(Long firId) {
+        FirRecord fir = firRecordRepository.findById(firId)
+                .orElseThrow(() -> new RuntimeException("FIR not found"));
+        
+        String findings = fir.getInvestigationDetails() != null ? fir.getInvestigationDetails() : "Investigation in progress.";
+        String evidence = "Refer to attached file: " + fir.getFileName() + " (Hash: " + fir.getFileHash() + ")";
+        
+        return groqService.generateCourtSubmission(fir.getDescription(), findings, evidence);
+    }
+    
+    /**
+     * Add additional evidence to an FIR under investigation
+     */
+    public FirUploadResponse addEvidence(Long firId, MultipartFile file, String description, User uploadedBy) {
+        try {
+            FirRecord fir = firRecordRepository.findById(firId)
+                    .orElseThrow(() -> new RuntimeException("FIR not found with ID: " + firId));
+
+            // Validate status
+            if (!"UNDER_INVESTIGATION".equals(fir.getStatus())) {
+                throw new RuntimeException("Can only add evidence to cases under investigation");
+            }
+
+            // Create upload directory if not exists
+            Path uploadDir = Paths.get(evidenceUploadPath).toAbsolutePath().normalize();
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            // Generate unique filename
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename != null && originalFilename.contains(".") 
+                ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+                : "";
+            String uniqueFilename = UUID.randomUUID().toString() + extension;
+            Path filePath = uploadDir.resolve(uniqueFilename);
+
+            // Save file
+            file.transferTo(filePath.toFile());
+
+            // Hash
+            String fileHash = blockchainService.calculateFileHash(filePath.toFile());
+
+            // Append evidence info to investigation notes (Case Diary)
+            // Since we can't create formal EvidenceRecord without a CaseID, we log it here.
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            String evidenceEntry = String.format("\n\n[%s] EVIDENCE ADDED\nFile: %s\nHash: %s\nDescription: %s\n-----------------------------------", 
+                timestamp, originalFilename, fileHash, description);
+            
+            String currentDetails = fir.getInvestigationDetails() != null ? fir.getInvestigationDetails() : "";
+            fir.setInvestigationDetails(currentDetails + evidenceEntry);
+            
+            FirRecord saved = firRecordRepository.save(fir);
+            return mapToResponse(saved);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload evidence: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get FIRs under active investigation
+     */
+    public List<FirUploadResponse> getFirsUnderInvestigation() {
+        return firRecordRepository.findByStatusOrderByUploadedAtDesc("UNDER_INVESTIGATION")
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

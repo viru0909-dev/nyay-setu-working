@@ -192,6 +192,14 @@ export const policeAPI = {
         params: { status, reviewNotes }
     }),
     health: () => api.get('/api/police/health'),
+    startInvestigation: (id) => api.post(`/api/police/investigation/${id}/start`),
+    submitInvestigation: (id, findings) => api.post(`/api/police/investigation/${id}/submit`, { findings }),
+    getInvestigations: () => api.get('/api/police/investigation/list'),
+
+    // New methods for Enhanced Investigation
+    uploadEvidence: (id, formData) => api.post(`/api/police/investigation/${id}/evidence`, formData),
+    generateAiSummary: (id) => api.get(`/api/police/investigation/${id}/summary`),
+    draftCourtSubmission: (id) => api.get(`/api/police/investigation/${id}/draft-submission`),
 };
 
 // Client FIR API - For citizens to file FIRs
