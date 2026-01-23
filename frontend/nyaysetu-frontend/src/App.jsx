@@ -32,14 +32,15 @@ const LawyerChatPage = lazy(() => import('./pages/litigant/LawyerChatPage'));
 const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
 
 
-// Judge Pages
-const PendingCasesPage = lazy(() => import('./pages/judge/PendingCasesPage'));
+// Judge Pages (keep only those still used)
 const ConductHearingPage = lazy(() => import('./pages/judge/ConductHearingPage'));
-const EvidenceReviewPage = lazy(() => import('./pages/judge/EvidenceReviewPage'));
-const DraftOrdersPage = lazy(() => import('./pages/judge/DraftOrdersPage'));
 const CourtAnalyticsPage = lazy(() => import('./pages/judge/CourtAnalyticsPage'));
-const AICaseSummaryPage = lazy(() => import('./pages/judge/AICaseSummaryPage'));
-const JudgeCaseDetailsPage = lazy(() => import('./pages/judge/JudgeCaseDetailsPage'));
+// New Unified Workspace Pages
+const MyDocket = lazy(() => import('./pages/judge/MyDocket'));
+const JudgeCaseWorkspace = lazy(() => import('./pages/judge/JudgeCaseWorkspace'));
+const JudicialOverview = lazy(() => import('./pages/judge/JudicialOverview'));
+const UnassignedPool = lazy(() => import('./pages/judge/UnassignedPool'));
+const LiveHearing = lazy(() => import('./pages/judge/LiveHearing'));
 
 // Lawyer Pages
 const LawyerCasesPage = lazy(() => import('./pages/lawyer/LawyerCasesPage'));
@@ -148,14 +149,15 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             >
-                                <Route index element={<JudgeDashboard />} />
-                                <Route path="pending" element={<PendingCasesPage />} />
+                                <Route index element={<JudicialOverview />} />
+                                {/* New Unified Workspace Routes */}
+                                <Route path="docket" element={<MyDocket />} />
+                                <Route path="unassigned" element={<UnassignedPool />} />
+                                <Route path="live-hearing" element={<LiveHearing />} />
+                                <Route path="case/:caseId" element={<JudgeCaseWorkspace />} />
+                                {/* Keep only essential old routes */}
                                 <Route path="conduct" element={<ConductHearingPage />} />
-                                <Route path="evidence" element={<EvidenceReviewPage />} />
-                                <Route path="case/:caseId" element={<JudgeCaseDetailsPage />} />
-                                <Route path="orders" element={<DraftOrdersPage />} />
                                 <Route path="analytics" element={<CourtAnalyticsPage />} />
-                                <Route path="ai-summary" element={<AICaseSummaryPage />} />
                                 <Route path="profile" element={<ProfilePage />} />
                             </Route>
 

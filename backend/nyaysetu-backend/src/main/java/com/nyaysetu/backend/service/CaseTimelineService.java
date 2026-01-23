@@ -28,22 +28,22 @@ public class CaseTimelineService {
     }
 
     public void logPoliceViewed(UUID caseId, String officerName) {
-        addEvent(caseId, "POLICE_VIEWED", "Police Officer " + officerName + " viewed the case files");
+        addEvent(caseId, "Police Officer " + officerName + " viewed the case files");
     }
 
     public void logJudgeAssigned(UUID caseId, String judgeName) {
-        addEvent(caseId, "JUDGE_ASSIGNED", "Case assigned to Hon'ble Judge " + judgeName);
+        addEvent(caseId, "Case assigned to Hon'ble Judge " + judgeName);
     }
 
     public void logHearingScheduled(UUID caseId, LocalDateTime date) {
-        addEvent(caseId, "HEARING_SCHEDULED", "Hearing scheduled for " + date.toLocalDate());
+        addEvent(caseId, "Hearing scheduled for " + date.toLocalDate());
     }
 
     public void addEvent(UUID caseId, String type, String description) {
+        // Combine type and description into single event field
         repo.save(CaseTimeline.builder()
                 .legalCaseId(caseId)
-                .event(type) // Using 'event' field for type/title
-                .description(description) // Assuming description field exists or I should check entity
+                .event(type + ": " + description)
                 .timestamp(LocalDateTime.now())
                 .build());
     }

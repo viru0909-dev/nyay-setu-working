@@ -28,12 +28,25 @@ public class DocumentManagementService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final DocumentAnalysisService documentAnalysisService;
+    private final BlockchainService blockchainService;
 
     @Transactional
-    public DocumentDto uploadDocument(MultipartFile file, UploadDocumentRequest request, User uploader) {
+    public DocumentDto uploadDocument(MultipartFile file, UploadDocumentRequest request, User uploader, String uploadIp) {
         // Store file
         String category = request.getCategory() != null ? request.getCategory() : "OTHER";
         String filePath = fileStorageService.storeFile(file, category);
+
+        // Calculate SHA-256 hash for data integrity (Section 63(4) compliance)
+        String fileHash = null;
+        try {
+            java.io.File physicalFile = fileStorageService.getFile(filePath);
+            fileHash = blockchainService.calculateFileHash(physicalFile);
+            org.slf4j.LoggerFactory.getLogger(DocumentManagementService.class)
+                .info("Document SHA-256 hash calculated: {}", fileHash);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(DocumentManagementService.class)
+                .warn("Failed to calculate file hash: {}", e.getMessage());
+        }
 
         // Create document entity
         DocumentEntity document = DocumentEntity.builder()
@@ -46,6 +59,9 @@ public class DocumentManagementService {
                 .uploadedBy(uploader.getId())
                 .caseId(request.getCaseId())
                 .storageType(DocumentStorageType.LOCAL)
+                .fileHash(fileHash)
+                .uploadIp(uploadIp)
+                .isVerified(fileHash != null)
                 .build();
 
         DocumentEntity saved = documentRepository.save(document);
@@ -122,6 +138,9 @@ public class DocumentManagementService {
                 .caseId(entity.getCaseId())
                 .uploadedAt(entity.getUploadedAt())
                 .fileUrl(entity.getFileUrl())
+                .fileHash(entity.getFileHash())
+                .uploadIp(entity.getUploadIp())
+                .isVerified(entity.getIsVerified())
                 .build();
 
         // Get case title if available

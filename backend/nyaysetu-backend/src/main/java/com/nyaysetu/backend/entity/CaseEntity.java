@@ -52,6 +52,8 @@ public class CaseEntity {
 
     private String filingMethod; // VAKIL_FRIEND, MANUAL
 
+    private Long sourceFirId;
+
     // ===== AI-RELATED FIELDS (Vakil-Friend System) =====
     
     @Column(columnDefinition = "TEXT")

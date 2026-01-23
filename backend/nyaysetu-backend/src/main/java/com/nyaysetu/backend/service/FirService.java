@@ -448,6 +448,7 @@ public class FirService {
                     .urgency("HIGH")
                     .client(fir.getFiledBy()) // Link to original filer
                     .filingMethod("POLICE_FIR")
+                    .sourceFirId(fir.getId())
                     .build();
             
             CaseEntity savedCase = caseRepository.save(newCase);
