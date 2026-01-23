@@ -35,6 +35,7 @@ public class FirService {
     private final BlockchainService blockchainService;
     private final com.nyaysetu.backend.repository.CaseRepository caseRepository;
     private final GroqDocumentVerificationService groqService;
+    private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
 
     @Value("${app.upload.fir-path:uploads/fir}")
     private String firUploadPath;
@@ -416,6 +417,10 @@ public class FirService {
     /**
      * Police updates FIR status (REGISTERED or REJECTED)
      */
+    /**
+     * Police updates FIR status (REGISTERED or REJECTED)
+     */
+    @Transactional
     public FirUploadResponse updateFirStatus(Long firId, String status, String reviewNotes, User reviewedBy) {
         FirRecord fir = firRecordRepository.findById(firId)
                 .orElseThrow(() -> new RuntimeException("FIR not found with ID: " + firId));
@@ -427,6 +432,48 @@ public class FirService {
 
         FirRecord saved = firRecordRepository.save(fir);
         log.info("FIR {} status updated to {} by {}", fir.getFirNumber(), status, reviewedBy.getName());
+
+        // Auto-Create Court Case if FIR is REGISTERED (Accepted)
+        if ("REGISTERED".equals(status) && fir.getCaseId() == null) {
+            log.info("🚨 FIR {} Accepted! Auto-creating Court Case...", fir.getFirNumber());
+            
+            CaseEntity newCase = CaseEntity.builder()
+                    .title("State vs " + (fir.getDescription().length() > 20 ? fir.getDescription().substring(0, 20) + "..." : fir.getDescription()))
+                    .description("FIR REGISTERED: " + fir.getFirNumber() + "\n\n" + fir.getDescription())
+                    .caseType("CRIMINAL")
+                    .status(CaseStatus.PENDING) 
+                    .petitioner("State (Police)")
+                    .respondent("Unknown") 
+                    .filedDate(LocalDateTime.now())
+                    .urgency("HIGH")
+                    .client(fir.getFiledBy()) // Link to original filer
+                    .filingMethod("POLICE_FIR")
+                    .build();
+            
+            CaseEntity savedCase = caseRepository.save(newCase);
+            
+            // Link FIR to Case
+            fir.setCaseId(savedCase.getId());
+            firRecordRepository.save(fir); // save again with case ID
+            
+            log.info("✅ Auto-created Criminal Case ID: {} for FIR {}", savedCase.getId(), fir.getFirNumber());
+
+            // Notification Logic
+            try {
+                if (fir.getFiledBy() != null) {
+                    com.nyaysetu.backend.notification.entity.Notification notif = com.nyaysetu.backend.notification.entity.Notification.builder()
+                            .userId(fir.getFiledBy().getId())
+                            .title("FIR Registered as Case")
+                            .message("Your FIR " + fir.getFirNumber() + " has been registered as Court Case #" + savedCase.getId() + ". You can now hire a lawyer.")
+                            .readFlag(false)
+                            .createdAt(java.time.Instant.now())
+                            .build();
+                    notificationService.save(notif);
+                }
+            } catch (Exception e) {
+                log.error("Failed to send notification", e);
+            }
+        }
 
         return mapToResponse(saved);
     }

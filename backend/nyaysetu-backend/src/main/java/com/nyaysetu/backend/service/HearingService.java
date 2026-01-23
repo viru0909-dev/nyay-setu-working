@@ -23,6 +23,7 @@ public class HearingService {
     private final HearingParticipantRepository participantRepository;
     private final CaseRepository caseRepository;
     private final UserRepository userRepository;
+    private final CaseTimelineService timelineService;
     
     @Transactional
     public Hearing scheduleHearing(UUID caseId, LocalDateTime scheduledDate, Integer durationMinutes) {
@@ -45,7 +46,16 @@ public class HearingService {
         caseEntity.setNextHearing(scheduledDate);
         caseRepository.save(caseEntity);
         
-        return hearingRepository.save(hearing);
+        Hearing savedHearing = hearingRepository.save(hearing);
+
+        // Timeline Log
+        try {
+            timelineService.logHearingScheduled(caseId, scheduledDate);
+        } catch (Exception e) {
+            log.error("Failed to log timeline event", e);
+        }
+
+        return savedHearing;
     }
     
     @Transactional

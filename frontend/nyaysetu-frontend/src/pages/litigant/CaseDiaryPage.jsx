@@ -352,9 +352,31 @@ export default function CaseDiaryPage() {
                                         )}
                                     </>
                                 ) : (
-                                    <button disabled style={{ flex: 1, textAlign: 'center', padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '0.5rem', fontWeight: '600', opacity: 0.7 }}>
-                                        Processing
-                                    </button>
+                                    (item.caseId) ? (
+                                        <Link
+                                            to={`/litigant/case-diary/${item.caseId}`}
+                                            style={{
+                                                flex: 1,
+                                                textAlign: 'center',
+                                                padding: '0.75rem',
+                                                background: 'rgba(16, 185, 129, 0.1)',
+                                                border: '1px solid rgba(16, 185, 129, 0.3)',
+                                                color: '#10b981',
+                                                borderRadius: '0.5rem',
+                                                fontWeight: '600',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '0.5rem'
+                                            }}
+                                        >
+                                            <Scale size={16} /> View Linked Court Case
+                                        </Link>
+                                    ) : (
+                                        <button disabled style={{ flex: 1, textAlign: 'center', padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '0.5rem', fontWeight: '600', opacity: 0.7 }}>
+                                            {item.status === 'REJECTED' ? 'Application Rejected' : 'Processing'}
+                                        </button>
+                                    )
                                 )}
                             </div>
                         </div>
