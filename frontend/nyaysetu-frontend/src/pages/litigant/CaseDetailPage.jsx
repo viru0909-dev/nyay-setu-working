@@ -86,15 +86,7 @@ export default function CaseDetailPage() {
     const handleSaveEdit = async () => {
         setSaving(true);
         try {
-            // In a real app, calls API to update. Using mock update for now or assuming API supports it.
-            // Since we don't have a direct update endpoint in the snippet, we'll try a generic update if available 
-            // or just update local state to simulate. 
-            // NOTE: Assuming caseAPI has an update method. If not, I'll add it or mock it.
-            // checking api.js... existing implementation might not have update. 
-            // For this task I will assume there is one or I will add it to api.js next.
-            // Let's assume we need to add caseAPI.update(id, data).
             await caseAPI.update(caseId, editData);
-
             setCaseData({ ...caseData, ...editData });
             setIsEditing(false);
             alert('Case updated successfully!');
@@ -110,7 +102,6 @@ export default function CaseDetailPage() {
         if (!editData.description) return;
         setRefining(true);
         try {
-            // Use analyzeCase to get a professional version
             const response = await brainAPI.analyzeCase(editData.description);
             if (response.data && response.data.description) {
                 setEditData({ ...editData, description: response.data.description });
@@ -244,8 +235,7 @@ export default function CaseDetailPage() {
             <div style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', marginBottom: '2rem', gap: '2rem' }}>
                 {[
                     { id: 'overview', label: 'Overview', icon: FileText },
-                    { id: 'documents', label: 'Documents', icon: FileCheck },
-                    { id: 'evidence', label: 'Evidence Vault', icon: Shield },
+                    { id: 'files', label: 'Case Files', icon: FileCheck },
                     { id: 'timeline', label: 'Timeline', icon: Clock }
                 ].map(tab => (
                     <button
@@ -274,11 +264,8 @@ export default function CaseDetailPage() {
             {/* OVERVIEW TAB */}
             {activeTab === 'overview' && <OverviewTab caseData={caseData} onHireLawyer={handleHireLawyer} />}
 
-            {/* DOCUMENTS TAB */}
-            {activeTab === 'documents' && <DocumentsTab caseId={caseId} />}
-
-            {/* EVIDENCE TAB */}
-            {activeTab === 'evidence' && <EvidenceTab caseId={caseId} />}
+            {/* CASE FILES TAB */}
+            {activeTab === 'files' && <CaseFilesTab caseId={caseId} />}
 
             {/* TIMELINE TAB */}
             {activeTab === 'timeline' && <TimelineTab caseData={caseData} />}
@@ -452,28 +439,52 @@ function OverviewTab({ caseData, onHireLawyer }) {
     );
 }
 
-function DocumentsTab({ caseId }) {
-    const [documents, setDocuments] = useState([]);
+function CaseFilesTab({ caseId }) {
+    const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
 
-    // Analysis state
+    // Analysis & Verification state
     const [analysisMap, setAnalysisMap] = useState({});
     const [selectedAnalysis, setSelectedAnalysis] = useState(null);
     const [showAnalysisModal, setShowAnalysisModal] = useState(false);
     const [analyzingIds, setAnalyzingIds] = useState([]);
 
     useEffect(() => {
-        fetchDocs();
+        fetchAllFiles();
     }, [caseId]);
 
-    const fetchDocs = async () => {
+    const fetchAllFiles = async () => {
         try {
-            const res = await documentAPI.getByCase(caseId);
-            const docs = res.data || [];
-            setDocuments(docs);
+            // Fetch both Documents and Evidence
+            const [docsRes, evidenceRes] = await Promise.all([
+                documentAPI.getByCase(caseId),
+                axios.get(`${API_BASE_URL}/api/evidence/case/${caseId}`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                })
+            ]);
 
-            // Check for analysis for each doc
+            const docs = docsRes.data || [];
+            const evidence = evidenceRes.data?.evidence || [];
+
+            // Normalize and merge
+            const merged = [
+                ...docs.map(d => ({ ...d, type: 'DOCUMENT', source: 'docs' })),
+                ...evidence.map(e => ({
+                    id: e.id,
+                    fileName: e.title,
+                    fileSize: 0,
+                    uploadedAt: e.timestamp,
+                    type: 'EVIDENCE',
+                    source: 'evidence',
+                    blockHash: e.blockHash,
+                    blockIndex: e.blockIndex
+                }))
+            ].sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+
+            setFiles(merged);
+
+            // Check analysis for docs
             docs.forEach(checkAnalysis);
         } catch (e) {
             console.error(e);
@@ -488,9 +499,7 @@ function DocumentsTab({ caseId }) {
             if (res.data.hasAnalysis) {
                 setAnalysisMap(prev => ({ ...prev, [doc.id]: true }));
             }
-        } catch (e) {
-            console.error("Error checking analysis", e);
-        }
+        } catch (e) { }
     };
 
     const handleUpload = async (e) => {
@@ -499,14 +508,12 @@ function DocumentsTab({ caseId }) {
 
         setUploading(true);
         try {
-            const res = await documentAPI.upload(file, { caseId, category: 'CASE_DOCUMENT', description: 'Uploaded from Case Detail' });
-            // Add to list immediately
+            const res = await documentAPI.upload(file, { caseId, category: 'CASE_DOCUMENT', description: 'Uploaded from Case Files' });
             if (res.data) {
-                setDocuments(prev => [res.data, ...prev]);
-                // Poll for analysis completion
+                setFiles(prev => [{ ...res.data, type: 'DOCUMENT', source: 'docs' }, ...prev]);
                 pollForAnalysis(res.data.id);
             } else {
-                fetchDocs();
+                fetchAllFiles();
             }
         } catch (error) {
             console.error(error);
@@ -528,9 +535,9 @@ function DocumentsTab({ caseId }) {
                     setAnalyzingIds(prev => prev.filter(id => id !== docId));
                     clearInterval(interval);
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { }
 
-            if (attempts > 20) { // Stop after 40s
+            if (attempts > 20) {
                 setAnalyzingIds(prev => prev.filter(id => id !== docId));
                 clearInterval(interval);
             }
@@ -549,6 +556,10 @@ function DocumentsTab({ caseId }) {
 
     const downloadDoc = async (doc) => {
         try {
+            if (doc.source === 'evidence') {
+                alert('Evidence download not implemented yet. Verify on blockchain.');
+                return;
+            }
             const res = await documentAPI.download(doc.id);
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
@@ -560,50 +571,66 @@ function DocumentsTab({ caseId }) {
         } catch (e) { console.error(e); alert('Download failed'); }
     };
 
+    const downloadCertificate = (doc) => {
+        alert(`Downloading Section 65B Certificate for: ${doc.fileName}\n(This would generate a signed PDF)`);
+    };
+
     return (
         <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>Case Documents ({documents.length})</h3>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>Case Files ({files.length})</h3>
                 <label style={{
                     padding: '0.75rem 1.5rem', background: '#8b5cf6', borderRadius: '0.5rem',
                     color: 'white', fontWeight: '600', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem'
                 }}>
                     {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
-                    {uploading ? 'Uploading...' : 'Upload Document'}
+                    {uploading ? 'Uploading...' : 'Upload File'}
                     <input type="file" style={{ display: 'none' }} onChange={handleUpload} disabled={uploading} />
                 </label>
             </div>
 
             {loading ? <Loader2 size={32} style={{ margin: '2rem auto', display: 'block' }} className="animate-spin" /> :
-                documents.length === 0 ? <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No documents found.</p> :
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-                        {documents.map(doc => (
-                            <div key={doc.id} style={{ background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '1rem', padding: '1rem', transition: 'all 0.2s' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                                    <div style={{ padding: '0.75rem', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '0.75rem' }}><FileText size={24} color="#8b5cf6" /></div>
-                                    <div style={{ overflow: 'hidden' }}>
-                                        <p style={{ fontWeight: '600', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={doc.fileName}>{doc.fileName}</p>
-                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{formatFileSize(doc.fileSize)} • {formatDate(doc.uploadedAt)}</p>
+                files.length === 0 ? <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No files found.</p> :
+                    <div style={{ display: 'grid', gap: '1rem' }}>
+                        {files.map(doc => (
+                            <div key={`${doc.source}-${doc.id}`} style={{ background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '1rem', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <div style={{ padding: '0.75rem', background: doc.type === 'EVIDENCE' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(139, 92, 246, 0.1)', borderRadius: '0.75rem' }}>
+                                        {doc.type === 'EVIDENCE' ? <Shield size={24} color="#10b981" /> : <FileText size={24} color="#8b5cf6" />}
+                                    </div>
+                                    <div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <p style={{ fontWeight: '600', color: 'var(--text-main)', margin: 0 }}>{doc.fileName}</p>
+                                            {doc.type === 'EVIDENCE' && (
+                                                <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', background: '#10b981', color: 'white', borderRadius: '99px', fontWeight: 'bold' }}>VERIFIED</span>
+                                            )}
+                                        </div>
+                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                                            {doc.type === 'EVIDENCE' ? `Hash: ${doc.blockHash?.substring(0, 16)}...` : `${formatFileSize(doc.fileSize)} • ${formatDate(doc.uploadedAt)}`}
+                                        </p>
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    {analysisMap[doc.id] ? (
-                                        <button
-                                            onClick={() => viewAnalysis(doc)}
-                                            style={{ flex: 1, padding: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '0.5rem', color: '#10b981', cursor: 'pointer', display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem', fontWeight: '600' }}
-                                        >
-                                            <Sparkles size={14} /> AI Review
-                                        </button>
-                                    ) : analyzingIds.includes(doc.id) ? (
-                                        <div style={{ flex: 1, padding: '0.5rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem' }}>
-                                            <Loader2 size={14} className="animate-spin" /> Analyzing...
-                                        </div>
-                                    ) : (
-                                        <div style={{ flex: 1 }}></div>
+                                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                    {doc.source === 'docs' && (
+                                        analysisMap[doc.id] ? (
+                                            <button onClick={() => viewAnalysis(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.5rem', color: '#8b5cf6', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                <Sparkles size={14} /> AI Insights
+                                            </button>
+                                        ) : analyzingIds.includes(doc.id) ? (
+                                            <div style={{ padding: '0.5rem 0.75rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
+                                                <Loader2 size={14} className="animate-spin" /> Analyzing...
+                                            </div>
+                                        ) : null
                                     )}
 
-                                    <button onClick={() => downloadDoc(doc)} style={{ padding: '0.5rem', background: 'none', border: '1px solid var(--border-glass)', borderRadius: '0.5rem', color: 'var(--color-accent)', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    {doc.type === 'EVIDENCE' && (
+                                        <button onClick={() => downloadCertificate(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '0.5rem', color: '#10b981', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                            <FileCheck size={14} /> Certificate
+                                        </button>
+                                    )}
+
+                                    <button onClick={() => downloadDoc(doc)} style={{ padding: '0.5rem', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <Download size={16} />
                                     </button>
                                 </div>
@@ -611,7 +638,6 @@ function DocumentsTab({ caseId }) {
                         ))}
                     </div>}
 
-            {/* Analysis Modal */}
             {showAnalysisModal && selectedAnalysis && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }} onClick={() => setShowAnalysisModal(false)}>
                     <div style={{ background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)', borderRadius: '1.5rem', width: '90%', maxWidth: '600px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-glass-strong)' }} onClick={e => e.stopPropagation()}>
@@ -637,7 +663,6 @@ function DocumentsTab({ caseId }) {
                                 <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Key Entities Extracted</h4>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                                     {selectedAnalysis.extractedEntities ? (
-                                        // Handle if it's a string or array
                                         (typeof selectedAnalysis.extractedEntities === 'string'
                                             ? selectedAnalysis.extractedEntities.split(',')
                                             : Object.keys(selectedAnalysis.extractedEntities || {})
@@ -660,112 +685,6 @@ function DocumentsTab({ caseId }) {
                     </div>
                 </div>
             )}
-        </div>
-    );
-}
-
-function EvidenceTab({ caseId }) {
-    const [evidence, setEvidence] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [uploading, setUploading] = useState(false);
-
-    // Upload state
-    const [file, setFile] = useState(null);
-    const [title, setTitle] = useState('');
-    const [desc, setDesc] = useState('');
-    const [showUpload, setShowUpload] = useState(false);
-
-    useEffect(() => {
-        fetchEvidence();
-    }, [caseId]);
-
-    const fetchEvidence = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_BASE_URL}/api/evidence/case/${caseId}`, { headers: { Authorization: `Bearer ${token}` } });
-            setEvidence(res.data.evidence || []);
-        } catch (e) { console.error(e); } finally { setLoading(false); }
-    };
-
-    const handleUpload = async () => {
-        if (!file || !title) return alert('File and Title are required');
-        setUploading(true);
-        try {
-            const token = localStorage.getItem('token');
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('caseId', caseId);
-            formData.append('title', title);
-            formData.append('description', desc);
-            formData.append('evidenceType', 'DOCUMENT');
-
-            await axios.post(`${API_BASE_URL}/api/evidence/upload`, formData, { headers: { Authorization: `Bearer ${token}` } });
-
-            setFile(null); setTitle(''); setDesc(''); setShowUpload(false);
-            fetchEvidence();
-            alert('Evidence secured on blockchain!');
-        } catch (e) {
-            console.error(e); alert('Upload failed');
-        } finally { setUploading(false); }
-    };
-
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {/* Header / Stats */}
-            <div style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '1.5rem', padding: '2rem', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', margin: '0 0 0.5rem 0' }}>Blockchain Evidence Vault</h2>
-                    <p style={{ margin: 0, opacity: 0.9 }}>Secured by immutable cryptographic hashing</p>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '2.5rem', fontWeight: '800' }}>{evidence.length}</div>
-                    <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Secured Items</div>
-                </div>
-            </div>
-
-            {/* Upload Section */}
-            {showUpload ? (
-                <div style={{ background: 'var(--bg-glass-strong)', padding: '1.5rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>Upload Evidence</h3>
-                        <button onClick={() => setShowUpload(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><X size={20} /></button>
-                    </div>
-                    <div style={{ display: 'grid', gap: '1rem' }}>
-                        <input placeholder="Evidence Title" value={title} onChange={e => setTitle(e.target.value)} style={{ padding: '0.75rem', borderRadius: '0.5rem', border: 'var(--border-glass)', background: 'var(--bg-glass)', color: 'var(--text-main)' }} />
-                        <textarea placeholder="Description" rows={2} value={desc} onChange={e => setDesc(e.target.value)} style={{ padding: '0.75rem', borderRadius: '0.5rem', border: 'var(--border-glass)', background: 'var(--bg-glass)', color: 'var(--text-main)' }} />
-                        <input type="file" onChange={e => setFile(e.target.files[0])} style={{ color: 'var(--text-secondary)' }} />
-                        <button onClick={handleUpload} disabled={uploading} style={{ padding: '0.75rem', background: '#10b981', color: 'white', border: 'none', borderRadius: '0.5rem', fontWeight: '600', cursor: uploading ? 'wait' : 'pointer' }}>
-                            {uploading ? 'Hashing & Uploading...' : 'Secure Upload'}
-                        </button>
-                    </div>
-                </div>
-            ) : (
-                <button onClick={() => setShowUpload(true)} style={{ padding: '1rem', background: 'var(--bg-glass)', border: '2px dashed var(--border-glass)', borderRadius: '1rem', color: 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                    <Upload size={20} /> Add New Secured Evidence
-                </button>
-            )}
-
-            {/* List */}
-            <div style={{ display: 'grid', gap: '1rem' }}>
-                {evidence.map(item => (
-                    <div key={item.id} style={{ background: 'var(--bg-glass-strong)', padding: '1.5rem', borderRadius: '1rem', border: '1px solid rgba(16, 185, 129, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', fontWeight: 'bold' }}>#{item.blockIndex}</div>
-                            <div>
-                                <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--text-main)', fontSize: '1rem' }}>{item.title}</h4>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>Hash: {item.blockHash?.substring(0, 24)}...</div>
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', fontSize: '0.8rem', fontWeight: '600', padding: '0.25rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '9999px' }}>
-                            <Link2 size={14} /> Verified on-chain
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-
-            {/* Hire Lawyer Modal */}
-
         </div>
     );
 }

@@ -22,6 +22,7 @@ public class CaseAssignmentService {
 
     private final CaseRepository caseRepository;
     private final UserRepository userRepository;
+    private final CaseTimelineService timelineService;
 
     /**
      * Auto-assign a case to a judge using round-robin
@@ -57,6 +58,13 @@ public class CaseAssignmentService {
 
         log.info("✅ Auto-assigned case {} to Judge {} ({})", 
                 caseId, selectedJudge.getName(), selectedJudge.getEmail());
+
+        // Timeline Log
+        try {
+            timelineService.logJudgeAssigned(caseId, selectedJudge.getName());
+        } catch (Exception e) {
+            log.error("Failed to log timeline event", e);
+        }
 
         return selectedJudge;
     }

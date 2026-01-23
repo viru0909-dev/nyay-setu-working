@@ -24,7 +24,27 @@ public class CaseTimelineService {
     }
 
     public List<CaseTimeline> getTimeline(UUID caseId) {
-        // method name used in screenshots: findByLegalCaseIdOrderByTimestampAsc
         return repo.findByLegalCaseIdOrderByTimestampAsc(caseId);
+    }
+
+    public void logPoliceViewed(UUID caseId, String officerName) {
+        addEvent(caseId, "POLICE_VIEWED", "Police Officer " + officerName + " viewed the case files");
+    }
+
+    public void logJudgeAssigned(UUID caseId, String judgeName) {
+        addEvent(caseId, "JUDGE_ASSIGNED", "Case assigned to Hon'ble Judge " + judgeName);
+    }
+
+    public void logHearingScheduled(UUID caseId, LocalDateTime date) {
+        addEvent(caseId, "HEARING_SCHEDULED", "Hearing scheduled for " + date.toLocalDate());
+    }
+
+    public void addEvent(UUID caseId, String type, String description) {
+        repo.save(CaseTimeline.builder()
+                .legalCaseId(caseId)
+                .event(type) // Using 'event' field for type/title
+                .description(description) // Assuming description field exists or I should check entity
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 }
