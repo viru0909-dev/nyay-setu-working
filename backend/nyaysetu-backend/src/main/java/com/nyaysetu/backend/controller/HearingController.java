@@ -158,9 +158,20 @@ public class HearingController {
     }
     
     @GetMapping("/case/{caseId}")
-    public ResponseEntity<List<Hearing>> getCaseHearings(@PathVariable UUID caseId) {
+    public ResponseEntity<List<Map<String, Object>>> getCaseHearings(@PathVariable UUID caseId) {
         List<Hearing> hearings = hearingService.getCaseHearings(caseId);
-        return ResponseEntity.ok(hearings);
+        List<Map<String, Object>> response = hearings.stream().map(h -> {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("id", h.getId());
+            dto.put("scheduledDate", h.getScheduledDate());
+            dto.put("durationMinutes", h.getDurationMinutes());
+            dto.put("status", h.getStatus());
+            dto.put("videoRoomId", h.getVideoRoomId());
+            dto.put("judgeNotes", h.getJudgeNotes());
+            dto.put("createdAt", h.getCreatedAt());
+            return dto;
+        }).toList();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/my")

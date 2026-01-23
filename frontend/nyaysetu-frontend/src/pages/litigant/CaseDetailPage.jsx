@@ -571,8 +571,28 @@ function CaseFilesTab({ caseId }) {
         } catch (e) { console.error(e); alert('Download failed'); }
     };
 
-    const downloadCertificate = (doc) => {
-        alert(`Downloading Section 65B Certificate for: ${doc.fileName}\n(This would generate a signed PDF)`);
+    const downloadCertificate = async (doc) => {
+        try {
+            // Use different endpoint based on doc type
+            const url = doc.source === 'evidence'
+                ? `${API_BASE_URL}/api/evidence/${doc.id}/certificate`
+                : `${API_BASE_URL}/api/documents/${doc.id}/certificate`;
+
+            const response = await axios.get(url, {
+                responseType: 'blob',
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.setAttribute('download', `Certificate_${doc.fileName || doc.id}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (e) {
+            console.error('Certificate download failed:', e);
+            alert('Failed to download certificate. This document may not have verification data.');
+        }
     };
 
     return (
@@ -592,50 +612,61 @@ function CaseFilesTab({ caseId }) {
             {loading ? <Loader2 size={32} style={{ margin: '2rem auto', display: 'block' }} className="animate-spin" /> :
                 files.length === 0 ? <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No files found.</p> :
                     <div style={{ display: 'grid', gap: '1rem' }}>
-                        {files.map(doc => (
-                            <div key={`${doc.source}-${doc.id}`} style={{ background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '1rem', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{ padding: '0.75rem', background: doc.type === 'EVIDENCE' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(139, 92, 246, 0.1)', borderRadius: '0.75rem' }}>
-                                        {doc.type === 'EVIDENCE' ? <Shield size={24} color="#10b981" /> : <FileText size={24} color="#8b5cf6" />}
-                                    </div>
-                                    <div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <p style={{ fontWeight: '600', color: 'var(--text-main)', margin: 0 }}>{doc.fileName}</p>
-                                            {doc.type === 'EVIDENCE' && (
-                                                <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', background: '#10b981', color: 'white', borderRadius: '99px', fontWeight: 'bold' }}>VERIFIED</span>
-                                            )}
+                        {files.map(doc => {
+                            // Check if document has hash verification
+                            const isVerified = doc.type === 'EVIDENCE' || (doc.fileHash && doc.isVerified);
+                            const showCertificate = doc.type === 'EVIDENCE' || doc.fileHash;
+
+                            return (
+                                <div key={`${doc.source}-${doc.id}`} style={{ background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '1rem', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{ padding: '0.75rem', background: isVerified ? 'rgba(16, 185, 129, 0.1)' : 'rgba(139, 92, 246, 0.1)', borderRadius: '0.75rem' }}>
+                                            {isVerified ? <Shield size={24} color="#10b981" /> : <FileText size={24} color="#8b5cf6" />}
                                         </div>
-                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
-                                            {doc.type === 'EVIDENCE' ? `Hash: ${doc.blockHash?.substring(0, 16)}...` : `${formatFileSize(doc.fileSize)} • ${formatDate(doc.uploadedAt)}`}
-                                        </p>
+                                        <div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <p style={{ fontWeight: '600', color: 'var(--text-main)', margin: 0 }}>{doc.fileName}</p>
+                                                {isVerified && (
+                                                    <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', background: '#10b981', color: 'white', borderRadius: '99px', fontWeight: 'bold' }}>VERIFIED</span>
+                                                )}
+                                            </div>
+                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                                                {doc.type === 'EVIDENCE'
+                                                    ? `Hash: ${doc.blockHash?.substring(0, 16)}...`
+                                                    : doc.fileHash
+                                                        ? `Hash: ${doc.fileHash.substring(0, 16)}... • ${formatFileSize(doc.fileSize)}`
+                                                        : `${formatFileSize(doc.fileSize)} • ${formatDate(doc.uploadedAt)}`
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                        {doc.source === 'docs' && (
+                                            analysisMap[doc.id] ? (
+                                                <button onClick={() => viewAnalysis(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.5rem', color: '#8b5cf6', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                    <Sparkles size={14} /> AI Insights
+                                                </button>
+                                            ) : analyzingIds.includes(doc.id) ? (
+                                                <div style={{ padding: '0.5rem 0.75rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
+                                                    <Loader2 size={14} className="animate-spin" /> Analyzing...
+                                                </div>
+                                            ) : null
+                                        )}
+
+                                        {showCertificate && (
+                                            <button onClick={() => downloadCertificate(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '0.5rem', color: '#10b981', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                <FileCheck size={14} /> Certificate
+                                            </button>
+                                        )}
+
+                                        <button onClick={() => downloadDoc(doc)} style={{ padding: '0.5rem', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Download size={16} />
+                                        </button>
                                     </div>
                                 </div>
-
-                                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                    {doc.source === 'docs' && (
-                                        analysisMap[doc.id] ? (
-                                            <button onClick={() => viewAnalysis(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.5rem', color: '#8b5cf6', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
-                                                <Sparkles size={14} /> AI Insights
-                                            </button>
-                                        ) : analyzingIds.includes(doc.id) ? (
-                                            <div style={{ padding: '0.5rem 0.75rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
-                                                <Loader2 size={14} className="animate-spin" /> Analyzing...
-                                            </div>
-                                        ) : null
-                                    )}
-
-                                    {doc.type === 'EVIDENCE' && (
-                                        <button onClick={() => downloadCertificate(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '0.5rem', color: '#10b981', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
-                                            <FileCheck size={14} /> Certificate
-                                        </button>
-                                    )}
-
-                                    <button onClick={() => downloadDoc(doc)} style={{ padding: '0.5rem', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Download size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>}
 
             {showAnalysisModal && selectedAnalysis && (
@@ -690,12 +721,63 @@ function CaseFilesTab({ caseId }) {
 }
 
 function TimelineTab({ caseData }) {
-    // Generate dummy timeline for now based on case dates
-    const timeline = [
-        { date: caseData.nextHearing, title: 'Upcoming Hearing', type: 'future', icon: Clock },
-        { date: new Date().toISOString(), title: 'Current Status: ' + caseData.status, type: 'current', icon: CheckCircle2 },
-        { date: caseData.filedDate, title: 'Case Filed', type: 'past', icon: FileText },
-    ].filter(e => e.date).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const [timeline, setTimeline] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchTimeline();
+    }, [caseData.id]);
+
+    const fetchTimeline = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${API_BASE_URL}/api/timeline/${caseData.id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const events = response.data || [];
+
+            // Map timeline events to display format
+            const mappedEvents = events.map(e => ({
+                date: e.timestamp,
+                title: e.event,
+                type: new Date(e.timestamp) > new Date() ? 'future' : 'past',
+                icon: e.event.includes('Hearing') ? Clock :
+                    e.event.includes('Filed') ? FileText :
+                        e.event.includes('Judge') ? Gavel : CheckCircle2
+            }));
+
+            // Add current status if no events
+            if (mappedEvents.length === 0) {
+                mappedEvents.push({
+                    date: new Date().toISOString(),
+                    title: 'Current Status: ' + caseData.status,
+                    type: 'current',
+                    icon: CheckCircle2
+                });
+            }
+
+            setTimeline(mappedEvents.sort((a, b) => new Date(b.date) - new Date(a.date)));
+        } catch (error) {
+            console.error('Error fetching timeline:', error);
+            // Fallback to showing basic info
+            setTimeline([
+                { date: caseData.nextHearing, title: 'Upcoming Hearing', type: 'future', icon: Clock },
+                { date: new Date().toISOString(), title: 'Current Status: ' + caseData.status, type: 'current', icon: CheckCircle2 },
+                { date: caseData.filedDate, title: 'Case Filed', type: 'past', icon: FileText },
+            ].filter(e => e.date).sort((a, b) => new Date(b.date) - new Date(a.date)));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
+                <Loader2 size={32} className="animate-spin" style={{ color: 'var(--color-accent)' }} />
+            </div>
+        );
+    }
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>

@@ -29,6 +29,7 @@ public class DocumentManagementController {
     private final CaseManagementService caseManagementService;
     private final AuthService authService;
     private final com.nyaysetu.backend.service.DocumentAnalysisService documentAnalysisService;
+    private final com.nyaysetu.backend.service.CertificateService certificateService;
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadDocument(
@@ -36,10 +37,14 @@ public class DocumentManagementController {
             @RequestParam(value = "category", defaultValue = "OTHER") String category,
             @RequestParam(value = "description", required = false, defaultValue = "") String description,
             @RequestParam(value = "caseId", required = false) String caseIdStr,
-            Authentication authentication
+            Authentication authentication,
+            jakarta.servlet.http.HttpServletRequest request
     ) {
         try {
             User user = authService.findByEmail(authentication.getName());
+            
+            // Extract client IP address for audit trail
+            String uploadIp = getClientIp(request);
             
             UUID caseId = null;
             if (caseIdStr != null && !caseIdStr.isEmpty() && !caseIdStr.equals("null")) {
@@ -50,13 +55,13 @@ public class DocumentManagementController {
                 }
             }
             
-            UploadDocumentRequest request = UploadDocumentRequest.builder()
+            UploadDocumentRequest uploadRequest = UploadDocumentRequest.builder()
                     .category(category)
                     .description(description)
                     .caseId(caseId)
                     .build();
 
-            DocumentDto document = documentManagementService.uploadDocument(file, request, user);
+            DocumentDto document = documentManagementService.uploadDocument(file, uploadRequest, user, uploadIp);
             
             // Auto-trigger AI verification
             try {
@@ -70,6 +75,24 @@ public class DocumentManagementController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
+    }
+    
+    /**
+     * Extract client IP address from request
+     */
+    private String getClientIp(jakarta.servlet.http.HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        // Handle multiple IPs in X-Forwarded-For
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        return ip;
     }
 
     /**
@@ -169,5 +192,23 @@ public class DocumentManagementController {
         User user = authService.findByEmail(authentication.getName());
         documentManagementService.deleteDocument(id, user.getId());
         return ResponseEntity.ok(Map.of("message", "Document deleted successfully"));
+    }
+
+    /**
+     * Download Section 63(4) Evidence Certificate for a document
+     */
+    @GetMapping("/{id}/certificate")
+    public ResponseEntity<byte[]> downloadCertificate(@PathVariable UUID id) {
+        try {
+            byte[] pdfBytes = certificateService.generateDocumentCertificate(id);
+            
+            return ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, 
+                            "attachment; filename=\"Certificate_" + id + ".pdf\"")
+                    .body(pdfBytes);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
     }
 }

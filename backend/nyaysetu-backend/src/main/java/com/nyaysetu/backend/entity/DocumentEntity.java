@@ -40,6 +40,13 @@ public class DocumentEntity {
     @Column(length = 500)
     private String description;
 
+    private String fileHash;
+
+    private String uploadIp;
+
+    @Builder.Default
+    private Boolean isVerified = true;
+
     @PrePersist
     protected void onCreate() {
         uploadedAt = LocalDateTime.now();

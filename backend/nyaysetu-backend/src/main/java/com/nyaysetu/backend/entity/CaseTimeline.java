@@ -20,7 +20,5 @@ public class CaseTimeline {
 
     private String event;
 
-    private String description;
-
     private LocalDateTime timestamp;
 }

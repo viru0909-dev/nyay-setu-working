@@ -30,12 +30,10 @@ const roleMenuItems = {
         { icon: User, label: 'Profile', path: '/lawyer/profile' }
     ],
     JUDGE: [
-        { icon: Home, label: 'Dashboard', path: '/judge' },
-        { icon: FolderOpen, label: 'Pending Cases', path: '/judge/pending' },
-        { icon: Brain, label: 'AI Case Summary', path: '/judge/ai-summary' },
-        { icon: Video, label: 'Conduct Hearing', path: '/judge/conduct' },
-        { icon: Archive, label: 'Evidence Review', path: '/judge/evidence' },
-        { icon: FileText, label: 'Draft Orders', path: '/judge/orders' },
+        { icon: Home, label: 'Judicial Overview', path: '/judge' },
+        { icon: Briefcase, label: 'My Docket', path: '/judge/docket' },
+        { icon: FolderOpen, label: 'Unassigned Pool', path: '/judge/unassigned' },
+        { icon: Video, label: 'Live Hearing', path: '/judge/live-hearing' },
         { icon: BarChart3, label: 'Court Analytics', path: '/judge/analytics' },
         { icon: User, label: 'Profile', path: '/judge/profile' }
     ],

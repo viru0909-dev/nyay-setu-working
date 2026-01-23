@@ -50,6 +50,17 @@ export default function PoliceDashboard() {
         }
     };
 
+    const handleRegisterFir = async (firId) => {
+        try {
+            await policeAPI.updateFirStatus(firId, 'REGISTERED');
+            alert('✅ FIR Registered & Court Case Created Successfully!');
+            fetchDashboardData();
+        } catch (error) {
+            console.error('Error registering FIR:', error);
+            alert('Failed to register FIR');
+        }
+    };
+
     const handleSubmitToCourt = async () => {
         if (!selectedFir || !findings.trim()) return;
 
@@ -234,12 +245,20 @@ export default function PoliceDashboard() {
                             <h4 style={{ margin: 0, color: 'var(--text-main)' }}>{fir.title}</h4>
                             <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Filed by: {fir.filedByName || 'Unknown'} | Date: {new Date(fir.uploadedAt).toLocaleDateString()}</p>
                         </div>
-                        <button
-                            onClick={() => handleStartInvestigation(fir.id)}
-                            style={{ background: 'var(--color-primary)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
-                        >
-                            Accept Investigation
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                onClick={() => handleRegisterFir(fir.id)}
+                                style={{ background: '#10b981', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
+                            >
+                                Register FIR
+                            </button>
+                            <button
+                                onClick={() => handleStartInvestigation(fir.id)}
+                                style={{ background: 'var(--color-primary)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
+                            >
+                                Investigate
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
