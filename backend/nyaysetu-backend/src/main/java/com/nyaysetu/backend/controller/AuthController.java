@@ -42,7 +42,7 @@ public class AuthController {
                     req.getEmail(),
                     req.getName(),
                     req.getPassword(),
-                    req.getRole() != null ? req.getRole() : Role.CLIENT // default to CLIENT
+                    req.getRole() != null ? req.getRole() : Role.LITIGANT // default to LITIGANT
             );
             
             // Auto-login after registration

@@ -15,6 +15,7 @@ export default function DashboardLayout() {
     // Pages where we want to hide the global AI brain widget to avoid clashes
     const hideAIBrainPaths = [
         '/client/vakil-friend',
+        '/litigant/vakil-friend',
         '/lawyer/chat',
         '/lawyer/ai-assistant',
         '/ai-review'

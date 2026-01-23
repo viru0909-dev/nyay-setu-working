@@ -20,18 +20,17 @@ const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 const AdminDashboard = lazy(() => import('./pages/dashboards/AdminDashboard'));
 const JudgeDashboard = lazy(() => import('./pages/dashboards/JudgeDashboard'));
 const LawyerDashboard = lazy(() => import('./pages/dashboards/LawyerDashboard'));
-const ClientDashboard = lazy(() => import('./pages/client/ClientDashboard'));
-const FileCasePage = lazy(() => import('./pages/client/FileCasePage'));
-const MyCasesPage = lazy(() => import('./pages/client/MyCasesPage'));
-const DocumentsPage = lazy(() => import('./pages/client/DocumentsPage'));
-const AIDocumentReviewPage = lazy(() => import('./pages/client/AIDocumentReviewPage'));
-const ProfilePage = lazy(() => import('./pages/client/ProfilePage'));
-const VakilFriendChat = lazy(() => import('./pages/client/VakilFriendChat'));
-const CaseDetailPage = lazy(() => import('./pages/client/CaseDetailPage'));
-const EvidenceManagerPage = lazy(() => import('./pages/client/EvidenceManagerPage'));
-const HearingsPage = lazy(() => import('./pages/client/HearingsPage'));
-const LawyerChatPage = lazy(() => import('./pages/client/LawyerChatPage'));
-const FileFirPage = lazy(() => import('./pages/client/FileFirPage'));
+
+// Litigant Pages
+const LitigantDashboard = lazy(() => import('./pages/litigant/LitigantDashboard'));
+const FileUnifiedPage = lazy(() => import('./pages/litigant/FileUnifiedPage'));
+const VakilFriendPage = lazy(() => import('./pages/litigant/VakilFriendPage'));
+const CaseDiaryPage = lazy(() => import('./pages/litigant/CaseDiaryPage'));
+const CaseDetailPage = lazy(() => import('./pages/litigant/CaseDetailPage'));
+const HearingsPage = lazy(() => import('./pages/litigant/HearingsPage'));
+const LawyerChatPage = lazy(() => import('./pages/litigant/LawyerChatPage'));
+const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
+
 
 // Judge Pages
 const PendingCasesPage = lazy(() => import('./pages/judge/PendingCasesPage'));
@@ -103,25 +102,21 @@ function App() {
 
                             {/* Protected Dashboards */}
                             <Route
-                                path="/client/*"
+                                path="/litigant/*"
                                 element={
-                                    <ProtectedRoute allowedRoles={['CLIENT']}>
+                                    <ProtectedRoute allowedRoles={['LITIGANT']}>
                                         <DashboardLayout />
                                     </ProtectedRoute>
                                 }
                             >
-                                <Route index element={<ClientDashboard />} />
-                                <Route path="file-case" element={<FileCasePage />} />
-                                <Route path="cases" element={<MyCasesPage />} />
-                                <Route path="documents" element={<DocumentsPage />} />
-                                <Route path="ai-review" element={<AIDocumentReviewPage />} />
-                                <Route path="profile" element={<ProfilePage />} />
-                                <Route path="vakil-friend" element={<VakilFriendChat />} />
-                                <Route path="case/:caseId" element={<CaseDetailPage />} />
-                                <Route path="evidence" element={<EvidenceManagerPage />} />
+                                <Route index element={<LitigantDashboard />} />
+                                <Route path="vakil-friend" element={<VakilFriendPage />} />
+                                <Route path="file" element={<FileUnifiedPage />} />
+                                <Route path="case-diary" element={<CaseDiaryPage />} />
+                                <Route path="case-diary/:caseId" element={<CaseDetailPage />} />
                                 <Route path="hearings" element={<HearingsPage />} />
                                 <Route path="chat" element={<LawyerChatPage />} />
-                                <Route path="file-fir" element={<FileFirPage />} />
+                                <Route path="profile" element={<ProfilePage />} />
                             </Route>
 
                             <Route

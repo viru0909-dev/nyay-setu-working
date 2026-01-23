@@ -8,17 +8,14 @@ import {
 } from 'lucide-react';
 
 const roleMenuItems = {
-    CLIENT: [
-        { icon: Home, label: 'Dashboard', path: '/client' },
-        { icon: Bot, label: 'Vakil-Friend AI', path: '/client/vakil-friend' },
-        { icon: FileText, label: 'File New Case', path: '/client/file-case' },
-        { icon: Scale, label: 'File FIR', path: '/client/file-fir' },
-        { icon: FolderOpen, label: 'My Cases', path: '/client/cases' },
-        { icon: Upload, label: 'Documents', path: '/client/documents' },
-        { icon: Brain, label: 'AI Document Review', path: '/client/ai-review' },
-        { icon: Archive, label: 'Evidence Manager', path: '/client/evidence' },
-        { icon: Video, label: 'Hearings', path: '/client/hearings' },
-        { icon: User, label: 'Profile', path: '/client/profile' }
+    LITIGANT: [
+        { icon: Home, label: 'Dashboard', path: '/litigant' },
+        { icon: Bot, label: 'Vakil Friend AI', path: '/litigant/vakil-friend' },
+        { icon: FileText, label: 'File Case / FIR', path: '/litigant/file' },
+        { icon: FolderOpen, label: 'Case Diary', path: '/litigant/case-diary' },
+        { icon: Video, label: 'Hearings', path: '/litigant/hearings' },
+        { icon: MessageSquare, label: 'Lawyer Chat', path: '/litigant/chat' },
+        { icon: User, label: 'Profile', path: '/litigant/profile' }
     ],
     LAWYER: [
         { icon: Home, label: 'Dashboard', path: '/lawyer' },
@@ -76,7 +73,7 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     const location = useLocation();
-    const menuItems = roleMenuItems[userRole] || roleMenuItems.CLIENT;
+    const menuItems = roleMenuItems[userRole] || roleMenuItems.LITIGANT;
 
     // Listen for window resize to detect mobile/desktop
     useEffect(() => {

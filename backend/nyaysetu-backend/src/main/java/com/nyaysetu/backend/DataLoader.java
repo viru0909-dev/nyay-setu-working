@@ -21,7 +21,7 @@ public class DataLoader implements CommandLineRunner {
         createIfMissing("admin@nyay.com", "Admin", "admin123", Role.ADMIN);
         createIfMissing("judge@nyay.com", "Judge X", "judge123", Role.JUDGE);
         createIfMissing("lawyer@nyay.com", "Lawyer Y", "lawyer123", Role.LAWYER);
-        createIfMissing("client@nyay.com", "Client Z", "client123", Role.CLIENT);
+        createIfMissing("litigant@nyay.com", "Litigant Z", "litigant123", Role.LITIGANT);
         createIfMissing("tech@nyay.com", "Tech Admin", "tech123", Role.TECH_ADMIN);
         createIfMissing("police@nyay.com", "Officer P", "police123", Role.POLICE);
     }

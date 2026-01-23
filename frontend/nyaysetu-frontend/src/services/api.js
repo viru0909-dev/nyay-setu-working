@@ -94,7 +94,10 @@ export const documentAPI = {
     list: () => api.get('/api/documents'),
     getByCase: (caseId) => api.get(`/api/documents/case/${caseId}`),
     download: (id) => api.get(`/api/documents/${id}/download`, { responseType: 'blob' }),
-    delete: (id) => api.delete(`/api/documents/${id}`)
+    delete: (id) => api.delete(`/api/documents/${id}`),
+    analyze: (id) => api.post(`/api/documents/${id}/analyze`),
+    getAnalysis: (id) => api.get(`/api/documents/${id}/analysis`),
+    hasAnalysis: (id) => api.get(`/api/documents/${id}/has-analysis`)
 };
 
 // Hearing API
@@ -178,6 +181,7 @@ export const lawyerAPI = {
 // Central Brain API
 export const brainAPI = {
     chat: (message, sessionId = null) => api.post('/api/brain/chat', { message, sessionId }),
+    analyzeCase: (query) => api.post('/api/brain/analyze-case', { query }),
 };
 
 // Police API - FIR management for police officers

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -286,9 +287,12 @@ public class FirService {
     /**
      * Submit FIR findings to Court (Creates a Case)
      */
+    @Transactional
     public FirUploadResponse submitToCourt(Long firId, String investigationFindings, User policeOfficer) {
         FirRecord fir = firRecordRepository.findById(firId)
                 .orElseThrow(() -> new RuntimeException("FIR not found with ID: " + firId));
+        
+        log.info("⚖️ Submitting FIR {} to court. Filed by: {}", fir.getFirNumber(), fir.getFiledBy() != null ? fir.getFiledBy().getEmail() : "NULL");
 
         // update FIR details
         fir.setInvestigationDetails(investigationFindings);
@@ -306,6 +310,8 @@ public class FirService {
                 .respondent("Unknown (Investigation On-going)") // or extract from FIR if structure allows
                 .filedDate(LocalDateTime.now())
                 .urgency("HIGH")
+                .client(fir.getFiledBy()) // Link to original filer
+                .filingMethod("POLICE_FIR")
                 .judgeId(null) // Unassigned
                 .assignedJudge(null)
                 .build();
