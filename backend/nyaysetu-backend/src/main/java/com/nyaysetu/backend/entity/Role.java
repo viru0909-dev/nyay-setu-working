@@ -1,7 +1,7 @@
 package com.nyaysetu.backend.entity;
 
 public enum Role {
-    CLIENT,
+    LITIGANT,
     LAWYER,
     JUDGE,
     ADMIN,

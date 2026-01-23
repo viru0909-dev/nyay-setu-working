@@ -118,7 +118,7 @@ public class HearingService {
         
         List<CaseEntity> userCases = new java.util.ArrayList<>();
         
-        if (user.getRole() == Role.CLIENT) {
+        if (user.getRole() == Role.LITIGANT) {
             userCases = caseRepository.findByClient(user);
         } else if (user.getRole() == Role.LAWYER) {
             userCases = caseRepository.findByLawyer(user);

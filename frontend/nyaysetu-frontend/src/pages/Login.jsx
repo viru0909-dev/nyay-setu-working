@@ -29,7 +29,7 @@ export default function Login() {
 
     const roles = [
         { value: '', label: 'All Roles', icon: <User size={18} />, color: '#64748b' },
-        { value: 'CLIENT', label: 'Client', icon: <Briefcase size={18} />, color: '#3b82f6' },
+        { value: 'LITIGANT', label: 'Litigant', icon: <Briefcase size={18} />, color: '#3b82f6' },
         { value: 'LAWYER', label: 'Lawyer', icon: <Scale size={18} />, color: '#8b5cf6' },
         { value: 'JUDGE', label: 'Judge', icon: <Gavel size={18} />, color: '#ec4899' }
     ];
@@ -55,7 +55,7 @@ export default function Login() {
                 ADMIN: '/admin',
                 JUDGE: '/judge',
                 LAWYER: '/lawyer',
-                CLIENT: '/client',
+                LITIGANT: '/litigant',
                 POLICE: '/police',
                 TECH_ADMIN: '/admin',
                 TECHNICAL_TEAM: '/admin',
@@ -501,7 +501,7 @@ export default function Login() {
                             ADMIN: '/admin',
                             JUDGE: '/judge',
                             LAWYER: '/lawyer',
-                            CLIENT: '/client',
+                            LITIGANT: '/litigant',
                             TECH_ADMIN: '/admin',
                             TECHNICAL_TEAM: '/admin',
                             SUPER_JUDGE: '/admin'

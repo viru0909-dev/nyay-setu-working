@@ -156,37 +156,52 @@ public class VakilFriendController {
             }
             
             log.info("📋 Completing session {} for user {}", sessionId, user.getEmail());
-            CaseEntity createdCase = vakilFriendService.completeSession(sessionId, user);
+            Object result = vakilFriendService.completeSession(sessionId, user);
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("message", "✅ Your case has been successfully filed!");
-            response.put("caseId", createdCase.getId());
-            response.put("caseTitle", createdCase.getTitle());
-            response.put("caseType", createdCase.getCaseType());
-            response.put("status", createdCase.getStatus());
-            response.put("urgency", createdCase.getUrgency());
-            response.put("petitioner", createdCase.getPetitioner());
-            response.put("respondent", createdCase.getRespondent());
-            
-            // Include assigned judge info
-            if (createdCase.getAssignedJudge() != null && !createdCase.getAssignedJudge().isEmpty()) {
-                response.put("assignedJudge", createdCase.getAssignedJudge());
-                response.put("judgeAssigned", true);
-            } else {
+
+            if (result instanceof com.nyaysetu.backend.entity.FirRecord) {
+                com.nyaysetu.backend.entity.FirRecord fir = (com.nyaysetu.backend.entity.FirRecord) result;
+                response.put("message", "✅ Your FIR has been successfully sent to the Police!");
+                // Map FIR fields to Case fields for frontend compatibility
+                response.put("caseId", fir.getFirNumber());
+                response.put("caseTitle", fir.getTitle());
+                response.put("caseType", "FIR (Criminal)");
+                response.put("status", "PENDING POLICE REVIEW");
+                response.put("urgency", "CRITICAL"); // FIRs are usually urgent
+                response.put("petitioner", user.getName());
+                response.put("respondent", "Unknown (Police Investigation)");
                 response.put("judgeAssigned", false);
-            }
-            
-            // Include next hearing date
-            if (createdCase.getNextHearing() != null) {
-                response.put("nextHearing", createdCase.getNextHearing().toString());
-                response.put("hearingScheduled", true);
-            } else {
                 response.put("hearingScheduled", false);
+                log.info("✅ Completed session {} and created FIR {}", sessionId, fir.getFirNumber());
+            } else if (result instanceof CaseEntity) {
+                CaseEntity createdCase = (CaseEntity) result;
+                response.put("message", "✅ Your case has been successfully filed!");
+                response.put("caseId", createdCase.getId());
+                response.put("caseTitle", createdCase.getTitle());
+                response.put("caseType", createdCase.getCaseType());
+                response.put("status", createdCase.getStatus());
+                response.put("urgency", createdCase.getUrgency());
+                response.put("petitioner", createdCase.getPetitioner());
+                response.put("respondent", createdCase.getRespondent());
+                
+                if (createdCase.getAssignedJudge() != null && !createdCase.getAssignedJudge().isEmpty()) {
+                    response.put("assignedJudge", createdCase.getAssignedJudge());
+                    response.put("judgeAssigned", true);
+                } else {
+                    response.put("judgeAssigned", false);
+                }
+                
+                if (createdCase.getNextHearing() != null) {
+                    response.put("nextHearing", createdCase.getNextHearing().toString());
+                    response.put("hearingScheduled", true);
+                } else {
+                    response.put("hearingScheduled", false);
+                }
+                log.info("✅ Completed session {} and created CASE {}", sessionId, createdCase.getId());
             }
-            
-            log.info("✅ Completed session {} and created case {} with judge {} and hearing {}", 
-                    sessionId, createdCase.getId(), createdCase.getAssignedJudge(), createdCase.getNextHearing());
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Failed to complete session: {}", e.getMessage(), e);

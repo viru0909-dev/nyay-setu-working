@@ -14,7 +14,7 @@ export default function Signup() {
         email: '',
         password: '',
         confirmPassword: '',
-        role: 'CLIENT'
+        role: 'LITIGANT'
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -36,7 +36,7 @@ export default function Signup() {
     }, []);
 
     const roles = [
-        { value: 'CLIENT', label: 'Client', icon: <Briefcase size={18} />, color: '#3b82f6', desc: 'File cases & track progress' },
+        { value: 'LITIGANT', label: 'Litigant', icon: <Briefcase size={18} />, color: '#3b82f6', desc: 'File cases & track progress' },
         { value: 'LAWYER', label: 'Lawyer', icon: <Scale size={18} />, color: '#8b5cf6', desc: 'Represent clients' },
         { value: 'JUDGE', label: 'Judge', icon: <Gavel size={18} />, color: '#ec4899', desc: 'Conduct hearings' }
     ];
@@ -101,7 +101,7 @@ export default function Signup() {
             ADMIN: '/admin',
             JUDGE: '/judge',
             LAWYER: '/lawyer',
-            CLIENT: '/client'
+            LITIGANT: '/litigant'
         };
         navigate(roleRoutes[registeredUser.role] || '/');
     };

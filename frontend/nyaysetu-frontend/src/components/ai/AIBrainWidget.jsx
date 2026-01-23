@@ -30,7 +30,7 @@ export default function AIBrainWidget({ user }) {
         switch (role) {
             case 'JUDGE': return "🙏 NyaySetu Judicial Brain online. I can help analyze dossiers, check evidence validity, or suggest procedural steps for your pending cases. How may I assist you, Your Honor?";
             case 'LAWYER': return "Greetings, Counselor. I'm ready to assist with case drafting, IPC/BNS research, or client communication strategies. What's on the agenda today?";
-            case 'CLIENT': return "🙏 Namaste. I am your NyaySetu legal guide. I can help you understand your rights, file a new case, or find a legal representative. What would you like to know?";
+            case 'LITIGANT': return "🙏 Namaste. I am your NyaySetu legal guide. I can help you understand your rights, file a new case, or find a legal representative. What would you like to know?";
             default: return "Hello. I am the NyaySetu AI Brain. How can I help you today?";
         }
     };
