@@ -156,6 +156,58 @@ public class HearingService {
         return "hearing-" + UUID.randomUUID().toString().substring(0, 12);
     }
     
+    @Transactional
+    public Hearing recordOutcome(UUID hearingId, com.nyaysetu.backend.dto.HearingOutcomeRequest request) {
+        log.info("Recording outcome for hearing: {}", hearingId);
+        
+        Hearing hearing = hearingRepository.findById(hearingId)
+                .orElseThrow(() -> new RuntimeException("Hearing not found"));
+        
+        CaseEntity caseEntity = hearing.getCaseEntity();
+        
+        // 1. Update Current Hearing
+        hearing.setStatus(HearingStatus.COMPLETED);
+        hearing.setJudgeNotes(request.getJudgeNotes());
+        hearing.setOutcomeType(request.getOutcomeType());
+        hearingRepository.save(hearing);
+        
+        // 2. Update Case Status/Stage
+        if (request.getNextStage() != null) {
+            caseEntity.setStage(request.getNextStage());
+            
+            // Auto-update status based on stage
+            if (request.getNextStage() == CaseStage.VERDICT || request.getNextStage() == CaseStage.CLOSED) {
+                caseEntity.setStatus(CaseStatus.CLOSED);
+            } else if (caseEntity.getStatus() == CaseStatus.PENDING) {
+                caseEntity.setStatus(CaseStatus.IN_PROGRESS);
+            }
+        }
+        
+        // 3. Schedule Next Hearing
+        if (request.getNextHearingDate() != null) {
+            scheduleHearing(caseEntity.getId(), request.getNextHearingDate(), 60);
+        }
+        
+        caseRepository.save(caseEntity);
+        
+        // 4. Timeline Log
+        try {
+            String logMessage = String.format("Hearing held. Outcome: %s. Case moved to %s stage.", 
+                request.getOutcomeType(), 
+                request.getNextStage() != null ? request.getNextStage() : "current");
+                
+            if (request.getNextHearingDate() != null) {
+                logMessage += " Next hearing: " + request.getNextHearingDate().toLocalDate();
+            }
+            
+            timelineService.addEvent(caseEntity.getId(), "HEARING_OUTCOME", logMessage);
+        } catch (Exception e) {
+            log.error("Failed to log timeline event", e);
+        }
+        
+        return hearing;
+    }
+
     public boolean canUserJoinHearing(UUID hearingId, Long userId) {
         return participantRepository.existsByHearingIdAndUserId(hearingId, userId);
     }

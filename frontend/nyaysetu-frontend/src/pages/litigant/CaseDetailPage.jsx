@@ -272,6 +272,111 @@ export default function CaseDetailPage() {
 
             {/* Chat Widget always visible */}
             <CaseChatWidget caseId={caseId} caseTitle={caseData.title} />
+
+            {/* Hire Lawyer Modal */}
+            {showHireModal && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.7)',
+                    backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }} onClick={() => setShowHireModal(false)}>
+                    <div style={{
+                        background: 'var(--bg-glass-strong)', width: '100%', maxWidth: '600px', maxHeight: '80vh',
+                        padding: '2rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)',
+                        overflow: 'hidden', display: 'flex', flexDirection: 'column'
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <div>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
+                                    ⚖️ Hire a Lawyer
+                                </h2>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                                    Select a verified legal professional
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowHireModal(false)}
+                                style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div style={{ flex: 1, overflowY: 'auto' }}>
+                            {lawyerLoading ? (
+                                <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+                                    <Loader2 size={32} className="animate-spin" style={{ color: 'var(--color-accent)' }} />
+                                </div>
+                            ) : availableLawyers.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                                    <User size={48} color="var(--text-secondary)" style={{ marginBottom: '1rem' }} />
+                                    <h4 style={{ color: 'var(--text-main)', margin: '0 0 0.5rem 0' }}>No Lawyers Available</h4>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                        There are no verified lawyers accepting cases at the moment.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {availableLawyers.map(lawyer => (
+                                        <div key={lawyer.id} style={{
+                                            background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                            borderRadius: '1rem', padding: '1.25rem',
+                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                            transition: 'all 0.2s'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{
+                                                    width: '50px', height: '50px', borderRadius: '50%',
+                                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, #4f46e5 100%)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    color: 'white', fontWeight: '700', fontSize: '1.25rem'
+                                                }}>
+                                                    {lawyer.name?.charAt(0) || 'L'}
+                                                </div>
+                                                <div>
+                                                    <h4 style={{ fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
+                                                        {lawyer.name}
+                                                    </h4>
+                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                                                        {lawyer.email}
+                                                    </p>
+                                                    {lawyer.specialization && (
+                                                        <span style={{
+                                                            display: 'inline-block', marginTop: '0.5rem',
+                                                            padding: '0.2rem 0.5rem', background: 'rgba(99, 102, 241, 0.1)',
+                                                            color: 'var(--color-accent)', borderRadius: '0.25rem',
+                                                            fontSize: '0.75rem', fontWeight: '600'
+                                                        }}>
+                                                            {lawyer.specialization}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => submitProposal(lawyer.id)}
+                                                style={{
+                                                    padding: '0.625rem 1.25rem',
+                                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                                    border: 'none',
+                                                    borderRadius: '0.5rem',
+                                                    color: 'white',
+                                                    fontWeight: '600',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem',
+                                                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
+                                                }}
+                                            >
+                                                <Gavel size={16} /> Send Proposal
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

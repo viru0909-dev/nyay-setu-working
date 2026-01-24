@@ -145,6 +145,24 @@ public class HearingController {
         return ResponseEntity.ok(hearing);
     }
     
+    @PostMapping("/{hearingId}/outcome")
+    public ResponseEntity<?> recordOutcome(
+            @PathVariable UUID hearingId,
+            @RequestBody com.nyaysetu.backend.dto.HearingOutcomeRequest request
+    ) {
+        try {
+            Hearing hearing = hearingService.recordOutcome(hearingId, request);
+            return ResponseEntity.ok(Map.of(
+                "message", "Outcome recorded successfully",
+                "hearingId", hearing.getId(),
+                "status", hearing.getStatus()
+            ));
+        } catch (Exception e) {
+            log.error("Failed to record hearing outcome", e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
     @GetMapping("/{hearingId}")
     public ResponseEntity<Hearing> getHearing(@PathVariable UUID hearingId) {
         Hearing hearing = hearingService.getHearing(hearingId);
