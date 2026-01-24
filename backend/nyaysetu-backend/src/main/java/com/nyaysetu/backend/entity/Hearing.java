@@ -41,6 +41,10 @@ public class Hearing {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private HearingStatus status = HearingStatus.SCHEDULED;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "outcome_type")
+    private HearingOutcomeType outcomeType;
     
     @Column(name = "judge_notes", columnDefinition = "TEXT")
     private String judgeNotes;

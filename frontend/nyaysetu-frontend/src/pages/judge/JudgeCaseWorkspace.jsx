@@ -48,6 +48,60 @@ const formatFileSize = (bytes) => {
 };
 
 // -----------------------------------------------------------------------------
+// HELPER COMPONENTS
+// -----------------------------------------------------------------------------
+
+const CaseLifecycleStepper = ({ currentStage }) => {
+    const stages = ['COGNIZANCE', 'APPEARANCE', 'FRAMING_OF_CHARGES', 'EVIDENCE', 'ARGUMENTS', 'JUDGMENT', 'VERDICT'];
+    // Default to first stage if undefined or not found
+    const safeStage = currentStage || 'COGNIZANCE';
+    const currentIndex = stages.indexOf(safeStage) !== -1 ? stages.indexOf(safeStage) : 0;
+
+    return (
+        <div style={{ marginTop: '2rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', minWidth: '800px' }}>
+                {stages.map((stage, index) => (
+                    <div key={stage} style={{ display: 'flex', alignItems: 'center', flex: index === stages.length - 1 ? 0 : 1 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
+                            <div style={{
+                                width: '32px', height: '32px', borderRadius: '50%',
+                                background: index <= currentIndex ? 'var(--color-accent)' : 'var(--bg-glass-strong)',
+                                border: index <= currentIndex ? 'none' : '2px solid var(--border-glass)',
+                                color: index <= currentIndex ? 'white' : 'var(--text-secondary)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontWeight: '700', fontSize: '0.8rem', zIndex: 2,
+                                boxShadow: index === currentIndex ? '0 0 0 4px rgba(99, 102, 241, 0.2)' : 'none'
+                            }}>
+                                {index + 1}
+                            </div>
+                            <span style={{
+                                fontSize: '0.75rem',
+                                fontWeight: index === currentIndex ? '800' : '600',
+                                color: index === currentIndex ? 'var(--color-accent)' :
+                                    index < currentIndex ? 'var(--text-main)' : 'var(--text-secondary)',
+                                whiteSpace: 'nowrap'
+                            }}>
+                                {stage.replace(/_/g, ' ')}
+                            </span>
+                        </div>
+                        {index < stages.length - 1 && (
+                            <div style={{
+                                height: '3px',
+                                flex: 1,
+                                background: index < currentIndex ? 'var(--color-accent)' : 'var(--border-glass)',
+                                margin: '0 0.5rem',
+                                transform: 'translateY(-14px)',
+                                borderRadius: '2px'
+                            }} />
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// -----------------------------------------------------------------------------
 // MAIN COMPONENT
 // -----------------------------------------------------------------------------
 
@@ -133,6 +187,9 @@ export default function JudgeCaseWorkspace() {
                         ⚡ {caseData.urgency} Priority
                     </span>
                 </div>
+
+                {/* Case Lifecycle Stepper */}
+                <CaseLifecycleStepper currentStage={caseData.stage} />
             </div>
 
             {/* 2. Tabs Navigation */}
@@ -387,6 +444,11 @@ function EvidenceTab({ caseId }) {
     const [evidence, setEvidence] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // AI Analysis State
+    const [analysisMap, setAnalysisMap] = useState({});
+    const [selectedAnalysis, setSelectedAnalysis] = useState(null);
+    const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+
     useEffect(() => {
         fetchEvidence();
     }, [caseId]);
@@ -394,7 +456,6 @@ function EvidenceTab({ caseId }) {
     const fetchEvidence = async () => {
         try {
             const token = localStorage.getItem('token');
-            // Fetch both blockchain evidence and regular documents
             const [evidenceRes, documentsRes] = await Promise.all([
                 axios.get(`${API_BASE_URL}/api/evidence/case/${caseId}`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -404,20 +465,19 @@ function EvidenceTab({ caseId }) {
                 })
             ]);
 
-            const blockchainEvidence = (evidenceRes.data.evidence || []).map(e => ({ ...e, source: 'blockchain' }));
-            const documents = (documentsRes.data || []).map(d => ({
-                id: d.id,
-                title: d.fileName,
-                description: d.description || 'Document evidence',
-                evidenceType: d.category || 'DOCUMENT',
-                fileHash: d.fileHash,
-                blockHash: null,
-                blockIndex: null,
-                isVerified: d.isVerified || !!d.fileHash,
-                verificationStatus: d.fileHash ? 'VERIFIED' : 'UNVERIFIED',
-                createdAt: d.uploadedAt,
-                uploadIp: d.uploadIp,
-                source: 'document'
+            const blockchainEvidence = (evidenceRes.data?.evidence || []).map(item => ({
+                ...item,
+                source: 'blockchain',
+                isVerified: true, // Blockchain items are inherently verified
+                evidenceType: 'BLOCKCHAIN_RECORD'
+            }));
+
+            const documents = (documentsRes.data || []).map(item => ({
+                ...item,
+                source: 'document',
+                isVerified: item.fileHash ? true : false, // Simple check if hash exists
+                evidenceType: 'CASE_DOCUMENT',
+                createdAt: item.uploadedAt // Normalize date field
             }));
 
             // Merge and sort by date
@@ -425,12 +485,52 @@ function EvidenceTab({ caseId }) {
                 .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             setEvidence(merged);
+
+            // Check analysis for documents
+            documents.forEach(checkAnalysis);
+
         } catch (error) {
             console.error('Error fetching evidence:', error);
             setEvidence([]);
         } finally {
             setLoading(false);
         }
+    };
+
+    const checkAnalysis = async (doc) => {
+        try {
+            const res = await documentAPI.hasAnalysis(doc.id);
+            if (res.data.hasAnalysis) {
+                setAnalysisMap(prev => ({ ...prev, [doc.id]: true }));
+            }
+        } catch (e) { }
+    };
+
+    const viewAnalysis = async (doc) => {
+        try {
+            const res = await documentAPI.getAnalysis(doc.id);
+            setSelectedAnalysis({ ...res.data, docName: doc.title || doc.fileName });
+            setShowAnalysisModal(true);
+        } catch (e) {
+            alert('Analysis not available yet');
+        }
+    };
+
+    const downloadDoc = async (doc) => {
+        try {
+            if (doc.source === 'blockchain') {
+                alert('Blockchain record cannot be downloaded as file. View Certificate instead.');
+                return;
+            }
+            const res = await documentAPI.download(doc.id);
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', doc.fileName || `Document_${doc.id}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (e) { console.error(e); alert('Download failed'); }
     };
 
     const downloadCertificate = async (item) => {
@@ -509,7 +609,7 @@ function EvidenceTab({ caseId }) {
                                 </span>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '1.5rem' }}>
+                            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                 <div style={{
                                     width: '56px', height: '56px', borderRadius: '12px',
                                     background: item.isVerified ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
@@ -521,11 +621,11 @@ function EvidenceTab({ caseId }) {
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                                        {item.blockIndex !== null && (
+                                        {item.blockIndex != null && (
                                             <span style={{ color: '#6366f1', fontFamily: 'monospace', fontSize: '0.75rem', fontWeight: '700' }}>BLOCK #{item.blockIndex}</span>
                                         )}
                                         <h4 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
-                                            {item.title}
+                                            {item.title || item.fileName}
                                         </h4>
                                     </div>
 
@@ -549,7 +649,15 @@ function EvidenceTab({ caseId }) {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignSelf: 'center' }}>
+                                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                                    {/* AI Analysis Button */}
+                                    {item.source === 'document' && analysisMap[item.id] && (
+                                        <button onClick={() => viewAnalysis(item)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.5rem', color: '#8b5cf6', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                            <Sparkles size={14} /> AI Insights
+                                        </button>
+                                    )}
+
+                                    {/* Certificate Button */}
                                     {item.isVerified && (item.fileHash || item.blockHash) && (
                                         <button
                                             onClick={() => downloadCertificate(item)}
@@ -573,10 +681,75 @@ function EvidenceTab({ caseId }) {
                                             View Certificate
                                         </button>
                                     )}
+
+                                    {/* Download Button */}
+                                    {item.source === 'document' && (
+                                        <button
+                                            onClick={() => downloadDoc(item)}
+                                            style={{
+                                                padding: '0.5rem',
+                                                background: 'var(--bg-glass)',
+                                                border: '1px solid var(--border-glass)',
+                                                borderRadius: '0.5rem',
+                                                color: 'var(--text-secondary)',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}
+                                            title="Download Document"
+                                        >
+                                            <Download size={16} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* AI Analysis Modal */}
+            {showAnalysisModal && selectedAnalysis && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }} onClick={() => setShowAnalysisModal(false)}>
+                    <div style={{ background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)', borderRadius: '1.5rem', width: '90%', maxWidth: '600px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-glass-strong)' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ padding: '1.5rem', borderBottom: 'var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{ padding: '0.5rem', background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)', borderRadius: '0.5rem', color: 'white' }}><Sparkles size={20} /></div>
+                                <div>
+                                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)' }}>AI Document Analysis</h3>
+                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{selectedAnalysis.docName}</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowAnalysisModal(false)}><X size={24} color="var(--text-secondary)" /></button>
+                        </div>
+                        <div style={{ padding: '1.5rem', overflowY: 'auto' }}>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Document Type</h4>
+                                <div style={{ padding: '0.75rem', background: 'var(--bg-glass)', borderRadius: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>
+                                    {selectedAnalysis.documentType || 'General Document'}
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Key Entities Extracted</h4>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                    {Object.entries(selectedAnalysis.entities || {}).map(([key, value]) => (
+                                        <span key={key} style={{ padding: '0.25rem 0.5rem', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '0.25rem', fontSize: '0.8rem' }}>
+                                            {key}: {value}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Summary & Key Points</h4>
+                                <div style={{ padding: '1rem', background: 'var(--bg-glass)', borderRadius: '0.75rem', lineHeight: '1.6', color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                                    {selectedAnalysis.summary}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
@@ -889,13 +1062,29 @@ Presiding Officer`
 }
 
 function HearingsTab({ caseId, caseData }) {
+    const navigate = useNavigate();
     const [hearings, setHearings] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Schedule Modal State
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [hearingData, setHearingData] = useState({
         scheduledDate: '',
         scheduledTime: '10:00',
         durationMinutes: 60
+    });
+
+    // Jitsi State
+    const [activeHearing, setActiveHearing] = useState(null);
+
+    // Outcome / Daily Order Modal State
+    const [showOutcomeModal, setShowOutcomeModal] = useState(false);
+    const [selectedHearingForOutcome, setSelectedHearingForOutcome] = useState(null);
+    const [outcomeData, setOutcomeData] = useState({
+        outcomeType: 'HEARD',
+        judgeNotes: '',
+        nextStage: caseData?.stage || 'EVIDENCE',
+        nextHearingDate: ''
     });
 
     useEffect(() => {
@@ -937,6 +1126,35 @@ function HearingsTab({ caseId, caseData }) {
         }
     };
 
+    const recordOutcome = async () => {
+        try {
+            const token = localStorage.getItem('token');
+
+            const payload = {
+                outcomeType: outcomeData.outcomeType,
+                judgeNotes: outcomeData.judgeNotes,
+                nextStage: outcomeData.nextStage,
+            };
+
+            if (outcomeData.outcomeType !== 'FINAL_VERDICT' && outcomeData.nextHearingDate) {
+                payload.nextHearingDate = new Date(outcomeData.nextHearingDate).toISOString();
+            }
+
+            await axios.post(`${API_BASE_URL}/api/hearings/${selectedHearingForOutcome.id}/outcome`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            alert('✅ Order recorded successfully & Case updated!');
+            setShowOutcomeModal(false);
+            fetchHearings();
+            // Trigger a refresh of the parent page case details ideally, but for now we rely on user refresh or context
+            window.location.reload();
+        } catch (error) {
+            console.error('Error recording outcome:', error);
+            alert('Failed to record outcome. Please try again.');
+        }
+    };
+
     const openScheduleModal = () => {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -946,6 +1164,29 @@ function HearingsTab({ caseId, caseData }) {
             durationMinutes: 60
         });
         setShowScheduleModal(true);
+    };
+
+    const openOutcomeModal = (hearing) => {
+        setSelectedHearingForOutcome(hearing);
+        // Pre-fill next hearing date to min 1 day after
+        const nextDay = new Date();
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        setOutcomeData({
+            outcomeType: 'HEARD',
+            judgeNotes: '',
+            nextStage: caseData?.stage || 'EVIDENCE',
+            nextHearingDate: nextDay.toISOString().split('T')[0]
+        });
+        setShowOutcomeModal(true);
+    };
+
+    const joinHearing = (hearing) => {
+        setActiveHearing(hearing);
+    };
+
+    const endCall = () => {
+        setActiveHearing(null);
     };
 
     if (loading) {
@@ -992,6 +1233,8 @@ function HearingsTab({ caseId, caseData }) {
                         {hearings.map(hearing => {
                             const isPast = new Date(hearing.scheduledDate) < new Date();
                             const statusColor = hearing.status === 'COMPLETED' ? '#10b981' : isPast ? '#ef4444' : '#f59e0b';
+                            // Show "Record Order" if scheduled or in progress, and not completed
+                            const canRecordOrder = hearing.status !== 'COMPLETED';
 
                             return (
                                 <div key={hearing.id} style={{
@@ -1025,30 +1268,116 @@ function HearingsTab({ caseId, caseData }) {
                                         </div>
                                         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
                                             Duration: {hearing.durationMinutes} minutes
+                                            {hearing.judgeNotes && <span style={{ marginLeft: '1rem', color: 'var(--text-main)' }}>• Judge's Note: {hearing.judgeNotes}</span>}
                                         </p>
                                     </div>
-                                    {!isPast && hearing.status === 'SCHEDULED' && (
-                                        <button style={{
-                                            padding: '0.5rem 1rem',
-                                            background: 'rgba(99, 102, 241, 0.1)',
-                                            border: '1px solid rgba(99, 102, 241, 0.3)',
-                                            borderRadius: '0.5rem',
-                                            color: 'var(--color-accent)',
-                                            fontWeight: '600',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem'
-                                        }}>
-                                            <Video size={16} /> Join Hearing
-                                        </button>
-                                    )}
+                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                        {!isPast && hearing.status === 'SCHEDULED' && (
+                                            <button
+                                                onClick={() => joinHearing(hearing)}
+                                                style={{
+                                                    padding: '0.5rem 1rem',
+                                                    background: 'rgba(99, 102, 241, 0.1)',
+                                                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                    borderRadius: '0.5rem',
+                                                    color: 'var(--color-accent)',
+                                                    fontWeight: '600',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem'
+                                                }}>
+                                                <Video size={16} /> Join Hearing
+                                            </button>
+                                        )}
+
+                                        {canRecordOrder && (
+                                            <button
+                                                onClick={() => openOutcomeModal(hearing)}
+                                                style={{
+                                                    padding: '0.5rem 1rem',
+                                                    background: 'rgba(59, 130, 246, 0.1)', // Blue
+                                                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                                                    borderRadius: '0.5rem',
+                                                    color: '#3b82f6',
+                                                    fontWeight: '600',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem'
+                                                }}>
+                                                <Gavel size={16} /> Record Order
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })}
                     </div>
                 )}
             </div>
+
+            {/* Active Jitsi Video Call Modal - SAME AS BEFORE */}
+            {activeHearing && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: '#0a0a0f',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    zIndex: 9999
+                }}>
+                    <div style={{
+                        padding: '1rem 1.5rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        background: 'rgba(20, 20, 30, 0.9)',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontWeight: '800', fontSize: '0.875rem' }}>
+                                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444', animation: 'blink 1.5s infinite' }} />
+                                LIVE SESSION
+                            </div>
+                            <div style={{ height: '20px', width: '1px', background: 'rgba(255, 255, 255, 0.2)' }} />
+                            <span style={{ color: 'white', fontWeight: '700', fontSize: '1.1rem' }}>
+                                {caseData?.title || 'Court Hearing'}
+                            </span>
+                        </div>
+                        <button
+                            onClick={endCall}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+                                border: 'none',
+                                borderRadius: '0.75rem',
+                                color: 'white',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)'
+                            }}
+                        >
+                            <X size={18} /> End Session
+                        </button>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <iframe
+                            src={`https://meet.jit.si/${activeHearing.videoRoomId || 'nyaysetu-hearing-' + activeHearing.id}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","closedcaptions","desktop","fullscreen","fodeviceselection","hangup","chat","recording","raisehand","videoquality","filmstrip","tileview","settings"]`}
+                            style={{ width: '100%', height: '100%', border: 'none' }}
+                            allow="camera; microphone; fullscreen; display-capture; autoplay"
+                            title="Court Hearing - NyaySetu"
+                        />
+                    </div>
+                    <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }`}</style>
+                </div>
+            )}
 
             {/* Schedule Modal */}
             {showScheduleModal && (
@@ -1068,7 +1397,6 @@ function HearingsTab({ caseId, caseData }) {
                                 <X size={24} />
                             </button>
                         </div>
-
                         <div style={{ display: 'grid', gap: '1.5rem' }}>
                             <div>
                                 <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Case</label>
@@ -1083,7 +1411,6 @@ function HearingsTab({ caseId, caseData }) {
                                     }}
                                 />
                             </div>
-
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div>
                                     <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Date</label>
@@ -1113,7 +1440,6 @@ function HearingsTab({ caseId, caseData }) {
                                     />
                                 </div>
                             </div>
-
                             <div>
                                 <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Duration</label>
                                 <select
@@ -1131,7 +1457,6 @@ function HearingsTab({ caseId, caseData }) {
                                     <option value={120}>2 hours</option>
                                 </select>
                             </div>
-
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                                 <button
                                     onClick={() => setShowScheduleModal(false)}
@@ -1153,6 +1478,155 @@ function HearingsTab({ caseId, caseData }) {
                                     }}
                                 >
                                     Schedule
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Hearing Outcome / Record Order Modal */}
+            {showOutcomeModal && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.7)',
+                    backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }} onClick={() => setShowOutcomeModal(false)}>
+                    <div style={{
+                        background: 'var(--bg-glass-strong)', width: '100%', maxWidth: '600px', padding: '2rem',
+                        borderRadius: '1.5rem', border: 'var(--border-glass-strong)', maxHeight: '90vh', overflowY: 'auto'
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{
+                                    width: '40px', height: '40px', borderRadius: '10px',
+                                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    color: 'white'
+                                }}>
+                                    <Gavel size={20} />
+                                </div>
+                                <div>
+                                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
+                                        Record Daily Order
+                                    </h2>
+                                    <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                        Record findings and move case to next stage
+                                    </p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowOutcomeModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '1.5rem' }}>
+                            {/* Outcome Type */}
+                            <div>
+                                <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                                    Hearing Outcome
+                                </label>
+                                <select
+                                    value={outcomeData.outcomeType}
+                                    onChange={e => setOutcomeData({ ...outcomeData, outcomeType: e.target.value })}
+                                    style={{
+                                        width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
+                                        background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                        color: 'var(--text-main)', outline: 'none'
+                                    }}
+                                >
+                                    <option value="ADJOURNED">Adjourned</option>
+                                    <option value="HEARD">Heard & Proceeded</option>
+                                    <option value="EVIDENCE_RECORDED">Evidence Recorded</option>
+                                    <option value="INTERIM_ORDER">Interim Order Passed</option>
+                                    <option value="FINAL_VERDICT">Final Verdict</option>
+                                </select>
+                            </div>
+
+                            {/* Status Stepper - Case Stage */}
+                            <div>
+                                <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                                    Move Case To Stage
+                                </label>
+                                <select
+                                    value={outcomeData.nextStage}
+                                    onChange={e => setOutcomeData({ ...outcomeData, nextStage: e.target.value })}
+                                    style={{
+                                        width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
+                                        background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                        color: 'var(--text-main)', outline: 'none'
+                                    }}
+                                >
+                                    <option value="COGNIZANCE">Cognizance</option>
+                                    <option value="APPEARANCE">Appearance</option>
+                                    <option value="FRAMING_OF_CHARGES">Framing of Charges</option>
+                                    <option value="EVIDENCE">Evidence</option>
+                                    <option value="ARGUMENTS">Arguments</option>
+                                    <option value="JUDGMENT">Judgment</option>
+                                    <option value="VERDICT">Verdict</option>
+                                    <option value="CLOSED">Closed/Disposed</option>
+                                </select>
+                            </div>
+
+                            {/* Judge Notes */}
+                            <div>
+                                <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                                    Bench Note / Summary (Roznama)
+                                </label>
+                                <textarea
+                                    value={outcomeData.judgeNotes}
+                                    onChange={e => setOutcomeData({ ...outcomeData, judgeNotes: e.target.value })}
+                                    placeholder="Enter brief summary of proceedings..."
+                                    rows={4}
+                                    style={{
+                                        width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
+                                        background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                        color: 'var(--text-main)', outline: 'none', resize: 'vertical'
+                                    }}
+                                />
+                            </div>
+
+                            {/* Next Hearing Date */}
+                            {outcomeData.outcomeType !== 'FINAL_VERDICT' && (
+                                <div>
+                                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                                        Next Hearing Date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={outcomeData.nextHearingDate}
+                                        onChange={e => setOutcomeData({ ...outcomeData, nextHearingDate: e.target.value })}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        style={{
+                                            width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
+                                            background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                            color: 'var(--text-main)', outline: 'none'
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                <button
+                                    onClick={() => setShowOutcomeModal(false)}
+                                    style={{
+                                        flex: 1, padding: '0.875rem', borderRadius: '0.75rem',
+                                        background: 'var(--bg-glass)', border: 'var(--border-glass)',
+                                        color: 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer'
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={recordOutcome}
+                                    style={{
+                                        flex: 2, padding: '0.875rem', borderRadius: '0.75rem',
+                                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                        border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer',
+                                        boxShadow: '0 4px 15px rgba(245, 158, 11, 0.3)'
+                                    }}
+                                >
+                                    {outcomeData.outcomeType === 'FINAL_VERDICT' ? 'Pronounce Verdict' : 'Record Order'}
                                 </button>
                             </div>
                         </div>

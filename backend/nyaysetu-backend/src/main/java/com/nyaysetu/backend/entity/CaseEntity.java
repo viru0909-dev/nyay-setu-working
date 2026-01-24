@@ -28,6 +28,9 @@ public class CaseEntity {
     @Enumerated(EnumType.STRING)
     private CaseStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private CaseStage stage;
+
     private String urgency; // NORMAL, URGENT, CRITICAL
 
     private String petitioner;
