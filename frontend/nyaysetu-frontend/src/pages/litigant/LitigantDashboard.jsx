@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
-import { FolderOpen, Video, FileText, TrendingUp, Clock, CheckCircle2, Bot, MessageCircle, MessageSquare, Loader2 } from 'lucide-react';
+import { FolderOpen, Video, FileText, TrendingUp, Clock, Bot, MessageCircle, MessageSquare, Loader2, Scale } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { caseAPI, hearingAPI, documentAPI } from '../../services/api';
 
-export default function ClientDashboard() {
+export default function LitigantDashboard() {
     const navigate = useNavigate();
     const { t } = useLanguage();
 
-    // State for real data
     const [recentCases, setRecentCases] = useState([]);
     const [upcomingHearings, setUpcomingHearings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,20 +15,17 @@ export default function ClientDashboard() {
         { label: 'My Cases', value: '0', icon: FolderOpen, color: 'var(--color-primary)', change: 'Loading...' },
         { label: 'Upcoming Hearings', value: '0', icon: Video, color: '#8b5cf6', change: 'Loading...' },
         { label: 'Documents', value: '0', icon: FileText, color: '#10b981', change: 'Loading...' },
-        { label: 'Legal Chat', value: 'Active', icon: MessageSquare, color: '#f59e0b', change: 'Chat with Lawyer', link: '/client/chat' }
+        { label: 'Legal Chat', value: 'Active', icon: MessageSquare, color: '#f59e0b', change: 'Chat with Lawyer', link: '/litigant/chat' }
     ]);
 
-    // Fetch real data on mount
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
                 setLoading(true);
 
-                // Fetch cases
                 const casesResponse = await caseAPI.list();
                 const cases = casesResponse.data || [];
 
-                // Sort by date and take recent 3
                 const sortedCases = cases.sort((a, b) =>
                     new Date(b.filedDate || b.createdAt) - new Date(a.filedDate || a.createdAt)
                 ).slice(0, 3);
@@ -42,27 +38,23 @@ export default function ClientDashboard() {
                     date: c.filedDate ? new Date(c.filedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'
                 })));
 
-                // Fetch hearings
                 const hearingsResponse = await hearingAPI.getMyHearings();
                 const hearings = hearingsResponse.data || [];
 
-                // Filter upcoming hearings (future dates)
                 const now = new Date();
-                const upcoming = hearings.filter(h => new Date(h.scheduledAt) > now)
-                    .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
+                const upcoming = hearings.filter(h => new Date(h.scheduledDate) > now)
+                    .sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate))
                     .slice(0, 2);
 
                 setUpcomingHearings(upcoming.map(h => ({
                     caseId: h.caseId?.substring(0, 8) || 'N/A',
                     fullCaseId: h.caseId,
                     title: h.title || 'Hearing',
-                    date: new Date(h.scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-                    time: new Date(h.scheduledAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-                    type: h.type || 'Virtual',
-                    meetingLink: h.meetingLink
+                    date: new Date(h.scheduledDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                    time: new Date(h.scheduledDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+                    type: h.type || 'Virtual'
                 })));
 
-                // Fetch documents count
                 let docCount = 0;
                 try {
                     const docsResponse = await documentAPI.list();
@@ -71,33 +63,34 @@ export default function ClientDashboard() {
                     console.log('Documents API not available');
                 }
 
-                // Calculate next hearing date
                 const nextHearing = upcoming.length > 0
-                    ? new Date(upcoming[0].scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                    ? new Date(upcoming[0].scheduledDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
                     : 'None scheduled';
 
-                // Update stats with real data
                 setStats([
                     {
                         label: 'My Cases',
                         value: String(cases.length),
                         icon: FolderOpen,
                         color: 'var(--color-primary)',
-                        change: cases.length > 0 ? `${cases.filter(c => c.status === 'OPEN' || c.status === 'PENDING').length} active` : 'No cases yet'
+                        change: cases.length > 0 ? `${cases.filter(c => c.status === 'OPEN' || c.status === 'PENDING').length} active` : 'No cases yet',
+                        link: '/litigant/case-diary'
                     },
                     {
                         label: 'Upcoming Hearings',
                         value: String(upcoming.length),
                         icon: Video,
                         color: '#8b5cf6',
-                        change: `Next: ${nextHearing}`
+                        change: `Next: ${nextHearing}`,
+                        link: '/litigant/hearings'
                     },
                     {
                         label: 'Documents',
                         value: String(docCount),
                         icon: FileText,
                         color: '#10b981',
-                        change: docCount > 0 ? 'All accessible' : 'No documents'
+                        change: docCount > 0 ? 'All accessible' : 'No documents',
+                        link: '/litigant/case-diary'
                     },
                     {
                         label: 'Legal Chat',
@@ -105,13 +98,12 @@ export default function ClientDashboard() {
                         icon: MessageSquare,
                         color: '#f59e0b',
                         change: 'Chat with Lawyer',
-                        link: '/client/chat'
+                        link: '/litigant/chat'
                     }
                 ]);
 
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
-                // Keep empty arrays on error
             } finally {
                 setLoading(false);
             }
@@ -120,12 +112,11 @@ export default function ClientDashboard() {
         fetchDashboardData();
     }, []);
 
-
     return (
         <div>
-            {/* Vakil-Friend CTA Banner */}
+            {/* File Case / FIR CTA Banner */}
             <div
-                onClick={() => navigate('/client/vakil-friend')}
+                onClick={() => navigate('/litigant/file')}
                 style={{
                     background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
                     border: 'var(--border-glass)',
@@ -142,14 +133,10 @@ export default function ClientDashboard() {
                 onMouseOver={(e) => {
                     e.currentTarget.style.transform = 'translateY(-2px)';
                     e.currentTarget.style.boxShadow = 'var(--shadow-glass-strong)';
-                    e.currentTarget.style.borderColor = 'var(--color-accent)';
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)';
                 }}
                 onMouseOut={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
-                    e.currentTarget.style.borderColor = 'var(--border-glass)';
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)';
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -163,14 +150,14 @@ export default function ClientDashboard() {
                         justifyContent: 'center',
                         boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)'
                     }}>
-                        <Bot size={32} color="white" />
+                        <Scale size={32} color="white" />
                     </div>
                     <div>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
-                            🤖 {t('File Case with Vakil-Friend AI')}
+                            📋 {t('File Case / FIR')}
                         </h2>
                         <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
-                            {t('Simply describe your legal issue and our AI will guide you through filing')}
+                            {t('File a civil case or criminal FIR with AI assistance from Vakil Friend')}
                         </p>
                     </div>
                 </div>
@@ -182,18 +169,17 @@ export default function ClientDashboard() {
                     fontWeight: '700',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
-                    boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+                    gap: '0.5rem'
                 }}>
-                    <MessageCircle size={20} />
-                    {t('Start Chat')}
+                    <Bot size={20} />
+                    {t('Get Started')}
                 </div>
             </div>
 
             {/* Stats Grid */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                 gap: '1.5rem',
                 marginBottom: '2rem'
             }}>
@@ -205,21 +191,19 @@ export default function ClientDashboard() {
                             onClick={() => stat.link && navigate(stat.link)}
                             style={{
                                 background: 'var(--bg-glass-strong)',
-                                backdropFilter: 'var(--glass-blur)',
                                 border: 'var(--border-glass-strong)',
                                 borderRadius: '1.5rem',
                                 padding: '1.5rem',
                                 transition: 'all 0.3s',
-                                boxShadow: 'var(--shadow-glass)',
                                 cursor: 'pointer'
                             }}
                             onMouseOver={(e) => {
                                 e.currentTarget.style.transform = 'translateY(-4px)';
-                                e.currentTarget.style.boxShadow = 'var(--shadow-glass-strong)';
+                                e.currentTarget.style.borderColor = 'var(--color-accent)';
                             }}
                             onMouseOut={(e) => {
                                 e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
+                                e.currentTarget.style.borderColor = '';
                             }}
                         >
                             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -236,7 +220,6 @@ export default function ClientDashboard() {
                                     height: '56px',
                                     borderRadius: '14px',
                                     background: 'var(--bg-glass)',
-                                    border: 'var(--border-glass)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center'
@@ -252,77 +235,35 @@ export default function ClientDashboard() {
                 })}
             </div>
 
-            {/* Quick Actions */}
-            <div style={{
-                background: 'var(--bg-glass-strong)',
-                backdropFilter: 'var(--glass-blur)',
-                border: 'var(--border-glass-strong)',
-                borderRadius: '1.5rem',
-                padding: '1.5rem',
-                marginBottom: '2rem',
-                boxShadow: 'var(--shadow-glass)'
-            }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>
-                    {t('Quick Actions')}
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                    {[
-                        { label: 'Traditional Filing', icon: FileText, path: '/client/file-case' },
-                        { label: 'Upload Documents', icon: FileText, path: '/client/documents' },
-                        { label: 'AI Document Review', icon: TrendingUp, path: '/client/ai-review' },
-                        { label: 'My Cases', icon: FolderOpen, path: '/client/cases' }
-                    ].map((action, index) => {
-                        const Icon = action.icon;
-                        return (
-                            <button
-                                key={index}
-                                onClick={() => navigate(action.path)}
-                                style={{
-                                    padding: '1rem',
-                                    background: 'var(--bg-glass)',
-                                    border: 'var(--border-glass)',
-                                    borderRadius: '0.75rem',
-                                    color: 'var(--text-secondary)',
-                                    fontWeight: '600',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.75rem'
-                                }}
-                                onMouseOver={(e) => {
-                                    e.currentTarget.style.background = 'var(--bg-glass-hover)';
-                                    e.currentTarget.style.borderColor = 'var(--color-accent)';
-                                    e.currentTarget.style.color = 'var(--color-accent)';
-                                }}
-                                onMouseOut={(e) => {
-                                    e.currentTarget.style.background = 'var(--bg-glass)';
-                                    e.currentTarget.style.borderColor = 'var(--border-glass)';
-                                    e.currentTarget.style.color = 'var(--text-secondary)';
-                                }}
-                            >
-                                <Icon size={20} />
-                                {t(action.label)}
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
             {/* Recent Cases & Hearings Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
                 {/* Recent Cases */}
                 <div style={{
                     background: 'var(--bg-glass-strong)',
-                    backdropFilter: 'var(--glass-blur)',
                     border: 'var(--border-glass-strong)',
                     borderRadius: '1.5rem',
-                    padding: '1.5rem',
-                    boxShadow: 'var(--shadow-glass)'
+                    padding: '1.5rem'
                 }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
-                        {t('Recent Cases')}
-                    </h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                            {t('Recent Cases')}
+                        </h3>
+                        <button
+                            onClick={() => navigate('/litigant/case-diary')}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
+                                borderRadius: '0.5rem',
+                                color: 'var(--color-accent)',
+                                fontSize: '0.875rem',
+                                fontWeight: '600',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            View All
+                        </button>
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {loading ? (
                             <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
@@ -333,7 +274,7 @@ export default function ClientDashboard() {
                                 <FolderOpen size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
                                 <p>No cases filed yet</p>
                                 <button
-                                    onClick={() => navigate('/client/file-case')}
+                                    onClick={() => navigate('/litigant/file')}
                                     style={{
                                         marginTop: '0.75rem',
                                         padding: '0.5rem 1rem',
@@ -352,7 +293,7 @@ export default function ClientDashboard() {
                             recentCases.map((caseItem, index) => (
                                 <div
                                     key={index}
-                                    onClick={() => navigate(`/client/case/${caseItem.fullId}`)}
+                                    onClick={() => navigate(`/litigant/case-diary/${caseItem.fullId}`)}
                                     style={{
                                         padding: '1rem',
                                         background: 'var(--bg-glass)',
@@ -363,11 +304,9 @@ export default function ClientDashboard() {
                                     }}
                                     onMouseOver={(e) => {
                                         e.currentTarget.style.borderColor = 'var(--color-accent)';
-                                        e.currentTarget.style.background = 'var(--bg-glass-hover)';
                                     }}
                                     onMouseOut={(e) => {
-                                        e.currentTarget.style.borderColor = 'var(--border-glass)';
-                                        e.currentTarget.style.background = 'var(--bg-glass)';
+                                        e.currentTarget.style.borderColor = '';
                                     }}
                                 >
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
@@ -382,8 +321,6 @@ export default function ClientDashboard() {
                                                 caseItem.status === 'OPEN' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
                                             color: caseItem.status === 'PENDING' ? '#f59e0b' :
                                                 caseItem.status === 'OPEN' ? '#3b82f6' : '#10b981',
-                                            border: `1px solid ${caseItem.status === 'PENDING' ? 'rgba(245, 158, 11, 0.2)' :
-                                                caseItem.status === 'OPEN' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`,
                                             fontWeight: '600'
                                         }}>
                                             {caseItem.status}
@@ -404,15 +341,30 @@ export default function ClientDashboard() {
                 {/* Upcoming Hearings */}
                 <div style={{
                     background: 'var(--bg-glass-strong)',
-                    backdropFilter: 'var(--glass-blur)',
                     border: 'var(--border-glass-strong)',
                     borderRadius: '1.5rem',
-                    padding: '1.5rem',
-                    boxShadow: 'var(--shadow-glass)'
+                    padding: '1.5rem'
                 }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
-                        {t('Upcoming Hearings')}
-                    </h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                            {t('Upcoming Hearings')}
+                        </h3>
+                        <button
+                            onClick={() => navigate('/litigant/hearings')}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
+                                borderRadius: '0.5rem',
+                                color: 'var(--color-accent)',
+                                fontSize: '0.875rem',
+                                fontWeight: '600',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            View All
+                        </button>
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {loading ? (
                             <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
@@ -468,8 +420,7 @@ export default function ClientDashboard() {
                                                 borderRadius: '9999px',
                                                 background: 'rgba(139, 92, 246, 0.1)',
                                                 color: 'var(--color-accent)',
-                                                fontWeight: '600',
-                                                border: '1px solid rgba(139, 92, 246, 0.2)'
+                                                fontWeight: '600'
                                             }}>
                                                 {hearing.type}
                                             </span>
@@ -482,8 +433,7 @@ export default function ClientDashboard() {
                                             color: 'white',
                                             fontSize: '0.875rem',
                                             fontWeight: '600',
-                                            cursor: 'pointer',
-                                            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+                                            cursor: 'pointer'
                                         }}>
                                             {t('Join')}
                                         </button>
@@ -495,7 +445,6 @@ export default function ClientDashboard() {
                 </div>
             </div>
 
-            {/* CSS for loading animation */}
             <style>{`
                 @keyframes spin {
                     from { transform: rotate(0deg); }

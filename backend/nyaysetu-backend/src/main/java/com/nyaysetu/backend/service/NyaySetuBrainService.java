@@ -47,9 +47,9 @@ public class NyaySetuBrainService {
      * System prompts tailored for different roles
      */
     private static final Map<Role, String> ROLE_PROMPTS = Map.of(
-        Role.CLIENT, """
+        Role.LITIGANT, """
             You are the NyaySetu AI Brain, a helpful legal guide for citizens.
-            Your main goal is to help clients file cases, find lawyers, or understand legal rights.
+            Your main goal is to help litigants file cases, find lawyers, or understand legal rights.
             
             SPECIFIC TASKS:
             - CASE FILING: Collect Issue, Case Type, Parties, Dates, Evidence, Urgency (Ask one at a time).
@@ -74,7 +74,7 @@ public class NyaySetuBrainService {
             SPECIFIC TASKS:
             - DRAFTING: Draft messages to clients, written statements, or Rejoinders.
             - RESEARCH: Provide quick summaries of legal sections (IPC, BNS, CrPC, etc.).
-            - CLIENT MGMT: Draft empathetic yet professional updates for clients.
+            - LITIGANT MGMT: Draft empathetic yet professional updates for litigants.
             
             Tone: Strategic, professional, concise.
             """
@@ -109,8 +109,8 @@ public class NyaySetuBrainService {
         userMsg.put("content", userMessage);
         conversation.add(userMsg);
 
-        // Get AI Response based on Role (Default to CLIENT for guest users)
-        Role role = (user != null) ? user.getRole() : Role.CLIENT;
+        // Get AI Response based on Role (Default to LITIGANT for guest users)
+        Role role = (user != null) ? user.getRole() : Role.LITIGANT;
         String aiResponse = getAIResponse(conversation, role);
 
         // Add assistant message
@@ -187,6 +187,74 @@ public class NyaySetuBrainService {
         JsonNode jsonResponse = objectMapper.readTree(response.getBody());
         
         return jsonResponse.path("choices").path(0).path("message").path("content").asText();
+    }
+
+    private static final String CLASSIFICATION_SYSTEM_PROMPT = """
+        You are a legal classification AI for NyaySetu. 
+        Analyze the user's situation and determine if they should file a Police FIR or a Court Case.
+        
+        Rules:
+        - Theft, Assault, Cybercrime, Lost Items, Accidents -> FIR (Police)
+        - Property disputes, Divorce, Contracts, Civil matters -> CASE (Court)
+        
+        Return ONLY valid JSON with this structure:
+        {
+          "type": "FIR" or "CASE",
+          "caseType": "CRIMINAL" or "CIVIL" or "FAMILY" or "PROPERTY" or "COMMERCIAL",
+          "title": "A short professional title for the filing",
+          "description": "A refined, professional description of the incident based on user input",
+          "reason": "One sentence explaining why this classification was chosen"
+        }
+        Do not output markdown code blocks. Just the raw JSON string.
+        """;
+
+    public Map<String, String> analyzeCaseIntent(String userQuery) {
+        if (groqApiKey != null && !groqApiKey.isEmpty()) {
+            try {
+                ArrayNode messagesArray = objectMapper.createArrayNode();
+                
+                ObjectNode systemMsg = objectMapper.createObjectNode();
+                systemMsg.put("role", "system");
+                systemMsg.put("content", CLASSIFICATION_SYSTEM_PROMPT);
+                messagesArray.add(systemMsg);
+                
+                ObjectNode userMsg = objectMapper.createObjectNode();
+                userMsg.put("role", "user");
+                userMsg.put("content", userQuery);
+                messagesArray.add(userMsg);
+
+                ObjectNode requestBody = objectMapper.createObjectNode();
+                requestBody.put("model", groqModel);
+                requestBody.set("messages", messagesArray);
+                requestBody.put("temperature", 0.3); // Lower temperature for consistent JSON
+                requestBody.put("response_format", objectMapper.createObjectNode().put("type", "json_object")); // Force JSON if supported by model
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.setBearerAuth(groqApiKey);
+
+                HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(requestBody), headers);
+                
+                ResponseEntity<String> response = restTemplate.exchange(GROQ_API_URL, HttpMethod.POST, entity, String.class);
+                JsonNode jsonResponse = objectMapper.readTree(response.getBody());
+                
+                String content = jsonResponse.path("choices").path(0).path("message").path("content").asText();
+                return objectMapper.readValue(content, Map.class);
+                
+            } catch (Exception e) {
+                log.error("Groq Analysis Failed", e);
+            }
+        }
+        
+        // Fallback for demo/offline
+        Map<String, String> fallback = new HashMap<>();
+        boolean isCriminal = userQuery.toLowerCase().contains("theft") || userQuery.toLowerCase().contains("police");
+        fallback.put("type", isCriminal ? "FIR" : "CASE");
+        fallback.put("caseType", isCriminal ? "CRIMINAL" : "CIVIL");
+        fallback.put("title", isCriminal ? "Incident Report" : "Legal Dispute");
+        fallback.put("description", userQuery);
+        fallback.put("reason", "Based on keywords (Offline Fallback)");
+        return fallback;
     }
 
     private List<Map<String, String>> parseConversation(String data) {

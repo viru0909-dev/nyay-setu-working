@@ -23,6 +23,7 @@ public class HearingService {
     private final HearingParticipantRepository participantRepository;
     private final CaseRepository caseRepository;
     private final UserRepository userRepository;
+    private final CaseTimelineService timelineService;
     
     @Transactional
     public Hearing scheduleHearing(UUID caseId, LocalDateTime scheduledDate, Integer durationMinutes) {
@@ -45,7 +46,16 @@ public class HearingService {
         caseEntity.setNextHearing(scheduledDate);
         caseRepository.save(caseEntity);
         
-        return hearingRepository.save(hearing);
+        Hearing savedHearing = hearingRepository.save(hearing);
+
+        // Timeline Log
+        try {
+            timelineService.logHearingScheduled(caseId, scheduledDate);
+        } catch (Exception e) {
+            log.error("Failed to log timeline event", e);
+        }
+
+        return savedHearing;
     }
     
     @Transactional
@@ -118,7 +128,7 @@ public class HearingService {
         
         List<CaseEntity> userCases = new java.util.ArrayList<>();
         
-        if (user.getRole() == Role.CLIENT) {
+        if (user.getRole() == Role.LITIGANT) {
             userCases = caseRepository.findByClient(user);
         } else if (user.getRole() == Role.LAWYER) {
             userCases = caseRepository.findByLawyer(user);
@@ -146,6 +156,58 @@ public class HearingService {
         return "hearing-" + UUID.randomUUID().toString().substring(0, 12);
     }
     
+    @Transactional
+    public Hearing recordOutcome(UUID hearingId, com.nyaysetu.backend.dto.HearingOutcomeRequest request) {
+        log.info("Recording outcome for hearing: {}", hearingId);
+        
+        Hearing hearing = hearingRepository.findById(hearingId)
+                .orElseThrow(() -> new RuntimeException("Hearing not found"));
+        
+        CaseEntity caseEntity = hearing.getCaseEntity();
+        
+        // 1. Update Current Hearing
+        hearing.setStatus(HearingStatus.COMPLETED);
+        hearing.setJudgeNotes(request.getJudgeNotes());
+        hearing.setOutcomeType(request.getOutcomeType());
+        hearingRepository.save(hearing);
+        
+        // 2. Update Case Status/Stage
+        if (request.getNextStage() != null) {
+            caseEntity.setStage(request.getNextStage());
+            
+            // Auto-update status based on stage
+            if (request.getNextStage() == CaseStage.VERDICT || request.getNextStage() == CaseStage.CLOSED) {
+                caseEntity.setStatus(CaseStatus.CLOSED);
+            } else if (caseEntity.getStatus() == CaseStatus.PENDING) {
+                caseEntity.setStatus(CaseStatus.IN_PROGRESS);
+            }
+        }
+        
+        // 3. Schedule Next Hearing
+        if (request.getNextHearingDate() != null) {
+            scheduleHearing(caseEntity.getId(), request.getNextHearingDate(), 60);
+        }
+        
+        caseRepository.save(caseEntity);
+        
+        // 4. Timeline Log
+        try {
+            String logMessage = String.format("Hearing held. Outcome: %s. Case moved to %s stage.", 
+                request.getOutcomeType(), 
+                request.getNextStage() != null ? request.getNextStage() : "current");
+                
+            if (request.getNextHearingDate() != null) {
+                logMessage += " Next hearing: " + request.getNextHearingDate().toLocalDate();
+            }
+            
+            timelineService.addEvent(caseEntity.getId(), "HEARING_OUTCOME", logMessage);
+        } catch (Exception e) {
+            log.error("Failed to log timeline event", e);
+        }
+        
+        return hearing;
+    }
+
     public boolean canUserJoinHearing(UUID hearingId, Long userId) {
         return participantRepository.existsByHearingIdAndUserId(hearingId, userId);
     }

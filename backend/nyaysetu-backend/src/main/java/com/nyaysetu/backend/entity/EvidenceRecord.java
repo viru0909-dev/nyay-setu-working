@@ -61,6 +61,9 @@ public class EvidenceRecord {
     @Builder.Default
     private String verificationStatus = "VERIFIED"; // VERIFIED, TAMPERED, PENDING
 
+    @Column(name = "upload_ip")
+    private String uploadIp;
+
     // Metadata
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploaded_by")

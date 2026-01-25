@@ -179,14 +179,14 @@ export default function VakilFriendChat() {
             successMessage += `1. Upload evidence documents in the Documents section\n`;
             successMessage += `2. Prepare a brief statement of facts\n`;
             successMessage += `3. Attend your scheduled hearing\n`;
-            successMessage += `\n_Redirecting to My Cases..._`;
+            successMessage += `\n_Redirecting to Case Diary..._`;
 
             setMessages(prev => [...prev, {
                 role: 'assistant',
                 content: successMessage
             }]);
 
-            setTimeout(() => navigate('/client/cases'), 5000);
+            setTimeout(() => navigate('/litigant/case-diary'), 5000);
         } catch (err) {
             console.error('Failed to complete session:', err);
             setMessages(prev => [...prev, {
@@ -414,7 +414,7 @@ export default function VakilFriendChat() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <button
-                        onClick={() => navigate('/client')}
+                        onClick={() => navigate('/litigant')}
                         style={{
                             background: 'var(--bg-glass)',
                             border: 'var(--border-glass)',

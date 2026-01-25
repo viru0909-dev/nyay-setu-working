@@ -24,6 +24,7 @@ import java.util.*;
 public class BlockchainEvidenceController {
 
     private final BlockchainEvidenceService evidenceService;
+    private final com.nyaysetu.backend.service.CertificateService certificateService;
     private final UserRepository userRepository;
 
     /**
@@ -35,7 +36,8 @@ public class BlockchainEvidenceController {
             @RequestParam("caseId") UUID caseId,
             @RequestParam("title") String title,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "evidenceType", defaultValue = "DOCUMENT") String evidenceType) {
+            @RequestParam(value = "evidenceType", defaultValue = "DOCUMENT") String evidenceType,
+            jakarta.servlet.http.HttpServletRequest request) {
         
         try {
             User currentUser = getCurrentUser();
@@ -44,7 +46,7 @@ public class BlockchainEvidenceController {
             }
 
             EvidenceRecord evidence = evidenceService.uploadEvidence(
-                    caseId, file, title, description, evidenceType, currentUser);
+                    caseId, file, title, description, evidenceType, currentUser, request.getRemoteAddr());
 
             Map<String, Object> response = new HashMap<>();
             response.put("id", evidence.getId());
@@ -154,6 +156,23 @@ public class BlockchainEvidenceController {
         } catch (Exception e) {
             log.error("Failed to get evidence {}", evidenceId, e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Download Section 63(4) Certificate
+     */
+    @GetMapping(value = "/{evidenceId}/certificate", produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> downloadCertificate(@PathVariable UUID evidenceId) {
+        try {
+            byte[] pdfBytes = certificateService.generateCertificate(evidenceId);
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=certificate-" + evidenceId + ".pdf")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                    .body(pdfBytes);
+        } catch (Exception e) {
+            log.error("Failed to generate certificate", e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
