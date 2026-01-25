@@ -42,16 +42,16 @@ export default function LitigantDashboard() {
                 const hearings = hearingsResponse.data || [];
 
                 const now = new Date();
-                const upcoming = hearings.filter(h => new Date(h.scheduledAt) > now)
-                    .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
+                const upcoming = hearings.filter(h => new Date(h.scheduledDate) > now)
+                    .sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate))
                     .slice(0, 2);
 
                 setUpcomingHearings(upcoming.map(h => ({
                     caseId: h.caseId?.substring(0, 8) || 'N/A',
                     fullCaseId: h.caseId,
                     title: h.title || 'Hearing',
-                    date: new Date(h.scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-                    time: new Date(h.scheduledAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+                    date: new Date(h.scheduledDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                    time: new Date(h.scheduledDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
                     type: h.type || 'Virtual'
                 })));
 
@@ -64,7 +64,7 @@ export default function LitigantDashboard() {
                 }
 
                 const nextHearing = upcoming.length > 0
-                    ? new Date(upcoming[0].scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                    ? new Date(upcoming[0].scheduledDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
                     : 'None scheduled';
 
                 setStats([
