@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Video, Calendar, Clock, Users, Loader2, ExternalLink, X, Shield, Phone } from 'lucide-react';
+import { Video, Calendar, Clock, Users, Loader2, ExternalLink, X, Shield, Phone, Maximize2, Minimize2 } from 'lucide-react';
 import { API_BASE_URL } from '../../config/apiConfig';
 import { judgeAPI } from '../../services/api';
 
@@ -10,6 +10,7 @@ export default function LiveHearing() {
     const [hearings, setHearings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeHearing, setActiveHearing] = useState(null);
+    const [isMaximized, setIsMaximized] = useState(false);
 
     useEffect(() => {
         fetchUpcomingHearings();
@@ -33,10 +34,12 @@ export default function LiveHearing() {
 
     const joinHearing = (hearing) => {
         setActiveHearing(hearing);
+        setIsMaximized(false); // Reset to default view
     };
 
     const endCall = () => {
         setActiveHearing(null);
+        setIsMaximized(false);
     };
 
     const formatTime = (dateString) => {
@@ -81,13 +84,13 @@ export default function LiveHearing() {
     if (activeHearing) {
         return (
             <div style={{
-                position: 'fixed',
+                position: isMaximized ? 'fixed' : 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
                 background: '#0a0a0f',
-                zIndex: 9999,
+                zIndex: isMaximized ? 9999 : 50, // Enough to cover header but not sidebar if separate context
                 display: 'flex',
                 flexDirection: 'column'
             }}>
@@ -127,6 +130,29 @@ export default function LiveHearing() {
                         <span style={{ color: '#94a3b8', fontWeight: '600' }}>
                             {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
                         </span>
+
+                        {/* Maximize Toggle Button */}
+                        <button
+                            onClick={() => setIsMaximized(!isMaximized)}
+                            style={{
+                                padding: '0.875rem',
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '0.75rem',
+                                color: 'white',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
+                            }}
+                            title={isMaximized ? "Exit Fullscreen" : "Maximize Screen"}
+                            onMouseOver={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
+                            onMouseOut={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                        >
+                            {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                        </button>
+
                         <button
                             onClick={endCall}
                             style={{
