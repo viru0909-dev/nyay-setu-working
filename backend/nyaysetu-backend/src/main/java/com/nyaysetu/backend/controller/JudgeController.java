@@ -105,14 +105,21 @@ public class JudgeController {
         try {
             User judge = authService.findByEmail(authentication.getName());
             String judgeName = judge.getName();
+            Long judgeId = judge.getId();
             LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
             LocalDateTime endOfDay = startOfDay.plusDays(7);
             
             List<Hearing> allHearings = hearingRepository.findByScheduledDateBetween(startOfDay, endOfDay);
             
-            // Filter to only judge's cases
-            List<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judgeName);
-            Set<UUID> judgeCaseIds = judgeCases.stream().map(CaseEntity::getId).collect(Collectors.toSet());
+            // Filter to only judge's cases - check both assignedJudge name AND judgeId
+            List<CaseEntity> judgeCasesByName = caseRepository.findByAssignedJudge(judgeName);
+            List<CaseEntity> judgeCasesById = caseRepository.findByJudgeId(judgeId);
+            
+            Set<UUID> judgeCaseIds = new HashSet<>();
+            judgeCasesByName.forEach(c -> judgeCaseIds.add(c.getId()));
+            judgeCasesById.forEach(c -> judgeCaseIds.add(c.getId()));
+            
+            log.info("Judge {} has {} cases by name, {} cases by ID", judgeName, judgeCasesByName.size(), judgeCasesById.size());
             
             List<Map<String, Object>> todaysHearings = allHearings.stream()
                 .filter(h -> h.getCaseEntity() != null && judgeCaseIds.contains(h.getCaseEntity().getId()))
@@ -302,7 +309,8 @@ public class JudgeController {
     @GetMapping("/unassigned")
     public ResponseEntity<?> getUnassignedCases() {
         try {
-            List<CaseEntity> cases = caseRepository.findByAssignedJudgeIsNull();
+            // Use the more robust query that handles both null and empty string
+            List<CaseEntity> cases = caseRepository.findUnassignedCases();
             
             List<Map<String, Object>> response = cases.stream().map(c -> {
                 Map<String, Object> caseData = new HashMap<>();

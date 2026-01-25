@@ -24,7 +24,27 @@ public class CaseTimelineService {
     }
 
     public List<CaseTimeline> getTimeline(UUID caseId) {
-        // method name used in screenshots: findByLegalCaseIdOrderByTimestampAsc
         return repo.findByLegalCaseIdOrderByTimestampAsc(caseId);
+    }
+
+    public void logPoliceViewed(UUID caseId, String officerName) {
+        addEvent(caseId, "Police Officer " + officerName + " viewed the case files");
+    }
+
+    public void logJudgeAssigned(UUID caseId, String judgeName) {
+        addEvent(caseId, "Case assigned to Hon'ble Judge " + judgeName);
+    }
+
+    public void logHearingScheduled(UUID caseId, LocalDateTime date) {
+        addEvent(caseId, "Hearing scheduled for " + date.toLocalDate());
+    }
+
+    public void addEvent(UUID caseId, String type, String description) {
+        // Combine type and description into single event field
+        repo.save(CaseTimeline.builder()
+                .legalCaseId(caseId)
+                .event(type + ": " + description)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 }

@@ -31,7 +31,7 @@ public class BlockchainEvidenceService {
     @Transactional
     public EvidenceRecord uploadEvidence(UUID caseId, MultipartFile file, 
                                           String title, String description,
-                                          String evidenceType, User uploadedBy) {
+                                          String evidenceType, User uploadedBy, String uploadIp) {
         log.info("Uploading blockchain-secured evidence '{}' for case {}", title, caseId);
 
         // Find case
@@ -76,6 +76,7 @@ public class BlockchainEvidenceService {
                 .fileSize(file.getSize())
                 .contentType(file.getContentType())
                 .createdAt(timestamp)
+                .uploadIp(uploadIp != null ? uploadIp : "UNKNOWN")
                 .build();
 
         EvidenceRecord saved = evidenceRepository.save(record);

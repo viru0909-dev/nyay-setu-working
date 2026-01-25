@@ -48,4 +48,15 @@ public class BrainController {
         Map<String, Object> response = brainService.process(sessionId, message, user);
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * Analyze case intent (FIR vs Court Case)
+     */
+    @PostMapping("/analyze-case")
+    public ResponseEntity<Map<String, String>> analyzeCase(@RequestBody Map<String, String> request) {
+        String query = request.get("query");
+        log.info("🧠 Brain Case Analysis request for: {}", query);
+        Map<String, String> analysis = brainService.analyzeCaseIntent(query);
+        return ResponseEntity.ok(analysis);
+    }
 }

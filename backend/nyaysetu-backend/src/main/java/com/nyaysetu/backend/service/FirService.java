@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -34,6 +35,7 @@ public class FirService {
     private final BlockchainService blockchainService;
     private final com.nyaysetu.backend.repository.CaseRepository caseRepository;
     private final GroqDocumentVerificationService groqService;
+    private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
 
     @Value("${app.upload.fir-path:uploads/fir}")
     private String firUploadPath;
@@ -286,9 +288,12 @@ public class FirService {
     /**
      * Submit FIR findings to Court (Creates a Case)
      */
+    @Transactional
     public FirUploadResponse submitToCourt(Long firId, String investigationFindings, User policeOfficer) {
         FirRecord fir = firRecordRepository.findById(firId)
                 .orElseThrow(() -> new RuntimeException("FIR not found with ID: " + firId));
+        
+        log.info("⚖️ Submitting FIR {} to court. Filed by: {}", fir.getFirNumber(), fir.getFiledBy() != null ? fir.getFiledBy().getEmail() : "NULL");
 
         // update FIR details
         fir.setInvestigationDetails(investigationFindings);
@@ -306,6 +311,8 @@ public class FirService {
                 .respondent("Unknown (Investigation On-going)") // or extract from FIR if structure allows
                 .filedDate(LocalDateTime.now())
                 .urgency("HIGH")
+                .client(fir.getFiledBy()) // Link to original filer
+                .filingMethod("POLICE_FIR")
                 .judgeId(null) // Unassigned
                 .assignedJudge(null)
                 .build();
@@ -410,6 +417,10 @@ public class FirService {
     /**
      * Police updates FIR status (REGISTERED or REJECTED)
      */
+    /**
+     * Police updates FIR status (REGISTERED or REJECTED)
+     */
+    @Transactional
     public FirUploadResponse updateFirStatus(Long firId, String status, String reviewNotes, User reviewedBy) {
         FirRecord fir = firRecordRepository.findById(firId)
                 .orElseThrow(() -> new RuntimeException("FIR not found with ID: " + firId));
@@ -421,6 +432,49 @@ public class FirService {
 
         FirRecord saved = firRecordRepository.save(fir);
         log.info("FIR {} status updated to {} by {}", fir.getFirNumber(), status, reviewedBy.getName());
+
+        // Auto-Create Court Case if FIR is REGISTERED (Accepted)
+        if ("REGISTERED".equals(status) && fir.getCaseId() == null) {
+            log.info("🚨 FIR {} Accepted! Auto-creating Court Case...", fir.getFirNumber());
+            
+            CaseEntity newCase = CaseEntity.builder()
+                    .title("State vs " + (fir.getDescription().length() > 20 ? fir.getDescription().substring(0, 20) + "..." : fir.getDescription()))
+                    .description("FIR REGISTERED: " + fir.getFirNumber() + "\n\n" + fir.getDescription())
+                    .caseType("CRIMINAL")
+                    .status(CaseStatus.PENDING) 
+                    .petitioner("State (Police)")
+                    .respondent("Unknown") 
+                    .filedDate(LocalDateTime.now())
+                    .urgency("HIGH")
+                    .client(fir.getFiledBy()) // Link to original filer
+                    .filingMethod("POLICE_FIR")
+                    .sourceFirId(fir.getId())
+                    .build();
+            
+            CaseEntity savedCase = caseRepository.save(newCase);
+            
+            // Link FIR to Case
+            fir.setCaseId(savedCase.getId());
+            firRecordRepository.save(fir); // save again with case ID
+            
+            log.info("✅ Auto-created Criminal Case ID: {} for FIR {}", savedCase.getId(), fir.getFirNumber());
+
+            // Notification Logic
+            try {
+                if (fir.getFiledBy() != null) {
+                    com.nyaysetu.backend.notification.entity.Notification notif = com.nyaysetu.backend.notification.entity.Notification.builder()
+                            .userId(fir.getFiledBy().getId())
+                            .title("FIR Registered as Case")
+                            .message("Your FIR " + fir.getFirNumber() + " has been registered as Court Case #" + savedCase.getId() + ". You can now hire a lawyer.")
+                            .readFlag(false)
+                            .createdAt(java.time.Instant.now())
+                            .build();
+                    notificationService.save(notif);
+                }
+            } catch (Exception e) {
+                log.error("Failed to send notification", e);
+            }
+        }
 
         return mapToResponse(saved);
     }

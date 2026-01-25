@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import java.nio.channels.ClosedChannelException;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -54,7 +56,11 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log.error("WebSocket error for session {}: {}", session.getId(), exception.getMessage());
+        if (exception instanceof ClosedChannelException) {
+            log.debug("WebSocket connection closed during transport for session {}", session.getId());
+        } else {
+            log.error("WebSocket error for session {}: {}", session.getId(), exception.getMessage());
+        }
     }
 
     /**

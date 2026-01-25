@@ -145,6 +145,24 @@ public class HearingController {
         return ResponseEntity.ok(hearing);
     }
     
+    @PostMapping("/{hearingId}/outcome")
+    public ResponseEntity<?> recordOutcome(
+            @PathVariable UUID hearingId,
+            @RequestBody com.nyaysetu.backend.dto.HearingOutcomeRequest request
+    ) {
+        try {
+            Hearing hearing = hearingService.recordOutcome(hearingId, request);
+            return ResponseEntity.ok(Map.of(
+                "message", "Outcome recorded successfully",
+                "hearingId", hearing.getId(),
+                "status", hearing.getStatus()
+            ));
+        } catch (Exception e) {
+            log.error("Failed to record hearing outcome", e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
     @GetMapping("/{hearingId}")
     public ResponseEntity<Hearing> getHearing(@PathVariable UUID hearingId) {
         Hearing hearing = hearingService.getHearing(hearingId);
@@ -158,9 +176,20 @@ public class HearingController {
     }
     
     @GetMapping("/case/{caseId}")
-    public ResponseEntity<List<Hearing>> getCaseHearings(@PathVariable UUID caseId) {
+    public ResponseEntity<List<Map<String, Object>>> getCaseHearings(@PathVariable UUID caseId) {
         List<Hearing> hearings = hearingService.getCaseHearings(caseId);
-        return ResponseEntity.ok(hearings);
+        List<Map<String, Object>> response = hearings.stream().map(h -> {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("id", h.getId());
+            dto.put("scheduledDate", h.getScheduledDate());
+            dto.put("durationMinutes", h.getDurationMinutes());
+            dto.put("status", h.getStatus());
+            dto.put("videoRoomId", h.getVideoRoomId());
+            dto.put("judgeNotes", h.getJudgeNotes());
+            dto.put("createdAt", h.getCreatedAt());
+            return dto;
+        }).toList();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/my")

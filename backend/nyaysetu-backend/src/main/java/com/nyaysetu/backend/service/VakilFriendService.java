@@ -16,6 +16,9 @@ import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.HearingRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.entity.DocumentEntity;
+import com.nyaysetu.backend.entity.FirRecord;
+import com.nyaysetu.backend.repository.FirRecordRepository;
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +55,7 @@ public class VakilFriendService {
     private final CaseRepository caseRepository;
     private final HearingRepository hearingRepository;
     private final DocumentRepository documentRepository;
+    private final FirRecordRepository firRecordRepository;
     private final OllamaService ollamaService;
     
     // Lazy injection to avoid circular dependency
@@ -91,12 +95,19 @@ public class VakilFriendService {
         When all 7 items are collected, you MUST provide a standardized summary between three hashes (###) like this:
         
         ### CASE SUMMARY START ###
+        - **Target**: [POLICE or COURT] (Use POLICE if it requires an FIR like theft/assault, otherwise COURT)
         - **Case Type**: [TYPE]
         - **Petitioner**: [NAME]
         - **Respondent**: [NAME]
         - **Issue**: [DESCRIPTION]
         - **Urgency**: [LEVEL]
         ### CASE SUMMARY END ###
+        
+        CORRECTION HANDLING:
+        If the user says "Change the date" or "That's wrong, the name is X", you MUST:
+        1. Acknowledge the correction.
+        2. Re-generate the COMPLETE "### CASE SUMMARY START ### ... ### CASE SUMMARY END ###" block with the updated information.
+        This is critical so the system can pick up the latest details.
         
         Then say: "Your case is ready to file! Click the 'Complete Filing' button to submit."
         """;
@@ -282,7 +293,7 @@ public class VakilFriendService {
      * Complete the chat session and create a case
      */
     @Transactional
-    public CaseEntity completeSession(UUID sessionId, User user) {
+    public Object completeSession(UUID sessionId, User user) {
         log.info("📋 Starting completeSession for session: {}, user: {}", sessionId, user != null ? user.getEmail() : "null");
         
         if (user == null) {
@@ -295,7 +306,7 @@ public class VakilFriendService {
 
         // Extract case data from conversation
         Map<String, String> caseData = extractCaseData(session.getConversationData());
-        log.info("📋 Extracted case data: type={}, urgency={}", caseData.get("caseType"), caseData.get("urgency"));
+        log.info("📋 Extracted case data: type={}, urgency={}, target={}", caseData.get("caseType"), caseData.get("urgency"), caseData.get("target"));
 
         // Limit chatTranscript to prevent DB issues
         String chatTranscript = session.getConversationData();
@@ -303,53 +314,64 @@ public class VakilFriendService {
             chatTranscript = chatTranscript.substring(0, 10000) + "... [truncated]";
         }
 
-        // Create the case
-        CaseEntity newCase = CaseEntity.builder()
-                .title(caseData.getOrDefault("title", "Case filed via Vakil-Friend"))
-                .description(caseData.getOrDefault("description", ""))
-                .caseType(caseData.getOrDefault("caseType", "CIVIL"))
-                .petitioner(caseData.getOrDefault("petitioner", user.getEmail()))
-                .respondent(caseData.getOrDefault("respondent", "Unknown"))
-                .urgency(caseData.getOrDefault("urgency", "NORMAL"))
-                .status(CaseStatus.PENDING)
-                .client(user)
-                .filingMethod("CHAT_AI")
-                .chatTranscript(chatTranscript)
-                .aiGeneratedSummary(generateSummary(session.getConversationData()))
-                .build();
-        log.info("📋 Built CaseEntity, saving to database");
+        Object resultEntity;
+        String target = caseData.getOrDefault("target", "COURT");
+        String caseType = caseData.getOrDefault("caseType", "CIVIL");
 
-        CaseEntity savedCase = caseRepository.save(newCase);
-        log.info("📋 Saved case with ID: {}", savedCase.getId());
+        // Logic check: If target is explicitly POLICE OR (Type is CRIMINAL/THEFT and user clearly wanted FIR)
+        // We defer to the explicit target extraction.
+        boolean isFir = "POLICE".equalsIgnoreCase(target);
 
-        // AUTO-ASSIGN: DISABLED - Cases now go to Unassigned Pool for Judges to claim
-        /*
-        try {
-            caseAssignmentService.autoAssignJudge(savedCase.getId());
-            // Refresh the case to get the assigned judge
-            savedCase = caseRepository.findById(savedCase.getId()).orElse(savedCase);
-            log.info("✅ Auto-assigned judge to case {}: {}", savedCase.getId(), savedCase.getAssignedJudge());
-        } catch (Exception e) {
-            log.warn("Could not auto-assign judge to case {}: {}", savedCase.getId(), e.getMessage());
+        if (isFir) {
+            log.info("🚨 Identified as POLICE FIR filing intent");
+            // Create FIR Record
+            String firNumber = generateFirNumber();
+            FirRecord firRecord = FirRecord.builder()
+                    .firNumber(firNumber)
+                    .title(caseData.getOrDefault("title", "FIR filed via Vakil-Friend"))
+                    .description(caseData.getOrDefault("description", ""))
+                    .filedBy(user)
+                    .uploadedAt(LocalDateTime.now())
+                    .status("PENDING_POLICE_REVIEW")
+                    .aiGenerated(true)
+                    .aiSessionId(sessionId.toString())
+                    .incidentLocation("Extracted from Chat") // Advanced extraction could go here
+                    // .incidentDate() // Need to parse date
+                    .build();
+            
+            resultEntity = firRecordRepository.save(firRecord);
+            log.info("✅ Saved AI-Generated FIR: {}", firNumber);
+        } else {
+            // Create the case
+            CaseEntity newCase = CaseEntity.builder()
+                    .title(caseData.getOrDefault("title", "Case filed via Vakil-Friend"))
+                    .description(caseData.getOrDefault("description", ""))
+                    .caseType(caseType)
+                    .petitioner(caseData.getOrDefault("petitioner", user.getEmail()))
+                    .respondent(caseData.getOrDefault("respondent", "Unknown"))
+                    .urgency(caseData.getOrDefault("urgency", "NORMAL"))
+                    .status(CaseStatus.PENDING)
+                    .client(user)
+                    .filingMethod("CHAT_AI")
+                    .chatTranscript(chatTranscript)
+                    .aiGeneratedSummary(generateSummary(session.getConversationData()))
+                    .build();
+            log.info("📋 Built CaseEntity, saving to database");
+
+            resultEntity = caseRepository.save(newCase);
+            log.info("📋 Saved case with ID: {}", ((CaseEntity)resultEntity).getId());
+            
+            // Link back to separate session field if needed, but we use generic link usually
+            session.setCaseEntity((CaseEntity)resultEntity);
         }
-
-        // AUTO-SCHEDULE: DISABLED - Judge will schedule after claiming
-        try {
-            savedCase = autoScheduleHearing(savedCase, caseData.get("urgency"));
-            log.info("📅 Auto-scheduled hearing for case {}", savedCase.getId());
-        } catch (Exception e) {
-            log.warn("Could not auto-schedule hearing for case {}: {}", savedCase.getId(), e.getMessage());
-        }
-        */
 
         // Mark session as completed
         session.setStatus(ChatSessionStatus.COMPLETED);
-        session.setCaseEntity(savedCase);
         session.setUpdatedAt(LocalDateTime.now());
         chatSessionRepository.save(session);
         log.info("✅ Session marked as completed");
 
-        return savedCase;
+        return resultEntity;
     }
     
     /**
@@ -545,6 +567,11 @@ public class VakilFriendService {
             // 2. Extract specific fields from the summary block (or full content if block missing)
             String sourceForExtraction = summaryBlock.isEmpty() ? fullAiContent : summaryBlock;
             
+            String target = extractAfterLabel(sourceForExtraction, "Target:", "लक्ष्य:");
+            if (!target.isEmpty()) {
+                caseData.put("target", target.toUpperCase());
+            }
+
             String petitioner = extractAfterLabel(sourceForExtraction, "Petitioner:", "पेटिशनर:");
             if (!petitioner.isEmpty() && !petitioner.equalsIgnoreCase("[NAME]")) {
                 caseData.put("petitioner", petitioner);
@@ -607,8 +634,12 @@ public class VakilFriendService {
             if (title != null && title.length() > 200) title = title.substring(0, 200);
             caseData.put("title", title != null ? title : "Case filed via Vakil-Friend");
 
-            // Use first user message as description - TRUNCATE to 1000 chars
-            String description = firstUserMessage;
+            // Use AI-extracted issue if available, otherwise fallback to user message
+            String description = extractAfterLabel(sourceForExtraction.isEmpty() ? fullAiContent : sourceForExtraction, "Issue:", "समस्या:", "Issue Description:");
+            if (description.isEmpty() || description.equalsIgnoreCase("[DESCRIPTION]")) {
+                description = firstUserMessage;
+            }
+            // TRUNCATE to 1000 chars
             if (description.length() > 1000) {
                 description = description.substring(0, 1000) + "...";
             }
@@ -816,5 +847,10 @@ public class VakilFriendService {
                     return data != null && data.contains("\"role\":\"user\"");
                 })
                 .collect(Collectors.toList());
+    }
+    private String generateFirNumber() {
+        String datePrefix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String randomSuffix = String.format("%06d", (int) (Math.random() * 1000000));
+        return "FIR-" + datePrefix + "-" + randomSuffix;
     }
 }
