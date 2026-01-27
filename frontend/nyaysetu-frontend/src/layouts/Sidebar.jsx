@@ -19,14 +19,11 @@ const roleMenuItems = {
     ],
     LAWYER: [
         { icon: Home, label: 'Dashboard', path: '/lawyer' },
-        { icon: Users, label: 'My Clients', path: '/lawyer/clients' },
+        { icon: Users, label: 'Litigant Directory', path: '/lawyer/clients' },
         { icon: Briefcase, label: 'Active Cases', path: '/lawyer/cases' },
-        { icon: FileText, label: 'Case Preparation', path: '/lawyer/preparation' },
-        { icon: Archive, label: 'Evidence Vault', path: '/lawyer/evidence' },
         { icon: Brain, label: 'AI Legal Assistant', path: '/lawyer/ai-assistant' },
         { icon: Video, label: 'Hearings', path: '/lawyer/hearings' },
         { icon: BarChart3, label: 'Analytics', path: '/lawyer/analytics' },
-        { icon: MessageSquare, label: 'Client Chat', path: '/lawyer/chat' },
         { icon: User, label: 'Profile', path: '/lawyer/profile' }
     ],
     JUDGE: [
