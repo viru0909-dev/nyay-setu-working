@@ -21,7 +21,12 @@ export default function DashboardLayout() {
         '/ai-review'
     ];
 
-    const shouldHideBrain = hideAIBrainPaths.some(path => location.pathname.includes(path));
+    const searchParams = new URLSearchParams(location.search);
+    const isChatTab = searchParams.get('tab') === 'chat' || searchParams.get('tab') === 'CHAT';
+
+    // Check if we show hide based on path OR specific tab parameters
+    const shouldHideBrain = hideAIBrainPaths.some(path => location.pathname.includes(path)) ||
+        (location.pathname.includes('/lawyer/case/') && isChatTab);
 
     // Listen for window resize
     useEffect(() => {

@@ -8,6 +8,7 @@ export default function LitigantDashboard() {
     const navigate = useNavigate();
     const { t } = useLanguage();
 
+    const [showReviewAction, setShowReviewAction] = useState(true);
     const [recentCases, setRecentCases] = useState([]);
     const [upcomingHearings, setUpcomingHearings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -175,6 +176,68 @@ export default function LitigantDashboard() {
                     {t('Get Started')}
                 </div>
             </div>
+
+            {/* Pending Action Items (Workflow) */}
+            {/* Pending Action Items (Workflow) */}
+            {showReviewAction ? (
+                <div style={{ marginBottom: '2rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>Action Items (1)</h3>
+                    <div style={{
+                        background: 'var(--bg-glass-strong)', padding: '1.5rem', borderRadius: '1.5rem',
+                        border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        boxShadow: '0 4px 12px rgba(245, 158, 11, 0.1)'
+                    }}>
+                        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                            <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FileText size={28} color="#f59e0b" />
+                            </div>
+                            <div>
+                                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.25rem' }}>
+                                    <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: '700' }}>Review Draft: Writ Petition</h4>
+                                    <span style={{ fontSize: '0.7rem', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', padding: '0.2rem 0.5rem', borderRadius: '0.5rem', fontWeight: '700' }}>URGENT</span>
+                                </div>
+                                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Sent by <b>Adv. Lawyer Y</b> • Awaiting your digital signature</p>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button
+                                onClick={() => {
+                                    // Mock Viewing
+                                    const dummyContent = "LEGAL DRAFT PREVIEW\n\n[DRAFT WRIT PETITION]\n\nSUBJECT: Application under Article 226...\n\nVS\nState of Delhi\n\n(This is a simulated preview of the document content)";
+                                    const blob = new Blob([dummyContent], { type: 'text/plain' });
+                                    const url = URL.createObjectURL(blob);
+                                    window.open(url, '_blank');
+                                }}
+                                style={{
+                                    padding: '0.6rem 1.2rem', background: 'transparent', border: '1px solid var(--border-glass)',
+                                    color: 'var(--text-main)', borderRadius: '0.75rem', cursor: 'pointer', fontWeight: '600'
+                                }}>
+                                View Preview
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (window.confirm("Digitally sign and approve this document?")) {
+                                        alert("Document Signed & Approved! It has been moved to your 'Documents' folder.");
+                                        setShowReviewAction(false);
+                                        // Update stats or navigate to documents
+                                    }
+                                }}
+                                style={{
+                                    padding: '0.6rem 1.5rem', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                    border: 'none', color: 'white', borderRadius: '0.75rem', fontWeight: '700', cursor: 'pointer',
+                                    boxShadow: '0 4px 10px rgba(245, 158, 11, 0.3)'
+                                }}>
+                                Approve & Sign
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '1rem', border: '1px solid rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <Scale size={20} color="#10b981" />
+                    <span style={{ color: '#10b981', fontWeight: '600' }}>You have successfully signed the pending draft. It is now filed in 'Documents'.</span>
+                </div>
+            )}
 
             {/* Stats Grid */}
             <div style={{
