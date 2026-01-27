@@ -18,7 +18,7 @@ const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 
 // Dashboard Pages
 const AdminDashboard = lazy(() => import('./pages/dashboards/AdminDashboard'));
-const JudgeDashboard = lazy(() => import('./pages/dashboards/JudgeDashboard'));
+
 const LawyerDashboard = lazy(() => import('./pages/dashboards/LawyerDashboard'));
 
 // Litigant Pages

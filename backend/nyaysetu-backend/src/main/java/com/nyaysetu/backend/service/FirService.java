@@ -437,9 +437,12 @@ public class FirService {
         if ("REGISTERED".equals(status) && fir.getCaseId() == null) {
             log.info("🚨 FIR {} Accepted! Auto-creating Court Case...", fir.getFirNumber());
             
+            String caseDescription = fir.getDescription() != null ? fir.getDescription() : "No details provided";
+            String caseTitleSuffix = caseDescription.length() > 20 ? caseDescription.substring(0, 20) + "..." : caseDescription;
+
             CaseEntity newCase = CaseEntity.builder()
-                    .title("State vs " + (fir.getDescription().length() > 20 ? fir.getDescription().substring(0, 20) + "..." : fir.getDescription()))
-                    .description("FIR REGISTERED: " + fir.getFirNumber() + "\n\n" + fir.getDescription())
+                    .title("State vs " + caseTitleSuffix)
+                    .description("FIR REGISTERED: " + fir.getFirNumber() + "\n\n" + caseDescription)
                     .caseType("CRIMINAL")
                     .status(CaseStatus.PENDING) 
                     .petitioner("State (Police)")
