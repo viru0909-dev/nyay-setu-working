@@ -7,7 +7,7 @@ import {
     Briefcase,
     Clock,
     Scale,
-    MoreVertical,
+    MoreVertical, ArrowRight, ChevronDown,
     ChevronRight,
     AlertCircle,
     CheckCircle2,
@@ -224,7 +224,7 @@ export default function LawyerCasesPage() {
             </div>
 
             {/* Cases List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {filteredCases.length === 0 ? (
                     <div style={{ ...glassStyle, textAlign: 'center', padding: '5rem' }}>
                         <Briefcase size={64} color="var(--text-secondary)" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
@@ -240,63 +240,78 @@ export default function LawyerCasesPage() {
                         <div
                             key={caseItem.id}
                             style={{
-                                ...glassStyle,
-                                padding: '1.5rem',
-                                transition: 'all 0.2s',
-                                cursor: 'pointer',
+                                background: 'var(--bg-glass-strong)',
+                                backdropFilter: 'var(--glass-blur)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '1.5rem',
+                                padding: '1.75rem',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                cursor: 'default',
                                 display: 'flex',
-                                gap: '2rem'
+                                gap: '2rem',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                             }}
-                            onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
-                            onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+                            onMouseOver={e => {
+                                e.currentTarget.style.transform = 'translateY(-4px)';
+                                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+                                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                            }}
+                            onMouseOut={e => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                            }}
                         >
                             {/* Left Side: Icon and Core Info */}
                             <div style={{ flex: 1 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1rem' }}>
                                     <div style={{
-                                        width: '40px', height: '40px', borderRadius: '10px',
-                                        background: activeTab === 'proposals' ? 'rgba(245, 158, 11, 0.1)' : 'var(--bg-glass)',
+                                        width: '48px', height: '48px', borderRadius: '12px',
+                                        background: activeTab === 'proposals' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: activeTab === 'proposals' ? 'var(--color-warning)' : 'var(--color-accent)'
+                                        color: activeTab === 'proposals' ? 'var(--color-warning)' : '#3b82f6',
+                                        flexShrink: 0
                                     }}>
-                                        {activeTab === 'proposals' ? <AlertCircle size={20} /> : <Scale size={20} />}
+                                        {activeTab === 'proposals' ? <AlertCircle size={24} /> : <Scale size={24} />}
                                     </div>
                                     <div>
-                                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
+                                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.35rem', fontWeight: '700', margin: 0, lineHeight: 1.2 }}>
                                             {caseItem.title}
                                         </h3>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.4rem' }}>
                                             <span style={{
-                                                fontSize: '0.7rem',
+                                                fontSize: '0.75rem',
                                                 color: 'var(--text-secondary)',
-                                                fontWeight: '800',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.05em'
+                                                fontFamily: 'monospace',
+                                                background: 'rgba(255,255,255,0.05)',
+                                                padding: '0.1rem 0.4rem', borderRadius: '4px'
                                             }}>
                                                 ID: {caseItem.id.substring(0, 8)}
                                             </span>
-                                            <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--text-secondary)' }} />
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--color-accent)', fontWeight: '700' }}>
+                                            <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--text-secondary)' }} />
+                                            <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: '600', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
                                                 {caseItem.caseType || 'General Litigation'}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6', margin: '1rem 0' }}>
-                                    {caseItem.description ? (caseItem.description.substring(0, 200) + (caseItem.description.length > 200 ? '...' : '')) : 'No case brief provided.'}
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6', margin: '0 0 1.5rem 0', maxWidth: '90%' }}>
+                                    {caseItem.description ? (caseItem.description.substring(0, 200) + (caseItem.description.length > 200 ? '...' : '')) : 'No case brief provided - please review full details.'}
                                 </p>
                                 <div style={{ display: 'flex', gap: '2rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: '600' }}>
-                                        <Calendar size={14} /> Filed: {new Date(caseItem.filedDate || caseItem.createdAt).toLocaleDateString()}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '500' }}>
+                                        <Calendar size={16} color="#64748b" />
+                                        <span>Filed: <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{new Date(caseItem.filedDate || caseItem.createdAt).toLocaleDateString()}</span></span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: '600' }}>
-                                        <User size={14} /> Petitioner: {caseItem.petitioner || 'Anonymous'}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '500' }}>
+                                        <User size={16} color="#64748b" />
+                                        <span>Petitioner: <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{caseItem.petitioner || 'Anonymous'}</span></span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Right Side: Status and Actions */}
-                            <div style={{ width: '220px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', borderLeft: '1px solid rgba(255, 255, 255, 0.05)', paddingLeft: '2rem' }}>
+                            <div style={{ width: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', paddingLeft: '2rem', borderLeft: '1px solid rgba(255, 255, 255, 0.05)' }}>
                                 {activeTab === 'active' ? (
                                     <>
                                         <div style={{
@@ -315,26 +330,42 @@ export default function LawyerCasesPage() {
                                             {caseItem.status}
                                         </div>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
                                             <button
-                                                onClick={() => navigate(`/lawyer/case/${caseItem.id}`)}
+                                                onClick={() => navigate(`/lawyer/case/${caseItem.id}/workspace`)}
                                                 style={{
                                                     width: '100%',
-                                                    background: 'var(--color-accent)',
-                                                    color: 'var(--text-main)', border: 'none', borderRadius: '0.75rem',
-                                                    padding: '0.6rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer'
-                                                }}>
-                                                Manage Case
+                                                    background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
+                                                    color: 'white', border: 'none', borderRadius: '0.75rem',
+                                                    padding: '0.7rem', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer',
+                                                    boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)',
+                                                    display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                                onMouseOver={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                                                onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+                                            >
+                                                Open Workspace <ChevronRight size={16} />
                                             </button>
                                             <button
-                                                onClick={() => navigate('/lawyer/evidence', { state: { caseId: caseItem.id } })}
+                                                onClick={() => navigate(`/lawyer/case/${caseItem.id}/workspace?tab=evidence`)}
                                                 style={{
                                                     width: '100%',
-                                                    background: 'var(--bg-glass)',
-                                                    color: 'var(--text-secondary)', border: 'var(--border-glass)',
-                                                    borderRadius: '0.75rem', padding: '0.6rem', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer'
-                                                }}>
-                                                View Evidence
+                                                    background: 'transparent',
+                                                    color: 'var(--text-secondary)', border: '1px solid var(--border-glass)',
+                                                    borderRadius: '0.75rem', padding: '0.65rem', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                                onMouseOver={e => {
+                                                    e.currentTarget.style.borderColor = 'var(--text-secondary)';
+                                                    e.currentTarget.style.color = 'var(--text-main)';
+                                                }}
+                                                onMouseOut={e => {
+                                                    e.currentTarget.style.borderColor = 'var(--border-glass)';
+                                                    e.currentTarget.style.color = 'var(--text-secondary)';
+                                                }}
+                                            >
+                                                Quick Verification
                                             </button>
                                         </div>
                                     </>
@@ -354,7 +385,7 @@ export default function LawyerCasesPage() {
                                                     width: '100%',
                                                     background: 'var(--color-success)',
                                                     color: 'white', border: 'none', borderRadius: '0.75rem',
-                                                    padding: '0.6rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer'
+                                                    padding: '0.65rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer'
                                                 }}
                                             >
                                                 Accept Case
@@ -365,7 +396,7 @@ export default function LawyerCasesPage() {
                                                     width: '100%',
                                                     background: 'rgba(239, 68, 68, 0.1)',
                                                     color: 'var(--color-error)', border: '1px solid rgba(239, 68, 68, 0.2)',
-                                                    borderRadius: '0.75rem', padding: '0.6rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer'
+                                                    borderRadius: '0.75rem', padding: '0.65rem', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer'
                                                 }}
                                             >
                                                 Decline

@@ -18,7 +18,7 @@ const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 
 // Dashboard Pages
 const AdminDashboard = lazy(() => import('./pages/dashboards/AdminDashboard'));
-const JudgeDashboard = lazy(() => import('./pages/dashboards/JudgeDashboard'));
+
 const LawyerDashboard = lazy(() => import('./pages/dashboards/LawyerDashboard'));
 
 // Litigant Pages
@@ -53,6 +53,7 @@ const LawyerAnalyticsPage = lazy(() => import('./pages/lawyer/AnalyticsPage'));
 const LawyerCaseDetailsPage = lazy(() => import('./pages/lawyer/LawyerCaseDetailsPage'));
 const ClientChatPage = lazy(() => import('./pages/lawyer/ClientChatPage'));
 const LawyerProfilePage = lazy(() => import('./pages/lawyer/LawyerProfilePage'));
+const CaseWorkspace = lazy(() => import('./pages/lawyer/CaseWorkspace'));
 
 // Police Pages
 const PoliceDashboard = lazy(() => import('./pages/police/PoliceDashboard'));
@@ -131,6 +132,7 @@ function App() {
                                 <Route index element={<LawyerDashboard />} />
                                 <Route path="cases" element={<LawyerCasesPage />} />
                                 <Route path="case/:caseId" element={<LawyerCaseDetailsPage />} />
+                                <Route path="case/:caseId/workspace" element={<CaseWorkspace />} />
                                 <Route path="clients" element={<MyClientsPage />} />
                                 <Route path="preparation" element={<CasePreparationPage />} />
                                 <Route path="evidence" element={<EvidenceVaultPage />} />
