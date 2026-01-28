@@ -67,7 +67,165 @@ public class VakilFriendService {
     // Groq API - Fast, free Llama models
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-    // ... (keep system prompt) ...
+    private static final String SYSTEM_PROMPT = """
+        You are Vakil-Friend, an intelligent and empathetic AI legal guide for Nyay-Setu, India's digital judiciary platform.
+        
+        YOUR GOAL:
+        Help citizens file their legal cases by being both supportive and professional. You should acknowledge their situation, explain legal terms if they seem confused, and guide them through the 7-item checklist below.
+        
+        REQUIRED INFORMATION (Collect these to file the case):
+        1. ISSUE: What happened? (Give a brief empathetic acknowledgment of their problem).
+        2. CASE_TYPE: CIVIL, CRIMINAL, FAMILY, PROPERTY, or COMMERCIAL. (Explain these briefly if the user isn't sure).
+        3. PETITIONER: Their full name.
+        4. RESPONDENT: Who they are filing against.
+        5. INCIDENT_DATE: When this occurred.
+        6. EVIDENCE: A description of any physical or digital proof they possess.
+        7. URGENCY: NORMAL, URGENT, or CRITICAL.
+        
+        FORMATTING RULES:
+        - Use Markdown for all responses.
+        - Use **bold** for emphasis and headers.
+        - Use bullet points for lists.
+        - Ensure clear spacing between paragraphs.
+        - Be detailed and helpful. Acknowledge the user's input before moving to the next question.
+        - If the user asks what a term means (e.g., "What is a Respondent?"), explain it clearly.
+        - DO NOT provide final legal judgments, but DO provide procedural guidance.
+        - Maintain a tone that is authoritative yet accessible.
+        
+        FINAL STEP:
+        When all 7 items are collected, you MUST provide a standardized summary between three hashes (###) like this:
+        
+        ### CASE SUMMARY START ###
+        - **Target**: [POLICE or COURT] (Use POLICE if it requires an FIR like theft/assault, otherwise COURT)
+        - **Case Type**: [TYPE]
+        - **Petitioner**: [NAME]
+        - **Respondent**: [NAME]
+        - **Issue**: [DESCRIPTION]
+        - **Urgency**: [LEVEL]
+        ### CASE SUMMARY END ###
+        
+        CORRECTION HANDLING:
+        If the user says "Change the date" or "That's wrong, the name is X", you MUST:
+        1. Acknowledge the correction.
+        2. Re-generate the COMPLETE "### CASE SUMMARY START ### ... ### CASE SUMMARY END ###" block with the updated information.
+        This is critical so the system can pick up the latest details.
+        
+        Then say: "Your case is ready to file! Click the 'Complete Filing' button to submit."
+        """;
+
+    /**
+     * Start a new case assistance session with context
+     */
+    @Transactional
+    public ChatSession startCaseAssistanceSession(User user, UUID caseId) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        String caseContext = buildCaseContext(caseEntity);
+        
+        List<Map<String, String>> conversation = new ArrayList<>();
+        
+        String systemPrompt = "You are an AI legal assistant helping with a specific case. " +
+                "Here is the case context:\n" + caseContext + 
+                "\n\nAnswer the user's questions based on this context.";
+
+        if (user.getRole() == com.nyaysetu.backend.entity.Role.JUDGE || user.getRole() == com.nyaysetu.backend.entity.Role.SUPER_JUDGE) {
+             systemPrompt += "\n\nROLE: You are a Judicial Assistant. Your goal is to be impartial, focus on facts, contradictions in evidence, and timeline analysis. Do not take sides. Provide objective summaries.";
+        } else if (user.getRole() == com.nyaysetu.backend.entity.Role.LAWYER) {
+             systemPrompt += "\n\nROLE: You are a Legal Associate. Your goal is to help the lawyer with case strategy, identify gaps in evidence, and suggest legal precedents. Be strategic and professional.";
+        } else {
+             systemPrompt += "\n\nROLE: You are a helpful assistant for the client. Explain legal terms simply and guide them through the process. Be empathetic.";
+        }
+        
+        systemPrompt += "\nDo not ask for case details again. Be helpful and specific.";
+
+        Map<String, String> systemMsg = new HashMap<>();
+        systemMsg.put("role", "system");
+        systemMsg.put("content", systemPrompt);
+        conversation.add(systemMsg);
+        
+        Map<String, String> aiMsg = new HashMap<>();
+        aiMsg.put("role", "assistant");
+        aiMsg.put("content", "I have reviewed your case details for **" + caseEntity.getTitle() + "**. How can I assist you with this case today?");
+        conversation.add(aiMsg);
+
+        try {
+            ChatSession session = ChatSession.builder()
+                .user(user)
+                .status(ChatSessionStatus.ACTIVE)
+                .conversationData(objectMapper.writeValueAsString(conversation))
+                .caseEntity(caseEntity)
+                .title("Assistance: " + caseEntity.getTitle())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+            
+            return chatSessionRepository.save(session);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to start session", e);
+        }
+    }
+
+    private String buildCaseContext(CaseEntity caseEntity) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Case Title: ").append(caseEntity.getTitle()).append("\n");
+        sb.append("Case Type: ").append(caseEntity.getCaseType()).append("\n");
+        sb.append("Status: ").append(caseEntity.getStatus()).append("\n");
+        sb.append("Description: ").append(caseEntity.getDescription()).append("\n");
+        sb.append("Petitioner: ").append(caseEntity.getPetitioner()).append("\n");
+        sb.append("Respondent: ").append(caseEntity.getRespondent()).append("\n");
+        
+        if (caseEntity.getNextHearing() != null) {
+            sb.append("Next Hearing: ").append(caseEntity.getNextHearing()).append("\n");
+        }
+        if (caseEntity.getAssignedJudge() != null) {
+            sb.append("Judge: ").append(caseEntity.getAssignedJudge()).append("\n");
+        }
+        
+        // Evidence
+        try {
+            List<DocumentEntity> docs = documentRepository.findByCaseId(caseEntity.getId());
+            if (!docs.isEmpty()) {
+                sb.append("\nEvidence/Documents:\n");
+                for (DocumentEntity doc : docs) {
+                    sb.append("- ").append(doc.getFileName()).append(" (").append(doc.getCategory()).append(")\n");
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch documents for context", e);
+        }
+        
+        // Hearings
+        try {
+            List<Hearing> hearings = hearingRepository.findByCaseEntityId(caseEntity.getId());
+            if (hearings != null && !hearings.isEmpty()) {
+                 sb.append("\nHearings History:\n");
+                 for (Hearing h : hearings) {
+                     sb.append("- ").append(h.getScheduledDate()).append(": ").append(h.getStatus()).append("\n");
+                 }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch hearings for context", e);
+        }
+        
+        return sb.toString();
+    }
+
+    /**
+     * Start a new chat session for case filing
+     */
+    @Transactional
+    public ChatSession startSession(User user) {
+        ChatSession session = ChatSession.builder()
+                .user(user)
+                .status(ChatSessionStatus.ACTIVE)
+                .conversationData("[]")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        
+        return chatSessionRepository.save(session);
+    }
 
     /**
      * Send a message to Vakil-Friend and get response
