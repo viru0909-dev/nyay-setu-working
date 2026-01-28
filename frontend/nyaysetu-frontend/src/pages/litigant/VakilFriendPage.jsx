@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, FileText, X } from 'lucide-react';
+import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, FileText, X, Mic, StopCircle, Volume2 } from 'lucide-react';
 import { vakilFriendAPI } from '../../services/api';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
@@ -20,9 +20,28 @@ export default function VakilFriendChat() {
     const [showHistory, setShowHistory] = useState(false);
     const [attachedFiles, setAttachedFiles] = useState([]); // For document attachments
     const [uploadingFile, setUploadingFile] = useState(false);
+    const [language, setLanguage] = useState('en'); // Default language
+    const [isRecording, setIsRecording] = useState(false);
+    const mediaRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
+
     const messagesContainerRef = useRef(null);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
+
+    // Supported Languages
+    const languages = [
+        { code: 'en', name: 'English' },
+        { code: 'hi', name: 'Hindi (हिंदी)' },
+        { code: 'mr', name: 'Marathi (मराठी)' },
+        { code: 'ta', name: 'Tamil (தமிழ்)' },
+        { code: 'te', name: 'Telugu (తెలుగు)' },
+        { code: 'gu', name: 'Gujarati (ગુજરાતી)' },
+        { code: 'kn', name: 'Kannada (ಕನ್ನಡ)' },
+        { code: 'bn', name: 'Bengali (বাংলা)' },
+        { code: 'ml', name: 'Malayalam (മലയാളം)' },
+        { code: 'pa', name: 'Punjabi (ਪੰਜਾਬੀ)' }
+    ];
 
     // Scroll to bottom of messages container only (not the page)
     const scrollToBottom = (behavior = 'auto') => {
@@ -111,12 +130,19 @@ export default function VakilFriendChat() {
         }
     };
 
-    const sendMessage = async () => {
-        if (!inputMessage.trim() || isLoading) return;
+    const sendMessage = async (audioData = null) => {
+        if ((!inputMessage.trim() && !audioData) || isLoading) return;
 
         const userMessage = inputMessage.trim();
         setInputMessage('');
-        setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+
+        // Optimistic UI update
+        if (!audioData) {
+            setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+        } else {
+            setMessages(prev => [...prev, { role: 'user', content: '🎤 [Voice Message]' }]);
+        }
+
         setIsLoading(true);
 
         if (!sessionId) {
@@ -129,12 +155,45 @@ export default function VakilFriendChat() {
         }
 
         try {
-            const response = await vakilFriendAPI.sendMessage(sessionId, userMessage);
+            // Updated API call with language and audioData
+            const payload = {
+                message: userMessage,
+                language: language,
+                audioData: audioData
+            };
+
+            const response = await axios.post(`${API_BASE_URL}/api/vakil-friend/chat/${sessionId}`, payload, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+
+            const data = response.data;
+
+            // If it was a voice message, update the placeholder with transcribed text
+            if (audioData && data.transcribedText) {
+                setMessages(prev => {
+                    const newMsgs = [...prev];
+                    // Find the last user message which corresponds to the voice input
+                    for (let i = newMsgs.length - 1; i >= 0; i--) {
+                        if (newMsgs[i].role === 'user' && newMsgs[i].content === '🎤 [Voice Message]') {
+                            newMsgs[i].content = `🎤 ${data.transcribedText}`;
+                            break;
+                        }
+                    }
+                    return newMsgs;
+                });
+            }
+
             setMessages(prev => [...prev, {
                 role: 'assistant',
-                content: response.data.message
+                content: data.message
             }]);
-            setReadyToFile(response.data.readyToFile);
+
+            // Auto-speak if using voice
+            if (audioData) {
+                speakText(data.message);
+            }
+
+            setReadyToFile(data.readyToFile);
         } catch (err) {
             console.error('Failed to send message:', err);
             setMessages(prev => [...prev, {
@@ -143,6 +202,57 @@ export default function VakilFriendChat() {
             }]);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    // Voice Recording Logic
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => {
+                    const base64Audio = reader.result.split(',')[1];
+                    sendMessage(base64Audio);
+                };
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+        } catch (err) {
+            console.error("Microphone access denied", err);
+            alert("Microphone access denied. Please allow audio permission.");
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+
+    const speakText = (text) => {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // Stop current speech
+            const utterance = new SpeechSynthesisUtterance(text);
+            // Try to match language code slightly (e.g. 'hi' -> 'hi-IN')
+            // This is OS dependent
+            utterance.lang = language === 'en' ? 'en-IN' : language + '-IN';
+            window.speechSynthesis.speak(utterance);
         }
     };
 
@@ -477,6 +587,30 @@ export default function VakilFriendChat() {
                         </p>
                     </div>
                 </div>
+
+                {/* Language Selector */}
+                <div style={{ marginLeft: 'auto', marginRight: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Language:</span>
+                    <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        style={{
+                            padding: '0.5rem',
+                            borderRadius: '0.5rem',
+                            border: 'var(--border-glass)',
+                            background: 'var(--bg-glass)',
+                            color: 'var(--text-main)',
+                            fontSize: '0.9rem',
+                            outline: 'none',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {languages.map(lang => (
+                            <option key={lang.code} value={lang.code}>{lang.name}</option>
+                        ))}
+                    </select>
+                </div>
+
                 {readyToFile && (
                     <button
                         onClick={completeSession}
@@ -640,6 +774,25 @@ export default function VakilFriendChat() {
                                                     {msg.content}
                                                 </ReactMarkdown>
                                             </div>
+                                            {msg.role === 'assistant' && (
+                                                <button
+                                                    onClick={() => speakText(msg.content)}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        color: 'var(--text-secondary)',
+                                                        cursor: 'pointer',
+                                                        padding: '0.25rem 0.5rem',
+                                                        opacity: 0.7,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        marginTop: '0.25rem'
+                                                    }}
+                                                    title="Read aloud"
+                                                >
+                                                    <Volume2 size={16} />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -804,8 +957,31 @@ export default function VakilFriendChat() {
                             onFocus={e => e.currentTarget.style.borderColor = 'var(--color-accent)'}
                             onBlur={e => e.currentTarget.style.borderColor = 'var(--border-glass)'}
                         />
+
+                        {/* Mic Button */}
                         <button
-                            onClick={sendMessage}
+                            onClick={isRecording ? stopRecording : startRecording}
+                            disabled={isLoading || isStarting}
+                            style={{
+                                padding: '0.75rem',
+                                background: isRecording ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-glass)',
+                                border: isRecording ? '1px solid rgba(239, 68, 68, 0.5)' : 'var(--border-glass)',
+                                borderRadius: '0.625rem',
+                                color: isRecording ? '#ef4444' : 'var(--text-secondary)',
+                                cursor: (isLoading) ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                                animation: isRecording ? 'pulse 1.5s infinite' : 'none'
+                            }}
+                            title={isRecording ? "Stop Recording" : "Speak (Bhashini AI)"}
+                        >
+                            {isRecording ? <StopCircle size={20} /> : <Mic size={20} />}
+                        </button>
+
+                        <button
+                            onClick={() => sendMessage()}
                             disabled={!inputMessage.trim() || isLoading || isStarting}
                             style={{
                                 padding: '0.75rem 1rem',
