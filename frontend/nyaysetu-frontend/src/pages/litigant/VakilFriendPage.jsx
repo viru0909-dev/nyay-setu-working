@@ -140,7 +140,9 @@ export default function VakilFriendChat() {
         // Optimistic UI update
         if (!audioData) {
             setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+            // If using browser speech, we already have the text in userMessage, so we don't need "Voice Message" placeholder
         } else {
+            // Legacy path for backend audio if we ever switch back
             setMessages(prev => [...prev, { role: 'user', content: '🎤 [Voice Message]' }]);
         }
 
@@ -156,11 +158,11 @@ export default function VakilFriendChat() {
         }
 
         try {
-            // Updated API call with language and audioData
+            // If using browser speech, just send text. If legacy backend audio, send audioData.
             const payload = {
                 message: userMessage,
                 language: language,
-                audioData: audioData
+                audioData: audioData // This will be null for browser speech
             };
 
             const response = await axios.post(`${API_BASE_URL}/api/vakil-friend/chat/${sessionId}`, payload, {
@@ -169,11 +171,10 @@ export default function VakilFriendChat() {
 
             const data = response.data;
 
-            // If it was a voice message, update the placeholder with transcribed text
+            // If it was a voice message (backend processed), update the placeholder
             if (audioData && data.transcribedText) {
                 setMessages(prev => {
                     const newMsgs = [...prev];
-                    // Find the last user message which corresponds to the voice input
                     for (let i = newMsgs.length - 1; i >= 0; i--) {
                         if (newMsgs[i].role === 'user' && newMsgs[i].content === '🎤 [Voice Message]') {
                             newMsgs[i].content = `🎤 ${data.transcribedText}`;
@@ -209,41 +210,63 @@ export default function VakilFriendChat() {
         }
     };
 
-    // Voice Recording Logic
-    const startRecording = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mediaRecorder = new MediaRecorder(stream);
-            mediaRecorderRef.current = mediaRecorder;
-            audioChunksRef.current = [];
-
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    audioChunksRef.current.push(event.data);
-                }
-            };
-
-            mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-                const reader = new FileReader();
-                reader.readAsDataURL(audioBlob);
-                reader.onloadend = () => {
-                    const base64Audio = reader.result.split(',')[1];
-                    sendMessage(base64Audio);
-                };
-                stream.getTracks().forEach(track => track.stop());
-            };
-
-            mediaRecorder.start();
-            setIsRecording(true);
-        } catch (err) {
-            console.error("Microphone access denied", err);
-            alert("Microphone access denied. Please allow audio permission.");
+    // Browser Native Speech Recognition
+    const startRecording = () => {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert("Your browser does not support speech recognition. Please use Chrome or Edge.");
+            return;
         }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        // Map our language codes to browser locales
+        const langMap = {
+            'en': 'en-IN',
+            'hi': 'hi-IN',
+            'mr': 'mr-IN',
+            'ta': 'ta-IN',
+            'te': 'te-IN',
+            'gu': 'gu-IN',
+            'kn': 'kn-IN',
+            'bn': 'bn-IN',
+            'ml': 'ml-IN',
+            'pa': 'pa-IN'
+        };
+
+        recognition.lang = langMap[language] || 'en-IN';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+            setIsRecording(true);
+        };
+
+        recognition.onend = () => {
+            setIsRecording(false);
+        };
+
+        recognition.onError = (event) => {
+            console.error("Speech recognition error", event.error);
+            setIsRecording(false);
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            console.log("Transcribed:", transcript);
+            setInputMessage(transcript);
+
+            // Optional: automatically send after short delay
+            // setTimeout(() => sendMessage(), 500);
+        };
+
+        // Store verification reference if needed to stop manually
+        mediaRecorderRef.current = recognition;
+        recognition.start();
     };
 
     const stopRecording = () => {
-        if (mediaRecorderRef.current && isRecording) {
+        if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
             setIsRecording(false);
         }
