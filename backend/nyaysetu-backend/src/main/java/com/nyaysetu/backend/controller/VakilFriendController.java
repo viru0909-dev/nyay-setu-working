@@ -128,7 +128,7 @@ public class VakilFriendController {
             Authentication auth
     ) {
         User user = getCurrentUser(auth);
-        Map<String, Object> response = vakilFriendService.chat(sessionId, request.getMessage(), user);
+        Map<String, Object> response = vakilFriendService.chat(sessionId, request, user);
         
         log.info("Processed message in session {}", sessionId);
         return ResponseEntity.ok(response);
