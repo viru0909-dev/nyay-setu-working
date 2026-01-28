@@ -22,6 +22,7 @@ export default function VakilFriendChat() {
     const [uploadingFile, setUploadingFile] = useState(false);
     const [language, setLanguage] = useState('en'); // Default language
     const [isRecording, setIsRecording] = useState(false);
+    const [speakingIndex, setSpeakingIndex] = useState(null); // Track which message is speaking
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
 
@@ -188,9 +189,12 @@ export default function VakilFriendChat() {
                 content: data.message
             }]);
 
-            // Auto-speak if using voice
+            // Auto-speak if using voice - assume it's the last message
             if (audioData) {
-                speakText(data.message);
+                // We need to wait for state update, but we can't easily. 
+                // Simple hack: Set generic "active" state or just fire and accept we might not match index perfectly initially
+                // Better: just speak it, and rely on global cancel for the stop button if we don't pass index
+                speakText(data.message, -1); // -1 or generic ID
             }
 
             setReadyToFile(data.readyToFile);
@@ -245,15 +249,32 @@ export default function VakilFriendChat() {
         }
     };
 
-    const speakText = (text) => {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); // Stop current speech
-            const utterance = new SpeechSynthesisUtterance(text);
-            // Try to match language code slightly (e.g. 'hi' -> 'hi-IN')
-            // This is OS dependent
-            utterance.lang = language === 'en' ? 'en-IN' : language + '-IN';
-            window.speechSynthesis.speak(utterance);
+    const speakText = (text, index = -1) => {
+        if (!('speechSynthesis' in window)) return;
+
+        // If currently speaking THIS message, stop it
+        if (speakingIndex === index && index !== -1) {
+            window.speechSynthesis.cancel();
+            setSpeakingIndex(null);
+            return;
         }
+
+        // Otherwise stop whatever was speaking and start this
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = language === 'en' ? 'en-IN' : language + '-IN';
+
+        utterance.onend = () => {
+            setSpeakingIndex(null);
+        };
+
+        utterance.onerror = () => {
+            setSpeakingIndex(null);
+        };
+
+        setSpeakingIndex(index);
+        window.speechSynthesis.speak(utterance);
     };
 
     const completeSession = async () => {
@@ -776,21 +797,29 @@ export default function VakilFriendChat() {
                                             </div>
                                             {msg.role === 'assistant' && (
                                                 <button
-                                                    onClick={() => speakText(msg.content)}
+                                                    onClick={() => speakText(msg.content, index)}
                                                     style={{
                                                         background: 'none',
                                                         border: 'none',
-                                                        color: 'var(--text-secondary)',
+                                                        color: speakingIndex === index ? 'var(--color-accent)' : 'var(--text-secondary)',
                                                         cursor: 'pointer',
                                                         padding: '0.25rem 0.5rem',
-                                                        opacity: 0.7,
+                                                        opacity: speakingIndex === index ? 1 : 0.7,
                                                         display: 'flex',
                                                         alignItems: 'center',
-                                                        marginTop: '0.25rem'
+                                                        marginTop: '0.25rem',
+                                                        transition: 'all 0.2s'
                                                     }}
-                                                    title="Read aloud"
+                                                    title={speakingIndex === index ? "Stop speaking" : "Read aloud"}
                                                 >
-                                                    <Volume2 size={16} />
+                                                    {speakingIndex === index ? (
+                                                        <>
+                                                            <StopCircle size={16} style={{ animation: 'pulse 1s infinite' }} />
+                                                            <span style={{ fontSize: '0.75rem', marginLeft: '4px' }}>Stop</span>
+                                                        </>
+                                                    ) : (
+                                                        <Volume2 size={16} />
+                                                    )}
                                                 </button>
                                             )}
                                         </div>
