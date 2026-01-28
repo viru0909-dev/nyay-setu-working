@@ -57,6 +57,7 @@ public class VakilFriendService {
     private final DocumentRepository documentRepository;
     private final FirRecordRepository firRecordRepository;
     private final OllamaService ollamaService;
+    private final BhashiniService bhashiniService;
     
     // Lazy injection to avoid circular dependency
     @Autowired
@@ -230,12 +231,32 @@ public class VakilFriendService {
      * Send a message to Vakil-Friend and get response
      */
     @Transactional
-    public Map<String, Object> chat(UUID sessionId, String userMessage, User user) {
+    public Map<String, Object> chat(UUID sessionId, com.nyaysetu.backend.dto.ChatMessageRequest request, User user) {
         ChatSession session = chatSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Chat session not found"));
 
         if (session.getStatus() != ChatSessionStatus.ACTIVE) {
             throw new RuntimeException("Chat session is no longer active");
+        }
+
+        String userLang = request.getLanguage() != null ? request.getLanguage() : "en";
+        String userMessage = request.getMessage();
+
+        // 1. Handle Audio Input (ASR)
+        if (request.getAudioData() != null && !request.getAudioData().isEmpty()) {
+            userMessage = bhashiniService.speechToText(request.getAudioData(), userLang);
+            log.info("ASR Transcribed: {}", userMessage);
+            // If transcription fails or is empty, handle gracefully?
+            if (userMessage.isEmpty()) {
+                userMessage = "[Audio unintelligible]";
+            }
+        }
+
+        // 2. Translate to English if needed (for better AI reasoning)
+        String englishMessage = userMessage;
+        if (!"en".equalsIgnoreCase(userLang)) {
+            englishMessage = bhashiniService.translate(userMessage, userLang, "en");
+            log.info("Translated 'search' to English: {}", englishMessage);
         }
 
         // Parse existing conversation
@@ -249,19 +270,28 @@ public class VakilFriendService {
             conversation = new ArrayList<>();
         }
 
-        // Add user message
+        // Add user message (Store English for AI Context)
         Map<String, String> userMsg = new HashMap<>();
         userMsg.put("role", "user");
-        userMsg.put("content", userMessage);
+        userMsg.put("content", englishMessage); // Storing English
         conversation.add(userMsg);
 
-        // Get AI response
-        String aiResponse = getAIResponse(conversation);
+        // Get AI response (English)
+        String aiResponseEnglish = getAIResponse(conversation);
 
-        // Add AI response
+        // Check for specific "Complete Filing" instruction in AI response
+        // Sometimes AI strictly follows the prompt, sometimes it chats.
+        
+        // 3. Translate response back to User Language
+        String finalResponse = aiResponseEnglish;
+        if (!"en".equalsIgnoreCase(userLang)) {
+            finalResponse = bhashiniService.translate(aiResponseEnglish, "en", userLang);
+        }
+
+        // Add AI response to history (Store English)
         Map<String, String> assistantMsg = new HashMap<>();
         assistantMsg.put("role", "assistant");
-        assistantMsg.put("content", aiResponse);
+        assistantMsg.put("content", aiResponseEnglish); // Storing English
         conversation.add(assistantMsg);
 
         // Save updated conversation
@@ -283,7 +313,9 @@ public class VakilFriendService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("sessionId", sessionId);
-        result.put("message", aiResponse);
+        result.put("message", finalResponse); // Return Localized Response
+        result.put("originalMessage", aiResponseEnglish); // Optional: send original too
+        result.put("transcribedText", userMessage); // Send back what was heard
         result.put("readyToFile", readyToFile);
 
         return result;
