@@ -335,7 +335,7 @@ export default function CaseDiaryPage() {
                                                     style={{
                                                         flex: 1,
                                                         padding: '0.75rem',
-                                                        background: '#0F172A',
+                                                        background: 'var(--color-accent)',
                                                         borderRadius: '0.5rem',
                                                         color: 'white',
                                                         fontWeight: '600',
