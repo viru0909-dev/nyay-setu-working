@@ -2,9 +2,10 @@ import Dexie from 'dexie';
 
 export const db = new Dexie('NyaySetuOfflineDB');
 
-db.version(2).stores({
+db.version(3).stores({
     drafts: '++id, title, type, createdAt, updatedAt, synced', // Primary key and indexed props
-    outbox: '++id, url, method, payload, createdAt' // For storing requests to sync later
+    outbox: '++id, url, method, payload, createdAt', // For storing requests to sync later
+    cases: 'id, title, status, updatedAt, lawyerProposalStatus' // Cache for cases
 });
 
 export const saveDraft = async (title, content, type = 'petition') => {
