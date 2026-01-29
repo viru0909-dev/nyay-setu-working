@@ -17,7 +17,7 @@ import { brainAPI } from '../../services/api';
 
 export default function AILegalAssistantPage() {
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: "🙏 Greetings, Counselor. I am the NyaySetu Legal Strategist. I can assist you with comprehensive case research, statute analysis, and drafting strategies. How can I help you today?" }
+        { role: 'assistant', content: "🙏 Greetings, Counselor. I am your Smart Legal Strategist.\n\nI have access to your **Active Case Portfolio** and **Hearing Schedule**. I can assist with:\n\n1. **Schedule Planning**: \"What hearings do I have this week?\"\n2. **Case Strategy**: \"Draft a strategy for the Theft case.\"\n3. **Legal Research**: \"Summarize BNS Section 302.\"\n\nHow can I help you today?" }
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -57,10 +57,10 @@ export default function AILegalAssistantPage() {
     };
 
     const researchTools = [
+        { name: 'Schedule Manager', icon: History, desc: 'Check upcoming hearings' },
+        { name: 'Portfolio Audit', icon: Scaling, desc: 'Review active cases' },
         { name: 'Statute Analyzer', icon: Scale, desc: 'Analyze IPC/BNS sections' },
-        { name: 'Precedent Search', icon: History, desc: 'Find similar case rulings' },
         { name: 'Draft Refinement', icon: FileText, desc: 'Polish legal petitions' },
-        { name: 'Strategy Audit', icon: Scaling, desc: 'Analyze case strengths' },
     ];
 
     return (
