@@ -11,9 +11,14 @@ import {
     Send,
     Scaling,
     ArrowUpRight,
-    Scale
+    Scale,
+    Mic,
+    StopCircle,
+    Volume2
 } from 'lucide-react';
 import { brainAPI } from '../../services/api';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function AILegalAssistantPage() {
     const [messages, setMessages] = useState([
@@ -21,7 +26,68 @@ export default function AILegalAssistantPage() {
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [speakingIndex, setSpeakingIndex] = useState(null);
     const scrollRef = useRef(null);
+    const mediaRecorderRef = useRef(null);
+
+    // Browser Native Speech Recognition
+    const startRecording = () => {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert("Your browser does not support speech recognition.");
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        recognition.lang = 'en-IN'; // Default to Indian English for Lawyers
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => setIsRecording(true);
+        recognition.onend = () => setIsRecording(false);
+        recognition.onError = (event) => {
+            console.error("Speech recognition error", event.error);
+            setIsRecording(false);
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            setInput(prev => prev + (prev ? ' ' : '') + transcript);
+        };
+
+        mediaRecorderRef.current = recognition;
+        recognition.start();
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+
+    // Text to Speech
+    const speakText = (text, index) => {
+        if (!('speechSynthesis' in window)) return;
+
+        if (speakingIndex === index) {
+            window.speechSynthesis.cancel();
+            setSpeakingIndex(null);
+            return;
+        }
+
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-IN';
+
+        utterance.onend = () => setSpeakingIndex(null);
+        utterance.onerror = () => setSpeakingIndex(null);
+
+        setSpeakingIndex(index);
+        window.speechSynthesis.speak(utterance);
+    };
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -131,7 +197,26 @@ export default function AILegalAssistantPage() {
                                     borderTopLeftRadius: msg.role === 'assistant' ? '0.2rem' : '1.25rem',
                                     whiteSpace: 'pre-wrap'
                                 }}>
-                                    {msg.content}
+                                    <div className="markdown-content">
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            {msg.content}
+                                        </ReactMarkdown>
+                                    </div>
+                                    {msg.role === 'assistant' && (
+                                        <button
+                                            onClick={() => speakText(msg.content, i)}
+                                            style={{
+                                                background: 'none', border: 'none',
+                                                color: speakingIndex === i ? 'var(--color-accent)' : 'var(--text-secondary)',
+                                                cursor: 'pointer', padding: '0.25rem 0', marginTop: '0.5rem',
+                                                display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem',
+                                                opacity: 0.8
+                                            }}
+                                        >
+                                            {speakingIndex === i ? <StopCircle size={14} /> : <Volume2 size={14} />}
+                                            {speakingIndex === i ? 'Stop' : 'Read'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -149,47 +234,66 @@ export default function AILegalAssistantPage() {
 
                     {/* Chat Input */}
                     <div style={{ padding: '1.5rem', background: 'var(--bg-glass-subtle)', borderTop: 'var(--border-glass-subtle)' }}>
-                        <div style={{ position: 'relative' }}>
-                            <textarea
-                                value={input}
-                                onChange={e => setInput(e.target.value)}
-                                onKeyPress={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
-                                placeholder="Query legal sections, research precedents, or ask for drafting help..."
-                                style={{
-                                    width: '100%',
-                                    background: 'var(--bg-glass)',
-                                    border: 'var(--border-glass)',
-                                    borderRadius: '1rem',
-                                    padding: '1rem 4rem 1rem 1.25rem',
-                                    color: 'var(--text-main)',
-                                    outline: 'none',
-                                    fontSize: '1rem',
-                                    resize: 'none',
-                                    height: '80px'
-                                }}
-                            />
+                        <div style={{ position: 'relative', display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
                             <button
-                                onClick={handleSend}
-                                disabled={!input.trim() || loading}
+                                onClick={isRecording ? stopRecording : startRecording}
+                                disabled={loading}
                                 style={{
-                                    position: 'absolute',
-                                    right: '1rem',
-                                    bottom: '1rem',
-                                    width: '44px',
-                                    height: '44px',
-                                    borderRadius: '10px',
-                                    background: input.trim() ? 'var(--color-accent)' : 'var(--bg-glass-subtle)',
-                                    border: 'none',
-                                    color: 'white',
-                                    cursor: input.trim() ? 'pointer' : 'not-allowed',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'all 0.2s'
+                                    width: '44px', height: '44px', borderRadius: '12px',
+                                    background: isRecording ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-glass)',
+                                    border: isRecording ? '1px solid rgba(239, 68, 68, 0.5)' : 'var(--border-glass)',
+                                    color: isRecording ? '#ef4444' : 'var(--text-secondary)',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    transition: 'all 0.2s', flexShrink: 0,
+                                    marginBottom: '2px', // Align with input
+                                    animation: isRecording ? 'pulse 1.5s infinite' : 'none'
                                 }}
                             >
-                                <Send size={20} />
+                                {isRecording ? <StopCircle size={20} /> : <Mic size={20} />}
                             </button>
+
+                            <div style={{ position: 'relative', flex: 1 }}>
+                                <textarea
+                                    value={input}
+                                    onChange={e => setInput(e.target.value)}
+                                    onKeyPress={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
+                                    placeholder="Query legal sections, research precedents, or ask for drafting help..."
+                                    style={{
+                                        width: '100%',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
+                                        borderRadius: '1rem',
+                                        padding: '1rem 3.5rem 1rem 1.25rem',
+                                        color: 'var(--text-main)',
+                                        outline: 'none',
+                                        fontSize: '1rem',
+                                        resize: 'none',
+                                        height: '80px' // Fixed height match
+                                    }}
+                                />
+                                <button
+                                    onClick={handleSend}
+                                    disabled={!input.trim() || loading}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '1rem',
+                                        bottom: '1rem',
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '8px',
+                                        background: input.trim() ? 'var(--color-accent)' : 'var(--bg-glass-subtle)',
+                                        border: 'none',
+                                        color: 'white',
+                                        cursor: input.trim() ? 'pointer' : 'not-allowed',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <Send size={18} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -243,7 +347,15 @@ export default function AILegalAssistantPage() {
             </div>
             <style>{`
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
                 .spin { animation: spin 1s linear infinite; }
+                
+                /* Markdown Styling */
+                .markdown-content p { margin-bottom: 0.5rem; }
+                .markdown-content ul, .markdown-content ol { padding-left: 1.2rem; margin-bottom: 0.5rem; }
+                .markdown-content li { margin-bottom: 0.2rem; }
+                .markdown-content strong { color: var(--color-accent); font-weight: 700; }
+                .markdown-content code { background: rgba(0,0,0,0.2); padding: 0.1rem 0.3rem; borderRadius: 4px; fontFamily: monospace; }
             `}</style>
         </div>
     );
