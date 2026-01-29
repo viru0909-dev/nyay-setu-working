@@ -834,25 +834,29 @@ var QUERIES = {
         baselineVersions = bbm.getCompatibleVersions({
           targetYear: node.year,
           includeDownstreamBrowsers: includeDownstream,
-          includeKaiOS: includeKaiOS
+          includeKaiOS: includeKaiOS,
+          suppressWarnings: true
         })
       } else if (node.date) {
         baselineVersions = bbm.getCompatibleVersions({
           widelyAvailableOnDate: node.date,
           includeDownstreamBrowsers: includeDownstream,
-          includeKaiOS: includeKaiOS
+          includeKaiOS: includeKaiOS,
+          suppressWarnings: true
         })
       } else if (node.availability === 'newly') {
         var future30months = new Date().setMonth(new Date().getMonth() + 30)
         baselineVersions = bbm.getCompatibleVersions({
           widelyAvailableOnDate: future30months,
           includeDownstreamBrowsers: includeDownstream,
-          includeKaiOS: includeKaiOS
+          includeKaiOS: includeKaiOS,
+          suppressWarnings: true
         })
       } else {
         baselineVersions = bbm.getCompatibleVersions({
           includeDownstreamBrowsers: includeDownstream,
-          includeKaiOS: includeKaiOS
+          includeKaiOS: includeKaiOS,
+          suppressWarnings: true
         })
       }
       return resolve(bbmTransform(baselineVersions), context)
@@ -1116,7 +1120,11 @@ var QUERIES = {
       var data = checkName(node.browser, context)
       var alias = browserslist.versionAliases[data.name][version.toLowerCase()]
       if (alias) version = alias
-      if (!/[\d.]+/.test(version)) throw new BrowserslistError('Unknown version ' + version + ' of ' + node.browser);
+      if (!/[\d.]+/.test(version)) {
+        throw new BrowserslistError(
+          'Unknown version ' + version + ' of ' + node.browser
+        )
+      }
       return data.released
         .filter(generateFilter(node.sign, version))
         .map(function (v) {
