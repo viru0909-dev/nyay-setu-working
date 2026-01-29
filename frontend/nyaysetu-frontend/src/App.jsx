@@ -54,6 +54,7 @@ const LawyerCaseDetailsPage = lazy(() => import('./pages/lawyer/LawyerCaseDetail
 const ClientChatPage = lazy(() => import('./pages/lawyer/ClientChatPage'));
 const LawyerProfilePage = lazy(() => import('./pages/lawyer/LawyerProfilePage'));
 const CaseWorkspace = lazy(() => import('./pages/lawyer/CaseWorkspace'));
+const OfflineDraftsPage = lazy(() => import('./pages/lawyer/OfflineDraftsPage'));
 
 // Police Pages
 const PoliceDashboard = lazy(() => import('./pages/police/PoliceDashboard'));
@@ -141,6 +142,7 @@ function App() {
                                 <Route path="analytics" element={<LawyerAnalyticsPage />} />
                                 <Route path="chat" element={<ClientChatPage />} />
                                 <Route path="profile" element={<LawyerProfilePage />} />
+                                <Route path="offline-drafts" element={<OfflineDraftsPage />} />
                             </Route>
 
                             <Route

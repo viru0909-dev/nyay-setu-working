@@ -4,7 +4,8 @@ import {
     Home, FileText, FolderOpen, Upload, Brain,
     Archive, Video, User, Users, Briefcase,
     Gavel, BarChart3, Settings, Menu, X,
-    Scale, MessageSquare, Calendar, Bot, TrendingUp
+    Scale, MessageSquare, Calendar, Bot, TrendingUp,
+    WifiOff
 } from 'lucide-react';
 
 const roleMenuItems = {

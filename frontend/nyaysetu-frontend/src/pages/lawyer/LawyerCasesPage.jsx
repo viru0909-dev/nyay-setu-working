@@ -18,8 +18,11 @@ import {
     Plus,
     User,
     Check,
-    X
+    Wifi,
+    WifiOff
 } from 'lucide-react';
+import { db } from '../../db/offlineDB';
+import toast from 'react-hot-toast';
 
 export default function LawyerCasesPage() {
     const [cases, setCases] = useState([]);
@@ -29,16 +32,47 @@ export default function LawyerCasesPage() {
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'proposals'
     const navigate = useNavigate();
 
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+
     useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
         fetchCases();
-    }, []);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, [isOnline]);
 
     const fetchCases = async () => {
+        setLoading(true);
         try {
-            const response = await lawyerAPI.getCases();
-            setCases(response.data || []);
+            // 1. Try Fetch from API if online
+            if (navigator.onLine) {
+                const response = await lawyerAPI.getCases();
+                const fetchedCases = response.data || [];
+                setCases(fetchedCases);
+
+                // 2. Cache to Dexie (bulkPut updates existing items by ID)
+                await db.cases.bulkPut(fetchedCases);
+            } else {
+                // 3. If offline, load from Dexie
+                const cachedCases = await db.cases.toArray();
+                setCases(cachedCases);
+                toast('Loaded cases from offline cache', { icon: '📦' });
+            }
         } catch (error) {
             console.error('Error fetching cases:', error);
+            // Fallback to cache even if API error (e.g. timeout)
+            const cachedCases = await db.cases.toArray();
+            if (cachedCases.length > 0) {
+                setCases(cachedCases);
+                toast.error('Network error. Showing cached cases.');
+            }
         } finally {
             setLoading(false);
         }
@@ -106,9 +140,26 @@ export default function LawyerCasesPage() {
                             <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
                                 Professional Console
                             </h1>
-                            <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
-                                Manage your litigation portfolio and evaluate new client proposals
-                            </p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                    Manage your litigation portfolio and evaluate new client proposals
+                                </p>
+                                {!isOnline && (
+                                    <span style={{
+                                        fontSize: '0.75rem',
+                                        background: '#fee2e2',
+                                        color: '#b91c1c',
+                                        padding: '0.1rem 0.5rem',
+                                        borderRadius: '1rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.25rem',
+                                        fontWeight: '600'
+                                    }}>
+                                        <WifiOff size={12} /> Offline Mode
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
