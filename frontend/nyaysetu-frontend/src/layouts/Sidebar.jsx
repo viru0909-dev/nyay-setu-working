@@ -20,7 +20,6 @@ const roleMenuItems = {
     ],
     LAWYER: [
         { icon: Home, label: 'Dashboard', path: '/lawyer' },
-        { icon: WifiOff, label: 'Offline Drafts', path: '/lawyer/offline-drafts' },
         { icon: Users, label: 'Litigant Directory', path: '/lawyer/clients' },
         { icon: Briefcase, label: 'Active Cases', path: '/lawyer/cases' },
         { icon: Brain, label: 'AI Legal Assistant', path: '/lawyer/ai-assistant' },
