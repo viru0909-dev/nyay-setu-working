@@ -40,6 +40,8 @@ public class NyaySetuBrainService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ChatSessionRepository chatSessionRepository;
     private final OllamaService ollamaService;
+    private final CaseRepository caseRepository;
+    private final HearingRepository hearingRepository;
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -68,15 +70,15 @@ public class NyaySetuBrainService {
             Tone: Formal, precise, objective. Never make final decisions.
             """,
         Role.LAWYER, """
-            You are the NyaySetu Legal Strategist, an assistant for Advocates and Lawyers.
-            Your goal is to increase legal efficiency and help draft high-quality documents.
+            You are the NyaySetu Legal Strategist, an intelligent assistant for Advocates.
+            Your goal is to optimize the lawyer's workflow, manage their schedule, and provide case insights.
             
-            SPECIFIC TASKS:
-            - DRAFTING: Draft messages to clients, written statements, or Rejoinders.
-            - RESEARCH: Provide quick summaries of legal sections (IPC, BNS, CrPC, etc.).
-            - LITIGANT MGMT: Draft empathetic yet professional updates for litigants.
+            CAPABILITIES:
+            1. **Schedule Management**: You have access to the lawyer's upcoming hearings. Help them plan their day or week.
+            2. **Case Strategy**: You know the details of their active cases. Provide summaries, drafting help, or strategy advice based on the specific case facts provided in the context.
+            3. **Legal Research**: Provide sections from BNS/IPC relevant to their cases.
             
-            Tone: Strategic, professional, concise.
+            Tone: Professional, strategic, and proactive.
             """
     );
 
@@ -111,7 +113,14 @@ public class NyaySetuBrainService {
 
         // Get AI Response based on Role (Default to LITIGANT for guest users)
         Role role = (user != null) ? user.getRole() : Role.LITIGANT;
-        String aiResponse = getAIResponse(conversation, role);
+        
+        // Context Injection for Lawyers
+        String dynamicContext = "";
+        if (role == Role.LAWYER && user != null) {
+            dynamicContext = getLawyerContext(user);
+        }
+
+        String aiResponse = getAIResponse(conversation, role, dynamicContext);
 
         // Add assistant message
         Map<String, String> assistantMsg = new HashMap<>();
@@ -136,10 +145,51 @@ public class NyaySetuBrainService {
         return response;
     }
 
-    private String getAIResponse(List<Map<String, String>> conversation, Role role) {
+    private String getLawyerContext(User lawyer) {
+        try {
+            var cases = caseRepository.findByLawyer(lawyer);
+            var hearings = hearingRepository.findByCaseEntityInOrderByScheduledDateDesc(cases);
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append("\n=== LAWYER CONTEXT ===\n");
+            sb.append("Current Time: ").append(LocalDateTime.now()).append("\n");
+            
+            sb.append("\n-- UPCOMING HEARINGS --\n");
+            if (hearings.isEmpty()) {
+                sb.append("No hearings scheduled.\n");
+            } else {
+                hearings.stream()
+                        .filter(h -> h.getScheduledDate().isAfter(LocalDateTime.now()))
+                        .limit(5)
+                        .forEach(h -> sb.append(String.format("- %s: %s (Case: %s)\n", 
+                                h.getScheduledDate().toLocalDate(), 
+                                h.getType(), 
+                                h.getCaseEntity().getTitle())));
+            }
+
+            sb.append("\n-- ACTIVE CASES SNAPSHOT --\n");
+            if (cases.isEmpty()) {
+                sb.append("No active cases.\n");
+            } else {
+                cases.stream()
+                     .limit(5) // Limit context window
+                     .forEach(c -> sb.append(String.format("- [%s] %s: %s (Status: %s)\n",
+                             c.getCaseType(), c.getTitle(), 
+                             c.getDescription() != null ? c.getDescription().substring(0, Math.min(c.getDescription().length(), 100)) + "..." : "No desc", 
+                             c.getStatus())));
+            }
+            sb.append("======================\n");
+            return sb.toString();
+        } catch (Exception e) {
+            log.error("Error building lawyer context", e);
+            return "";
+        }
+    }
+
+    private String getAIResponse(List<Map<String, String>> conversation, Role role, String context) {
         if (groqApiKey != null && !groqApiKey.isEmpty()) {
             try {
-                return callGroqAPI(conversation, role);
+                return callGroqAPI(conversation, role, context);
             } catch (Exception e) {
                 log.error("Groq API error, falling back to local AI", e);
             }
@@ -147,20 +197,26 @@ public class NyaySetuBrainService {
         
         // Fallback to Ollama
         try {
-            String prompt = conversation.get(conversation.size() - 1).get("content");
+            String prompt = (context.isEmpty() ? "" : context + "\n\n") + conversation.get(conversation.size() - 1).get("content");
             return ollamaService.chat(prompt).getResponse();
         } catch (Exception e) {
             return "BRAIN_OFFLINE: I'm currently having trouble connecting to my central reasoning core. Please try again in a moment.";
         }
     }
 
-    private String callGroqAPI(List<Map<String, String>> conversation, Role role) throws Exception {
+    private String callGroqAPI(List<Map<String, String>> conversation, Role role, String context) throws Exception {
         ArrayNode messagesArray = objectMapper.createArrayNode();
         
-        // System Prompt based on Role
+        // System Prompt based on Role + Context
         ObjectNode systemMsg = objectMapper.createObjectNode();
         systemMsg.put("role", "system");
-        systemMsg.put("content", ROLE_PROMPTS.getOrDefault(role, "You are a helpful legal assistant for NyaySetu."));
+        
+        String basePrompt = ROLE_PROMPTS.getOrDefault(role, "You are a helpful legal assistant for NyaySetu.");
+        if (!context.isEmpty()) {
+            basePrompt += "\n\n" + context;
+        }
+        
+        systemMsg.put("content", basePrompt);
         messagesArray.add(systemMsg);
         
         // Context
