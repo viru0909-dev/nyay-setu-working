@@ -30,6 +30,8 @@ public class MessageService {
                 .legalCaseId(caseId)
                 .senderId(dto.getSenderId())
                 .message(dto.getMessage())
+                .type(dto.getType() != null ? dto.getType() : "TEXT")
+                .attachmentUrl(dto.getAttachmentUrl())
                 .timestamp(LocalDateTime.now())
                 .build();
 
