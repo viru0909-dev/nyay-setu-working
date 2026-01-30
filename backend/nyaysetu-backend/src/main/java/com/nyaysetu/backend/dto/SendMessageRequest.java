@@ -10,4 +10,6 @@ import java.util.UUID;
 public class SendMessageRequest {
     private Long senderId;
     private String message;
+    private String type;
+    private String attachmentUrl;
 }
