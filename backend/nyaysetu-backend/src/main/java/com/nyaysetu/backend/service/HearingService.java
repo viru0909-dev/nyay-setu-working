@@ -48,6 +48,17 @@ public class HearingService {
         
         Hearing savedHearing = hearingRepository.save(hearing);
 
+        // Automatically add participants
+        // 1. Client
+        if (caseEntity.getClient() != null) {
+            addParticipant(savedHearing.getId(), caseEntity.getClient().getId(), ParticipantRole.LITIGANT);
+        }
+        
+        // 2. Lawyer
+        if (caseEntity.getLawyer() != null) {
+            addParticipant(savedHearing.getId(), caseEntity.getLawyer().getId(), ParticipantRole.LAWYER);
+        }
+
         // Timeline Log
         try {
             timelineService.logHearingScheduled(caseId, scheduledDate);

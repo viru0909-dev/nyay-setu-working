@@ -13,7 +13,8 @@ import {
     Loader2,
     Calendar,
     ArrowLeft,
-    ChevronDown
+    ChevronDown,
+    Mic
 } from 'lucide-react';
 import { messageAPI, caseAPI, vakilFriendAPI, documentAPI } from '../../services/api';
 // import toast from 'react-hot-toast';
@@ -135,13 +136,14 @@ export default function LawyerChatPage() {
         }
     };
 
-    const handleSendMessage = async () => {
-        if (!message.trim() || !selectedCase) return;
+    const handleSendMessage = async (customMessage = null) => {
+        const msgToSend = customMessage || message;
+        if (!msgToSend.trim() || !selectedCase) return;
 
         setSending(true);
         try {
-            await messageAPI.send(selectedCase.id, message);
-            setMessage('');
+            await messageAPI.send(selectedCase.id, msgToSend);
+            if (!customMessage) setMessage('');
             fetchMessages(selectedCase.id);
         } catch (error) {
             console.error('Error sending message:', error);
@@ -174,6 +176,21 @@ export default function LawyerChatPage() {
         } finally {
             setFileUploading(false);
         }
+    };
+
+    const handleVideoCall = () => {
+        // In a real app, this would initiate a WebRTC call
+        // For now, we simulate a request
+        handleSendMessage("📞 I would like to start a video call.");
+    };
+
+    const handlePhoneCall = () => {
+        handleSendMessage("📞 I would like to have a phone call.");
+    };
+
+    const handleVoiceMessage = () => {
+        // Placeholder for voice recording logic
+        alert("Voice message recording coming soon!");
     };
 
     // AI Helper specialized for client queries
@@ -312,7 +329,8 @@ export default function LawyerChatPage() {
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <button title="Request Meeting" style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Calendar size={20} /></button>
-                                <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Phone size={20} /></button>
+                                <button onClick={handlePhoneCall} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Phone size={20} /></button>
+                                <button onClick={handleVideoCall} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Video size={20} /></button>
                             </div>
                         </div>
 
@@ -358,6 +376,12 @@ export default function LawyerChatPage() {
                                 >
                                     {fileUploading ? <Loader2 size={22} className="animate-spin" /> : <Paperclip size={22} />}
                                 </button>
+                                <button
+                                    onClick={handleVoiceMessage}
+                                    style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                                >
+                                    <Mic size={22} />
+                                </button>
 
                                 <div style={{ position: 'relative', flex: 1 }}>
                                     <input
@@ -389,7 +413,7 @@ export default function LawyerChatPage() {
                                     </button>
                                 </div>
                                 <button
-                                    onClick={handleSendMessage}
+                                    onClick={() => handleSendMessage()}
                                     disabled={!message.trim() || sending}
                                     style={{
                                         width: '44px', height: '44px', borderRadius: '50%',
