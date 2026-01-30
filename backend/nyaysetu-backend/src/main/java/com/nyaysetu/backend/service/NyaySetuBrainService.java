@@ -8,7 +8,9 @@ import com.nyaysetu.backend.entity.ChatSession;
 import com.nyaysetu.backend.entity.ChatSessionStatus;
 import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.ChatSessionRepository;
+import com.nyaysetu.backend.repository.HearingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,7 +85,68 @@ public class NyaySetuBrainService {
             """
     );
 
-    // ... (rest of process method usually remains same, but context builder changes below)
+    /**
+     * Start/Resume a brain session
+     */
+    @Transactional
+    public Map<String, Object> process(UUID sessionId, String userMessage, User user) {
+        ChatSession session;
+        if (sessionId == null) {
+            session = ChatSession.builder()
+                .user(user) // Can be null for guests
+                .status(ChatSessionStatus.ACTIVE)
+                .conversationData("[]")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+            session = chatSessionRepository.save(session);
+        } else {
+            session = chatSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+        }
+
+        // Parse conversation
+        List<Map<String, String>> conversation = parseConversation(session.getConversationData());
+        
+        // Add user message
+        Map<String, String> userMsg = new HashMap<>();
+        userMsg.put("role", "user");
+        userMsg.put("content", userMessage);
+        conversation.add(userMsg);
+
+        // Get AI Response based on Role (Default to LITIGANT for guest users)
+        Role role = (user != null) ? user.getRole() : Role.LITIGANT;
+        
+        // Context Injection for Lawyers
+        String dynamicContext = "";
+        if (role == Role.LAWYER && user != null) {
+            dynamicContext = getLawyerContext(user);
+        }
+
+        String aiResponse = getAIResponse(conversation, role, dynamicContext);
+
+        // Add assistant message
+        Map<String, String> assistantMsg = new HashMap<>();
+        assistantMsg.put("role", "assistant");
+        assistantMsg.put("content", aiResponse);
+        conversation.add(assistantMsg);
+
+        // Save session
+        try {
+            session.setConversationData(objectMapper.writeValueAsString(conversation));
+            session.setUpdatedAt(LocalDateTime.now());
+            chatSessionRepository.save(session);
+        } catch (Exception e) {
+            log.error("Failed to save conversation", e);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("sessionId", session.getId());
+        response.put("message", aiResponse);
+        response.put("role", role);
+        
+        return response;
+    }
 
     private String getLawyerContext(User lawyer) {
         try {
@@ -104,7 +167,7 @@ public class NyaySetuBrainService {
                         .filter(h -> h.getScheduledDate().isAfter(LocalDateTime.now()))
                         .forEach(h -> {
                             String dateKey = h.getScheduledDate().toLocalDate().toString();
-                            String details = String.format("%s - %s (%s)", h.getScheduledDate().toLocalTime(), h.getType(), h.getCaseEntity().getTitle());
+                            String details = String.format("%s - %s (%s)", h.getScheduledDate().toLocalTime(), h.getStatus(), h.getCaseEntity().getTitle());
                             scheduleMap.computeIfAbsent(dateKey, k -> new ArrayList<>()).add(details);
                         });
 
