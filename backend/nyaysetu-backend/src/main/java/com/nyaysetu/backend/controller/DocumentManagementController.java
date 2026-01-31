@@ -174,14 +174,24 @@ public class DocumentManagementController {
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<Resource> downloadDocument(@PathVariable UUID id) {
-        DocumentDto metadata = documentManagementService.getDocumentById(id);
-        Resource resource = documentManagementService.downloadDocument(id);
+    public ResponseEntity<?> downloadDocument(@PathVariable UUID id) {
+        try {
+            DocumentDto metadata = documentManagementService.getDocumentById(id);
+            Resource resource = documentManagementService.downloadDocument(id);
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(metadata.getContentType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + metadata.getFileName() + "\"")
-                .body(resource);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(metadata.getContentType()))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + metadata.getFileName() + "\"")
+                    .body(resource);
+        } catch (RuntimeException e) {
+            String msg = e.getMessage();
+            if (msg.contains("not found")) {
+                return ResponseEntity.status(404).body(Map.of("error", msg));
+            }
+            return ResponseEntity.status(500).body(Map.of("error", "Download failed: " + msg));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Unexpected error: " + e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -198,7 +208,7 @@ public class DocumentManagementController {
      * Download Section 63(4) Evidence Certificate for a document
      */
     @GetMapping("/{id}/certificate")
-    public ResponseEntity<byte[]> downloadCertificate(@PathVariable UUID id) {
+    public ResponseEntity<?> downloadCertificate(@PathVariable UUID id) {
         try {
             byte[] pdfBytes = certificateService.generateDocumentCertificate(id);
             
@@ -208,7 +218,8 @@ public class DocumentManagementController {
                             "attachment; filename=\"Certificate_" + id + ".pdf\"")
                     .body(pdfBytes);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(null);
+            e.printStackTrace(); // Log stack trace to console
+            return ResponseEntity.status(500).body(Map.of("error", "Certificate generation failed: " + e.getMessage()));
         }
     }
     /**

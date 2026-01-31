@@ -82,64 +82,67 @@ export default function JudicialOverview() {
             {/* Stats Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
                 <div style={{
-                    background: 'linear-gradient(135deg, rgba(30, 42, 68, 0.03), rgba(30, 42, 68, 0.01))',
-                    border: '1px solid rgba(30, 42, 68, 0.1)',
+                    background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)', // Dark Navy
                     borderRadius: '1.5rem',
                     padding: '2rem',
-                    backdropFilter: 'blur(10px)'
+                    boxShadow: '0 10px 30px -10px rgba(30, 41, 59, 0.3)',
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.1)'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                        <div style={{ padding: '0.75rem', background: 'rgba(30, 42, 68, 0.1)', borderRadius: '0.75rem' }}>
-                            <Scale size={24} color="var(--color-primary)" />
+                        <div style={{ padding: '0.75rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '0.75rem' }}>
+                            <Scale size={24} color="white" />
                         </div>
-                        <span style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--color-primary)' }}>{stats.totalCases}</span>
+                        <span style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white' }}>{stats.totalCases}</span>
                     </div>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)', margin: 0 }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', margin: 0 }}>
                         Total Assigned Cases
                     </h3>
-                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                    <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem' }}>
                         Active matters pending review
                     </p>
                 </div>
 
                 <div style={{
-                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.05))',
-                    border: '1px solid rgba(16, 185, 129, 0.2)',
+                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', // Emerald Green
                     borderRadius: '1.5rem',
                     padding: '2rem',
-                    backdropFilter: 'blur(10px)'
+                    boxShadow: '0 10px 30px -10px rgba(5, 150, 105, 0.3)',
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.1)'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                        <div style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '0.75rem' }}>
-                            <Calendar size={24} color="#10b981" />
+                        <div style={{ padding: '0.75rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '0.75rem' }}>
+                            <Calendar size={24} color="white" />
                         </div>
-                        <span style={{ fontSize: '2.5rem', fontWeight: '800', color: '#10b981' }}>{stats.hearingsToday}</span>
+                        <span style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white' }}>{stats.hearingsToday}</span>
                     </div>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)', margin: 0 }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', margin: 0 }}>
                         Hearings Today
                     </h3>
-                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                    <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem' }}>
                         Scheduled for {new Date().toLocaleDateString('en-IN', { month: 'long', day: 'numeric' })}
                     </p>
                 </div>
 
                 <div style={{
-                    background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(220, 38, 38, 0.05))',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)', // Red
                     borderRadius: '1.5rem',
                     padding: '2rem',
-                    backdropFilter: 'blur(10px)'
+                    boxShadow: '0 10px 30px -10px rgba(220, 38, 38, 0.3)',
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.1)'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                        <div style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '0.75rem' }}>
-                            <AlertTriangle size={24} color="#ef4444" />
+                        <div style={{ padding: '0.75rem', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '0.75rem' }}>
+                            <AlertTriangle size={24} color="white" />
                         </div>
-                        <span style={{ fontSize: '2.5rem', fontWeight: '800', color: '#ef4444' }}>{stats.pendingActions}</span>
+                        <span style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white' }}>{stats.pendingActions}</span>
                     </div>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)', margin: 0 }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.9)', margin: 0 }}>
                         Urgent Matters
                     </h3>
-                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                    <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem' }}>
                         Require immediate attention
                     </p>
                 </div>
