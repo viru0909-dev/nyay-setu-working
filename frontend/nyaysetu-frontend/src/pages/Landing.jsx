@@ -23,46 +23,41 @@ export default function Landing() {
             icon: <Bot size={32} />,
             title: t('aiLegalAssistant'),
             description: t('aiLegalAssistantDesc'),
-            color: '#8b5cf6'
+            color: '#1E2A44'
         },
         {
             icon: <BookOpen size={32} />,
             title: t('constitutionReader'),
             description: t('constitutionReaderDesc'),
-            color: '#6366f1'
+            color: '#1E2A44'
         },
         {
             icon: <FileText size={32} />,
             title: t('fileCases'),
             description: t('fileCasesDesc'),
-            color: '#ec4899'
+            color: '#1E2A44'
         },
         {
             icon: <Video size={32} />,
             title: t('virtualHearings'),
             description: t('virtualHearingsDesc'),
-            color: '#10b981'
+            color: '#1E2A44'
         },
         {
             icon: <Shield size={32} />,
             title: t('securePrivate'),
             description: t('securePrivateDesc'),
-            color: '#f59e0b'
+            color: '#1E2A44'
         },
         {
             icon: <Zap size={32} />,
             title: t('realTimeUpdates'),
             description: t('realTimeUpdatesDesc'),
-            color: '#3b82f6'
+            color: '#1E2A44'
         }
     ];
 
-    const stats = [
-        { number: '10K+', label: t('casesFiled') },
-        { number: '50K+', label: t('activeUsers') },
-        { number: '99%', label: t('successRate') },
-        { number: '24/7', label: t('aiSupport') }
-    ];
+
 
     return (
         <div style={{
@@ -82,164 +77,122 @@ export default function Landing() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: '8rem 2rem 4rem',
+                    padding: '8rem 2rem 1rem',
                     textAlign: 'center'
                 }}>
-                    <div className="container" style={{ maxWidth: '1200px', width: '100%' }}>
+                    <div className="container" style={{ maxWidth: '1400px', width: '100%' }}>
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.8 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
                             style={{
-                                background: 'var(--bg-glass-strong)',
-                                backdropFilter: 'var(--glass-blur)',
-                                WebkitBackdropFilter: 'var(--glass-blur)',
-                                borderRadius: '32px',
-                                border: 'var(--border-glass-strong)',
-                                boxShadow: 'var(--shadow-glass)',
-                                padding: '4rem 2rem',
-                                maxWidth: '1000px',
+                                maxWidth: '1200px',
                                 margin: '0 auto'
                             }}
                         >
                             <div style={{
                                 display: 'inline-block',
-                                padding: '0.5rem 1.5rem',
-                                background: 'rgba(37, 99, 235, 0.1)',
-                                border: '1px solid rgba(37, 99, 235, 0.2)',
+                                padding: '0.5rem 1.25rem',
+                                background: 'rgba(63, 93, 204, 0.08)',
+                                border: '1px solid rgba(63, 93, 204, 0.15)',
                                 borderRadius: '2rem',
-                                marginBottom: '2rem'
+                                marginBottom: '2.5rem'
                             }}>
-                                <span style={{ color: 'var(--color-accent)', fontSize: '0.95rem', fontWeight: '600' }}>
-                                    ⚡ {t('aboutHeroTag')}
+                                <span style={{ color: 'var(--color-secondary)', fontSize: '0.875rem', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                    {t('aboutHeroTag')}
                                 </span>
                             </div>
 
                             <h1 style={{
-                                fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
-                                fontWeight: '900',
-                                color: 'var(--text-main)',
+                                fontSize: 'clamp(2.5rem, 5vw, 4.25rem)',
+                                fontWeight: '800',
+                                color: 'var(--color-primary)',
                                 marginBottom: '1.5rem',
-                                lineHeight: '1.1'
+                                lineHeight: '1.15',
+                                letterSpacing: '-0.03em'
                             }}>
                                 {t('heroTitle')}{' '}
                                 <span style={{
-                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, #ec4899 100%)',
+                                    background: 'linear-gradient(135deg, #3F5DCC 0%, #7C5CFF 100%)',
                                     WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent'
+                                    WebkitTextFillColor: 'transparent',
+                                    backgroundClip: 'text'
                                 }}>
                                     {t('heroTitleHighlight')}
                                 </span>
                             </h1>
 
                             <p style={{
-                                fontSize: 'clamp(1.125rem, 2vw, 1.5rem)',
+                                fontSize: 'clamp(1.1rem, 2vw, 1.25rem)',
                                 color: 'var(--text-secondary)',
-                                maxWidth: '800px',
-                                margin: '0 auto 3rem',
-                                lineHeight: '1.6'
+                                maxWidth: '750px',
+                                margin: '0 auto 3.5rem',
+                                lineHeight: '1.7'
                             }}>
                                 {t('heroSubtitle')}
                             </p>
 
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                                <Link to="/signup" className="btn btn-primary btn-lg" style={{
-                                    textDecoration: 'none',
-                                    fontSize: '1.125rem',
-                                    padding: '1rem 2.5rem'
+                            <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                <Link to="/signup" className="btn btn-primary" style={{
+                                    fontSize: '1.1rem',
+                                    padding: '1.1rem 2.75rem',
+                                    borderRadius: '12px',
+                                    textDecoration: 'none'
                                 }}>
-                                    {t('getStartedFree')} <ArrowRight size={20} />
+                                    {t('getStartedFree')} <ArrowRight size={20} style={{ marginLeft: '0.5rem' }} />
                                 </Link>
 
-                                <a href="#features" className="btn" style={{
-                                    background: 'var(--bg-glass)',
-                                    color: 'var(--color-accent)',
-                                    border: 'var(--border-glass-strong)',
-                                    fontSize: '1.125rem',
-                                    padding: '1rem 2.5rem',
-                                    textDecoration: 'none',
-                                    fontWeight: '700',
-                                    borderRadius: '0.75rem'
-                                }}>
+                                <motion.a
+                                    href="#features"
+                                    className="btn btn-secondary"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    transition={{ duration: 0.2 }}
+                                    style={{
+                                        fontSize: '1.1rem',
+                                        padding: '1.1rem 2.75rem',
+                                        borderRadius: '12px',
+                                        textDecoration: 'none'
+                                    }}
+                                >
                                     {t('watchDemo')}
-                                </a>
+                                </motion.a>
                             </div>
                         </motion.div>
                     </div>
                 </section>
 
-                {/* Stats Section */}
-                {/* Stats Section - Floating Glass Cards */}
-                <section style={{ padding: '0 2rem 4rem' }}>
-                    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                            gap: '2rem'
-                        }}>
-                            {stats.map((stat, idx) => (
-                                <motion.div
-                                    key={idx}
-                                    className="card"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: idx * 0.1 }}
-                                    style={{
-                                        textAlign: 'center',
-                                        padding: '2rem'
-                                    }}
-                                >
-                                    <div style={{
-                                        fontSize: 'clamp(2.5rem, 4vw, 3.5rem)',
-                                        fontWeight: '900',
-                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, #ec4899 100%)',
-                                        WebkitBackgroundClip: 'text',
-                                        WebkitTextFillColor: 'transparent',
-                                        marginBottom: '0.5rem'
-                                    }}>
-                                        {stat.number}
-                                    </div>
-                                    <div style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', fontWeight: '600' }}>
-                                        {stat.label}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
+
 
                 {/* How It Works Section */}
                 <HowItWorks />
 
                 {/* Features Section */}
-                <section id="features" style={{ padding: '6rem 2rem' }}>
-                    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                <section id="features" style={{ padding: '8rem 0', background: '#FFFFFF', borderTop: '1px solid #E5E7EB', borderBottom: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                    <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 2rem' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
                             <h2 style={{
-                                fontSize: 'clamp(2rem, 4vw, 3rem)',
-                                fontWeight: '900',
-                                color: 'var(--text-main)',
-                                marginBottom: '1rem'
+                                fontSize: 'clamp(2rem, 4vw, 2.75rem)',
+                                fontWeight: '800',
+                                color: 'var(--color-primary)',
+                                marginBottom: '1.25rem',
+                                letterSpacing: '-0.02em'
                             }}>
                                 {t('featuresTitle')}{' '}
-                                <span style={{
-                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, #6366f1 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent'
-                                }}>
+                                <span style={{ color: 'var(--color-secondary)' }}>
                                     {t('featuresTitleHighlight')}
                                 </span>
                             </h2>
-                            <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
+                            <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', maxWidth: '650px', margin: '0 auto', lineHeight: '1.7' }}>
                                 {t('featuresSubtitle')}
                             </p>
                         </div>
 
+                        {/* Features Grid */}
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                            gap: '2rem'
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                            gap: '2.5rem'
                         }}>
                             {features.map((feature, idx) => (
                                 <motion.div
@@ -248,29 +201,38 @@ export default function Landing() {
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    whileHover={{ y: -8 }}
+                                    whileHover={{ y: -8, borderColor: 'var(--color-secondary)' }}
+                                    transition={{ duration: 0.3 }}
                                     style={{
-                                        padding: '2rem',
-                                        cursor: 'pointer'
+                                        padding: '3rem 2.5rem',
+                                        cursor: 'pointer',
+                                        background: '#FFFFFF',
+                                        border: '1px solid #E5E7EB',
+                                        borderRadius: '20px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'center',
+                                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+                                        transition: 'all 0.3s ease-out'
                                     }}
                                 >
                                     <div style={{
-                                        width: '60px',
-                                        height: '60px',
-                                        borderRadius: '1rem',
-                                        background: `${feature.color}20`,
+                                        width: '64px',
+                                        height: '64px',
+                                        borderRadius: '16px',
+                                        background: 'rgba(63, 93, 204, 0.08)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        marginBottom: '1.5rem',
-                                        color: feature.color
+                                        marginBottom: '2rem',
+                                        color: 'var(--color-secondary)'
                                     }}>
                                         {feature.icon}
                                     </div>
-                                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                                    <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.25rem' }}>
                                         {feature.title}
                                     </h3>
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.6' }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.7', marginBottom: 0 }}>
                                         {feature.description}
                                     </p>
                                 </motion.div>
@@ -286,34 +248,38 @@ export default function Landing() {
                 <NewsSection />
 
                 {/* CTA Section */}
-                {/* CTA Section */}
                 <section style={{
-                    padding: '6rem 2rem',
-                    marginBottom: '4rem'
+                    padding: '8rem 2rem',
+                    background: 'var(--bg-main)'
                 }}>
-                    <div className="container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                    <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
                         <div className="card" style={{
-                            padding: '4rem 2rem',
+                            padding: '7rem 3rem',
                             textAlign: 'center',
-                            borderRadius: '32px',
-                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%)'
+                            borderRadius: '24px',
+                            background: '#FFFFFF',
+                            border: 'none',
+                            boxShadow: '0 10px 40px rgba(30, 42, 68, 0.04)'
                         }}>
                             <h2 style={{
                                 fontSize: 'clamp(2rem, 4vw, 3rem)',
-                                fontWeight: '900',
-                                color: 'var(--text-main)',
-                                marginBottom: '1.5rem'
+                                fontWeight: '800',
+                                color: 'var(--color-primary)',
+                                marginBottom: '1.5rem',
+                                letterSpacing: '-0.02em'
                             }}>
                                 {t('ctaTitle')}
                             </h2>
-                            <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>
+                            <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '3rem', maxWidth: '700px', margin: '0 auto 3rem' }}>
                                 {t('ctaSubtitle')}
                             </p>
-                            <Link to="/signup" className="btn btn-primary btn-lg" style={{
+                            <Link to="/signup" className="btn btn-primary" style={{
                                 textDecoration: 'none',
-                                fontSize: '1.25rem'
+                                fontSize: '1.15rem',
+                                padding: '1.1rem 3rem',
+                                borderRadius: '12px'
                             }}>
-                                {t('createAccount')} <ArrowRight size={24} />
+                                {t('createAccount')} <ArrowRight size={22} style={{ marginLeft: '0.75rem' }} />
                             </Link>
                         </div>
                     </div>

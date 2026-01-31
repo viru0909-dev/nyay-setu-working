@@ -28,6 +28,8 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                 justifyContent: 'space-between',
                 position: 'relative',
                 zIndex: 100,
+                background: '#FFFFFF',
+                borderBottom: '1px solid #E5E7EB',
                 gap: '0.75rem'
             }}
         >
@@ -38,12 +40,12 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                     <button
                         onClick={onMobileMenuToggle}
                         style={{
-                            background: 'var(--bg-glass-strong)',
-                            border: 'var(--border-glass)',
+                            background: '#F8FAFC',
+                            border: '1px solid #E5E7EB',
                             borderRadius: '10px',
                             padding: '0.625rem',
                             cursor: 'pointer',
-                            color: 'var(--color-accent)',
+                            color: 'var(--color-secondary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -57,20 +59,22 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                 {/* Page Title */}
                 <div style={{ minWidth: 0 }}>
                     <h1 style={{
-                        fontSize: isMobile ? '1.25rem' : '1.75rem',
-                        fontWeight: '700',
+                        fontSize: isMobile ? '1.15rem' : '1.5rem',
+                        fontWeight: '800',
                         color: 'var(--color-primary)',
-                        marginBottom: isMobile ? 0 : '0.25rem',
+                        marginBottom: isMobile ? 0 : '0.1rem',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
-                        textOverflow: 'ellipsis'
+                        textOverflow: 'ellipsis',
+                        letterSpacing: '-0.02em'
                     }}>
                         {isMobile ? 'Dashboard' : `${user?.role?.replace('_', ' ')} Dashboard`}
                     </h1>
                     {!isMobile && (
                         <p style={{
-                            fontSize: '0.875rem',
-                            color: 'var(--text-secondary)'
+                            fontSize: '0.825rem',
+                            color: 'var(--text-secondary)',
+                            fontWeight: '500'
                         }}>
                             Welcome back, {user?.name || 'User'}!
                         </p>
@@ -96,46 +100,47 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             display: 'flex',
                             alignItems: 'center',
                             gap: isMobile ? '0.5rem' : '0.75rem',
-                            padding: isMobile ? '0.375rem 0.5rem' : '0.5rem 1rem',
+                            padding: isMobile ? '0.25rem' : '0.5rem 0.75rem',
                             borderRadius: '12px',
-                            background: 'var(--bg-glass-strong)',
-                            border: 'var(--border-glass)',
-                            color: 'var(--text-main)',
+                            background: '#F8FAFC',
+                            border: '1px solid #E5E7EB',
+                            color: 'var(--color-primary)',
                             cursor: 'pointer',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            fontWeight: '700'
                         }}
                         onMouseOver={(e) => {
-                            e.currentTarget.style.background = 'var(--bg-glass-hover)';
+                            e.currentTarget.style.background = '#F1F5F9';
+                            e.currentTarget.style.borderColor = '#CBD5E1';
                         }}
                         onMouseOut={(e) => {
-                            e.currentTarget.style.background = 'var(--bg-glass-strong)';
+                            e.currentTarget.style.background = '#F8FAFC';
+                            e.currentTarget.style.borderColor = '#E5E7EB';
                         }}
                     >
                         <div style={{
                             width: isMobile ? '32px' : '36px',
                             height: isMobile ? '32px' : '36px',
                             borderRadius: '50%',
-                            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                            background: 'var(--color-primary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontWeight: '700',
-                            fontSize: isMobile ? '0.75rem' : '0.875rem',
-                            color: 'white'
+                            fontWeight: '800',
+                            fontSize: isMobile ? '0.75rem' : '0.85rem',
+                            color: 'white',
+                            boxShadow: '0 2px 8px rgba(30, 42, 68, 0.2)'
                         }}>
                             {user?.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         {!isMobile && (
                             <>
                                 <div style={{ textAlign: 'left' }}>
-                                    <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--color-primary)' }}>
                                         {user?.name || 'User'}
                                     </div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                        {user?.role?.replace('_', ' ')}
-                                    </div>
                                 </div>
-                                <ChevronDown size={16} />
+                                <ChevronDown size={14} color="#64748B" />
                             </>
                         )}
                     </button>
@@ -144,16 +149,14 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                     {showProfileMenu && (
                         <div style={{
                             position: 'absolute',
-                            top: '100%',
+                            top: '110%',
                             right: 0,
-                            marginTop: '0.5rem',
                             width: '220px',
-                            background: 'var(--bg-white)', /* Solid/opaque for readability */
-                            backdropFilter: 'var(--glass-blur)',
-                            border: 'var(--border-glass)',
+                            background: '#FFFFFF',
+                            border: '1px solid #E5E7EB',
                             borderRadius: '12px',
                             padding: '0.5rem',
-                            boxShadow: 'var(--shadow-glass)',
+                            boxShadow: '0 10px 25px rgba(30, 42, 68, 0.1)',
                             zIndex: 200
                         }}>
                             <button
@@ -167,9 +170,9 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                     background: 'transparent',
                                     border: 'none',
                                     borderRadius: '8px',
-                                    color: 'var(--text-main)',
+                                    color: 'var(--color-primary)',
                                     fontSize: '0.875rem',
-                                    fontWeight: '500',
+                                    fontWeight: '600',
                                     textAlign: 'left',
                                     cursor: 'pointer',
                                     display: 'flex',
@@ -179,10 +182,12 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                     marginBottom: '0.25rem'
                                 }}
                                 onMouseOver={(e) => {
-                                    e.currentTarget.style.background = 'var(--bg-glass-hover)';
+                                    e.currentTarget.style.background = '#F8FAFC';
+                                    e.currentTarget.style.color = 'var(--color-secondary)';
                                 }}
                                 onMouseOut={(e) => {
                                     e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.color = 'var(--color-primary)';
                                 }}
                             >
                                 <User size={16} />

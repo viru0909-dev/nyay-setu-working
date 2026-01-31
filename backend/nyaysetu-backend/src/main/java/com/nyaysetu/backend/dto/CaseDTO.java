@@ -27,4 +27,10 @@ public class CaseDTO {
     private Long lawyerId;
     private String lawyerName;
     private LocalDateTime updatedAt;
+    
+    // New Fields
+    private Boolean hasBsaCert;
+    private String summonsStatus;
+    private String aiGeneratedSummary;
+    private com.nyaysetu.backend.entity.DocumentStatus documentStatus;
 }

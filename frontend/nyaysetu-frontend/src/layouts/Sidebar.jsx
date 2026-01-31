@@ -129,20 +129,21 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                     height: '100vh',
                     display: 'flex',
                     flexDirection: 'column',
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     position: isMobile ? 'fixed' : 'relative',
                     top: 0,
                     left: 0,
                     zIndex: isMobile ? 999 : 100,
                     flexShrink: 0,
+                    background: '#FFFFFF',
+                    borderRight: '1px solid #E5E7EB',
                     transform: isMobile && !isMobileOpen ? 'translateX(-100%)' : 'translateX(0)',
-                    boxShadow: isMobile ? '4px 0 20px rgba(0, 0, 0, 0.15)' : 'none'
+                    boxShadow: isMobile ? '4px 0 24px rgba(0, 0, 0, 0.08)' : 'none'
                 }}
             >
-                {/* Logo Section - Fixed at top */}
+                {/* Logo Section */}
                 <div style={{
-                    padding: '1.5rem',
-                    borderBottom: 'var(--border-glass)',
+                    padding: '2rem 1.5rem',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -154,49 +155,34 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                             width: '40px',
                             height: '40px',
                             minWidth: '40px',
-                            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                            background: 'var(--color-primary)',
                             borderRadius: '10px',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 12px rgba(30, 42, 68, 0.2)'
                         }}>
                             <Scale size={24} color="white" />
                         </div>
                         {(!isCollapsed || isMobile) && (
                             <span style={{
-                                fontSize: '1.5rem',
+                                fontSize: '1.4rem',
                                 fontWeight: '800',
                                 color: 'var(--color-primary)',
-                                whiteSpace: 'nowrap'
+                                whiteSpace: 'nowrap',
+                                letterSpacing: '-0.02em'
                             }}>
                                 NyaySetu
                             </span>
                         )}
                     </div>
-                    {/* Mobile close button */}
-                    {isMobile && (
-                        <button
-                            onClick={onMobileClose}
-                            style={{
-                                background: 'var(--bg-glass)',
-                                border: 'var(--border-glass)',
-                                borderRadius: '8px',
-                                padding: '0.5rem',
-                                cursor: 'pointer',
-                                color: 'var(--text-secondary)'
-                            }}
-                        >
-                            <X size={20} />
-                        </button>
-                    )}
                 </div>
 
-                {/* Navigation Menu - Scrollable */}
+                {/* Navigation Menu */}
                 <nav style={{
                     flex: 1,
-                    padding: '1rem',
-                    overflowY: 'auto',
-                    overflowX: 'hidden'
+                    padding: '0.75rem',
+                    overflowY: 'auto'
                 }}>
                     {menuItems.map((item, index) => {
                         const Icon = item.icon;
@@ -210,49 +196,39 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '0.75rem',
+                                    gap: '0.875rem',
                                     padding: '0.875rem 1rem',
-                                    marginBottom: '0.5rem',
+                                    marginBottom: '0.25rem',
                                     borderRadius: '0.75rem',
                                     background: isActive
-                                        ? 'var(--bg-glass-strong)'
+                                        ? 'rgba(30, 42, 68, 0.06)'
                                         : 'transparent',
-                                    border: isActive
-                                        ? 'var(--border-glass-strong)'
-                                        : '1px solid transparent',
-                                    color: isActive ? 'var(--color-accent)' : 'var(--text-secondary)',
+                                    color: isActive ? 'var(--color-secondary)' : '#64748B',
                                     textDecoration: 'none',
-                                    fontSize: '0.95rem',
-                                    fontWeight: isActive ? '600' : '500',
-                                    transition: 'all 0.2s',
+                                    fontSize: '0.9rem',
+                                    fontWeight: isActive ? '700' : '600',
+                                    transition: 'all 0.2s ease',
                                     cursor: 'pointer',
-                                    whiteSpace: 'nowrap'
-                                }}
-                                onMouseOver={(e) => {
-                                    if (!isActive) {
-                                        e.currentTarget.style.background = 'var(--bg-glass-hover)';
-                                        e.currentTarget.style.color = 'var(--text-main)';
-                                    }
-                                }}
-                                onMouseOut={(e) => {
-                                    if (!isActive) {
-                                        e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = 'var(--text-secondary)';
-                                    }
+                                    whiteSpace: 'nowrap',
+                                    border: '1px solid transparent',
+                                    borderColor: isActive ? 'rgba(30, 42, 68, 0.1)' : 'transparent'
                                 }}
                             >
-                                <Icon size={20} style={{ flexShrink: 0, minWidth: '20px' }} />
+                                <Icon size={20} style={{
+                                    flexShrink: 0,
+                                    minWidth: '20px',
+                                    color: isActive ? 'var(--color-secondary)' : 'inherit'
+                                }} />
                                 {(!isCollapsed || isMobile) && <span>{item.label}</span>}
                             </Link>
                         );
                     })}
                 </nav>
 
-                {/* Collapse Button - Only on desktop */}
                 {!isMobile && (
                     <div style={{
                         padding: '1rem',
-                        borderTop: 'var(--border-glass)',
+                        borderTop: '1px solid #E5E7EB',
                         flexShrink: 0
                     }}>
                         <button
@@ -260,12 +236,12 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                             style={{
                                 width: '100%',
                                 padding: '0.75rem',
-                                background: 'var(--bg-glass-strong)',
-                                border: 'var(--border-glass)',
+                                background: '#F8FAFC',
+                                border: '1px solid #E5E7EB',
                                 borderRadius: '0.5rem',
-                                color: 'var(--color-accent)',
-                                fontSize: '0.875rem',
-                                fontWeight: '600',
+                                color: '#64748B',
+                                fontSize: '0.85rem',
+                                fontWeight: '700',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s',
                                 display: 'flex',
@@ -274,10 +250,12 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                                 gap: '0.5rem'
                             }}
                             onMouseOver={(e) => {
-                                e.currentTarget.style.background = 'var(--bg-glass-hover)';
+                                e.currentTarget.style.background = '#F1F5F9';
+                                e.currentTarget.style.color = 'var(--color-secondary)';
                             }}
                             onMouseOut={(e) => {
-                                e.currentTarget.style.background = 'var(--bg-glass-strong)';
+                                e.currentTarget.style.background = '#F8FAFC';
+                                e.currentTarget.style.color = '#64748B';
                             }}
                         >
                             {isCollapsed ? (

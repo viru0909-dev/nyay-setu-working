@@ -24,5 +24,10 @@ public class CaseMessage {
 
     private String message;
 
+    @Column(columnDefinition = "VARCHAR(50) DEFAULT 'TEXT'")
+    private String type; // TEXT, AUDIO, VIDEO_CALL, PHONE_CALL, FILE
+
+    private String attachmentUrl;
+
     private LocalDateTime timestamp;
 }

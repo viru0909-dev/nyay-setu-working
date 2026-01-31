@@ -300,11 +300,11 @@ export default function FileUnifiedPage() {
                     onClick={() => setShowAiAssistant(true)}
                     style={{
                         padding: '0.75rem 1.5rem',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                        background: 'var(--color-primary)',
                         color: 'white', border: 'none', borderRadius: '2rem',
                         fontWeight: '700', cursor: 'pointer',
                         display: 'flex', alignItems: 'center', gap: '0.5rem',
-                        boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)',
+                        boxShadow: '0 4px 15px rgba(30, 42, 68, 0.4)',
                         animation: 'pulse 2s infinite'
                     }}
                 >
@@ -322,7 +322,7 @@ export default function FileUnifiedPage() {
                     onClick={() => { setActiveTab('case'); setCurrentStep(1); }}
                     style={{
                         flex: 1, padding: '1rem',
-                        background: activeTab === 'case' ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' : 'transparent',
+                        background: activeTab === 'case' ? 'var(--color-primary)' : 'transparent',
                         border: 'none', borderRadius: '0.75rem',
                         color: activeTab === 'case' ? 'white' : 'var(--text-secondary)',
                         fontWeight: '700', cursor: 'pointer',
@@ -361,22 +361,22 @@ export default function FileUnifiedPage() {
                             }}>
                                 <div style={{
                                     height: '100%', width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`,
-                                    background: 'linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)', transition: 'width 0.3s'
+                                    background: 'var(--color-primary)', transition: 'width 0.3s'
                                 }} />
                             </div>
                             {steps.map((step) => (
                                 <div key={step.number} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, position: 'relative', zIndex: 1 }}>
                                     <div style={{
                                         width: '40px', height: '40px', borderRadius: '50%',
-                                        background: step.number <= currentStep ? 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)' : 'var(--bg-glass)',
-                                        border: step.number === currentStep ? '3px solid rgba(59, 130, 246, 0.4)' : 'none',
+                                        background: step.number <= currentStep ? 'var(--color-primary)' : 'var(--bg-glass)',
+                                        border: step.number === currentStep ? '3px solid rgba(30, 42, 68, 0.4)' : 'none',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700',
                                         color: step.number <= currentStep ? 'white' : 'var(--text-secondary)', marginBottom: '0.75rem'
                                     }}>
                                         {step.number < currentStep ? <CheckCircle2 size={20} /> : step.number}
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.875rem', fontWeight: '600', color: step.number <= currentStep ? '#3b82f6' : 'var(--text-secondary)' }}>{step.name}</div>
+                                        <div style={{ fontSize: '0.875rem', fontWeight: '600', color: step.number <= currentStep ? 'var(--color-primary)' : 'var(--text-secondary)' }}>{step.name}</div>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{step.desc}</div>
                                     </div>
                                 </div>
@@ -393,7 +393,14 @@ export default function FileUnifiedPage() {
                         {currentStep === 1 && (
                             <div>
                                 <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Select Case Type</h2>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '1.5rem',
+                                    overflowX: 'auto',
+                                    paddingBottom: '1rem',
+                                    scrollbarWidth: 'none',
+                                    msOverflowStyle: 'none'
+                                }}>
                                     {caseTypes.map((type) => {
                                         const Icon = type.icon;
                                         const isSelected = formData.caseType === type.id;
@@ -402,20 +409,25 @@ export default function FileUnifiedPage() {
                                                 key={type.id}
                                                 onClick={() => setFormData({ ...formData, caseType: type.id })}
                                                 style={{
-                                                    padding: '1.5rem',
+                                                    minWidth: '320px',
+                                                    flex: '0 0 auto',
+                                                    padding: '2rem',
                                                     background: isSelected ? `${type.color}20` : 'var(--bg-glass)',
                                                     border: isSelected ? `2px solid ${type.color}` : 'var(--border-glass)',
-                                                    borderRadius: '1rem', cursor: 'pointer', textAlign: 'left'
+                                                    borderRadius: '1.25rem', cursor: 'pointer', textAlign: 'left',
+                                                    transition: 'all 0.2s ease'
                                                 }}
                                             >
-                                                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: `${type.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                                                    <Icon size={24} color={type.color} />
+                                                <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: `${type.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+                                                    <Icon size={32} color={type.color} />
                                                 </div>
-                                                <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.25rem' }}>{type.name}</h3>
-                                                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{type.desc}</p>
+                                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>{type.name}</h3>
+                                                <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>{type.desc}</p>
                                             </button>
                                         );
                                     })}
+                                    {/* Spacer for right padding in scroll view */}
+                                    <div style={{ width: '1px', flex: '0 0 1px' }}></div>
                                 </div>
                             </div>
                         )}
@@ -447,7 +459,7 @@ export default function FileUnifiedPage() {
                                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Urgency</label>
                                         <div style={{ display: 'flex', gap: '1rem' }}>
                                             {['normal', 'urgent', 'critical'].map((level) => (
-                                                <button key={level} onClick={() => setFormData({ ...formData, urgency: level })} style={{ flex: 1, padding: '0.75rem', background: formData.urgency === level ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-glass)', border: formData.urgency === level ? '2px solid #3b82f6' : 'var(--border-glass)', borderRadius: '0.75rem', color: formData.urgency === level ? '#3b82f6' : 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer', textTransform: 'capitalize' }}>{level}</button>
+                                                <button key={level} onClick={() => setFormData({ ...formData, urgency: level })} style={{ flex: 1, padding: '0.75rem', background: formData.urgency === level ? 'rgba(30, 42, 68, 0.2)' : 'var(--bg-glass)', border: formData.urgency === level ? '2px solid var(--color-primary)' : 'var(--border-glass)', borderRadius: '0.75rem', color: formData.urgency === level ? 'var(--color-primary)' : 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer', textTransform: 'capitalize' }}>{level}</button>
                                             ))}
                                         </div>
                                     </div>
@@ -461,7 +473,7 @@ export default function FileUnifiedPage() {
                                 <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Upload Documents</h2>
                                 <label style={{ display: 'block', padding: '3rem', background: 'var(--bg-glass)', border: '2px dashed var(--border-glass)', borderRadius: '1rem', textAlign: 'center', cursor: 'pointer', marginBottom: '1.5rem' }}>
                                     <input type="file" multiple onChange={handleFileUpload} style={{ display: 'none' }} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
-                                    <Upload size={40} style={{ color: '#3b82f6', margin: '0 auto 1rem' }} />
+                                    <Upload size={40} style={{ color: 'var(--color-primary)', margin: '0 auto 1rem' }} />
                                     <p style={{ fontWeight: '600', color: 'var(--text-main)' }}>Click to upload files</p>
                                     <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>PDF, DOC, JPG, PNG (max 10MB)</p>
                                 </label>
@@ -470,7 +482,7 @@ export default function FileUnifiedPage() {
                                         {formData.documents.map((doc, index) => (
                                             <div key={index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: 'var(--bg-glass)', borderRadius: '0.5rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                    <FileText size={20} color="#3b82f6" />
+                                                    <FileText size={20} color="var(--color-primary)" />
                                                     <div>
                                                         <span style={{ color: 'var(--text-main)', display: 'block' }}>{doc.name}</span>
                                                         {doc.aiAnalyzed ? (
@@ -525,11 +537,11 @@ export default function FileUnifiedPage() {
 
                     {/* Navigation */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem' }}>
-                        <button onClick={() => setCurrentStep(Math.max(1, currentStep - 1))} disabled={currentStep === 1} style={{ padding: '1rem 2rem', background: currentStep === 1 ? 'var(--bg-glass)' : 'rgba(59, 130, 246, 0.1)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: currentStep === 1 ? 'var(--text-secondary)' : '#3b82f6', fontWeight: '600', cursor: currentStep === 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <button onClick={() => setCurrentStep(Math.max(1, currentStep - 1))} disabled={currentStep === 1} style={{ padding: '1rem 2rem', background: currentStep === 1 ? 'var(--bg-glass)' : 'rgba(30, 42, 68, 0.1)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: currentStep === 1 ? 'var(--text-secondary)' : 'var(--color-primary)', fontWeight: '600', cursor: currentStep === 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <ChevronLeft size={20} /> Previous
                         </button>
                         {currentStep < 4 ? (
-                            <button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()} style={{ padding: '1rem 2rem', background: canProceed() ? 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)' : 'var(--bg-glass)', border: 'none', borderRadius: '0.75rem', color: canProceed() ? 'white' : 'var(--text-secondary)', fontWeight: '700', cursor: canProceed() ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()} style={{ padding: '1rem 2rem', background: canProceed() ? 'var(--color-primary)' : 'var(--bg-glass)', border: 'none', borderRadius: '0.75rem', color: canProceed() ? 'white' : 'var(--text-secondary)', fontWeight: '700', cursor: canProceed() ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 Next <ChevronRight size={20} />
                             </button>
                         ) : (
@@ -566,9 +578,28 @@ export default function FileUnifiedPage() {
                         </div>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Evidence (Optional)</label>
-                            <div onClick={() => document.getElementById('fir-file').click()} style={{ padding: '2rem', background: 'var(--bg-glass)', border: '2px dashed var(--border-glass)', borderRadius: '0.75rem', textAlign: 'center', cursor: 'pointer' }}>
+                            <div onClick={() => document.getElementById('fir-file').click()} style={{ padding: '2rem', background: 'var(--bg-glass)', border: '2px dashed var(--border-glass)', borderRadius: '0.75rem', textAlign: 'center', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', transition: 'all 0.2s' }}>
                                 <input id="fir-file" type="file" accept=".pdf,.jpg,.jpeg,.png,.mp4" onChange={(e) => setFirFile(e.target.files[0])} style={{ display: 'none' }} />
-                                {firFile ? <p style={{ color: '#3b82f6', fontWeight: '600' }}>📎 {firFile.name}</p> : <p style={{ color: 'var(--text-secondary)' }}>Click to upload evidence</p>}
+                                {firFile ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)', fontWeight: '600' }}>
+                                        <CheckCircle2 size={24} />
+                                        <span>{firFile.name}</span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div style={{
+                                            width: '64px', height: '64px', borderRadius: '50%',
+                                            background: 'rgba(30, 42, 68, 0.05)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            <Upload size={32} style={{ color: 'var(--color-primary)' }} />
+                                        </div>
+                                        <div>
+                                            <p style={{ color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.25rem' }}>Click to upload evidence</p>
+                                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Supported: PDF, JPG, PNG, MP4</p>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                         <button onClick={handleSubmitFir} disabled={uploading || !firData.title || !firData.description} style={{ marginTop: '1rem', padding: '1rem', background: (!firData.title || !firData.description) ? 'var(--bg-glass)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', border: 'none', borderRadius: '0.75rem', color: (!firData.title || !firData.description) ? 'var(--text-secondary)' : 'white', fontWeight: '700', cursor: (!firData.title || !firData.description) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
@@ -584,7 +615,7 @@ export default function FileUnifiedPage() {
                     <div style={{ background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)', borderRadius: '2rem', width: '90%', maxWidth: '600px', padding: '2rem', boxShadow: 'var(--shadow-glass-strong)', animation: 'slideUp 0.3s' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <Bot size={28} color="white" />
                                 </div>
                                 <div>
@@ -607,7 +638,7 @@ export default function FileUnifiedPage() {
                                 <button
                                     onClick={handleAiAssist}
                                     disabled={aiThinking || !aiQuery.trim()}
-                                    style={{ width: '100%', padding: '1rem', background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)', border: 'none', borderRadius: '1rem', color: 'white', fontWeight: '700', cursor: (aiThinking || !aiQuery.trim()) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                                    style={{ width: '100%', padding: '1rem', background: 'var(--color-primary)', border: 'none', borderRadius: '1rem', color: 'white', fontWeight: '700', cursor: (aiThinking || !aiQuery.trim()) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                                 >
                                     {aiThinking ? <Loader2 size={20} className="animate-spin" /> : <Wand2 size={20} />}
                                     {aiThinking ? 'Analyzing your case...' : 'Analyze & Suggest'}
@@ -636,7 +667,7 @@ export default function FileUnifiedPage() {
                                 </div>
                                 <button
                                     onClick={applyAiSuggestion}
-                                    style={{ width: '100%', padding: '1rem', background: 'var(--color-accent)', border: 'none', borderRadius: '1rem', color: 'white', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                                    style={{ width: '100%', padding: '1rem', background: 'var(--color-primary)', border: 'none', borderRadius: '1rem', color: 'white', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                                 >
                                     <CheckCircle2 size={20} /> Convert to Filing
                                 </button>
