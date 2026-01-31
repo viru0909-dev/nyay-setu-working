@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const techStack = [
     { icon: Code2, name: 'React + Spring Boot', color: '#61dafb' },
@@ -51,52 +52,58 @@ const roadmapPhases = [
             'e-Courts Phase III Integration',
             'MeghRaj Sovereign Cloud'
         ]
-    }
+    },
 ];
 
 export default function About() {
+    const { t } = useLanguage();
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg-gradient)' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
             <Header />
 
             {/* Hero Section */}
             <section style={{
-                padding: '8rem 2rem 4rem',
+                padding: '10rem 2rem 6rem',
                 textAlign: 'center',
-                background: 'linear-gradient(180deg, var(--bg-glass-strong) 0%, var(--bg-main) 100%)'
+                background: '#FFFFFF',
+                borderBottom: '1px solid #E5E7EB'
             }}>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    style={{ maxWidth: '900px', margin: '0 auto' }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    style={{ maxWidth: '1100px', margin: '0 auto' }}
                 >
                     <span style={{
                         display: 'inline-block',
-                        padding: '0.5rem 1.5rem',
-                        background: 'rgba(59, 130, 246, 0.1)',
-                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                        padding: '0.4rem 1rem',
+                        background: 'rgba(63, 93, 204, 0.08)',
+                        border: '1px solid rgba(63, 93, 204, 0.15)',
                         borderRadius: '2rem',
-                        color: 'var(--color-accent)',
-                        fontWeight: '600',
-                        fontSize: '0.9rem',
-                        marginBottom: '1.5rem'
+                        color: 'var(--color-secondary)',
+                        fontWeight: '700',
+                        fontSize: '0.8rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        marginBottom: '2rem'
                     }}>
-                        🚀 About NyaySetu
+                        {t('aboutHeroTag')}
                     </span>
 
                     <h1 style={{
-                        fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-                        fontWeight: '900',
-                        color: 'var(--text-main)',
+                        fontSize: 'clamp(2.5rem, 5vw, 3.75rem)',
+                        fontWeight: '800',
+                        color: 'var(--color-primary)',
                         marginBottom: '1.5rem',
-                        lineHeight: '1.2'
+                        lineHeight: '1.2',
+                        letterSpacing: '-0.02em'
                     }}>
                         Building India's{' '}
                         <span style={{
-                            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                            background: 'linear-gradient(135deg, #3F5DCC, #7C5CFF)',
                             WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent'
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text'
                         }}>
                             Sovereign Legal-Tech
                         </span>
@@ -104,10 +111,11 @@ export default function About() {
                     </h1>
 
                     <p style={{
-                        fontSize: '1.25rem',
+                        fontSize: '1.15rem',
                         color: 'var(--text-secondary)',
-                        lineHeight: '1.8',
-                        marginBottom: '2rem'
+                        lineHeight: '1.7',
+                        maxWidth: '750px',
+                        margin: '0 auto'
                     }}>
                         NyaySetu combines AI intelligence with blockchain integrity to modernize
                         India's judicial system — aligned with the e-Courts Phase III mandate.
@@ -131,12 +139,12 @@ export default function About() {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         style={{
-                            background: 'var(--bg-glass)',
-                            border: 'var(--border-glass)',
+                            background: '#FFFFFF',
+                            border: '1px solid #E5E7EB',
                             borderRadius: '2rem',
                             padding: '3rem',
                             textAlign: 'center',
-                            boxShadow: 'var(--shadow-glass)',
+                            boxShadow: '0 4px 20px rgba(30, 42, 68, 0.05)',
                             position: 'relative'
                         }}
                     >
@@ -151,9 +159,9 @@ export default function About() {
                                 height: '180px',
                                 margin: '0 auto 2rem',
                                 borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                                background: 'linear-gradient(135deg, #3F5DCC, #7C5CFF)',
                                 padding: '4px',
-                                boxShadow: '0 20px 40px rgba(59, 130, 246, 0.2)',
+                                boxShadow: '0 20px 40px rgba(63, 93, 204, 0.15)',
                                 position: 'relative',
                                 cursor: 'pointer',
                                 transition: 'transform 0.3s'
@@ -203,15 +211,15 @@ export default function About() {
                         <h3 style={{
                             fontSize: '1.75rem',
                             fontWeight: '800',
-                            color: 'var(--text-main)',
+                            color: 'var(--color-primary)',
                             marginBottom: '0.5rem'
                         }}>
                             Virendra Gadekar
                         </h3>
 
                         <p style={{
-                            color: 'var(--color-accent)',
-                            fontWeight: '600',
+                            color: 'var(--color-secondary)',
+                            fontWeight: '700',
                             marginBottom: '1.5rem'
                         }}>
                             Founder & Lead Developer
@@ -256,11 +264,11 @@ export default function About() {
                         viewport={{ once: true }}
                     >
                         <div style={{ marginBottom: '2rem' }}>
-                            <Target size={40} style={{ color: 'var(--color-accent)', marginBottom: '1rem' }} />
+                            <Target size={40} style={{ color: 'var(--color-secondary)', marginBottom: '1rem' }} />
                             <h2 style={{
                                 fontSize: '2rem',
                                 fontWeight: '800',
-                                color: 'var(--text-main)',
+                                color: 'var(--color-primary)',
                                 marginBottom: '1rem'
                             }}>
                                 Our Vision
@@ -321,23 +329,24 @@ export default function About() {
             </section>
 
             {/* Development Roadmap */}
-            <section style={{ padding: '4rem 2rem', background: 'var(--bg-glass-strong)' }}>
+            <section style={{ padding: '6rem 2rem', background: '#FFFFFF', borderTop: '1px solid #E5E7EB', borderBottom: '1px solid #E5E7EB' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        style={{ textAlign: 'center', marginBottom: '3rem' }}
+                        style={{ textAlign: 'center', marginBottom: '4rem' }}
                     >
                         <h2 style={{
-                            fontSize: 'clamp(2rem, 4vw, 3rem)',
-                            fontWeight: '900',
-                            color: 'var(--text-main)',
-                            marginBottom: '1rem'
+                            fontSize: 'clamp(2rem, 4vw, 2.75rem)',
+                            fontWeight: '800',
+                            color: 'var(--color-primary)',
+                            marginBottom: '1rem',
+                            letterSpacing: '-0.02em'
                         }}>
                             Development Roadmap
                         </h2>
-                        <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
                             Our journey to building India's sovereign legal-tech platform
                         </p>
                     </motion.div>
@@ -464,51 +473,48 @@ export default function About() {
             </section>
 
             {/* CTA Section */}
-            <section style={{ padding: '6rem 2rem', textAlign: 'center' }}>
+            <section style={{ padding: '8rem 2rem', textAlign: 'center', background: 'var(--bg-main)' }}>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     style={{
-                        maxWidth: '700px',
+                        maxWidth: '750px',
                         margin: '0 auto',
-                        padding: '3rem',
-                        background: 'var(--bg-glass)',
-                        border: 'var(--border-glass)',
+                        padding: '5rem 3rem',
+                        background: '#FFFFFF',
+                        border: '1px solid #E5E7EB',
                         borderRadius: '2rem',
-                        boxShadow: 'var(--shadow-glass)'
+                        boxShadow: '0 10px 40px rgba(30, 42, 68, 0.04)'
                     }}
                 >
                     <h2 style={{
-                        fontSize: '2rem',
+                        fontSize: '2.5rem',
                         fontWeight: '800',
-                        color: 'var(--text-main)',
-                        marginBottom: '1rem'
+                        color: 'var(--color-primary)',
+                        marginBottom: '1.25rem',
+                        letterSpacing: '-0.02em'
                     }}>
                         Ready to Experience NyaySetu?
                     </h2>
                     <p style={{
                         color: 'var(--text-secondary)',
-                        marginBottom: '2rem',
+                        fontSize: '1.15rem',
+                        marginBottom: '3rem',
                         lineHeight: '1.7'
                     }}>
                         Join us in transforming India's judicial system
                     </p>
                     <Link to="/signup" style={{ textDecoration: 'none' }}>
-                        <button style={{
-                            padding: '1rem 2.5rem',
-                            background: 'var(--color-accent)',
-                            border: 'none',
-                            borderRadius: '0.75rem',
-                            color: 'white',
-                            fontSize: '1.1rem',
-                            fontWeight: '700',
-                            cursor: 'pointer',
+                        <button className="btn btn-primary" style={{
+                            padding: '1.1rem 3.5rem',
+                            fontSize: '1.2rem',
+                            borderRadius: '12px',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '0.5rem'
+                            gap: '0.75rem'
                         }}>
-                            Get Started <ArrowRight size={20} />
+                            Get Started <ArrowRight size={22} />
                         </button>
                     </Link>
                 </motion.div>

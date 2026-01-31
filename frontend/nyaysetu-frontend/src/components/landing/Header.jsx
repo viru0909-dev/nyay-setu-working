@@ -42,18 +42,18 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                 right: 0,
                 zIndex: 1000,
                 background: isScrolled
-                    ? 'var(--bg-glass-strong)'
-                    : 'transparent',
-                backdropFilter: isScrolled ? 'var(--glass-blur)' : 'none',
-                borderBottom: isScrolled ? 'var(--border-glass)' : 'none',
-                transition: 'all 0.3s ease',
-                boxShadow: isScrolled ? 'var(--shadow-glass)' : 'none'
+                    ? '#FFFFFF'
+                    : 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(10px)',
+                borderBottom: '1px solid #E5E7EB',
+                transition: 'all 0.3s ease-out',
+                boxShadow: isScrolled ? '0 1px 3px 0 rgba(0, 0, 0, 0.05)' : 'none'
             }}
         >
             <div className="container" style={{
                 maxWidth: '1400px',
                 margin: '0 auto',
-                padding: '1rem 2rem',
+                padding: '0.75rem 2rem',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center'
@@ -64,30 +64,26 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                     alignItems: 'center',
                     gap: '0.75rem',
                     textDecoration: 'none',
-                    color: 'var(--text-main)',
-                    fontSize: '1.5rem',
-                    fontWeight: '900'
+                    color: 'var(--color-primary)',
+                    fontSize: '1.25rem',
+                    fontWeight: '800',
+                    letterSpacing: '-0.02em'
                 }}>
                     <motion.div
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.6 }}
+                        whileHover={{ rotate: 10 }}
+                        transition={{ duration: 0.3 }}
                         style={{
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                            borderRadius: '12px',
+                            background: 'var(--color-primary)',
+                            borderRadius: '10px',
                             padding: '0.5rem',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}
                     >
-                        <Scale size={28} color="white" />
+                        <Scale size={24} color="white" />
                     </motion.div>
-                    <span style={{
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text'
-                    }}>
+                    <span>
                         NyaySetu
                     </span>
                 </Link>
@@ -95,24 +91,25 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                 {/* Desktop Navigation */}
                 <nav style={{
                     display: 'flex',
-                    gap: '2rem',
+                    gap: '2.5rem',
                     alignItems: 'center'
                 }} className="desktop-nav">
-                    {navItems.map((item) => (
-                        item.isRoute ? (
+                    {navItems.map((item) => {
+                        const isActive = false; // Add logic if needed
+                        return item.isRoute ? (
                             <Link
                                 key={item.label}
                                 to={item.href}
                                 style={{
-                                    color: 'var(--text-main)',
+                                    color: isActive ? 'var(--color-secondary)' : '#475569',
                                     textDecoration: 'none',
-                                    fontSize: '1rem',
-                                    fontWeight: '600',
-                                    transition: 'color 0.2s',
+                                    fontSize: '0.95rem',
+                                    fontWeight: isActive ? '600' : '500',
+                                    transition: 'color 0.3s ease-out',
                                     cursor: 'pointer'
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
-                                onMouseLeave={(e) => e.target.style.color = 'var(--text-main)'}
+                                onMouseEnter={(e) => e.target.style.color = 'var(--color-primary)'}
+                                onMouseLeave={(e) => e.target.style.color = isActive ? 'var(--color-secondary)' : '#475569'}
                             >
                                 {item.label}
                             </Link>
@@ -123,15 +120,15 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 style={{
                                     background: 'none',
                                     border: 'none',
-                                    color: 'var(--text-main)',
-                                    fontSize: '1rem',
-                                    fontWeight: '600',
-                                    transition: 'color 0.2s',
+                                    color: '#475569',
+                                    fontSize: '0.95rem',
+                                    fontWeight: '500',
+                                    transition: 'color 0.3s ease-out',
                                     cursor: 'pointer',
                                     padding: 0
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
-                                onMouseLeave={(e) => e.target.style.color = 'var(--text-main)'}
+                                onMouseEnter={(e) => e.target.style.color = 'var(--color-primary)'}
+                                onMouseLeave={(e) => e.target.style.color = '#475569'}
                             >
                                 {item.label}
                             </button>
@@ -140,91 +137,97 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 key={item.label}
                                 href={item.href}
                                 style={{
-                                    color: 'var(--text-main)',
+                                    color: '#475569',
                                     textDecoration: 'none',
-                                    fontSize: '1rem',
-                                    fontWeight: '600',
-                                    transition: 'color 0.2s',
+                                    fontSize: '0.95rem',
+                                    fontWeight: '500',
+                                    transition: 'color 0.3s ease-out',
                                     position: 'relative'
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = 'var(--color-accent)'}
-                                onMouseLeave={(e) => e.target.style.color = 'var(--text-main)'}
+                                onMouseEnter={(e) => e.target.style.color = 'var(--color-primary)'}
+                                onMouseLeave={(e) => e.target.style.color = '#475569'}
                             >
                                 {item.label}
                             </a>
-                        )
-                    ))}
+                        );
+                    })}
                 </nav>
 
                 {/* CTA Buttons */}
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }} className="desktop-cta">
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }} className="desktop-cta">
                     {/* Language Toggle */}
                     <button
                         onClick={toggleLanguage}
                         style={{
-                            padding: '0.625rem 1rem',
-                            background: 'rgba(139, 92, 246, 0.15)',
-                            border: '2px solid rgba(139, 92, 246, 0.3)',
-                            borderRadius: '0.5rem',
-                            color: '#8b5cf6',
+                            padding: '0.6rem 1rem',
+                            background: 'transparent',
+                            border: '1px solid #CBD5E1',
+                            borderRadius: '10px',
+                            color: 'var(--color-primary)',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
-                            fontWeight: '700',
-                            fontSize: '0.9rem',
-                            transition: 'all 0.2s'
+                            fontWeight: '600',
+                            fontSize: '0.875rem',
+                            transition: 'all 0.3s ease-out'
                         }}
                         onMouseEnter={(e) => {
-                            e.target.style.background = 'rgba(139, 92, 246, 0.25)';
-                            e.target.style.borderColor = '#8b5cf6';
+                            e.currentTarget.style.background = '#F1F5F9';
+                            e.currentTarget.style.borderColor = 'var(--color-primary)';
                         }}
                         onMouseLeave={(e) => {
-                            e.target.style.background = 'rgba(139, 92, 246, 0.15)';
-                            e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.borderColor = '#CBD5E1';
                         }}
                     >
-                        <Globe size={18} />
+                        <Globe size={16} />
                         {language === 'en' ? 'हिंदी' : 'EN'}
                     </button>
 
                     {!hideAuthButtons && (
                         <>
                             <Link to="/login" style={{
-                                padding: '0.625rem 1.5rem',
-                                color: 'var(--text-main)',
+                                padding: '0.6rem 1.25rem',
+                                color: 'var(--color-primary)',
+                                border: '1px solid #CBD5E1',
+                                background: 'transparent',
                                 textDecoration: 'none',
-                                borderRadius: '0.5rem',
+                                borderRadius: '10px',
                                 fontWeight: '600',
-                                transition: 'all 0.2s'
+                                fontSize: '0.875rem',
+                                transition: 'all 0.3s ease-out'
                             }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.background = 'rgba(139, 92, 246, 0.1)';
-                                    e.target.style.color = '#8b5cf6';
+                                    e.target.style.background = '#F1F5F9';
+                                    e.target.style.borderColor = 'var(--color-primary)';
                                 }}
                                 onMouseLeave={(e) => {
                                     e.target.style.background = 'transparent';
-                                    e.target.style.color = '#e2e8f0';
+                                    e.target.style.borderColor = '#CBD5E1';
                                 }}>
                                 Login
                             </Link>
                             <Link to="/signup" style={{
-                                padding: '0.625rem 1.5rem',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                padding: '0.6rem 1.5rem',
+                                background: 'var(--color-primary)',
                                 color: 'white',
                                 textDecoration: 'none',
-                                borderRadius: '0.5rem',
-                                fontWeight: '700',
-                                boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)',
-                                transition: 'all 0.2s'
+                                borderRadius: '10px',
+                                fontWeight: '600',
+                                fontSize: '0.875rem',
+                                transition: 'all 0.3s ease-out',
+                                boxShadow: 'var(--shadow-sm)'
                             }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.transform = 'translateY(-2px)';
-                                    e.target.style.boxShadow = '0 6px 20px rgba(139, 92, 246, 0.5)';
+                                    e.target.style.background = 'var(--color-primary-hover)';
+                                    e.target.style.transform = 'translateY(-1px)';
+                                    e.target.style.boxShadow = 'var(--shadow-md)';
                                 }}
                                 onMouseLeave={(e) => {
+                                    e.target.style.background = 'var(--color-primary)';
                                     e.target.style.transform = 'translateY(0)';
-                                    e.target.style.boxShadow = '0 4px 15px rgba(139, 92, 246, 0.4)';
+                                    e.target.style.boxShadow = 'var(--shadow-sm)';
                                 }}>
                                 Get Started
                             </Link>
@@ -332,11 +335,11 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 style={{
                                     padding: '0.75rem',
                                     textAlign: 'center',
-                                    color: 'var(--color-accent)',
+                                    color: 'var(--color-primary)',
                                     textDecoration: 'none',
-                                    border: '2px solid var(--color-accent)',
-                                    borderRadius: '0.5rem',
-                                    fontWeight: '700',
+                                    border: '1px solid #CBD5E1',
+                                    borderRadius: '10px',
+                                    fontWeight: '600',
                                     background: 'transparent'
                                 }}>
                                 Login
@@ -347,11 +350,11 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 style={{
                                     padding: '0.75rem',
                                     textAlign: 'center',
-                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                    background: 'var(--color-primary)',
                                     color: 'white',
                                     textDecoration: 'none',
-                                    borderRadius: '0.5rem',
-                                    fontWeight: '700'
+                                    borderRadius: '10px',
+                                    fontWeight: '600'
                                 }}>
                                 Get Started
                             </Link>

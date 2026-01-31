@@ -63,6 +63,8 @@ export const caseAPI = {
     getById: (id) => api.get(`/api/cases/${id}`),
     update: (id, data) => api.put(`/api/cases/${id}`, data),
     delete: (id) => api.delete(`/api/cases/${id}`),
+    submitDraft: (id, draftContent) => api.post(`/api/cases/${id}/submit-draft`, { draftContent }),
+    reviewDraft: (id, approved, comments) => api.post(`/api/cases/${id}/review-draft`, { approved, comments }),
 };
 
 // Document API
@@ -154,6 +156,9 @@ export const caseAssignmentAPI = {
     respondToProposal: (caseId, status) => api.post(`/api/cases/${caseId}/respond-proposal`, { status }),
     getPendingCases: () => api.get('/api/cases/pending-assignment'),
     getJudgeWorkload: () => api.get('/api/cases/judge-workload'),
+    takeCognizance: (caseId, judgeId) => api.post(`/api/cases/${caseId}/take-cognizance`, { judgeId }),
+    updateSummons: (caseId, served) => api.post(`/api/cases/${caseId}/update-summons`, { served }),
+    updateDocumentStatus: (caseId, status) => api.post(`/api/cases/${caseId}/document-status`, { status }),
 };
 
 // Judge API - Case management for judges

@@ -700,40 +700,47 @@ export default function VakilFriendChat() {
 
             {/* Chat Container */}
             <div style={{
-                background: 'var(--bg-glass-strong)',
-                backdropFilter: 'var(--glass-blur)',
-                border: 'var(--border-glass-strong)',
-                borderRadius: '1rem',
+                background: '#FFFFFF',
+                border: '1px solid #E5E7EB',
+                borderRadius: '1.25rem',
                 overflow: 'hidden',
-                boxShadow: 'var(--shadow-glass)'
+                boxShadow: '0 10px 30px rgba(30, 42, 68, 0.06)'
             }}>
                 {/* Chat Header */}
                 <div style={{
-                    padding: '1rem 1.25rem',
-                    borderBottom: 'var(--border-glass)',
+                    padding: '1.25rem 1.5rem',
+                    background: '#F8FAFC',
+                    borderBottom: '1px solid #E5E7EB',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'space-between',
                     gap: '0.75rem'
                 }}>
-                    <div style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                    }}>
-                        <Bot size={24} color="white" />
-                    </div>
-                    <div>
-                        <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
-                            AI Legal Assistant
-                        </h3>
-                        <p style={{ fontSize: '0.8rem', color: sessionId ? '#10b981' : '#f59e0b', margin: 0 }}>
-                            {sessionId ? '● Online' : '● Connecting...'}
-                        </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '14px',
+                            background: 'linear-gradient(135deg, #7C5CFF 0%, #3F5DCC 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            boxShadow: '0 4px 12px rgba(124, 92, 255, 0.2)'
+                        }}>
+                            <Bot size={28} color="white" />
+                        </div>
+                        <div>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--color-primary)', margin: 0, letterSpacing: '-0.01em' }}>
+                                Vakil-Friend AI
+                            </h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: sessionId ? '#10b981' : '#f59e0b' }} />
+                                <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#64748B' }}>
+                                    {sessionId ? 'Secured AI Assistant' : 'Connecting...'}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -797,17 +804,13 @@ export default function VakilFriendChat() {
                                             }
                                         </div>
                                         <div style={{
-                                            padding: '0.875rem 1rem',
-                                            background: msg.role === 'user'
-                                                ? 'rgba(59, 130, 246, 0.1)'
-                                                : 'var(--bg-glass)',
-                                            border: msg.role === 'user'
-                                                ? '1px solid rgba(59, 130, 246, 0.2)'
-                                                : 'var(--border-glass)',
+                                            padding: '1rem 1.25rem',
+                                            background: msg.role === 'user' ? '#F1F5F9' : '#FFFFFF',
+                                            border: msg.role === 'user' ? '1px solid #E2E8F0' : '1px solid #E5E7EB',
                                             borderRadius: msg.role === 'user'
-                                                ? '0.875rem 0.875rem 0.25rem 0.875rem'
-                                                : '0.875rem 0.875rem 0.875rem 0.25rem',
-                                            boxShadow: 'var(--shadow-glass-sm)'
+                                                ? '1rem 1rem 0.25rem 1rem'
+                                                : '1rem 1rem 1rem 0.25rem',
+                                            boxShadow: msg.role === 'user' ? 'none' : '0 4px 12px rgba(30, 42, 68, 0.04)'
                                         }}>
                                             <div className="markdown-content" style={{
                                                 color: 'var(--text-main)',

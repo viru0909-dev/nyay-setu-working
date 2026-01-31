@@ -242,30 +242,19 @@ export default function NewsSection() {
 
                 {/* View All Button */}
                 <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-                    <button style={{
-                        padding: '1rem 2.5rem',
-                        background: 'rgba(139, 92, 246, 0.1)',
-                        border: '2px solid rgba(139, 92, 246, 0.3)',
-                        borderRadius: '0.75rem',
-                        color: '#8b5cf6',
-                        fontSize: '1.125rem',
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s'
-                    }}
-                        onMouseEnter={(e) => {
-                            e.target.style.background = 'rgba(139, 92, 246, 0.2)';
-                            e.target.style.borderColor = '#8b5cf6';
-                            e.target.style.transform = 'translateY(-2px)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.background = 'rgba(139, 92, 246, 0.1)';
-                            e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)';
-                            e.target.style.transform = 'translateY(0)';
+                    <motion.button
+                        className="btn btn-primary"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                            padding: '1rem 3rem',
+                            fontSize: '1.125rem',
+                            borderRadius: '12px'
                         }}
                     >
                         {language === 'en' ? 'View All News' : 'सभी समाचार देखें'}
-                    </button>
+                    </motion.button>
                 </div>
             </div>
         </section>

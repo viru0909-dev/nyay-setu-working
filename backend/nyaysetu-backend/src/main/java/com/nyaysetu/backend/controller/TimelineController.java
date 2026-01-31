@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/cases/{caseId}/timeline")
+@RequestMapping("/api/timeline")
 @RequiredArgsConstructor
 public class TimelineController {
 
     private final CaseTimelineService timelineService;
 
-    @GetMapping
+    @GetMapping("/{caseId}")
     public List<CaseTimeline> getTimeline(@PathVariable UUID caseId) {
         return timelineService.getTimeline(caseId);
     }

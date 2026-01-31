@@ -269,11 +269,12 @@ export default function CasePreparationPage() {
                             <button
                                 onClick={handleAutoDraft}
                                 disabled={!selectedTemplate || isDrafting}
+                                className="btn"
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    background: 'var(--bg-glass-subtle)',
-                                    color: 'var(--color-accent)', border: 'var(--border-glass-subtle)',
-                                    padding: '0.6rem 1rem', borderRadius: '0.75rem', fontWeight: '700',
+                                    background: 'rgba(124, 92, 255, 0.08)',
+                                    color: 'var(--color-accent)', border: '1px solid rgba(124, 92, 255, 0.2)',
+                                    padding: '0.6rem 1.25rem', borderRadius: '0.75rem', fontWeight: '700',
                                     fontSize: '0.85rem', cursor: (selectedTemplate && !isDrafting) ? 'pointer' : 'not-allowed'
                                 }}
                             >
@@ -283,23 +284,48 @@ export default function CasePreparationPage() {
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving || !selectedCaseId}
+                                className="btn"
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    background: 'var(--bg-glass)', color: 'var(--text-main)', border: 'var(--border-glass)',
-                                    padding: '0.6rem 1rem', borderRadius: '0.75rem', fontWeight: '700',
+                                    background: '#F8FAFC', color: 'var(--color-primary)', border: '1px solid #E5E7EB',
+                                    padding: '0.6rem 1.25rem', borderRadius: '0.75rem', fontWeight: '700',
                                     fontSize: '0.85rem', cursor: (isSaving || !selectedCaseId) ? 'not-allowed' : 'pointer'
                                 }}>
                                 {isSaving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
                                 {isSaving ? 'Saving...' : 'Save'}
                             </button>
+
+                            {/* NEW: Send for Review Button */}
                             <button
-                                onClick={handleExport}
+                                onClick={async () => {
+                                    if (!selectedCaseId) return;
+                                    if (confirm("Send this draft to the client for approval?")) {
+                                        try {
+                                            await import('../../services/api').then(({ default: api }) =>
+                                                api.post(`/api/cases/${selectedCaseId}/submit-draft`, { draftContent })
+                                            );
+                                            alert("Draft sent to client!");
+                                            fetchCaseDetails(selectedCaseId);
+                                        } catch (e) { console.error(e); alert("Failed to send"); }
+                                    }
+                                }}
+                                className="btn"
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    background: 'var(--color-accent)',
-                                    color: 'var(--text-main)', border: 'none',
-                                    padding: '0.6rem 1rem', borderRadius: '0.75rem', fontWeight: '700',
+                                    background: 'rgba(63, 93, 204, 0.08)',
+                                    color: 'var(--color-secondary)', border: '1px solid rgba(63, 93, 204, 0.2)',
+                                    padding: '0.6rem 1.25rem', borderRadius: '0.75rem', fontWeight: '700',
                                     fontSize: '0.85rem', cursor: 'pointer'
+                                }}>
+                                <ArrowRight size={16} /> Send for Review
+                            </button>
+
+                            <button
+                                onClick={handleExport}
+                                className="btn btn-primary"
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                    fontSize: '0.85rem', padding: '0.6rem 1.25rem', borderRadius: '0.75rem'
                                 }}>
                                 <Download size={16} /> Export
                             </button>

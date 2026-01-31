@@ -28,7 +28,7 @@ export default function UnassignedPool() {
     const takeCognizance = async (caseId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8080/api/judge/cases/${caseId}/claim`, {
+            const response = await fetch(`${API_BASE_URL}/api/judge/cases/${caseId}/claim`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -37,7 +37,7 @@ export default function UnassignedPool() {
             });
 
             if (response.ok) {
-                alert('✅ Case assigned successfully!');
+                alert('✅ Cognizance Taken! Case moved to Review.');
                 fetchUnassignedCases();
             } else {
                 const error = await response.json();
