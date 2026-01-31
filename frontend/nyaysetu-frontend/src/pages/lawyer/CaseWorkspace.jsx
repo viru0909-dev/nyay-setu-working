@@ -69,7 +69,7 @@ export default function CaseWorkspace() {
                             </h1>
                             <span style={{
                                 padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: '800',
-                                background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)'
+                                background: 'rgba(30, 42, 68, 0.1)', color: 'var(--color-accent)', border: '1px solid rgba(30, 42, 68, 0.2)'
                             }}>
                                 {caseData.status}
                             </span>

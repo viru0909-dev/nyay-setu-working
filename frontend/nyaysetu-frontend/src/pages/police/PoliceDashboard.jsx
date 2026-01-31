@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     FileText, Upload, Shield, CheckCircle2,
-    Clock, TrendingUp, AlertTriangle, Loader2
+    Clock, TrendingUp, AlertTriangle, Loader2, Lock
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { policeAPI } from '../../services/api';
@@ -52,7 +52,7 @@ export default function PoliceDashboard() {
             await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/police/summons/${caseId}/complete`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert('✅ Summons marked as SERVED');
+            alert('Success: Summons marked as SERVED');
             fetchDashboardData();
         } catch (error) {
             console.error('Error completing summons:', error);
@@ -72,7 +72,7 @@ export default function PoliceDashboard() {
     const handleRegisterFir = async (firId) => {
         try {
             await policeAPI.updateFirStatus(firId, 'REGISTERED');
-            alert('✅ FIR Registered & Court Case Created Successfully!');
+            alert('Success: FIR Registered & Court Case Created Successfully!');
             fetchDashboardData();
         } catch (error) {
             console.error('Error registering FIR:', error);
@@ -169,8 +169,8 @@ export default function PoliceDashboard() {
                         <Shield size={32} color="white" />
                     </div>
                     <div>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
-                            🔒 {t('Upload FIR - Digital Evidence Sealing')}
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <Lock size={28} /> {t('Upload FIR - Digital Evidence Sealing')}
                         </h2>
                         <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
                             {t('Upload FIR documents to generate SHA-256 tamper-proof digital fingerprints')}

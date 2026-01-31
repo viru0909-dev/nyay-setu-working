@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { judgeAPI } from '../../services/api';
 import {
-    Gavel, Calendar, AlertTriangle, Clock, ChevronRight, Loader2, Scale, Users
+    Gavel, Calendar, AlertTriangle, Clock, ChevronRight, Loader2, Scale, Users, CalendarDays, AlertOctagon
 } from 'lucide-react';
 
 export default function JudicialOverview() {
@@ -49,7 +49,7 @@ export default function JudicialOverview() {
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-                <Loader2 size={48} className="spin" style={{ color: 'var(--color-accent)' }} />
+                <Loader2 size={48} className="spin" style={{ color: 'var(--color-primary)' }} />
                 <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .spin { animation: spin 1s linear infinite; }`}</style>
             </div>
         );
@@ -62,9 +62,9 @@ export default function JudicialOverview() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
                     <div style={{
                         width: '56px', height: '56px', borderRadius: '14px',
-                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        background: 'var(--color-primary)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 8px 16px rgba(99, 102, 241, 0.2)'
+                        boxShadow: '0 8px 16px rgba(30, 42, 68, 0.2)'
                     }}>
                         <Gavel size={28} color="white" />
                     </div>
@@ -82,17 +82,17 @@ export default function JudicialOverview() {
             {/* Stats Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
                 <div style={{
-                    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(79, 70, 229, 0.05))',
-                    border: '1px solid rgba(99, 102, 241, 0.2)',
+                    background: 'linear-gradient(135deg, rgba(30, 42, 68, 0.03), rgba(30, 42, 68, 0.01))',
+                    border: '1px solid rgba(30, 42, 68, 0.1)',
                     borderRadius: '1.5rem',
                     padding: '2rem',
                     backdropFilter: 'blur(10px)'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                        <div style={{ padding: '0.75rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '0.75rem' }}>
-                            <Scale size={24} color="#6366f1" />
+                        <div style={{ padding: '0.75rem', background: 'rgba(30, 42, 68, 0.1)', borderRadius: '0.75rem' }}>
+                            <Scale size={24} color="var(--color-primary)" />
                         </div>
-                        <span style={{ fontSize: '2.5rem', fontWeight: '800', color: '#6366f1' }}>{stats.totalCases}</span>
+                        <span style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--color-primary)' }}>{stats.totalCases}</span>
                     </div>
                     <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)', margin: 0 }}>
                         Total Assigned Cases
@@ -158,9 +158,12 @@ export default function JudicialOverview() {
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
                         <div>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0, marginBottom: '0.25rem' }}>
-                                🚨 Urgent Attention Required
-                            </h2>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                <AlertOctagon size={24} color="#ef4444" />
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
+                                    Urgent Attention Required
+                                </h2>
+                            </div>
                             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
                                 High-priority cases requiring immediate review
                             </p>
@@ -225,8 +228,8 @@ export default function JudicialOverview() {
                                                 </span>
                                                 <span style={{
                                                     padding: '0.25rem 0.75rem',
-                                                    background: 'rgba(99, 102, 241, 0.1)',
-                                                    color: '#6366f1',
+                                                    background: 'rgba(30, 42, 68, 0.1)',
+                                                    color: 'var(--color-primary)',
                                                     borderRadius: '9999px',
                                                     fontSize: '0.7rem',
                                                     fontWeight: '700'
@@ -264,9 +267,12 @@ export default function JudicialOverview() {
                     backdropFilter: 'var(--glass-blur)',
                     boxShadow: 'var(--shadow-glass)'
                 }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0, marginBottom: '0.25rem' }}>
-                        📅 Today's Schedule
-                    </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                        <CalendarDays size={24} color="var(--color-primary)" />
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
+                            Today's Schedule
+                        </h2>
+                    </div>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
                         {new Date().toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' })}
                     </p>
