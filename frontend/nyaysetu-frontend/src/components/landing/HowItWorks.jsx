@@ -67,7 +67,7 @@ export default function HowItWorks() {
 
     return (
         <section style={{
-            padding: '6rem 2rem',
+            padding: '1rem 2rem 6rem',
             background: 'transparent' // Let body background show through
         }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
@@ -284,34 +284,24 @@ export default function HowItWorks() {
                             : '🎯 न्याय के भविष्य का अनुभव करने के लिए तैयार हैं?'
                         }
                     </p>
-                    <button style={{
-                        padding: '1.25rem 3rem',
-                        background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                        border: 'none',
-                        borderRadius: '0.75rem',
-                        color: 'white',
-                        fontSize: '1.125rem',
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                        boxShadow: '0 10px 40px rgba(139, 92, 246, 0.4)',
-                        transition: 'all 0.3s',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.75rem'
-                    }}
-                        onMouseEnter={(e) => {
-                            e.target.style.transform = 'translateY(-3px)';
-                            e.target.style.boxShadow = '0 15px 50px rgba(139, 92, 246, 0.6)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.transform = 'translateY(0)';
-                            e.target.style.boxShadow = '0 10px 40px rgba(139, 92, 246, 0.4)';
+                    <motion.button
+                        className="btn btn-primary"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                            padding: '1.25rem 3rem',
+                            fontSize: '1.125rem',
+                            borderRadius: '12px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.75rem'
                         }}
                         onClick={() => window.location.href = '/signup'}
                     >
                         {language === 'en' ? 'Start Your Journey' : 'अपनी यात्रा शुरू करें'}
                         <ArrowRight size={20} />
-                    </button>
+                    </motion.button>
                 </motion.div>
             </div>
         </section>

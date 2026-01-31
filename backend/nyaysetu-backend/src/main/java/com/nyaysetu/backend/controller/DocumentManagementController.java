@@ -211,4 +211,12 @@ public class DocumentManagementController {
             return ResponseEntity.status(500).body(null);
         }
     }
+    /**
+     * Verify document hash (SHA-256) againts stored fingerprint
+     */
+    @GetMapping("/{id}/verify-hash")
+    public ResponseEntity<?> verifyHash(@PathVariable UUID id) {
+        boolean isValid = documentManagementService.verifyDocumentHash(id);
+        return ResponseEntity.ok(Map.of("id", id, "valid", isValid));
+    }
 }

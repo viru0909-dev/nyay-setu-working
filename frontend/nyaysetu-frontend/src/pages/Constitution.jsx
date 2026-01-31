@@ -252,25 +252,25 @@ export default function Constitution() {
     };
 
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg-gradient)' }}>
+        <div style={{ minHeight: '100vh', background: '#FFFFFF' }}>
             <Header />
 
             <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '6rem 2rem 4rem' }}>
                 {/* Enhanced Page Header */}
                 <div style={{
                     padding: '3rem',
-                    background: 'var(--bg-glass-strong)',
-                    backdropFilter: 'var(--glass-blur)',
-                    border: 'var(--border-glass-strong)',
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(226, 232, 240, 0.8)',
                     borderRadius: '2rem',
                     marginBottom: '3rem',
-                    boxShadow: 'var(--shadow-glass-strong)'
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                             <div style={{
                                 padding: '1rem',
-                                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                background: 'var(--color-primary)',
                                 borderRadius: '1rem'
                             }}>
                                 <BookOpen size={48} color="white" />
@@ -290,10 +290,10 @@ export default function Constitution() {
                                 onClick={toggleLanguage}
                                 style={{
                                     padding: '0.75rem 1.5rem',
-                                    background: 'var(--bg-glass)',
-                                    border: 'var(--border-glass)',
+                                    background: 'var(--color-primary)',
+                                    border: 'none',
                                     borderRadius: '0.75rem',
-                                    color: 'var(--text-main)',
+                                    color: '#FFFFFF',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -303,12 +303,10 @@ export default function Constitution() {
                                     transition: 'all 0.3s'
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.background = 'var(--bg-glass-hover)';
-                                    e.target.style.borderColor = 'var(--color-accent)';
+                                    e.target.style.opacity = '0.9';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.target.style.background = 'var(--bg-glass)';
-                                    e.target.style.borderColor = 'var(--border-glass)';
+                                    e.target.style.opacity = '1';
                                 }}
                             >
                                 <Globe size={20} />
@@ -319,7 +317,7 @@ export default function Constitution() {
                                 onClick={handleDownloadPDF}
                                 style={{
                                     padding: '0.75rem 1.5rem',
-                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                    background: 'var(--color-primary)',
                                     border: 'none',
                                     borderRadius: '0.75rem',
                                     color: 'white',
@@ -342,10 +340,10 @@ export default function Constitution() {
                                 onClick={() => setShowAIChat(!showAIChat)}
                                 style={{
                                     padding: '0.75rem 1.5rem',
-                                    background: showAIChat ? 'var(--color-accent)' : 'var(--bg-glass)',
-                                    border: showAIChat ? '2px solid var(--color-accent)' : 'var(--border-glass)',
+                                    background: showAIChat ? 'var(--color-primary)' : '#FFFFFF',
+                                    border: showAIChat ? '2px solid var(--color-primary)' : '1px solid #E2E8F0',
                                     borderRadius: '0.75rem',
-                                    color: 'white',
+                                    color: showAIChat ? '#FFFFFF' : 'var(--color-primary)',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -370,7 +368,7 @@ export default function Constitution() {
                             left: '1.5rem',
                             top: '50%',
                             transform: 'translateY(-50%)',
-                            color: 'var(--color-accent)'
+                            color: 'var(--color-primary)'
                         }} />
                         <input
                             type="text"
@@ -380,17 +378,23 @@ export default function Constitution() {
                             style={{
                                 width: '100%',
                                 padding: '1.5rem 1.5rem 1.5rem 4.5rem',
-                                background: 'var(--bg-glass)',
-                                backdropFilter: 'var(--glass-blur)',
-                                border: 'var(--border-glass)',
+                                background: '#FFFFFF',
+                                border: '1px solid #E2E8F0',
                                 borderRadius: '1.5rem',
                                 color: 'var(--text-main)',
                                 fontSize: '1.125rem',
                                 outline: 'none',
-                                transition: 'all 0.3s'
+                                transition: 'all 0.3s',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
                             }}
-                            onFocus={(e) => e.target.style.borderColor = 'var(--color-accent)'}
-                            onBlur={(e) => e.target.style.borderColor = 'var(--border-glass)'}
+                            onFocus={(e) => {
+                                e.target.style.borderColor = 'var(--color-primary)';
+                                e.target.style.boxShadow = '0 0 0 3px rgba(30, 42, 68, 0.1)';
+                            }}
+                            onBlur={(e) => {
+                                e.target.style.borderColor = '#E2E8F0';
+                                e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                            }}
                         />
                     </div>
                 </div>
@@ -408,10 +412,10 @@ export default function Constitution() {
                                     onClick={() => setSelectedArticle(null)}
                                     style={{
                                         padding: '0.75rem 1.5rem',
-                                        background: 'rgba(139, 92, 246, 0.2)',
-                                        border: '2px solid rgba(139, 92, 246, 0.3)',
+                                        background: 'rgba(30, 42, 68, 0.08)',
+                                        border: '1px solid rgba(30, 42, 68, 0.1)',
                                         borderRadius: '0.75rem',
-                                        color: '#8b5cf6',
+                                        color: 'var(--color-primary)',
                                         cursor: 'pointer',
                                         marginBottom: '2rem',
                                         fontWeight: '700',
@@ -423,16 +427,15 @@ export default function Constitution() {
 
                                 <div style={{
                                     padding: '3rem',
-                                    background: 'var(--bg-glass-strong)',
-                                    backdropFilter: 'var(--glass-blur)',
+                                    background: '#FFFFFF',
                                     borderRadius: '2rem',
-                                    border: 'var(--border-glass-strong)',
-                                    boxShadow: 'var(--shadow-glass-strong)'
+                                    border: '1px solid #E2E8F0',
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '2rem' }}>
                                         <span style={{
                                             padding: '0.75rem 1.5rem',
-                                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                            background: 'var(--color-primary)',
                                             borderRadius: '1rem',
                                             color: 'white',
                                             fontWeight: '800',
@@ -446,8 +449,8 @@ export default function Constitution() {
                                                 onClick={() => toggleBookmark(selectedArticle)}
                                                 style={{
                                                     padding: '0.75rem',
-                                                    background: bookmarks.find(b => b.number === selectedArticle.number) ? 'var(--color-accent)' : 'var(--bg-glass)',
-                                                    border: 'var(--border-glass)',
+                                                    background: bookmarks.find(b => b.number === selectedArticle.number) ? 'var(--color-primary)' : '#F1F5F9',
+                                                    border: '1px solid #E2E8F0',
                                                     borderRadius: '0.75rem',
                                                     color: 'white',
                                                     cursor: 'pointer',
@@ -488,7 +491,8 @@ export default function Constitution() {
                                                     background: 'var(--bg-glass)',
                                                     border: 'var(--border-glass)',
                                                     borderRadius: '0.5rem',
-                                                    color: 'var(--color-accent)',
+                                                    borderRadius: '0.5rem',
+                                                    color: 'var(--color-primary)',
                                                     fontSize: '0.9rem',
                                                     fontWeight: '600'
                                                 }}>
@@ -506,10 +510,10 @@ export default function Constitution() {
                                     onClick={() => setSelectedPart(null)}
                                     style={{
                                         padding: '0.75rem 1.5rem',
-                                        background: 'var(--bg-glass)',
-                                        border: 'var(--border-glass)',
+                                        background: 'rgba(30, 42, 68, 0.08)',
+                                        border: '1px solid rgba(30, 42, 68, 0.1)',
                                         borderRadius: '0.75rem',
-                                        color: 'var(--color-accent)',
+                                        color: 'var(--color-primary)',
                                         cursor: 'pointer',
                                         marginBottom: '2rem',
                                         fontWeight: '700',
@@ -521,11 +525,11 @@ export default function Constitution() {
 
                                 <div style={{
                                     padding: '2rem',
-                                    background: 'var(--bg-glass-strong)',
+                                    background: '#FFFFFF',
                                     borderRadius: '1.5rem',
                                     marginBottom: '2rem',
-                                    border: 'var(--border-glass-strong)',
-                                    boxShadow: 'var(--shadow-glass)'
+                                    border: '1px solid #E2E8F0',
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
                                 }}>
                                     <h2 style={{ color: 'var(--color-primary)', fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem' }}>
                                         {selectedPart.title}
@@ -546,27 +550,27 @@ export default function Constitution() {
                                             whileHover={{ x: 8 }}
                                             style={{
                                                 padding: '2rem',
-                                                background: 'var(--bg-glass-strong)',
-                                                backdropFilter: 'var(--glass-blur)',
+                                                background: '#FFFFFF',
                                                 borderRadius: '1.5rem',
-                                                border: 'var(--border-glass)',
+                                                border: '1px solid #E2E8F0',
                                                 cursor: 'pointer',
                                                 transition: 'all 0.3s',
-                                                boxShadow: 'var(--shadow-glass)'
+                                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
                                             }}
                                             onMouseEnter={(e) => {
-                                                e.currentTarget.style.borderColor = 'var(--color-accent)';
-                                                e.currentTarget.style.boxShadow = 'var(--shadow-glass-strong)';
+                                                e.currentTarget.style.borderColor = 'var(--color-primary)';
+                                                e.currentTarget.style.boxShadow = '0 10px 40px rgba(30, 42, 68, 0.1)';
                                             }}
                                             onMouseLeave={(e) => {
-                                                e.currentTarget.style.borderColor = 'var(--border-glass)';
-                                                e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
+                                                e.currentTarget.style.borderColor = '#E2E8F0';
+                                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
                                             }}
                                         >
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
                                                 <span style={{
                                                     padding: '0.6rem 1.25rem',
-                                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                                                    padding: '0.6rem 1.25rem',
+                                                    background: 'var(--color-primary)',
                                                     borderRadius: '0.75rem',
                                                     color: 'white',
                                                     fontWeight: '800',
@@ -583,14 +587,14 @@ export default function Constitution() {
                                                         background: 'none',
                                                         border: 'none',
                                                         cursor: 'pointer',
-                                                        color: bookmarks.find(b => b.number === article.number) ? '#8b5cf6' : '#64748b'
+                                                        color: bookmarks.find(b => b.number === article.number) ? 'var(--color-primary)' : '#64748b'
                                                     }}
                                                 >
-                                                    <Bookmark size={20} fill={bookmarks.find(b => b.number === article.number) ? '#8b5cf6' : 'none'} />
+                                                    <Bookmark size={20} fill={bookmarks.find(b => b.number === article.number) ? 'var(--color-primary)' : 'none'} />
                                                 </button>
                                             </div>
 
-                                            <h3 style={{ color: 'var(--text-main)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                                            <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                                                 {article.title}
                                             </h3>
 
@@ -618,23 +622,22 @@ export default function Constitution() {
                                         onClick={() => setSelectedPart(part)}
                                         style={{
                                             padding: '2.5rem',
-                                            background: 'var(--bg-glass-strong)',
-                                            backdropFilter: 'var(--glass-blur)',
+                                            background: '#FFFFFF',
                                             borderRadius: '1.5rem',
-                                            border: 'var(--border-glass-strong)',
+                                            border: '1px solid #E2E8F0',
                                             cursor: 'pointer',
                                             transition: 'all 0.3s',
                                             position: 'relative',
                                             overflow: 'hidden',
-                                            boxShadow: 'var(--shadow-glass)'
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
                                         }}
                                         onMouseEnter={(e) => {
-                                            e.currentTarget.style.borderColor = '#8b5cf6';
-                                            e.currentTarget.style.boxShadow = '0 20px 50px rgba(139, 92, 246, 0.3)';
+                                            e.currentTarget.style.borderColor = 'var(--color-primary)';
+                                            e.currentTarget.style.boxShadow = '0 20px 50px rgba(30, 42, 68, 0.2)';
                                         }}
                                         onMouseLeave={(e) => {
-                                            e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
-                                            e.currentTarget.style.boxShadow = 'none';
+                                            e.currentTarget.style.borderColor = '#E2E8F0';
+                                            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)';
                                         }}
                                     >
                                         <div style={{
@@ -642,16 +645,18 @@ export default function Constitution() {
                                             top: '1rem',
                                             right: '1rem',
                                             padding: '0.5rem 1rem',
-                                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                            background: 'rgba(30, 42, 68, 0.05)',
+                                            border: '1px solid rgba(30, 42, 68, 0.1)',
                                             borderRadius: '0.75rem',
                                             fontSize: '0.85rem',
                                             fontWeight: '800',
-                                            color: 'white'
+                                            background: 'var(--color-primary)',
+                                            color: '#FFFFFF'
                                         }}>
                                             {part.articles.length} {t('articles')}
                                         </div>
 
-                                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.5rem', fontWeight: '800', marginBottom: '1rem', lineHeight: '1.3', paddingRight: '3rem' }}>
+                                        <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '800', marginBottom: '1rem', lineHeight: '1.3', paddingRight: '3rem' }}>
                                             {part.title}
                                         </h3>
 
@@ -659,7 +664,7 @@ export default function Constitution() {
                                             {part.description}
                                         </p>
 
-                                        <div style={{ color: '#8b5cf6', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <div style={{ color: 'var(--color-primary)', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                             {t('readMore')} →
                                         </div>
                                     </motion.div>
@@ -686,17 +691,16 @@ export default function Constitution() {
                             >
                                 <div style={{
                                     padding: '2rem',
-                                    background: 'var(--bg-glass-strong)',
-                                    backdropFilter: 'var(--glass-blur)',
+                                    background: '#FFFFFF',
                                     borderRadius: '1.5rem',
-                                    border: 'var(--border-glass-strong)',
+                                    border: '1px solid #E2E8F0',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     gap: '1.5rem',
-                                    boxShadow: 'var(--shadow-glass-strong)'
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <h3 style={{ color: 'white', fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>
+                                        <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>
                                             {t('aiChatbotTitle')}
                                         </h3>
                                         <button
@@ -718,9 +722,9 @@ export default function Constitution() {
 
                                     <div style={{
                                         padding: '1.5rem',
-                                        background: 'rgba(139, 92, 246, 0.1)',
+                                        background: 'rgba(30, 42, 68, 0.05)',
                                         borderRadius: '1rem',
-                                        border: '1px solid rgba(139, 92, 246, 0.2)'
+                                        border: '1px solid rgba(30, 42, 68, 0.2)'
                                     }}>
                                         <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
                                             {language === 'en'
@@ -738,15 +742,15 @@ export default function Constitution() {
                                         placeholder={t('typeMessage')}
                                         style={{
                                             padding: '1rem',
-                                            background: 'var(--bg-glass)',
-                                            border: 'var(--border-glass)',
+                                            background: '#F8FAFC',
+                                            border: '1px solid #E2E8F0',
                                             borderRadius: '0.75rem',
                                             color: 'var(--text-main)',
                                             fontSize: '1rem',
                                             outline: 'none'
                                         }}
-                                        onFocus={(e) => e.target.style.borderColor = 'var(--color-accent)'}
-                                        onBlur={(e) => e.target.style.borderColor = 'var(--border-glass)'}
+                                        onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
+                                        onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
                                     />
 
                                     <button
@@ -755,8 +759,8 @@ export default function Constitution() {
                                         style={{
                                             padding: '1rem',
                                             background: isAiLoading || !aiQuery.trim()
-                                                ? 'rgba(139, 92, 246, 0.3)'
-                                                : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                                                ? 'rgba(30, 42, 68, 0.3)'
+                                                : 'var(--color-primary)',
                                             border: 'none',
                                             borderRadius: '0.75rem',
                                             color: 'white',
@@ -786,14 +790,14 @@ export default function Constitution() {
                                         <div style={{
                                             marginTop: '1rem',
                                             padding: '1.5rem',
-                                            background: 'var(--bg-glass)',
+                                            background: '#F8FAFC',
                                             borderRadius: '1rem',
-                                            border: 'var(--border-glass)'
+                                            border: '1px solid #E2E8F0'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'start', gap: '1rem' }}>
-                                                <MessageCircle size={24} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
+                                                <MessageCircle size={24} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
                                                 <div>
-                                                    <h4 style={{ color: 'var(--color-accent-light)', fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+                                                    <h4 style={{ color: 'var(--color-primary)', fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem' }}>
                                                         {language === 'en' ? 'AI Response:' : 'AI उत्तर:'}
                                                     </h4>
                                                     <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: '1.6', margin: 0, whiteSpace: 'pre-wrap' }}>
@@ -810,13 +814,13 @@ export default function Constitution() {
                                     <div style={{
                                         marginTop: '1.5rem',
                                         padding: '1.5rem',
-                                        background: 'rgba(30, 41, 59, 0.8)',
+                                        background: 'rgba(30, 42, 68, 0.05)',
                                         backdropFilter: 'blur(20px)',
                                         borderRadius: '1.5rem',
-                                        border: '2px solid rgba(139, 92, 246, 0.3)'
+                                        border: '1px solid rgba(30, 42, 68, 0.1)'
                                     }}>
-                                        <h4 style={{ color: 'white', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <Bookmark size={20} fill="#8b5cf6" color="#8b5cf6" />
+                                        <h4 style={{ color: 'var(--color-primary)', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <Bookmark size={20} fill="var(--color-primary)" color="var(--color-primary)" />
                                             {t('bookmarks')}
                                         </h4>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -826,18 +830,18 @@ export default function Constitution() {
                                                     onClick={() => setSelectedArticle(bookmark)}
                                                     style={{
                                                         padding: '0.75rem',
-                                                        background: 'rgba(139, 92, 246, 0.1)',
+                                                        background: 'rgba(30, 42, 68, 0.05)',
                                                         borderRadius: '0.75rem',
                                                         cursor: 'pointer',
                                                         transition: 'all 0.3s'
                                                     }}
-                                                    onMouseEnter={(e) => e.target.style.background = 'rgba(139, 92, 246, 0.2)'}
-                                                    onMouseLeave={(e) => e.target.style.background = 'rgba(139, 92, 246, 0.1)'}
+                                                    onMouseEnter={(e) => e.target.style.background = 'rgba(30, 42, 68, 0.1)'}
+                                                    onMouseLeave={(e) => e.target.style.background = 'rgba(30, 42, 68, 0.05)'}
                                                 >
-                                                    <p style={{ color: '#8b5cf6', fontSize: '0.85rem', fontWeight: '700', margin: '0 0 0.25rem 0' }}>
+                                                    <p style={{ color: 'var(--color-primary)', fontSize: '0.85rem', fontWeight: '700', margin: '0 0 0.25rem 0' }}>
                                                         {t('article')} {bookmark.number}
                                                     </p>
-                                                    <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: 0 }}>
+                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
                                                         {bookmark.title.length > 40 ? bookmark.title.substring(0, 40) + '...' : bookmark.title}
                                                     </p>
                                                 </div>
@@ -859,6 +863,6 @@ export default function Constitution() {
                     to { transform: rotate(360deg); }
                 }
             `}</style>
-        </div>
+        </div >
     );
 }

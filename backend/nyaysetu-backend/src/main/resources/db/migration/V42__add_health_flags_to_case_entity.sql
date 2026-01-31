@@ -1,0 +1,3 @@
+ALTER TABLE case_entity 
+ADD COLUMN has_bsa_cert BOOLEAN DEFAULT FALSE,
+ADD COLUMN summons_status VARCHAR(50) DEFAULT 'PENDING';

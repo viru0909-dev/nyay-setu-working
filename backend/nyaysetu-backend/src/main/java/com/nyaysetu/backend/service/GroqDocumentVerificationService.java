@@ -144,12 +144,21 @@ public class GroqDocumentVerificationService {
             : documentContent;
         prompt.append(limitedContent);
         
+        prompt.append("\n\nCRITICAL CHECK: Section 63(4) BSA Certificate Compliance\n");
+        prompt.append("Check if this document contains or is accompanied by a Section 63(4) BSA Certificate metadata.\n");
+        prompt.append("Specifically look for:\n");
+        prompt.append("1. User ID / Uploader ID\n");
+        prompt.append("2. IP Address / Source Device Details\n");
+        prompt.append("3. Digital Hash / Checksum (SHA-256)\n");
+        prompt.append("If these are missing, flag as PROCEDURAL ERROR.\n");
+        
         prompt.append("\n\nPlease analyze and respond in the following JSON format:\n");
         prompt.append("{\n");
         prompt.append("  \"verified\": true/false,\n");
         prompt.append("  \"confidenceScore\": 0-100,\n");
         prompt.append("  \"documentType\": \"detected document type\",\n");
         prompt.append("  \"authenticity\": { \"valid\": true/false, \"notes\": \"explanation\" },\n");
+        prompt.append("  \"bsaCompliance\": { \"compliant\": true/false, \"missingMetadata\": [\"User ID\", \"IP\", \"Hash\"] },\n");
         prompt.append("  \"legalRelevance\": { \"relevant\": true/false, \"notes\": \"explanation\" },\n");
         prompt.append("  \"requiredFields\": { \"present\": true/false, \"missing\": [\"list of missing fields\"] },\n");
         prompt.append("  \"caseMatch\": { \"matches\": true/false, \"notes\": \"explanation\" },\n");
@@ -202,6 +211,8 @@ public class GroqDocumentVerificationService {
                 .documentType(json.path("documentType").asText("Unknown"))
                 .authenticityValid(json.path("authenticity").path("valid").asBoolean(false))
                 .authenticityNotes(json.path("authenticity").path("notes").asText(""))
+                .bsaCompliant(json.path("bsaCompliance").path("compliant").asBoolean(false))
+                .bsaMissingMetadata(extractStringList(json.path("bsaCompliance").path("missingMetadata")))
                 .legallyRelevant(json.path("legalRelevance").path("relevant").asBoolean(false))
                 .relevanceNotes(json.path("legalRelevance").path("notes").asText(""))
                 .requiredFieldsPresent(json.path("requiredFields").path("present").asBoolean(false))
@@ -234,6 +245,8 @@ public class GroqDocumentVerificationService {
             .documentType("Unknown")
             .authenticityValid(false)
             .authenticityNotes("AI verification unavailable")
+            .bsaCompliant(false)
+            .bsaMissingMetadata(List.of("Verification Failed"))
             .legallyRelevant(false)
             .relevanceNotes("Manual review required")
             .requiredFieldsPresent(false)
@@ -258,6 +271,9 @@ public class GroqDocumentVerificationService {
         private boolean authenticityValid;
         private String authenticityNotes;
         
+        private boolean bsaCompliant;
+        private List<String> bsaMissingMetadata;
+        
         private boolean legallyRelevant;
         private String relevanceNotes;
         
@@ -271,8 +287,10 @@ public class GroqDocumentVerificationService {
         private List<String> recommendations;
         
         public String getStatus() {
-            if (verified && confidenceScore >= 70) {
+            if (verified && confidenceScore >= 70 && bsaCompliant) {
                 return "VERIFIED";
+            } else if (!bsaCompliant) {
+                return "PROCEDURAL_ERROR";
             } else if (confidenceScore >= 50) {
                 return "UNDER_REVIEW";
             } else {

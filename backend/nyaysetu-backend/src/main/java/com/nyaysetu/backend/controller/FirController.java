@@ -25,6 +25,53 @@ public class FirController {
 
     private final FirService firService;
     private final UserRepository userRepository;
+    private final com.nyaysetu.backend.repository.CaseRepository caseRepository;
+
+    /**
+     * Get pending summons delivery tasks for police
+     */
+    @GetMapping("/summons/pending")
+    public ResponseEntity<?> getSummonsTasks() {
+        try {
+            // Find cases where summons status is IN_TRANSIT
+            List<com.nyaysetu.backend.entity.CaseEntity> cases = caseRepository.findAll().stream()
+                .filter(c -> "IN_TRANSIT".equals(c.getSummonsStatus()))
+                .collect(java.util.stream.Collectors.toList());
+                
+            List<Map<String, Object>> tasks = cases.stream().map(c -> {
+                Map<String, Object> task = new java.util.HashMap<>();
+                task.put("id", c.getId());
+                task.put("caseTitle", c.getTitle());
+                task.put("respondent", c.getRespondent());
+                task.put("status", "PENDING_DELIVERY");
+                task.put("type", "SUMMONS");
+                return task;
+            }).collect(java.util.stream.Collectors.toList());
+            
+            return ResponseEntity.ok(tasks);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Mark summons as served
+     */
+    @PostMapping("/summons/{caseId}/complete")
+    public ResponseEntity<?> completeSummonsTask(@PathVariable UUID caseId, Authentication auth) {
+        try {
+            com.nyaysetu.backend.entity.CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+            
+            caseEntity.setSummonsStatus("SERVED");
+            caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.SUMMONS_SERVED);
+            caseRepository.save(caseEntity);
+            
+            return ResponseEntity.ok(Map.of("message", "Summons marked as SERVED"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 
     /**
      * Upload FIR document with SHA-256 digital stamping
