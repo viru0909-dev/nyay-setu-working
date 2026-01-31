@@ -89,7 +89,7 @@ export default function AIBrainWidget({ user }) {
                 {/* Header */}
                 <div style={{
                     padding: '1rem 1.25rem',
-                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                    background: 'var(--color-primary)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -140,8 +140,8 @@ export default function AIBrainWidget({ user }) {
                                     gap: '0.75rem'
                                 }}>
                                     {msg.role === 'assistant' && (
-                                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <Sparkles size={14} color="#6366f1" />
+                                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(30, 42, 68, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Sparkles size={14} color="var(--color-primary)" />
                                         </div>
                                     )}
                                     <div style={{
@@ -151,8 +151,8 @@ export default function AIBrainWidget({ user }) {
                                         fontSize: '0.9rem',
                                         lineHeight: '1.5',
                                         background: msg.role === 'user' ? 'var(--color-accent-light)' : 'var(--bg-glass)',
-                                        color: msg.role === 'user' ? 'var(--color-accent)' : 'var(--text-secondary)',
-                                        border: msg.role === 'user' ? '1px solid var(--color-accent)' : 'var(--border-glass)',
+                                        color: msg.role === 'user' ? 'var(--color-primary)' : 'var(--text-secondary)',
+                                        border: msg.role === 'user' ? '1px solid var(--color-primary)' : 'var(--border-glass)',
                                         borderBottomRightRadius: msg.role === 'user' ? '0.2rem' : '1rem',
                                         borderBottomLeftRadius: msg.role === 'assistant' ? '0.2rem' : '1rem'
                                     }} className="markdown-content">
@@ -164,8 +164,8 @@ export default function AIBrainWidget({ user }) {
                             ))}
                             {loading && (
                                 <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Loader2 size={14} className="spin" color="#6366f1" />
+                                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(30, 42, 68, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Loader2 size={14} className="spin" color="var(--color-primary)" />
                                     </div>
                                     <div style={{ padding: '0.75rem 1rem', background: 'var(--bg-glass)', borderRadius: '1rem', borderBottomLeftRadius: '0.2rem' }}>
                                         <div style={{ display: 'flex', gap: '4px' }}>
@@ -206,7 +206,7 @@ export default function AIBrainWidget({ user }) {
                                         right: '0.5rem',
                                         top: '50%',
                                         transform: 'translateY(-50%)',
-                                        background: input.trim() ? '#6366f1' : 'transparent',
+                                        background: input.trim() ? 'var(--color-primary)' : 'transparent',
                                         border: 'none',
                                         borderRadius: '0.5rem',
                                         padding: '0.4rem',
@@ -264,14 +264,14 @@ export default function AIBrainWidget({ user }) {
                         width: '64px',
                         height: '64px',
                         borderRadius: '20px',
-                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        background: 'var(--color-primary)',
                         border: 'none',
                         color: 'white',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxShadow: '0 8px 32px rgba(99, 102, 241, 0.4)',
+                        boxShadow: '0 8px 32px rgba(30, 42, 68, 0.4)',
                         transition: 'all 0.3s ease'
                     }}
                     onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1) translateY(-4px)'}

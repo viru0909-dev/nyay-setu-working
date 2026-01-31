@@ -92,7 +92,7 @@ export default function Login() {
                             position: 'absolute',
                             width: '800px',
                             height: '800px',
-                            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)',
+                            background: 'radial-gradient(circle, rgba(30, 42, 68, 0.1) 0%, transparent 70%)',
                             top: '-200px',
                             right: '-200px',
                             borderRadius: '50%',
@@ -102,7 +102,7 @@ export default function Login() {
                             position: 'absolute',
                             width: '600px',
                             height: '600px',
-                            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%)',
+                            background: 'radial-gradient(circle, rgba(30, 42, 68, 0.08) 0%, transparent 70%)',
                             bottom: '-150px',
                             left: '-150px',
                             borderRadius: '50%',
@@ -129,9 +129,7 @@ export default function Login() {
                                     fontSize: '3.5rem',
                                     fontWeight: '900',
                                     marginBottom: '1rem',
-                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, #8b5cf6 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
+                                    color: 'var(--color-primary)',
                                     lineHeight: '1.2'
                                 }}>
                                     Welcome Back
@@ -142,16 +140,16 @@ export default function Login() {
                                     lineHeight: '1.8',
                                     maxWidth: '500px'
                                 }}>
-                                    Sign in to access your dashboard and manage your cases on India's most advanced virtual judiciary platform
+                                    Access your dashboard and manage cases on India's most advanced virtual judiciary platform
                                 </p>
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                 {[
                                     { icon: <Shield size={24} />, text: 'Secure encrypted authentication', color: '#10b981' },
-                                    { icon: <CheckCircle2 size={24} />, text: 'Real-time case status updates', color: '#3b82f6' },
-                                    { icon: <Scale size={24} />, text: 'Instant access to hearings', color: '#8b5cf6' },
-                                    { icon: <Camera size={24} />, text: 'Face recognition login', color: '#ec4899' }
+                                    { icon: <CheckCircle2 size={24} />, text: 'Real-time case status updates', color: '#1E2A44' },
+                                    { icon: <Scale size={24} />, text: 'Instant access to hearings', color: '#334155' },
+                                    { icon: <Camera size={24} />, text: 'Face recognition login', color: '#1E2A44' }
                                 ].map((item, idx) => (
                                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                         <div style={{
@@ -233,7 +231,7 @@ export default function Login() {
                                         left: '1rem',
                                         top: '50%',
                                         transform: 'translateY(-50%)',
-                                        color: 'var(--color-accent)'
+                                        color: 'var(--color-primary)'
                                     }} />
                                     <input
                                         type="email"
@@ -252,7 +250,7 @@ export default function Login() {
                                             transition: 'all 0.2s'
                                         }}
                                         onFocus={(e) => {
-                                            e.target.style.borderColor = 'var(--color-accent)';
+                                            e.target.style.borderColor = 'var(--color-primary)';
                                             e.target.style.background = 'rgba(255,255,255,0.8)';
                                         }}
                                         onBlur={(e) => {
@@ -280,7 +278,7 @@ export default function Login() {
                                         left: '1rem',
                                         top: '50%',
                                         transform: 'translateY(-50%)',
-                                        color: 'var(--color-accent)'
+                                        color: 'var(--color-primary)'
                                     }} />
                                     <input
                                         type={showPassword ? 'text' : 'password'}
@@ -299,7 +297,7 @@ export default function Login() {
                                             transition: 'all 0.2s'
                                         }}
                                         onFocus={(e) => {
-                                            e.target.style.borderColor = 'var(--color-accent)';
+                                            e.target.style.borderColor = 'var(--color-primary)';
                                             e.target.style.background = 'rgba(255,255,255,0.8)';
                                         }}
                                         onBlur={(e) => {
@@ -408,7 +406,7 @@ export default function Login() {
                                     style={{
                                         background: 'none',
                                         border: 'none',
-                                        color: 'var(--color-accent)',
+                                        color: 'var(--color-primary)',
                                         fontSize: '0.875rem',
                                         fontWeight: '600',
                                         cursor: 'pointer'
@@ -427,7 +425,7 @@ export default function Login() {
                                     padding: '1rem',
                                     background: loading
                                         ? 'var(--bg-glass-hover)'
-                                        : 'linear-gradient(135deg, var(--color-accent) 0%, #8b5cf6 100%)',
+                                        : 'var(--color-primary)',
                                     border: 'none',
                                     borderRadius: '0.75rem',
                                     color: 'white',
@@ -449,10 +447,10 @@ export default function Login() {
                                 style={{
                                     width: '100%',
                                     padding: '1rem',
-                                    background: 'rgba(139, 92, 246, 0.1)',
-                                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                                    background: 'rgba(30, 42, 68, 0.08)',
+                                    border: '1px solid rgba(30, 42, 68, 0.2)',
                                     borderRadius: '0.75rem',
-                                    color: '#8b5cf6',
+                                    color: 'var(--color-primary)',
                                     fontSize: '1rem',
                                     fontWeight: '600',
                                     cursor: 'pointer',
@@ -463,12 +461,12 @@ export default function Login() {
                                     transition: 'all 0.3s'
                                 }}
                                 onMouseOver={(e) => {
-                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
-                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)';
+                                    e.currentTarget.style.background = 'rgba(30, 42, 68, 0.15)';
+                                    e.currentTarget.style.borderColor = 'rgba(30, 42, 68, 0.3)';
                                 }}
                                 onMouseOut={(e) => {
-                                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                                    e.currentTarget.style.background = 'rgba(30, 42, 68, 0.08)';
+                                    e.currentTarget.style.borderColor = 'rgba(30, 42, 68, 0.2)';
                                 }}
                             >
                                 <Camera size={20} />
@@ -480,7 +478,7 @@ export default function Login() {
                             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 Don't have an account?{' '}
                                 <Link to="/signup" style={{
-                                    color: 'var(--color-accent)',
+                                    color: 'var(--color-primary)',
                                     fontWeight: '600',
                                     textDecoration: 'none'
                                 }}>

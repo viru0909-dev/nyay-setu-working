@@ -57,12 +57,7 @@ export default function Landing() {
         }
     ];
 
-    const stats = [
-        { number: '10K+', label: t('casesFiled') },
-        { number: '50K+', label: t('activeUsers') },
-        { number: '99%', label: t('successRate') },
-        { number: '24/7', label: t('aiSupport') }
-    ];
+
 
     return (
         <div style={{
@@ -82,7 +77,7 @@ export default function Landing() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: '8rem 2rem 4rem',
+                    padding: '8rem 2rem 1rem',
                     textAlign: 'center'
                 }}>
                     <div className="container" style={{ maxWidth: '1400px', width: '100%' }}>
@@ -167,62 +162,14 @@ export default function Landing() {
                     </div>
                 </section>
 
-                {/* Stats Section */}
-                {/* Stats Section */}
-                <section style={{ padding: '0 2rem 6rem' }}>
-                    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                            gap: '2rem'
-                        }}>
-                            {stats.map((stat, idx) => (
-                                <motion.div
-                                    key={idx}
-                                    className="card"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: idx * 0.1, duration: 0.5 }}
-                                    style={{
-                                        textAlign: 'center',
-                                        padding: '2.5rem 2rem',
-                                        background: '#FFFFFF',
-                                        border: '1px solid #E5E7EB',
-                                        borderRadius: '16px'
-                                    }}
-                                >
-                                    <div style={{
-                                        fontSize: 'clamp(2.25rem, 4vw, 3rem)',
-                                        fontWeight: '800',
-                                        color: 'var(--color-primary)',
-                                        marginBottom: '0.5rem',
-                                        letterSpacing: '-0.02em',
-                                        lineHeight: 1
-                                    }}>
-                                        {stat.number}
-                                    </div>
-                                    <div style={{
-                                        color: 'var(--text-secondary)',
-                                        fontSize: '1rem',
-                                        fontWeight: '600',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.05em'
-                                    }}>
-                                        {stat.label}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
+
 
                 {/* How It Works Section */}
                 <HowItWorks />
 
                 {/* Features Section */}
-                <section id="features" style={{ padding: '8rem 2rem', background: '#FFFFFF', borderTop: '1px solid #E5E7EB', borderBottom: '1px solid #E5E7EB' }}>
-                    <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                <section id="features" style={{ padding: '8rem 0', background: '#FFFFFF', borderTop: '1px solid #E5E7EB', borderBottom: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                    <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 2rem' }}>
                         <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
                             <h2 style={{
                                 fontSize: 'clamp(2rem, 4vw, 2.75rem)',
@@ -241,6 +188,7 @@ export default function Landing() {
                             </p>
                         </div>
 
+                        {/* Features Grid */}
                         <div style={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
@@ -253,32 +201,38 @@ export default function Landing() {
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    whileHover={{ y: -5, borderColor: 'var(--color-secondary)' }}
+                                    whileHover={{ y: -8, borderColor: 'var(--color-secondary)' }}
+                                    transition={{ duration: 0.3 }}
                                     style={{
-                                        padding: '2.5rem',
+                                        padding: '3rem 2.5rem',
                                         cursor: 'pointer',
                                         background: '#FFFFFF',
                                         border: '1px solid #E5E7EB',
+                                        borderRadius: '20px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'center',
+                                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
                                         transition: 'all 0.3s ease-out'
                                     }}
                                 >
                                     <div style={{
-                                        width: '56px',
-                                        height: '56px',
-                                        borderRadius: '12px',
+                                        width: '64px',
+                                        height: '64px',
+                                        borderRadius: '16px',
                                         background: 'rgba(63, 93, 204, 0.08)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        marginBottom: '1.75rem',
+                                        marginBottom: '2rem',
                                         color: 'var(--color-secondary)'
                                     }}>
                                         {feature.icon}
                                     </div>
-                                    <h3 style={{ color: 'var(--color-primary)', fontSize: '1.35rem', fontWeight: '700', marginBottom: '1rem' }}>
+                                    <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.25rem' }}>
                                         {feature.title}
                                     </h3>
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.7', marginBottom: 0 }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.7', marginBottom: 0 }}>
                                         {feature.description}
                                     </p>
                                 </motion.div>
@@ -300,11 +254,11 @@ export default function Landing() {
                 }}>
                     <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
                         <div className="card" style={{
-                            padding: '5rem 3rem',
+                            padding: '7rem 3rem',
                             textAlign: 'center',
                             borderRadius: '24px',
                             background: '#FFFFFF',
-                            border: '1px solid #E5E7EB',
+                            border: 'none',
                             boxShadow: '0 10px 40px rgba(30, 42, 68, 0.04)'
                         }}>
                             <h2 style={{

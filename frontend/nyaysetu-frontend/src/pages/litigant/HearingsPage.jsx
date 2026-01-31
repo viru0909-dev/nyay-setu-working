@@ -158,7 +158,7 @@ export default function HearingsPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{
                         width: '56px', height: '56px', borderRadius: '16px',
-                        background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+                        background: 'var(--color-primary)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         boxShadow: 'var(--shadow-glass)'
                     }}>
@@ -196,7 +196,7 @@ export default function HearingsPage() {
 
                     {loading ? (
                         <div style={{ ...glassStyle, padding: '3rem', textAlign: 'center' }}>
-                            <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 1rem', color: 'var(--color-accent)' }} />
+                            <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 1rem', color: 'var(--color-primary)' }} />
                             <p style={{ color: 'var(--text-secondary)' }}>Loading hearings...</p>
                             <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .animate-spin { animation: spin 1s linear infinite; }`}</style>
                         </div>
@@ -217,11 +217,11 @@ export default function HearingsPage() {
 
                                     <div style={{
                                         width: '70px', height: '70px', borderRadius: '15px',
-                                        background: isToday ? 'rgba(74, 222, 128, 0.1)' : 'rgba(99, 102, 241, 0.1)',
-                                        border: isToday ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(139, 92, 246, 0.2)',
+                                        background: isToday ? 'rgba(74, 222, 128, 0.1)' : 'rgba(30, 42, 68, 0.05)',
+                                        border: isToday ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(30, 42, 68, 0.2)',
                                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                                     }}>
-                                        <span style={{ fontSize: '0.8rem', color: isToday ? '#22c55e' : 'var(--color-accent)', fontWeight: '600', textTransform: 'uppercase' }}>
+                                        <span style={{ fontSize: '0.8rem', color: isToday ? '#22c55e' : 'var(--color-primary)', fontWeight: '600', textTransform: 'uppercase' }}>
                                             {hearing.dateStr}
                                         </span>
                                         <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', lineHeight: 1 }}>
@@ -246,9 +246,9 @@ export default function HearingsPage() {
 
                                     {hearing.canJoin ? (
                                         <button onClick={() => joinHearing(hearing)} style={{
-                                            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none', borderRadius: '0.75rem',
+                                            background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '0.75rem',
                                             padding: '0.75rem 1.5rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                            boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
+                                            boxShadow: '0 4px 12px rgba(30, 42, 68, 0.3)'
                                         }}>
                                             <Video size={18} /> Join Now
                                         </button>
@@ -270,7 +270,7 @@ export default function HearingsPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div style={glassStyle}>
                         <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Calendar size={18} color="#818cf8" /> Weekly Overview
+                            <Calendar size={18} color="var(--color-primary)" /> Weekly Overview
                         </h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem', marginBottom: '1rem' }}>
                             {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
@@ -282,9 +282,9 @@ export default function HearingsPage() {
                                 return (
                                     <div key={i} style={{
                                         height: '35px', borderRadius: '8px',
-                                        background: isDateToday ? 'rgba(99, 102, 241, 0.2)' : (hasHearing ? 'rgba(76, 209, 55, 0.1)' : 'rgba(255, 255, 255, 0.03)'),
-                                        border: isDateToday ? '1px solid rgba(99, 102, 241, 0.4)' : (hasHearing ? '1px solid rgba(76, 209, 55, 0.2)' : '1px solid transparent'),
-                                        color: isDateToday ? '#818cf8' : (hasHearing ? '#4cd137' : 'var(--text-secondary)'),
+                                        background: isDateToday ? 'rgba(30, 42, 68, 0.1)' : (hasHearing ? 'rgba(76, 209, 55, 0.1)' : 'rgba(255, 255, 255, 0.03)'),
+                                        border: isDateToday ? '1px solid var(--color-primary)' : (hasHearing ? '1px solid rgba(76, 209, 55, 0.2)' : '1px solid transparent'),
+                                        color: isDateToday ? 'var(--color-primary)' : (hasHearing ? '#4cd137' : 'var(--text-secondary)'),
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: '700'
                                     }}>{date.getDate()}</div>
                                 );
@@ -298,14 +298,14 @@ export default function HearingsPage() {
                         </div>
                     </div>
 
-                    <div style={{ ...glassStyle, background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.2)' }}>
-                        <div style={{ color: '#38bdf8', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ ...glassStyle, background: 'rgba(30, 42, 68, 0.05)', border: '1px solid rgba(30, 42, 68, 0.2)' }}>
+                        <div style={{ color: 'var(--color-primary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <BookOpen size={14} /> Legal Aid
                         </div>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.6', margin: 0 }}>
                             Need help preparing for court? Access our library of litigant rights and procedural guidelines.
                         </p>
-                        <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#38bdf8', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer' }}>
+                        <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-primary)', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer' }}>
                             View Resources <ArrowUpRight size={14} />
                         </div>
                     </div>

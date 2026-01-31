@@ -64,9 +64,13 @@ export default function TrustIndicators() {
                         fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
                         fontWeight: '900',
                         color: 'var(--text-main)',
-                        marginBottom: '1rem'
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.75rem'
                     }}>
-                        {language === 'en' ? '🔒 ' : '🔒 '}
+                        <Lock size={36} color="var(--color-primary)" strokeWidth={2.5} />
                         <span style={{
                             background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
                             WebkitBackgroundClip: 'text',

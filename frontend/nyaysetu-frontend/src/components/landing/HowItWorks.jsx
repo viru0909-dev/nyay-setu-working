@@ -67,7 +67,7 @@ export default function HowItWorks() {
 
     return (
         <section style={{
-            padding: '6rem 2rem',
+            padding: '1rem 2rem 6rem',
             background: 'transparent' // Let body background show through
         }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
