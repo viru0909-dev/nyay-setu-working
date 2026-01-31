@@ -63,7 +63,7 @@ export default function LawyerCasesPage() {
                 // 3. If offline, load from Dexie
                 const cachedCases = await db.cases.toArray();
                 setCases(cachedCases);
-                toast('Loaded cases from offline cache', { icon: '📦' });
+                toast('Loaded cases from offline cache');
             }
         } catch (error) {
             console.error('Error fetching cases:', error);
@@ -81,7 +81,7 @@ export default function LawyerCasesPage() {
     const handleRespondProposal = async (caseId, status) => {
         try {
             await caseAssignmentAPI.respondToProposal(caseId, status);
-            alert(`✅ Proposal ${status.toLowerCase()} successfully!`);
+            alert(`Success: Proposal ${status.toLowerCase()} successfully!`);
             fetchCases();
         } catch (error) {
             console.error('Error responding to proposal:', error);
@@ -130,7 +130,7 @@ export default function LawyerCasesPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{
                             width: '56px', height: '56px', borderRadius: '14px',
-                            background: 'var(--color-accent)',
+                            background: 'var(--color-primary)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             boxShadow: 'var(--shadow-glass)'
                         }}>
@@ -177,7 +177,7 @@ export default function LawyerCasesPage() {
                             alignItems: 'center',
                             gap: '0.6rem',
                             transition: 'all 0.2s',
-                            background: activeTab === 'active' ? 'var(--color-accent)' : 'var(--bg-glass)',
+                            background: activeTab === 'active' ? 'var(--color-primary)' : 'var(--bg-glass)',
                             color: activeTab === 'active' ? 'var(--text-main)' : 'var(--text-secondary)',
                             border: activeTab === 'active' ? 'none' : 'var(--border-glass)',
                             boxShadow: activeTab === 'active' ? 'var(--shadow-glass)' : 'none'

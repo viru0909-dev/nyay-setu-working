@@ -410,12 +410,29 @@ function OverviewTab({ caseData, onHireLawyer }) {
 
                 {/* AI Summary */}
                 {caseData.aiGeneratedSummary && (
-                    <div style={{ background: 'rgba(30, 42, 68, 0.05)', padding: '2rem', borderRadius: '1.5rem', border: '1px solid rgba(30, 42, 68, 0.2)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                            <MessageSquare size={24} style={{ color: 'var(--color-primary)' }} />
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-primary)', margin: 0 }}>Vakil Friend Analysis</h3>
+                    <div style={{
+                        background: 'linear-gradient(135deg, rgba(30, 42, 68, 0.03) 0%, rgba(30, 42, 68, 0.01) 100%)',
+                        padding: '2rem',
+                        borderRadius: '1.5rem',
+                        border: '1px solid rgba(30, 42, 68, 0.1)',
+                        boxShadow: '0 4px 20px rgba(30, 42, 68, 0.05)',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            position: 'absolute', top: 0, left: 0, width: '4px', height: '100%',
+                            background: 'var(--color-primary)'
+                        }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+                            <div style={{
+                                width: '40px', height: '40px', borderRadius: '12px',
+                                background: 'rgba(30, 42, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}>
+                                <Sparkles size={20} style={{ color: 'var(--color-primary)' }} />
+                            </div>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Vakil Friend Analysis</h3>
                         </div>
-                        <div style={{ lineHeight: '1.7', color: 'var(--text-main)', fontSize: '0.95rem' }}>
+                        <div style={{ lineHeight: '1.8', color: 'var(--text-main)', fontSize: '1rem' }}>
                             <ReactMarkdown>{caseData.aiGeneratedSummary}</ReactMarkdown>
                         </div>
                     </div>
