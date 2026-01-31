@@ -146,10 +146,10 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                 borderTopRightRadius: '1rem'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <Sparkles size={20} />
+                    <Sparkles size={20} color="white" />
                     <div>
-                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '600' }}>Vakil Friend</h3>
-                        <p style={{ margin: 0, fontSize: '0.75rem', opacity: 0.9 }}>AI Case Assistant</p>
+                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '600', color: 'white' }}>Vakil Friend</h3>
+                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.9)' }}>AI Case Assistant</p>
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
