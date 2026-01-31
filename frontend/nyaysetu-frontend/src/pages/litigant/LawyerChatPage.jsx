@@ -317,7 +317,7 @@ export default function LawyerChatPage() {
                                 marginTop: '0.5rem',
                                 padding: '0.5rem 1rem',
                                 background: 'white',
-                                color: 'var(--color-accent)',
+                                color: 'var(--color-primary)',
                                 borderRadius: '0.5rem',
                                 textDecoration: 'none',
                                 fontWeight: 'bold',
@@ -359,7 +359,7 @@ export default function LawyerChatPage() {
                             <ArrowLeft size={24} />
                         </button>
                         <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <MessageSquare size={24} color="var(--color-accent)" /> My Lawyers
+                            <MessageSquare size={24} color="var(--color-primary)" /> My Lawyers
                         </h2>
                     </div>
                 </div>
@@ -367,7 +367,7 @@ export default function LawyerChatPage() {
                 <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
                     {loading ? (
                         <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                            <Loader2 className="animate-spin" color="var(--color-accent)" />
+                            <Loader2 className="animate-spin" color="var(--color-primary)" />
                         </div>
                     ) : cases.length === 0 ? (
                         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
@@ -381,7 +381,7 @@ export default function LawyerChatPage() {
                                 padding: '1rem',
                                 borderRadius: '1rem',
                                 background: selectedCase?.id === c.id ? 'var(--bg-glass-subtle)' : 'transparent',
-                                border: `1px solid ${selectedCase?.id === c.id ? 'var(--color-accent)' : 'transparent'}`,
+                                border: `1px solid ${selectedCase?.id === c.id ? 'var(--color-primary)' : 'transparent'}`,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 gap: '1rem',
@@ -410,7 +410,7 @@ export default function LawyerChatPage() {
             <div style={{ ...glassStyle, flex: 1, padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 {!selectedCase ? (
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem' }}>
-                        <MessageSquare size={48} color="var(--color-accent)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                        <MessageSquare size={48} color="var(--color-primary)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
                         <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>Select a Lawyer</h3>
                         <p style={{ color: 'var(--text-secondary)' }}>Select a conversation to start chatting with your lawyer.</p>
                     </div>
@@ -475,8 +475,8 @@ export default function LawyerChatPage() {
                                     <div style={{
                                         padding: '0.75rem 1rem',
                                         borderRadius: '1rem',
-                                        background: msg.sender === 'me' ? 'var(--color-accent)' : 'var(--bg-glass-subtle)',
-                                        color: 'var(--text-main)',
+                                        background: msg.sender === 'me' ? 'var(--color-primary)' : 'var(--bg-glass-subtle)',
+                                        color: msg.sender === 'me' ? 'white' : 'var(--text-main)',
                                         fontSize: '0.95rem',
                                         borderBottomRightRadius: msg.sender === 'me' ? '0.2rem' : '1rem',
                                         borderBottomLeftRadius: msg.sender === 'client' ? '0.2rem' : '1rem'
@@ -548,7 +548,7 @@ export default function LawyerChatPage() {
                                         onClick={handleAIHelp}
                                         style={{
                                             position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)',
-                                            background: 'var(--bg-glass-subtle)', color: 'var(--color-accent)', border: 'none',
+                                            background: 'var(--bg-glass-subtle)', color: 'var(--color-primary)', border: 'none',
                                             borderRadius: '0.5rem', padding: '0.3rem 0.6rem', fontSize: '0.7rem',
                                             fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer'
                                         }}

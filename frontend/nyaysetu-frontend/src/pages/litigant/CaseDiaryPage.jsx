@@ -9,11 +9,11 @@ import { caseAPI, clientFirAPI, caseAssignmentAPI } from '../../services/api';
 
 const statusColors = {
     'PENDING': { bg: '#f5930020', border: '#f59e0b', text: '#f59e0b' },
-    'OPEN': { bg: '#3b82f620', border: '#3b82f6', text: '#3b82f6' },
-    'IN_PROGRESS': { bg: '#10b98120', border: '#10b981', text: '#10b981' },
-    'UNDER_REVIEW': { bg: '#8b5cf620', border: '#8b5cf6', text: '#8b5cf6' },
+    'OPEN': { bg: 'rgba(30, 42, 68, 0.1)', border: 'var(--color-primary)', text: 'var(--color-primary)' },
+    'IN_PROGRESS': { bg: 'rgba(30, 42, 68, 0.1)', border: 'var(--color-primary)', text: 'var(--color-primary)' },
+    'UNDER_REVIEW': { bg: 'rgba(30, 42, 68, 0.1)', border: 'var(--color-primary)', text: 'var(--color-primary)' },
     'AWAITING_DOCUMENTS': { bg: '#ef444420', border: '#ef4444', text: '#ef4444' },
-    'COMPLETED': { bg: '#10b98120', border: '#10b981', text: '#10b981' },
+    'COMPLETED': { bg: 'rgba(16, 185, 129, 0.1)', border: '#10b981', text: '#10b981' },
     'CLOSED': { bg: '#64748b20', border: '#64748b', text: '#64748b' }
 };
 
@@ -137,7 +137,7 @@ export default function CaseDiaryPage() {
                     style={{
                         display: 'flex', alignItems: 'center', gap: '0.5rem',
                         padding: '0.875rem 1.5rem',
-                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                        background: 'var(--color-primary)',
                         border: 'none', borderRadius: '0.75rem',
                         color: 'white', fontSize: '1rem', fontWeight: '700',
                         boxShadow: 'var(--shadow-glass-strong)'
@@ -153,9 +153,9 @@ export default function CaseDiaryPage() {
                 <div className="card flex flex-col justify-between">
                     <div className="flex justify-between items-center">
                         <p className="text-secondary font-semibold text-sm">Total Cases</p>
-                        <Scale size={20} className="text-primary" style={{ opacity: 0.5 }} />
+                        <Scale size={20} className="text-primary" style={{ color: 'var(--color-primary)', opacity: 0.5 }} />
                     </div>
-                    <p className="font-bold text-primary" style={{ fontSize: '2rem' }}>{cases.length}</p>
+                    <p className="font-bold text-primary" style={{ fontSize: '2rem', color: 'var(--color-primary)' }}>{cases.length}</p>
                 </div>
                 <div className="card flex flex-col justify-between">
                     <div className="flex justify-between items-center">
@@ -167,9 +167,9 @@ export default function CaseDiaryPage() {
                 <div className="card flex flex-col justify-between">
                     <div className="flex justify-between items-center">
                         <p className="text-secondary font-semibold text-sm">Active</p>
-                        <Clock size={20} style={{ color: '#3b82f6', opacity: 0.5 }} />
+                        <Clock size={20} style={{ color: 'var(--color-primary)', opacity: 0.5 }} />
                     </div>
-                    <p className="font-bold" style={{ fontSize: '2rem', color: '#3b82f6' }}>
+                    <p className="font-bold" style={{ fontSize: '2rem', color: 'var(--color-primary)' }}>
                         {cases.filter(c => c.status !== 'CLOSED').length + firs.filter(f => f.status !== 'CLOSED').length}
                     </p>
                 </div>
@@ -191,10 +191,10 @@ export default function CaseDiaryPage() {
                     className={`btn ${activeTab === 'cases' ? 'btn-ghost' : 'btn-ghost'}`}
                     style={{
                         padding: '1rem 2rem',
-                        borderBottom: activeTab === 'cases' ? '3px solid #3b82f6' : '3px solid transparent',
-                        color: activeTab === 'cases' ? '#3b82f6' : 'var(--text-secondary)',
+                        borderBottom: activeTab === 'cases' ? '3px solid var(--color-primary)' : '3px solid transparent',
+                        color: activeTab === 'cases' ? 'var(--color-primary)' : 'var(--text-secondary)',
                         borderRadius: '0',
-                        background: activeTab === 'cases' ? 'linear-gradient(to top, rgba(59, 130, 246, 0.1), transparent)' : 'transparent',
+                        background: activeTab === 'cases' ? 'rgba(30, 42, 68, 0.05)' : 'transparent',
                     }}
                 >
                     <Scale size={20} /> Court Cases
@@ -244,21 +244,21 @@ export default function CaseDiaryPage() {
                     </select>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
-                    <button onClick={() => setViewMode('grid')} style={{ padding: '0.5rem', background: viewMode === 'grid' ? 'rgba(139, 92, 246, 0.2)' : 'var(--bg-glass)', borderRadius: '0.5rem', cursor: 'pointer', color: viewMode === 'grid' ? '#8b5cf6' : '#94a3b8' }}><Grid size={20} /></button>
-                    <button onClick={() => setViewMode('list')} style={{ padding: '0.5rem', background: viewMode === 'list' ? 'rgba(139, 92, 246, 0.2)' : 'var(--bg-glass)', borderRadius: '0.5rem', cursor: 'pointer', color: viewMode === 'list' ? '#8b5cf6' : '#94a3b8' }}><ListIcon size={20} /></button>
+                    <button onClick={() => setViewMode('grid')} style={{ padding: '0.5rem', background: viewMode === 'grid' ? 'rgba(30, 42, 68, 0.1)' : 'var(--bg-glass)', borderRadius: '0.5rem', cursor: 'pointer', color: viewMode === 'grid' ? 'var(--color-primary)' : '#94a3b8' }}><Grid size={20} /></button>
+                    <button onClick={() => setViewMode('list')} style={{ padding: '0.5rem', background: viewMode === 'list' ? 'rgba(30, 42, 68, 0.1)' : 'var(--bg-glass)', borderRadius: '0.5rem', cursor: 'pointer', color: viewMode === 'list' ? 'var(--color-primary)' : '#94a3b8' }}><ListIcon size={20} /></button>
                 </div>
             </div>
 
             {/* List Content */}
             {loading ? (
                 <div style={{ textAlign: 'center', padding: '4rem' }}>
-                    <Loader2 size={40} className="animate-spin" style={{ color: '#8b5cf6', margin: '0 auto 1rem' }} />
+                    <Loader2 size={40} className="animate-spin" style={{ color: 'var(--color-primary)', margin: '0 auto 1rem' }} />
                     <p style={{ color: 'var(--text-secondary)' }}>Loading your diary...</p>
                 </div>
             ) : filteredItems.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '4rem', background: 'var(--bg-glass)', borderRadius: '1rem' }}>
                     <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>No entries found</p>
-                    <Link to="/litigant/file" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', background: 'var(--color-accent)', borderRadius: '0.5rem', color: 'white', fontWeight: '600' }}>
+                    <Link to="/litigant/file" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', background: 'var(--color-primary)', borderRadius: '0.5rem', color: 'white', fontWeight: '600' }}>
                         <Plus size={18} /> File New
                     </Link>
                 </div>
@@ -302,7 +302,7 @@ export default function CaseDiaryPage() {
                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
                                 {activeTab === 'cases' ? (
                                     <>
-                                        <Link to={`/litigant/case-diary/${item.id}`} style={{ flex: 1, textAlign: 'center', padding: '0.75rem', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', borderRadius: '0.5rem', fontWeight: '600' }}>
+                                        <Link to={`/litigant/case-diary/${item.id}`} style={{ flex: 1, textAlign: 'center', padding: '0.75rem', background: 'rgba(30, 42, 68, 0.1)', color: 'var(--color-primary)', borderRadius: '0.5rem', fontWeight: '600' }}>
                                             View Details
                                         </Link>
                                         {!item.assignedLawyer && item.status !== 'CLOSED' && (
@@ -335,7 +335,7 @@ export default function CaseDiaryPage() {
                                                     style={{
                                                         flex: 1,
                                                         padding: '0.75rem',
-                                                        background: 'var(--color-accent)',
+                                                        background: 'var(--color-primary)',
                                                         borderRadius: '0.5rem',
                                                         color: 'white',
                                                         fontWeight: '600',
@@ -407,7 +407,7 @@ export default function CaseDiaryPage() {
                                         Match with Legal Experts
                                     </h2>
                                     <p style={{ color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
-                                        Select the best lawyer for: <span style={{ color: 'var(--color-accent)', fontWeight: '600' }}>{selectedCaseForLawyer?.title}</span>
+                                        Select the best lawyer for: <span style={{ color: 'var(--color-primary)', fontWeight: '600' }}>{selectedCaseForLawyer?.title}</span>
                                     </p>
                                 </div>
                                 <button onClick={() => setShowHireModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
@@ -417,7 +417,7 @@ export default function CaseDiaryPage() {
 
                             {lawyerLoading ? (
                                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem' }}>
-                                    <Loader2 size={48} style={{ color: '#8b5cf6', animation: 'spin 1s linear infinite' }} />
+                                    <Loader2 size={48} style={{ color: 'var(--color-primary)', animation: 'spin 1s linear infinite' }} />
                                     <p style={{ color: '#94a3b8', marginTop: '1rem' }}>Sourcing available legal experts...</p>
                                 </div>
                             ) : availableLawyers.length === 0 ? (
@@ -440,7 +440,7 @@ export default function CaseDiaryPage() {
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
                                                 <div style={{
                                                     width: '56px', height: '56px', borderRadius: '50%',
-                                                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                                                    background: 'var(--color-primary)',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                     fontWeight: '800', fontSize: '1.25rem', color: 'white'
                                                 }}>
@@ -471,17 +471,17 @@ export default function CaseDiaryPage() {
                                                 onClick={() => submitProposal(lawyer.id)}
                                                 style={{
                                                     width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
-                                                    background: 'var(--bg-glass-strong)', border: '1px solid var(--color-accent)',
-                                                    color: 'var(--color-accent)', fontWeight: '700', cursor: 'pointer',
+                                                    background: 'var(--bg-glass-strong)', border: '1px solid var(--color-primary)',
+                                                    color: 'var(--color-primary)', fontWeight: '700', cursor: 'pointer',
                                                     transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
                                                 }}
                                                 onMouseOver={(e) => {
-                                                    e.currentTarget.style.background = 'var(--color-accent)';
+                                                    e.currentTarget.style.background = 'var(--color-primary)';
                                                     e.currentTarget.style.color = 'white';
                                                 }}
                                                 onMouseOut={(e) => {
                                                     e.currentTarget.style.background = 'var(--bg-glass-strong)';
-                                                    e.currentTarget.style.color = 'var(--color-accent)';
+                                                    e.currentTarget.style.color = 'var(--color-primary)';
                                                 }}
                                             >
                                                 <Check size={18} />

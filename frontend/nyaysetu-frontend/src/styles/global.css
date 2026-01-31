@@ -5,37 +5,50 @@
 
 /* CSS Variables - Design Tokens */
 :root {
-  /* Primary Palette */
-  --color-primary: #0F172A;
-  /* Deep Slate for high contrast text */
-  --color-accent: #2563EB;
-  /* Royal Blue for actions */
-  --color-accent-hover: #1D4ED8;
+  /* Primary Palette - Judiciary Grade */
+  /* Primary Palette - Judiciary Grade */
+  --color-primary: #1E2A44;
+  /* Deep Navy */
+  --color-secondary: #334155;
+  /* Slate Navy */
+  --color-accent: #3B82F6;
+  /* Bright Blue */
+  --color-accent-hover: #2563EB;
 
-  /* Backgrounds */
-  --bg-main: #D2D6C8;
-  /* User requested color */
-  --bg-glass: rgba(255, 255, 255, 0.35);
-  /* Liquid glass base */
-  --bg-glass-strong: rgba(255, 255, 255, 0.70);
-  /* Increased opacity for better readability */
-  --bg-glass-hover: rgba(255, 255, 255, 0.55);
+  /* Global States */
+  --color-primary-hover: #162035;
+  --color-secondary-hover: #344fb3;
+
+  /* Backgrounds & Surfaces */
+  --bg-main: #F7F8FA;
+  /* Neutral Light Gray */
+  --bg-surface: #FFFFFF;
+  /* Pure White */
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --bg-glass-strong: rgba(255, 255, 255, 0.95);
+  --bg-glass-hover: rgba(255, 255, 255, 1);
   --bg-white: #ffffff;
 
-  /* Borders for Glass Effect */
-  --border-glass: 1px solid rgba(255, 255, 255, 0.5);
-  --border-glass-strong: 1px solid rgba(255, 255, 255, 0.9);
+  /* Borders & Dividers */
+  --border-light: #E5E7EB;
+  /* Subtle Gray */
+  --border-medium: #CBD5E1;
+  /* Medium Gray */
+  --border-glass: 1px solid #E5E7EB;
+  --border-glass-strong: 1px solid #E5E7EB;
 
   /* Text Colors */
-  --text-main: #1E293B;
+  --text-main: #1E2A44;
+  /* Deep Navy for headings */
   --text-secondary: #475569;
+  /* Gray for paragraphs */
   --text-muted: #64748B;
   --text-on-accent: #FFFFFF;
 
   /* Semantic Colors */
-  --color-success: #059669;
-  --color-warning: #D97706;
-  --color-error: #DC2626;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
 
   /* Typography */
   --font-heading: 'Manrope', sans-serif;
@@ -61,19 +74,20 @@
   --spacing-2xl: 2rem;
   --spacing-3xl: 3rem;
 
-  /* Radii - Liquid Feel */
+  /* Radii - Trustworthy yet modern */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
   --radius-full: 9999px;
 
-  /* Effects */
-  --glass-blur: blur(16px);
-  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-  --shadow-hover: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+  /* Effects - Subtle and Confident */
+  --glass-blur: blur(8px);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-glass: 0 4px 20px 0 rgba(30, 42, 68, 0.05);
+  --shadow-hover: 0 10px 30px 0 rgba(30, 42, 68, 0.08);
 }
 
 /* Reset */
@@ -97,14 +111,13 @@ body {
 body {
   font-family: var(--font-body);
   font-size: var(--text-body);
-  line-height: 1.6;
-  color: var(--text-main);
+  line-height: 1.7;
+  /* Improved readability */
+  color: var(--text-secondary);
+  /* Default body text color */
   background-color: var(--bg-main) !important;
-  background-image:
-    radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 0) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 0) 0, transparent 50%);
-  /* Minimal gradient on top if needed, otherwise just color */
+  background-image: none;
+  /* Removed heavy gradients */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -117,8 +130,12 @@ h5,
 h6 {
   font-family: var(--font-heading);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
+  /* Tightened for professionalism */
+  letter-spacing: -0.02em;
+  /* Modern typography feel */
   color: var(--color-primary);
+  /* Deep Navy for headings */
   margin-bottom: var(--spacing-md);
 }
 
@@ -141,16 +158,17 @@ h4 {
 p {
   margin-bottom: var(--spacing-lg);
   color: var(--text-secondary);
+  line-height: 1.7;
 }
 
 a {
-  color: var(--color-accent);
+  color: var(--color-secondary);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease-out;
 }
 
 a:hover {
-  color: var(--color-accent-hover);
+  color: var(--color-primary);
 }
 
 /* Utility Components */
@@ -161,44 +179,45 @@ a:hover {
   padding: 0 var(--spacing-xl);
 }
 
-/* Glassmorphism Implementation */
+/* Glassmorphism Implementation - Refined for Judiciary */
 .glass-effect,
 .card,
 .sidebar,
 .navbar,
 .modal-content {
-  background: var(--bg-glass);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  /* Safari support */
-  border: var(--border-glass);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
   box-shadow: var(--shadow-glass);
   border-radius: var(--radius-xl);
 }
 
-/* Sidebar Specifics to ensure it pops */
+/* Sidebar Specifics */
 .sidebar {
-  background: rgba(255, 255, 255, 0.45);
-  border-right: var(--border-glass-strong);
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-light);
 }
 
 /* Navbar Specifics */
 .navbar {
-  background: rgba(255, 255, 255, 0.45);
-  border-bottom: var(--border-glass-strong);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: none;
+  /* Removed heavy shadows as requested */
 }
 
 /* Cards */
 .card {
   padding: var(--spacing-xl);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background: var(--bg-glass);
+  transition: all 0.3s ease-out;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
 }
 
 .card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
-  background: var(--bg-glass-hover);
+  border-color: var(--color-secondary);
+  /* Border color transitions to secondary blue */
 }
 
 /* Buttons */
@@ -207,52 +226,40 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: 1rem 2rem;
   font-family: var(--font-body);
-  font-weight: 600;
-  border-radius: var(--radius-lg);
-  border: none;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease-out;
   position: relative;
   overflow: hidden;
+  font-size: 1rem;
 }
 
 .btn-primary {
-  background: var(--color-accent);
+  background: var(--color-primary);
   color: var(--text-on-accent);
-  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.3);
-}
-
-.btn-primary::before {
-  /* Shine effect */
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: 0.5s;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
-  background: var(--color-accent-hover);
+  background: var(--color-primary-hover);
+  color: #FFFFFF;
   transform: translateY(-1px);
-}
-
-.btn-primary:hover::before {
-  left: 100%;
+  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
-  background: var(--bg-glass-strong);
-  color: var(--color-accent);
-  border: var(--border-glass-strong);
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--border-medium);
 }
 
 .btn-secondary:hover {
-  background: #ffffff;
+  background: #F1F5F9;
+  border-color: var(--color-primary);
 }
 
 .btn-ghost {
@@ -261,8 +268,8 @@ a:hover {
 }
 
 .btn-ghost:hover {
-  background: var(--bg-glass-hover);
-  color: var(--text-main);
+  background: #F1F5F9;
+  color: var(--color-primary);
 }
 
 /* Form Elements */

@@ -128,4 +128,58 @@ public class CaseAssignmentController {
         List<Map<String, Object>> workload = caseAssignmentService.getJudgeWorkload();
         return ResponseEntity.ok(workload);
     }
+
+    @PostMapping("/{caseId}/take-cognizance")
+    public ResponseEntity<Map<String, Object>> takeCognizance(
+            @PathVariable UUID caseId,
+            @RequestBody Map<String, Object> request
+    ) {
+        try {
+            Long judgeId = Long.parseLong(request.get("judgeId").toString());
+            caseAssignmentService.takeCognizance(caseId, judgeId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Cognizance taken successfully. Case moved to Docket.");
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to take cognizance for case {}", caseId, e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+
+    @PostMapping("/{caseId}/update-summons")
+    public ResponseEntity<Map<String, Object>> updateSummons(
+            @PathVariable UUID caseId,
+            @RequestBody Map<String, Boolean> request
+    ) {
+        try {
+            boolean served = request.get("served");
+            caseAssignmentService.updateSummonsStatus(caseId, served);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Summons status updated"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{caseId}/document-status")
+    public ResponseEntity<Map<String, Object>> updateDocumentStatus(
+            @PathVariable UUID caseId,
+            @RequestBody Map<String, String> request
+    ) {
+        try {
+            String statusStr = request.get("status");
+            // Assuming DocumentStatus enum is available or imported
+            com.nyaysetu.backend.entity.DocumentStatus status = com.nyaysetu.backend.entity.DocumentStatus.valueOf(statusStr);
+            caseAssignmentService.updateDocumentStatus(caseId, status);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Document status updated"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 }

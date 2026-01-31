@@ -24,6 +24,8 @@ public class EvidenceService {
     private final LegalCaseRepository legalCaseRepository;
     private final CaseTimelineService timelineService;
 
+    private final GroqDocumentVerificationService groqService;
+
     private final String uploadDir = "uploads/evidence/";
 
     @Transactional
@@ -42,6 +44,33 @@ public class EvidenceService {
             fos.write(file.getBytes());
         } catch (Exception e) {
             throw new RuntimeException("File upload failed");
+        }
+
+        // Groq Validation
+        try {
+            String content = new String(file.getBytes()); // simplistic text extraction
+            // Limit content size for API
+            if (content.length() > 5000) content = content.substring(0, 5000);
+            
+            var result = groqService.verifyDocument(
+                content, 
+                filename, 
+                "Evidence", 
+                lc.getTitle(), 
+                "Legal Case" // CaseType missing in LegalCase entity
+            );
+            
+            if ("PROCEDURAL_ERROR".equals(result.getStatus())) {
+                // Delete file if rejected? Or keep for audit?
+                // keeping for now but throwing error
+                throw new RuntimeException("PROCEDURAL ERROR: Missing Section 63(4) BSA Certificate Metadata (User ID/IP/Hash). Upload Rejected.");
+            }
+            
+        } catch (Exception e) {
+             if (e.getMessage() != null && e.getMessage().contains("PROCEDURAL ERROR")) {
+                 throw new RuntimeException(e.getMessage());
+             }
+             // Ignore other AI errors (graceful degradation)
         }
 
         CaseEvidence evidence = CaseEvidence.builder()
