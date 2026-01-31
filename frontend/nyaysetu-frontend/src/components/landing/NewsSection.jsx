@@ -129,49 +129,69 @@ export default function NewsSection() {
                     </p>
                 </div>
 
-                {/* News Grid */}
+                {/* News Horizontal Scroll */}
                 <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                    gap: '2rem'
+                    display: 'flex',
+                    overflowX: 'auto',
+                    gap: '2rem',
+                    padding: '2rem 1rem',
+                    scrollSnapType: 'x mandatory',
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none'
                 }}>
+                    <style>
+                        {`
+                            /* Hide scrollbar for Chrome, Safari and Opera */
+                            div::-webkit-scrollbar {
+                                display: none;
+                            }
+                        `}
+                    </style>
                     {newsItems.map((news, idx) => (
                         <motion.div
                             key={idx}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, x: 50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: idx * 0.1 }}
-                            whileHover={{ y: -8 }}
+                            whileHover={{ y: -8, scale: 1.02 }}
                             style={{
-                                padding: '2rem',
+                                minWidth: '350px',
+                                minHeight: '400px',
+                                padding: '2.25rem',
                                 background: 'var(--bg-glass-strong)',
                                 backdropFilter: 'var(--glass-blur)',
                                 borderRadius: '1.5rem',
                                 border: 'var(--border-glass)',
                                 cursor: 'pointer',
                                 transition: 'all 0.3s',
-                                height: '100%',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                boxShadow: 'var(--shadow-glass)'
+                                boxShadow: 'var(--shadow-glass)',
+                                scrollSnapAlign: 'start',
+                                flexShrink: 0,
+                                // Hardware acceleration fixes
+                                transform: 'translateZ(0)',
+                                WebkitBackfaceVisibility: 'hidden',
+                                backfaceVisibility: 'hidden'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.borderColor = categoryColors[news.category] || '#8b5cf6';
                                 e.currentTarget.style.boxShadow = `0 20px 40px ${categoryColors[news.category] || '#8b5cf6'}30`;
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = 'var(--border-glass)'; // Fixed border color on leave
+                                e.currentTarget.style.borderColor = 'var(--border-glass)';
                                 e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
                             }}
                         >
                             {/* Category & Time */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                                 <span style={{
-                                    padding: '0.4rem 1rem',
+                                    padding: '0.45rem 1.1rem',
                                     background: `${categoryColors[news.category] || '#8b5cf6'}20`,
                                     color: categoryColors[news.category] || '#8b5cf6',
-                                    borderRadius: '0.5rem',
+                                    borderRadius: '0.6rem',
                                     fontSize: '0.85rem',
                                     fontWeight: '700'
                                 }}>
@@ -180,11 +200,12 @@ export default function NewsSection() {
                                 <span style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '0.4rem',
+                                    gap: '0.45rem',
                                     color: 'var(--text-secondary)',
-                                    fontSize: '0.85rem'
+                                    fontSize: '0.85rem',
+                                    fontWeight: '500'
                                 }}>
-                                    <Clock size={14} />
+                                    <Clock size={15} />
                                     {news.time}
                                 </span>
                             </div>
@@ -192,10 +213,10 @@ export default function NewsSection() {
                             {/* Title */}
                             <h3 style={{
                                 color: 'var(--text-main)',
-                                fontSize: '1.375rem',
+                                fontSize: '1.35rem',
                                 fontWeight: '800',
                                 marginBottom: '1rem',
-                                lineHeight: '1.3',
+                                lineHeight: '1.35',
                                 flex: '0 0 auto'
                             }}>
                                 {news.title}
@@ -204,7 +225,7 @@ export default function NewsSection() {
                             {/* Source */}
                             <p style={{
                                 color: '#8b5cf6',
-                                fontSize: '0.9rem',
+                                fontSize: '0.95rem',
                                 fontWeight: '600',
                                 marginBottom: '1rem',
                                 flex: '0 0 auto'
@@ -215,8 +236,8 @@ export default function NewsSection() {
                             {/* Excerpt */}
                             <p style={{
                                 color: 'var(--text-secondary)',
-                                fontSize: '1rem',
-                                lineHeight: '1.6',
+                                fontSize: '1.05rem',
+                                lineHeight: '1.65',
                                 marginBottom: '1.5rem',
                                 flex: '1 1 auto'
                             }}>
@@ -231,10 +252,11 @@ export default function NewsSection() {
                                 color: categoryColors[news.category] || '#8b5cf6',
                                 fontWeight: '700',
                                 fontSize: '0.95rem',
-                                flex: '0 0 auto'
+                                flex: '0 0 auto',
+                                marginTop: 'auto'
                             }}>
                                 {language === 'en' ? 'Read Full Story' : 'पूरी कहानी पढ़ें'}
-                                <ExternalLink size={16} />
+                                <ExternalLink size={18} />
                             </div>
                         </motion.div>
                     ))}

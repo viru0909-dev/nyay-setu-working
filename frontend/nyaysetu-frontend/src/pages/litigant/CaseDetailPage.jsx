@@ -20,8 +20,8 @@ import CaseChatWidget from '../../components/CaseChatWidget';
 
 const statusColors = {
     'PENDING': { bg: '#f5930020', border: '#f59e0b', text: '#f59e0b' },
-    'IN_PROGRESS': { bg: '#3b82f620', border: '#3b82f6', text: '#3b82f6' },
-    'UNDER_REVIEW': { bg: '#8b5cf620', border: '#8b5cf6', text: '#8b5cf6' },
+    'IN_PROGRESS': { bg: 'rgba(30, 42, 68, 0.1)', border: 'var(--color-primary)', text: 'var(--color-primary)' },
+    'UNDER_REVIEW': { bg: 'rgba(30, 42, 68, 0.1)', border: 'var(--color-primary)', text: 'var(--color-primary)' },
     'AWAITING_DOCUMENTS': { bg: '#ef444420', border: '#ef4444', text: '#ef4444' },
     'COMPLETED': { bg: '#10b98120', border: '#10b981', text: '#10b981' },
     'CLOSED': { bg: '#64748b20', border: '#64748b', text: '#64748b' }
@@ -184,7 +184,7 @@ export default function CaseDetailPage() {
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{error || 'Case Not Found'}</h2>
                 <button
                     onClick={() => navigate('/litigant/case-diary')}
-                    style={{ marginTop: '1rem', padding: '0.75rem 1.5rem', background: 'var(--color-accent)', border: 'none', borderRadius: '0.5rem', color: 'white', cursor: 'pointer' }}
+                    style={{ marginTop: '1rem', padding: '0.75rem 1.5rem', background: 'var(--color-primary)', border: 'none', borderRadius: '0.5rem', color: 'white', cursor: 'pointer' }}
                 >
                     Back to Case Diary
                 </button>
@@ -256,8 +256,8 @@ export default function CaseDetailPage() {
                             padding: '1rem 0',
                             background: 'none',
                             border: 'none',
-                            borderBottom: activeTab === tab.id ? '2px solid var(--color-accent)' : '2px solid transparent',
-                            color: activeTab === tab.id ? 'var(--color-accent)' : 'var(--text-secondary)',
+                            borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
+                            color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--text-secondary)',
                             fontWeight: activeTab === tab.id ? '700' : '500',
                             cursor: 'pointer',
                             fontSize: '1rem',
@@ -317,7 +317,7 @@ export default function CaseDetailPage() {
                         <div style={{ flex: 1, overflowY: 'auto' }}>
                             {lawyerLoading ? (
                                 <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
-                                    <Loader2 size={32} className="animate-spin" style={{ color: 'var(--color-accent)' }} />
+                                    <Loader2 size={32} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
                                 </div>
                             ) : availableLawyers.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '3rem' }}>
@@ -339,7 +339,7 @@ export default function CaseDetailPage() {
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                                 <div style={{
                                                     width: '50px', height: '50px', borderRadius: '50%',
-                                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, #4f46e5 100%)',
+                                                    background: 'var(--color-primary)',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                     color: 'white', fontWeight: '700', fontSize: '1.25rem'
                                                 }}>
@@ -355,8 +355,8 @@ export default function CaseDetailPage() {
                                                     {lawyer.specialization && (
                                                         <span style={{
                                                             display: 'inline-block', marginTop: '0.5rem',
-                                                            padding: '0.2rem 0.5rem', background: 'rgba(99, 102, 241, 0.1)',
-                                                            color: 'var(--color-accent)', borderRadius: '0.25rem',
+                                                            padding: '0.2rem 0.5rem', background: 'rgba(30, 42, 68, 0.1)',
+                                                            color: 'var(--color-primary)', borderRadius: '0.25rem',
                                                             fontSize: '0.75rem', fontWeight: '600'
                                                         }}>
                                                             {lawyer.specialization}
@@ -410,10 +410,10 @@ function OverviewTab({ caseData, onHireLawyer }) {
 
                 {/* AI Summary */}
                 {caseData.aiGeneratedSummary && (
-                    <div style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(99, 102, 241, 0.05))', padding: '2rem', borderRadius: '1.5rem', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                    <div style={{ background: 'rgba(30, 42, 68, 0.05)', padding: '2rem', borderRadius: '1.5rem', border: '1px solid rgba(30, 42, 68, 0.2)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                            <MessageSquare size={24} style={{ color: '#8b5cf6' }} />
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#8b5cf6', margin: 0 }}>Vakil Friend Analysis</h3>
+                            <MessageSquare size={24} style={{ color: 'var(--color-primary)' }} />
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-primary)', margin: 0 }}>Vakil Friend Analysis</h3>
                         </div>
                         <div style={{ lineHeight: '1.7', color: 'var(--text-main)', fontSize: '0.95rem' }}>
                             <ReactMarkdown>{caseData.aiGeneratedSummary}</ReactMarkdown>
@@ -426,12 +426,12 @@ function OverviewTab({ caseData, onHireLawyer }) {
                     <div style={{
                         padding: '1.5rem',
                         borderRadius: '0.75rem',
-                        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1))',
-                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                        background: 'rgba(30, 42, 68, 0.05)',
+                        border: '1px solid rgba(30, 42, 68, 0.3)',
                         marginTop: '0.5rem'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                            <FileText size={24} color="#3b82f6" />
+                            <FileText size={24} color="var(--color-primary)" />
                             <h4 style={{ margin: 0, color: 'var(--text-main)' }}>
                                 {caseData.aiGeneratedSummary && caseData.status === 'PENDING' ? 'AI Draft Ready for Review' : 'Review & Approve Petition'}
                             </h4>
@@ -456,7 +456,7 @@ function OverviewTab({ caseData, onHireLawyer }) {
                                 }}
                                 style={{
                                     padding: '0.5rem 1rem',
-                                    background: '#3b82f6',
+                                    background: 'var(--color-primary)',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '0.5rem',
@@ -490,7 +490,7 @@ function OverviewTab({ caseData, onHireLawyer }) {
                         <div>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Case Type</p>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Scale size={16} color="var(--color-accent)" />
+                                <Scale size={16} color="var(--color-primary)" />
                                 <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{caseData.caseType}</span>
                             </div>
                         </div>
@@ -524,7 +524,7 @@ function OverviewTab({ caseData, onHireLawyer }) {
                                     style={{
                                         width: '100%',
                                         padding: '0.75rem',
-                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                        background: 'var(--color-primary)',
                                         border: 'none',
                                         borderRadius: '0.75rem',
                                         color: 'white',
@@ -796,7 +796,7 @@ function CaseFilesTab({ caseId }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>Case Files ({files.length})</h3>
                 <label style={{
-                    padding: '0.75rem 1.5rem', background: '#8b5cf6', borderRadius: '0.5rem',
+                    padding: '0.75rem 1.5rem', background: 'var(--color-primary)', borderRadius: '0.5rem',
                     color: 'white', fontWeight: '600', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem'
                 }}>
                     {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}

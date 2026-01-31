@@ -14,8 +14,8 @@ export default function LitigantDashboard() {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState([
         { label: 'My Cases', value: '0', icon: FolderOpen, color: 'var(--color-primary)', change: 'Loading...' },
-        { label: 'Upcoming Hearings', value: '0', icon: Video, color: '#8b5cf6', change: 'Loading...' },
-        { label: 'Documents', value: '0', icon: FileText, color: '#10b981', change: 'Loading...' },
+        { label: 'Upcoming Hearings', value: '0', icon: Video, color: 'var(--color-primary)', change: 'Loading...' },
+        { label: 'Documents', value: '0', icon: FileText, color: 'var(--color-primary)', change: 'Loading...' },
         { label: 'Legal Chat', value: 'Active', icon: MessageSquare, color: '#f59e0b', change: 'Chat with Lawyer', link: '/litigant/chat' }
     ]);
 
@@ -96,8 +96,8 @@ export default function LitigantDashboard() {
                 // Update Stats
                 setStats([
                     { label: 'My Cases', value: cases.length.toString(), icon: FolderOpen, color: 'var(--color-primary)', change: '+1 this month' },
-                    { label: 'Upcoming Hearings', value: hearings.length.toString(), icon: Video, color: '#8b5cf6', change: 'Next: ' + (hearings[0]?.date || 'None') },
-                    { label: 'Documents', value: cases.reduce((acc, c) => acc + (c.documents?.length || 1), 0).toString(), icon: FileText, color: '#10b981', change: '+2 new' },
+                    { label: 'Upcoming Hearings', value: hearings.length.toString(), icon: Video, color: 'var(--color-primary)', change: 'Next: ' + (hearings[0]?.date || 'None') },
+                    { label: 'Documents', value: cases.reduce((acc, c) => acc + (c.documents?.length || 1), 0).toString(), icon: FileText, color: 'var(--color-primary)', change: '+2 new' },
                     { label: 'Legal Chat', value: 'Active', icon: MessageSquare, color: '#f59e0b', change: 'Chat with Lawyer', link: '/litigant/chat' }
                 ]);
 
@@ -118,7 +118,7 @@ export default function LitigantDashboard() {
                 onClick={() => navigate('/litigant/file')}
                 // ... (keep existing banner styles)
                 style={{
-                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)',
+                    background: 'linear-gradient(135deg, rgba(30, 42, 68, 0.1) 0%, rgba(30, 42, 68, 0.05) 100%)',
                     border: 'var(--border-glass)',
                     borderRadius: '1.5rem',
                     padding: '1.5rem 2rem',
@@ -145,11 +145,11 @@ export default function LitigantDashboard() {
                         width: '64px',
                         height: '64px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                        background: 'var(--color-primary)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)'
+                        boxShadow: '0 4px 20px rgba(30, 42, 68, 0.4)'
                     }}>
                         <Scale size={32} color="white" />
                     </div>
@@ -164,7 +164,7 @@ export default function LitigantDashboard() {
                 </div>
                 <div style={{
                     padding: '0.75rem 1.5rem',
-                    background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                    background: 'var(--color-primary)',
                     borderRadius: '0.75rem',
                     color: 'white',
                     fontWeight: '700',
@@ -278,7 +278,7 @@ export default function LitigantDashboard() {
                             }}
                             onMouseOver={(e) => {
                                 e.currentTarget.style.transform = 'translateY(-4px)';
-                                e.currentTarget.style.borderColor = 'var(--color-accent)';
+                                e.currentTarget.style.borderColor = 'var(--color-primary)';
                             }}
                             onMouseOut={(e) => {
                                 e.currentTarget.style.transform = 'translateY(0)';
@@ -334,7 +334,7 @@ export default function LitigantDashboard() {
                                 background: 'var(--bg-glass)',
                                 border: 'var(--border-glass)',
                                 borderRadius: '0.5rem',
-                                color: 'var(--color-accent)',
+                                color: 'var(--color-primary)',
                                 fontSize: '0.875rem',
                                 fontWeight: '600',
                                 cursor: 'pointer'
@@ -346,7 +346,7 @@ export default function LitigantDashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {loading ? (
                             <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                                <Loader2 size={24} style={{ color: 'var(--color-accent)', animation: 'spin 1s linear infinite' }} />
+                                <Loader2 size={24} style={{ color: 'var(--color-primary)', animation: 'spin 1s linear infinite' }} />
                             </div>
                         ) : recentCases.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
@@ -357,7 +357,7 @@ export default function LitigantDashboard() {
                                     style={{
                                         marginTop: '0.75rem',
                                         padding: '0.5rem 1rem',
-                                        background: 'var(--color-accent)',
+                                        background: 'var(--color-primary)',
                                         border: 'none',
                                         borderRadius: '0.5rem',
                                         color: 'white',
@@ -382,14 +382,14 @@ export default function LitigantDashboard() {
                                         transition: 'all 0.2s'
                                     }}
                                     onMouseOver={(e) => {
-                                        e.currentTarget.style.borderColor = 'var(--color-accent)';
+                                        e.currentTarget.style.borderColor = 'var(--color-primary)';
                                     }}
                                     onMouseOut={(e) => {
                                         e.currentTarget.style.borderColor = '';
                                     }}
                                 >
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-accent)', fontWeight: '600' }}>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: '600' }}>
                                             {caseItem.id}
                                         </span>
                                         <span style={{
@@ -435,7 +435,7 @@ export default function LitigantDashboard() {
                                 background: 'var(--bg-glass)',
                                 border: 'var(--border-glass)',
                                 borderRadius: '0.5rem',
-                                color: 'var(--color-accent)',
+                                color: 'var(--color-primary)',
                                 fontSize: '0.875rem',
                                 fontWeight: '600',
                                 cursor: 'pointer'
@@ -447,7 +447,7 @@ export default function LitigantDashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {loading ? (
                             <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                                <Loader2 size={24} style={{ color: 'var(--color-accent)', animation: 'spin 1s linear infinite' }} />
+                                <Loader2 size={24} style={{ color: 'var(--color-primary)', animation: 'spin 1s linear infinite' }} />
                             </div>
                         ) : upcomingHearings.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
@@ -471,7 +471,7 @@ export default function LitigantDashboard() {
                                             width: '40px',
                                             height: '40px',
                                             borderRadius: '10px',
-                                            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                            background: 'var(--color-primary)',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center'
@@ -482,7 +482,7 @@ export default function LitigantDashboard() {
                                             <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
                                                 {hearing.title}
                                             </h4>
-                                            <p style={{ fontSize: '0.75rem', color: 'var(--color-accent)' }}>
+                                            <p style={{ fontSize: '0.75rem', color: 'var(--color-primary)' }}>
                                                 {hearing.caseId}
                                             </p>
                                         </div>
@@ -498,7 +498,7 @@ export default function LitigantDashboard() {
                                                 padding: '0.25rem 0.75rem',
                                                 borderRadius: '9999px',
                                                 background: 'rgba(139, 92, 246, 0.1)',
-                                                color: 'var(--color-accent)',
+                                                color: 'var(--color-primary)',
                                                 fontWeight: '600'
                                             }}>
                                                 {hearing.type}
@@ -515,7 +515,7 @@ export default function LitigantDashboard() {
                                                     background: 'rgba(139, 92, 246, 0.1)',
                                                     border: '1px solid rgba(139, 92, 246, 0.3)',
                                                     borderRadius: '0.5rem',
-                                                    color: 'var(--color-accent)',
+                                                    color: 'var(--color-primary)',
                                                     cursor: 'pointer',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                                                 }} title="Test 5G Connection">
@@ -544,7 +544,7 @@ export default function LitigantDashboard() {
                                                             }}
                                                             style={{
                                                                 padding: '0.5rem 1rem',
-                                                                background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                                                background: 'var(--color-primary)',
                                                                 border: 'none',
                                                                 borderRadius: '0.5rem',
                                                                 color: 'white',

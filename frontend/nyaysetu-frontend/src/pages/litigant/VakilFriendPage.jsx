@@ -504,7 +504,7 @@ export default function VakilFriendChat() {
                             onClick={() => { startNewSession(); setShowHistory(false); }}
                             style={{
                                 width: '100%',
-                                background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                background: 'var(--color-primary)',
                                 border: 'none',
                                 borderRadius: '0.75rem',
                                 padding: '0.75rem 1rem',
@@ -535,19 +535,19 @@ export default function VakilFriendChat() {
                                         style={{
                                             padding: '0.875rem',
                                             background: session.sessionId === sessionId
-                                                ? 'rgba(139, 92, 246, 0.1)'
+                                                ? 'rgba(30, 42, 68, 0.1)'
                                                 : 'var(--bg-glass)',
                                             borderRadius: '0.75rem',
                                             marginBottom: '0.5rem',
                                             cursor: 'pointer',
                                             border: session.sessionId === sessionId
-                                                ? '1px solid var(--color-accent)'
+                                                ? '1px solid var(--color-primary)'
                                                 : 'var(--border-glass)',
                                             transition: 'all 0.2s ease'
                                         }}
                                     >
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <MessageSquare size={16} style={{ color: 'var(--color-accent)' }} />
+                                            <MessageSquare size={16} style={{ color: 'var(--color-primary)' }} />
                                             <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                 {session.title || `Session ${sessions.length - idx}`}
                                             </span>
@@ -588,12 +588,12 @@ export default function VakilFriendChat() {
                             setShowHistory(true);
                         }}
                         style={{
-                            background: showHistory ? 'rgba(139, 92, 246, 0.1)' : 'var(--bg-glass)',
-                            border: showHistory ? '1px solid var(--color-accent)' : 'var(--border-glass)',
+                            background: showHistory ? 'rgba(30, 42, 68, 0.1)' : 'var(--bg-glass)',
+                            border: showHistory ? '1px solid var(--color-primary)' : 'var(--border-glass)',
                             borderRadius: '0.5rem',
                             padding: '0.5rem 0.75rem',
                             cursor: 'pointer',
-                            color: showHistory ? 'var(--color-accent)' : 'var(--text-secondary)',
+                            color: showHistory ? 'var(--color-primary)' : 'var(--text-secondary)',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
@@ -721,12 +721,12 @@ export default function VakilFriendChat() {
                             width: '48px',
                             height: '48px',
                             borderRadius: '14px',
-                            background: 'linear-gradient(135deg, #7C5CFF 0%, #3F5DCC 100%)',
+                            background: 'var(--color-primary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             flexShrink: 0,
-                            boxShadow: '0 4px 12px rgba(124, 92, 255, 0.2)'
+                            boxShadow: '0 4px 12px rgba(30, 42, 68, 0.2)'
                         }}>
                             <Bot size={28} color="white" />
                         </div>
@@ -765,7 +765,7 @@ export default function VakilFriendChat() {
                             height: '100%',
                             color: 'var(--text-secondary)'
                         }}>
-                            <Loader2 size={36} style={{ marginBottom: '1rem', animation: 'spin 1s linear infinite', color: 'var(--color-accent)' }} />
+                            <Loader2 size={36} style={{ marginBottom: '1rem', animation: 'spin 1s linear infinite', color: 'var(--color-primary)' }} />
                             <p>Connecting to Vakil-Friend...</p>
                         </div>
                     ) : (
@@ -791,7 +791,7 @@ export default function VakilFriendChat() {
                                             borderRadius: '50%',
                                             background: msg.role === 'user'
                                                 ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
-                                                : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                                : 'var(--color-primary)',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
@@ -827,7 +827,7 @@ export default function VakilFriendChat() {
                                                     style={{
                                                         background: 'none',
                                                         border: 'none',
-                                                        color: speakingIndex === index ? 'var(--color-accent)' : 'var(--text-secondary)',
+                                                        color: speakingIndex === index ? 'var(--color-primary)' : 'var(--text-secondary)',
                                                         cursor: 'pointer',
                                                         padding: '0.25rem 0.5rem',
                                                         opacity: speakingIndex === index ? 1 : 0.7,
@@ -858,7 +858,7 @@ export default function VakilFriendChat() {
                                         width: '32px',
                                         height: '32px',
                                         borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                        background: 'var(--color-primary)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center'
@@ -1009,7 +1009,7 @@ export default function VakilFriendChat() {
                                 fontFamily: 'inherit',
                                 transition: 'all 0.2s'
                             }}
-                            onFocus={e => e.currentTarget.style.borderColor = 'var(--color-accent)'}
+                            onFocus={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
                             onBlur={e => e.currentTarget.style.borderColor = 'var(--border-glass)'}
                         />
 
@@ -1042,7 +1042,7 @@ export default function VakilFriendChat() {
                                 padding: '0.75rem 1rem',
                                 background: (!inputMessage.trim() || isLoading || isStarting)
                                     ? 'var(--bg-glass-strong)'
-                                    : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                    : 'var(--color-primary)',
                                 border: 'none',
                                 borderRadius: '0.625rem',
                                 color: (!inputMessage.trim() || isLoading || isStarting) ? 'var(--text-secondary)' : 'white',
@@ -1052,7 +1052,7 @@ export default function VakilFriendChat() {
                                 justifyContent: 'center',
                                 boxShadow: (!inputMessage.trim() || isLoading || isStarting)
                                     ? 'none'
-                                    : '0 4px 15px rgba(139, 92, 246, 0.4)',
+                                    : '0 4px 15px rgba(30, 42, 68, 0.4)',
                                 transition: 'all 0.2s'
                             }}
                         >
@@ -1105,7 +1105,7 @@ export default function VakilFriendChat() {
                     margin-bottom: 0.35rem !important;
                 }
                 .markdown-content strong {
-                    color: var(--color-accent) !important;
+                    color: var(--color-primary) !important;
                     font-weight: 700 !important;
                 }
                 .markdown-content code {

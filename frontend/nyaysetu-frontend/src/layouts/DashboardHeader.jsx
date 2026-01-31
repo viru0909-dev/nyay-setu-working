@@ -122,14 +122,14 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             width: isMobile ? '32px' : '36px',
                             height: isMobile ? '32px' : '36px',
                             borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #3F5DCC 0%, #7C5CFF 100%)',
+                            background: 'var(--color-primary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontWeight: '800',
                             fontSize: isMobile ? '0.75rem' : '0.85rem',
                             color: 'white',
-                            boxShadow: '0 2px 8px rgba(63, 93, 204, 0.2)'
+                            boxShadow: '0 2px 8px rgba(30, 42, 68, 0.2)'
                         }}>
                             {user?.name?.charAt(0).toUpperCase() || 'U'}
                         </div>

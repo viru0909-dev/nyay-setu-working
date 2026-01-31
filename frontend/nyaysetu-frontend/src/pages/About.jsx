@@ -441,7 +441,7 @@ export default function About() {
                             textAlign: 'center'
                         }}
                     >
-                        <Sparkles size={32} style={{ color: '#8b5cf6', marginBottom: '1rem' }} />
+                        <Sparkles size={32} style={{ color: 'var(--color-primary)', marginBottom: '1rem' }} />
                         <h4 style={{ color: 'var(--text-main)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
                             Indigenous NLP Model - OpenNyAI
                         </h4>
@@ -458,7 +458,7 @@ export default function About() {
                                 alignItems: 'center',
                                 gap: '0.5rem',
                                 padding: '0.75rem 1.5rem',
-                                background: '#8b5cf6',
+                                background: 'var(--color-primary)',
                                 color: 'white',
                                 borderRadius: '0.75rem',
                                 textDecoration: 'none',

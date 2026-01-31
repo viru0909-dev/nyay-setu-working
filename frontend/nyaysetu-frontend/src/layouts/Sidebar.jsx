@@ -155,12 +155,12 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                             width: '40px',
                             height: '40px',
                             minWidth: '40px',
-                            background: 'linear-gradient(135deg, #3F5DCC 0%, #7C5CFF 100%)',
+                            background: 'var(--color-primary)',
                             borderRadius: '10px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            boxShadow: '0 4px 12px rgba(63, 93, 204, 0.2)'
+                            boxShadow: '0 4px 12px rgba(30, 42, 68, 0.2)'
                         }}>
                             <Scale size={24} color="white" />
                         </div>
@@ -201,7 +201,7 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                                     marginBottom: '0.25rem',
                                     borderRadius: '0.75rem',
                                     background: isActive
-                                        ? 'rgba(63, 93, 204, 0.06)'
+                                        ? 'rgba(30, 42, 68, 0.06)'
                                         : 'transparent',
                                     color: isActive ? 'var(--color-secondary)' : '#64748B',
                                     textDecoration: 'none',
@@ -211,7 +211,7 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                                     cursor: 'pointer',
                                     whiteSpace: 'nowrap',
                                     border: '1px solid transparent',
-                                    borderColor: isActive ? 'rgba(63, 93, 204, 0.1)' : 'transparent'
+                                    borderColor: isActive ? 'rgba(30, 42, 68, 0.1)' : 'transparent'
                                 }}
                             >
                                 <Icon size={20} style={{
