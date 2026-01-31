@@ -426,6 +426,11 @@ function EvidenceTab({ caseId }) {
     const [selectedAnalysis, setSelectedAnalysis] = useState(null);
     const [showAnalysisModal, setShowAnalysisModal] = useState(false);
 
+    // Certificate Modal State
+    const [showCertModal, setShowCertModal] = useState(false);
+    const [certUrl, setCertUrl] = useState(null);
+    const [certLoading, setCertLoading] = useState(false);
+
     useEffect(() => {
         fetchEvidence();
     }, [caseId]);
@@ -529,7 +534,8 @@ function EvidenceTab({ caseId }) {
         }
     };
 
-    const downloadCertificate = async (item) => {
+    const viewCertificate = async (item) => {
+        setCertLoading(true);
         try {
             const url = item.source === 'blockchain'
                 ? `${API_BASE_URL}/api/evidence/${item.id}/certificate`
@@ -543,16 +549,14 @@ function EvidenceTab({ caseId }) {
 
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.setAttribute('download', `Certificate_${item.title || item.fileName || item.id}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            setCertUrl(blobUrl);
+            setShowCertModal(true);
         } catch (error) {
-            console.error('Certificate download failed:', error);
+            console.error('Certificate fetch failed:', error);
             const msg = error.response?.statusText || error.message || 'Unknown error';
-            alert(`❌ Failed to download certificate: ${msg}. This evidence may not have verification data.`);
+            alert(`❌ Failed to load certificate: ${msg}. This evidence may not have verification data.`);
+        } finally {
+            setCertLoading(false);
         }
     };
 
@@ -567,11 +571,31 @@ function EvidenceTab({ caseId }) {
     return (
         <>
             <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Evidence Vault</h3>
-                    <span style={{ padding: '0.2rem 0.6rem', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: '700' }}>
-                        {evidence.length} FILE{evidence.length !== 1 ? 'S' : ''}
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Evidence Vault</h3>
+                        <span style={{ padding: '0.2rem 0.6rem', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: '700' }}>
+                            {evidence.length} FILE{evidence.length !== 1 ? 'S' : ''}
+                        </span>
+                    </div>
+                    <label style={{
+                        padding: '0.6rem 1rem', background: 'var(--color-primary)', borderRadius: '0.5rem',
+                        color: 'white', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                        fontSize: '0.9rem'
+                    }}>
+                        <Upload size={16} /> Quick Upload
+                        <input type="file" style={{ display: 'none' }} onChange={async (e) => {
+                            if (!e.target.files[0]) return;
+                            try {
+                                const res = await documentAPI.upload(e.target.files[0], { caseId, category: 'EVIDENCE', description: 'Uploaded by Judge' });
+                                alert('✅ File uploaded successfully!');
+                                fetchEvidence(); // Refresh list
+                            } catch (err) {
+                                alert('Upload failed');
+                                console.error(err);
+                            }
+                        }} />
+                    </label>
                 </div>
 
                 {evidence.length === 0 ? (
@@ -668,7 +692,7 @@ function EvidenceTab({ caseId }) {
                                             {/* Certificate Button - Show for all hashed docs */}
                                             {(item.fileHash || item.blockHash) && (
                                                 <button
-                                                    onClick={() => downloadCertificate(item)}
+                                                    onClick={() => viewCertificate(item)}
                                                     style={{
                                                         padding: '0.5rem 0.75rem',
                                                         background: 'rgba(16, 185, 129, 0.1)',
@@ -716,6 +740,53 @@ function EvidenceTab({ caseId }) {
                     </div>
                 )}
             </div>
+
+            {/* Certificate Viewer Modal */}
+            {showCertModal && certUrl && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.8)',
+                    backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+                }} onClick={() => setShowCertModal(false)}>
+                    <div style={{
+                        background: '#1e1e1e', width: '90%', maxWidth: '900px', height: '90vh',
+                        borderRadius: '1rem', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    }} onClick={e => e.stopPropagation()}>
+                        {/* Modal Header */}
+                        <div style={{
+                            padding: '1rem 1.5rem', background: '#2d2d2d', borderBottom: '1px solid #404040',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}>
+                            <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <Shield size={20} color="#10b981" /> Section 63(4) Evidence Certificate
+                            </h3>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <a href={certUrl} download="Admissibility_Certificate.pdf" style={{
+                                    padding: '0.5rem 1rem', background: '#10b981', color: 'white', borderRadius: '0.5rem',
+                                    textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                                }}>
+                                    <Download size={16} /> Download PDF
+                                </a>
+                                <button onClick={() => setShowCertModal(false)} style={{
+                                    background: 'none', border: 'none', color: '#a0a0a0', cursor: 'pointer'
+                                }}>
+                                    <X size={24} />
+                                </button>
+                            </div>
+                        </div>
+                        {/* PDF View Area */}
+                        <div style={{ flex: 1, background: '#525659' }}>
+                            <iframe
+                                src={certUrl}
+                                title="Certificate Preview"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 'none' }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* AI Analysis Modal */}
             {showAnalysisModal && selectedAnalysis && (

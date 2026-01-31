@@ -142,10 +142,21 @@ export const assignmentAPI = {
 // Message API
 // Message API
 export const messageAPI = {
-    send: (caseId, message) => {
+    send: (caseId, messageOrPayload) => {
         const user = JSON.parse(localStorage.getItem('user'));
         const senderId = user?.id;
-        return api.post(`/api/cases/${caseId}/messages`, { message, senderId });
+
+        // Handle both string messages and full payload objects
+        const payload = typeof messageOrPayload === 'string'
+            ? { message: messageOrPayload, senderId, type: 'TEXT', attachmentUrl: null }
+            : {
+                message: messageOrPayload.message,
+                senderId: messageOrPayload.senderId || senderId,
+                type: messageOrPayload.type || 'TEXT',
+                attachmentUrl: messageOrPayload.attachmentUrl || null
+            };
+
+        return api.post(`/api/cases/${caseId}/messages`, payload);
     },
     getMessages: (caseId) => api.get(`/api/cases/${caseId}/messages`),
 };
@@ -219,6 +230,43 @@ export const clientFirAPI = {
     getStats: () => api.get('/api/client/fir/stats'),
 };
 
+// ===== NEW: Case Events API (Audit Trail / Timeline) =====
+export const caseEventAPI = {
+    // Get timeline events for a case (chronological order)
+    getTimeline: (caseId) => api.get(`/api/cases/${caseId}/events`),
+    // Get recent events (newest first)
+    getRecent: (caseId) => api.get(`/api/cases/${caseId}/events/recent`),
+    // Get events for judge's dashboard
+    getJudgeEvents: (judgeId) => api.get(`/api/cases/judge/${judgeId}/events`),
+};
+
+// ===== NEW: Case State Transition API (Chain Reaction Handover) =====
+export const caseTransitionAPI = {
+    // POLICE → COURT: Submit case for cognizance
+    policeSubmitToCourt: (caseId, officerId, officerName) =>
+        api.post(`/api/cases/transition/${caseId}/submit-to-court`, { officerId, officerName }),
+
+    // LAWYER: Save draft (triggers client approval flow)
+    lawyerSaveDraft: (caseId, lawyerId, lawyerName, draftContent) =>
+        api.post(`/api/cases/transition/${caseId}/save-draft`, { lawyerId, lawyerName, draftContent }),
+
+    // LITIGANT: Approve/Reject draft
+    litigantApproveDraft: (caseId, litigantId, litigantName) =>
+        api.post(`/api/cases/transition/${caseId}/approve-draft`, { litigantId, litigantName }),
+    litigantRejectDraft: (caseId, litigantId, litigantName, reason) =>
+        api.post(`/api/cases/transition/${caseId}/reject-draft`, { litigantId, litigantName, reason }),
+
+    // JUDGE: Cognizance and Stage advancement
+    judgeTakeCognizance: (caseId, judgeId, judgeName) =>
+        api.post(`/api/cases/transition/${caseId}/take-cognizance`, { judgeId, judgeName }),
+    judgeAdvanceStage: (caseId, judgeId, judgeName) =>
+        api.post(`/api/cases/transition/${caseId}/advance-stage`, { judgeId, judgeName }),
+
+    // SYSTEM: Summons served
+    markSummonsServed: (caseId) => api.post(`/api/cases/transition/${caseId}/summons-served`),
+
+    // Get case health
+    getCaseHealth: (caseId) => api.get(`/api/cases/transition/${caseId}/health`),
+};
+
 export default api;
-
-
