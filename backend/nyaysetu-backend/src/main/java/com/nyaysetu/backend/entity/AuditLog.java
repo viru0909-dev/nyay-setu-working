@@ -23,7 +23,9 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private UUID userId;          // user who did the action
+    private Long userId;          // user who did the action
+    private UUID caseId;          // Link to case
+    private String role;          // User role (JUDGE, POLICE, etc.)
     private String action;        // LOGIN, CASE_CREATED, DOC_UPLOADED
     private String description;   // details
     private LocalDateTime timestamp;

@@ -446,6 +446,7 @@ function EvidenceTab({ caseId }) {
 
     // AI Analysis State
     const [analysisMap, setAnalysisMap] = useState({});
+    const [verificationMap, setVerificationMap] = useState({}); // Stores hash match result
     const [selectedAnalysis, setSelectedAnalysis] = useState(null);
     const [showAnalysisModal, setShowAnalysisModal] = useState(false);
 
@@ -475,7 +476,7 @@ function EvidenceTab({ caseId }) {
             const documents = (documentsRes.data || []).map(item => ({
                 ...item,
                 source: 'document',
-                isVerified: item.fileHash ? true : false, // Simple check if hash exists
+                isVerified: false, // Will be updated by dynamic check
                 evidenceType: 'CASE_DOCUMENT',
                 createdAt: item.uploadedAt // Normalize date field
             }));
@@ -486,14 +487,29 @@ function EvidenceTab({ caseId }) {
 
             setEvidence(merged);
 
-            // Check analysis for documents
-            documents.forEach(checkAnalysis);
+            // Trigger dynamic checks
+            documents.forEach(doc => {
+                checkAnalysis(doc);
+                verifyHash(doc);
+            });
 
         } catch (error) {
             console.error('Error fetching evidence:', error);
             setEvidence([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const verifyHash = async (doc) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`${API_BASE_URL}/api/documents/${doc.id}/verify-hash`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setVerificationMap(prev => ({ ...prev, [doc.id]: res.data.valid }));
+        } catch (e) {
+            setVerificationMap(prev => ({ ...prev, [doc.id]: false }));
         }
     };
 
@@ -567,147 +583,157 @@ function EvidenceTab({ caseId }) {
     }
 
     return (
-        <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Evidence Vault</h3>
-                <span style={{ padding: '0.2rem 0.6rem', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: '700' }}>
-                    {evidence.length} FILE{evidence.length !== 1 ? 'S' : ''}
-                </span>
+        <>
+            <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Evidence Vault</h3>
+                    <span style={{ padding: '0.2rem 0.6rem', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: '700' }}>
+                        {evidence.length} FILE{evidence.length !== 1 ? 'S' : ''}
+                    </span>
+                </div>
+
+                {evidence.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '4rem' }}>
+                        <FileText size={64} color="var(--text-secondary)" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                        <h4 style={{ color: 'var(--text-secondary)', margin: 0 }}>No evidence found in this case</h4>
+                        <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Evidence will appear here once uploaded</p>
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gap: '1.25rem' }}>
+                        {evidence.map((item) => {
+                            const isVerifiedStatus = item.source === 'blockchain' || verificationMap[item.id];
+                            const verificationText = item.source === 'blockchain'
+                                ? 'TAMPER-PROOF'
+                                : (verificationMap[item.id] === true
+                                    ? 'TAMPER-PROOF'
+                                    : (verificationMap[item.id] === false
+                                        ? 'TAMPERED / UNVERIFIED'
+                                        : 'VERIFYING...'));
+
+                            return (
+                                <div key={item.id} style={{
+                                    background: 'var(--bg-glass)',
+                                    border: `1px solid ${isVerifiedStatus ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                                    borderRadius: '1.25rem',
+                                    padding: '1.5rem',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}>
+                                    {/* Verification Badge */}
+                                    <div style={{
+                                        position: 'absolute', top: 0, right: 0, padding: '0.5rem 1rem',
+                                        background: isVerifiedStatus ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                        borderBottomLeftRadius: '1rem',
+                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                        borderLeft: 'var(--border-glass)', borderBottom: 'var(--border-glass)'
+                                    }}>
+                                        {isVerifiedStatus ? <CheckCircle2 size={14} color="#10b981" /> : <AlertTriangle size={14} color="#ef4444" />}
+                                        <span style={{
+                                            fontSize: '0.7rem', fontWeight: '800',
+                                            color: isVerifiedStatus ? '#4ade80' : '#f87171'
+                                        }}>
+                                            {verificationText}
+                                        </span>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                                        <div style={{
+                                            width: '56px', height: '56px', borderRadius: '12px',
+                                            background: isVerifiedStatus ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                            border: `2px solid ${isVerifiedStatus ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+                                        }}>
+                                            {item.source === 'blockchain' ? <Shield size={28} color="#10b981" /> : (isVerifiedStatus ? <FileCheck size={28} color="#10b981" /> : <AlertTriangle size={28} color="#ef4444" />)}
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                                                {item.blockIndex != null && (
+                                                    <span style={{ color: '#6366f1', fontFamily: 'monospace', fontSize: '0.75rem', fontWeight: '700' }}>BLOCK #{item.blockIndex}</span>
+                                                )}
+                                                <h4 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
+                                                    {item.title || item.fileName}
+                                                </h4>
+                                            </div>
+
+                                            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: '0.5rem 0' }}>
+                                                {item.description}
+                                            </p>
+
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <FileText size={14} />
+                                                    <span>{item.evidenceType}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <Link2 size={14} />
+                                                    <span style={{ fontFamily: 'monospace' }}>{(item.blockHash || item.fileHash)?.substring(0, 16)}...</span>
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                    <Clock size={14} />
+                                                    <span>{item.createdAt ? new Date(item.createdAt).toLocaleString() : 'N/A'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                                            {/* AI Analysis Button */}
+                                            {item.source === 'document' && analysisMap[item.id] && (
+                                                <button onClick={() => viewAnalysis(item)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.5rem', color: '#8b5cf6', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                    <Sparkles size={14} /> AI Insights
+                                                </button>
+                                            )}
+
+                                            {/* Certificate Button */}
+                                            {isVerifiedStatus && (item.fileHash || item.blockHash) && (
+                                                <button
+                                                    onClick={() => downloadCertificate(item)}
+                                                    style={{
+                                                        padding: '0.5rem 0.75rem',
+                                                        background: 'rgba(16, 185, 129, 0.1)',
+                                                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                                                        borderRadius: '0.5rem',
+                                                        color: '#10b981',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        gap: '0.5rem',
+                                                        alignItems: 'center',
+                                                        fontSize: '0.85rem',
+                                                        fontWeight: '600',
+                                                        whiteSpace: 'nowrap'
+                                                    }}
+                                                    title="Download Section 63(4) Certificate"
+                                                >
+                                                    <FileCheck size={14} />
+                                                    View Certificate
+                                                </button>
+                                            )}
+
+                                            {/* Download Button */}
+                                            {item.source === 'document' && (
+                                                <button
+                                                    onClick={() => downloadDoc(item)}
+                                                    style={{
+                                                        padding: '0.5rem',
+                                                        background: 'var(--bg-glass)',
+                                                        border: '1px solid var(--border-glass)',
+                                                        borderRadius: '0.5rem',
+                                                        color: 'var(--text-secondary)',
+                                                        cursor: 'pointer',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }}
+                                                    title="Download Document"
+                                                >
+                                                    <Download size={16} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
-
-            {evidence.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '4rem' }}>
-                    <FileText size={64} color="var(--text-secondary)" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
-                    <h4 style={{ color: 'var(--text-secondary)', margin: 0 }}>No evidence found in this case</h4>
-                    <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Evidence will appear here once uploaded</p>
-                </div>
-            ) : (
-                <div style={{ display: 'grid', gap: '1.25rem' }}>
-                    {evidence.map((item) => (
-                        <div key={item.id} style={{
-                            background: 'var(--bg-glass)',
-                            border: `1px solid ${item.isVerified ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
-                            borderRadius: '1.25rem',
-                            padding: '1.5rem',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}>
-                            {/* Verification Badge */}
-                            <div style={{
-                                position: 'absolute', top: 0, right: 0, padding: '0.5rem 1rem',
-                                background: item.isVerified ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                borderLeft: `1px solid ${item.isVerified ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
-                                borderBottom: `1px solid ${item.isVerified ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
-                                borderBottomLeftRadius: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
-                            }}>
-                                {item.isVerified ? <CheckCircle2 size={14} color="#10b981" /> : <AlertTriangle size={14} color="#ef4444" />}
-                                <span style={{
-                                    fontSize: '0.7rem', fontWeight: '800',
-                                    color: item.isVerified ? '#4ade80' : '#f87171'
-                                }}>
-                                    {item.isVerified ? 'TAMPER-PROOF' : 'UNVERIFIED'}
-                                </span>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                                <div style={{
-                                    width: '56px', height: '56px', borderRadius: '12px',
-                                    background: item.isVerified ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                    display: 'flex',
-                                    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                    border: `2px solid ${item.isVerified ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
-                                }}>
-                                    {item.isVerified ? <Shield size={28} color="#10b981" /> : <AlertTriangle size={28} color="#ef4444" />}
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                                        {item.blockIndex != null && (
-                                            <span style={{ color: '#6366f1', fontFamily: 'monospace', fontSize: '0.75rem', fontWeight: '700' }}>BLOCK #{item.blockIndex}</span>
-                                        )}
-                                        <h4 style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
-                                            {item.title || item.fileName}
-                                        </h4>
-                                    </div>
-
-                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: '0.5rem 0' }}>
-                                        {item.description}
-                                    </p>
-
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                            <FileText size={14} />
-                                            <span>{item.evidenceType}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                            <Link2 size={14} />
-                                            <span style={{ fontFamily: 'monospace' }}>{(item.blockHash || item.fileHash)?.substring(0, 16)}...</span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                            <Clock size={14} />
-                                            <span>{item.createdAt ? new Date(item.createdAt).toLocaleString() : 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                                    {/* AI Analysis Button */}
-                                    {item.source === 'document' && analysisMap[item.id] && (
-                                        <button onClick={() => viewAnalysis(item)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.5rem', color: '#8b5cf6', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
-                                            <Sparkles size={14} /> AI Insights
-                                        </button>
-                                    )}
-
-                                    {/* Certificate Button */}
-                                    {item.isVerified && (item.fileHash || item.blockHash) && (
-                                        <button
-                                            onClick={() => downloadCertificate(item)}
-                                            style={{
-                                                padding: '0.5rem 0.75rem',
-                                                background: 'rgba(16, 185, 129, 0.1)',
-                                                border: '1px solid rgba(16, 185, 129, 0.3)',
-                                                borderRadius: '0.5rem',
-                                                color: '#10b981',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                gap: '0.5rem',
-                                                alignItems: 'center',
-                                                fontSize: '0.85rem',
-                                                fontWeight: '600',
-                                                whiteSpace: 'nowrap'
-                                            }}
-                                            title="Download Section 63(4) Certificate"
-                                        >
-                                            <FileCheck size={14} />
-                                            View Certificate
-                                        </button>
-                                    )}
-
-                                    {/* Download Button */}
-                                    {item.source === 'document' && (
-                                        <button
-                                            onClick={() => downloadDoc(item)}
-                                            style={{
-                                                padding: '0.5rem',
-                                                background: 'var(--bg-glass)',
-                                                border: '1px solid var(--border-glass)',
-                                                borderRadius: '0.5rem',
-                                                color: 'var(--text-secondary)',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}
-                                            title="Download Document"
-                                        >
-                                            <Download size={16} />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
 
             {/* AI Analysis Modal */}
             {showAnalysisModal && selectedAnalysis && (
@@ -752,7 +778,7 @@ function EvidenceTab({ caseId }) {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }
 
@@ -1638,6 +1664,7 @@ function HearingsTab({ caseId, caseData }) {
 }
 
 // Timeline Display Component
+// Timeline Display Component
 function TimelineDisplay({ caseId }) {
     const [timeline, setTimeline] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -1649,12 +1676,34 @@ function TimelineDisplay({ caseId }) {
     const fetchTimeline = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_BASE_URL}/api/timeline/${caseId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            // Fetch both standard timeline and audit logs
+            const [timelineRes, auditRes] = await Promise.all([
+                axios.get(`${API_BASE_URL}/api/timeline/${caseId}`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${API_BASE_URL}/api/audit/case/${caseId}`, { headers: { Authorization: `Bearer ${token}` } })
+            ]);
 
-            const events = response.data || [];
-            setTimeline(events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
+            const timelineEvents = (timelineRes.data || []).map(e => ({
+                id: e.id,
+                date: e.timestamp,
+                title: e.event,
+                source: 'SYSTEM',
+                description: ''
+            }));
+
+            const auditEvents = (auditRes.data || []).map(e => ({
+                id: e.id,
+                date: e.timestamp,
+                title: formatAuditTitle(e),
+                source: e.role || 'SYSTEM',
+                description: e.description
+            }));
+
+            // Merge and Sort
+            const merged = [...timelineEvents, ...auditEvents]
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Remove duplicates if any (naive approach based on timestamp/title similarity if needed, but IDs differ)
+            setTimeline(merged);
         } catch (error) {
             console.error('Error fetching timeline:', error);
             setTimeline([]);
@@ -1663,11 +1712,25 @@ function TimelineDisplay({ caseId }) {
         }
     };
 
-    const getEventIcon = (eventText) => {
-        if (eventText.includes('Hearing') || eventText.includes('hearing')) return Clock;
-        if (eventText.includes('Filed') || eventText.includes('filed')) return FileText;
-        if (eventText.includes('Judge') || eventText.includes('judge')) return Gavel;
-        if (eventText.includes('Evidence') || eventText.includes('evidence')) return Shield;
+    const formatAuditTitle = (e) => {
+        if (e.role === 'POLICE' && (e.action === 'FIR_REGISTERED' || e.action === 'CASE_CREATED')) {
+            return `POLICE: ${e.action}`;
+        }
+        if (e.role === 'JUDGE' && e.action === 'SUMMONS_ISSUED') {
+            return `JUDGE: SUMMONS ISSUED`;
+        }
+        return e.action.replace(/_/g, ' ');
+    };
+
+    const getEventIcon = (event) => {
+        const title = event.title.toLowerCase();
+        const src = (event.source || '').toLowerCase();
+
+        if (src === 'police') return Shield; // Badge for police
+        if (title.includes('hearing')) return Clock;
+        if (title.includes('filed')) return FileText;
+        if (title.includes('judge') || src === 'judge') return Gavel;
+        if (title.includes('summons')) return Gavel;
         return CheckCircle2;
     };
 
@@ -1690,34 +1753,34 @@ function TimelineDisplay({ caseId }) {
     return (
         <div style={{ position: 'relative', borderLeft: '2px solid var(--border-glass)', paddingLeft: '2rem', marginLeft: '0.5rem' }}>
             {timeline.map((event, i) => {
-                const Icon = getEventIcon(event.event);
-                const isPast = new Date(event.timestamp) < new Date();
+                const Icon = getEventIcon(event);
+                const isPast = new Date(event.date) < new Date();
 
                 return (
                     <div key={event.id || i} style={{ marginBottom: '2rem', position: 'relative' }}>
                         <div style={{
                             position: 'absolute', left: '-2.5rem', top: '0',
                             width: '2rem', height: '2rem', borderRadius: '50%',
-                            background: isPast ? 'var(--color-accent)' : 'var(--bg-glass)',
-                            border: '2px solid var(--color-accent)',
-                            color: isPast ? 'white' : 'var(--color-accent)',
+                            background: event.source === 'POLICE' ? '#ef4444' : (isPast ? 'var(--color-accent)' : 'var(--bg-glass)'),
+                            border: `2px solid ${event.source === 'POLICE' ? '#ef4444' : 'var(--color-accent)'}`,
+                            color: 'white',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1
                         }}>
                             <Icon size={14} />
                         </div>
                         <div style={{ background: 'var(--bg-glass)', padding: '1rem', borderRadius: '0.75rem', border: 'var(--border-glass)' }}>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                {new Date(event.timestamp).toLocaleString('en-IN', {
-                                    day: 'numeric',
-                                    month: 'short',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
+                                {new Date(event.date).toLocaleString('en-IN', {
+                                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
                                 })}
                             </span>
-                            <h4 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', margin: '0.5rem 0 0 0' }}>
-                                {event.event}
-                            </h4>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <h4 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', margin: '0.5rem 0 0 0' }}>
+                                    {event.title}
+                                </h4>
+                                {event.source === 'POLICE' && <span style={{ fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', background: '#ef4444', color: 'white', fontWeight: 'bold' }}>POLICE</span>}
+                            </div>
+                            {event.description && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>{event.description}</p>}
                         </div>
                     </div>
                 );
@@ -1728,6 +1791,22 @@ function TimelineDisplay({ caseId }) {
 
 
 function PartiesTab({ caseData, caseId }) {
+    const issueSummons = async () => {
+        if (confirm("Issue digital summons to the Respondent? Task will be assigned to Police.")) {
+            try {
+                const token = localStorage.getItem('token');
+                await axios.post(`${API_BASE_URL}/api/judge/cases/${caseId}/issue-summons`, {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                alert("Summons Issued! Police Dashboard updated.");
+                window.location.reload();
+            } catch (e) {
+                console.error(e);
+                alert("Failed to issue summons.");
+            }
+        }
+    };
+
     return (
         <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>Parties Involved</h3>
@@ -1738,8 +1817,20 @@ function PartiesTab({ caseData, caseId }) {
                     {caseData.lawyerName && <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Represented by: {caseData.lawyerName}</p>}
                 </div>
                 <div>
-                    <h4 style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: '700', marginBottom: '0.5rem' }}>RESPONDENT</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h4 style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: '700', marginBottom: '0.5rem' }}>RESPONDENT</h4>
+                        <button
+                            onClick={issueSummons}
+                            style={{
+                                padding: '0.5rem 1rem', background: '#ef4444', color: 'white',
+                                border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer',
+                                fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                            }}>
+                            <Gavel size={14} /> Issue Digital Summons
+                        </button>
+                    </div>
                     <p style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.respondent}</p>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Status: {caseData.summonsStatus || 'Not Served'}</p>
                 </div>
             </div>
         </div>

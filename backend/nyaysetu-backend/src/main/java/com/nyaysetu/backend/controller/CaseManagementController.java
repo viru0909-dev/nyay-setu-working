@@ -68,4 +68,52 @@ public class CaseManagementController {
         caseManagementService.deleteCase(id);
         return ResponseEntity.ok(Map.of("message", "Case deleted successfully"));
     }
+
+    /**
+     * Handover C: Lawyer submits draft
+     */
+    @PostMapping("/{id}/submit-draft")
+    public ResponseEntity<Map<String, Object>> submitDraft(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> request
+    ) {
+        String draftContent = request.get("draftContent");
+        caseManagementService.sendDraftForApproval(id, draftContent);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Draft submitted for approval"));
+    }
+
+    /**
+     * Handover C: Client reviews draft
+     */
+    @PostMapping("/{id}/review-draft")
+    public ResponseEntity<Map<String, Object>> reviewDraft(
+            @PathVariable UUID id,
+            @RequestBody Map<String, Object> request
+    ) {
+        boolean approved = Boolean.parseBoolean(request.get("approved").toString());
+        String comments = request.get("comments") != null ? request.get("comments").toString() : "";
+        
+        caseManagementService.approveDraft(id, approved, comments);
+        
+        return ResponseEntity.ok(Map.of(
+            "success", true, 
+            "message", approved ? "Draft Approved" : "Changes Requested"
+        ));
+    }
+
+    @PutMapping("/{id}/approve-draft")
+    public ResponseEntity<Map<String, Object>> approveDraft(
+            @PathVariable UUID id,
+            @RequestBody Map<String, Object> request
+    ) {
+        boolean approved = Boolean.parseBoolean(request.get("approved").toString());
+        String comments = request.get("comments") != null ? request.get("comments").toString() : "";
+        
+        caseManagementService.approveDraft(id, approved, comments);
+        
+        return ResponseEntity.ok(Map.of(
+            "success", true, 
+            "message", approved ? "Draft Approved" : "Changes Requested"
+        ));
+    }
 }
