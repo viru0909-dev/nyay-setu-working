@@ -127,6 +127,25 @@ public class DocumentManagementService {
         documentAnalysisService.analyzeDocumentAsync(document, file);
     }
 
+    /**
+     * Verify document hash against storage
+     */
+    public boolean verifyDocumentHash(UUID id) {
+        DocumentEntity document = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+        
+        if (document.getFileHash() == null) return false;
+        
+        try {
+            java.io.File file = fileStorageService.getFile(document.getFileUrl());
+            return blockchainService.verifyFileIntegrity(file, document.getFileHash());
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(DocumentManagementService.class)
+                .error("Hash verification failed for doc {}: {}", id, e.getMessage());
+            return false;
+        }
+    }
+
     private DocumentDto convertToDto(DocumentEntity entity) {
         DocumentDto dto = DocumentDto.builder()
                 .id(entity.getId())

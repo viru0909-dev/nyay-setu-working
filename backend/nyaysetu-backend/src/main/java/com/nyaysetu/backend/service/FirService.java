@@ -306,7 +306,7 @@ public class FirService {
                 .title("State vs " + (fir.getDescription().length() > 20 ? fir.getDescription().substring(0, 20) + "..." : fir.getDescription()))
                 .description(fir.getDescription())
                 .caseType("CRIMINAL") // Defaulting to criminal for FIRs
-                .status(CaseStatus.PENDING) // Initial status in court
+                .status(CaseStatus.PENDING_COGNIZANCE) // Initial status in court - Handover A
                 .petitioner("State (Police)")
                 .respondent("Unknown (Investigation On-going)") // or extract from FIR if structure allows
                 .filedDate(LocalDateTime.now())
@@ -444,7 +444,7 @@ public class FirService {
                     .title("State vs " + caseTitleSuffix)
                     .description("FIR REGISTERED: " + fir.getFirNumber() + "\n\n" + caseDescription)
                     .caseType("CRIMINAL")
-                    .status(CaseStatus.PENDING) 
+                    .status(CaseStatus.PENDING_COGNIZANCE) 
                     .petitioner("State (Police)")
                     .respondent("Unknown") 
                     .filedDate(LocalDateTime.now())

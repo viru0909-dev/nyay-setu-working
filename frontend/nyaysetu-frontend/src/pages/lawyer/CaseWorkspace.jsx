@@ -761,27 +761,204 @@ function TabChat({ caseData }) {
     const [input, setInput] = useState('');
     const [isRefining, setIsRefining] = useState(false);
     const messagesEndRef = useRef(null);
+    const [isRecording, setIsRecording] = useState(false);
+    const mediaRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
+    const fileInputRef = useRef(null);
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
-        // Mock fetch messages
-        messageAPI.getMessages(caseData.id).then(res =>
-            setMessages(res.data.map(m => ({ ...m, sender: m.senderId === caseData.clientId ? 'client' : 'me' })))
-        ).catch(() => {
-            setMessages([
-                { id: 1, text: `Hello, I have a question about my case: ${caseData.title}`, sender: 'client', time: '10:00 AM' },
-                { id: 2, text: 'Yes, please go ahead.', sender: 'me', time: '10:05 AM' }
-            ]);
-        });
+        fetchMessages();
+        const interval = setInterval(fetchMessages, 10000);
+        return () => clearInterval(interval);
     }, [caseData.id]);
 
-    const handleSend = async () => {
-        if (!input.trim()) return;
-        const newMsg = { id: Date.now(), text: input, sender: 'me', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-        setMessages([...messages, newMsg]);
-        setInput('');
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    const fetchMessages = () => {
+        messageAPI.getMessages(caseData.id).then(res =>
+            setMessages(res.data.map(m => ({
+                ...m,
+                sender: m.senderId === caseData.clientId ? 'client' : 'me',
+                text: m.message,
+                type: m.type || 'TEXT',
+                attachmentUrl: m.attachmentUrl,
+                time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            })))
+        ).catch(() => {
+            console.error("Failed to fetch messages");
+        });
+    };
+
+    const handleSend = async (customMessage = null, type = 'TEXT', attachmentUrl = null) => {
+        const msgToSend = customMessage || input;
+        if ((!msgToSend.trim() && type === 'TEXT')) return;
+
+        // Optimistic Update
+        const newMsg = {
+            id: Date.now(),
+            text: msgToSend,
+            sender: 'me',
+            type: type,
+            attachmentUrl: attachmentUrl,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setMessages(prev => [...prev, newMsg]);
+        if (!customMessage && type === 'TEXT') setInput('');
+
         try {
-            await messageAPI.send(caseData.id, input);
+            const user = JSON.parse(localStorage.getItem('user'));
+            const payload = {
+                senderId: user?.id,
+                message: msgToSend,
+                type: type,
+                attachmentUrl: attachmentUrl
+            };
+            await messageAPI.send(caseData.id, payload);
+            fetchMessages(); // Sync with server
         } catch (e) { console.error(e) }
+    };
+
+    const handleVideoCall = () => {
+        const roomId = `nyaysetu-video-${caseData.id}-${Date.now()}`;
+        const url = `https://meet.jit.si/${roomId}`;
+        handleSend("📞 I would like to start a video call.", 'VIDEO_CALL', url);
+    };
+
+    const handlePhoneCall = () => {
+        const roomId = `nyaysetu-audio-${caseData.id}-${Date.now()}`;
+        const url = `https://meet.jit.si/${roomId}#config.startWithVideoMuted=true`;
+        handleSend("📞 I would like to have a phone call.", 'PHONE_CALL', url);
+    };
+
+    const handleVoiceMessage = async () => {
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    };
+
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = uploadVoiceMessage;
+            mediaRecorder.start();
+            setIsRecording(true);
+        } catch (err) {
+            console.error("Error accessing microphone:", err);
+            alert("Could not access microphone.");
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+        }
+    };
+
+    const uploadVoiceMessage = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const audioFile = new File([audioBlob], "voice_message.wav", { type: 'audio/wav' });
+
+        setUploading(true);
+        try {
+            const res = await documentAPI.upload(audioFile, {
+                caseId: caseData.id,
+                category: 'VOICE_NOTE',
+                description: `Voice message from Lawyer`
+            });
+
+            const docId = res.data.id;
+            const downloadUrl = `/api/documents/${docId}/download`;
+
+            await handleSend("🎤 Voice Message", 'AUDIO', downloadUrl);
+        } catch (error) {
+            console.error("Failed to upload voice message", error);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const res = await documentAPI.upload(file, {
+                caseId: caseData.id,
+                category: 'EVIDENCE',
+                description: `Shared via chat by Lawyer`
+            });
+            const docId = res.data.id;
+            const downloadUrl = `/api/documents/${docId}/download`;
+            await handleSend(`Shared file: ${file.name}`, 'FILE', downloadUrl);
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const renderMessageContent = (msg) => {
+        switch (msg.type) {
+            case 'AUDIO':
+                return (
+                    <div>
+                        <div style={{ marginBottom: '5px' }}>🎤 Voice Message</div>
+                        <audio controls src={msg.attachmentUrl || '#'} style={{ height: '30px', maxWidth: '100%' }} />
+                    </div>
+                );
+            case 'VIDEO_CALL':
+            case 'PHONE_CALL':
+                return (
+                    <div>
+                        <div style={{ marginBottom: '5px' }}>{msg.text}</div>
+                        <a
+                            href={msg.attachmentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                display: 'inline-block',
+                                marginTop: '0.5rem',
+                                padding: '0.5rem 1rem',
+                                background: 'white',
+                                color: 'var(--color-accent)',
+                                borderRadius: '0.5rem',
+                                textDecoration: 'none',
+                                fontWeight: 'bold',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            {msg.type === 'VIDEO_CALL' ? 'Join Video Call' : 'Join Audio Call'}
+                        </a>
+                    </div>
+                );
+            case 'FILE':
+                return (
+                    <div>
+                        <div>{msg.text}</div>
+                        <a href={msg.attachmentUrl} download style={{ color: 'gold', textDecoration: 'underline' }}>Download File</a>
+                    </div>
+                );
+            default:
+                return msg.text;
+        }
     };
 
     return (
@@ -797,8 +974,8 @@ function TabChat({ caseData }) {
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button style={{ padding: '0.5rem', background: 'var(--bg-glass)', border: 'none', borderRadius: '0.5rem', color: 'var(--text-secondary)' }}><Phone size={18} /></button>
-                    <button style={{ padding: '0.5rem', background: 'var(--bg-glass)', border: 'none', borderRadius: '0.5rem', color: 'var(--text-secondary)' }}><Video size={18} /></button>
+                    <button onClick={handlePhoneCall} style={{ padding: '0.5rem', background: 'var(--bg-glass)', border: 'none', borderRadius: '0.5rem', color: 'var(--text-secondary)', cursor: 'pointer' }}><Phone size={18} /></button>
+                    <button onClick={handleVideoCall} style={{ padding: '0.5rem', background: 'var(--bg-glass)', border: 'none', borderRadius: '0.5rem', color: 'var(--text-secondary)', cursor: 'pointer' }}><Video size={18} /></button>
                 </div>
             </div>
 
@@ -822,7 +999,7 @@ function TabChat({ caseData }) {
                             borderBottomLeftRadius: msg.sender === 'client' ? '0.2rem' : '1rem',
                             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                         }}>
-                            {text}
+                            {renderMessageContent(msg)}
                             <div style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '0.5rem', textAlign: 'right' }}>{msg.time}</div>
                         </div>
                     );
@@ -831,7 +1008,14 @@ function TabChat({ caseData }) {
             </div>
 
             <div style={{ padding: '1.5rem', borderTop: 'var(--border-glass-strong)', display: 'flex', gap: '1rem' }}>
-                <button style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)' }}><Paperclip size={20} /></button>
+                <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} />
+                <button
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    disabled={uploading}
+                >
+                    {uploading ? <Loader2 size={20} className="animate-spin" /> : <Paperclip size={20} />}
+                </button>
                 <button
                     onClick={async () => {
                         if (!input) return;
@@ -845,13 +1029,33 @@ function TabChat({ caseData }) {
                     style={{ background: 'transparent', border: '1px solid var(--color-accent)', borderRadius: '2rem', padding: '0 1rem', color: 'var(--color-accent)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: isRefining ? 0.5 : 1 }}>
                     {isRefining ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
                 </button>
+                <button
+                    onClick={handleVoiceMessage}
+                    style={{
+                        background: isRecording ? '#ef4444' : 'transparent',
+                        border: 'none',
+                        color: isRecording ? 'white' : 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        borderRadius: '50%',
+                        width: '32px',
+                        height: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    {isRecording ? <div className="animate-pulse" style={{ width: '12px', height: '12px', background: 'white', borderRadius: '2px' }} /> : <Type size={0} style={{ display: 'none' }} /> /* Hack to use a valid icon or nothing */}
+                    {isRecording ? null : <div style={{ fontSize: '1.2rem' }}>🎤</div>}
+                </button>
                 <input
                     value={input} onChange={e => setInput(e.target.value)}
                     onKeyPress={e => e.key === 'Enter' && handleSend()}
-                    placeholder="Type your message..."
+                    placeholder={isRecording ? "Recording..." : "Type your message..."}
+                    disabled={isRecording}
                     style={{ flex: 1, background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '2rem', padding: '0.75rem 1.5rem', color: 'var(--text-main)', outline: 'none' }}
                 />
-                <button onClick={handleSend} style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--color-accent)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', cursor: 'pointer' }}>
+                <button onClick={() => handleSend()} style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--color-accent)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', cursor: 'pointer' }}>
                     <Send size={18} />
                 </button>
             </div>

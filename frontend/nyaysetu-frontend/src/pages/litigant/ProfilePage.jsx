@@ -105,7 +105,7 @@ export default function ProfilePage() {
                                 width: '120px',
                                 height: '120px',
                                 borderRadius: '50%',
-                                background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                background: 'var(--color-primary)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -125,7 +125,7 @@ export default function ProfilePage() {
                                     width: '40px',
                                     height: '40px',
                                     borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                    background: 'var(--color-primary)',
                                     border: '3px solid var(--bg-glass-strong)',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -141,7 +141,7 @@ export default function ProfilePage() {
                         <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                             {profileData.name}
                         </h2>
-                        <p style={{ fontSize: '0.875rem', color: 'var(--color-accent)', fontWeight: '600', marginBottom: '0.25rem' }}>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--color-primary)', fontWeight: '600', marginBottom: '0.25rem' }}>
                             {user?.role?.replace('_', ' ')}
                         </p>
                         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
@@ -181,7 +181,7 @@ export default function ProfilePage() {
                                 style={{
                                     flex: 1,
                                     padding: '0.875rem',
-                                    background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                    background: 'var(--color-primary)',
                                     border: 'none',
                                     borderRadius: '0.75rem',
                                     color: 'white',
@@ -248,7 +248,7 @@ export default function ProfilePage() {
                                         : 'var(--bg-glass)',
                                     border: editing ? 'none' : 'var(--border-glass)',
                                     borderRadius: '0.5rem',
-                                    color: editing ? 'white' : 'var(--color-accent)',
+                                    color: editing ? 'white' : 'var(--color-primary)',
                                     fontSize: '0.875rem',
                                     fontWeight: '600',
                                     cursor: 'pointer'
@@ -269,10 +269,10 @@ export default function ProfilePage() {
                                     gap: '0.75rem',
                                     padding: '0.875rem 1rem',
                                     background: 'var(--bg-glass)',
-                                    border: editing ? '2px solid var(--color-accent)' : 'var(--border-glass)',
+                                    border: editing ? '2px solid var(--color-primary)' : 'var(--border-glass)',
                                     borderRadius: '0.75rem'
                                 }}>
-                                    <User size={18} style={{ color: 'var(--color-accent)' }} />
+                                    <User size={18} style={{ color: 'var(--color-primary)' }} />
                                     {editing ? (
                                         <input
                                             type="text"
@@ -306,7 +306,7 @@ export default function ProfilePage() {
                                     border: 'var(--border-glass)',
                                     borderRadius: '0.75rem'
                                 }}>
-                                    <Mail size={18} style={{ color: 'var(--color-accent)' }} />
+                                    <Mail size={18} style={{ color: 'var(--color-primary)' }} />
                                     <span style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>{profileData.email}</span>
                                 </div>
                             </div>
@@ -321,10 +321,10 @@ export default function ProfilePage() {
                                     gap: '0.75rem',
                                     padding: '0.875rem 1rem',
                                     background: 'var(--bg-glass)',
-                                    border: editing ? '2px solid var(--color-accent)' : 'var(--border-glass)',
+                                    border: editing ? '2px solid var(--color-primary)' : 'var(--border-glass)',
                                     borderRadius: '0.75rem'
                                 }}>
-                                    <Phone size={18} style={{ color: 'var(--color-accent)' }} />
+                                    <Phone size={18} style={{ color: 'var(--color-primary)' }} />
                                     {editing ? (
                                         <input
                                             type="text"
@@ -355,10 +355,10 @@ export default function ProfilePage() {
                                     gap: '0.75rem',
                                     padding: '0.875rem 1rem',
                                     background: 'var(--bg-glass)',
-                                    border: editing ? '2px solid var(--color-accent)' : 'var(--border-glass)',
+                                    border: editing ? '2px solid var(--color-primary)' : 'var(--border-glass)',
                                     borderRadius: '0.75rem'
                                 }}>
-                                    <Briefcase size={18} style={{ color: 'var(--color-accent)' }} />
+                                    <Briefcase size={18} style={{ color: 'var(--color-primary)' }} />
                                     {editing ? (
                                         <input
                                             type="text"
@@ -390,10 +390,10 @@ export default function ProfilePage() {
                                 gap: '0.75rem',
                                 padding: '0.875rem 1rem',
                                 background: 'var(--bg-glass)',
-                                border: editing ? '2px solid var(--color-accent)' : 'var(--border-glass)',
+                                border: editing ? '2px solid var(--color-primary)' : 'var(--border-glass)',
                                 borderRadius: '0.75rem'
                             }}>
-                                <MapPin size={18} style={{ color: 'var(--color-accent)' }} />
+                                <MapPin size={18} style={{ color: 'var(--color-primary)' }} />
                                 {editing ? (
                                     <input
                                         type="text"
@@ -436,7 +436,7 @@ export default function ProfilePage() {
                                 background: 'var(--bg-glass)',
                                 border: 'var(--border-glass)',
                                 borderRadius: '0.75rem',
-                                color: 'var(--color-accent)',
+                                color: 'var(--color-primary)',
                                 fontSize: '0.875rem',
                                 fontWeight: '600',
                                 cursor: 'pointer',
@@ -516,7 +516,7 @@ export default function ProfilePage() {
                                     onClick={handlePasswordChange}
                                     style={{
                                         padding: '0.875rem',
-                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                        background: 'var(--color-primary)',
                                         border: 'none',
                                         borderRadius: '0.75rem',
                                         color: 'white',

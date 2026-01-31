@@ -14,6 +14,7 @@ export default function PoliceDashboard() {
     const [loading, setLoading] = useState(true);
     const [pendingFirs, setPendingFirs] = useState([]);
     const [activeInvestigations, setActiveInvestigations] = useState([]);
+    const [summonsTasks, setSummonsTasks] = useState([]);
     const [selectedFir, setSelectedFir] = useState(null);
     const [findings, setFindings] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,19 +26,37 @@ export default function PoliceDashboard() {
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
-            const [statsRes, pendingRes, activeRes] = await Promise.all([
+            const [statsRes, pendingRes, activeRes, summonsRes] = await Promise.all([
                 policeAPI.getStats(),
                 policeAPI.getPendingFirs(),
-                policeAPI.getInvestigations()
+                policeAPI.getInvestigations(),
+                axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/police/summons/pending`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                })
             ]);
             setStats(statsRes.data);
             setPendingFirs(pendingRes.data);
             setActiveInvestigations(activeRes.data);
+            setSummonsTasks(summonsRes.data || []);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
             setStats({ totalFirs: 0, sealedFirs: 0, linkedFirs: 0, firsToday: 0 });
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCompleteSummons = async (caseId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/police/summons/${caseId}/complete`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert('✅ Summons marked as SERVED');
+            fetchDashboardData();
+        } catch (error) {
+            console.error('Error completing summons:', error);
+            alert('Failed to complete summons task');
         }
     };
 
@@ -259,6 +278,28 @@ export default function PoliceDashboard() {
                                 Investigate
                             </button>
                         </div>
+                    </div>
+                ))}
+            </div>
+            {/* SUMMONS DELIVERY TASKS */}
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Clock size={20} color="#8b5cf6" /> Summons Delivery Tasks ({summonsTasks.length})
+            </h3>
+            <div style={{ display: 'grid', gap: '1rem', marginBottom: '2rem' }}>
+                {summonsTasks.length === 0 ? (
+                    <p style={{ color: 'var(--text-secondary)' }}>No pending summons for delivery.</p>
+                ) : summonsTasks.map(task => (
+                    <div key={task.id} style={{ background: 'var(--bg-glass)', padding: '1rem', borderRadius: '1rem', border: 'var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h4 style={{ margin: 0, color: 'var(--text-main)' }}>{task.caseTitle}</h4>
+                            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>To: {task.respondent} | <strong>Type: {task.type}</strong></p>
+                        </div>
+                        <button
+                            onClick={() => handleCompleteSummons(task.id)}
+                            style={{ background: '#8b5cf6', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                            Mark as Handed Over
+                        </button>
                     </div>
                 ))}
             </div>

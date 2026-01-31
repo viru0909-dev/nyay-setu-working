@@ -31,6 +31,9 @@ public class CaseEntity {
     @Enumerated(EnumType.STRING)
     private CaseStage stage;
 
+    @Enumerated(EnumType.STRING)
+    private DocumentStatus documentStatus;
+
     private String urgency; // NORMAL, URGENT, CRITICAL
 
     private String petitioner;
@@ -56,6 +59,11 @@ public class CaseEntity {
     private String filingMethod; // VAKIL_FRIEND, MANUAL
 
     private Long sourceFirId;
+
+    private Boolean hasBsaCert;
+    
+    private String summonsStatus; // PENDING, SERVED, FAILED
+
 
     // ===== AI-RELATED FIELDS (Vakil-Friend System) =====
     

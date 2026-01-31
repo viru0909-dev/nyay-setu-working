@@ -70,6 +70,34 @@ public class CaseAssignmentService {
     }
 
     /**
+     * Handover B: Judge Takes Cognizance
+     * Updates status to IN_PROGRESS (My Docket)
+     */
+    @Transactional
+    public void takeCognizance(UUID caseId, Long judgeId) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        if (!CaseStatus.PENDING_COGNIZANCE.equals(caseEntity.getStatus())) {
+            // Check if already in progress to allow re-assignment if needed, but primary flow expects checking strict state
+            // For flexibility during dev/test, we log warning
+            log.warn("Taking cognizance of case {} which is in status {}", caseId, caseEntity.getStatus());
+        }
+
+        User judge = userRepository.findById(judgeId)
+                .orElseThrow(() -> new RuntimeException("Judge not found"));
+
+        caseEntity.setJudgeId(judgeId);
+        caseEntity.setAssignedJudge(judge.getName());
+        caseEntity.setStatus(CaseStatus.IN_PROGRESS);
+        
+        caseRepository.save(caseEntity);
+        
+        timelineService.addEvent(caseId, "COGNIZANCE TAKEN", "Judge " + judge.getName() + " took cognizance. Case moved to Docket.");
+        log.info("Handover B Complete: Case {} moved to Docket of Judge {}", caseId, judge.getName());
+    }
+
+    /**
      * Get list of available lawyers for client to choose from
      */
     public List<LawyerDTO> getAvailableLawyers() {
@@ -161,5 +189,37 @@ public class CaseAssignmentService {
                     return workload;
                 })
                 .collect(Collectors.toList());
+    }
+
+
+    @Transactional
+    public void updateSummonsStatus(UUID caseId, boolean served) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        if (served) {
+            caseEntity.setStatus(CaseStatus.SUMMONS_SERVED);
+            timelineService.addEvent(caseId, "SUMMONS SERVED", "Summons served to Respondent.");
+        }
+        caseRepository.save(caseEntity);
+    }
+    
+    @Transactional
+    public void updateDocumentStatus(UUID caseId, DocumentStatus status) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        caseEntity.setDocumentStatus(status);
+        if (status == DocumentStatus.APPROVED) {
+            caseEntity.setStatus(CaseStatus.READY_FOR_COURT);
+             timelineService.addEvent(caseId, "DRAFT APPROVED", "Client approved draft petition. Ready for Court.");
+        } else if (status == DocumentStatus.REJECTED) {
+            timelineService.addEvent(caseId, "DRAFT REJECTED", "Client requested changes to draft petition.");
+        } else if (status == DocumentStatus.PENDING_REVIEW) {
+            caseEntity.setStatus(CaseStatus.DRAFT_PENDING_CLIENT);
+            timelineService.addEvent(caseId, "DRAFT SUBMITTED", "Lawyer submitted draft for client review.");
+        }
+        
+        caseRepository.save(caseEntity);
     }
 }
