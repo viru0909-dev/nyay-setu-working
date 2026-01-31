@@ -177,10 +177,10 @@ export default function LawyerCasesPage() {
                             alignItems: 'center',
                             gap: '0.6rem',
                             transition: 'all 0.2s',
-                            background: activeTab === 'active' ? 'var(--color-primary)' : 'var(--bg-glass)',
-                            color: activeTab === 'active' ? 'var(--text-main)' : 'var(--text-secondary)',
+                            background: activeTab === 'active' ? '#3b82f6' : 'var(--bg-glass)', // Explicit Blue
+                            color: activeTab === 'active' ? 'white' : 'var(--text-secondary)',
                             border: activeTab === 'active' ? 'none' : 'var(--border-glass)',
-                            boxShadow: activeTab === 'active' ? 'var(--shadow-glass)' : 'none'
+                            boxShadow: activeTab === 'active' ? '0 4px 12px rgba(59, 130, 246, 0.4)' : 'none'
                         }}
                     >
                         <Activity size={18} />
@@ -293,24 +293,21 @@ export default function LawyerCasesPage() {
                             style={{
                                 background: 'var(--bg-glass-strong)',
                                 backdropFilter: 'var(--glass-blur)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                border: 'var(--border-glass)',
                                 borderRadius: '1.5rem',
-                                padding: '1.75rem',
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                cursor: 'default',
+                                padding: '1.5rem',
+                                transition: 'all 0.3s',
+                                cursor: 'pointer',
                                 display: 'flex',
-                                gap: '2rem',
-                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                                gap: '2rem'
                             }}
                             onMouseOver={e => {
-                                e.currentTarget.style.transform = 'translateY(-4px)';
-                                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-                                e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                                e.currentTarget.style.borderColor = 'var(--color-primary)';
+                                e.currentTarget.style.transform = 'translateY(-2px)';
                             }}
                             onMouseOut={e => {
+                                e.currentTarget.style.borderColor = '';
                                 e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                             }}
                         >
                             {/* Left Side: Icon and Core Info */}
@@ -365,21 +362,18 @@ export default function LawyerCasesPage() {
                             <div style={{ width: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', paddingLeft: '2rem', borderLeft: '1px solid rgba(255, 255, 255, 0.05)' }}>
                                 {activeTab === 'active' ? (
                                     <>
-                                        <div style={{
-                                            padding: '0.4rem 1rem',
-                                            borderRadius: '2rem',
+                                        <span style={{
                                             fontSize: '0.75rem',
-                                            fontWeight: '800',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem',
-                                            background: caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                                            color: caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? 'var(--color-success)' : 'var(--color-warning)',
-                                            border: `1px solid ${caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'}`
+                                            padding: '0.25rem 0.75rem',
+                                            borderRadius: '9999px',
+                                            fontWeight: '700',
+                                            background: caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? 'rgba(59, 130, 246, 0.1)' :
+                                                caseItem.status === 'PENDING' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                                            color: caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? '#3b82f6' :
+                                                caseItem.status === 'PENDING' ? '#f59e0b' : '#10b981'
                                         }}>
-                                            {caseItem.status === 'OPEN' || caseItem.status === 'IN_PROGRESS' ? <Activity size={12} /> : <Clock size={12} />}
                                             {caseItem.status}
-                                        </div>
+                                        </span>
 
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
                                             <button

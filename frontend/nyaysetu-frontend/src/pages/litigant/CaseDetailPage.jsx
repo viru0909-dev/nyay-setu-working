@@ -524,6 +524,36 @@ function OverviewTab({ caseData, onHireLawyer }) {
                                 <Clock size={16} color="#ef4444" />
                                 <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formatDate(caseData.nextHearing) || 'TBA'}</span>
                             </div>
+                            {/* Virtual Court Join Button - appears 15 min before hearing */}
+                            {caseData.nextHearing && (() => {
+                                const hearingTime = new Date(caseData.nextHearing);
+                                const now = new Date();
+                                const timeDiff = (hearingTime - now) / (1000 * 60); // difference in minutes
+                                const showJoinButton = timeDiff <= 15 && timeDiff > -60; // 15 min before to 60 min after
+
+                                return showJoinButton ? (
+                                    <button
+                                        onClick={() => window.open('https://meet.google.com/new', '_blank')}
+                                        style={{
+                                            marginTop: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            background: 'linear-gradient(135deg, #10b981, #059669)',
+                                            border: 'none',
+                                            borderRadius: '0.5rem',
+                                            color: 'white',
+                                            fontWeight: '700',
+                                            fontSize: '0.8rem',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            animation: 'pulse 2s infinite'
+                                        }}
+                                    >
+                                        📹 Join VOIS 5G Virtual Court
+                                    </button>
+                                ) : null;
+                            })()}
                         </div>
                         <div>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Assigned Judge</p>
@@ -647,6 +677,11 @@ function CaseFilesTab({ caseId }) {
     const [selectedAnalysis, setSelectedAnalysis] = useState(null);
     const [showAnalysisModal, setShowAnalysisModal] = useState(false);
     const [analyzingIds, setAnalyzingIds] = useState([]);
+
+    // Certificate Modal State
+    const [showCertModal, setShowCertModal] = useState(false);
+    const [certUrl, setCertUrl] = useState(null);
+    const [certLoading, setCertLoading] = useState(false);
 
     useEffect(() => {
         fetchAllFiles();
@@ -784,7 +819,8 @@ function CaseFilesTab({ caseId }) {
         } catch (e) { console.error(e); alert('Download failed'); }
     };
 
-    const downloadCertificate = async (doc) => {
+    const viewCertificate = async (doc) => {
+        setCertLoading(true);
         try {
             // Use different endpoint based on doc type
             const url = doc.source === 'evidence'
@@ -795,16 +831,14 @@ function CaseFilesTab({ caseId }) {
                 responseType: 'blob',
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
-            const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.setAttribute('download', `Certificate_${doc.fileName || doc.id}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+            setCertUrl(blobUrl);
+            setShowCertModal(true);
         } catch (e) {
-            console.error('Certificate download failed:', e);
-            alert('Failed to download certificate. This document may not have verification data.');
+            console.error('Certificate fetch failed:', e);
+            alert('❌ Failed to load certificate. This document may not have verification data.');
+        } finally {
+            setCertLoading(false);
         }
     };
 
@@ -868,7 +902,7 @@ function CaseFilesTab({ caseId }) {
                                         )}
 
                                         {showCertificate && (
-                                            <button onClick={() => downloadCertificate(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '0.5rem', color: '#10b981', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                            <button onClick={() => viewCertificate(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '0.5rem', color: '#10b981', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
                                                 <FileCheck size={14} /> Certificate
                                             </button>
                                         )}
@@ -929,9 +963,76 @@ function CaseFilesTab({ caseId }) {
                     </div>
                 </div>
             )}
+
+            {/* Certificate Viewer Modal */}
+            {showCertModal && certUrl && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.8)',
+                    backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+                }} onClick={() => setShowCertModal(false)}>
+                    <div style={{
+                        background: '#1e1e1e', width: '90%', maxWidth: '900px', height: '90vh',
+                        borderRadius: '1rem', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{
+                            padding: '1rem 1.5rem', background: '#2d2d2d', borderBottom: '1px solid #404040',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}>
+                            <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <Shield size={20} color="#10b981" /> Section 63(4) Evidence Certificate
+                            </h3>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <a href={certUrl} download="Admissibility_Certificate.pdf" style={{
+                                    padding: '0.5rem 1rem', background: '#10b981', color: 'white', borderRadius: '0.5rem',
+                                    textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                                }}>
+                                    <Download size={16} /> Download PDF
+                                </a>
+                                <button onClick={() => setShowCertModal(false)} style={{
+                                    background: 'none', border: 'none', color: '#a0a0a0', cursor: 'pointer', fontSize: '1.5rem'
+                                }}>
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+                        <div style={{ flex: 1, background: '#525659' }}>
+                            <iframe
+                                src={certUrl}
+                                title="Certificate Preview"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 'none' }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+
+// Helper: Map event types to icons for Timeline
+const getEventIcon = (eventType) => {
+    const iconMap = {
+        'POLICE_SUBMIT': FileText,
+        'LAWYER_DRAFT_SAVE': Edit,
+        'LITIGANT_APPROVE': CheckCircle2,
+        'LITIGANT_REJECT': AlertTriangle,
+        'JUDGE_COGNIZANCE': Gavel,
+        'EVIDENCE_UPLOADED': Upload,
+        'BSA_VALIDATED': Shield,
+        'BSA_FAILED': AlertCircle,
+        'SUMMONS_ISSUED': FileCheck,
+        'SUMMONS_SERVED': CheckCircle,
+        'HEARING_SCHEDULED': Calendar,
+        'STATUS_CHANGE': RefreshCw,
+        'STAGE_CHANGE': Gavel,
+        'CASE_CREATED': FileText,
+        'DOCUMENT_ANALYZED': Sparkles,
+    };
+    return iconMap[eventType] || Clock;
+};
 
 function TimelineTab({ caseData }) {
     const [timeline, setTimeline] = useState([]);
@@ -969,16 +1070,47 @@ function TimelineTab({ caseData }) {
     const fetchTimeline = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_BASE_URL}/api/timeline/${caseData.id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
 
-            const actualEvents = response.data || [];
+            // Fetch from BOTH legacy timeline AND new CaseEvents API
+            const [timelineRes, eventsRes] = await Promise.allSettled([
+                axios.get(`${API_BASE_URL}/api/timeline/${caseData.id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                }),
+                axios.get(`${API_BASE_URL}/api/cases/${caseData.id}/events`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+            ]);
+
+            // Merge both sources of events
+            const legacyEvents = timelineRes.status === 'fulfilled' ? (timelineRes.value.data || []) : [];
+            const caseEvents = eventsRes.status === 'fulfilled' ? (eventsRes.value.data || []) : [];
+
+            // Map CaseEvents to timeline format
+            const mappedCaseEvents = caseEvents.map(e => ({
+                date: e.timestamp,
+                title: e.summary || e.eventType.replace(/_/g, ' '),
+                subtitle: `${e.actorRole}: ${e.actorName || 'System'}`,
+                type: 'completed',
+                icon: getEventIcon(e.eventType),
+                eventType: e.eventType,
+                actorRole: e.actorRole
+            }));
+
+            // Combine and deduplicate
+            const actualEvents = [...legacyEvents.map(e => ({
+                date: e.timestamp,
+                title: e.event,
+                subtitle: e.description || 'Completed',
+                type: 'completed',
+                icon: CheckCircle2
+            })), ...mappedCaseEvents];
+
+            // Sort by date
+            actualEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             // Determine lifecycle
             const lifecycle = standardStages[caseData.caseType] || standardStages['CIVIL'];
 
-            // Find current stage index based on history or status
             // This is a simplification; in production, backend should return 'currentStageIndex'
             let currentStageIndex = 0;
             if (caseData.status === 'FIR_FILED') currentStageIndex = 1;
