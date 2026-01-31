@@ -238,6 +238,52 @@ public class GroqDocumentVerificationService {
             .toList();
     }
 
+    /**
+     * Generate a Judge's Brief (Digital Court Master) for a case
+     */
+    public String generateCaseBrief(com.nyaysetu.backend.entity.CaseEntity caseEntity) {
+        String prompt = String.format("""
+            You are a "Digital Court Master" (AI Judicial Assistant) for the High Court.
+            Your task is to provide a concise, structured pre-hearing briefing for the Judge for the following case:
+            
+            Case Details:
+            Title: %s
+            Type: %s
+            Petitioner: %s
+            Respondent: %s
+            Description: %s
+            
+            Please provide a summary in the following plain text format (Do NOT use markdown like **bold**):
+            
+            CASE SYNOPSIS
+            (A 2-3 sentence overview of what the case is about)
+            
+            KEY LEGAL ISSUES
+            (Bulleted list of potential legal questions or conflicts)
+            
+            PROCEDURAL STATUS
+            (Current stage and what is expected next)
+            
+            SUGGESTED ACTIONS
+            (1-2 recommended questions or actions for the judge)
+            
+            Keep the tone formal, judicial, and objective. Do not use asterisks or colons in the headers.
+            """, 
+            caseEntity.getTitle(),
+            caseEntity.getCaseType(),
+            caseEntity.getPetitioner(),
+            caseEntity.getRespondent(),
+            caseEntity.getDescription()
+        );
+        
+        String response = chatWithAI(prompt);
+        // Aggressively remove markdown symbols if AI ignored the instruction
+        return response.replaceAll("\\*\\*", "")
+                      .replaceAll("##", "")
+                      .replaceAll("#", "")
+                      .trim();
+    }
+
     private DocumentVerificationResult defaultVerification(String documentName) {
         return DocumentVerificationResult.builder()
             .verified(false)

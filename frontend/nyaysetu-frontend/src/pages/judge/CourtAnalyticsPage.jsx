@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { judgeAPI } from '../../services/api';
 import {
     BarChart3,
@@ -263,33 +263,32 @@ export default function CourtAnalyticsPage() {
 function StatCard({ icon, value, label, color, description }) {
     return (
         <div style={{
-            background: 'var(--bg-glass-strong)',
-            backdropFilter: 'var(--glass-blur)',
-            border: 'var(--border-glass-strong)',
-            borderRadius: '1.25rem',
+            background: `linear-gradient(135deg, ${color} 0%, ${color}CC 100%)`,
+            borderRadius: '1.5rem',
             padding: '1.25rem',
             display: 'flex',
             alignItems: 'center',
             gap: '1.25rem',
             transition: 'transform 0.2s',
-            boxShadow: 'var(--shadow-glass)'
+            boxShadow: `0 10px 20px -5px ${color}40`,
+            border: '1px solid rgba(255,255,255,0.1)'
         }}
             onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
             onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
         >
             <div style={{
                 width: '52px', height: '52px', borderRadius: '14px',
-                background: `${color}15`,
+                background: 'rgba(255,255,255,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: color,
-                border: `1px solid ${color}33`
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.2)'
             }}>
-                {icon}
+                {React.cloneElement(icon, { color: 'white' })}
             </div>
             <div>
-                <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-main)', lineHeight: '1' }}>{value}</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)', marginTop: '0.35rem' }}>{label}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>{description}</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: '900', color: 'white', lineHeight: '1' }}>{value}</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginTop: '0.35rem' }}>{label}</div>
+                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', marginTop: '0.15rem' }}>{description}</div>
             </div>
         </div>
     );
