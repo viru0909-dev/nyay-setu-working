@@ -20,7 +20,7 @@ public class EvidenceController {
     public UploadEvidenceResponse uploadEvidence(
             @PathVariable UUID caseId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam UUID uploaderId
+            @RequestParam Long uploaderId
     ) {
         return evidenceService.upload(caseId, file, uploaderId);
     }
