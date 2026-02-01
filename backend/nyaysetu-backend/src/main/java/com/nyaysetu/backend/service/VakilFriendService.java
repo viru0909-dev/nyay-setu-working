@@ -59,6 +59,10 @@ public class VakilFriendService {
     private final OllamaService ollamaService;
     private final BhashiniService bhashiniService;
     
+    // Document analysis and diary service (nullable for backward compatibility)
+    @Autowired(required = false)
+    private VakilFriendDocumentService documentService;
+    
     // Lazy injection to avoid circular dependency
     @Autowired
     @Lazy
@@ -294,6 +298,22 @@ public class VakilFriendService {
         assistantMsg.put("content", aiResponseEnglish); // Storing English
         conversation.add(assistantMsg);
 
+        // Log to Case Diary if session is linked to a case (SHA-256 protected)
+        if (session.getCaseEntity() != null && documentService != null && user != null) {
+            try {
+                documentService.logChatToDiary(
+                    session.getCaseEntity().getId(),
+                    sessionId,
+                    user.getId(),
+                    userMessage,
+                    aiResponseEnglish
+                );
+                log.info("📔 Logged AI interaction to Case Diary for case: {}", session.getCaseEntity().getId());
+            } catch (Exception e) {
+                log.warn("Failed to log to case diary: {}", e.getMessage());
+            }
+        }
+
         // Save updated conversation
         try {
             session.setConversationData(objectMapper.writeValueAsString(conversation));
@@ -395,6 +415,25 @@ public class VakilFriendService {
             
             // Link back to separate session field if needed, but we use generic link usually
             session.setCaseEntity((CaseEntity)resultEntity);
+
+            // Backfill Case Diary with Chat History
+            if (documentService != null) {
+                try {
+                    documentService.backfillDiary(
+                        newCase.getId(),
+                        session.getId(),
+                        user.getId(),
+                        session.getConversationData()
+                    );
+                    log.info("📔 Backfilled Case Diary with chat history");
+                } catch (Exception e) {
+                    log.warn("Failed to backfill diary: {}", e.getMessage());
+                }
+                
+                // Also check for any uploaded documents in this session and link them (Future Enhancement)
+                // For now, documents uploaded via /analyze-document endpoint will have null caseId
+                // We could iterate and update them, but that requires tracking doc IDs in session.
+            }
         }
 
         // Mark session as completed

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, FileText, X, Mic, StopCircle, Volume2 } from 'lucide-react';
+import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, FileText, X, Mic, StopCircle, Volume2, Shield, AlertTriangle, CheckCircle2, Eye } from 'lucide-react';
 import { vakilFriendAPI } from '../../services/api';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
@@ -20,6 +20,8 @@ export default function VakilFriendChat() {
     const [showHistory, setShowHistory] = useState(false);
     const [attachedFiles, setAttachedFiles] = useState([]); // For document attachments
     const [uploadingFile, setUploadingFile] = useState(false);
+    const [documentAnalysis, setDocumentAnalysis] = useState(null); // AI analysis results
+    const [showAnalysisModal, setShowAnalysisModal] = useState(false); // Show analysis modal
     const [language, setLanguage] = useState('en'); // Default language
     const [isRecording, setIsRecording] = useState(false);
     const [speakingIndex, setSpeakingIndex] = useState(null); // Track which message is speaking
@@ -400,40 +402,103 @@ export default function VakilFriendChat() {
     const uploadFile = async (file) => {
         setUploadingFile(true);
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('category', 'EVIDENCE');
-            formData.append('description', `Uploaded during case filing via Vakil-Friend chat`);
-            // Don't set caseId yet - will link when case is filed
+            // Use Vakil Friend AI document analysis
+            if (sessionId) {
+                console.log('🔍 Analyzing document with AI...');
+                const response = await vakilFriendAPI.analyzeDocumentForSession(sessionId, file);
+                const analysis = response.data;
 
-            const token = localStorage.getItem('token');
-            const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+                // Update file status with analysis results
+                setAttachedFiles(prev => prev.map(f =>
+                    f.name === file.name && f.status === 'pending'
+                        ? {
+                            ...f,
+                            status: 'analyzed',
+                            id: analysis.documentId,
+                            sha256Hash: analysis.sha256Hash,
+                            analysis: analysis,
+                            validityStatus: analysis.validityStatus,
+                            usefulnessLevel: analysis.usefulnessLevel,
+                            storedInVault: analysis.storedInVault
+                        }
+                        : f
+                ));
+
+                // Store current analysis for modal
+                setDocumentAnalysis(analysis);
+                setShowAnalysisModal(true);
+
+                // Build AI analysis message
+                let analysisMessage = `📄 **Document Analyzed: ${file.name}**\n\n`;
+                analysisMessage += `🔐 **SHA-256 Hash:** \`${analysis.sha256Hash?.substring(0, 16)}...\`\n\n`;
+                analysisMessage += `📋 **Type:** ${analysis.documentType || 'Unknown'}\n`;
+                analysisMessage += `✅ **Validity:** ${analysis.validityStatus || 'Pending Review'}\n`;
+                analysisMessage += `📊 **Usefulness:** ${analysis.usefulnessLevel || 'Medium'}\n\n`;
+
+                if (analysis.summary) {
+                    analysisMessage += `**Summary:** ${analysis.summary}\n\n`;
                 }
-            });
 
-            // Update file status to uploaded
-            setAttachedFiles(prev => prev.map(f =>
-                f.name === file.name && f.status === 'pending'
-                    ? { ...f, status: 'uploaded', id: response.data.id }
-                    : f
-            ));
+                if (analysis.keyPoints && analysis.keyPoints.length > 0) {
+                    analysisMessage += `**Key Points:**\n`;
+                    analysis.keyPoints.forEach(point => {
+                        analysisMessage += `• ${point}\n`;
+                    });
+                    analysisMessage += '\n';
+                }
 
-            // Add a message about the uploaded file
-            setMessages(prev => [...prev, {
-                role: 'user',
-                content: `📎 Attached document: ${file.name}`
-            }]);
+                if (analysis.storedInVault) {
+                    analysisMessage += `🛡️ **Stored in Evidence Vault** - Document protected with SHA-256 hash\n`;
+                }
+
+                if (analysis.validityIssues && analysis.validityIssues.length > 0) {
+                    analysisMessage += `\n⚠️ **Issues Found:**\n`;
+                    analysis.validityIssues.forEach(issue => {
+                        analysisMessage += `• ${issue}\n`;
+                    });
+                }
+
+                // Add AI analysis as assistant message
+                setMessages(prev => [
+                    ...prev,
+                    { role: 'user', content: `📎 Attached document: ${file.name}` },
+                    { role: 'assistant', content: analysisMessage }
+                ]);
+
+            } else {
+                // Fallback to simple upload if no session
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('category', 'EVIDENCE');
+                formData.append('description', `Uploaded during case filing via Vakil-Friend chat`);
+
+                const token = localStorage.getItem('token');
+                const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                setAttachedFiles(prev => prev.map(f =>
+                    f.name === file.name && f.status === 'pending'
+                        ? { ...f, status: 'uploaded', id: response.data.id }
+                        : f
+                ));
+
+                setMessages(prev => [...prev, {
+                    role: 'user',
+                    content: `📎 Attached document: ${file.name}`
+                }]);
+            }
 
         } catch (error) {
-            console.error('File upload failed:', error);
+            console.error('Document analysis failed:', error);
             setAttachedFiles(prev => prev.map(f =>
                 f.name === file.name && f.status === 'pending'
                     ? { ...f, status: 'failed' }
                     : f
             ));
-            alert(`Failed to upload ${file.name}`);
+            alert(`Failed to analyze ${file.name}. Please try again.`);
         } finally {
             setUploadingFile(false);
         }
@@ -559,6 +624,280 @@ export default function VakilFriendChat() {
                                 ))}
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Document Analysis Modal */}
+            {showAnalysisModal && documentAnalysis && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0,0,0,0.75)',
+                        zIndex: 10001,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: '2rem',
+                        backdropFilter: 'blur(8px)'
+                    }}
+                    onClick={() => setShowAnalysisModal(false)}
+                >
+                    <div
+                        style={{
+                            width: '600px',
+                            maxWidth: '95vw',
+                            maxHeight: '90vh',
+                            background: 'linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%)',
+                            borderRadius: '1.5rem',
+                            padding: '2rem',
+                            overflowY: 'auto',
+                            border: '1px solid rgba(99, 102, 241, 0.3)',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                            <div>
+                                <h3 style={{
+                                    color: '#fff',
+                                    fontSize: '1.5rem',
+                                    fontWeight: '700',
+                                    margin: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem'
+                                }}>
+                                    <Shield size={24} style={{ color: '#10b981' }} />
+                                    AI Document Analysis
+                                </h3>
+                                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                                    {documentAnalysis.documentName}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowAnalysisModal(false)}
+                                style={{
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                    borderRadius: '0.5rem',
+                                    padding: '0.5rem',
+                                    color: '#ef4444',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        {/* SHA-256 Hash */}
+                        <div style={{
+                            background: 'rgba(16, 185, 129, 0.1)',
+                            borderRadius: '0.75rem',
+                            padding: '1rem',
+                            marginBottom: '1.5rem',
+                            border: '1px solid rgba(16, 185, 129, 0.2)'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                <Shield size={16} style={{ color: '#10b981' }} />
+                                <span style={{ color: '#10b981', fontWeight: '600', fontSize: '0.85rem' }}>SHA-256 PROTECTED</span>
+                            </div>
+                            <code style={{
+                                color: 'rgba(255,255,255,0.8)',
+                                fontSize: '0.75rem',
+                                wordBreak: 'break-all',
+                                fontFamily: 'monospace'
+                            }}>
+                                {documentAnalysis.sha256Hash}
+                            </code>
+                        </div>
+
+                        {/* Status Cards */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                            {/* Validity */}
+                            <div style={{
+                                background: documentAnalysis.validityStatus === 'VALID'
+                                    ? 'rgba(16, 185, 129, 0.1)'
+                                    : documentAnalysis.validityStatus === 'INVALID'
+                                        ? 'rgba(239, 68, 68, 0.1)'
+                                        : 'rgba(245, 158, 11, 0.1)',
+                                borderRadius: '0.75rem',
+                                padding: '1rem',
+                                textAlign: 'center',
+                                border: documentAnalysis.validityStatus === 'VALID'
+                                    ? '1px solid rgba(16, 185, 129, 0.3)'
+                                    : documentAnalysis.validityStatus === 'INVALID'
+                                        ? '1px solid rgba(239, 68, 68, 0.3)'
+                                        : '1px solid rgba(245, 158, 11, 0.3)'
+                            }}>
+                                {documentAnalysis.validityStatus === 'VALID' ? (
+                                    <CheckCircle2 size={24} style={{ color: '#10b981', marginBottom: '0.5rem' }} />
+                                ) : documentAnalysis.validityStatus === 'INVALID' ? (
+                                    <X size={24} style={{ color: '#ef4444', marginBottom: '0.5rem' }} />
+                                ) : (
+                                    <AlertTriangle size={24} style={{ color: '#f59e0b', marginBottom: '0.5rem' }} />
+                                )}
+                                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>Validity</div>
+                                <div style={{
+                                    color: documentAnalysis.validityStatus === 'VALID' ? '#10b981'
+                                        : documentAnalysis.validityStatus === 'INVALID' ? '#ef4444' : '#f59e0b',
+                                    fontWeight: '600',
+                                    fontSize: '0.9rem'
+                                }}>
+                                    {documentAnalysis.validityStatus || 'REVIEW'}
+                                </div>
+                            </div>
+
+                            {/* Usefulness */}
+                            <div style={{
+                                background: documentAnalysis.usefulnessLevel === 'HIGH'
+                                    ? 'rgba(99, 102, 241, 0.1)'
+                                    : 'rgba(156, 163, 175, 0.1)',
+                                borderRadius: '0.75rem',
+                                padding: '1rem',
+                                textAlign: 'center',
+                                border: '1px solid rgba(99, 102, 241, 0.3)'
+                            }}>
+                                <Eye size={24} style={{ color: '#6366f1', marginBottom: '0.5rem' }} />
+                                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>Usefulness</div>
+                                <div style={{ color: '#6366f1', fontWeight: '600', fontSize: '0.9rem' }}>
+                                    {documentAnalysis.usefulnessLevel || 'MEDIUM'}
+                                </div>
+                            </div>
+
+                            {/* Vault Status */}
+                            <div style={{
+                                background: documentAnalysis.storedInVault
+                                    ? 'rgba(16, 185, 129, 0.1)'
+                                    : 'rgba(156, 163, 175, 0.1)',
+                                borderRadius: '0.75rem',
+                                padding: '1rem',
+                                textAlign: 'center',
+                                border: documentAnalysis.storedInVault
+                                    ? '1px solid rgba(16, 185, 129, 0.3)'
+                                    : '1px solid rgba(156, 163, 175, 0.2)'
+                            }}>
+                                <Shield size={24} style={{
+                                    color: documentAnalysis.storedInVault ? '#10b981' : '#9ca3af',
+                                    marginBottom: '0.5rem'
+                                }} />
+                                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>Evidence Vault</div>
+                                <div style={{
+                                    color: documentAnalysis.storedInVault ? '#10b981' : '#9ca3af',
+                                    fontWeight: '600',
+                                    fontSize: '0.9rem'
+                                }}>
+                                    {documentAnalysis.storedInVault ? 'STORED ✓' : 'NOT STORED'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Document Type & Category */}
+                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div style={{
+                                flex: 1,
+                                background: 'rgba(255,255,255,0.05)',
+                                borderRadius: '0.75rem',
+                                padding: '1rem'
+                            }}>
+                                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>Document Type</div>
+                                <div style={{ color: '#fff', fontWeight: '600' }}>{documentAnalysis.documentType || 'Unknown'}</div>
+                            </div>
+                            <div style={{
+                                flex: 1,
+                                background: 'rgba(255,255,255,0.05)',
+                                borderRadius: '0.75rem',
+                                padding: '1rem'
+                            }}>
+                                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>Category</div>
+                                <div style={{ color: '#fff', fontWeight: '600' }}>{documentAnalysis.suggestedCategory || 'OTHER'}</div>
+                            </div>
+                        </div>
+
+                        {/* Summary */}
+                        {documentAnalysis.summary && (
+                            <div style={{
+                                background: 'rgba(255,255,255,0.05)',
+                                borderRadius: '0.75rem',
+                                padding: '1rem',
+                                marginBottom: '1.5rem'
+                            }}>
+                                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', marginBottom: '0.5rem' }}>AI Summary</div>
+                                <div style={{ color: 'rgba(255,255,255,0.9)', lineHeight: '1.6' }}>{documentAnalysis.summary}</div>
+                            </div>
+                        )}
+
+                        {/* Key Points */}
+                        {documentAnalysis.keyPoints && documentAnalysis.keyPoints.length > 0 && (
+                            <div style={{
+                                background: 'rgba(99, 102, 241, 0.05)',
+                                borderRadius: '0.75rem',
+                                padding: '1rem',
+                                marginBottom: '1.5rem',
+                                border: '1px solid rgba(99, 102, 241, 0.2)'
+                            }}>
+                                <div style={{ color: '#6366f1', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.75rem' }}>
+                                    📌 Key Points
+                                </div>
+                                {documentAnalysis.keyPoints.map((point, idx) => (
+                                    <div key={idx} style={{
+                                        color: 'rgba(255,255,255,0.8)',
+                                        fontSize: '0.9rem',
+                                        padding: '0.5rem 0',
+                                        borderBottom: idx < documentAnalysis.keyPoints.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none'
+                                    }}>
+                                        • {point}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Validity Issues */}
+                        {documentAnalysis.validityIssues && documentAnalysis.validityIssues.length > 0 && (
+                            <div style={{
+                                background: 'rgba(239, 68, 68, 0.05)',
+                                borderRadius: '0.75rem',
+                                padding: '1rem',
+                                marginBottom: '1.5rem',
+                                border: '1px solid rgba(239, 68, 68, 0.2)'
+                            }}>
+                                <div style={{ color: '#ef4444', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.75rem' }}>
+                                    ⚠️ Issues Found
+                                </div>
+                                {documentAnalysis.validityIssues.map((issue, idx) => (
+                                    <div key={idx} style={{
+                                        color: 'rgba(255,255,255,0.8)',
+                                        fontSize: '0.9rem',
+                                        padding: '0.5rem 0'
+                                    }}>
+                                        • {issue}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowAnalysisModal(false)}
+                            style={{
+                                width: '100%',
+                                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                                border: 'none',
+                                borderRadius: '0.75rem',
+                                padding: '1rem',
+                                color: 'white',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                fontSize: '1rem'
+                            }}
+                        >
+                            Close Analysis
+                        </button>
                     </div>
                 </div>
             )}

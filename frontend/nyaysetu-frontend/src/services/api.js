@@ -130,6 +130,29 @@ export const vakilFriendAPI = {
     completeSession: (sessionId) => api.post(`/api/vakil-friend/complete/${sessionId}`),
     getSession: (sessionId) => api.get(`/api/vakil-friend/session/${sessionId}`),
     getSessions: () => api.get('/api/vakil-friend/sessions'),
+
+    // Document Analysis with AI & SHA-256 protection
+    analyzeDocument: (caseId, file, sessionId = null) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (sessionId) {
+            formData.append('sessionId', sessionId);
+        }
+        return api.post(`/api/vakil-friend/case/${caseId}/analyze-document`, formData);
+    },
+
+    // Analyze document for session (before case is created)
+    analyzeDocumentForSession: (sessionId, file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return api.post(`/api/vakil-friend/session/${sessionId}/analyze-document`, formData);
+    },
+
+    // Case Diary entries with SHA-256 integrity
+    getCaseDiary: (caseId) => api.get(`/api/vakil-friend/case/${caseId}/diary`),
+
+    // Verify diary entry integrity
+    verifyDiaryEntry: (entryId) => api.get(`/api/vakil-friend/diary/${entryId}/verify`),
 };
 
 // Case Assignment API (Auto-assign judges, lawyer selection)

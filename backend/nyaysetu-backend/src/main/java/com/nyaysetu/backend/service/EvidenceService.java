@@ -29,7 +29,7 @@ public class EvidenceService {
     private final String uploadDir = "uploads/evidence/";
 
     @Transactional
-    public UploadEvidenceResponse upload(UUID caseId, MultipartFile file, UUID uploaderId) {
+    public UploadEvidenceResponse upload(UUID caseId, MultipartFile file, Long uploaderId) {
 
         LegalCase lc = legalCaseRepository.findById(caseId)
                 .orElseThrow(() -> new NotFoundException("Case not found " + caseId));

@@ -2,16 +2,21 @@ package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.dto.ChatMessageRequest;
 import com.nyaysetu.backend.dto.ChatSessionResponse;
+import com.nyaysetu.backend.dto.DocumentAnalysisResponse;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.ChatSession;
 import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.entity.VakilAiDiaryEntry;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.VakilFriendService;
+import com.nyaysetu.backend.service.VakilFriendDocumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +34,7 @@ import java.util.stream.Collectors;
 public class VakilFriendController {
 
     private final VakilFriendService vakilFriendService;
+    private final VakilFriendDocumentService documentService;
     private final UserRepository userRepository;
 
     /**
@@ -255,6 +261,148 @@ public class VakilFriendController {
                 .collect(Collectors.toList());
         
         return ResponseEntity.ok(response);
+    }
+
+    // ===== DOCUMENT ANALYSIS ENDPOINTS =====
+
+    /**
+     * Upload and analyze a document with Vakil Friend AI.
+     * Features:
+     * - SHA-256 hash computation for integrity
+     * - AI analysis (validity, usefulness, type detection)
+     * - Automatic storage to Evidence Vault if important
+     * - Case Diary logging with cryptographic protection
+     */
+    @PostMapping(value = "/case/{caseId}/analyze-document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<DocumentAnalysisResponse> analyzeDocument(
+            @PathVariable UUID caseId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "sessionId", required = false) UUID sessionId,
+            Authentication auth
+    ) {
+        try {
+            User user = getCurrentUser(auth);
+            if (user == null) {
+                return ResponseEntity.status(401).build();
+            }
+
+            log.info("📄 Document analysis request - Case: {}, File: {}, User: {}", 
+                    caseId, file.getOriginalFilename(), user.getEmail());
+
+            DocumentAnalysisResponse analysis = documentService.analyzeDocument(
+                    caseId,
+                    sessionId,
+                    file,
+                    user
+            );
+
+            log.info("✅ Document analyzed: {} - Validity: {}, Usefulness: {}, StoredInVault: {}",
+                    file.getOriginalFilename(),
+                    analysis.getValidityStatus(),
+                    analysis.getUsefulnessLevel(),
+                    analysis.isStoredInVault());
+
+            return ResponseEntity.ok(analysis);
+
+        } catch (Exception e) {
+            log.error("❌ Document analysis failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(
+                    DocumentAnalysisResponse.builder()
+                            .documentName(file.getOriginalFilename())
+                            .validityStatus("ERROR")
+                            .validityReason("Analysis failed: " + e.getMessage())
+                            .build()
+            );
+        }
+    }
+
+    /**
+     * Upload document for general analysis (not linked to a case).
+     * Used during initial case filing via Vakil Friend.
+     */
+    @PostMapping(value = "/session/{sessionId}/analyze-document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<DocumentAnalysisResponse> analyzeDocumentForSession(
+            @PathVariable UUID sessionId,
+            @RequestParam("file") MultipartFile file,
+            Authentication auth
+    ) {
+        try {
+            User user = getCurrentUser(auth);
+            if (user == null) {
+                return ResponseEntity.status(401).build();
+            }
+
+            log.info("📄 Document analysis for session: {}, File: {}", 
+                    sessionId, file.getOriginalFilename());
+
+            // Analyze without case context (case will be created later)
+            DocumentAnalysisResponse analysis = documentService.analyzeDocument(
+                    null, // No case ID yet
+                    sessionId,
+                    file,
+                    user
+            );
+
+            return ResponseEntity.ok(analysis);
+
+        } catch (Exception e) {
+            log.error("❌ Document analysis failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(
+                    DocumentAnalysisResponse.builder()
+                            .documentName(file.getOriginalFilename())
+                            .validityStatus("ERROR")
+                            .validityReason("Analysis failed: " + e.getMessage())
+                            .build()
+            );
+        }
+    }
+
+    // ===== CASE DIARY ENDPOINTS =====
+
+    /**
+     * Get all Vakil AI diary entries for a case.
+     * Each entry is protected with SHA-256 hash for integrity.
+     */
+    @GetMapping("/case/{caseId}/diary")
+    public ResponseEntity<List<VakilAiDiaryEntry>> getCaseDiaryEntries(
+            @PathVariable UUID caseId,
+            Authentication auth
+    ) {
+        User user = getCurrentUser(auth);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        List<VakilAiDiaryEntry> entries = documentService.getDiaryEntries(caseId);
+        return ResponseEntity.ok(entries);
+    }
+
+    /**
+     * Verify integrity of a diary entry using SHA-256 hash.
+     */
+    @GetMapping("/diary/{entryId}/verify")
+    public ResponseEntity<Map<String, Object>> verifyDiaryEntry(
+            @PathVariable UUID entryId,
+            Authentication auth
+    ) {
+        User user = getCurrentUser(auth);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            boolean isValid = documentService.verifyDiaryEntryIntegrity(entryId);
+            return ResponseEntity.ok(Map.of(
+                    "entryId", entryId,
+                    "integrityVerified", isValid,
+                    "message", isValid ? "Entry integrity verified ✅" : "⚠️ Entry may have been tampered with"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Entry not found",
+                    "message", e.getMessage()
+            ));
+        }
     }
 
     private User getCurrentUser(Authentication auth) {
