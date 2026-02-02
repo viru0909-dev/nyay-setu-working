@@ -401,6 +401,12 @@ export default function VakilFriendChat() {
 
     const uploadFile = async (file) => {
         setUploadingFile(true);
+        // Add a temporary "Analyzing..." message
+        setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `🔄 Analyzing document: ${file.name}... Please wait.`
+        }]);
+
         try {
             // Use Vakil Friend AI document analysis
             if (sessionId) {
@@ -499,6 +505,10 @@ export default function VakilFriendChat() {
                     : f
             ));
             alert(`Failed to analyze ${file.name}. Please try again.`);
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: `❌ Failed to analyze ${file.name}. Please try again.`
+            }]);
         } finally {
             setUploadingFile(false);
         }

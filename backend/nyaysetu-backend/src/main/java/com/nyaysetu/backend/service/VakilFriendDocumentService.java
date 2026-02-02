@@ -55,6 +55,7 @@ public class VakilFriendDocumentService {
     private final VakilAiDiaryEntryRepository diaryRepository;
     private final CaseRepository caseRepository;
     private final CaseTimelineService timelineService;
+    private final DocumentRepository documentRepository; // Added for transfer logic
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -118,6 +119,11 @@ public class VakilFriendDocumentService {
                 response.setStoredInVault(true);
                 response.setVaultStorageId(evidenceId.toString());
                 log.info("✅ Document stored in Evidence Vault: {}", evidenceId);
+            }
+
+            // 6b. If caseId is NULL (initial chat), store as temp DocumentEntity for later transfer
+            if (caseId == null && sessionId != null) {
+               saveTempDocument(sessionId, fileName, file, response);
             }
 
             // 7. Log to Case Diary with SHA-256 protection
@@ -512,6 +518,29 @@ public class VakilFriendDocumentService {
 
         return evidenceRepository.save(evidence);
     }
+    
+    /**
+     * Save temporary document for session (Transfer later)
+     */
+    private void saveTempDocument(
+            UUID sessionId,
+            String savedFileName,
+            MultipartFile file,
+            DocumentAnalysisResponse analysis
+    ) {
+         DocumentEntity doc = DocumentEntity.builder()
+                .fileName(file.getOriginalFilename())
+                .fileUrl("/" + evidenceUploadPath + "/" + savedFileName) // Assuming relative
+                .contentType(file.getContentType())
+                .size(file.getSize())
+                .storageType(DocumentStorageType.LOCAL)
+                .category("VAKIL_FRIEND_TEMP")
+                .description("SESSION:" + sessionId.toString() + " | Analysis: " + analysis.getSummary())
+                .isVerified(false)
+                .build();
+        
+        doc = documentRepository.save(doc);
+    }
 
     /**
      * Log interaction to Case Diary with SHA-256 protection
@@ -661,6 +690,39 @@ public class VakilFriendDocumentService {
             }
         } catch (Exception e) {
             log.error("Failed to backfill diary from conversation: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Transfer temp documents to the actual case
+     */
+    @Transactional
+    public void transferDocumentsToCase(UUID sessionId, UUID caseId) {
+        log.info("Transferring documents for session {} to case {}", sessionId, caseId);
+        
+        // Find documents tagged with this session
+        var docs = documentRepository.findByCategoryAndDescriptionContaining(
+            "VAKIL_FRIEND_TEMP", 
+            "SESSION:" + sessionId.toString()
+        );
+        
+        log.info("Found {} documents to transfer", docs.size());
+        
+        for (DocumentEntity doc : docs) {
+            // Create CaseEvidence (Vault) from DocumentEntity (Temp)
+            // But DocumentEntity doesn't have the AI analysis data if we stored it vaguely in description.
+            // HEAD's storeInEvidenceVault is detailed.
+            // In saveTempDocument, I only put summary in description.
+            // Ideally, I should store the full analysis JSON in description or another field.
+            // For now, I'll do a basic transfer.
+            
+            doc.setCaseId(caseId);
+            doc.setCategory("EVIDENCE");
+            doc.setDescription(doc.getDescription() + " | Linked to Case " + caseId);
+            doc.setIsVerified(true);
+            documentRepository.save(doc);
+            
+            // TODO: Ideally elevate to CaseEvidence table
         }
     }
 }

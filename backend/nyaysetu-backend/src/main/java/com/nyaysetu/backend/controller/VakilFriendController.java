@@ -10,6 +10,7 @@ import com.nyaysetu.backend.entity.VakilAiDiaryEntry;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.VakilFriendService;
 import com.nyaysetu.backend.service.VakilFriendDocumentService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -122,6 +123,25 @@ public class VakilFriendController {
                 "message", e.getMessage() != null ? e.getMessage() : "Unknown error"
             ));
         }
+    }
+
+    /**
+     * Upload and analyze a document
+     */
+    @PostMapping("/chat/{sessionId}/upload")
+    public ResponseEntity<DocumentAnalysisResponse> uploadDocument(
+            @PathVariable UUID sessionId,
+            @RequestParam("file") MultipartFile file,
+            Authentication auth
+    ) {
+        log.info("Uploading document for session {}", sessionId);
+        User user = getCurrentUser(auth);
+        if (user == null) {
+            return ResponseEntity.status(401).build(); // Or throw exception
+        }
+        // Use analyzeDocument with null caseId
+        DocumentAnalysisResponse response = documentService.analyzeDocument(null, sessionId, file, user);
+        return ResponseEntity.ok(response);
     }
 
     /**
