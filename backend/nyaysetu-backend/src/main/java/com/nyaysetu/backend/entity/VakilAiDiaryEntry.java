@@ -23,7 +23,7 @@ public class VakilAiDiaryEntry {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private UUID caseId;
 
     @Column(nullable = false)

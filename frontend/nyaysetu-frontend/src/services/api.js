@@ -99,7 +99,8 @@ export const documentAPI = {
     delete: (id) => api.delete(`/api/documents/${id}`),
     analyze: (id) => api.post(`/api/documents/${id}/analyze`),
     getAnalysis: (id) => api.get(`/api/documents/${id}/analysis`),
-    hasAnalysis: (id) => api.get(`/api/documents/${id}/has-analysis`)
+    hasAnalysis: (id) => api.get(`/api/documents/${id}/has-analysis`),
+    downloadCertificate: (id) => api.get(`/api/documents/${id}/certificate`, { responseType: 'blob' })
 };
 
 // Hearing API
