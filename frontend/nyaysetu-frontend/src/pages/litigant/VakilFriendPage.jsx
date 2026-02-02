@@ -399,31 +399,52 @@ export default function VakilFriendChat() {
 
     const uploadFile = async (file) => {
         setUploadingFile(true);
+        // Add a temporary "Analyzing..." message
+        setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `🔄 Analyzing document: ${file.name}... Please wait.`
+        }]);
+
         try {
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('category', 'EVIDENCE');
-            formData.append('description', `Uploaded during case filing via Vakil-Friend chat`);
-            // Don't set caseId yet - will link when case is filed
+            // Description and category are handled by the backend service now
+
+            if (!sessionId) {
+                alert("Session not active. Please refresh.");
+                return;
+            }
 
             const token = localStorage.getItem('token');
-            const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/api/vakil-friend/chat/${sessionId}/upload`, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
 
+            const data = response.data;
+
             // Update file status to uploaded
             setAttachedFiles(prev => prev.map(f =>
                 f.name === file.name && f.status === 'pending'
-                    ? { ...f, status: 'uploaded', id: response.data.id }
+                    ? { ...f, status: 'uploaded', id: data.documentId }
                     : f
             ));
 
-            // Add a message about the uploaded file
+            // Remove the "Analyzing..." message (optional, or just append)
+            // Actually, keep history, just append new info.
+
+            // Add a message about the uploaded file from User
             setMessages(prev => [...prev, {
                 role: 'user',
                 content: `📎 Attached document: ${file.name}`
+            }]);
+
+            // Add AI Analysis message
+            const summary = data.summary || "Document uploaded successfully.";
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: `**✅ Document Verified: ${file.name}**\n\n${summary}\n\nI have secured this in the Evidence Vault for your case.`
             }]);
 
         } catch (error) {
@@ -433,7 +454,11 @@ export default function VakilFriendChat() {
                     ? { ...f, status: 'failed' }
                     : f
             ));
-            alert(`Failed to upload ${file.name}`);
+
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: `❌ Failed to analyze ${file.name}. Please try again.`
+            }]);
         } finally {
             setUploadingFile(false);
         }
