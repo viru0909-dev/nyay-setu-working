@@ -1,6 +1,9 @@
 package com.nyaysetu.backend.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,19 +13,22 @@ import java.util.UUID;
  * Contains document assessment, validity, relevance, and storage recommendation.
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class DocumentAnalysisResponse {
 
     private UUID documentId;
-    private String documentName;
+    private String documentName; // Alias for fileName if needed, or prefer fileName
+    private String fileName;     // From fix
     private String sha256Hash;
 
     // Document Analysis
     private String documentType; // E.g., "Agreement", "FIR Copy", "Medical Certificate"
     private String summary;
     private String language;
+    private String extractedText; // From fix
+    private String analysisJson;  // From fix
 
     // Validity Assessment
     private String validityStatus; // VALID, INVALID, PARTIALLY_VALID, REQUIRES_REVIEW
