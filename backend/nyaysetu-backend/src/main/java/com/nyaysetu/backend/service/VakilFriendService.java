@@ -60,9 +60,7 @@ public class VakilFriendService {
     private final BhashiniService bhashiniService;
     private final VakilFriendDocumentService vakilFriendDocumentService;
     
-    // Document analysis and diary service (nullable for backward compatibility)
-    @Autowired(required = false)
-    private VakilFriendDocumentService documentService;
+
     
     // Lazy injection to avoid circular dependency
     @Autowired
@@ -300,9 +298,9 @@ public class VakilFriendService {
         conversation.add(assistantMsg);
 
         // Log to Case Diary if session is linked to a case (SHA-256 protected)
-        if (session.getCaseEntity() != null && documentService != null && user != null) {
+        if (session.getCaseEntity() != null && vakilFriendDocumentService != null && user != null) {
             try {
-                documentService.logChatToDiary(
+                vakilFriendDocumentService.logChatToDiary(
                     session.getCaseEntity().getId(),
                     sessionId,
                     user.getId(),
@@ -418,9 +416,9 @@ public class VakilFriendService {
             session.setCaseEntity((CaseEntity)resultEntity);
 
             // Backfill Case Diary with Chat History
-            if (documentService != null) {
+            if (vakilFriendDocumentService != null) {
                 try {
-                    documentService.backfillDiary(
+                    vakilFriendDocumentService.backfillDiary(
                         newCase.getId(),
                         session.getId(),
                         user.getId(),
@@ -430,10 +428,6 @@ public class VakilFriendService {
                 } catch (Exception e) {
                     log.warn("Failed to backfill diary: {}", e.getMessage());
                 }
-                
-                // Also check for any uploaded documents in this session and link them (Future Enhancement)
-                // For now, documents uploaded via /analyze-document endpoint will have null caseId
-                // We could iterate and update them, but that requires tracking doc IDs in session.
             }
         }
 
