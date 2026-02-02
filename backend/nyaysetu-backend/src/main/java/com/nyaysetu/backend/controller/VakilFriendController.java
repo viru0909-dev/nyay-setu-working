@@ -7,6 +7,9 @@ import com.nyaysetu.backend.entity.ChatSession;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.VakilFriendService;
+import com.nyaysetu.backend.service.VakilFriendDocumentService;
+import com.nyaysetu.backend.dto.DocumentAnalysisResponse;
+import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
 public class VakilFriendController {
 
     private final VakilFriendService vakilFriendService;
+    private final VakilFriendDocumentService vakilFriendDocumentService;
     private final UserRepository userRepository;
 
     /**
@@ -116,6 +120,20 @@ public class VakilFriendController {
                 "message", e.getMessage() != null ? e.getMessage() : "Unknown error"
             ));
         }
+    }
+
+    /**
+     * Upload and analyze a document
+     */
+    @PostMapping("/chat/{sessionId}/upload")
+    public ResponseEntity<DocumentAnalysisResponse> uploadDocument(
+            @PathVariable UUID sessionId,
+            @RequestParam("file") MultipartFile file,
+            Authentication auth
+    ) {
+        log.info("Uploading document for session {}", sessionId);
+        DocumentAnalysisResponse response = vakilFriendDocumentService.uploadAndAnalyze(sessionId, file);
+        return ResponseEntity.ok(response);
     }
 
     /**
