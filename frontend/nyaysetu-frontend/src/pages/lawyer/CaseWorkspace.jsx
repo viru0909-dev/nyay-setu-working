@@ -69,7 +69,7 @@ export default function CaseWorkspace() {
                             </h1>
                             <span style={{
                                 padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: '800',
-                                background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)'
+                                background: 'rgba(30, 42, 68, 0.1)', color: 'var(--color-accent)', border: '1px solid rgba(30, 42, 68, 0.2)'
                             }}>
                                 {caseData.status}
                             </span>
@@ -289,6 +289,11 @@ function TabEvidence({ caseId }) {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef(null);
 
+    // Certificate Modal State
+    const [showCertModal, setShowCertModal] = useState(false);
+    const [certUrl, setCertUrl] = useState(null);
+    const [certLoading, setCertLoading] = useState(false);
+
     useEffect(() => {
         refreshDocuments();
     }, [caseId]);
@@ -350,16 +355,29 @@ function TabEvidence({ caseId }) {
         }
     };
 
-    const handleDownloadCertificate = (doc) => {
-        const certContent = `OFFICIAL DIGITAL EVIDENCE CERTIFICATE\n-------------------------------------\nDocument: ${doc.name || 'Unknown'}\nID: ${doc.id}\nHash: SHA-256-${doc.id.substring(0, 12)}...\nTimestamp: ${new Date().toISOString()}\nStatus: VERIFIED AUTHENTIC via NyaySetu Blockchain`;
-        const blob = new Blob([certContent], { type: 'text/plain' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `Certificate_${doc.name || 'doc'}.txt`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+    const viewCertificate = async (doc) => {
+        setCertLoading(true);
+        try {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+            const url = `${API_BASE_URL}/api/documents/${doc.id}/certificate`;
+            const token = localStorage.getItem('token');
+
+            const response = await fetch(url, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error('Certificate not available');
+
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            setCertUrl(blobUrl);
+            setShowCertModal(true);
+        } catch (error) {
+            console.error('Certificate fetch failed:', error);
+            alert(`❌ Failed to load certificate: ${error.message}`);
+        } finally {
+            setCertLoading(false);
+        }
     };
 
     const handleDelete = async (docId) => {
@@ -469,7 +487,7 @@ function TabEvidence({ caseId }) {
                                             AI Review
                                         </button>
                                         <button
-                                            onClick={() => handleDownloadCertificate(doc)}
+                                            onClick={() => viewCertificate(doc)}
                                             style={{
                                                 padding: '0.6rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)',
                                                 borderRadius: '0.5rem', color: '#10b981', fontSize: '0.8rem', fontWeight: '600',
@@ -539,6 +557,51 @@ function TabEvidence({ caseId }) {
                         </div>
                     </div>
                     <style>{`@keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`}</style>
+                </div>
+            )}
+
+            {/* Certificate Viewer Modal */}
+            {showCertModal && certUrl && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.8)',
+                    backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+                }} onClick={() => setShowCertModal(false)}>
+                    <div style={{
+                        background: '#1e1e1e', width: '90%', maxWidth: '900px', height: '90vh',
+                        borderRadius: '1rem', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{
+                            padding: '1rem 1.5rem', background: '#2d2d2d', borderBottom: '1px solid #404040',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}>
+                            <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <Shield size={20} color="#10b981" /> Section 63(4) Evidence Certificate
+                            </h3>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <a href={certUrl} download="Admissibility_Certificate.pdf" style={{
+                                    padding: '0.5rem 1rem', background: '#10b981', color: 'white', borderRadius: '0.5rem',
+                                    textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                                }}>
+                                    <Download size={16} /> Download PDF
+                                </a>
+                                <button onClick={() => setShowCertModal(false)} style={{
+                                    background: 'none', border: 'none', color: '#a0a0a0', cursor: 'pointer', fontSize: '1.5rem'
+                                }}>
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+                        <div style={{ flex: 1, background: '#525659' }}>
+                            <iframe
+                                src={certUrl}
+                                title="Certificate Preview"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 'none' }}
+                            />
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

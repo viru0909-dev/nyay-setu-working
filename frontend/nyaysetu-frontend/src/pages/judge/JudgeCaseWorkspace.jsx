@@ -163,7 +163,13 @@ export default function JudgeCaseWorkspace() {
     return (
         <div style={{ maxWidth: '1400px', margin: '0 auto', paddingBottom: '4rem' }}>
             {/* 1. Header Section */}
-            <div style={{ marginBottom: '2rem' }}>
+            <div style={{
+                marginBottom: '2rem',
+                background: 'linear-gradient(180deg, rgba(30, 42, 68, 0.03) 0%, rgba(255,255,255,0) 100%)',
+                padding: '1.5rem',
+                borderRadius: '1.5rem',
+                border: '1px solid rgba(30, 42, 68, 0.05)'
+            }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <button
                         onClick={() => navigate('/judge/docket')}
@@ -260,7 +266,7 @@ function OverviewTab({ caseData }) {
 
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '2rem' }}>
-            {/* Left Column: Case Details */}
+            {/* Left Column: Case Details & AI Brief */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 {/* Case Information */}
                 <div style={{ background: 'var(--bg-glass-strong)', padding: '2rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
@@ -307,134 +313,104 @@ function OverviewTab({ caseData }) {
                     </div>
                 </div>
 
-                {/* Timeline */}
-                <div style={{ background: 'var(--bg-glass-strong)', padding: '2rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Case Timeline</h3>
-                    <TimelineDisplay caseId={caseData.id} />
+                {/* AI Digital Court Master (Moved to Left) */}
+                <div style={{
+                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(99, 102, 241, 0.05))',
+                    padding: '2rem',
+                    borderRadius: '1.5rem',
+                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                        <div style={{ padding: '0.5rem', background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', borderRadius: '0.75rem' }}>
+                            <Sparkles size={24} color="white" />
+                        </div>
+                        <div>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#8b5cf6', margin: 0 }}>AI Digital Court Master</h3>
+                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Pre-Hearing Briefing</p>
+                        </div>
+                    </div>
+
+                    {loadingAI ? (
+                        <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                            <Loader2 size={32} className="animate-spin" style={{ color: '#8b5cf6' }} />
+                        </div>
+                    ) : (
+                        <div style={{
+                            color: 'var(--text-main)',
+                            lineHeight: '1.8',
+                            fontSize: '0.95rem'
+                        }}>
+                            {(() => {
+                                const summary = aiSummary?.summary || 'No AI summary available';
+                                const lines = summary.split('\n');
+                                return lines.map((line, idx) => {
+                                    const trimmed = line.trim();
+                                    if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
+                                        const text = trimmed.replace(/\*\*/g, '');
+                                        return (
+                                            <h4 key={idx} style={{
+                                                fontSize: '1.1rem', fontWeight: '700', color: '#8b5cf6',
+                                                marginTop: idx === 0 ? 0 : '1.5rem', marginBottom: '0.75rem',
+                                                paddingBottom: '0.5rem', borderBottom: '1px solid rgba(139, 92, 246, 0.15)'
+                                            }}>{text}</h4>
+                                        );
+                                    }
+                                    if (/^\d+\./.test(trimmed) || trimmed.startsWith('•') || trimmed.startsWith('-')) {
+                                        return (
+                                            <div key={idx} style={{
+                                                marginLeft: '1.25rem', marginBottom: '0.5rem', paddingLeft: '0.75rem',
+                                                borderLeft: '2px solid rgba(139, 92, 246, 0.2)'
+                                            }}>{trimmed}</div>
+                                        );
+                                    }
+                                    if (trimmed.includes('**')) {
+                                        const parts = trimmed.split('**');
+                                        return (
+                                            <p key={idx} style={{ marginBottom: '0.75rem' }}>
+                                                {parts.map((part, i) =>
+                                                    i % 2 === 1 ? <strong key={i} style={{ color: '#6366f1' }}>{part}</strong> : part
+                                                )}
+                                            </p>
+                                        );
+                                    }
+                                    if (trimmed.length > 0) {
+                                        return <p key={idx} style={{ marginBottom: '0.75rem', color: 'var(--text-main)' }}>{trimmed}</p>;
+                                    }
+                                    return null;
+                                });
+                            })()}
+                        </div>
+                    )}
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                        <button onClick={fetchAISummary} style={{
+                            flex: 1, padding: '0.75rem', background: 'rgba(139, 92, 246, 0.1)',
+                            border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.75rem',
+                            color: '#8b5cf6', fontWeight: '600', cursor: 'pointer', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center', gap: '0.5rem', transition: 'all 0.2s'
+                        }}
+                            onMouseOver={e => e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)'}
+                            onMouseOut={e => e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)'}
+                        >
+                            <RefreshCw size={16} /> Regenerate
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* Right Column: AI Digital Court Master */}
+            {/* Right Column: Timeline (Moved to Right) */}
             <div style={{
-                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(99, 102, 241, 0.05))',
+                background: 'var(--bg-glass-strong)',
                 padding: '2rem',
                 borderRadius: '1.5rem',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
+                border: 'var(--border-glass-strong)',
                 height: 'fit-content',
-                maxHeight: '800px',
-                display: 'flex',
-                flexDirection: 'column'
+                maxHeight: '1000px',
+                overflowY: 'auto'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(139, 92, 246, 0.2)' }}>
-                    <div style={{ padding: '0.5rem', background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', borderRadius: '0.75rem' }}>
-                        <Sparkles size={24} color="white" />
-                    </div>
-                    <div>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#8b5cf6', margin: 0 }}>AI Digital Court Master</h3>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Pre-Hearing Briefing</p>
-                    </div>
-                </div>
-
-                {loadingAI ? (
-                    <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                        <Loader2 size={32} className="animate-spin" style={{ color: '#8b5cf6' }} />
-                    </div>
-                ) : (
-                    <div style={{
-                        flex: 1,
-                        overflowY: 'auto',
-                        paddingRight: '0.5rem',
-                        color: 'var(--text-main)',
-                        lineHeight: '1.8',
-                        fontSize: '0.95rem'
-                    }}>
-                        {(() => {
-                            const summary = aiSummary?.summary || 'No AI summary available';
-
-                            // Parse and format the summary
-                            const lines = summary.split('\n');
-                            return lines.map((line, idx) => {
-                                const trimmed = line.trim();
-
-                                // Section headers (bold, larger)
-                                if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
-                                    const text = trimmed.replace(/\*\*/g, '');
-                                    return (
-                                        <h4 key={idx} style={{
-                                            fontSize: '1.1rem',
-                                            fontWeight: '700',
-                                            color: '#8b5cf6',
-                                            marginTop: idx === 0 ? 0 : '1.5rem',
-                                            marginBottom: '0.75rem',
-                                            paddingBottom: '0.5rem',
-                                            borderBottom: '1px solid rgba(139, 92, 246, 0.15)'
-                                        }}>
-                                            {text}
-                                        </h4>
-                                    );
-                                }
-
-                                // Numbered/bulleted lists
-                                if (/^\d+\./.test(trimmed) || trimmed.startsWith('•') || trimmed.startsWith('-')) {
-                                    return (
-                                        <div key={idx} style={{
-                                            marginLeft: '1.25rem',
-                                            marginBottom: '0.5rem',
-                                            paddingLeft: '0.75rem',
-                                            borderLeft: '2px solid rgba(139, 92, 246, 0.2)'
-                                        }}>
-                                            {trimmed}
-                                        </div>
-                                    );
-                                }
-
-                                // Bold inline text
-                                if (trimmed.includes('**')) {
-                                    const parts = trimmed.split('**');
-                                    return (
-                                        <p key={idx} style={{ marginBottom: '0.75rem' }}>
-                                            {parts.map((part, i) =>
-                                                i % 2 === 1 ? <strong key={i} style={{ color: '#6366f1' }}>{part}</strong> : part
-                                            )}
-                                        </p>
-                                    );
-                                }
-
-                                // Regular paragraphs
-                                if (trimmed.length > 0) {
-                                    return <p key={idx} style={{ marginBottom: '0.75rem', color: 'var(--text-main)' }}>{trimmed}</p>;
-                                }
-
-                                return null;
-                            });
-                        })()}
-                    </div>
-                )}
-
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(139, 92, 246, 0.2)' }}>
-                    <button
-                        onClick={fetchAISummary}
-                        style={{
-                            flex: 1,
-                            padding: '0.75rem',
-                            background: 'rgba(139, 92, 246, 0.1)',
-                            border: '1px solid rgba(139, 92, 246, 0.3)',
-                            borderRadius: '0.75rem',
-                            color: '#8b5cf6',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.5rem',
-                            transition: 'all 0.2s'
-                        }}
-                        onMouseOver={e => e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)'}
-                        onMouseOut={e => e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)'}
-                    >
-                        <RefreshCw size={16} /> Regenerate
-                    </button>
-                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Case Timeline</h3>
+                <TimelineDisplay caseId={caseData.id} />
             </div>
         </div>
     );
@@ -449,6 +425,11 @@ function EvidenceTab({ caseId }) {
     const [verificationMap, setVerificationMap] = useState({}); // Stores hash match result
     const [selectedAnalysis, setSelectedAnalysis] = useState(null);
     const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+
+    // Certificate Modal State
+    const [showCertModal, setShowCertModal] = useState(false);
+    const [certUrl, setCertUrl] = useState(null);
+    const [certLoading, setCertLoading] = useState(false);
 
     useEffect(() => {
         fetchEvidence();
@@ -546,10 +527,15 @@ function EvidenceTab({ caseId }) {
             document.body.appendChild(link);
             link.click();
             link.remove();
-        } catch (e) { console.error(e); alert('Download failed'); }
+        } catch (e) {
+            console.error('Download error:', e);
+            const msg = e.response?.data?.error || e.message || 'Unknown error';
+            alert(`Download failed: ${msg}`);
+        }
     };
 
-    const downloadCertificate = async (item) => {
+    const viewCertificate = async (item) => {
+        setCertLoading(true);
         try {
             const url = item.source === 'blockchain'
                 ? `${API_BASE_URL}/api/evidence/${item.id}/certificate`
@@ -561,16 +547,16 @@ function EvidenceTab({ caseId }) {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.setAttribute('download', `Certificate_${item.title || item.id}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const blobUrl = window.URL.createObjectURL(blob);
+            setCertUrl(blobUrl);
+            setShowCertModal(true);
         } catch (error) {
-            console.error('Certificate download failed:', error);
-            alert('❌ Failed to download certificate. This evidence may not have verification data.');
+            console.error('Certificate fetch failed:', error);
+            const msg = error.response?.statusText || error.message || 'Unknown error';
+            alert(`❌ Failed to load certificate: ${msg}. This evidence may not have verification data.`);
+        } finally {
+            setCertLoading(false);
         }
     };
 
@@ -585,11 +571,31 @@ function EvidenceTab({ caseId }) {
     return (
         <>
             <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Evidence Vault</h3>
-                    <span style={{ padding: '0.2rem 0.6rem', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: '700' }}>
-                        {evidence.length} FILE{evidence.length !== 1 ? 'S' : ''}
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Evidence Vault</h3>
+                        <span style={{ padding: '0.2rem 0.6rem', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: '700' }}>
+                            {evidence.length} FILE{evidence.length !== 1 ? 'S' : ''}
+                        </span>
+                    </div>
+                    <label style={{
+                        padding: '0.6rem 1rem', background: 'var(--color-primary)', borderRadius: '0.5rem',
+                        color: 'white', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                        fontSize: '0.9rem'
+                    }}>
+                        <Upload size={16} /> Quick Upload
+                        <input type="file" style={{ display: 'none' }} onChange={async (e) => {
+                            if (!e.target.files[0]) return;
+                            try {
+                                const res = await documentAPI.upload(e.target.files[0], { caseId, category: 'EVIDENCE', description: 'Uploaded by Judge' });
+                                alert('✅ File uploaded successfully!');
+                                fetchEvidence(); // Refresh list
+                            } catch (err) {
+                                alert('Upload failed');
+                                console.error(err);
+                            }
+                        }} />
+                    </label>
                 </div>
 
                 {evidence.length === 0 ? (
@@ -683,10 +689,10 @@ function EvidenceTab({ caseId }) {
                                                 </button>
                                             )}
 
-                                            {/* Certificate Button */}
-                                            {isVerifiedStatus && (item.fileHash || item.blockHash) && (
+                                            {/* Certificate Button - Show for all hashed docs */}
+                                            {(item.fileHash || item.blockHash) && (
                                                 <button
-                                                    onClick={() => downloadCertificate(item)}
+                                                    onClick={() => viewCertificate(item)}
                                                     style={{
                                                         padding: '0.5rem 0.75rem',
                                                         background: 'rgba(16, 185, 129, 0.1)',
@@ -734,6 +740,53 @@ function EvidenceTab({ caseId }) {
                     </div>
                 )}
             </div>
+
+            {/* Certificate Viewer Modal */}
+            {showCertModal && certUrl && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.8)',
+                    backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+                }} onClick={() => setShowCertModal(false)}>
+                    <div style={{
+                        background: '#1e1e1e', width: '90%', maxWidth: '900px', height: '90vh',
+                        borderRadius: '1rem', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    }} onClick={e => e.stopPropagation()}>
+                        {/* Modal Header */}
+                        <div style={{
+                            padding: '1rem 1.5rem', background: '#2d2d2d', borderBottom: '1px solid #404040',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}>
+                            <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <Shield size={20} color="#10b981" /> Section 63(4) Evidence Certificate
+                            </h3>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <a href={certUrl} download="Admissibility_Certificate.pdf" style={{
+                                    padding: '0.5rem 1rem', background: '#10b981', color: 'white', borderRadius: '0.5rem',
+                                    textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                                }}>
+                                    <Download size={16} /> Download PDF
+                                </a>
+                                <button onClick={() => setShowCertModal(false)} style={{
+                                    background: 'none', border: 'none', color: '#a0a0a0', cursor: 'pointer'
+                                }}>
+                                    <X size={24} />
+                                </button>
+                            </div>
+                        </div>
+                        {/* PDF View Area */}
+                        <div style={{ flex: 1, background: '#525659' }}>
+                            <iframe
+                                src={certUrl}
+                                title="Certificate Preview"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 'none' }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* AI Analysis Modal */}
             {showAnalysisModal && selectedAnalysis && (
@@ -1698,11 +1751,20 @@ function TimelineDisplay({ caseId }) {
                 description: e.description
             }));
 
-            // Merge and Sort
+            // Merge and Sort with Filtering for "Message sent" spam
             const merged = [...timelineEvents, ...auditEvents]
+                .filter(e => {
+                    const title = (e.title || '').toLowerCase();
+                    const desc = (e.description || '').toLowerCase();
+                    const isSpam = title.includes('message sent') ||
+                        title.includes('msg') ||
+                        desc.includes('message sent') ||
+                        (e.source === 'POLICE' && e.title === 'MESSAGE_SENT');
+                    return !isSpam;
+                })
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            // Remove duplicates if any (naive approach based on timestamp/title similarity if needed, but IDs differ)
+            // Remove duplicates if any
             setTimeline(merged);
         } catch (error) {
             console.error('Error fetching timeline:', error);

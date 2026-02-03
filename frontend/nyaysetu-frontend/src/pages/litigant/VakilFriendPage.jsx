@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, FileText, X, Mic, StopCircle, Volume2 } from 'lucide-react';
+import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, FileText, X, Mic, StopCircle, Volume2, Shield, AlertTriangle, CheckCircle2, Eye } from 'lucide-react';
 import { vakilFriendAPI } from '../../services/api';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
@@ -20,6 +20,8 @@ export default function VakilFriendChat() {
     const [showHistory, setShowHistory] = useState(false);
     const [attachedFiles, setAttachedFiles] = useState([]); // For document attachments
     const [uploadingFile, setUploadingFile] = useState(false);
+    const [documentAnalysis, setDocumentAnalysis] = useState(null); // AI analysis results
+    const [showAnalysisModal, setShowAnalysisModal] = useState(false); // Show analysis modal
     const [language, setLanguage] = useState('en'); // Default language
     const [isRecording, setIsRecording] = useState(false);
     const [speakingIndex, setSpeakingIndex] = useState(null); // Track which message is speaking
@@ -406,55 +408,103 @@ export default function VakilFriendChat() {
         }]);
 
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-            // Description and category are handled by the backend service now
+            // Use Vakil Friend AI document analysis
+            if (sessionId) {
+                console.log('🔍 Analyzing document with AI...');
+                const response = await vakilFriendAPI.analyzeDocumentForSession(sessionId, file);
+                const analysis = response.data;
 
-            if (!sessionId) {
-                alert("Session not active. Please refresh.");
-                return;
+                // Update file status with analysis results
+                setAttachedFiles(prev => prev.map(f =>
+                    f.name === file.name && f.status === 'pending'
+                        ? {
+                            ...f,
+                            status: 'analyzed',
+                            id: analysis.documentId,
+                            sha256Hash: analysis.sha256Hash,
+                            analysis: analysis,
+                            validityStatus: analysis.validityStatus,
+                            usefulnessLevel: analysis.usefulnessLevel,
+                            storedInVault: analysis.storedInVault
+                        }
+                        : f
+                ));
+
+                // Store current analysis for modal
+                setDocumentAnalysis(analysis);
+                setShowAnalysisModal(true);
+
+                // Build AI analysis message
+                let analysisMessage = `📄 **Document Analyzed: ${file.name}**\n\n`;
+                analysisMessage += `🔐 **SHA-256 Hash:** \`${analysis.sha256Hash?.substring(0, 16)}...\`\n\n`;
+                analysisMessage += `📋 **Type:** ${analysis.documentType || 'Unknown'}\n`;
+                analysisMessage += `✅ **Validity:** ${analysis.validityStatus || 'Pending Review'}\n`;
+                analysisMessage += `📊 **Usefulness:** ${analysis.usefulnessLevel || 'Medium'}\n\n`;
+
+                if (analysis.summary) {
+                    analysisMessage += `**Summary:** ${analysis.summary}\n\n`;
+                }
+
+                if (analysis.keyPoints && analysis.keyPoints.length > 0) {
+                    analysisMessage += `**Key Points:**\n`;
+                    analysis.keyPoints.forEach(point => {
+                        analysisMessage += `• ${point}\n`;
+                    });
+                    analysisMessage += '\n';
+                }
+
+                if (analysis.storedInVault) {
+                    analysisMessage += `🛡️ **Stored in Evidence Vault** - Document protected with SHA-256 hash\n`;
+                }
+
+                if (analysis.validityIssues && analysis.validityIssues.length > 0) {
+                    analysisMessage += `\n⚠️ **Issues Found:**\n`;
+                    analysis.validityIssues.forEach(issue => {
+                        analysisMessage += `• ${issue}\n`;
+                    });
+                }
+
+                // Add AI analysis as assistant message
+                setMessages(prev => [
+                    ...prev,
+                    { role: 'user', content: `📎 Attached document: ${file.name}` },
+                    { role: 'assistant', content: analysisMessage }
+                ]);
+
+            } else {
+                // Fallback to simple upload if no session
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('category', 'EVIDENCE');
+                formData.append('description', `Uploaded during case filing via Vakil-Friend chat`);
+
+                const token = localStorage.getItem('token');
+                const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                setAttachedFiles(prev => prev.map(f =>
+                    f.name === file.name && f.status === 'pending'
+                        ? { ...f, status: 'uploaded', id: response.data.id }
+                        : f
+                ));
+
+                setMessages(prev => [...prev, {
+                    role: 'user',
+                    content: `📎 Attached document: ${file.name}`
+                }]);
             }
 
-            const token = localStorage.getItem('token');
-            const response = await axios.post(`${API_BASE_URL}/api/vakil-friend/chat/${sessionId}/upload`, formData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            const data = response.data;
-
-            // Update file status to uploaded
-            setAttachedFiles(prev => prev.map(f =>
-                f.name === file.name && f.status === 'pending'
-                    ? { ...f, status: 'uploaded', id: data.documentId }
-                    : f
-            ));
-
-            // Remove the "Analyzing..." message (optional, or just append)
-            // Actually, keep history, just append new info.
-
-            // Add a message about the uploaded file from User
-            setMessages(prev => [...prev, {
-                role: 'user',
-                content: `📎 Attached document: ${file.name}`
-            }]);
-
-            // Add AI Analysis message
-            const summary = data.summary || "Document uploaded successfully.";
-            setMessages(prev => [...prev, {
-                role: 'assistant',
-                content: `**✅ Document Verified: ${file.name}**\n\n${summary}\n\nI have secured this in the Evidence Vault for your case.`
-            }]);
-
         } catch (error) {
-            console.error('File upload failed:', error);
+            console.error('Document analysis failed:', error);
             setAttachedFiles(prev => prev.map(f =>
                 f.name === file.name && f.status === 'pending'
                     ? { ...f, status: 'failed' }
                     : f
             ));
-
+            alert(`Failed to analyze ${file.name}. Please try again.`);
             setMessages(prev => [...prev, {
                 role: 'assistant',
                 content: `❌ Failed to analyze ${file.name}. Please try again.`
@@ -584,6 +634,273 @@ export default function VakilFriendChat() {
                                 ))}
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Document Analysis Modal */}
+            {showAnalysisModal && documentAnalysis && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0,0,0,0.75)',
+                        zIndex: 10001,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: '2rem',
+                        backdropFilter: 'blur(8px)'
+                    }}
+                    onClick={() => setShowAnalysisModal(false)}
+                >
+                    <div
+                        style={{
+                            width: '580px',
+                            maxWidth: '95vw',
+                            maxHeight: '90vh',
+                            background: '#ffffff', // Clean white background for light theme
+                            borderRadius: '2rem',
+                            padding: '2rem',
+                            overflowY: 'auto',
+                            border: '1px solid rgba(30, 42, 68, 0.08)',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+                            position: 'relative'
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <Shield size={22} style={{ color: '#10b981' }} />
+                                    <h3 style={{
+                                        color: '#1e2a44',
+                                        fontSize: '1.4rem',
+                                        fontWeight: '800',
+                                        margin: 0
+                                    }}>
+                                        AI Document Analysis
+                                    </h3>
+                                </div>
+                                <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
+                                    {documentAnalysis.documentName || 'Analyzing Document...'}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowAnalysisModal(false)}
+                                style={{
+                                    background: '#f8fafc',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '0.75rem',
+                                    padding: '0.6rem',
+                                    color: '#64748b',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* SHA-256 Hash Section */}
+                        <div style={{
+                            background: '#f8fafc',
+                            borderRadius: '1.25rem',
+                            padding: '1.25rem',
+                            marginBottom: '1.5rem',
+                            border: '1px solid #e2e8f0'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
+                                <Shield size={16} style={{ color: '#10b981' }} />
+                                <span style={{ color: '#10b981', fontWeight: '700', fontSize: '0.75rem', letterSpacing: '0.05em' }}>SHA-256 PROTECTED</span>
+                            </div>
+                            <div style={{
+                                color: '#334155',
+                                fontSize: '0.8rem',
+                                wordBreak: 'break-all',
+                                fontFamily: 'monospace',
+                                lineHeight: '1.5'
+                            }}>
+                                {documentAnalysis.sha256Hash}
+                            </div>
+                        </div>
+
+                        {/* Status Cards */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                            {/* Validity */}
+                            <div style={{
+                                background: 'rgba(16, 185, 129, 0.04)',
+                                borderRadius: '1.25rem',
+                                padding: '1.25rem 0.75rem',
+                                textAlign: 'center',
+                                border: '1px solid rgba(16, 185, 129, 0.15)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}>
+                                <div style={{
+                                    width: '36px', height: '36px', borderRadius: '50%',
+                                    background: 'rgba(16, 185, 129, 0.1)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <CheckCircle size={20} color="#10b981" />
+                                </div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Validity</div>
+                                <div style={{ color: '#10b981', fontWeight: '800', fontSize: '0.95rem' }}>
+                                    {documentAnalysis.validityStatus || 'VALID'}
+                                </div>
+                            </div>
+
+                            {/* Usefulness */}
+                            <div style={{
+                                background: 'rgba(99, 102, 241, 0.04)',
+                                borderRadius: '1.25rem',
+                                padding: '1.25rem 0.75rem',
+                                textAlign: 'center',
+                                border: '1px solid rgba(99, 102, 241, 0.15)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}>
+                                <div style={{
+                                    width: '36px', height: '36px', borderRadius: '50%',
+                                    background: 'rgba(99, 102, 241, 0.1)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <Eye size={20} color="#6366f1" />
+                                </div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Usefulness</div>
+                                <div style={{ color: '#6366f1', fontWeight: '800', fontSize: '0.95rem' }}>
+                                    {documentAnalysis.usefulnessLevel || 'HIGH'}
+                                </div>
+                            </div>
+
+                            {/* Vault Status */}
+                            <div style={{
+                                background: '#f8fafc',
+                                borderRadius: '1.25rem',
+                                padding: '1.25rem 0.75rem',
+                                textAlign: 'center',
+                                border: '1px solid #e2e8f0',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}>
+                                <div style={{
+                                    width: '36px', height: '36px', borderRadius: '50%',
+                                    background: '#f1f5f9',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <Shield size={20} color="#64748b" />
+                                </div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Evidence Vault</div>
+                                <div style={{ color: '#475569', fontWeight: '800', fontSize: '0.95rem' }}>
+                                    {documentAnalysis.storedInVault ? 'STORED' : 'NOT STORED'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Document Type & Category */}
+                        {/* Document Details Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '1.25rem', border: '1px solid #e2e8f0' }}>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: '700' }}>Document Type</div>
+                                <div style={{ color: '#1e2a44', fontWeight: '700', fontSize: '1rem' }}>{documentAnalysis.documentType || 'Legal Document'}</div>
+                            </div>
+                            <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '1.25rem', border: '1px solid #e2e8f0' }}>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: '700' }}>Category</div>
+                                <div style={{ color: '#1e2a44', fontWeight: '700', fontSize: '1rem' }}>{documentAnalysis.suggestedCategory || 'EVIDENCE'}</div>
+                            </div>
+                        </div>
+
+                        {/* AI Summary Section */}
+                        <div style={{
+                            background: '#f8fafc',
+                            padding: '1.5rem',
+                            borderRadius: '1.25rem',
+                            border: '1px solid #e2e8f0',
+                            marginBottom: '1.5rem'
+                        }}>
+                            <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.75rem' }}>AI Summary</div>
+                            <p style={{ color: '#334155', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
+                                {documentAnalysis.summary || 'Analytical summary pending...'}
+                            </p>
+                        </div>
+
+                        {/* Key Points Section */}
+                        {documentAnalysis.keyPoints && documentAnalysis.keyPoints.length > 0 && (
+                            <div style={{
+                                background: 'rgba(99, 102, 241, 0.03)',
+                                padding: '1.5rem',
+                                borderRadius: '1.25rem',
+                                border: '1px solid rgba(99, 102, 241, 0.1)',
+                                marginBottom: '2rem'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', color: '#6366f1' }}>
+                                    <Bot size={18} />
+                                    <span style={{ fontWeight: '800', fontSize: '0.9rem', letterSpacing: '0.02em' }}>Key Points</span>
+                                </div>
+                                <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {documentAnalysis.keyPoints.map((point, idx) => (
+                                        <li key={idx} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#6366f1', marginTop: '0.6rem', flexShrink: 0 }} />
+                                            <span style={{ color: '#475569', fontSize: '0.95rem', lineHeight: '1.5' }}>{point}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Validity Issues Area */}
+                        {documentAnalysis.validityIssues && documentAnalysis.validityIssues.length > 0 && (
+                            <div style={{
+                                background: 'rgba(239, 68, 68, 0.03)',
+                                padding: '1.5rem',
+                                borderRadius: '1.25rem',
+                                border: '1px solid rgba(239, 68, 68, 0.1)',
+                                marginBottom: '2rem'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', color: '#ef4444' }}>
+                                    <AlertTriangle size={18} />
+                                    <span style={{ fontWeight: '800', fontSize: '0.9rem', letterSpacing: '0.02em' }}>Critical Issues</span>
+                                </div>
+                                <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {documentAnalysis.validityIssues.map((issue, idx) => (
+                                        <li key={idx} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444', marginTop: '0.6rem', flexShrink: 0 }} />
+                                            <span style={{ color: '#475569', fontSize: '0.95rem', lineHeight: '1.5' }}>{issue}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowAnalysisModal(false)}
+                            style={{
+                                width: '100%',
+                                padding: '1.1rem',
+                                background: '#1e2a44',
+                                border: 'none',
+                                borderRadius: '1rem',
+                                color: 'white',
+                                fontWeight: '700',
+                                fontSize: '1rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 10px 15px -3px rgba(30, 42, 68, 0.2)'
+                            }}
+                        >
+                            Close Analysis
+                        </button>
                     </div>
                 </div>
             )}

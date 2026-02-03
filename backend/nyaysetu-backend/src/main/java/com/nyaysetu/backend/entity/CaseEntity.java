@@ -48,10 +48,12 @@ public class CaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User client;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lawyer_id")
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User lawyer;
 
     private Long judgeId;
@@ -85,9 +87,85 @@ public class CaseEntity {
 
     private String lawyerProposalStatus; // PENDING, ACCEPTED, REJECTED
 
+    // ===== JUDICIAL WORKFLOW FIELDS =====
+    
+    /**
+     * Whether summons have been successfully delivered to all parties
+     */
+    private Boolean summonsDelivered;
+    
+    /**
+     * Whether Section 63(4) BSA 2023 certification is complete
+     * (Device Logs, User ID, SHA-256 Hash verified by Groq)
+     */
+    private Boolean bsa634Certified;
+    
+    /**
+     * Draft approval status from litigant
+     * Values: AWAITING_CLIENT, APPROVED, REJECTED, NOT_APPLICABLE
+     */
+    private String draftApprovalStatus;
+    
+    /**
+     * Current stage in the Judge's 7-step judicial process:
+     * 1 = Cognizance, 2 = Summons, 3 = Appearance, 4 = Evidence, 
+     * 5 = Arguments, 6 = Judgment, 7 = Verdict
+     */
+    private Integer currentJudicialStage;
+    
+    /**
+     * Blocking errors from Groq validation (prevents trial ready status)
+     */
+    @Column(columnDefinition = "TEXT")
+    private String blockingErrors;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+    
+    // ===== COMPUTED PROPERTIES =====
+    
+    /**
+     * Case is TRIAL_READY only when:
+     * 1. Summons have been delivered (summonsDelivered == true)
+     * 2. BSA Section 63(4) is certified (bsa634Certified == true)
+     * 3. No blocking validation errors exist
+     */
+    @Transient
+    public boolean isTrialReady() {
+        return Boolean.TRUE.equals(summonsDelivered) 
+            && Boolean.TRUE.equals(bsa634Certified)
+            && (blockingErrors == null || blockingErrors.isEmpty());
+    }
+    
+    /**
+     * Whether the case can proceed to court submission
+     * (Litigant must have approved the draft)
+     */
+    @Transient
+    public boolean canSubmitToCourt() {
+        return "APPROVED".equals(draftApprovalStatus);
+    }
+    
+    /**
+     * Get the health status of the case
+     */
+    @Transient
+    public String getCaseHealth() {
+        if (blockingErrors != null && !blockingErrors.isEmpty()) {
+            return "BLOCKED";
+        }
+        if (!Boolean.TRUE.equals(bsa634Certified)) {
+            return "NEEDS_CERTIFICATION";
+        }
+        if (!Boolean.TRUE.equals(summonsDelivered)) {
+            return "AWAITING_SUMMONS";
+        }
+        if (!"APPROVED".equals(draftApprovalStatus) && draftApprovalStatus != null) {
+            return "AWAITING_APPROVAL";
+        }
+        return "HEALTHY";
+    }
 
     @PrePersist
     protected void onCreate() {

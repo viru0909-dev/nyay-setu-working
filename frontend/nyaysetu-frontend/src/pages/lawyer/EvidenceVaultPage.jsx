@@ -16,7 +16,12 @@ import {
     Database,
     Loader2,
     X,
-    FolderOpen
+    FolderOpen,
+    Shield,
+    Bot,
+    CheckCircle,
+    AlertTriangle,
+    FileCheck
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { documentAPI, lawyerAPI } from '../../services/api';
@@ -34,6 +39,12 @@ export default function EvidenceVaultPage() {
     const [uploadDescription, setUploadDescription] = useState('');
     const [cases, setCases] = useState([]);
     const [selectedCaseId, setSelectedCaseId] = useState(filterCaseId || '');
+
+    // Document Analysis State
+    const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+    const [documentAnalysis, setDocumentAnalysis] = useState(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+
     const fileInputRef = useRef(null);
 
     useEffect(() => {
@@ -110,6 +121,38 @@ export default function EvidenceVaultPage() {
         }
     };
 
+    const handleDownloadCertificate = async (item) => {
+        try {
+            const response = await documentAPI.downloadCertificate(item.id);
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Certificate_${item.fileName || item.id}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } catch (error) {
+            console.error('Error downloading certificate:', error);
+            alert('Failed to download certificate. It might not be generated yet.');
+        }
+    };
+
+    const handleViewAnalysis = async (item) => {
+        try {
+            setIsAnalyzing(true);
+            const response = await documentAPI.getAnalysis(item.id);
+            setDocumentAnalysis(response.data);
+            setShowAnalysisModal(true);
+        } catch (error) {
+            console.error('Error fetching analysis:', error);
+            alert('No AI analysis found for this document. You may need to trigger it first.');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
     // Calculate real stats
     const stats = [
         {
@@ -155,6 +198,169 @@ export default function EvidenceVaultPage() {
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            {/* AI Analysis Modal */}
+            {showAnalysisModal && documentAnalysis && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(30, 42, 68, 0.4)',
+                        zIndex: 10001,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: '2rem',
+                        backdropFilter: 'blur(8px)'
+                    }}
+                    onClick={() => setShowAnalysisModal(false)}
+                >
+                    <div
+                        style={{
+                            width: '580px',
+                            maxWidth: '95vw',
+                            maxHeight: '90vh',
+                            background: '#ffffff',
+                            borderRadius: '2rem',
+                            padding: '2.4rem',
+                            overflowY: 'auto',
+                            border: '1px solid rgba(30, 42, 68, 0.08)',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+                            position: 'relative'
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <Shield size={22} style={{ color: '#10b981' }} />
+                                    <h3 style={{ color: '#1e2a44', fontSize: '1.4rem', fontWeight: '800', margin: 0 }}>AI Document Analysis</h3>
+                                </div>
+                                <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0.25rem 0 0', fontWeight: '500' }}>
+                                    {documentAnalysis.documentName || 'Analyzing Document...'}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowAnalysisModal(false)}
+                                style={{
+                                    background: '#f8fafc',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '0.75rem',
+                                    padding: '0.6rem',
+                                    color: '#64748b',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* SHA-256 Hash Section */}
+                        <div style={{
+                            background: '#f8fafc',
+                            borderRadius: '1.25rem',
+                            padding: '1.25rem',
+                            marginBottom: '1.5rem',
+                            border: '1px solid #e2e8f0'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
+                                <Shield size={16} style={{ color: '#10b981' }} />
+                                <span style={{ color: '#10b981', fontWeight: '700', fontSize: '0.75rem', letterSpacing: '0.05em' }}>SHA-256 PROTECTED</span>
+                            </div>
+                            <div style={{ color: '#334155', fontSize: '0.8rem', wordBreak: 'break-all', fontFamily: 'monospace' }}>
+                                {documentAnalysis.sha256Hash}
+                            </div>
+                        </div>
+
+                        {/* Status Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                            {/* Validity */}
+                            <div style={{ background: 'rgba(16, 185, 129, 0.04)', borderRadius: '1.25rem', padding: '1.25rem 0.75rem', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.15)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <CheckCircle size={20} color="#10b981" />
+                                </div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Validity</div>
+                                <div style={{ color: '#10b981', fontWeight: '800', fontSize: '0.95rem' }}>{documentAnalysis.validityStatus || 'VALID'}</div>
+                            </div>
+                            {/* Usefulness */}
+                            <div style={{ background: 'rgba(99, 102, 241, 0.04)', borderRadius: '1.25rem', padding: '1.25rem 0.75rem', textAlign: 'center', border: '1px solid rgba(99, 102, 241, 0.15)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Eye size={20} color="#6366f1" />
+                                </div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Usefulness</div>
+                                <div style={{ color: '#6366f1', fontWeight: '800', fontSize: '0.95rem' }}>{documentAnalysis.usefulnessLevel || 'HIGH'}</div>
+                            </div>
+                            {/* Vault Status */}
+                            <div style={{ background: '#f8fafc', borderRadius: '1.25rem', padding: '1.25rem 0.75rem', textAlign: 'center', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Shield size={20} color="#64748b" />
+                                </div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Evidence Vault</div>
+                                <div style={{ color: '#475569', fontWeight: '800', fontSize: '0.95rem' }}>STORED</div>
+                            </div>
+                        </div>
+
+                        {/* Document Details */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '1.25rem', border: '1px solid #e2e8f0' }}>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: '700' }}>Document Type</div>
+                                <div style={{ color: '#1e2a44', fontWeight: '700', fontSize: '1rem' }}>{documentAnalysis.documentType || 'Legal Document'}</div>
+                            </div>
+                            <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '1.25rem', border: '1px solid #e2e8f0' }}>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: '700' }}>Category</div>
+                                <div style={{ color: '#1e2a44', fontWeight: '700', fontSize: '1rem' }}>{documentAnalysis.suggestedCategory || 'EVIDENCE'}</div>
+                            </div>
+                        </div>
+
+                        {/* AI Summary */}
+                        <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '1.25rem', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
+                            <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.75rem' }}>AI Summary</div>
+                            <p style={{ color: '#334155', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
+                                {documentAnalysis.summary || 'Analytical summary pending...'}
+                            </p>
+                        </div>
+
+                        {/* Key Points */}
+                        {documentAnalysis.keyPoints && documentAnalysis.keyPoints.length > 0 && (
+                            <div style={{ background: 'rgba(99, 102, 241, 0.03)', padding: '1.5rem', borderRadius: '1.25rem', border: '1px solid rgba(99, 102, 241, 0.1)', marginBottom: '2.4rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', color: '#6366f1' }}>
+                                    <Bot size={18} />
+                                    <span style={{ fontWeight: '800', fontSize: '0.9rem', letterSpacing: '0.02em' }}>Key Points</span>
+                                </div>
+                                <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {documentAnalysis.keyPoints.map((point, idx) => (
+                                        <li key={idx} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#6366f1', marginTop: '0.6rem', flexShrink: 0 }} />
+                                            <span style={{ color: '#475569', fontSize: '0.95rem', lineHeight: '1.5' }}>{point}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        <button
+                            onClick={() => setShowAnalysisModal(false)}
+                            style={{
+                                width: '100%',
+                                padding: '1.1rem',
+                                background: '#1e2a44',
+                                border: 'none',
+                                borderRadius: '1rem',
+                                color: 'white',
+                                fontWeight: '700',
+                                fontSize: '1rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 10px 15px -3px rgba(30, 42, 68, 0.2)'
+                            }}
+                        >
+                            Close Analysis
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Upload Modal */}
             {showUploadModal && (
                 <div style={{
@@ -488,12 +694,68 @@ export default function EvidenceVaultPage() {
                                         </td>
                                         <td style={{ padding: '1rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
+                                                {/* AI Insights Button */}
+                                                <button
+                                                    onClick={() => handleViewAnalysis(item)}
+                                                    disabled={isAnalyzing}
+                                                    style={{
+                                                        background: 'rgba(99, 102, 241, 0.1)',
+                                                        border: '1px solid rgba(99, 102, 241, 0.2)',
+                                                        color: '#6366f1',
+                                                        borderRadius: '0.5rem',
+                                                        padding: '0.4rem 0.75rem',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.4rem',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: '700',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    title="View AI Analysis"
+                                                >
+                                                    <Bot size={14} />
+                                                    AI Insights
+                                                </button>
+
+                                                {/* Certificate Button (Only for Hashed Documents) */}
+                                                {(item.sha256Hash || item.blockchain) && (
+                                                    <button
+                                                        onClick={() => handleDownloadCertificate(item)}
+                                                        style={{
+                                                            background: 'rgba(16, 185, 129, 0.1)',
+                                                            border: '1px solid rgba(16, 185, 129, 0.2)',
+                                                            color: '#10b981',
+                                                            borderRadius: '0.5rem',
+                                                            padding: '0.4rem 0.75rem',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '0.4rem',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: '700',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                        title="Download Evidence Certificate"
+                                                    >
+                                                        <FileCheck size={14} />
+                                                        Certificate
+                                                    </button>
+                                                )}
+
                                                 <button
                                                     onClick={() => handleDownload(item)}
-                                                    style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-                                                    title="Download"
+                                                    style={{
+                                                        background: 'rgba(255, 255, 255, 0.05)',
+                                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                        color: 'var(--text-secondary)',
+                                                        borderRadius: '0.5rem',
+                                                        padding: '0.4rem 0.6rem',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    title="Download File"
                                                 >
-                                                    <Download size={18} />
+                                                    <Download size={16} />
                                                 </button>
                                             </div>
                                         </td>

@@ -149,7 +149,12 @@ export default function MyDocket() {
                         const urgencyStyle = urgencyColors[caseItem.urgency] || urgencyColors['NORMAL'];
 
                         return (
-                            <div key={caseItem.id} style={{ ...glassStyle, transition: 'transform 0.2s', cursor: 'pointer' }}
+                            <div key={caseItem.id} style={{
+                                ...glassStyle,
+                                transition: 'transform 0.2s',
+                                cursor: 'pointer',
+                                borderLeft: `5px solid ${statusStyle.text}`
+                            }}
                                 onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                                 onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
                             >

@@ -27,25 +27,14 @@ export default function UnassignedPool() {
 
     const takeCognizance = async (caseId) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/judge/cases/${caseId}/claim`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
+            const response = await judgeAPI.claimCase(caseId);
+            if (response.status === 200) {
                 alert('✅ Cognizance Taken! Case moved to Review.');
                 fetchUnassignedCases();
-            } else {
-                const error = await response.json();
-                alert(`Failed: ${error.error || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('Error assigning case:', error);
-            alert('Failed to assign case');
+            alert('Failed to assign case: ' + (error.response?.data?.error || error.message));
         }
     };
 
