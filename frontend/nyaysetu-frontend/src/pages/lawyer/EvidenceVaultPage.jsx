@@ -19,7 +19,6 @@ import {
     FolderOpen,
     Shield,
     Bot,
-    Eye,
     CheckCircle,
     AlertTriangle,
     FileCheck

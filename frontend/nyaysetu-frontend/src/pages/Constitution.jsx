@@ -491,7 +491,6 @@ export default function Constitution() {
                                                     background: 'var(--bg-glass)',
                                                     border: 'var(--border-glass)',
                                                     borderRadius: '0.5rem',
-                                                    borderRadius: '0.5rem',
                                                     color: 'var(--color-primary)',
                                                     fontSize: '0.9rem',
                                                     fontWeight: '600'
@@ -568,7 +567,6 @@ export default function Constitution() {
                                         >
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
                                                 <span style={{
-                                                    padding: '0.6rem 1.25rem',
                                                     padding: '0.6rem 1.25rem',
                                                     background: 'var(--color-primary)',
                                                     borderRadius: '0.75rem',
