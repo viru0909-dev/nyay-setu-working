@@ -31,7 +31,7 @@ public class CaseEvidence {
     private Long uploadedBy;
 
     // ===== SHA-256 Protection Fields =====
-    @Column(length = 64)
+    @Column(name = "sha256_hash", length = 64)
     private String sha256Hash; // SHA-256 hash for integrity verification
 
     @Column(length = 128)  
