@@ -25,13 +25,31 @@ export default function ProfilePage() {
         setFaceLoaded(true);
     }, []);
 
+    const getDefaultProfession = (role) => {
+        switch (role) {
+            case 'JUDGE': return 'High Court Justice';
+            case 'LAWYER': return 'Senior Advocate';
+            case 'POLICE': return 'Police Officer';
+            default: return 'Software Engineer';
+        }
+    };
+
+    const getDefaultBio = (role) => {
+        switch (role) {
+            case 'JUDGE': return 'Presiding over civil and criminal matters with a commitment to justice.';
+            case 'LAWYER': return 'Legal counsel specializing in constitutional and criminal law.';
+            case 'POLICE': return 'Dedicated to maintaining law and order and serving the community.';
+            default: return 'Experienced professional seeking legal assistance for property matters.';
+        }
+    };
+
     const [profileData, setProfileData] = useState({
         name: user?.name || 'John Doe',
         email: user?.email || 'john.doe@example.com',
         phone: '+91 9876543210',
         address: 'Mumbai, Maharashtra, India',
-        profession: 'Software Engineer',
-        bio: 'Experienced professional seeking legal assistance for property matters.',
+        profession: getDefaultProfession(user?.role),
+        bio: getDefaultBio(user?.role),
         faceEnabled: false
     });
 

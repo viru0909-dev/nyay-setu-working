@@ -42,18 +42,17 @@ export default function NotificationBell() {
             setNotifications(prev => {
                 const exists = prev.some(n => n.id === notification.id);
                 if (exists) return prev;
-
-                const newCount = unreadCount + 1; // Increment unread
-                setUnreadCount(newCount);
                 return [notification, ...prev];
             });
+            // Increment unread count for new notifications
+            setUnreadCount(prev => prev + 1);
         });
 
         return () => {
             unsubscribe();
             // Optimization: We don't disconnect immediately on unmount to keep connection alive during nav
         };
-    }, [user, unreadCount]);
+    }, [user]); // Removed unreadCount to prevent refetch loop
 
     const markAsRead = async (id) => {
         // Optimistic update

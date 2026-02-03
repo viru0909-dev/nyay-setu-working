@@ -170,6 +170,137 @@ public class GroqDocumentVerificationService {
         return prompt.toString();
     }
 
+    /**
+     * Validate BSA Section 63(4) compliance for digital evidence.
+     * Checks for mandatory metadata:
+     * 1. Device Logs (origin device identification)
+     * 2. User ID (person who captured/created the digital evidence)
+     * 3. SHA-256 Hash (integrity verification)
+     * 
+     * @param documentContent The content/text of the document to validate
+     * @param documentName Name of the document for reference
+     * @return ValidationResult with compliance status and any blocking errors
+     */
+    public com.nyaysetu.backend.dto.ValidationResult validateBSA634Compliance(
+            String documentContent, String documentName) {
+        
+        if (groqApiKey == null || groqApiKey.isEmpty()) {
+            log.warn("Groq API key not configured. Returning default validation.");
+            return com.nyaysetu.backend.dto.ValidationResult.builder()
+                    .compliant(false)
+                    .blockingError("Groq API not configured - cannot validate BSA 63(4) compliance")
+                    .suggestion("Configure Groq API key in application properties")
+                    .build();
+        }
+
+        try {
+            String prompt = buildBSA634ValidationPrompt(documentContent, documentName);
+            String aiResponse = callGroqAPI(prompt);
+            return parseBSA634Response(aiResponse);
+        } catch (Exception e) {
+            log.error("Error validating BSA 63(4) compliance: {}", e.getMessage());
+            return com.nyaysetu.backend.dto.ValidationResult.builder()
+                    .compliant(false)
+                    .blockingError("Validation failed: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    /**
+     * Build the prompt for BSA 63(4) validation
+     */
+    private String buildBSA634ValidationPrompt(String documentContent, String documentName) {
+        return String.format("""
+            You are a legal compliance validator for the Indian Bharatiya Sakshya Act (BSA) 2023.
+            
+            Your task is to verify if this DIGITAL EVIDENCE document complies with Section 63(4) requirements.
+            
+            Section 63(4) BSA 2023 MANDATORY REQUIREMENTS for digital evidence admissibility:
+            1. DEVICE LOGS: Information about the device that created/captured the evidence
+            2. USER ID: Identification of the person responsible for the digital record
+            3. SHA-256 HASH: Cryptographic hash for integrity verification
+            
+            Document Name: %s
+            
+            Document Content:
+            ---
+            %s
+            ---
+            
+            Analyze the document and determine if it contains or references:
+            1. Device logs or device identification (e.g., IMEI, device serial, IP address, device name)
+            2. User identification (e.g., user ID, username, authenticated user, creator name)
+            3. SHA-256 or similar cryptographic hash for data integrity
+            
+            Respond ONLY with a JSON object in this exact format:
+            {
+                "compliant": true/false,
+                "hasDeviceLogs": true/false,
+                "hasUserId": true/false,
+                "hasSHA256Hash": true/false,
+                "missingFields": ["Device Logs", "User ID", "SHA-256 Hash"],
+                "details": "Explanation of what was found or missing",
+                "suggestion": "How to fix compliance issues if any",
+                "confidence": 0.0-1.0
+            }
+            
+            Be strict - if any of the three requirements is clearly missing, the document is NOT compliant.
+            """, documentName, documentContent != null ? documentContent.substring(0, Math.min(documentContent.length(), 3000)) : "No content");
+    }
+
+    /**
+     * Parse Groq response for BSA 63(4) validation
+     */
+    private com.nyaysetu.backend.dto.ValidationResult parseBSA634Response(String aiResponse) {
+        try {
+            // Clean the response (remove markdown code blocks if present)
+            String cleanResponse = aiResponse.trim();
+            if (cleanResponse.startsWith("```json")) {
+                cleanResponse = cleanResponse.substring(7);
+            }
+            if (cleanResponse.startsWith("```")) {
+                cleanResponse = cleanResponse.substring(3);
+            }
+            if (cleanResponse.endsWith("```")) {
+                cleanResponse = cleanResponse.substring(0, cleanResponse.length() - 3);
+            }
+            cleanResponse = cleanResponse.trim();
+
+            JsonNode json = objectMapper.readTree(cleanResponse);
+            
+            boolean compliant = json.has("compliant") && json.get("compliant").asBoolean();
+            boolean hasDeviceLogs = json.has("hasDeviceLogs") && json.get("hasDeviceLogs").asBoolean();
+            boolean hasUserId = json.has("hasUserId") && json.get("hasUserId").asBoolean();
+            boolean hasSHA256 = json.has("hasSHA256Hash") && json.get("hasSHA256Hash").asBoolean();
+            
+            java.util.List<String> missingFields = new java.util.ArrayList<>();
+            if (!hasDeviceLogs) missingFields.add("Device Logs");
+            if (!hasUserId) missingFields.add("User ID");
+            if (!hasSHA256) missingFields.add("SHA-256 Hash");
+            
+            String details = json.has("details") ? json.get("details").asText() : "";
+            String suggestion = json.has("suggestion") ? json.get("suggestion").asText() : "";
+            double confidence = json.has("confidence") ? json.get("confidence").asDouble() : 0.5;
+            
+            if (!compliant || !missingFields.isEmpty()) {
+                return com.nyaysetu.backend.dto.ValidationResult.blockingFailure(missingFields, suggestion);
+            }
+            
+            return com.nyaysetu.backend.dto.ValidationResult.builder()
+                    .compliant(true)
+                    .details(details)
+                    .confidence(confidence)
+                    .build();
+                    
+        } catch (Exception e) {
+            log.error("Failed to parse BSA 63(4) validation response: {}", e.getMessage());
+            return com.nyaysetu.backend.dto.ValidationResult.builder()
+                    .compliant(false)
+                    .blockingError("Failed to parse validation response")
+                    .build();
+        }
+    }
+
     private String callGroqAPI(String prompt) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -236,6 +367,52 @@ public class GroqDocumentVerificationService {
         return java.util.stream.StreamSupport.stream(arrayNode.spliterator(), false)
             .map(JsonNode::asText)
             .toList();
+    }
+
+    /**
+     * Generate a Judge's Brief (Digital Court Master) for a case
+     */
+    public String generateCaseBrief(com.nyaysetu.backend.entity.CaseEntity caseEntity) {
+        String prompt = String.format("""
+            You are a "Digital Court Master" (AI Judicial Assistant) for the High Court.
+            Your task is to provide a concise, structured pre-hearing briefing for the Judge for the following case:
+            
+            Case Details:
+            Title: %s
+            Type: %s
+            Petitioner: %s
+            Respondent: %s
+            Description: %s
+            
+            Please provide a summary in the following plain text format (Do NOT use markdown like **bold**):
+            
+            CASE SYNOPSIS
+            (A 2-3 sentence overview of what the case is about)
+            
+            KEY LEGAL ISSUES
+            (Bulleted list of potential legal questions or conflicts)
+            
+            PROCEDURAL STATUS
+            (Current stage and what is expected next)
+            
+            SUGGESTED ACTIONS
+            (1-2 recommended questions or actions for the judge)
+            
+            Keep the tone formal, judicial, and objective. Do not use asterisks or colons in the headers.
+            """, 
+            caseEntity.getTitle(),
+            caseEntity.getCaseType(),
+            caseEntity.getPetitioner(),
+            caseEntity.getRespondent(),
+            caseEntity.getDescription()
+        );
+        
+        String response = chatWithAI(prompt);
+        // Aggressively remove markdown symbols if AI ignored the instruction
+        return response.replaceAll("\\*\\*", "")
+                      .replaceAll("##", "")
+                      .replaceAll("#", "")
+                      .trim();
     }
 
     private DocumentVerificationResult defaultVerification(String documentName) {

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, X, MessageSquare, Loader2, MinusCircle, Maximize2, Minimize2 } from 'lucide-react';
+import { Send, Bot, User, X, MessageSquare, Loader2, MinusCircle, Maximize2, Minimize2, Sparkles } from 'lucide-react';
 import { vakilFriendAPI } from '../services/api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -95,10 +95,10 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                     right: '2rem',
                     padding: '1rem',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                    background: 'var(--color-primary)',
                     color: 'white',
                     border: 'none',
-                    boxShadow: '0 4px 20px rgba(139, 92, 246, 0.5)',
+                    boxShadow: '0 4px 20px rgba(30, 42, 68, 0.4)',
                     cursor: 'pointer',
                     zIndex: 9999,
                     display: 'flex',
@@ -110,7 +110,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 title="Ask Vakil Friend about this case"
             >
-                <Bot size={32} />
+                <Sparkles size={28} />
             </button>
         );
     }
@@ -137,7 +137,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
             {/* Header */}
             <div style={{
                 padding: '1rem',
-                background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                background: 'var(--color-primary)',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
@@ -146,10 +146,10 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                 borderTopRightRadius: '1rem'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <Bot size={20} />
+                    <Sparkles size={20} color="white" />
                     <div>
-                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '600' }}>Vakil Friend</h3>
-                        <p style={{ margin: 0, fontSize: '0.75rem', opacity: 0.9 }}>Case Assistant</p>
+                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '600', color: 'white' }}>Vakil Friend</h3>
+                        <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.9)' }}>AI Case Assistant</p>
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>

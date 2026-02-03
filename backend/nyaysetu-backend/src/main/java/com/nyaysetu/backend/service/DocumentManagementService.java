@@ -141,7 +141,7 @@ public class DocumentManagementService {
             return blockchainService.verifyFileIntegrity(file, document.getFileHash());
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(DocumentManagementService.class)
-                .error("Hash verification failed for doc {}: {}", id, e.getMessage());
+                .warn("Hash verification skipped for doc {} (file may be missing): {}", id, e.getMessage());
             return false;
         }
     }

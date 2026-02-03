@@ -4,7 +4,7 @@ import {
     ChevronLeft, ChevronRight, Upload, X, FileText,
     CheckCircle2, Scale, Users, Home as HomeIcon, Briefcase,
     AlertCircle, Shield, MapPin, Calendar, MessageSquare,
-    Bot, Sparkles, Wand2, Loader2, BrainCircuit
+    Bot, Sparkles, Wand2, Loader2, BrainCircuit, ClipboardList, Siren
 } from 'lucide-react';
 import { caseAPI, documentAPI, clientFirAPI, vakilFriendAPI, brainAPI } from '../../services/api';
 
@@ -287,8 +287,8 @@ export default function FileUnifiedPage() {
                     >
                         <ChevronLeft size={16} /> Back to Dashboard
                     </button>
-                    <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                        📋 File Case / FIR
+                    <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <ClipboardList size={32} color="var(--color-primary)" /> File Case / FIR
                     </h1>
                     <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
                         Choose between filing a court case or a police FIR
@@ -556,7 +556,9 @@ export default function FileUnifiedPage() {
             {/* FIR TAB */}
             {activeTab === 'fir' && (
                 <div style={{ background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)', borderRadius: '1.5rem', padding: '2.5rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>🚔 File Police FIR</h2>
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <Siren size={24} color="#ef4444" /> File Police FIR
+                    </h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Incident Title *</label>

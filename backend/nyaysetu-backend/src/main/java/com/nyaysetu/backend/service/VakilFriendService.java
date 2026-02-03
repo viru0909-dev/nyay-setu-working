@@ -60,6 +60,8 @@ public class VakilFriendService {
     private final BhashiniService bhashiniService;
     private final VakilFriendDocumentService vakilFriendDocumentService;
     
+
+    
     // Lazy injection to avoid circular dependency
     @Autowired
     @Lazy
@@ -295,6 +297,22 @@ public class VakilFriendService {
         assistantMsg.put("content", aiResponseEnglish); // Storing English
         conversation.add(assistantMsg);
 
+        // Log to Case Diary if session is linked to a case (SHA-256 protected)
+        if (session.getCaseEntity() != null && vakilFriendDocumentService != null && user != null) {
+            try {
+                vakilFriendDocumentService.logChatToDiary(
+                    session.getCaseEntity().getId(),
+                    sessionId,
+                    user.getId(),
+                    userMessage,
+                    aiResponseEnglish
+                );
+                log.info("📔 Logged AI interaction to Case Diary for case: {}", session.getCaseEntity().getId());
+            } catch (Exception e) {
+                log.warn("Failed to log to case diary: {}", e.getMessage());
+            }
+        }
+
         // Save updated conversation
         try {
             session.setConversationData(objectMapper.writeValueAsString(conversation));
@@ -396,6 +414,21 @@ public class VakilFriendService {
             
             // Link back to separate session field if needed, but we use generic link usually
             session.setCaseEntity((CaseEntity)resultEntity);
+
+            // Backfill Case Diary with Chat History
+            if (vakilFriendDocumentService != null) {
+                try {
+                    vakilFriendDocumentService.backfillDiary(
+                        newCase.getId(),
+                        session.getId(),
+                        user.getId(),
+                        session.getConversationData()
+                    );
+                    log.info("📔 Backfilled Case Diary with chat history");
+                } catch (Exception e) {
+                    log.warn("Failed to backfill diary: {}", e.getMessage());
+                }
+            }
         }
 
         // Mark session as completed
@@ -828,23 +861,29 @@ public class VakilFriendService {
                     .replace("### CASE SUMMARY START ###", "")
                     .replace("### CASE SUMMARY END ###", "")
                     .trim();
+            
+            // If summary is just the raw chat (long), rely more on user input
+            String relevantContext = cleanedSummary.length() > 500 ? 
+                firstMessage : cleanedSummary + "\nContext: " + firstMessage;
 
             List<Map<String, String>> prompt = new ArrayList<>();
             Map<String, String> systemMsg = new HashMap<>();
             systemMsg.put("role", "system");
-            systemMsg.put("content", "You are a professional legal registrar. Create a formal Indian court case title (e.g., '[Petitioner] vs. [Respondent] for [Key Issue]'). " +
-                    "IMPORTANT: Return ONLY the plain text of the title. DO NOT include headers, hashtags, markdown bolding, or the word 'Title:'. " +
-                    "Keep it under 12 words.");
+            systemMsg.put("content", "You are a professional legal registrar. Create a formal Indian court case title (e.g., 'State vs. [Respondent]' or '[Petitioner] vs. [Respondent]'). " +
+                    "IMPORTANT: Return ONLY the plain text of the title. Keep it under 10 words. " +
+                    "Do NOT use complete sentences. Do NOT use formatted lists. Just the title.");
             prompt.add(systemMsg);
             
             Map<String, String> userMsg = new HashMap<>();
             userMsg.put("role", "user");
-            userMsg.put("content", "Relevant Info: " + cleanedSummary + "\nUser Input: " + firstMessage);
+            userMsg.put("content", "Draft a legal case title based on this issue: " + relevantContext);
             prompt.add(userMsg);
             
             String title = callGroqAPI(prompt);
+            
+            // Fallback if AI fails
             if (title == null || title.trim().isEmpty()) {
-                return "Case filed via Vakil-Friend";
+                return "Case: " + (firstMessage.length() > 50 ? firstMessage.substring(0, 50) + "..." : firstMessage);
             }
 
             // Post-processing cleanup
@@ -855,14 +894,20 @@ public class VakilFriendService {
                     .replace("\"", "")
                     .trim();
 
-            // Final safety check: if the AI still returned the full summary block (echoing)
-            if (cleanedTitle.contains("Case Type:") || cleanedTitle.contains("Petitioner:")) {
-                log.warn("AI echoed summary in title. Fallback to basic extraction.");
-                String p = extractAfterLabel(cleanedTitle, "Petitioner:", "पेटिशनर:");
-                String r = extractAfterLabel(cleanedTitle, "Respondent:", "रेस्पोंडेंट:");
-                if (p.isEmpty()) p = "Petitioner";
-                if (r.isEmpty()) r = "Respondent";
-                return p + " vs. " + r;
+            // Sanity Check: If title looks like a sentence or is too long, discard it
+            if (cleanedTitle.length() > 100 || 
+                cleanedTitle.startsWith("Your Input") || 
+                cleanedTitle.startsWith("I have") ||
+                cleanedTitle.contains("\n")) {
+                
+                log.warn("AI returned invalid title: {}. Fallback to extraction.", cleanedTitle);
+                String p = extractAfterLabel(summaryText, "Petitioner:", "पेटिशनर:");
+                String r = extractAfterLabel(summaryText, "Respondent:", "रेस्पोंडेंट:");
+                
+                if (!p.isEmpty() && !r.isEmpty()) {
+                    return p + " vs. " + r;
+                }
+                return "Case: " + (firstMessage.length() > 50 ? firstMessage.substring(0, 50) + "..." : firstMessage);
             }
 
             return cleanedTitle;
