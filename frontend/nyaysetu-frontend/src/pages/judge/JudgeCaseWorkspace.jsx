@@ -7,7 +7,7 @@ import {
     Gavel, FileCheck, MessageSquare, Shield, Lock,
     Link2, RefreshCw, Eye, CheckCircle2, AlertTriangle,
     Upload, Trash2, Search, Filter, Grid, List as ListIcon, X,
-    Edit, Sparkles, Save, Video, Users
+    Edit, Sparkles, Save, Video, Users, Send
 } from 'lucide-react';
 import { caseAPI, judgeAPI, documentAPI } from '../../services/api';
 import { API_BASE_URL } from '../../config/apiConfig';
@@ -133,6 +133,22 @@ export default function JudgeCaseWorkspace() {
         }
     };
 
+    const handleOrderNotice = async () => {
+        if (!confirm('Are you sure you want to issue a formal notice to the Respondent? This will trigger an official email notification.')) return;
+
+        try {
+            // Using a specific endpoint for ordering notice
+            await axios.post(`${API_BASE_URL}/api/cases/${caseId}/order-notice`, {}, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            alert('✅ Notice Ordered Successfully! The respondent has been notified.');
+            fetchCaseDetails(); // Refresh to show updated status or logs
+        } catch (error) {
+            console.error('Error ordering notice:', error);
+            alert('Failed to order notice. Please try again.');
+        }
+    };
+
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -165,31 +181,84 @@ export default function JudgeCaseWorkspace() {
             {/* 1. Header Section */}
             <div style={{
                 marginBottom: '2rem',
-                background: 'linear-gradient(180deg, rgba(30, 42, 68, 0.03) 0%, rgba(255,255,255,0) 100%)',
-                padding: '1.5rem',
+                background: 'var(--bg-glass-strong)',
+                padding: '2rem',
                 borderRadius: '1.5rem',
-                border: '1px solid rgba(30, 42, 68, 0.05)'
+                border: 'var(--border-glass-strong)',
+                boxShadow: 'var(--shadow-glass)'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <button
                         onClick={() => navigate('/judge/docket')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '500' }}
                     >
-                        <ArrowLeft size={20} /> Back to Docket
+                        <ArrowLeft size={18} /> Back to Docket
                     </button>
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button
+                            onClick={handleOrderNotice}
+                            style={{
+                                padding: '0.6rem 1.2rem',
+                                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '0.75rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                                transition: 'all 0.2s',
+                                fontSize: '0.9rem'
+                            }}
+                            onMouseOver={e => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(245, 158, 11, 0.4)';
+                            }}
+                            onMouseOut={e => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
+                            }}
+                        >
+                            <Send size={16} /> Order Notice
+                        </button>
+                    </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                            <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{caseData.title}</h1>
-                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', background: statusStyle.bg, border: `1px solid ${statusStyle.border}`, color: statusStyle.text, fontSize: '0.75rem', fontWeight: '700' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
+                            <h1 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{caseData.title}</h1>
+                            <span style={{
+                                padding: '0.3rem 0.8rem',
+                                borderRadius: '0.5rem',
+                                background: statusStyle.bg,
+                                border: `1px solid ${statusStyle.border}40`,
+                                color: statusStyle.text,
+                                fontSize: '0.75rem',
+                                fontWeight: '700',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                            }}>
                                 {caseData.status.replace(/_/g, ' ')}
                             </span>
                         </div>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Case ID: {caseData.id}</p>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', fontFamily: 'monospace', margin: 0 }}>CASE ID: {caseData.id}</p>
                     </div>
-                    <span style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', background: urgencyStyle.bg, color: urgencyStyle.text, fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '0.75rem',
+                        background: urgencyStyle.bg,
+                        color: urgencyStyle.text,
+                        fontWeight: '700',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        border: `1px solid ${urgencyStyle.text}40`,
+                        boxShadow: `0 4px 12px ${urgencyStyle.bg}`
+                    }}>
                         ⚡ {caseData.urgency} Priority
                     </span>
                 </div>
@@ -199,7 +268,16 @@ export default function JudgeCaseWorkspace() {
             </div>
 
             {/* 2. Tabs Navigation */}
-            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', marginBottom: '2rem', gap: '2rem' }}>
+            <div style={{
+                display: 'flex',
+                background: 'var(--bg-glass)',
+                padding: '0.5rem',
+                borderRadius: '1rem',
+                border: 'var(--border-glass)',
+                marginBottom: '2rem',
+                gap: '0.5rem',
+                overflowX: 'auto'
+            }}>
                 {[
                     { id: 'overview', label: 'Overview & AI Brief', icon: FileText },
                     { id: 'evidence', label: 'Evidence Vault', icon: Shield },
@@ -212,18 +290,20 @@ export default function JudgeCaseWorkspace() {
                         onClick={() => setActiveTab(tab.id)}
                         style={{
                             display: 'flex', alignItems: 'center', gap: '0.5rem',
-                            padding: '1rem 0',
-                            background: 'none',
+                            padding: '0.75rem 1.25rem',
+                            background: activeTab === tab.id ? 'var(--color-primary)' : 'transparent',
                             border: 'none',
-                            borderBottom: activeTab === tab.id ? '2px solid var(--color-accent)' : '2px solid transparent',
-                            color: activeTab === tab.id ? 'var(--color-accent)' : 'var(--text-secondary)',
+                            borderRadius: '0.75rem',
+                            color: activeTab === tab.id ? 'white' : 'var(--text-secondary)',
                             fontWeight: activeTab === tab.id ? '700' : '500',
                             cursor: 'pointer',
-                            fontSize: '1rem',
-                            transition: 'all 0.2s'
+                            fontSize: '0.9rem',
+                            transition: 'all 0.2s',
+                            whiteSpace: 'nowrap',
+                            boxShadow: activeTab === tab.id ? '0 4px 12px rgba(79, 70, 229, 0.3)' : 'none'
                         }}
                     >
-                        <tab.icon size={18} /> {tab.label}
+                        <tab.icon size={16} /> {tab.label}
                     </button>
                 ))}
             </div>

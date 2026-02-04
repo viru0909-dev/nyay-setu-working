@@ -58,20 +58,20 @@ export default function UnassignedPool() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '2rem' }}>
             {/* Header */}
             <div style={{ marginBottom: '2.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '0.5rem' }}>
                     <div style={{
-                        width: '56px', height: '56px', borderRadius: '14px',
+                        width: '64px', height: '64px', borderRadius: '1.25rem',
                         background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 8px 16px rgba(245, 158, 11, 0.2)'
+                        boxShadow: '0 10px 25px -5px rgba(245, 158, 11, 0.4)'
                     }}>
-                        <Scale size={28} color="white" />
+                        <Scale size={32} color="white" />
                     </div>
                     <div>
-                        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em' }}>
                             Unassigned Pool
                         </h1>
-                        <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
+                        <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
                             New cases awaiting judicial assignment
                         </p>
                     </div>
@@ -97,32 +97,49 @@ export default function UnassignedPool() {
             ) : (
                 <div style={{ display: 'grid', gap: '1.5rem' }}>
                     {cases.map(caseItem => (
-                        <div key={caseItem.id} style={{ ...glassStyle }}>
+                        <div key={caseItem.id} style={{
+                            ...glassStyle,
+                            transition: 'all 0.3s ease',
+                            cursor: 'default',
+                            borderLeft: '5px solid #f59e0b',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}
+                            onMouseOver={e => {
+                                e.currentTarget.style.transform = 'translateY(-4px)';
+                                e.currentTarget.style.boxShadow = '0 12px 30px -10px rgba(0, 0, 0, 0.15)';
+                            }}
+                            onMouseOut={e => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
+                            }}
+                        >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '1.5rem', flexWrap: 'wrap' }}>
                                 <div style={{ flex: 1, minWidth: '300px' }}>
                                     {/* Title and Badges */}
-                                    <div style={{ marginBottom: '0.75rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
+                                    <div style={{ marginBottom: '1rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                                            <h3 style={{ fontSize: '1.4rem', fontWeight: '700', color: 'var(--text-main)', margin: 0, letterSpacing: '-0.01em' }}>
                                                 {caseItem.title}
                                             </h3>
                                             <span style={{
-                                                padding: '0.25rem 0.75rem',
+                                                padding: '0.3rem 0.8rem',
                                                 background: 'rgba(245, 158, 11, 0.1)',
                                                 border: '1px solid rgba(245, 158, 11, 0.3)',
-                                                borderRadius: '9999px',
+                                                borderRadius: '0.5rem',
                                                 fontSize: '0.7rem',
                                                 fontWeight: '700',
                                                 color: '#f59e0b',
-                                                textTransform: 'uppercase'
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.05em'
                                             }}>
                                                 UNASSIGNED
                                             </span>
                                             <span style={{
-                                                padding: '0.25rem 0.75rem',
+                                                padding: '0.3rem 0.8rem',
                                                 background: 'rgba(99, 102, 241, 0.1)',
                                                 border: '1px solid rgba(99, 102, 241, 0.2)',
-                                                borderRadius: '9999px',
+                                                borderRadius: '0.5rem',
                                                 fontSize: '0.7rem',
                                                 fontWeight: '700',
                                                 color: '#818cf8'
@@ -130,13 +147,13 @@ export default function UnassignedPool() {
                                                 {caseItem.caseType}
                                             </span>
                                         </div>
-                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.5rem 0 0 0' }}>
-                                            Case ID: {caseItem.id.substring(0, 13)}...
+                                        <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', margin: '0', fontFamily: 'monospace' }}>
+                                            CASE ID: {caseItem.id}
                                         </p>
                                     </div>
 
                                     {/* Description */}
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6', margin: '0.75rem 0 1.25rem 0' }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.7', margin: '0 0 1.5rem 0' }}>
                                         {caseItem.description?.substring(0, 150)}
                                         {caseItem.description?.length > 150 ? '...' : ''}
                                     </p>
@@ -145,28 +162,43 @@ export default function UnassignedPool() {
                                     <div style={{
                                         display: 'flex',
                                         gap: '2rem',
-                                        paddingTop: '1rem',
-                                        borderTop: '1px solid rgba(148, 163, 184, 0.1)',
-                                        fontSize: '0.875rem',
+                                        paddingTop: '1.25rem',
+                                        borderTop: '1px solid var(--border-glass)',
+                                        fontSize: '0.9rem',
                                         flexWrap: 'wrap'
                                     }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
-                                            <User size={14} />
-                                            <span><strong>Petitioner:</strong> <span style={{ color: 'var(--text-main)' }}>{caseItem.petitioner}</span></span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)' }}>
+                                            <div style={{ padding: '0.4rem', background: 'var(--bg-glass)', borderRadius: '0.4rem' }}>
+                                                <User size={16} />
+                                            </div>
+                                            <div>
+                                                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Petitioner</span>
+                                                <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{caseItem.petitioner}</span>
+                                            </div>
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
-                                            <Users size={14} />
-                                            <span><strong>Respondent:</strong> <span style={{ color: 'var(--text-main)' }}>{caseItem.respondent}</span></span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)' }}>
+                                            <div style={{ padding: '0.4rem', background: 'var(--bg-glass)', borderRadius: '0.4rem' }}>
+                                                <Users size={16} />
+                                            </div>
+                                            <div>
+                                                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Respondent</span>
+                                                <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{caseItem.respondent}</span>
+                                            </div>
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
-                                            <Clock size={14} />
-                                            <span><strong>Filed:</strong> <span style={{ color: 'var(--text-main)' }}>{formatDate(caseItem.filedDate)}</span></span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)' }}>
+                                            <div style={{ padding: '0.4rem', background: 'var(--bg-glass)', borderRadius: '0.4rem' }}>
+                                                <Clock size={16} />
+                                            </div>
+                                            <div>
+                                                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Filed</span>
+                                                <span style={{ color: 'var(--text-main)', fontWeight: '600' }}>{formatDate(caseItem.filedDate)}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
                                     <button
                                         onClick={() => takeCognizance(caseItem.id)}
                                         style={{
@@ -179,9 +211,21 @@ export default function UnassignedPool() {
                                             cursor: 'pointer',
                                             boxShadow: '0 4px 15px rgba(16, 185, 129, 0.4)',
                                             transition: 'all 0.2s',
-                                            whiteSpace: 'nowrap'
+                                            whiteSpace: 'nowrap',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem'
+                                        }}
+                                        onMouseOver={e => {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(16, 185, 129, 0.5)';
+                                        }}
+                                        onMouseOut={e => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.4)';
                                         }}
                                     >
+                                        <Scale size={18} />
                                         Take Cognizance
                                     </button>
                                     <button
@@ -189,15 +233,24 @@ export default function UnassignedPool() {
                                         style={{
                                             padding: '0.75rem 1.5rem',
                                             background: 'var(--bg-glass)',
-                                            color: 'var(--color-accent)',
-                                            border: 'var(--border-glass)',
+                                            color: 'var(--color-primary)',
+                                            border: '1px solid var(--border-glass)',
                                             borderRadius: '0.75rem',
                                             fontWeight: '600',
                                             cursor: 'pointer',
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '0.5rem',
-                                            whiteSpace: 'nowrap'
+                                            whiteSpace: 'nowrap',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseOver={e => {
+                                            e.currentTarget.style.background = 'var(--color-primary)';
+                                            e.currentTarget.style.color = 'white';
+                                        }}
+                                        onMouseOut={e => {
+                                            e.currentTarget.style.background = 'var(--bg-glass)';
+                                            e.currentTarget.style.color = 'var(--color-primary)';
                                         }}
                                     >
                                         View Details <ChevronRight size={18} />

@@ -116,4 +116,13 @@ public class CaseManagementController {
             "message", approved ? "Draft Approved" : "Changes Requested"
         ));
     }
+
+    @PostMapping("/{id}/order-notice")
+    public ResponseEntity<Map<String, Object>> orderNotice(@PathVariable UUID id) {
+        caseManagementService.orderRespondentNotice(id);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Notice ordered successfully"
+        ));
+    }
 }
