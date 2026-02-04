@@ -240,4 +240,54 @@ public class CaseManagementService {
                 .status(entity.getStatus())
                 .build();
     }
+
+    /**
+     * Judge orders a notice to be sent to the Respondent.
+     * Triggers email via EmailService and updates case timeline.
+     */
+    @Transactional
+    public void orderRespondentNotice(UUID caseId) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        // Update status or flag if needed
+        caseEntity.setSummonsStatus("ISSUED");
+        caseRepository.save(caseEntity);
+
+        // Add to timeline
+        timelineService.addEvent(
+            caseId, 
+            "SUMMONS_ISSUED", 
+            "Judge ordered formal notice to Respondent. Electronic summons initiated."
+        );
+
+        // Send Email (Mocking Respondent Email for demo, assuming it might be in Respondent details or generic)
+        // In a real app, we'd fetch the respondent's registered email.
+        // For now, we'll try to find a user with the respondent's name or fallback to a demo email.
+        String respondentEmail = "respondent@example.com"; 
+        // Try to find if respondent is a user? (Optional enhancement)
+        
+        // Trigger Email
+        String nextHearingStr = caseEntity.getNextHearing() != null ? 
+            caseEntity.getNextHearing().toLocalDate().toString() : "To be scheduled";
+            
+        com.nyaysetu.backend.service.EmailService emailService = getEmailService(); // Need to inject this
+        if (emailService != null) {
+            emailService.sendRespondentSummons(
+                respondentEmail, 
+                caseEntity.getRespondent(), 
+                caseEntity.getId().toString(), 
+                nextHearingStr
+            );
+        }
+    }
+    
+    // Quick helper to avoid constructor circular dependency if EmailService isn't already injected
+    // Ideally should perform proper constructor injection.
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.nyaysetu.backend.service.EmailService emailService;
+    
+    private com.nyaysetu.backend.service.EmailService getEmailService() {
+        return emailService;
+    }
 }
