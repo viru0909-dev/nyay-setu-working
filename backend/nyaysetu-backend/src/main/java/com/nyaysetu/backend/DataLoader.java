@@ -17,18 +17,27 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-
-        createIfMissing("admin@nyay.com", "Admin", "admin123", Role.ADMIN);
-        createIfMissing("judge@nyay.com", "Judge X", "password", Role.JUDGE);
-        createIfMissing("lawyer@nyay.com", "Lawyer Y", "password", Role.LAWYER);
-        createIfMissing("litigant@nyay.com", "Litigant Z", "password", Role.LITIGANT);
-        createIfMissing("client@nyay.com", "Client User", "password", Role.LITIGANT);
-        createIfMissing("tech@nyay.com", "Tech Admin", "tech123", Role.TECH_ADMIN);
-        createIfMissing("police@nyay.com", "Officer P", "password", Role.POLICE);
+        // Update passwords if users exist, create if they don't
+        updateOrCreate("admin@nyay.com", "Admin", "admin123", Role.ADMIN);
+        updateOrCreate("judge@nyay.com", "Judge X", "password", Role.JUDGE);
+        updateOrCreate("lawyer@nyay.com", "Lawyer Y", "password", Role.LAWYER);
+        updateOrCreate("litigant@nyay.com", "Litigant Z", "password", Role.LITIGANT);
+        updateOrCreate("client@nyay.com", "Client User", "password", Role.LITIGANT);
+        updateOrCreate("tech@nyay.com", "Tech Admin", "tech123", Role.TECH_ADMIN);
+        updateOrCreate("police@nyay.com", "Officer P", "password", Role.POLICE);
     }
 
-    private void createIfMissing(String email, String name, String pass, Role role) {
-        if (userRepository.findByEmail(email).isEmpty()) {
+    private void updateOrCreate(String email, String name, String pass, Role role) {
+        var optionalUser = userRepository.findByEmail(email);
+        
+        if (optionalUser.isPresent()) {
+            // User exists - UPDATE password
+            User user = optionalUser.get();
+            user.setPassword(encoder.encode(pass));
+            userRepository.save(user);
+            System.out.println("✓ " + email + " ready");
+        } else {
+            // User doesn't exist - CREATE
             User u = User.builder()
                     .email(email)
                     .name(name)
@@ -36,8 +45,7 @@ public class DataLoader implements CommandLineRunner {
                     .role(role)
                     .build();
             userRepository.save(u);
-
-            System.out.println("Created user: " + email + " | role = " + role);
+            System.out.println("✓ " + email + " created");
         }
     }
 }
