@@ -40,7 +40,15 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const response = await authAPI.login({ email, password });
+            // Backend expects { email, password, role }
+            const loginPayload = {
+                email,
+                password,
+                role: selectedRole || 'LITIGANT' // Default to LITIGANT if no role selected
+            };
+
+            console.log('Sending login request:', loginPayload);
+            const response = await authAPI.login(loginPayload);
             const { token, user } = response.data;
 
             if (selectedRole && user.role !== selectedRole) {
@@ -64,6 +72,7 @@ export default function Login() {
 
             navigate(roleRoutes[user.role] || '/');
         } catch (err) {
+            console.error('Login error:', err);
             setError(err.response?.data?.message || 'Invalid email or password');
         } finally {
             setLoading(false);
