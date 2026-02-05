@@ -8,7 +8,6 @@ import LoadingSpinner from './components/LoadingSpinner';
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
 import UpdateNotification from './components/UpdateNotification';
-import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 // Lazy load pages for better performance
 const Landing = lazy(() => import('./pages/Landing'));
@@ -96,7 +95,6 @@ function App({ swRegistration }) {
                 {/* Global PWA Components */}
                 <OfflineIndicator />
                 <UpdateNotification registration={swRegistration} />
-                <PWAInstallPrompt />
 
                 <BrowserRouter
                     future={{
