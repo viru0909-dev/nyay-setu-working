@@ -136,4 +136,84 @@ public class EmailService {
         tokenRepository.deleteByExpiryDateBefore(LocalDateTime.now());
         log.info("Cleaned up expired password reset tokens");
     }
+
+    @Async
+    public void sendRespondentSummons(String recipientEmail, String respondentName, String caseNumber, String hearingDate) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(recipientEmail);
+            helper.setSubject("URGENT: Legal Summons - Case " + caseNumber);
+            helper.setText(buildSummonsContent(respondentName, caseNumber, hearingDate), true);
+
+            mailSender.send(message);
+            log.info("Summons email sent successfully to: {}", recipientEmail);
+        } catch (Exception e) {
+            log.error("Failed to send summons email: {}", e.getMessage());
+            // Fallback for dev
+            log.info("====================================================================");
+            log.info("DEVELOPMENT SUMMONS FOR {}: Case {}, Hearing {}", recipientEmail, caseNumber, hearingDate);
+            log.info("====================================================================");
+        }
+    }
+
+    private String buildSummonsContent(String respondentName, String caseNumber, String hearingDate) {
+        return String.format("""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: 'Times New Roman', serif; background: #fdfbf7; margin: 0; padding: 0; }
+                        .container { max-width: 700px; margin: 40px auto; background: white; border: 2px solid #1e293b; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+                        .header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 20px; margin-bottom: 30px; }
+                        .header h1 { color: #1e293b; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
+                        .header h2 { color: #dc2626; margin: 10px 0 0 0; font-size: 18px; text-transform: uppercase; }
+                        .content { color: #1e293b; line-height: 1.8; font-size: 16px; }
+                        .details { background: #f1f5f9; padding: 20px; border-left: 4px solid #1e293b; margin: 20px 0; }
+                        .detail-row { display: flex; margin-bottom: 10px; }
+                        .detail-label { font-weight: bold; width: 150px; }
+                        .footer { margin-top: 40px; border-top: 1px solid #cbd5e1; padding-top: 20px; text-align: center; font-size: 14px; color: #64748b; }
+                        .stamp { text-align: right; margin-top: 40px; }
+                        .stamp img { width: 120px; opacity: 0.8; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Electronic Summons</h1>
+                            <h2>By Order of the Court</h2>
+                        </div>
+                        <div class="content">
+                            <p>To,</p>
+                            <p><strong>%s</strong></p>
+                            <p><strong>NOTICE IS HEREBY GIVEN</strong> that legal proceedings have been instituted against you. You are required to appear before the designated court in relation to the case described below.</p>
+                            
+                            <div class="details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Case Number:</span>
+                                    <span>%s</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Hearing Date:</span>
+                                    <span>%s</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Requirement:</span>
+                                    <span>Personal Appearance / Legal Representation</span>
+                                </div>
+                            </div>
+
+                            <p>Failure to attend may result in an ex-parte decision against you or issuance of a warrant.</p>
+                            <p>Please log in to the <strong>NyaySetu</strong> portal to view full case details and submit your response.</p>
+                        </div>
+                        <div class="footer">
+                            <p>This is a computer-generated notice and requires no physical signature.</p>
+                            <p>NyaySetu Virtual Judiciary System</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """, respondentName, caseNumber, hearingDate);
+    }
 }

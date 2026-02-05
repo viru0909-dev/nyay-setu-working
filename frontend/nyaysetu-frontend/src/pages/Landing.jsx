@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import {
     Bot, BookOpen, FileText, Video, Shield, Zap,
-    ArrowRight
+    ArrowRight, Download, Smartphone, Check
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -17,6 +18,23 @@ import TrustIndicators from '../components/landing/TrustIndicators';
 
 export default function Landing() {
     const { t } = useLanguage();
+    const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+    // Capture the PWA install prompt event
+    useEffect(() => {
+        const handleBeforeInstallPrompt = (e) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+            // Also store globally for access from anywhere
+            window.deferredPrompt = e;
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        };
+    }, []);
 
     const features = [
         {
@@ -158,6 +176,127 @@ export default function Landing() {
                                     {t('watchDemo')}
                                 </motion.a>
                             </div>
+                        </motion.div>
+                    </div>
+                </section>
+
+                {/* Simple PWA Download Section */}
+                <section style={{
+                    padding: '5rem 2rem',
+                    background: '#FFFFFF',
+                    borderBottom: '1px solid #E5E7EB'
+                }}>
+                    <div className="container" style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6 }}
+                        >
+                            <div style={{
+                                display: 'inline-block',
+                                padding: '0.5rem 1.25rem',
+                                background: 'rgba(63, 93, 204, 0.08)',
+                                border: '1px solid rgba(63, 93, 204, 0.15)',
+                                borderRadius: '2rem',
+                                marginBottom: '2rem'
+                            }}>
+                                <span style={{
+                                    color: 'var(--color-secondary)',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '700',
+                                    letterSpacing: '0.05em',
+                                    textTransform: 'uppercase'
+                                }}>
+                                    <Download size={14} style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle' }} />
+                                    Works Offline
+                                </span>
+                            </div>
+
+                            <h2 style={{
+                                fontSize: 'clamp(2rem, 4vw, 2.75rem)',
+                                fontWeight: '800',
+                                color: 'var(--color-primary)',
+                                marginBottom: '1.25rem',
+                                letterSpacing: '-0.02em'
+                            }}>
+                                Install NyaySetu {' '}
+                                <span style={{
+                                    background: 'linear-gradient(135deg, #3F5DCC 0%, #7C5CFF 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent'
+                                }}>
+                                    On Your Device
+                                </span>
+                            </h2>
+
+                            <p style={{
+                                fontSize: '1.15rem',
+                                color: 'var(--text-secondary)',
+                                maxWidth: '650px',
+                                margin: '0 auto 3rem',
+                                lineHeight: '1.7'
+                            }}>
+                                Access justice anytime, anywhere—even without internet. Our Progressive Web App works offline and installs in seconds.
+                            </p>
+
+                            {/* Install Button */}
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={async () => {
+                                    // Check if on preview server
+                                    const isDev = import.meta.env.DEV;
+                                    if (isDev) {
+                                        alert('⚠️ PWA installation only works on the preview server.\n\nPlease visit: http://localhost:4174');
+                                        return;
+                                    }
+
+                                    // Try to trigger install
+                                    const installEvent = window.deferredPrompt || deferredPrompt;
+                                    if (installEvent) {
+                                        try {
+                                            await installEvent.prompt();
+                                            const { outcome } = await installEvent.userChoice;
+
+                                            if (outcome === 'accepted') {
+                                                alert('✅ App installed successfully! Check your home screen or app drawer.');
+                                            } else {
+                                                alert('ℹ️ Installation cancelled. You can install anytime from your browser menu.');
+                                            }
+
+                                            window.deferredPrompt = null;
+                                            setDeferredPrompt(null);
+                                        } catch (error) {
+                                            console.error('Install error:', error);
+                                            alert('❌ Installation failed. Please try again or use your browser\'s install option.');
+                                        }
+                                    } else {
+                                        alert('ℹ️ App is already installed, or your browser doesn\'t support PWA installation.\n\nYou can also install from your browser menu (⋮ > Install NyaySetu).');
+                                    }
+                                }}
+                                className="btn btn-primary"
+                                style={{
+                                    fontSize: '1.1rem',
+                                    padding: '1.1rem 2.75rem',
+                                    borderRadius: '12px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                }}
+                            >
+                                <Download size={20} />
+                                Install App
+                            </motion.button>
+
+                            <p style={{
+                                marginTop: '1.5rem',
+                                fontSize: '0.875rem',
+                                color: 'var(--text-secondary)',
+                                fontStyle: 'italic'
+                            }}>
+                                No app store required • Works on all devices • Offline capable
+                            </p>
                         </motion.div>
                     </div>
                 </section>

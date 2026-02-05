@@ -1,0 +1,338 @@
+/* PWA Components Styling - NyaySetu Custom CSS */
+
+/* Install Prompt */
+.pwa-install-prompt {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 99999;
+}
+
+@media (min-width: 768px) {
+    .pwa-install-prompt {
+        left: auto;
+        right: 1.5rem;
+        max-width: 400px;
+    }
+}
+
+.pwa-prompt-card {
+    position: relative;
+    background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 50%, #EC4899 100%);
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3), 0 10px 25px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pwa-close-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 0.35rem;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.pwa-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
+.pwa-prompt-content {
+    padding: 1.5rem;
+}
+
+.pwa-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.pwa-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.pwa-header-text {
+    flex: 1;
+}
+
+.pwa-header-text h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.3;
+}
+
+.pwa-header-text p {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.pwa-benefits {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.625rem;
+    padding: 0.75rem 0;
+    margin-bottom: 1rem;
+}
+
+.pwa-benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.pwa-check-icon {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.pwa-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    padding-top: 0.5rem;
+}
+
+.pwa-install-btn {
+    flex: 1;
+    background: #fff !important;
+    color: #8B5CF6 !important;
+    font-weight: 700;
+    padding: 0.875rem 1.25rem !important;
+    font-size: 0.9375rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+.pwa-install-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.95) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.pwa-install-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.pwa-install-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.pwa-installing {
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.pwa-dismiss-btn {
+    padding: 0.875rem 1rem !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    background: transparent !important;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.pwa-dismiss-btn:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+}
+
+/* Offline Indicator */
+.offline-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    pointer-events: none;
+}
+
+.offline-banner {
+    background: linear-gradient(90deg, #f97316 0%, #ef4444 50%, #f97316 100%);
+    color: #fff;
+    padding: 0.875rem 1rem;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    border-bottom: 2px solid rgba(220, 38, 38, 0.5);
+}
+
+.offline-banner-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.offline-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.2);
+    }
+}
+
+.offline-banner-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Update Notification */
+.update-notification {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 99999;
+}
+
+@media (max-width: 768px) {
+    .update-notification {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+    }
+}
+
+.update-card {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    border-radius: var(--radius-xl);
+    padding: 1.25rem;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3), 0 5px 15px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    max-width: 360px;
+}
+
+.update-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.update-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+    animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.update-text h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.25rem 0;
+}
+
+.update-text p {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.update-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.update-btn {
+    flex: 1;
+    background: #fff !important;
+    color: #6366F1 !important;
+    font-weight: 700;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.update-btn:hover {
+    background: rgba(255, 255, 255, 0.95) !important;
+    transform: translateY(-1px);
+}
+
+.update-dismiss {
+    padding: 0.75rem 0.875rem !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    background: transparent !important;
+    font-weight: 600;
+}
+
+.update-dismiss:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+}

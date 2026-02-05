@@ -302,13 +302,15 @@ public class FirService {
         fir.setStatus("COURT_REVIEW_PENDING");
         
         // Create new Case Entity
+        String petitionerName = fir.getFiledBy() != null ? fir.getFiledBy().getName() : "Unknown";
         CaseEntity newCase = CaseEntity.builder()
                 .title("State vs " + (fir.getDescription().length() > 20 ? fir.getDescription().substring(0, 20) + "..." : fir.getDescription()))
                 .description(fir.getDescription())
                 .caseType("CRIMINAL") // Defaulting to criminal for FIRs
                 .status(CaseStatus.PENDING_COGNIZANCE) // Initial status in court - Handover A
-                .petitioner("State (Police)")
+                .petitioner(petitionerName) // Use actual filer's name
                 .respondent("Unknown (Investigation On-going)") // or extract from FIR if structure allows
+                .respondentIdentified(false) // Respondent not yet identified
                 .filedDate(LocalDateTime.now())
                 .urgency("HIGH")
                 .client(fir.getFiledBy()) // Link to original filer
@@ -440,13 +442,15 @@ public class FirService {
             String caseDescription = fir.getDescription() != null ? fir.getDescription() : "No details provided";
             String caseTitleSuffix = caseDescription.length() > 20 ? caseDescription.substring(0, 20) + "..." : caseDescription;
 
+            String petitionerName = fir.getFiledBy() != null ? fir.getFiledBy().getName() : "Unknown";
             CaseEntity newCase = CaseEntity.builder()
                     .title("State vs " + caseTitleSuffix)
                     .description("FIR REGISTERED: " + fir.getFirNumber() + "\n\n" + caseDescription)
                     .caseType("CRIMINAL")
                     .status(CaseStatus.PENDING_COGNIZANCE) 
-                    .petitioner("State (Police)")
-                    .respondent("Unknown") 
+                    .petitioner(petitionerName) // Use actual filer's name
+                    .respondent("Unknown (Investigation On-going)") 
+                    .respondentIdentified(false) // Respondent not yet identified
                     .filedDate(LocalDateTime.now())
                     .urgency("HIGH")
                     .client(fir.getFiledBy()) // Link to original filer

@@ -36,4 +36,7 @@ public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
     
     @Query("SELECT c FROM CaseEntity c WHERE c.assignedJudge IS NULL OR c.assignedJudge = ''")
     List<CaseEntity> findUnassignedCases();
+    
+    // Find cases by respondent email
+    List<CaseEntity> findByRespondentEmail(String respondentEmail);
 }

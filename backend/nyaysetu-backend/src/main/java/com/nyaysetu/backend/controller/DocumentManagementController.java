@@ -162,8 +162,29 @@ public class DocumentManagementController {
     }
 
     @GetMapping("/case/{caseId}")
-    public ResponseEntity<List<DocumentDto>> getCaseDocuments(@PathVariable UUID caseId) {
-        List<DocumentDto> documents = documentManagementService.getCaseDocuments(caseId);
+    public ResponseEntity<List<DocumentDto>> getCaseDocuments(
+            @PathVariable UUID caseId,
+            Authentication authentication
+    ) {
+        User user = authService.findByEmail(authentication.getName());
+        
+        // Get the case to determine user's role
+        com.nyaysetu.backend.dto.CaseDTO caseData = caseManagementService.getCaseById(caseId);
+        
+        // Determine user's role in this case
+        String userRole = "VISITOR"; // Default
+        if (user.getRole() == com.nyaysetu.backend.entity.Role.JUDGE) {
+            userRole = "JUDGE";
+        } else if (caseData.getClientId() != null && caseData.getClientId().equals(user.getId())) {
+            userRole = "PETITIONER";
+        } else if (user.getEmail().equals(caseData.getRespondentEmail())) {
+            userRole = "RESPONDENT";
+        }
+        
+        // Get filtered documents based on role
+        List<DocumentDto> documents = documentManagementService.getCaseDocumentsWithAccessControl(
+            caseId, user.getId(), userRole
+        );
         return ResponseEntity.ok(documents);
     }
 

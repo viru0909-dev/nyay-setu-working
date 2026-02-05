@@ -7,11 +7,11 @@ import {
     Gavel, FileCheck, MessageSquare, Shield, Lock,
     Link2, RefreshCw, Eye, CheckCircle2, AlertTriangle,
     Upload, Trash2, Search, Filter, Grid, List as ListIcon, X,
-    Edit, Sparkles, Save, Video, Users
+    Edit, Sparkles, Save, Video, Users, Send
 } from 'lucide-react';
 import { caseAPI, judgeAPI, documentAPI } from '../../services/api';
 import { API_BASE_URL } from '../../config/apiConfig';
-import CaseChatWidget from '../../components/CaseChatWidget';
+import JudgeChatWidget from '../../components/JudgeChatWidget';
 
 // -----------------------------------------------------------------------------
 // HELPER CONSTANTS & FUNCTIONS
@@ -133,6 +133,22 @@ export default function JudgeCaseWorkspace() {
         }
     };
 
+    const handleOrderNotice = async () => {
+        if (!confirm('Are you sure you want to issue a formal notice to the Respondent? This will trigger an official email notification.')) return;
+
+        try {
+            // Using a specific endpoint for ordering notice
+            await axios.post(`${API_BASE_URL}/api/cases/${caseId}/order-notice`, {}, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            alert('✅ Notice Ordered Successfully! The respondent has been notified.');
+            fetchCaseDetails(); // Refresh to show updated status or logs
+        } catch (error) {
+            console.error('Error ordering notice:', error);
+            alert('Failed to order notice. Please try again.');
+        }
+    };
+
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -165,31 +181,84 @@ export default function JudgeCaseWorkspace() {
             {/* 1. Header Section */}
             <div style={{
                 marginBottom: '2rem',
-                background: 'linear-gradient(180deg, rgba(30, 42, 68, 0.03) 0%, rgba(255,255,255,0) 100%)',
-                padding: '1.5rem',
+                background: 'var(--bg-glass-strong)',
+                padding: '2rem',
                 borderRadius: '1.5rem',
-                border: '1px solid rgba(30, 42, 68, 0.05)'
+                border: 'var(--border-glass-strong)',
+                boxShadow: 'var(--shadow-glass)'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <button
                         onClick={() => navigate('/judge/docket')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '500' }}
                     >
-                        <ArrowLeft size={20} /> Back to Docket
+                        <ArrowLeft size={18} /> Back to Docket
                     </button>
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button
+                            onClick={handleOrderNotice}
+                            style={{
+                                padding: '0.6rem 1.2rem',
+                                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '0.75rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                                transition: 'all 0.2s',
+                                fontSize: '0.9rem'
+                            }}
+                            onMouseOver={e => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(245, 158, 11, 0.4)';
+                            }}
+                            onMouseOut={e => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
+                            }}
+                        >
+                            <Send size={16} /> Order Notice
+                        </button>
+                    </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                            <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{caseData.title}</h1>
-                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', background: statusStyle.bg, border: `1px solid ${statusStyle.border}`, color: statusStyle.text, fontSize: '0.75rem', fontWeight: '700' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
+                            <h1 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{caseData.title}</h1>
+                            <span style={{
+                                padding: '0.3rem 0.8rem',
+                                borderRadius: '0.5rem',
+                                background: statusStyle.bg,
+                                border: `1px solid ${statusStyle.border}40`,
+                                color: statusStyle.text,
+                                fontSize: '0.75rem',
+                                fontWeight: '700',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                            }}>
                                 {caseData.status.replace(/_/g, ' ')}
                             </span>
                         </div>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Case ID: {caseData.id}</p>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', fontFamily: 'monospace', margin: 0 }}>CASE ID: {caseData.id}</p>
                     </div>
-                    <span style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', background: urgencyStyle.bg, color: urgencyStyle.text, fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '0.75rem',
+                        background: urgencyStyle.bg,
+                        color: urgencyStyle.text,
+                        fontWeight: '700',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        border: `1px solid ${urgencyStyle.text}40`,
+                        boxShadow: `0 4px 12px ${urgencyStyle.bg}`
+                    }}>
                         ⚡ {caseData.urgency} Priority
                     </span>
                 </div>
@@ -199,7 +268,16 @@ export default function JudgeCaseWorkspace() {
             </div>
 
             {/* 2. Tabs Navigation */}
-            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', marginBottom: '2rem', gap: '2rem' }}>
+            <div style={{
+                display: 'flex',
+                background: 'var(--bg-glass)',
+                padding: '0.5rem',
+                borderRadius: '1rem',
+                border: 'var(--border-glass)',
+                marginBottom: '2rem',
+                gap: '0.5rem',
+                overflowX: 'auto'
+            }}>
                 {[
                     { id: 'overview', label: 'Overview & AI Brief', icon: FileText },
                     { id: 'evidence', label: 'Evidence Vault', icon: Shield },
@@ -212,18 +290,20 @@ export default function JudgeCaseWorkspace() {
                         onClick={() => setActiveTab(tab.id)}
                         style={{
                             display: 'flex', alignItems: 'center', gap: '0.5rem',
-                            padding: '1rem 0',
-                            background: 'none',
+                            padding: '0.75rem 1.25rem',
+                            background: activeTab === tab.id ? 'var(--color-primary)' : 'transparent',
                             border: 'none',
-                            borderBottom: activeTab === tab.id ? '2px solid var(--color-accent)' : '2px solid transparent',
-                            color: activeTab === tab.id ? 'var(--color-accent)' : 'var(--text-secondary)',
+                            borderRadius: '0.75rem',
+                            color: activeTab === tab.id ? 'white' : 'var(--text-secondary)',
                             fontWeight: activeTab === tab.id ? '700' : '500',
                             cursor: 'pointer',
-                            fontSize: '1rem',
-                            transition: 'all 0.2s'
+                            fontSize: '0.9rem',
+                            transition: 'all 0.2s',
+                            whiteSpace: 'nowrap',
+                            boxShadow: activeTab === tab.id ? '0 4px 12px rgba(79, 70, 229, 0.3)' : 'none'
                         }}
                     >
-                        <tab.icon size={18} /> {tab.label}
+                        <tab.icon size={16} /> {tab.label}
                     </button>
                 ))}
             </div>
@@ -233,10 +313,15 @@ export default function JudgeCaseWorkspace() {
             {activeTab === 'evidence' && <EvidenceTab caseId={caseId} />}
             {activeTab === 'orders' && <OrdersTab caseId={caseId} />}
             {activeTab === 'hearings' && <HearingsTab caseId={caseId} caseData={caseData} />}
-            {activeTab === 'parties' && <PartiesTab caseData={caseData} caseId={caseId} />}
+            {activeTab === 'parties' && <PartiesTab caseData={caseData} caseId={caseId} onUpdate={fetchCaseDetails} />}
 
-            {/* Chat Widget always visible */}
-            <CaseChatWidget caseId={caseId} caseTitle={caseData.title} />
+            {/* Judge Chat Widget with Quick Actions */}
+            <JudgeChatWidget
+                caseId={caseId}
+                caseTitle={caseData.title}
+                onScheduleHearing={() => setActiveTab('hearings')}
+                onAddParty={() => setActiveTab('parties')}
+            />
         </div>
     );
 }
@@ -313,28 +398,28 @@ function OverviewTab({ caseData }) {
                     </div>
                 </div>
 
-                {/* AI Digital Court Master (Moved to Left) */}
+                {/* AI Legal Brief */}
                 <div style={{
-                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(99, 102, 241, 0.05))',
+                    background: 'var(--bg-glass-strong)',
                     padding: '2rem',
                     borderRadius: '1.5rem',
-                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                    border: 'var(--border-glass-strong)',
                     display: 'flex',
                     flexDirection: 'column'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(139, 92, 246, 0.2)' }}>
-                        <div style={{ padding: '0.5rem', background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', borderRadius: '0.75rem' }}>
-                            <Sparkles size={24} color="white" />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: 'var(--border-glass)' }}>
+                        <div style={{ padding: '0.5rem', background: 'var(--color-accent)', borderRadius: '0.75rem' }}>
+                            <Sparkles size={20} color="white" />
                         </div>
                         <div>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#8b5cf6', margin: 0 }}>AI Digital Court Master</h3>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Pre-Hearing Briefing</p>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>AI Legal Brief</h3>
+                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Pre-Hearing Analysis</p>
                         </div>
                     </div>
 
                     {loadingAI ? (
                         <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                            <Loader2 size={32} className="animate-spin" style={{ color: '#8b5cf6' }} />
+                            <Loader2 size={32} className="animate-spin" style={{ color: 'var(--color-accent)' }} />
                         </div>
                     ) : (
                         <div style={{
@@ -351,9 +436,9 @@ function OverviewTab({ caseData }) {
                                         const text = trimmed.replace(/\*\*/g, '');
                                         return (
                                             <h4 key={idx} style={{
-                                                fontSize: '1.1rem', fontWeight: '700', color: '#8b5cf6',
+                                                fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-main)',
                                                 marginTop: idx === 0 ? 0 : '1.5rem', marginBottom: '0.75rem',
-                                                paddingBottom: '0.5rem', borderBottom: '1px solid rgba(139, 92, 246, 0.15)'
+                                                paddingBottom: '0.5rem', borderBottom: 'var(--border-glass)'
                                             }}>{text}</h4>
                                         );
                                     }
@@ -361,7 +446,7 @@ function OverviewTab({ caseData }) {
                                         return (
                                             <div key={idx} style={{
                                                 marginLeft: '1.25rem', marginBottom: '0.5rem', paddingLeft: '0.75rem',
-                                                borderLeft: '2px solid rgba(139, 92, 246, 0.2)'
+                                                borderLeft: '2px solid var(--color-accent)', color: 'var(--text-main)'
                                             }}>{trimmed}</div>
                                         );
                                     }
@@ -370,7 +455,7 @@ function OverviewTab({ caseData }) {
                                         return (
                                             <p key={idx} style={{ marginBottom: '0.75rem' }}>
                                                 {parts.map((part, i) =>
-                                                    i % 2 === 1 ? <strong key={i} style={{ color: '#6366f1' }}>{part}</strong> : part
+                                                    i % 2 === 1 ? <strong key={i} style={{ color: 'var(--color-accent)' }}>{part}</strong> : part
                                                 )}
                                             </p>
                                         );
@@ -383,15 +468,15 @@ function OverviewTab({ caseData }) {
                             })()}
                         </div>
                     )}
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', paddingTop: '1rem', borderTop: 'var(--border-glass)' }}>
                         <button onClick={fetchAISummary} style={{
-                            flex: 1, padding: '0.75rem', background: 'rgba(139, 92, 246, 0.1)',
-                            border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.75rem',
-                            color: '#8b5cf6', fontWeight: '600', cursor: 'pointer', display: 'flex',
+                            flex: 1, padding: '0.75rem', background: 'var(--bg-glass)',
+                            border: 'var(--border-glass)', borderRadius: '0.75rem',
+                            color: 'var(--text-main)', fontWeight: '600', cursor: 'pointer', display: 'flex',
                             alignItems: 'center', justifyContent: 'center', gap: '0.5rem', transition: 'all 0.2s'
                         }}
-                            onMouseOver={e => e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)'}
-                            onMouseOut={e => e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)'}
+                            onMouseOver={e => e.currentTarget.style.background = 'var(--color-accent-light)'}
+                            onMouseOut={e => e.currentTarget.style.background = 'var(--bg-glass)'}
                         >
                             <RefreshCw size={16} /> Regenerate
                         </button>
@@ -1852,7 +1937,38 @@ function TimelineDisplay({ caseId }) {
 }
 
 
-function PartiesTab({ caseData, caseId }) {
+function PartiesTab({ caseData, caseId, onUpdate }) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [respondentDetails, setRespondentDetails] = useState({
+        respondentName: caseData.respondent || '',
+        respondentEmail: caseData.respondentEmail || '',
+        respondentPhone: caseData.respondentPhone || '',
+        respondentAddress: caseData.respondentAddress || '',
+        respondentIdentified: caseData.respondentIdentified || false
+    });
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSaveRespondentDetails = async () => {
+        setIsSaving(true);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(
+                `${API_BASE_URL}/api/cases/${caseId}/respondent-details`,
+                respondentDetails,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            alert("Respondent details updated successfully!");
+            setIsEditing(false);
+            // Refetch data instead of reloading the page
+            if (onUpdate) await onUpdate();
+        } catch (error) {
+            console.error("Failed to update respondent details:", error);
+            alert(error.response?.data?.message || "Failed to update respondent details");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const issueSummons = async () => {
         if (confirm("Issue digital summons to the Respondent? Task will be assigned to Police.")) {
             try {
@@ -1861,7 +1977,8 @@ function PartiesTab({ caseData, caseId }) {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 alert("Summons Issued! Police Dashboard updated.");
-                window.location.reload();
+                // Refetch data instead of reloading the page
+                if (onUpdate) await onUpdate();
             } catch (e) {
                 console.error(e);
                 alert("Failed to issue summons.");
@@ -1869,31 +1986,282 @@ function PartiesTab({ caseData, caseId }) {
         }
     };
 
+    const respondentEmailMissing = !caseData.respondentEmail || caseData.respondentEmail.trim() === '';
+
     return (
-        <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>Parties Involved</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                <div>
-                    <h4 style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: '700', marginBottom: '0.5rem' }}>PETITIONER</h4>
-                    <p style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.petitioner}</p>
-                    {caseData.lawyerName && <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Represented by: {caseData.lawyerName}</p>}
-                </div>
-                <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h4 style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: '700', marginBottom: '0.5rem' }}>RESPONDENT</h4>
-                        <button
-                            onClick={issueSummons}
-                            style={{
-                                padding: '0.5rem 1rem', background: '#ef4444', color: 'white',
-                                border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer',
-                                fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
-                            }}>
-                            <Gavel size={14} /> Issue Digital Summons
-                        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* Warning Banner if Respondent Not Identified */}
+            {!caseData.respondentIdentified && (
+                <div style={{
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    borderRadius: '1rem',
+                    padding: '1rem 1.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem'
+                }}>
+                    <AlertTriangle size={24} color="#ef4444" />
+                    <div>
+                        <h4 style={{ margin: 0, color: '#ef4444', fontSize: '1rem', fontWeight: '700' }}>Respondent Identity Unknown</h4>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                            Please update respondent contact details before ordering summons.
+                        </p>
                     </div>
-                    <p style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.respondent}</p>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Status: {caseData.summonsStatus || 'Not Served'}</p>
                 </div>
+            )}
+
+            {/* Parties Overview */}
+            <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Parties Involved</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                    <div>
+                        <h4 style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: '700', marginBottom: '0.5rem' }}>PETITIONER</h4>
+                        <p style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.petitioner}</p>
+                        {caseData.lawyerName && <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Represented by: {caseData.lawyerName}</p>}
+                    </div>
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <h4 style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: '700', margin: 0 }}>RESPONDENT</h4>
+                            {respondentEmailMissing && (
+                                <span style={{
+                                    fontSize: '0.75rem',
+                                    color: '#ef4444',
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    padding: '0.25rem 0.5rem',
+                                    borderRadius: '0.25rem',
+                                    fontWeight: '600'
+                                }}>
+                                    Email Missing
+                                </span>
+                            )}
+                        </div>
+                        <p style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.respondent}</p>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Status: {caseData.summonsStatus || 'Not Served'}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Respondent Contact Details Form */}
+            <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Respondent Contact Details</h3>
+                    {!isEditing && (
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                background: 'var(--color-accent)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '0.5rem',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}
+                        >
+                            <Edit size={16} /> Edit Details
+                        </button>
+                    )}
+                </div>
+
+                {isEditing ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                Respondent Name
+                            </label>
+                            <input
+                                type="text"
+                                value={respondentDetails.respondentName}
+                                onChange={(e) => setRespondentDetails({ ...respondentDetails, respondentName: e.target.value })}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    borderRadius: '0.5rem',
+                                    border: 'var(--border-glass)',
+                                    background: 'var(--bg-white)',
+                                    color: 'var(--text-main)',
+                                    fontSize: '1rem'
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                    Email Address *
+                                </label>
+                                <input
+                                    type="email"
+                                    value={respondentDetails.respondentEmail}
+                                    onChange={(e) => setRespondentDetails({ ...respondentDetails, respondentEmail: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem',
+                                        borderRadius: '0.5rem',
+                                        border: 'var(--border-glass)',
+                                        background: 'var(--bg-white)',
+                                        color: 'var(--text-main)',
+                                        fontSize: '1rem'
+                                    }}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                    Phone Number
+                                </label>
+                                <input
+                                    type="tel"
+                                    value={respondentDetails.respondentPhone}
+                                    onChange={(e) => setRespondentDetails({ ...respondentDetails, respondentPhone: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem',
+                                        borderRadius: '0.5rem',
+                                        border: 'var(--border-glass)',
+                                        background: 'var(--bg-white)',
+                                        color: 'var(--text-main)',
+                                        fontSize: '1rem'
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                Physical Address
+                            </label>
+                            <textarea
+                                value={respondentDetails.respondentAddress}
+                                onChange={(e) => setRespondentDetails({ ...respondentDetails, respondentAddress: e.target.value })}
+                                rows={3}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    borderRadius: '0.5rem',
+                                    border: 'var(--border-glass)',
+                                    background: 'var(--bg-white)',
+                                    color: 'var(--text-main)',
+                                    fontSize: '1rem',
+                                    resize: 'vertical'
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <input
+                                type="checkbox"
+                                id="respondent-identified"
+                                checked={respondentDetails.respondentIdentified}
+                                onChange={(e) => setRespondentDetails({ ...respondentDetails, respondentIdentified: e.target.checked })}
+                                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            />
+                            <label htmlFor="respondent-identified" style={{ fontSize: '0.95rem', color: 'var(--text-main)', cursor: 'pointer' }}>
+                                Respondent has been positively identified
+                            </label>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem', paddingTop: '1rem', borderTop: 'var(--border-glass)' }}>
+                            <button
+                                onClick={handleSaveRespondentDetails}
+                                disabled={isSaving}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem',
+                                    background: 'var(--color-accent)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '0.5rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem',
+                                    opacity: isSaving ? 0.7 : 1
+                                }}
+                            >
+                                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                {isSaving ? 'Saving...' : 'Save Details'}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsEditing(false);
+                                    setRespondentDetails({
+                                        respondentName: caseData.respondent || '',
+                                        respondentEmail: caseData.respondentEmail || '',
+                                        respondentPhone: caseData.respondentPhone || '',
+                                        respondentAddress: caseData.respondentAddress || '',
+                                        respondentIdentified: caseData.respondentIdentified || false
+                                    });
+                                }}
+                                style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: 'var(--bg-glass)',
+                                    color: 'var(--text-main)',
+                                    border: 'var(--border-glass)',
+                                    borderRadius: '0.5rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {respondentEmailMissing ? (
+                            <div style={{
+                                padding: '2rem',
+                                textAlign: 'center',
+                                color: 'var(--text-secondary)',
+                                background: 'rgba(239, 68, 68, 0.05)',
+                                borderRadius: '0.75rem'
+                            }}>
+                                <AlertCircle size={32} color="#ef4444" style={{ marginBottom: '0.5rem' }} />
+                                <p style={{ fontSize: '0.95rem', margin: 0 }}>No contact information available. Click "Edit Details" to add respondent information.</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                    <div>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Email Address</p>
+                                        <p style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.respondentEmail}</p>
+                                    </div>
+                                    <div>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Phone Number</p>
+                                        <p style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.respondentPhone || 'Not provided'}</p>
+                                    </div>
+                                </div>
+                                {caseData.respondentAddress && (
+                                    <div>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Physical Address</p>
+                                        <p style={{ fontSize: '1rem', color: 'var(--text-main)', lineHeight: '1.6' }}>{caseData.respondentAddress}</p>
+                                    </div>
+                                )}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingTop: '0.5rem' }}>
+                                    {caseData.respondentIdentified ? (
+                                        <>
+                                            <CheckCircle2 size={18} color="#10b981" />
+                                            <span style={{ fontSize: '0.9rem', color: '#10b981', fontWeight: '600' }}>Respondent Identified</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <AlertCircle size={18} color="#f59e0b" />
+                                            <span style={{ fontSize: '0.9rem', color: '#f59e0b', fontWeight: '600' }}>Identification Pending</span>
+                                        </>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
