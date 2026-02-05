@@ -33,4 +33,13 @@ public class CaseDTO {
     private String summonsStatus;
     private String aiGeneratedSummary;
     private com.nyaysetu.backend.entity.DocumentStatus documentStatus;
+    
+    // Respondent Contact Information
+    private String respondentEmail;
+    private String respondentPhone;
+    private String respondentAddress;
+    private Boolean respondentIdentified;
+    
+    // User's role in this case (PETITIONER or RESPONDENT)
+    private String userRole;
 }

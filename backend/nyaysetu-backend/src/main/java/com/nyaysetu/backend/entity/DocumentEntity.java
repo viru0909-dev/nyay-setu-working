@@ -43,6 +43,10 @@ public class DocumentEntity {
     private String fileHash;
 
     private String uploadIp;
+    
+    // Access control: PUBLIC (all parties), RESTRICTED (uploader+lawyer+judge), SEALED (judge only)
+    @Builder.Default
+    private String visibilityLevel = "PUBLIC";
 
     @Builder.Default
     private Boolean isVerified = true;

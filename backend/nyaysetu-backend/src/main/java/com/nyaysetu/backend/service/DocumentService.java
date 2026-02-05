@@ -72,8 +72,59 @@ public class DocumentService {
                 .build();
     }
 
+    /**
+     * Get documents by case WITHOUT access control (for internal use)
+     */
     public List<DocumentEntity> getDocumentsByCase(UUID caseId) {
         return documentRepository.findByCaseId(caseId);
+    }
+    
+    /**
+     * Get documents by case WITH access control based on user's role
+     * @param caseId The case ID
+     * @param userId The requesting user's ID
+     * @param userRole The user's role in this case (JUDGE, PETITIONER, RESPONDENT, LAWYER)
+     */
+    public List<DocumentEntity> getDocumentsByCaseWithAccessControl(UUID caseId, Long userId, String userRole) {
+        List<DocumentEntity> allDocuments = documentRepository.findByCaseId(caseId);
+        
+        return allDocuments.stream()
+                .filter(doc -> hasAccess(doc, userId, userRole))
+                .toList();
+    }
+    
+    /**
+     * Check if user has access to a document based on visibility level
+     */
+    private boolean hasAccess(DocumentEntity doc, Long userId, String userRole) {
+        String visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : "PUBLIC";
+        
+        switch (visibility) {
+            case "PUBLIC":
+                // Everyone can see public documents (court orders, judgments, etc.)
+                return true;
+                
+            case "RESTRICTED":
+                // Only uploader, their lawyer, and judge can see
+                // If user is judge, allow access
+                if ("JUDGE".equals(userRole)) {
+                    return true;
+                }
+                // If user uploaded it, allow access
+                if (userId.equals(doc.getUploadedBy())) {
+                    return true;
+                }
+                // TODO: Add lawyer check when we have lawyer-client relationship
+                return false;
+                
+            case "SEALED":
+                // Only judge can see sealed documents
+                return "JUDGE".equals(userRole);
+                
+            default:
+                // Default to restricting access if unknown visibility level
+                return false;
+        }
     }
 
     public DocumentEntity getDocument(UUID id) {

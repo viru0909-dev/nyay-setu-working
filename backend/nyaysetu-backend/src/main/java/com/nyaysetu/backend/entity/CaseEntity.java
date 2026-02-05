@@ -64,7 +64,20 @@ public class CaseEntity {
 
     private Boolean hasBsaCert;
     
+    
     private String summonsStatus; // PENDING, SERVED, FAILED
+
+    // ===== RESPONDENT CONTACT INFORMATION =====
+    
+    private String respondentEmail;
+    
+    private String respondentPhone;
+    
+    @Column(columnDefinition = "TEXT")
+    private String respondentAddress;
+    
+    private Boolean respondentIdentified;
+
 
 
     // ===== AI-RELATED FIELDS (Vakil-Friend System) =====
