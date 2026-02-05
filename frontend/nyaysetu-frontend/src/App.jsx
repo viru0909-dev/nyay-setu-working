@@ -5,6 +5,11 @@ import { LanguageProvider } from './contexts/LanguageContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 
+// PWA Components
+import OfflineIndicator from './components/OfflineIndicator';
+import UpdateNotification from './components/UpdateNotification';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
+
 // Lazy load pages for better performance
 const Landing = lazy(() => import('./pages/Landing'));
 const Constitution = lazy(() => import('./pages/Constitution'));
@@ -78,7 +83,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return children;
 };
 
-function App() {
+function App({ swRegistration }) {
     const { initAuth } = useAuthStore();
 
     useEffect(() => {
@@ -88,6 +93,11 @@ function App() {
     return (
         <ErrorBoundary>
             <LanguageProvider>
+                {/* Global PWA Components */}
+                <OfflineIndicator />
+                <UpdateNotification registration={swRegistration} />
+                <PWAInstallPrompt />
+
                 <BrowserRouter
                     future={{
                         v7_startTransition: true,

@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.HashSet;
 
 import com.nyaysetu.backend.repository.HearingRepository;
 import com.nyaysetu.backend.entity.Hearing;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class CaseManagementService {
 
     private final CaseRepository caseRepository;
@@ -46,9 +49,28 @@ public class CaseManagementService {
     
 
     public List<CaseDTO> getCasesByUser(User user) {
-        List<CaseEntity> cases = caseRepository.findByClient(user);
-        return cases.stream()
-                .map(this::convertToDTO)
+        // Find cases where user is the client (petitioner)
+        List<CaseEntity> casesAsClient = caseRepository.findByClient(user);
+        
+        // Find cases where user's email matches respondent email
+        List<CaseEntity> casesAsRespondent = caseRepository.findByRespondentEmail(user.getEmail());
+        
+        // Combine both lists and remove duplicates
+        Set<CaseEntity> allCases = new HashSet<>();
+        allCases.addAll(casesAsClient);
+        allCases.addAll(casesAsRespondent);
+        
+        return allCases.stream()
+                .map(caseEntity -> {
+                    CaseDTO dto = convertToDTO(caseEntity);
+                    // Set user role based on relationship to case
+                    if (caseEntity.getClient() != null && caseEntity.getClient().getId().equals(user.getId())) {
+                        dto.setUserRole("PETITIONER");
+                    } else if (user.getEmail().equals(caseEntity.getRespondentEmail())) {
+                        dto.setUserRole("RESPONDENT");
+                    }
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -229,6 +251,11 @@ public class CaseManagementService {
                 .summonsStatus(entity.getSummonsStatus())
                 .aiGeneratedSummary(entity.getAiGeneratedSummary())
                 .documentStatus(entity.getDocumentStatus())
+                // Respondent Contact Information
+                .respondentEmail(entity.getRespondentEmail())
+                .respondentPhone(entity.getRespondentPhone())
+                .respondentAddress(entity.getRespondentAddress())
+                .respondentIdentified(entity.getRespondentIdentified())
                 .build();
     }
 
@@ -250,6 +277,11 @@ public class CaseManagementService {
         CaseEntity caseEntity = caseRepository.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
 
+        // Check if respondent email is available
+        if (caseEntity.getRespondentEmail() == null || caseEntity.getRespondentEmail().trim().isEmpty()) {
+            throw new RuntimeException("Cannot order notice: Respondent email not available. Please update respondent details first.");
+        }
+
         // Update status or flag if needed
         caseEntity.setSummonsStatus("ISSUED");
         caseRepository.save(caseEntity);
@@ -261,17 +293,14 @@ public class CaseManagementService {
             "Judge ordered formal notice to Respondent. Electronic summons initiated."
         );
 
-        // Send Email (Mocking Respondent Email for demo, assuming it might be in Respondent details or generic)
-        // In a real app, we'd fetch the respondent's registered email.
-        // For now, we'll try to find a user with the respondent's name or fallback to a demo email.
-        String respondentEmail = "respondent@example.com"; 
-        // Try to find if respondent is a user? (Optional enhancement)
+        // Use the respondent's email from the case entity
+        String respondentEmail = caseEntity.getRespondentEmail();
         
         // Trigger Email
         String nextHearingStr = caseEntity.getNextHearing() != null ? 
             caseEntity.getNextHearing().toLocalDate().toString() : "To be scheduled";
             
-        com.nyaysetu.backend.service.EmailService emailService = getEmailService(); // Need to inject this
+        com.nyaysetu.backend.service.EmailService emailService = getEmailService();
         if (emailService != null) {
             emailService.sendRespondentSummons(
                 respondentEmail, 
@@ -280,7 +309,10 @@ public class CaseManagementService {
                 nextHearingStr
             );
         }
+        
+        log.info("Summons ordered for case {} to respondent email: {}", caseId, respondentEmail);
     }
+    
     
     // Quick helper to avoid constructor circular dependency if EmailService isn't already injected
     // Ideally should perform proper constructor injection.
@@ -290,4 +322,82 @@ public class CaseManagementService {
     private com.nyaysetu.backend.service.EmailService getEmailService() {
         return emailService;
     }
+
+    /**
+     * Add a party to an existing case
+     */
+    @Transactional
+    public void addPartyToCase(UUID caseId, String partyName, String partyType, String partyEmail) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        // Update the case with the new party information
+        // For now, we'll add it to the timeline as a record
+        // In a more sophisticated system, you might have a separate Party entity
+
+        String eventDescription = String.format(
+            "New %s added: %s (%s)", 
+            partyType != null ? partyType : "PARTY",
+            partyName, 
+            partyEmail != null ? partyEmail : "No email provided"
+        );
+
+        timelineService.addEvent(
+            caseId,
+            "PARTY_ADDED",
+            eventDescription
+        );
+
+        log.info("Added party {} as {} to case {}", partyName, partyType, caseId);
+
+        // Optionally send notification to the new party
+        if (partyEmail != null && emailService != null) {
+            // Could send a notification email here
+            log.info("Would send notification email to {}", partyEmail);
+        }
+    }
+
+    /**
+     * Update respondent contact details for a case
+     */
+    @Transactional
+    public void updateRespondentDetails(UUID caseId, com.nyaysetu.backend.dto.RespondentDetailsDTO details) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        // Update respondent name if provided
+        if (details.getRespondentName() != null && !details.getRespondentName().trim().isEmpty()) {
+            caseEntity.setRespondent(details.getRespondentName());
+        }
+
+        // Update contact details
+        caseEntity.setRespondentEmail(details.getRespondentEmail());
+        caseEntity.setRespondentPhone(details.getRespondentPhone());
+        caseEntity.setRespondentAddress(details.getRespondentAddress());
+        
+        // Update identification status
+        if (details.getRespondentIdentified() != null) {
+            caseEntity.setRespondentIdentified(details.getRespondentIdentified());
+        }
+
+        caseRepository.save(caseEntity);
+
+        // Add timeline event
+        String eventDescription = String.format(
+            "Respondent details updated: %s (Email: %s, Phone: %s)",
+            details.getRespondentName() != null ? details.getRespondentName() : caseEntity.getRespondent(),
+            details.getRespondentEmail() != null ? details.getRespondentEmail() : "Not provided",
+            details.getRespondentPhone() != null ? details.getRespondentPhone() : "Not provided"
+        );
+
+        timelineService.addEvent(
+            caseId,
+            "RESPONDENT_DETAILS_UPDATED",
+            eventDescription
+        );
+
+        log.info("Updated respondent details for case {}: Email={}, Identified={}", 
+                 caseId, details.getRespondentEmail(), details.getRespondentIdentified());
+    }
 }
+
