@@ -62,6 +62,7 @@ public class DocumentManagementService {
                 .fileHash(fileHash)
                 .uploadIp(uploadIp)
                 .isVerified(fileHash != null)
+                .visibilityLevel("RESTRICTED") // Default: only uploader, their lawyer, and judge can see
                 .build();
 
         DocumentEntity saved = documentRepository.save(document);
@@ -82,6 +83,43 @@ public class DocumentManagementService {
         return documents.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+    
+    /**
+     * Get case documents with access control based on user's role
+     */
+    public List<DocumentDto> getCaseDocumentsWithAccessControl(UUID caseId, Long userId, String userRole) {
+        List<DocumentEntity> allDocuments = documentRepository.findByCaseId(caseId);
+        
+        return allDocuments.stream()
+                .filter(doc -> hasDocumentAccess(doc, userId, userRole))
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Check if user has access to a document
+     */
+    private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole) {
+        String visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : "PUBLIC";
+        
+        switch (visibility) {
+            case "PUBLIC":
+                return true; // Everyone can see public documents
+                
+            case "RESTRICTED":
+                // Judge, uploader, or their lawyer can see
+                if ("JUDGE".equals(userRole)) return true;
+                if (userId.equals(doc.getUploadedBy())) return true;
+                // TODO: Add lawyer check
+                return false;
+                
+            case "SEALED":
+                return "JUDGE".equals(userRole); // Only judge
+                
+            default:
+                return false; // Unknown visibility level - deny by default
+        }
     }
 
     public DocumentDto getDocumentById(UUID id) {

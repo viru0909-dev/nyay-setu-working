@@ -116,4 +116,43 @@ public class CaseManagementController {
             "message", approved ? "Draft Approved" : "Changes Requested"
         ));
     }
+
+    @PostMapping("/{id}/order-notice")
+    public ResponseEntity<Map<String, Object>> orderNotice(@PathVariable UUID id) {
+        caseManagementService.orderRespondentNotice(id);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Notice ordered successfully"
+        ));
+    }
+
+    @PostMapping("/{id}/parties")
+    public ResponseEntity<Map<String, Object>> addParty(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> request
+    ) {
+        String partyName = request.get("partyName");
+        String partyType = request.get("partyType"); // PETITIONER, RESPONDENT, WITNESS, etc.
+        String partyEmail = request.get("partyEmail");
+        
+        caseManagementService.addPartyToCase(id, partyName, partyType, partyEmail);
+        
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Party added successfully"
+        ));
+    }
+
+    @PutMapping("/{id}/respondent-details")
+    public ResponseEntity<Map<String, Object>> updateRespondentDetails(
+            @PathVariable UUID id,
+            @RequestBody com.nyaysetu.backend.dto.RespondentDetailsDTO details
+    ) {
+        caseManagementService.updateRespondentDetails(id, details);
+        
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Respondent details updated successfully"
+        ));
+    }
 }
