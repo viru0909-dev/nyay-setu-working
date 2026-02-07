@@ -58,9 +58,15 @@ export default function VakilFriendChat() {
     };
 
     useEffect(() => {
-        // Only auto-scroll if shouldAutoScrollRef is true (e.g., after sending a message)
-        if (shouldAutoScrollRef.current) {
-            scrollToBottom(messages.length <= 1 ? 'auto' : 'smooth');
+        // Only auto-scroll if user is already near the bottom (within 100px)
+        // This preserves reading position when user is scrolled up
+        if (shouldAutoScrollRef.current && messagesContainerRef.current) {
+            const container = messagesContainerRef.current;
+            const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+
+            if (isNearBottom || messages.length <= 1) {
+                scrollToBottom(messages.length <= 1 ? 'auto' : 'smooth');
+            }
         }
     }, [messages, isLoading]);
 
