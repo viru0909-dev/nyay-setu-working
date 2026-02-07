@@ -11,7 +11,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Map;
 import java.util.UUID;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * REST Controller for the Central AI Brain
@@ -58,5 +61,18 @@ public class BrainController {
         log.info("🧠 Brain Case Analysis request for: {}", query);
         Map<String, String> analysis = brainService.analyzeCaseIntent(query);
         return ResponseEntity.ok(analysis);
+    }
+
+    /**
+     * Suggest documents based on case details
+     */
+    @PostMapping("/suggest-documents")
+    public ResponseEntity<Map<String, Object>> suggestDocuments(@RequestBody Map<String, Object> request) {
+        @SuppressWarnings("unchecked")
+        Map<String, String> caseDetails = (Map<String, String>) request.get("caseDetails");
+        log.info("🧠 Brain Document Suggestion request for case type: {}", caseDetails.get("caseType"));
+        
+        List<String> suggestions = brainService.suggestDocuments(caseDetails);
+        return ResponseEntity.ok(Map.of("suggestions", suggestions));
     }
 }
