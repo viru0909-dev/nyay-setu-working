@@ -11,6 +11,7 @@ import {
     Edit, Sparkles, Save
 } from 'lucide-react';
 import { caseAPI, documentAPI, brainAPI, caseAssignmentAPI } from '../../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../config/apiConfig';
 import CaseChatWidget from '../../components/CaseChatWidget';
 
@@ -697,31 +698,45 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
     const fetchSuggestions = async () => {
         setLoadingSuggestions(true);
         try {
-            // We use the chat endpoint to get structured suggestions
-            const prompt = `For a legal case of type '${caseType}' and description '${caseDescription ? caseDescription.substring(0, 200) : ''}...', list the top 3-5 mandatory documents required. Return ONLY a JSON array of strings, e.g., ["Driving License", "Insurance Policy"]. Do not include any other text.`;
+            // Use dedicated suggestion endpoint
+            const response = await brainAPI.getSuggestedDocuments({
+                caseType: caseType || 'Legal Case',
+                description: caseDescription || ''
+            });
 
-            const response = await brainAPI.chat(prompt);
-            const content = response.data.message || response.data.reply;
-
-            // Try to extract JSON array from response
-            const match = content.match(/\[.*\]/s);
-            if (match) {
-                const parsed = JSON.parse(match[0]);
-                setSuggestions(parsed);
+            if (response.data && response.data.suggestions) {
+                setSuggestions(response.data.suggestions);
             } else {
-                // Fallback: split by newlines if not JSON
-                const lines = content.split('\n').filter(line => line.trim().startsWith('-') || line.trim().match(/^\d+\./));
-                setSuggestions(lines.map(l => l.replace(/^[-\d\.]+\s*/, '').trim()));
+                setSuggestions([]);
             }
         } catch (error) {
             console.error("Failed to fetch suggestions:", error);
-            // Fallback defaults based on case type
+            // Fallback defaults based on case type if API fails
             if (caseType === 'CIVIL') setSuggestions(["Property Deed", "Identity Proof", "Affidavit"]);
             else if (caseType === 'CRIMINAL') setSuggestions(["FIR Copy", "Witness Statements", "Medical Report"]);
             else setSuggestions(["Identity Proof", "Address Proof", "Relevant Contracts"]);
         } finally {
             setLoadingSuggestions(false);
         }
+    };
+
+    // Smart Deduplication Logic (Token Overlap)
+    const isDocumentPresent = (suggestion, uploadedFiles) => {
+        // Normalize: lowercase, remove special chars
+        const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+        const suggestionTokens = normalize(suggestion).split(/\s+/).filter(t => t.length > 2); // Filter small words
+
+        return uploadedFiles.some(file => {
+            const fileTokens = normalize(file.fileName).split(/\s+/).concat(
+                file.description ? normalize(file.description).split(/\s+/) : []
+            );
+
+            // Check for overlap
+            const matchCount = suggestionTokens.filter(token => fileTokens.includes(token)).length;
+
+            // Match if > 50% of significant suggestion tokens are present
+            return matchCount >= Math.ceil(suggestionTokens.length * 0.5);
+        });
     };
 
     const fetchAllFiles = async () => {
@@ -917,73 +932,80 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                         Analyzing case details...
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
-                        {suggestions.length > 0 ? suggestions.map((doc, idx) => {
-                            // Check if this document type is already uploaded (fuzzy match)
-                            const isUploaded = files.some(f =>
-                                f.fileName.toLowerCase().includes(doc.toLowerCase()) ||
-                                (f.description && f.description.toLowerCase().includes(doc.toLowerCase()))
-                            );
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                        <AnimatePresence>
+                            {suggestions.length > 0 ? suggestions.map((doc, idx) => {
+                                const isUploaded = isDocumentPresent(doc, files);
 
-                            return (
-                                <div key={idx} style={{
-                                    background: isUploaded ? 'rgba(16, 185, 129, 0.1)' : 'white',
-                                    border: isUploaded ? '1px solid #10b981' : '1px solid rgba(99, 102, 241, 0.2)',
-                                    borderRadius: '0.75rem',
-                                    padding: '1rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    transition: 'all 0.2s',
-                                    opacity: isUploaded ? 0.8 : 1
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                        {isUploaded ? (
-                                            <CheckCircle2 size={18} color="#10b981" />
-                                        ) : (
-                                            <div style={{
-                                                width: '18px', height: '18px', borderRadius: '50%',
-                                                border: '2px solid #cbd5e1'
-                                            }} />
+                                return (
+                                    <motion.div
+                                        key={idx}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3, delay: idx * 0.05 }}
+                                        whileHover={{ scale: 1.02, y: -2 }}
+                                        style={{
+                                            background: isUploaded ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255, 255, 255, 0.6)',
+                                            border: isUploaded ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(99, 102, 241, 0.15)',
+                                            borderRadius: '0.75rem',
+                                            padding: '1rem',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            backdropFilter: 'blur(8px)',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                                            {isUploaded ? (
+                                                <div style={{ padding: '0.25rem', background: '#d1fae5', borderRadius: '50%' }}>
+                                                    <CheckCircle2 size={18} color="#059669" />
+                                                </div>
+                                            ) : (
+                                                <div style={{
+                                                    width: '20px', height: '20px', borderRadius: '50%',
+                                                    border: '2px solid #cbd5e1', background: 'white'
+                                                }} />
+                                            )}
+                                            <span style={{
+                                                fontWeight: '600',
+                                                fontSize: '0.9rem',
+                                                color: isUploaded ? '#059669' : '#1e293b',
+                                                textDecoration: isUploaded ? 'line-through' : 'none',
+                                                opacity: isUploaded ? 0.8 : 1
+                                            }}>
+                                                {doc}
+                                            </span>
+                                        </div>
+                                        {!isUploaded && (
+                                            <label style={{ cursor: 'pointer', display: 'flex', padding: '0.4rem', borderRadius: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', transition: 'background 0.2s' }} title="Upload this document">
+                                                <Upload size={16} color="#6366f1" />
+                                                <input
+                                                    type="file"
+                                                    style={{ display: 'none' }}
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            setUploading(true);
+                                                            documentAPI.upload(file, {
+                                                                caseId,
+                                                                category: 'EVIDENCE',
+                                                                description: doc
+                                                            }).then(res => {
+                                                                setFiles(prev => [{ ...res.data, type: 'DOCUMENT', source: 'docs' }, ...prev]);
+                                                                setUploading(false);
+                                                            });
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
                                         )}
-                                        <span style={{
-                                            fontWeight: '600',
-                                            fontSize: '0.9rem',
-                                            color: isUploaded ? '#059669' : '#334155',
-                                            textDecoration: isUploaded ? 'line-through' : 'none'
-                                        }}>
-                                            {doc}
-                                        </span>
-                                    </div>
-                                    {!isUploaded && (
-                                        <label style={{ cursor: 'pointer', display: 'flex' }} title="Upload this document">
-                                            <Upload size={16} color="#6366f1" />
-                                            <input
-                                                type="file"
-                                                style={{ display: 'none' }}
-                                                onChange={(e) => {
-                                                    // Auto-fill description with suggestion name for better tracking
-                                                    const file = e.target.files[0];
-                                                    if (file) {
-                                                        setUploading(true);
-                                                        documentAPI.upload(file, {
-                                                            caseId,
-                                                            category: 'EVIDENCE',
-                                                            description: doc
-                                                        }).then(res => {
-                                                            setFiles(prev => [{ ...res.data, type: 'DOCUMENT', source: 'docs' }, ...prev]);
-                                                            setUploading(false);
-                                                        });
-                                                    }
-                                                }}
-                                            />
-                                        </label>
-                                    )}
-                                </div>
-                            );
-                        }) : (
-                            <p style={{ color: '#64748b', fontSize: '0.9rem' }}>No specific suggestions found.</p>
-                        )}
+                                    </motion.div>
+                                );
+                            }) : (
+                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>No specific suggestions found.</p>
+                            )}
+                        </AnimatePresence>
                     </div>
                 )}
             </div>

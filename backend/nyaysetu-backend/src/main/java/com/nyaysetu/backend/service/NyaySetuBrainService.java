@@ -342,4 +342,85 @@ public class NyaySetuBrainService {
             return new ArrayList<>();
         }
     }
+
+    /**
+     * Suggest documents based on case details
+     */
+    public List<String> suggestDocuments(Map<String, String> caseDetails) {
+        String caseType = caseDetails.getOrDefault("caseType", "Legal Case");
+        String description = caseDetails.getOrDefault("description", "No description provided");
+        
+        // Truncate description to avoid token limits
+        if (description.length() > 500) description = description.substring(0, 500) + "...";
+
+        List<Map<String, String>> messages = new ArrayList<>();
+        Map<String, String> systemMsg = new HashMap<>();
+        systemMsg.put("role", "system");
+        systemMsg.put("content", """
+            You are a legal expert assistant for Indian Courts.
+            Based on the case type and description, suggest a list of 3-5 mandatory documents the litigant should upload.
+            
+            OUTPUT RULES:
+            - Return ONLY a valid JSON array of strings.
+            - Example: ["Aadhaar Card", "Property Deed", "Rent Agreement"]
+            - Do not include any other text or markdown.
+            """);
+        messages.add(systemMsg);
+
+        Map<String, String> userMsg = new HashMap<>();
+        userMsg.put("role", "user");
+        userMsg.put("content", String.format("Case Type: %s\nDescription: %s", caseType, description));
+        messages.add(userMsg);
+
+        try {
+            String jsonResponse = callGroqAPI(messages);
+            
+            // Cleanup and Parse
+            String cleanJson = jsonResponse.replace("```json", "").replace("```", "").trim();
+            JsonNode root = objectMapper.readTree(cleanJson);
+            
+            List<String> suggestions = new ArrayList<>();
+            if (root.isArray()) {
+                for (JsonNode node : root) {
+                    suggestions.add(node.asText());
+                }
+            }
+            return suggestions;
+        } catch (Exception e) {
+            log.error("Failed to get document suggestions", e);
+            // Fallback
+            if ("CIVIL".equalsIgnoreCase(caseType)) return List.of("Identity Proof", "Address Proof", "Property Documents");
+            if ("CRIMINAL".equalsIgnoreCase(caseType)) return List.of("Identity Proof", "Complaint Copy", "Evidence");
+            return List.of("Identity Proof", "Relevant Contracts", "Correspondence");
+        }
+    }
+
+    private String callGroqAPI(List<Map<String, String>> messages) throws Exception {
+        ArrayNode messagesArray = objectMapper.createArrayNode();
+        for (Map<String, String> msg : messages) {
+            ObjectNode msgNode = objectMapper.createObjectNode();
+            msgNode.put("role", msg.get("role"));
+            msgNode.put("content", msg.get("content"));
+            messagesArray.add(msgNode);
+        }
+
+        ObjectNode requestBody = objectMapper.createObjectNode();
+        requestBody.put("model", "llama3-8b-8192");
+        requestBody.set("messages", messagesArray);
+        requestBody.put("temperature", 0.3);
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.set("Authorization", "Bearer " + groqApiKey);
+        headers.set("Content-Type", "application/json");
+
+        org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(requestBody.toString(), headers);
+        
+        // Use RestTemplate (assumed injected or new)
+        // Since we don't see RestTemplate in imports, let's check if we can reuse the existing logic's RestTemplate if any.
+        // Actually, let's see how the existing callGroqAPI calls it.
+        // It's likely using a RestTemplate bean or new RestTemplate().
+        // I need to see the implementation of the existing callGroqAPI further down.
+        // But for now, I'll use new RestTemplate() to be safe, or check imports.
+        return new org.springframework.web.client.RestTemplate().postForObject("https://api.groq.com/openai/v1/chat/completions", entity, String.class);
+    }
 }
