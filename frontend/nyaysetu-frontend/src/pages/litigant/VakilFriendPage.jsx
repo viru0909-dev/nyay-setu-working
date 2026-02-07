@@ -30,6 +30,7 @@ export default function VakilFriendChat() {
 
     const messagesContainerRef = useRef(null);
     const fileInputRef = useRef(null);
+    const shouldAutoScrollRef = useRef(true); // Control auto-scroll behavior
     const navigate = useNavigate();
 
     // Supported Languages
@@ -57,8 +58,10 @@ export default function VakilFriendChat() {
     };
 
     useEffect(() => {
-        // Use smooth scroll when messages change, but immediate for first load
-        scrollToBottom(messages.length <= 1 ? 'auto' : 'smooth');
+        // Only auto-scroll if shouldAutoScrollRef is true (e.g., after sending a message)
+        if (shouldAutoScrollRef.current) {
+            scrollToBottom(messages.length <= 1 ? 'auto' : 'smooth');
+        }
     }, [messages, isLoading]);
 
     useEffect(() => {
@@ -80,6 +83,7 @@ export default function VakilFriendChat() {
     const loadSession = async (historySessionId) => {
         try {
             setIsLoading(true);
+            shouldAutoScrollRef.current = false; // Don't auto-scroll when loading history
             const response = await vakilFriendAPI.getSession(historySessionId);
             const data = response.data;
             setSessionId(historySessionId);
@@ -115,6 +119,7 @@ export default function VakilFriendChat() {
         try {
             setIsStarting(true);
             setError(null);
+            shouldAutoScrollRef.current = true; // Auto-scroll for new session
             const response = await vakilFriendAPI.startSession();
             setSessionId(response.data.sessionId);
             setMessages([{
@@ -138,6 +143,7 @@ export default function VakilFriendChat() {
 
         const userMessage = inputMessage.trim();
         setInputMessage('');
+        shouldAutoScrollRef.current = true; // Enable auto-scroll for new messages
 
         // Optimistic UI update
         if (!audioData) {
