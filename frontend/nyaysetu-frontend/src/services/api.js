@@ -222,6 +222,7 @@ export const lawyerAPI = {
 export const brainAPI = {
     chat: (message, sessionId = null) => api.post('/api/brain/chat', { message, sessionId }),
     analyzeCase: (query) => api.post('/api/brain/analyze-case', { query }),
+    getSuggestedDocuments: (caseDetails) => api.post('/api/brain/suggest-documents', { caseDetails }),
 };
 
 // Police API - FIR management for police officers

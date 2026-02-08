@@ -28,4 +28,6 @@ public interface HearingRepository extends JpaRepository<Hearing, UUID> {
     List<Hearing> findByCaseEntityInOrderByScheduledDateDesc(List<CaseEntity> cases);
 
     Hearing findTopByCaseEntityIdAndScheduledDateAfterOrderByScheduledDateAsc(UUID caseId, LocalDateTime date);
+
+    List<Hearing> findByCaseEntityInAndScheduledDateBetween(List<CaseEntity> caseEntities, LocalDateTime start, LocalDateTime end);
 }

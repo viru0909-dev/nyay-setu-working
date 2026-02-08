@@ -854,6 +854,9 @@ public class VakilFriendService {
     /**
      * Generate a professional case title using AI
      */
+    /**
+     * Generate a professional case title using AI with strict JSON enforcement
+     */
     private String generateCaseTitle(String summaryText, String firstMessage) {
         try {
             // Clean the summary text to remove tags before sending to AI to avoid confusion
@@ -869,48 +872,61 @@ public class VakilFriendService {
             List<Map<String, String>> prompt = new ArrayList<>();
             Map<String, String> systemMsg = new HashMap<>();
             systemMsg.put("role", "system");
-            systemMsg.put("content", "You are a professional legal registrar. Create a formal Indian court case title (e.g., 'State vs. [Respondent]' or '[Petitioner] vs. [Respondent]'). " +
-                    "IMPORTANT: Return ONLY the plain text of the title. Keep it under 10 words. " +
-                    "Do NOT use complete sentences. Do NOT use formatted lists. Just the title.");
+            // STRICT JSON PROMPT
+            systemMsg.put("content", """
+                You are a professional legal registrar for Indian Courts.
+                Create a formal case title based on the provided context.
+                
+                RULES:
+                1. Format must be: "[Petitioner] vs. [Respondent]" or "State vs. [Accused]" (for criminal).
+                2. If names are unknown, use "Petitioner" or "Respondent".
+                3. Add a short suffix if needed: " - [Case Type] Dispute".
+                4. Max 10-12 words.
+                
+                You MUST return a valid JSON object:
+                {
+                  "title": "The generated title string"
+                }
+                Do not add any markdown, explanation, or conversational text. Just the JSON.
+                """);
             prompt.add(systemMsg);
             
             Map<String, String> userMsg = new HashMap<>();
             userMsg.put("role", "user");
-            userMsg.put("content", "Draft a legal case title based on this issue: " + relevantContext);
+            userMsg.put("content", "Context: " + relevantContext);
             prompt.add(userMsg);
             
-            String title = callGroqAPI(prompt);
+            // Call AI
+            String jsonResponse = callGroqAPI(prompt);
             
-            // Fallback if AI fails
-            if (title == null || title.trim().isEmpty()) {
-                return "Case: " + (firstMessage.length() > 50 ? firstMessage.substring(0, 50) + "..." : firstMessage);
-            }
-
-            // Post-processing cleanup
-            String cleanedTitle = title.trim()
-                    .replaceAll("(?i)^Title:\\s*", "")
-                    .replace("###", "")
-                    .replace("**", "")
-                    .replace("\"", "")
-                    .trim();
-
-            // Sanity Check: If title looks like a sentence or is too long, discard it
-            if (cleanedTitle.length() > 100 || 
-                cleanedTitle.startsWith("Your Input") || 
-                cleanedTitle.startsWith("I have") ||
-                cleanedTitle.contains("\n")) {
-                
-                log.warn("AI returned invalid title: {}. Fallback to extraction.", cleanedTitle);
-                String p = extractAfterLabel(summaryText, "Petitioner:", "पेटिशनर:");
-                String r = extractAfterLabel(summaryText, "Respondent:", "रेस्पोंडेंट:");
-                
-                if (!p.isEmpty() && !r.isEmpty()) {
-                    return p + " vs. " + r;
+            // Parse JSON Response
+            try {
+                // Sanitize potential markdown code blocks if AI fails to follow strict JSON
+                String cleanJson = jsonResponse.replace("```json", "").replace("```", "").trim();
+                JsonNode rootNode = objectMapper.readTree(cleanJson);
+                if (rootNode.has("title")) {
+                    String title = rootNode.get("title").asText().trim();
+                    log.info("✅ Generated formalized title: {}", title);
+                    return title;
                 }
-                return "Case: " + (firstMessage.length() > 50 ? firstMessage.substring(0, 50) + "..." : firstMessage);
+            } catch (Exception e) {
+                log.warn("⚠️ Failed to parse title JSON, attempting raw text fallback. Response: {}", jsonResponse);
             }
 
-            return cleanedTitle;
+            // Fallback: If JSON parsing failed, check if response ITSELF is a short title
+            if (jsonResponse != null && jsonResponse.length() < 100 && !jsonResponse.contains("\n") && !jsonResponse.contains("{")) {
+                return jsonResponse.trim().replace("\"", "");
+            }
+
+            // Final Fallback: Extraction
+            String p = extractAfterLabel(summaryText, "Petitioner:", "पेटिशनर:");
+            String r = extractAfterLabel(summaryText, "Respondent:", "रेस्पोंडेंट:");
+            
+            if (!p.isEmpty() && !r.isEmpty()) {
+                return p + " vs. " + r;
+            }
+            return "Case: " + (firstMessage.length() > 50 ? firstMessage.substring(0, 50) + "..." : firstMessage);
+
         } catch (Exception e) {
             log.error("Title generation failed: {}", e.getMessage());
             return "Case: " + (firstMessage.length() > 50 ? firstMessage.substring(0, 50) + "..." : firstMessage);

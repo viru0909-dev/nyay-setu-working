@@ -11,6 +11,7 @@ import {
     Edit, Sparkles, Save
 } from 'lucide-react';
 import { caseAPI, documentAPI, brainAPI, caseAssignmentAPI } from '../../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../config/apiConfig';
 import CaseChatWidget from '../../components/CaseChatWidget';
 
@@ -275,7 +276,7 @@ export default function CaseDetailPage() {
             {activeTab === 'overview' && <OverviewTab caseData={caseData} onHireLawyer={handleHireLawyer} />}
 
             {/* CASE FILES TAB */}
-            {activeTab === 'files' && <CaseFilesTab caseId={caseId} />}
+            {activeTab === 'files' && <CaseFilesTab caseId={caseId} caseType={caseData.caseType} caseDescription={caseData.description} />}
 
             {/* TIMELINE TAB */}
             {activeTab === 'timeline' && <TimelineTab caseData={caseData} />}
@@ -666,7 +667,7 @@ function OverviewTab({ caseData, onHireLawyer }) {
     );
 }
 
-function CaseFilesTab({ caseId }) {
+function CaseFilesTab({ caseId, caseType, caseDescription }) {
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
@@ -683,9 +684,60 @@ function CaseFilesTab({ caseId }) {
     const [certUrl, setCertUrl] = useState(null);
     const [certLoading, setCertLoading] = useState(false);
 
+    // AI Suggestions State
+    const [suggestions, setSuggestions] = useState([]);
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
     useEffect(() => {
         fetchAllFiles();
-    }, [caseId]);
+        if (caseType && caseDescription) {
+            fetchSuggestions();
+        }
+    }, [caseId, caseType]);
+
+    const fetchSuggestions = async () => {
+        setLoadingSuggestions(true);
+        try {
+            // Use dedicated suggestion endpoint
+            const response = await brainAPI.getSuggestedDocuments({
+                caseType: caseType || 'Legal Case',
+                description: caseDescription || ''
+            });
+
+            if (response.data && response.data.suggestions) {
+                setSuggestions(response.data.suggestions);
+            } else {
+                setSuggestions([]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch suggestions:", error);
+            // Fallback defaults based on case type if API fails
+            if (caseType === 'CIVIL') setSuggestions(["Property Deed", "Identity Proof", "Affidavit"]);
+            else if (caseType === 'CRIMINAL') setSuggestions(["FIR Copy", "Witness Statements", "Medical Report"]);
+            else setSuggestions(["Identity Proof", "Address Proof", "Relevant Contracts"]);
+        } finally {
+            setLoadingSuggestions(false);
+        }
+    };
+
+    // Smart Deduplication Logic (Token Overlap)
+    const isDocumentPresent = (suggestion, uploadedFiles) => {
+        // Normalize: lowercase, remove special chars
+        const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+        const suggestionTokens = normalize(suggestion).split(/\s+/).filter(t => t.length > 2); // Filter small words
+
+        return uploadedFiles.some(file => {
+            const fileTokens = normalize(file.fileName).split(/\s+/).concat(
+                file.description ? normalize(file.description).split(/\s+/) : []
+            );
+
+            // Check for overlap
+            const matchCount = suggestionTokens.filter(token => fileTokens.includes(token)).length;
+
+            // Match if > 50% of significant suggestion tokens are present
+            return matchCount >= Math.ceil(suggestionTokens.length * 0.5);
+        });
+    };
 
     const fetchAllFiles = async () => {
         try {
@@ -843,171 +895,290 @@ function CaseFilesTab({ caseId }) {
     };
 
     return (
-        <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>Case Files ({files.length})</h3>
-                <label style={{
-                    padding: '0.75rem 1.5rem', background: 'var(--color-primary)', borderRadius: '0.5rem',
-                    color: 'white', fontWeight: '600', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem'
-                }}>
-                    {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
-                    {uploading ? 'Uploading...' : 'Upload File'}
-                    <input type="file" style={{ display: 'none' }} onChange={handleUpload} disabled={uploading} />
-                </label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+
+            {/* AI Suggested Documents Section */}
+            <div style={{
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%)',
+                border: '1px solid rgba(99, 102, 241, 0.2)',
+                borderRadius: '1rem',
+                padding: '1.5rem',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div style={{
+                        background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                        padding: '0.5rem',
+                        borderRadius: '0.5rem',
+                        color: 'white',
+                        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+                    }}>
+                        <Sparkles size={18} />
+                    </div>
+                    <div>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#1e2a44', margin: 0 }}>
+                            AI Suggested Documents
+                        </h3>
+                        <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>
+                            Based on your case type <strong>{caseType}</strong>, Groq AI recommends uploading these:
+                        </p>
+                    </div>
+                </div>
+
+                {loadingSuggestions ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', padding: '1rem 0' }}>
+                        <Loader2 size={18} className="animate-spin" />
+                        Analyzing case details...
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                        <AnimatePresence>
+                            {suggestions.length > 0 ? suggestions.map((doc, idx) => {
+                                const isUploaded = isDocumentPresent(doc, files);
+
+                                return (
+                                    <motion.div
+                                        key={idx}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3, delay: idx * 0.05 }}
+                                        whileHover={{ scale: 1.02, y: -2 }}
+                                        style={{
+                                            background: isUploaded ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255, 255, 255, 0.6)',
+                                            border: isUploaded ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(99, 102, 241, 0.15)',
+                                            borderRadius: '0.75rem',
+                                            padding: '1rem',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            backdropFilter: 'blur(8px)',
+                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                                            {isUploaded ? (
+                                                <div style={{ padding: '0.25rem', background: '#d1fae5', borderRadius: '50%' }}>
+                                                    <CheckCircle2 size={18} color="#059669" />
+                                                </div>
+                                            ) : (
+                                                <div style={{
+                                                    width: '20px', height: '20px', borderRadius: '50%',
+                                                    border: '2px solid #cbd5e1', background: 'white'
+                                                }} />
+                                            )}
+                                            <span style={{
+                                                fontWeight: '600',
+                                                fontSize: '0.9rem',
+                                                color: isUploaded ? '#059669' : '#1e293b',
+                                                textDecoration: isUploaded ? 'line-through' : 'none',
+                                                opacity: isUploaded ? 0.8 : 1
+                                            }}>
+                                                {doc}
+                                            </span>
+                                        </div>
+                                        {!isUploaded && (
+                                            <label style={{ cursor: 'pointer', display: 'flex', padding: '0.4rem', borderRadius: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', transition: 'background 0.2s' }} title="Upload this document">
+                                                <Upload size={16} color="#6366f1" />
+                                                <input
+                                                    type="file"
+                                                    style={{ display: 'none' }}
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            setUploading(true);
+                                                            documentAPI.upload(file, {
+                                                                caseId,
+                                                                category: 'EVIDENCE',
+                                                                description: doc
+                                                            }).then(res => {
+                                                                setFiles(prev => [{ ...res.data, type: 'DOCUMENT', source: 'docs' }, ...prev]);
+                                                                setUploading(false);
+                                                            });
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                        )}
+                                    </motion.div>
+                                );
+                            }) : (
+                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>No specific suggestions found.</p>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                )}
             </div>
 
-            {loading ? <Loader2 size={32} style={{ margin: '2rem auto', display: 'block' }} className="animate-spin" /> :
-                files.length === 0 ? <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No files found.</p> :
-                    <div style={{ display: 'grid', gap: '1rem' }}>
-                        {files.map(doc => {
-                            // Check if document has hash verification
-                            const isVerified = doc.type === 'EVIDENCE' || verificationMap[doc.id] === true;
-                            const showCertificate = doc.type === 'EVIDENCE' || verificationMap[doc.id] === true;
+            {/* Upload & List Section (Existing) */}
+            <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
+                        Uploaded Files ({files.length})
+                    </h3>
+                    <label style={{
+                        padding: '0.75rem 1.5rem', background: 'var(--color-primary)', borderRadius: '0.5rem',
+                        color: 'white', fontWeight: '600', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                    }}>
+                        {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
+                        {uploading ? 'Uploading...' : 'Upload File'}
+                        <input type="file" style={{ display: 'none' }} onChange={handleUpload} disabled={uploading} />
+                    </label>
+                </div>
 
-                            return (
-                                <div key={`${doc.source}-${doc.id}`} style={{ background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '1rem', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <div style={{ padding: '0.75rem', background: isVerified ? 'rgba(16, 185, 129, 0.1)' : 'rgba(139, 92, 246, 0.1)', borderRadius: '0.75rem' }}>
-                                            {isVerified ? <Shield size={24} color="#10b981" /> : <FileText size={24} color="#8b5cf6" />}
-                                        </div>
-                                        <div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <p style={{ fontWeight: '600', color: 'var(--text-main)', margin: 0 }}>{doc.fileName}</p>
-                                                {isVerified && (
-                                                    <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', background: '#10b981', color: 'white', borderRadius: '99px', fontWeight: 'bold' }}>VERIFIED</span>
-                                                )}
+                {loading ? <Loader2 size={32} style={{ margin: '2rem auto', display: 'block' }} className="animate-spin" /> :
+                    files.length === 0 ? <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No files found.</p> :
+                        <div style={{ display: 'grid', gap: '1rem' }}>
+                            {files.map(doc => {
+                                // Check if document has hash verification
+                                const isVerified = doc.type === 'EVIDENCE' || verificationMap[doc.id] === true;
+                                const showCertificate = doc.type === 'EVIDENCE' || verificationMap[doc.id] === true;
+
+                                return (
+                                    <div key={`${doc.source}-${doc.id}`} style={{ background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '1rem', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <div style={{ padding: '0.75rem', background: isVerified ? 'rgba(16, 185, 129, 0.1)' : 'rgba(139, 92, 246, 0.1)', borderRadius: '0.75rem' }}>
+                                                {isVerified ? <Shield size={24} color="#10b981" /> : <FileText size={24} color="#8b5cf6" />}
                                             </div>
-                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
-                                                {doc.type === 'EVIDENCE'
-                                                    ? `Hash: ${doc.blockHash?.substring(0, 16)}...`
-                                                    : doc.fileHash
-                                                        ? `Hash: ${doc.fileHash.substring(0, 16)}... • ${formatFileSize(doc.size)}`
-                                                        : `${formatFileSize(doc.size)} • ${formatDate(doc.uploadedAt)}`
-                                                }
-                                            </p>
+                                            <div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <p style={{ fontWeight: '600', color: 'var(--text-main)', margin: 0 }}>{doc.fileName}</p>
+                                                    {isVerified && (
+                                                        <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', background: '#10b981', color: 'white', borderRadius: '99px', fontWeight: 'bold' }}>VERIFIED</span>
+                                                    )}
+                                                </div>
+                                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                                                    {doc.type === 'EVIDENCE'
+                                                        ? `Hash: ${doc.blockHash?.substring(0, 16)}...`
+                                                        : doc.fileHash
+                                                            ? `Hash: ${doc.fileHash.substring(0, 16)}... • ${formatFileSize(doc.size)}`
+                                                            : `${formatFileSize(doc.size)} • ${formatDate(doc.uploadedAt)}`
+                                                    }
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                            {doc.source === 'docs' && (
+                                                analysisMap[doc.id] ? (
+                                                    <button onClick={() => viewAnalysis(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.5rem', color: '#8b5cf6', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                        <Sparkles size={14} /> AI Insights
+                                                    </button>
+                                                ) : analyzingIds.includes(doc.id) ? (
+                                                    <div style={{ padding: '0.5rem 0.75rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
+                                                        <Loader2 size={14} className="animate-spin" /> Analyzing...
+                                                    </div>
+                                                ) : null
+                                            )}
+
+                                            {showCertificate && (
+                                                <button onClick={() => viewCertificate(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '0.5rem', color: '#10b981', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                    <FileCheck size={14} /> Certificate
+                                                </button>
+                                            )}
+
+                                            <button onClick={() => downloadDoc(doc)} style={{ padding: '0.5rem', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Download size={16} />
+                                            </button>
                                         </div>
                                     </div>
+                                )
+                            })}
+                        </div>}
 
-                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                        {doc.source === 'docs' && (
-                                            analysisMap[doc.id] ? (
-                                                <button onClick={() => viewAnalysis(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.5rem', color: '#8b5cf6', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
-                                                    <Sparkles size={14} /> AI Insights
-                                                </button>
-                                            ) : analyzingIds.includes(doc.id) ? (
-                                                <div style={{ padding: '0.5rem 0.75rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
-                                                    <Loader2 size={14} className="animate-spin" /> Analyzing...
-                                                </div>
-                                            ) : null
-                                        )}
-
-                                        {showCertificate && (
-                                            <button onClick={() => viewCertificate(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '0.5rem', color: '#10b981', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
-                                                <FileCheck size={14} /> Certificate
-                                            </button>
-                                        )}
-
-                                        <button onClick={() => downloadDoc(doc)} style={{ padding: '0.5rem', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <Download size={16} />
-                                        </button>
+                {showAnalysisModal && selectedAnalysis && (
+                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }} onClick={() => setShowAnalysisModal(false)}>
+                        <div style={{ background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)', borderRadius: '1.5rem', width: '90%', maxWidth: '600px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-glass-strong)' }} onClick={e => e.stopPropagation()}>
+                            <div style={{ padding: '1.5rem', borderBottom: 'var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <div style={{ padding: '0.5rem', background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)', borderRadius: '0.5rem', color: 'white' }}><Sparkles size={20} /></div>
+                                    <div>
+                                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)' }}>AI Document Analysis</h3>
+                                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{selectedAnalysis.docName}</p>
                                     </div>
                                 </div>
-                            )
-                        })}
-                    </div>}
+                                <button onClick={() => setShowAnalysisModal(false)}><X size={24} color="var(--text-secondary)" /></button>
+                            </div>
+                            <div style={{ padding: '1.5rem', overflowY: 'auto' }}>
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Document Type</h4>
+                                    <div style={{ padding: '0.75rem', background: 'var(--bg-glass)', borderRadius: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>
+                                        {selectedAnalysis.documentType || 'General Document'}
+                                    </div>
+                                </div>
 
-            {showAnalysisModal && selectedAnalysis && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }} onClick={() => setShowAnalysisModal(false)}>
-                    <div style={{ background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)', borderRadius: '1.5rem', width: '90%', maxWidth: '600px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-glass-strong)' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ padding: '1.5rem', borderBottom: 'var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <div style={{ padding: '0.5rem', background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)', borderRadius: '0.5rem', color: 'white' }}><Sparkles size={20} /></div>
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Key Entities Extracted</h4>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                        {selectedAnalysis.extractedEntities ? (
+                                            (typeof selectedAnalysis.extractedEntities === 'string'
+                                                ? selectedAnalysis.extractedEntities.split(',')
+                                                : Object.keys(selectedAnalysis.extractedEntities || {})
+                                            ).map((entity, i) => (
+                                                <span key={i} style={{ padding: '0.25rem 0.75rem', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '999px', fontSize: '0.8rem', fontWeight: '600' }}>
+                                                    {entity.replace(/[{}"]/g, '')}
+                                                </span>
+                                            ))
+                                        ) : <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No entities detected</span>}
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)' }}>AI Document Analysis</h3>
-                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{selectedAnalysis.docName}</p>
-                                </div>
-                            </div>
-                            <button onClick={() => setShowAnalysisModal(false)}><X size={24} color="var(--text-secondary)" /></button>
-                        </div>
-                        <div style={{ padding: '1.5rem', overflowY: 'auto' }}>
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Document Type</h4>
-                                <div style={{ padding: '0.75rem', background: 'var(--bg-glass)', borderRadius: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>
-                                    {selectedAnalysis.documentType || 'General Document'}
-                                </div>
-                            </div>
-
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Key Entities Extracted</h4>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                    {selectedAnalysis.extractedEntities ? (
-                                        (typeof selectedAnalysis.extractedEntities === 'string'
-                                            ? selectedAnalysis.extractedEntities.split(',')
-                                            : Object.keys(selectedAnalysis.extractedEntities || {})
-                                        ).map((entity, i) => (
-                                            <span key={i} style={{ padding: '0.25rem 0.75rem', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '999px', fontSize: '0.8rem', fontWeight: '600' }}>
-                                                {entity.replace(/[{}"]/g, '')}
-                                            </span>
-                                        ))
-                                    ) : <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No entities detected</span>}
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Analysis Summary</h4>
-                                <div style={{ padding: '1rem', background: 'var(--bg-glass)', borderRadius: '0.5rem', color: 'var(--text-main)', lineHeight: '1.6', fontSize: '0.95rem' }}>
-                                    {selectedAnalysis.summary || 'No summary available.'}
+                                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Analysis Summary</h4>
+                                    <div style={{ padding: '1rem', background: 'var(--bg-glass)', borderRadius: '0.5rem', color: 'var(--text-main)', lineHeight: '1.6', fontSize: '0.95rem' }}>
+                                        {selectedAnalysis.summary || 'No summary available.'}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* Certificate Viewer Modal */}
-            {showCertModal && certUrl && (
-                <div style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.8)',
-                    backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
-                }} onClick={() => setShowCertModal(false)}>
+                {/* Certificate Viewer Modal */}
+                {showCertModal && certUrl && (
                     <div style={{
-                        background: '#1e1e1e', width: '90%', maxWidth: '900px', height: '90vh',
-                        borderRadius: '1rem', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-                    }} onClick={e => e.stopPropagation()}>
+                        position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.8)',
+                        backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+                    }} onClick={() => setShowCertModal(false)}>
                         <div style={{
-                            padding: '1rem 1.5rem', background: '#2d2d2d', borderBottom: '1px solid #404040',
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                        }}>
-                            <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Shield size={20} color="#10b981" /> Section 63(4) Evidence Certificate
-                            </h3>
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <a href={certUrl} download="Admissibility_Certificate.pdf" style={{
-                                    padding: '0.5rem 1rem', background: '#10b981', color: 'white', borderRadius: '0.5rem',
-                                    textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}>
-                                    <Download size={16} /> Download PDF
-                                </a>
-                                <button onClick={() => setShowCertModal(false)} style={{
-                                    background: 'none', border: 'none', color: '#a0a0a0', cursor: 'pointer', fontSize: '1.5rem'
-                                }}>
-                                    ×
-                                </button>
+                            background: '#1e1e1e', width: '90%', maxWidth: '900px', height: '90vh',
+                            borderRadius: '1rem', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                        }} onClick={e => e.stopPropagation()}>
+                            <div style={{
+                                padding: '1rem 1.5rem', background: '#2d2d2d', borderBottom: '1px solid #404040',
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                            }}>
+                                <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Shield size={20} color="#10b981" /> Section 63(4) Evidence Certificate
+                                </h3>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <a href={certUrl} download="Admissibility_Certificate.pdf" style={{
+                                        padding: '0.5rem 1rem', background: '#10b981', color: 'white', borderRadius: '0.5rem',
+                                        textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                                    }}>
+                                        <Download size={16} /> Download PDF
+                                    </a>
+                                    <button onClick={() => setShowCertModal(false)} style={{
+                                        background: 'none', border: 'none', color: '#a0a0a0', cursor: 'pointer', fontSize: '1.5rem'
+                                    }}>
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                            <div style={{ flex: 1, background: '#525659' }}>
+                                <iframe
+                                    src={certUrl}
+                                    title="Certificate Preview"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 'none' }}
+                                />
                             </div>
                         </div>
-                        <div style={{ flex: 1, background: '#525659' }}>
-                            <iframe
-                                src={certUrl}
-                                title="Certificate Preview"
-                                width="100%"
-                                height="100%"
-                                style={{ border: 'none' }}
-                            />
-                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }
