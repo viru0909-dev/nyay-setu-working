@@ -14,12 +14,22 @@ export default function JudicialOverview() {
 
     useEffect(() => {
         fetchDashboardData();
+
+        // Poll every 30 seconds for real-time updates
+        const interval = setInterval(fetchDashboardData, 30000);
+        return () => clearInterval(interval);
     }, []);
 
     const fetchDashboardData = async () => {
         try {
-            const casesResponse = await judgeAPI.getCases();
-            const cases = casesResponse.data || [];
+            // Parallel fetch for speed
+            const [casesRes, hearingsRes] = await Promise.all([
+                judgeAPI.getCases(),
+                judgeAPI.getTodaysHearings()
+            ]);
+
+            const cases = casesRes.data || [];
+            const hearings = hearingsRes.data || [];
 
             // Calculate stats
             const totalCases = cases.filter(c => c.status !== 'CLOSED').length;
@@ -27,11 +37,22 @@ export default function JudicialOverview() {
 
             setStats({
                 totalCases,
-                hearingsToday: 0, // TODO: Connect to hearings API
+                hearingsToday: hearings.length,
                 pendingActions: urgentCasesFiltered.length
             });
 
             setUrgentCases(urgentCasesFiltered.slice(0, 5));
+
+            // Format hearings for display
+            const formattedHearings = hearings.map(h => ({
+                time: new Date(h.scheduledDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+                title: h.caseEntity ? h.caseEntity.title : 'Scheduled Hearing',
+                type: h.caseEntity ? h.caseEntity.caseType : 'LEGAL',
+                id: h.id
+            })).sort((a, b) => a.time.localeCompare(b.time));
+
+            setTodayHearings(formattedHearings);
+
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
         } finally {
@@ -358,7 +379,7 @@ export default function JudicialOverview() {
 
                     {/* Timeline */}
                     <div style={{ position: 'relative' }}>
-                        {stats.hearingsToday === 0 ? (
+                        {todayHearings.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
                                 <Calendar size={48} color="#64748b" style={{ marginBottom: '1rem', opacity: 0.5 }} />
                                 <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
@@ -367,19 +388,20 @@ export default function JudicialOverview() {
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {/* Example hearing slots - replace with actual data */}
-                                {[
-                                    { time: '10:00 AM', title: 'Case Hearing #1', type: 'CRIMINAL' },
-                                    { time: '11:30 AM', title: 'Case Hearing #2', type: 'CIVIL' },
-                                    { time: '02:00 PM', title: 'Case Hearing #3', type: 'FAMILY' }
-                                ].map((slot, i) => (
+                                {todayHearings.map((slot, i) => (
                                     <div key={i} style={{
                                         background: 'var(--bg-glass)',
                                         border: 'var(--border-glass)',
                                         borderRadius: '0.75rem',
                                         padding: '1rem',
-                                        borderLeft: '4px solid #6366f1'
-                                    }}>
+                                        borderLeft: '4px solid #6366f1',
+                                        cursor: 'pointer',
+                                        transition: 'background 0.2s'
+                                    }}
+                                        onClick={() => navigate(`/judge/case/${slot.id}`)}
+                                        onMouseOver={e => e.currentTarget.style.background = 'rgba(99, 102, 241, 0.05)'}
+                                        onMouseOut={e => e.currentTarget.style.background = 'var(--bg-glass)'}
+                                    >
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                                             <Clock size={16} color="#6366f1" />
                                             <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)' }}>

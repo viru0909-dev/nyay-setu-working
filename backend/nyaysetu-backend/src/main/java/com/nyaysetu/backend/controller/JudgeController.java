@@ -165,6 +165,24 @@ public class JudgeController {
         
         return ResponseEntity.ok(stats);
     }
+
+    /**
+     * Get hearings scheduled for today
+     */
+    @GetMapping("/hearings/today")
+    public ResponseEntity<?> getTodaysHearings(Authentication authentication) {
+        User judge = authService.findByEmail(authentication.getName());
+        List<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName());
+        
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
+        
+        List<Hearing> todayHearings = hearingRepository.findByCaseEntityInAndScheduledDateBetween(
+            judgeCases, startOfDay, endOfDay
+        );
+        
+        return ResponseEntity.ok(todayHearings);
+    }
     
     /**
      * AI Case Summary for Judge (Digital Court Master)
