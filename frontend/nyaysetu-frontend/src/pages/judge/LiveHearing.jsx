@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Video, Calendar, Clock, Loader2, ExternalLink, Shield, Phone, Maximize2, Minimize2, MapPin, User, Activity, ArrowUpRight, Search } from 'lucide-react';
+import { Video, Calendar, Clock, Loader2, ExternalLink, Shield, Phone, MapPin, User, Activity, ArrowUpRight, Search, ArrowLeft } from 'lucide-react';
 import { judgeAPI } from '../../services/api';
 
 export default function LiveHearing() {
@@ -9,7 +9,6 @@ export default function LiveHearing() {
     const [hearings, setHearings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeHearing, setActiveHearing] = useState(null);
-    const [isMaximized, setIsMaximized] = useState(false);
 
     useEffect(() => {
         fetchUpcomingHearings();
@@ -27,6 +26,8 @@ export default function LiveHearing() {
                 const date = new Date(h.scheduledDate);
                 return {
                     ...h,
+                    caseTitle: h.caseEntity?.title || 'Untitled Case',
+                    caseId: h.caseEntity?.id || h.id,
                     fullDate: date,
                     time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
                     dateStr: date.toLocaleDateString([], { month: 'short', day: '2-digit' }),
@@ -65,12 +66,10 @@ export default function LiveHearing() {
 
     const joinHearing = (hearing) => {
         setActiveHearing(hearing);
-        setIsMaximized(false);
     };
 
     const endCall = () => {
         setActiveHearing(null);
-        setIsMaximized(false);
     };
 
     // Calendar Logic
@@ -105,56 +104,94 @@ export default function LiveHearing() {
     // Active Video Call View
     if (activeHearing) {
         return (
-            <div style={{
-                position: isMaximized ? 'fixed' : 'absolute',
-                top: 0, left: 0, right: 0, bottom: 0,
-                background: '#0a0a0f',
-                zIndex: isMaximized ? 9999 : 50,
-                display: 'flex', flexDirection: 'column'
-            }}>
-                <div style={{
-                    padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    background: 'linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%)',
-                    borderBottom: '1px solid rgba(239, 68, 68, 0.3)'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontWeight: '800', fontSize: '0.9rem' }}>
-                            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 10px #ef4444', animation: 'pulse 1.5s infinite' }} />
-                            LIVE SESSION
-                        </div>
-                        <div style={{ height: '24px', width: '1px', background: 'rgba(255, 255, 255, 0.2)' }} />
-                        <div>
-                            <span style={{ color: 'white', fontWeight: '700', fontSize: '1.25rem' }}>{activeHearing.caseTitle}</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
-                                <Shield size={12} color="#4ade80" />
-                                <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>End-to-End Encrypted Judicial Session</span>
+            <div style={{ maxWidth: '1400px', margin: '0 auto', paddingTop: '2rem', paddingBottom: '2rem' }}>
+                <div style={{ height: '75vh', display: 'flex', flexDirection: 'column', background: '#0a0a0f', borderRadius: '1.5rem', overflow: 'hidden', border: '2px solid rgba(99, 102, 241, 0.3)', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}>
+                    {/* Video Header Area */}
+                    <div style={{
+                        padding: '1rem 1.5rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        background: 'rgba(17, 24, 39, 0.95)',
+                        borderBottom: '1px solid rgba(99, 102, 241, 0.2)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <button
+                                onClick={endCall}
+                                style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
+                            >
+                                <ArrowLeft size={20} />
+                            </button>
+                            <div>
+                                <h2 style={{ color: 'white', margin: 0, fontSize: '1.125rem', fontWeight: '700' }}>
+                                    {activeHearing.caseTitle}
+                                </h2>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', fontSize: '0.75rem' }}>
+                                    <Shield size={12} color="#4ade80" />
+                                    <span>End-to-End Encrypted Secure Judicial Line</span>
+                                </div>
                             </div>
                         </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontWeight: '800', fontSize: '0.875rem' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', animation: 'blink 1.5s infinite' }} />
+                                SESSION LIVE
+                            </div>
+                            <div style={{ height: '24px', width: '1px', background: 'rgba(148, 163, 184, 0.3)' }} />
+                            <span style={{ color: '#94a3b8', fontSize: '0.875rem', fontWeight: '600' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <span style={{ color: '#94a3b8', fontWeight: '600' }}>{new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
-                        <button onClick={() => setIsMaximized(!isMaximized)} style={{
-                            padding: '0.875rem', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '0.75rem', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }} title={isMaximized ? "Exit Fullscreen" : "Maximize Screen"}>
-                            {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-                        </button>
-                        <button onClick={endCall} style={{
-                            padding: '0.875rem 2rem', background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
-                            border: 'none', borderRadius: '0.75rem', color: 'white', fontWeight: '700', cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 20px rgba(239, 68, 68, 0.4)'
-                        }}>
-                            <Phone size={18} /> End Session
+
+                    {/* Jitsi Video Container */}
+                    <div style={{ flex: 1, position: 'relative', background: '#1a1a1f', minHeight: 0 }}>
+                        <iframe
+                            src={`https://meet.jit.si/${activeHearing.videoRoomId || 'nyaysetu-court-' + activeHearing.id}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","closedcaptions","desktop","embedmeeting","fullscreen","fodeviceselection","hangup","profile","chat","recording","livestreaming","etherpad","sharedvideo","settings","raisehand","videoquality","filmstrip","invite","feedback","stats","shortcuts","tileview","videobackgroundblur","download","help","mute-everyone","security"]`}
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                border: 'none'
+                            }}
+                            allow="camera; microphone; fullscreen; display-capture; autoplay"
+                            title="NyaySetu Court Hearing"
+                        />
+                    </div>
+
+                    {/* Bottom Control Bar */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        background: 'rgba(17, 24, 39, 0.95)',
+                        borderTop: '1px solid rgba(99, 102, 241, 0.2)'
+                    }}>
+                        <button
+                            onClick={endCall}
+                            style={{
+                                padding: '0.875rem 2rem',
+                                background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+                                border: 'none',
+                                borderRadius: '9999px',
+                                color: 'white',
+                                fontWeight: '800',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                boxShadow: '0 10px 25px rgba(239, 68, 68, 0.4)',
+                                transition: 'all 0.2s',
+                                letterSpacing: '0.5px'
+                            }}
+                            onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                            onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                        >
+                            <Phone size={20} />
+                            END SESSION
                         </button>
                     </div>
-                </div>
-                <div style={{ flex: 1, background: '#000' }}>
-                    <iframe
-                        src={`https://meet.jit.si/${activeHearing.videoRoomId || 'nyaysetu-court-' + activeHearing.id}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.SHOW_JITSI_WATERMARK=false&interfaceConfig.SHOW_BRAND_WATERMARK=false`}
-                        style={{ width: '100%', height: '100%', border: 'none' }}
-                        allow="camera; microphone; fullscreen; display-capture; autoplay"
-                        title="NyaySetu Court Hearing"
-                    />
                 </div>
             </div>
         );
