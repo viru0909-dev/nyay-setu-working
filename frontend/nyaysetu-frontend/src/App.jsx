@@ -45,6 +45,8 @@ const JudgeCaseWorkspace = lazy(() => import('./pages/judge/JudgeCaseWorkspace')
 const JudicialOverview = lazy(() => import('./pages/judge/JudicialOverview'));
 const UnassignedPool = lazy(() => import('./pages/judge/UnassignedPool'));
 const LiveHearing = lazy(() => import('./pages/judge/LiveHearing'));
+const JudgeHearingsPage = lazy(() => import('./pages/judge/JudgeHearingsPage'));
+
 
 // Lawyer Pages
 const LawyerCasesPage = lazy(() => import('./pages/lawyer/LawyerCasesPage'));
@@ -165,6 +167,7 @@ function App({ swRegistration }) {
                                 {/* New Unified Workspace Routes */}
                                 <Route path="docket" element={<MyDocket />} />
                                 <Route path="unassigned" element={<UnassignedPool />} />
+                                <Route path="hearings" element={<JudgeHearingsPage />} />
                                 <Route path="live-hearing" element={<LiveHearing />} />
                                 <Route path="case/:caseId" element={<JudgeCaseWorkspace />} />
                                 {/* Keep only essential old routes */}
