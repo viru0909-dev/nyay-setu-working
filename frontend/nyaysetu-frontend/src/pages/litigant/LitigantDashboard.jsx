@@ -83,15 +83,19 @@ export default function LitigantDashboard() {
 
                 const hearingsResponse = await hearingAPI.getMyHearings();
                 const hearings = hearingsResponse.data || [];
-                setUpcomingHearings(hearings.map(h => ({
-                    id: h.id,
-                    caseId: h.caseId || 'UNKNOWN',
-                    type: h.type || 'Regular Hearing',
-                    date: h.date,
-                    time: h.time,
-                    judge: h.judgeName,
-                    status: h.status
-                })));
+                setUpcomingHearings(hearings.map(h => {
+                    const scheduledDate = new Date(h.scheduledDate);
+                    return {
+                        id: h.id,
+                        caseId: h.caseId || 'UNKNOWN',
+                        title: h.caseTitle || 'Scheduled Hearing',
+                        type: h.caseType || 'Regular Hearing',
+                        date: scheduledDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                        time: scheduledDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+                        judge: h.judgeName || 'TBA',
+                        status: h.status
+                    };
+                }));
 
                 // Update Stats
                 setStats([
