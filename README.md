@@ -720,7 +720,7 @@ For licensing inquiries: **gadekarvirendra4@gmail.com**
 - **GitHub:** [@viru0909-dev](https://github.com/viru0909-dev)
 - **LinkedIn:** [Virendra Gadekar](https://linkedin.com/in/virendra-gadekar)
 - **Email:** gadekarvirendra4@gmail.com
-- **Twitter:** [@viru0909dev](https://twitter.com/viru0909dev)
+- **Twitter:** [@GadekarVirendra](https://x.com/GadekarVirendra)
 
 ---
 
