@@ -1,9 +1,11 @@
-import { Trophy, Award, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Trophy, Award, Sparkles, FileText, Presentation, Video } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useState } from 'react';
 
 export default function AchievementsSection() {
     const { language } = useLanguage();
+    const [hoveredCard, setHoveredCard] = useState(null);
 
     const achievements = language === 'en' ? [
         {
@@ -118,10 +120,12 @@ export default function AchievementsSection() {
                                 minHeight: '320px'
                             }}
                             onMouseEnter={(e) => {
+                                setHoveredCard(idx);
                                 e.currentTarget.style.borderColor = achievement.color;
                                 e.currentTarget.style.boxShadow = `0 20px 60px ${achievement.color}40`;
                             }}
                             onMouseLeave={(e) => {
+                                setHoveredCard(null);
                                 e.currentTarget.style.borderColor = 'var(--border-glass)';
                                 e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
                             }}
@@ -138,6 +142,132 @@ export default function AchievementsSection() {
                                 borderRadius: '0 0 0 100%',
                                 pointerEvents: 'none'
                             }} />
+
+                            {/* Interactive Overlay for VOIS (idx === 0) */}
+                            <AnimatePresence>
+                                {idx === 0 && hoveredCard === 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            background: 'rgba(255, 215, 0, 0.95)',
+                                            backdropFilter: 'blur(10px)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '1.25rem',
+                                            zIndex: 10,
+                                            borderRadius: '2rem',
+                                            padding: '2rem'
+                                        }}
+                                    >
+                                        <h4 style={{
+                                            color: '#1E2A44',
+                                            fontSize: '1.5rem',
+                                            fontWeight: '800',
+                                            marginBottom: '1rem',
+                                            textAlign: 'center'
+                                        }}>
+                                            {language === 'en' ? 'View Submission Materials' : 'सबमिशन सामग्री देखें'}
+                                        </h4>
+
+                                        {/* Report Button */}
+                                        <motion.a
+                                            href="/VOIS_Submission/VOIS_Final_Report_NyaySetu.pdf"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.75rem',
+                                                padding: '1rem 2rem',
+                                                background: '#1E2A44',
+                                                color: '#FFD700',
+                                                borderRadius: '12px',
+                                                border: '2px solid #1E2A44',
+                                                fontSize: '1.1rem',
+                                                fontWeight: '700',
+                                                textDecoration: 'none',
+                                                width: '80%',
+                                                maxWidth: '300px',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <FileText size={22} />
+                                            {language === 'en' ? 'View Report' : 'रिपोर्ट देखें'}
+                                        </motion.a>
+
+                                        {/* Presentation Button */}
+                                        <motion.a
+                                            href="/VOIS_Submission/Nyay_Setu_VOIS_Presentation_PDF.pdf"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.75rem',
+                                                padding: '1rem 2rem',
+                                                background: '#1E2A44',
+                                                color: '#FFD700',
+                                                borderRadius: '12px',
+                                                border: '2px solid #1E2A44',
+                                                fontSize: '1.1rem',
+                                                fontWeight: '700',
+                                                textDecoration: 'none',
+                                                width: '80%',
+                                                maxWidth: '300px',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <Presentation size={22} />
+                                            {language === 'en' ? 'View Presentation' : 'प्रस्तुति देखें'}
+                                        </motion.a>
+
+                                        {/* Video Button */}
+                                        <motion.a
+                                            href="/VOIS_Submission/NyaySetu_VOIS.mp4"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.75rem',
+                                                padding: '1rem 2rem',
+                                                background: '#1E2A44',
+                                                color: '#FFD700',
+                                                borderRadius: '12px',
+                                                border: '2px solid #1E2A44',
+                                                fontSize: '1.1rem',
+                                                fontWeight: '700',
+                                                textDecoration: 'none',
+                                                width: '80%',
+                                                maxWidth: '300px',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <Video size={22} />
+                                            {language === 'en' ? 'Watch Video' : 'वीडियो देखें'}
+                                        </motion.a>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
 
                             {/* Icon */}
                             <div style={{
