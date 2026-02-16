@@ -1,14 +1,17 @@
-import { Trophy, Award, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Trophy, Award, Sparkles, FileText, Presentation, Video } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useState } from 'react';
 
 export default function AchievementsSection() {
     const { language } = useLanguage();
+    const [hoveredCard, setHoveredCard] = useState(null);
 
     const achievements = language === 'en' ? [
         {
             title: "VOIS Finale",
             subtitle: "Top 50 Finalist",
+            badge: "Ongoing",
             description: "Selected among the top 50 finalists in the VOIS for Tech Innovation Marathon 2.0, a prestigious national competition demonstrating excellence in legal technology innovation.",
             icon: <Trophy size={40} />,
             color: '#FFD700',
@@ -26,6 +29,7 @@ export default function AchievementsSection() {
         {
             title: "VOIS फाइनल",
             subtitle: "शीर्ष 50 फाइनलिस्ट",
+            badge: "जारी",
             description: "VOIS for Tech Innovation Marathon 2.0 में शीर्ष 50 फाइनलिस्टों में चयनित, एक प्रतिष्ठित राष्ट्रीय प्रतियोगिता जो कानूनी प्रौद्योगिकी नवाचार में उत्कृष्टता का प्रदर्शन करती है।",
             icon: <Trophy size={40} />,
             color: '#FFD700',
@@ -118,10 +122,12 @@ export default function AchievementsSection() {
                                 minHeight: '320px'
                             }}
                             onMouseEnter={(e) => {
+                                setHoveredCard(idx);
                                 e.currentTarget.style.borderColor = achievement.color;
                                 e.currentTarget.style.boxShadow = `0 20px 60px ${achievement.color}40`;
                             }}
                             onMouseLeave={(e) => {
+                                setHoveredCard(null);
                                 e.currentTarget.style.borderColor = 'var(--border-glass)';
                                 e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
                             }}
@@ -138,6 +144,132 @@ export default function AchievementsSection() {
                                 borderRadius: '0 0 0 100%',
                                 pointerEvents: 'none'
                             }} />
+
+                            {/* Interactive Overlay for VOIS (idx === 0) */}
+                            <AnimatePresence>
+                                {idx === 0 && hoveredCard === 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            background: 'rgba(255, 215, 0, 0.95)',
+                                            backdropFilter: 'blur(10px)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '1.25rem',
+                                            zIndex: 10,
+                                            borderRadius: '2rem',
+                                            padding: '2rem'
+                                        }}
+                                    >
+                                        <h4 style={{
+                                            color: '#1E2A44',
+                                            fontSize: '1.5rem',
+                                            fontWeight: '800',
+                                            marginBottom: '1rem',
+                                            textAlign: 'center'
+                                        }}>
+                                            {language === 'en' ? 'View Submission Materials' : 'सबमिशन सामग्री देखें'}
+                                        </h4>
+
+                                        {/* Report Button */}
+                                        <motion.a
+                                            href="/VOIS_Submission/VOIS_Final_Report_NyaySetu.pdf"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.75rem',
+                                                padding: '1rem 2rem',
+                                                background: '#1E2A44',
+                                                color: '#FFD700',
+                                                borderRadius: '12px',
+                                                border: '2px solid #1E2A44',
+                                                fontSize: '1.1rem',
+                                                fontWeight: '700',
+                                                textDecoration: 'none',
+                                                width: '80%',
+                                                maxWidth: '300px',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <FileText size={22} />
+                                            {language === 'en' ? 'View Report' : 'रिपोर्ट देखें'}
+                                        </motion.a>
+
+                                        {/* Presentation Button */}
+                                        <motion.a
+                                            href="/VOIS_Submission/Nyay_Setu_VOIS_Presentation_PDF.pdf"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.75rem',
+                                                padding: '1rem 2rem',
+                                                background: '#1E2A44',
+                                                color: '#FFD700',
+                                                borderRadius: '12px',
+                                                border: '2px solid #1E2A44',
+                                                fontSize: '1.1rem',
+                                                fontWeight: '700',
+                                                textDecoration: 'none',
+                                                width: '80%',
+                                                maxWidth: '300px',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <Presentation size={22} />
+                                            {language === 'en' ? 'View Presentation' : 'प्रस्तुति देखें'}
+                                        </motion.a>
+
+                                        {/* Video Button */}
+                                        <motion.a
+                                            href="/VOIS_Submission/NyaySetu_VOIS.mp4"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.75rem',
+                                                padding: '1rem 2rem',
+                                                background: '#1E2A44',
+                                                color: '#FFD700',
+                                                borderRadius: '12px',
+                                                border: '2px solid #1E2A44',
+                                                fontSize: '1.1rem',
+                                                fontWeight: '700',
+                                                textDecoration: 'none',
+                                                width: '80%',
+                                                maxWidth: '300px',
+                                                justifyContent: 'center',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <Video size={22} />
+                                            {language === 'en' ? 'Watch Video' : 'वीडियो देखें'}
+                                        </motion.a>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
 
                             {/* Icon */}
                             <div style={{
@@ -169,19 +301,41 @@ export default function AchievementsSection() {
                                     {achievement.title}
                                 </h3>
 
-                                {/* Subtitle */}
+                                {/* Subtitle and Badge */}
                                 <div style={{
-                                    display: 'inline-block',
-                                    width: 'fit-content',
-                                    padding: '0.5rem 1.25rem',
-                                    background: `${achievement.color}20`,
-                                    color: achievement.color,
-                                    borderRadius: '0.75rem',
-                                    fontSize: '1rem',
-                                    fontWeight: '700',
-                                    marginBottom: '1.5rem'
+                                    display: 'flex',
+                                    gap: '0.75rem',
+                                    alignItems: 'center',
+                                    marginBottom: '1.5rem',
+                                    flexWrap: 'wrap'
                                 }}>
-                                    {achievement.subtitle}
+                                    <div style={{
+                                        display: 'inline-block',
+                                        padding: '0.5rem 1.25rem',
+                                        background: `${achievement.color}20`,
+                                        color: achievement.color,
+                                        borderRadius: '0.75rem',
+                                        fontSize: '1rem',
+                                        fontWeight: '700'
+                                    }}>
+                                        {achievement.subtitle}
+                                    </div>
+
+                                    {/* Ongoing Badge (only for VOIS) */}
+                                    {achievement.badge && (
+                                        <div style={{
+                                            display: 'inline-block',
+                                            padding: '0.5rem 1rem',
+                                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                            color: '#FFFFFF',
+                                            borderRadius: '0.75rem',
+                                            fontSize: '0.875rem',
+                                            fontWeight: '700',
+                                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
+                                        }}>
+                                            {achievement.badge}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Description */}
