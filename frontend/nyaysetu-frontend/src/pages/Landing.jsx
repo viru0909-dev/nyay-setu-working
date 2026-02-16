@@ -12,7 +12,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
 import AIChatbot from '../components/landing/AIChatbot';
-import NewsSection from '../components/landing/NewsSection';
+import AchievementsSection from '../components/landing/AchievementsSection';
 import HowItWorks from '../components/landing/HowItWorks';
 import TrustIndicators from '../components/landing/TrustIndicators';
 
@@ -295,8 +295,8 @@ export default function Landing() {
                 {/* Trust Indicators */}
                 <TrustIndicators />
 
-                {/* News Section */}
-                <NewsSection />
+                {/* Achievements Section */}
+                <AchievementsSection />
 
                 {/* CTA Section */}
                 <section style={{
