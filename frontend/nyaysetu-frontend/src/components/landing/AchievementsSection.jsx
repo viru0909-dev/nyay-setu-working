@@ -11,6 +11,7 @@ export default function AchievementsSection() {
         {
             title: "VOIS Finale",
             subtitle: "Top 50 Finalist",
+            badge: "Ongoing",
             description: "Selected among the top 50 finalists in the VOIS for Tech Innovation Marathon 2.0, a prestigious national competition demonstrating excellence in legal technology innovation.",
             icon: <Trophy size={40} />,
             color: '#FFD700',
@@ -28,6 +29,7 @@ export default function AchievementsSection() {
         {
             title: "VOIS फाइनल",
             subtitle: "शीर्ष 50 फाइनलिस्ट",
+            badge: "जारी",
             description: "VOIS for Tech Innovation Marathon 2.0 में शीर्ष 50 फाइनलिस्टों में चयनित, एक प्रतिष्ठित राष्ट्रीय प्रतियोगिता जो कानूनी प्रौद्योगिकी नवाचार में उत्कृष्टता का प्रदर्शन करती है।",
             icon: <Trophy size={40} />,
             color: '#FFD700',
@@ -299,19 +301,41 @@ export default function AchievementsSection() {
                                     {achievement.title}
                                 </h3>
 
-                                {/* Subtitle */}
+                                {/* Subtitle and Badge */}
                                 <div style={{
-                                    display: 'inline-block',
-                                    width: 'fit-content',
-                                    padding: '0.5rem 1.25rem',
-                                    background: `${achievement.color}20`,
-                                    color: achievement.color,
-                                    borderRadius: '0.75rem',
-                                    fontSize: '1rem',
-                                    fontWeight: '700',
-                                    marginBottom: '1.5rem'
+                                    display: 'flex',
+                                    gap: '0.75rem',
+                                    alignItems: 'center',
+                                    marginBottom: '1.5rem',
+                                    flexWrap: 'wrap'
                                 }}>
-                                    {achievement.subtitle}
+                                    <div style={{
+                                        display: 'inline-block',
+                                        padding: '0.5rem 1.25rem',
+                                        background: `${achievement.color}20`,
+                                        color: achievement.color,
+                                        borderRadius: '0.75rem',
+                                        fontSize: '1rem',
+                                        fontWeight: '700'
+                                    }}>
+                                        {achievement.subtitle}
+                                    </div>
+
+                                    {/* Ongoing Badge (only for VOIS) */}
+                                    {achievement.badge && (
+                                        <div style={{
+                                            display: 'inline-block',
+                                            padding: '0.5rem 1rem',
+                                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                            color: '#FFFFFF',
+                                            borderRadius: '0.75rem',
+                                            fontSize: '0.875rem',
+                                            fontWeight: '700',
+                                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
+                                        }}>
+                                            {achievement.badge}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Description */}
