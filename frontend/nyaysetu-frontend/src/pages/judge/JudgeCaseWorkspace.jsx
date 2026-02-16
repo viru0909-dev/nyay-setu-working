@@ -1271,11 +1271,14 @@ function HearingsTab({ caseId, caseData }) {
 
     const scheduleHearing = async () => {
         try {
-            const dateTime = new Date(`${hearingData.scheduledDate}T${hearingData.scheduledTime}`);
             const token = localStorage.getItem('token');
+
+            // Create datetime string in local timezone format (YYYY-MM-DDTHH:mm:ss)
+            const localDateTime = `${hearingData.scheduledDate}T${hearingData.scheduledTime}:00`;
+
             await axios.post(`${API_BASE_URL}/api/hearings/schedule`, {
                 caseId,
-                scheduledDate: dateTime.toISOString(),
+                scheduledDate: localDateTime, // Send as local datetime string, backend will parse correctly
                 durationMinutes: hearingData.durationMinutes
             }, {
                 headers: { Authorization: `Bearer ${token}` }
