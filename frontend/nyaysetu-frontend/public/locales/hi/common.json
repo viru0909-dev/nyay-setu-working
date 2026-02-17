@@ -1,0 +1,42 @@
+{
+    "header": {
+        "nav": {
+            "home": "होम",
+            "features": "विशेषताएँ",
+            "constitution": "संविधान",
+            "aiAssistant": "AI सहायक",
+            "about": "हमारे बारे में"
+        },
+        "cta": {
+            "login": "लॉगिन",
+            "getStarted": "शुरू करें",
+            "signup": "साइन अप करें"
+        }
+    },
+    "footer": {
+        "tagline": "भारत का पहला AI-संचालित वर्चुअल न्यायपालिका मंच, जो हर नागरिक के लिए न्याय सुलभ बना रहा है।",
+        "quickLinks": "त्वरित लिंक",
+        "legal": "कानूनी",
+        "getInTouch": "संपर्क में रहें",
+        "viewRepository": "रिपॉजिटरी देखें",
+        "allRightsReserved": "सर्वाधिकार सुरक्षित।",
+        "madeWith": "के साथ बनाया गया",
+        "by": "द्वारा",
+        "privacyPolicy": "गोपनीयता नीति",
+        "termsOfService": "सेवा की शर्तें",
+        "disclaimer": "अस्वीकरण"
+    },
+    "common": {
+        "loading": "लोड हो रहा है...",
+        "error": "त्रुटि",
+        "success": "सफलता",
+        "close": "बंद करें",
+        "save": "सहेजें",
+        "cancel": "रद्द करें",
+        "confirm": "पुष्टि करें",
+        "delete": "हटाएं",
+        "edit": "संपादित करें",
+        "search": "खोजें",
+        "learnMore": "और जानें"
+    }
+}
