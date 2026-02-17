@@ -45,5 +45,42 @@
         "title": "Ready to Start Your Journey to Justice?",
         "subtitle": "Join thousands of citizens already using NyaySetu for their legal needs",
         "createAccount": "Create Free Account"
+    },
+    "howItWorks": {
+        "badge": "⚡ SIMPLE PROCESS",
+        "title": "How ",
+        "titleHighlight": "It Works",
+        "subtitle": "Get justice in 4 simple steps. Our AI-powered platform makes legal processes accessible to everyone.",
+        "steps": {
+            "step01": {
+                "title": "Create Account",
+                "description": "Sign up in seconds with your phone number or email. No lengthy paperwork required."
+            },
+            "step02": {
+                "title": "Submit Your Case",
+                "description": "Fill out a simple form describing your legal issue. Upload relevant documents securely."
+            },
+            "step03": {
+                "title": "AI Processing",
+                "description": "Our AI analyzes your case, suggests relevant laws, and routes it to the appropriate court."
+            },
+            "step04": {
+                "title": "Track & Resolve",
+                "description": "Attend virtual hearings, get real-time updates, and track your case till resolution."
+            }
+        },
+        "stepLabel": "STEP",
+        "ctaText": "🎯 Ready to experience the future of justice?",
+        "ctaButton": "Start Your Journey"
+    },
+    "footer": {
+        "tagline": "India's first AI-powered virtual judiciary platform, making justice accessible to every citizen.",
+        "quickLinks": "Quick Links",
+        "legal": "Legal",
+        "getInTouch": "Get In Touch",
+        "viewRepository": "View Repository",
+        "copyright": "NyaySetu. Made with",
+        "by": "by Virendra Gadekar",
+        "allRightsReserved": "All rights reserved."
     }
 }
