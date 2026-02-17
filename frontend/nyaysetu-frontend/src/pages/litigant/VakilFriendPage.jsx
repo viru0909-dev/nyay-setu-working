@@ -249,7 +249,7 @@ export default function VakilFriendChat() {
         };
 
         recognition.lang = langMap[language] || 'en-IN';
-        recognition.interimResults = false;
+        recognition.interimResults = true; // Enable real-time transcription
         recognition.maxAlternatives = 1;
 
         recognition.onstart = () => {
@@ -266,12 +266,23 @@ export default function VakilFriendChat() {
         };
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            console.log("Transcribed:", transcript);
-            setInputMessage(transcript);
+            let interimTranscript = '';
+            let finalTranscript = '';
 
-            // Optional: automatically send after short delay
-            // setTimeout(() => sendMessage(), 500);
+            // Process all results from the current event
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript;
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+
+            // Update input with interim results during speech, final results at the end
+            const currentTranscript = finalTranscript || interimTranscript;
+            console.log("Transcribed:", currentTranscript, "(Final:", event.results[event.results.length - 1].isFinal, ")");
+            setInputMessage(currentTranscript);
         };
 
         // Store verification reference if needed to stop manually
