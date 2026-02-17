@@ -53,72 +53,80 @@ public class BhashiniService {
         if (text == null || text.trim().isEmpty()) return "";
         if (sourceLang.equalsIgnoreCase(targetLang)) return text;
 
+        // Skip Bhashini if API key is not configured - will use Groq fallback
         if (apiKey == null || apiKey.isEmpty()) {
-            log.warn("⚠️ Bhashini API Key missing. Returning mock translation.");
-            return "[Mock Translation to " + targetLang + "]: " + text;
+            log.info("⚠️ Bhashini API Key not configured, will use Groq AI fallback");
         }
 
-        try {
-            // Construct Bhashini Payload
-            ObjectNode requestBody = objectMapper.createObjectNode();
-            
-            ObjectNode pipelineTasks = objectMapper.createObjectNode();
-            pipelineTasks.put("taskType", "translation");
-            
-            ObjectNode config = objectMapper.createObjectNode();
-            ObjectNode language = objectMapper.createObjectNode();
-            language.put("sourceLanguage", sourceLang);
-            language.put("targetLanguage", targetLang);
-            config.set("language", language);
-            pipelineTasks.set("config", config);
-
-            ArrayNode inputData = objectMapper.createArrayNode();
-            ObjectNode inputItem = objectMapper.createObjectNode();
-            inputItem.put("source", text);
-            inputData.add(inputItem);
-            
-            ArrayNode pipelineTasksArray = objectMapper.createArrayNode();
-            pipelineTasksArray.add(pipelineTasks);
-            
-            requestBody.set("pipelineTasks", pipelineTasksArray);
-            requestBody.set("inputData", inputData);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", apiKey);
-            headers.set("x-user-id", userId);
-
-            HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(requestBody), headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
-            
-            JsonNode root = objectMapper.readTree(response.getBody());
-            return root.path("pipelineResponse")
-                    .path(0)
-                    .path("output")
-                    .path(0)
-                    .path("target")
-                    .asText();
-
-        } catch (Exception e) {
-            log.error("Failed to translate via Bhashini: {}", e.getMessage());
-            
-            // Try Groq AI fallback
+        // Try Bhashini first (only if API key is configured)
+        if (apiKey != null && !apiKey.isEmpty()) {
             try {
-                log.info("📡 Attempting Groq AI fallback for translation: {} → {}", sourceLang, targetLang);
-                String groqTranslation = translateViaGroq(text, sourceLang, targetLang);
-                if (groqTranslation != null && !groqTranslation.isEmpty()) {
-                    log.info("✅ Groq translation successful");
-                    return groqTranslation;
+                // Construct Bhashini Payload
+                ObjectNode requestBody = objectMapper.createObjectNode();
+                
+                ObjectNode pipelineTasks = objectMapper.createObjectNode();
+                pipelineTasks.put("taskType", "translation");
+                
+                ObjectNode config = objectMapper.createObjectNode();
+                ObjectNode language = objectMapper.createObjectNode();
+                language.put("sourceLanguage", sourceLang);
+                language.put("targetLanguage", targetLang);
+                config.set("language", language);
+                pipelineTasks.set("config", config);
+
+                ArrayNode inputData = objectMapper.createArrayNode();
+                ObjectNode inputItem = objectMapper.createObjectNode();
+                inputItem.put("source", text);
+                inputData.add(inputItem);
+                
+                ArrayNode pipelineTasksArray = objectMapper.createArrayNode();
+                pipelineTasksArray.add(pipelineTasks);
+                
+                requestBody.set("pipelineTasks", pipelineTasksArray);
+                requestBody.set("inputData", inputData);
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.set("Authorization", apiKey);
+                headers.set("x-user-id", userId);
+
+                HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(requestBody), headers);
+                
+                ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
+                
+                JsonNode root = objectMapper.readTree(response.getBody());
+                String bhashiniTranslation = root.path("pipelineResponse")
+                        .path(0)
+                        .path("output")
+                        .path(0)
+                        .path("target")
+                        .asText();
+                
+                if (bhashiniTranslation != null && !bhashiniTranslation.isEmpty()) {
+                    log.info("✅ Bhashini translation successful");
+                    return bhashiniTranslation;
                 }
-            } catch (Exception groqError) {
-                log.error("❌ Groq translation also failed: {}", groqError.getMessage());
+            } catch (Exception e) {
+                log.error("Failed to translate via Bhashini: {}", e.getMessage());
             }
-            
-            // Final fallback: return original text to avoid blocking flow
-            log.warn("⚠️ All translation methods failed, returning original text");
-            return text;
         }
+        
+        
+        // Try Groq AI fallback
+        try {
+            log.info("📡 Attempting Groq AI fallback for translation: {} → {}", sourceLang, targetLang);
+            String groqTranslation = translateViaGroq(text, sourceLang, targetLang);
+            if (groqTranslation != null && !groqTranslation.isEmpty()) {
+                log.info("✅ Groq translation successful");
+                return groqTranslation;
+            }
+        } catch (Exception groqError) {
+            log.error("❌ Groq translation also failed: {}", groqError.getMessage());
+        }
+        
+        // Final fallback: return original text to avoid blocking flow
+        log.warn("⚠️ All translation methods failed, returning original text");
+        return text;
     }
 
     /**
