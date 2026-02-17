@@ -5,7 +5,7 @@ import {
     Bot, BookOpen, FileText, Video, Shield, Zap,
     ArrowRight, Download, Smartphone, Check
 } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 // Temporarily comment out problematic components
 // import AnimatedBackground from '../components/landing/AnimatedBackground';
@@ -17,7 +17,7 @@ import HowItWorks from '../components/landing/HowItWorks';
 import TrustIndicators from '../components/landing/TrustIndicators';
 
 export default function Landing() {
-    const { t } = useLanguage();
+    const { t } = useTranslation(['landing', 'common']);
     const [deferredPrompt, setDeferredPrompt] = useState(null);
 
     // Capture the PWA install prompt event
@@ -39,38 +39,38 @@ export default function Landing() {
     const features = [
         {
             icon: <Bot size={32} />,
-            title: t('aiLegalAssistant'),
-            description: t('aiLegalAssistantDesc'),
+            title: t('landing:features.aiLegalAssistant.title'),
+            description: t('landing:features.aiLegalAssistant.description'),
             color: '#1E2A44'
         },
         {
             icon: <BookOpen size={32} />,
-            title: t('constitutionReader'),
-            description: t('constitutionReaderDesc'),
+            title: t('landing:features.constitutionReader.title'),
+            description: t('landing:features.constitutionReader.description'),
             color: '#1E2A44'
         },
         {
             icon: <FileText size={32} />,
-            title: t('fileCases'),
-            description: t('fileCasesDesc'),
+            title: t('landing:features.fileCases.title'),
+            description: t('landing:features.fileCases.description'),
             color: '#1E2A44'
         },
         {
             icon: <Video size={32} />,
-            title: t('virtualHearings'),
-            description: t('virtualHearingsDesc'),
+            title: t('landing:features.virtualHearings.title'),
+            description: t('landing:features.virtualHearings.description'),
             color: '#1E2A44'
         },
         {
             icon: <Shield size={32} />,
-            title: t('securePrivate'),
-            description: t('securePrivateDesc'),
+            title: t('landing:features.securePrivate.title'),
+            description: t('landing:features.securePrivate.description'),
             color: '#1E2A44'
         },
         {
             icon: <Zap size={32} />,
-            title: t('realTimeUpdates'),
-            description: t('realTimeUpdatesDesc'),
+            title: t('landing:features.realTimeUpdates.title'),
+            description: t('landing:features.realTimeUpdates.description'),
             color: '#1E2A44'
         }
     ];
@@ -117,7 +117,7 @@ export default function Landing() {
                                 marginBottom: '2.5rem'
                             }}>
                                 <span style={{ color: 'var(--color-secondary)', fontSize: '0.875rem', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                                    {t('aboutHeroTag')}
+                                    INDIA'S FIRST AI-POWERED JUDICIARY PLATFORM
                                 </span>
                             </div>
 
@@ -129,14 +129,14 @@ export default function Landing() {
                                 lineHeight: '1.15',
                                 letterSpacing: '-0.03em'
                             }}>
-                                {t('heroTitle')}{' '}
+                                {t('landing:hero.title')}{' '}
                                 <span style={{
                                     background: 'linear-gradient(135deg, #3F5DCC 0%, #7C5CFF 100%)',
                                     WebkitBackgroundClip: 'text',
                                     WebkitTextFillColor: 'transparent',
                                     backgroundClip: 'text'
                                 }}>
-                                    {t('heroTitleHighlight')}
+                                    {t('landing:hero.titleHighlight')}
                                 </span>
                             </h1>
 
@@ -147,7 +147,7 @@ export default function Landing() {
                                 margin: '0 auto 3.5rem',
                                 lineHeight: '1.7'
                             }}>
-                                {t('heroSubtitle')}
+                                {t('landing:hero.subtitle')}
                             </p>
 
                             <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -157,7 +157,7 @@ export default function Landing() {
                                     borderRadius: '12px',
                                     textDecoration: 'none'
                                 }}>
-                                    {t('getStartedFree')} <ArrowRight size={20} style={{ marginLeft: '0.5rem' }} />
+                                    {t('landing:hero.getStartedFree')} <ArrowRight size={20} style={{ marginLeft: '0.5rem' }} />
                                 </Link>
 
                                 <motion.button
@@ -229,13 +229,13 @@ export default function Landing() {
                                 marginBottom: '1.25rem',
                                 letterSpacing: '-0.02em'
                             }}>
-                                {t('featuresTitle')}{' '}
+                                {t('landing:features.title')}{' '}
                                 <span style={{ color: 'var(--color-secondary)' }}>
-                                    {t('featuresTitleHighlight')}
+                                    {t('landing:features.titleHighlight')}
                                 </span>
                             </h2>
                             <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', maxWidth: '650px', margin: '0 auto', lineHeight: '1.7' }}>
-                                {t('featuresSubtitle')}
+                                {t('landing:features.subtitle')}
                             </p>
                         </div>
 
@@ -319,10 +319,10 @@ export default function Landing() {
                                 marginBottom: '1.5rem',
                                 letterSpacing: '-0.02em'
                             }}>
-                                {t('ctaTitle')}
+                                {t('landing:cta.title')}
                             </h2>
                             <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '3rem', maxWidth: '700px', margin: '0 auto 3rem' }}>
-                                {t('ctaSubtitle')}
+                                {t('landing:cta.subtitle')}
                             </p>
                             <Link to="/signup" className="btn btn-primary" style={{
                                 textDecoration: 'none',
@@ -330,7 +330,7 @@ export default function Landing() {
                                 padding: '1.1rem 3rem',
                                 borderRadius: '12px'
                             }}>
-                                {t('createAccount')} <ArrowRight size={22} style={{ marginLeft: '0.75rem' }} />
+                                {t('landing:cta.createAccount')} <ArrowRight size={22} style={{ marginLeft: '0.75rem' }} />
                             </Link>
                         </div>
                     </div>
