@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { authAPI } from '../services/api';
 import useAuthStore from '../store/authStore';
 import { Mail, Lock, Eye, EyeOff, User as UserIcon, Briefcase, Scale, Gavel, CheckCircle2, Shield, Camera, ArrowRight, ArrowLeft as ArrowLeftIcon } from 'lucide-react';
@@ -9,6 +10,7 @@ import { useFaceRecognition } from '../hooks/useFaceRecognition';
 import '../styles/Biometrics.css';
 
 export default function Signup() {
+    const { t } = useTranslation('auth');
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -36,16 +38,16 @@ export default function Signup() {
     }, []);
 
     const roles = [
-        { value: 'LITIGANT', label: 'Litigant', icon: <Briefcase size={18} />, color: '#3b82f6', desc: 'File cases & track progress' },
-        { value: 'LAWYER', label: 'Lawyer', icon: <Scale size={18} />, color: '#8b5cf6', desc: 'Represent clients' },
-        { value: 'JUDGE', label: 'Judge', icon: <Gavel size={18} />, color: '#ec4899', desc: 'Conduct hearings' }
+        { value: 'LITIGANT', label: t('auth:login.roles.litigant'), icon: <Briefcase size={18} />, color: '#3b82f6', desc: t('auth:signup.features.instantFilings') },
+        { value: 'LAWYER', label: t('auth:login.roles.lawyer'), icon: <Scale size={18} />, color: '#8b5cf6', desc: t('auth:signup.features.aiAssistance') },
+        { value: 'JUDGE', label: t('auth:login.roles.judge'), icon: <Gavel size={18} />, color: '#ec4899', desc: t('auth:signup.features.virtualCourts') }
     ];
 
     const getPasswordStrength = (pass) => {
-        if (pass.length < 6) return { label: 'Too Short', color: '#f87171', width: '25%' };
-        if (pass.length < 8) return { label: 'Weak', color: '#fb923c', width: '50%' };
-        if (!/[A-Z]/.test(pass) || !/[0-9]/.test(pass)) return { label: 'Fair', color: '#fbbf24', width: '75%' };
-        return { label: 'Strong', color: '#10b981', width: '100%' };
+        if (pass.length < 6) return { label: t('auth:signup.passwordStrength.tooShort', 'Too Short'), color: '#f87171', width: '25%' };
+        if (pass.length < 8) return { label: t('auth:signup.passwordStrength.weak', 'Weak'), color: '#fb923c', width: '50%' };
+        if (!/[A-Z]/.test(pass) || !/[0-9]/.test(pass)) return { label: t('auth:signup.passwordStrength.fair', 'Fair'), color: '#fbbf24', width: '75%' };
+        return { label: t('auth:signup.passwordStrength.strong', 'Strong'), color: '#10b981', width: '100%' };
     };
 
     const handleSubmit = async (e) => {
@@ -53,12 +55,12 @@ export default function Signup() {
         setError('');
 
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+            setError(t('auth:signup.errors.passwordMismatch'));
             return;
         }
 
         if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
+            setError(t('auth:signup.errors.passwordTooShort', 'Password must be at least 6 characters'));
             return;
         }
 
@@ -77,7 +79,7 @@ export default function Signup() {
             setRegisteredToken(token);
             setStep(2); // Move to face registration
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
+            setError(err.response?.data?.message || t('auth:signup.errors.registrationFailed', 'Registration failed'));
         } finally {
             setLoading(false);
         }
@@ -89,7 +91,7 @@ export default function Signup() {
             await enrollFace(descriptor, registeredToken);
             completeSignup();
         } catch (err) {
-            setError('Face registration failed. You can skip this for now or try again.');
+            setError(t('auth:signup.errors.faceRegistrationFailed', 'Face registration failed. You can skip this for now or try again.'));
         } finally {
             setLoading(false);
         }
@@ -172,7 +174,7 @@ export default function Signup() {
                                     WebkitTextFillColor: 'transparent',
                                     lineHeight: '1.2'
                                 }}>
-                                    Join NyaySetu
+                                    {t('auth:signup.pageTitle')}
                                 </h1>
                                 <p style={{
                                     fontSize: '1.25rem',
@@ -180,16 +182,16 @@ export default function Signup() {
                                     lineHeight: '1.8',
                                     maxWidth: '500px'
                                 }}>
-                                    Create your account and get instant access to India's most advanced virtual judiciary platform
+                                    {t('auth:signup.pageSubtitle')}
                                 </p>
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                 {[
-                                    { icon: <CheckCircle2 size={24} />, text: 'Free account with full access', color: '#10b981' },
-                                    { icon: <Shield size={24} />, text: 'Secure blockchain document storage', color: '#3b82f6' },
-                                    { icon: <Scale size={24} />, text: 'AI-powered case analysis', color: '#8b5cf6' },
-                                    { icon: <CheckCircle2 size={24} />, text: '24/7 virtual hearing support', color: '#ec4899' }
+                                    { icon: <CheckCircle2 size={24} />, text: t('auth:signup.features.aiAssistance'), color: '#10b981' },
+                                    { icon: <Shield size={24} />, text: t('auth:signup.features.instantFilings'), color: '#3b82f6' },
+                                    { icon: <Scale size={24} />, text: t('auth:signup.features.virtualCourts'), color: '#8b5cf6' },
+                                    { icon: <CheckCircle2 size={24} />, text: t('auth:signup.features.multilingual'), color: '#ec4899' }
                                 ].map((item, idx) => (
                                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                         <div style={{
@@ -233,10 +235,10 @@ export default function Signup() {
                                         color: 'var(--text-main)',
                                         marginBottom: '0.5rem'
                                     }}>
-                                        Create Account
+                                        {t('auth:signup.title')}
                                     </h2>
                                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-                                        Fill in your details to get started
+                                        {t('auth:signup.subtitle')}
                                     </p>
                                 </div>
 
@@ -265,7 +267,7 @@ export default function Signup() {
                                             color: 'var(--text-main)',
                                             fontSize: '0.875rem'
                                         }}>
-                                            Full Name
+                                            {t('auth:signup.fullName')}
                                         </label>
                                         <div style={{ position: 'relative' }}>
                                             <UserIcon size={18} style={{
@@ -279,7 +281,7 @@ export default function Signup() {
                                                 type="text"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                placeholder="John Doe"
+                                                placeholder={t('auth:signup.fullNamePlaceholder')}
                                                 required
                                                 style={{
                                                     width: '100%',
@@ -303,7 +305,7 @@ export default function Signup() {
                                             color: 'var(--text-main)',
                                             fontSize: '0.875rem'
                                         }}>
-                                            Email Address
+                                            {t('auth:signup.email')}
                                         </label>
                                         <div style={{ position: 'relative' }}>
                                             <Mail size={18} style={{
@@ -317,7 +319,7 @@ export default function Signup() {
                                                 type="email"
                                                 value={formData.email}
                                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                placeholder="your.email@example.com"
+                                                placeholder={t('auth:signup.emailPlaceholder')}
                                                 required
                                                 style={{
                                                     width: '100%',
@@ -341,7 +343,7 @@ export default function Signup() {
                                             color: 'var(--text-main)',
                                             fontSize: '0.875rem'
                                         }}>
-                                            Select Your Role
+                                            {t('auth:signup.selectRole')}
                                         </label>
                                         <div style={{
                                             display: 'grid',
@@ -389,7 +391,7 @@ export default function Signup() {
                                             color: 'var(--text-main)',
                                             fontSize: '0.875rem'
                                         }}>
-                                            Password
+                                            {t('auth:signup.password')}
                                         </label>
                                         <div style={{ position: 'relative' }}>
                                             <Lock size={18} style={{
@@ -403,7 +405,7 @@ export default function Signup() {
                                                 type={showPassword ? 'text' : 'password'}
                                                 value={formData.password}
                                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                                placeholder="••••••••"
+                                                placeholder={t('auth:signup.passwordPlaceholder')}
                                                 required
                                                 style={{
                                                     width: '100%',
@@ -435,7 +437,7 @@ export default function Signup() {
                                         {strength && (
                                             <div style={{ marginTop: '0.5rem' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Strength:</span>
+                                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{t('auth:signup.strengthLabel', 'Strength')}:</span>
                                                     <span style={{ fontSize: '0.75rem', color: strength.color, fontWeight: '600' }}>{strength.label}</span>
                                                 </div>
                                                 <div style={{ height: '4px', background: 'rgba(148, 163, 184, 0.2)', borderRadius: '2px' }}>
@@ -454,7 +456,7 @@ export default function Signup() {
                                             color: 'var(--text-main)',
                                             fontSize: '0.875rem'
                                         }}>
-                                            Confirm Password
+                                            {t('auth:signup.confirmPassword')}
                                         </label>
                                         <div style={{ position: 'relative' }}>
                                             <Lock size={18} style={{
@@ -468,7 +470,7 @@ export default function Signup() {
                                                 type={showConfirmPassword ? 'text' : 'password'}
                                                 value={formData.confirmPassword}
                                                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                                placeholder="••••••••"
+                                                placeholder={t('auth:signup.confirmPasswordPlaceholder')}
                                                 required
                                                 style={{
                                                     width: '100%',
@@ -519,19 +521,19 @@ export default function Signup() {
                                             transition: 'all 0.3s'
                                         }}
                                     >
-                                        {loading ? 'Creating Account...' : 'Create Account'}
+                                        {loading ? t('auth:signup.signingUp') : t('auth:signup.signUp')}
                                     </button>
                                 </form>
 
                                 <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
                                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                                        Already have an account?{' '}
+                                        {t('auth:signup.hasAccount')}{' '}
                                         <Link to="/login" style={{
                                             color: 'var(--color-accent)',
                                             fontWeight: '600',
                                             textDecoration: 'none'
                                         }}>
-                                            Sign In
+                                            {t('auth:signup.loginLink')}
                                         </Link>
                                     </p>
                                 </div>
@@ -542,10 +544,10 @@ export default function Signup() {
                                     <Shield size={32} />
                                 </div>
                                 <h2 className="biometric-title" style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
-                                    Biometric Identity Link
+                                    {t('auth:signup.biometricTitle', 'Biometric Identity Link')}
                                 </h2>
                                 <p className="biometric-subtitle" style={{ fontSize: '0.95rem', marginBottom: '2rem', color: 'var(--text-secondary)' }}>
-                                    Establish your digital biometric signature for rapid, ultra-secure access
+                                    {t('auth:signup.biometricSubtitle', 'Establish your digital biometric signature for rapid, ultra-secure access')}
                                 </p>
 
                                 {error && (
@@ -579,7 +581,7 @@ export default function Signup() {
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        Skip for now
+                                        {t('auth:signup.skipForNow', 'Skip for now')}
                                     </button>
                                 </div>
                             </div>

@@ -1,66 +1,37 @@
 import { motion } from 'framer-motion';
 import { UserPlus, FileSearch, Gavel, CheckCircle, ArrowRight } from 'lucide-react';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export default function HowItWorks() {
-    const { language } = useLanguage();
+    const { t } = useTranslation('landing');
 
-    const steps = language === 'en' ? [
+    const steps = [
         {
             icon: UserPlus,
             number: "01",
-            title: "Create Account",
-            description: "Sign up in seconds with your phone number or email. No lengthy paperwork required.",
+            title: t('landing:howItWorks.steps.step01.title'),
+            description: t('landing:howItWorks.steps.step01.description'),
             color: "#8b5cf6"
         },
         {
             icon: FileSearch,
             number: "02",
-            title: "Submit Your Case",
-            description: "Fill out a simple form describing your legal issue. Upload relevant documents securely.",
+            title: t('landing:howItWorks.steps.step02.title'),
+            description: t('landing:howItWorks.steps.step02.description'),
             color: "#6366f1"
         },
         {
             icon: Gavel,
             number: "03",
-            title: "AI Processing",
-            description: "Our AI analyzes your case, suggests relevant laws, and routes it to the appropriate court.",
+            title: t('landing:howItWorks.steps.step03.title'),
+            description: t('landing:howItWorks.steps.step03.description'),
             color: "#ec4899"
         },
         {
             icon: CheckCircle,
             number: "04",
-            title: "Track & Resolve",
-            description: "Attend virtual hearings, get real-time updates, and track your case till resolution.",
-            color: "#10b981"
-        }
-    ] : [
-        {
-            icon: UserPlus,
-            number: "01",
-            title: "खाता बनाएं",
-            description: "अपने फ़ोन नंबर या ईमेल से सेकंडों में साइन अप करें। लंबी कागजी कार्रवाई की आवश्यकता नहीं।",
-            color: "#8b5cf6"
-        },
-        {
-            icon: FileSearch,
-            number: "02",
-            title: "अपना मामला प्रस्तुत करें",
-            description: "अपने कानूनी मुद्दे का वर्णन करते हुए एक सरल फॉर्म भरें। प्रासंगिक दस्तावेज़ सुरक्षित रूप से अपलोड करें।",
-            color: "#6366f1"
-        },
-        {
-            icon: Gavel,
-            number: "03",
-            title: "AI प्रक्रिया",
-            description: "हमारा AI आपके मामले का विश्लेषण करता है, प्रासंगिक कानूनों का सुझाव देता है, और इसे उपयुक्त अदालत में भेजता है।",
-            color: "#ec4899"
-        },
-        {
-            icon: CheckCircle,
-            number: "04",
-            title: "ट्रैक और समाधान",
-            description: "वर्चुअल सुनवाई में भाग लें, रीयल-टाइम अपडेट प्राप्त करें, और समाधान तक अपने मामले को ट्रैक करें।",
+            title: t('landing:howItWorks.steps.step04.title'),
+            description: t('landing:howItWorks.steps.step04.description'),
             color: "#10b981"
         }
     ];
@@ -87,7 +58,7 @@ export default function HowItWorks() {
                         }}
                     >
                         <span style={{ color: 'var(--color-accent)', fontSize: '0.95rem', fontWeight: '700' }}>
-                            {language === 'en' ? '⚡ SIMPLE PROCESS' : '⚡ सरल प्रक्रिया'}
+                            {t('landing:howItWorks.badge')}
                         </span>
                     </motion.div>
 
@@ -103,13 +74,13 @@ export default function HowItWorks() {
                             marginBottom: '1rem'
                         }}
                     >
-                        {language === 'en' ? 'How ' : 'यह कैसे '}
+                        {t('landing:howItWorks.title')}
                         <span style={{
                             background: 'linear-gradient(135deg, var(--color-accent) 0%, #ec4899 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>
-                            {language === 'en' ? 'It Works' : 'काम करता है'}
+                            {t('landing:howItWorks.titleHighlight')}
                         </span>
                     </motion.h2>
 
@@ -126,10 +97,7 @@ export default function HowItWorks() {
                             lineHeight: '1.6'
                         }}
                     >
-                        {language === 'en'
-                            ? 'Get justice in 4 simple steps. Our AI-powered platform makes legal processes accessible to everyone.'
-                            : '4 सरल चरणों में न्याय प्राप्त करें। हमारा AI-संचालित प्लेटफ़ॉर्म कानूनी प्रक्रियाओं को सभी के लिए सुलभ बनाता है।'
-                        }
+                        {t('landing:howItWorks.subtitle')}
                     </motion.p>
                 </div>
 
@@ -220,7 +188,7 @@ export default function HowItWorks() {
                                     marginBottom: '1rem',
                                     letterSpacing: '0.05em'
                                 }}>
-                                    {language === 'en' ? 'STEP' : 'चरण'} {step.number}
+                                    {t('landing:howItWorks.stepLabel')} {step.number}
                                 </div>
 
                                 {/* Title */}
@@ -279,10 +247,7 @@ export default function HowItWorks() {
                         marginBottom: '2rem',
                         fontWeight: '600'
                     }}>
-                        {language === 'en'
-                            ? '🎯 Ready to experience the future of justice?'
-                            : '🎯 न्याय के भविष्य का अनुभव करने के लिए तैयार हैं?'
-                        }
+                        {t('landing:howItWorks.ctaText')}
                     </p>
                     <motion.button
                         className="btn btn-primary"
@@ -299,7 +264,7 @@ export default function HowItWorks() {
                         }}
                         onClick={() => window.location.href = '/signup'}
                     >
-                        {language === 'en' ? 'Start Your Journey' : 'अपनी यात्रा शुरू करें'}
+                        {t('landing:howItWorks.ctaButton')}
                         <ArrowRight size={20} />
                     </motion.button>
                 </motion.div>
@@ -307,4 +272,3 @@ export default function HowItWorks() {
         </section>
     );
 }
-

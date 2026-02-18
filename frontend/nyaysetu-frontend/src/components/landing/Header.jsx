@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Scale, Menu, X, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '../../contexts/LanguageContext.jsx';
+import { useTranslation } from 'react-i18next';
 import AIAssistantModal from './AIAssistantModal';
 
 export default function Header({ hideAuthButtons = false, onConstitutionClick }) {
@@ -11,8 +11,8 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
     const [showAIModal, setShowAIModal] = useState(false);
     const navigate = useNavigate();
 
-    // Use language context
-    const { language, toggleLanguage } = useLanguage();
+    // Use react-i18next
+    const { t, i18n } = useTranslation('common');
 
     useEffect(() => {
         const handleScroll = () => {
@@ -23,11 +23,11 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
     }, []);
 
     const navItems = [
-        { label: 'Home', href: '/', isRoute: true },
-        { label: 'Features', href: '#features' },
-        { label: 'Constitution', href: '/constitution', isRoute: true },
-        { label: 'AI Assistant', href: '#chatbot' },
-        { label: 'About', href: '/about', isRoute: true }
+        { labelKey: 'header.nav.home', href: '/', isRoute: true },
+        { labelKey: 'header.nav.features', href: '#features' },
+        { labelKey: 'header.nav.constitution', href: '/constitution', isRoute: true },
+        { labelKey: 'header.nav.aiAssistant', href: '#chatbot' },
+        { labelKey: 'header.nav.about', href: '/about', isRoute: true }
     ];
 
     return (
@@ -111,9 +111,9 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 onMouseEnter={(e) => e.target.style.color = 'var(--color-primary)'}
                                 onMouseLeave={(e) => e.target.style.color = isActive ? 'var(--color-secondary)' : '#475569'}
                             >
-                                {item.label}
+                                {t(item.labelKey)}
                             </Link>
-                        ) : item.label === 'AI Assistant' ? (
+                        ) : item.labelKey === 'header.nav.aiAssistant' ? (
                             <button
                                 key={item.label}
                                 onClick={() => setShowAIModal(true)}
@@ -130,7 +130,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 onMouseEnter={(e) => e.target.style.color = 'var(--color-primary)'}
                                 onMouseLeave={(e) => e.target.style.color = '#475569'}
                             >
-                                {item.label}
+                                {t(item.labelKey)}
                             </button>
                         ) : (
                             <a
@@ -147,7 +147,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 onMouseEnter={(e) => e.target.style.color = 'var(--color-primary)'}
                                 onMouseLeave={(e) => e.target.style.color = '#475569'}
                             >
-                                {item.label}
+                                {t(item.labelKey)}
                             </a>
                         );
                     })}
@@ -157,7 +157,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }} className="desktop-cta">
                     {/* Language Toggle */}
                     <button
-                        onClick={toggleLanguage}
+                        onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'hi' : 'en')}
                         style={{
                             padding: '0.6rem 1rem',
                             background: 'transparent',
@@ -182,7 +182,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                         }}
                     >
                         <Globe size={16} />
-                        {language === 'en' ? 'हिंदी' : 'EN'}
+                        {i18n.language === 'en' ? 'हिंदी' : 'EN'}
                     </button>
 
                     {!hideAuthButtons && (
@@ -206,7 +206,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                     e.target.style.background = 'transparent';
                                     e.target.style.borderColor = '#CBD5E1';
                                 }}>
-                                Login
+                                {t('header.cta.login')}
                             </Link>
                             <Link to="/signup" style={{
                                 padding: '0.6rem 1.5rem',
@@ -229,7 +229,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                     e.target.style.transform = 'translateY(0)';
                                     e.target.style.boxShadow = 'var(--shadow-sm)';
                                 }}>
-                                Get Started
+                                {t('header.cta.getStarted')}
                             </Link>
                         </>
                     )}
@@ -284,9 +284,9 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                         borderBottom: 'var(--border-glass)'
                                     }}
                                 >
-                                    {item.label}
+                                    {t(item.labelKey)}
                                 </Link>
-                            ) : item.label === 'AI Assistant' ? (
+                            ) : item.labelKey === 'header.nav.aiAssistant' ? (
                                 <button
                                     key={item.label}
                                     onClick={() => {
@@ -307,7 +307,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                         cursor: 'pointer'
                                     }}
                                 >
-                                    {item.label}
+                                    {t(item.labelKey)}
                                 </button>
                             ) : (
                                 <a
@@ -324,7 +324,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                         borderBottom: 'var(--border-glass)'
                                     }}
                                 >
-                                    {item.label}
+                                    {t(item.labelKey)}
                                 </a>
                             )
                         ))}
@@ -342,7 +342,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                     fontWeight: '600',
                                     background: 'transparent'
                                 }}>
-                                Login
+                                {t('header.cta.login')}
                             </Link>
                             <Link
                                 to="/signup"
@@ -356,7 +356,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                     borderRadius: '10px',
                                     fontWeight: '600'
                                 }}>
-                                Get Started
+                                {t('header.cta.getStarted')}
                             </Link>
                         </div>
                     </motion.div>

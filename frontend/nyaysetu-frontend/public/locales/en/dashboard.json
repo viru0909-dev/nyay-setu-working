@@ -1,0 +1,126 @@
+{
+    "sidebar": {
+        "collapseSidebar": "Collapse Sidebar",
+        "litigant": {
+            "dashboard": "Dashboard",
+            "vakilFriendAI": "Vakil Friend AI",
+            "fileCaseFIR": "File Case / FIR",
+            "caseDiary": "Case Diary",
+            "hearings": "Hearings",
+            "lawyerChat": "Lawyer Chat",
+            "profile": "Profile"
+        },
+        "lawyer": {
+            "dashboard": "Dashboard",
+            "litigantDirectory": "Litigant Directory",
+            "activeCases": "Active Cases",
+            "aiLegalAssistant": "AI Legal Assistant",
+            "hearings": "Hearings",
+            "analytics": "Analytics",
+            "profile": "Profile"
+        },
+        "judge": {
+            "judicialOverview": "Judicial Overview",
+            "myDocket": "My Docket",
+            "unassignedPool": "Unassigned Pool",
+            "liveHearing": "Live Hearing",
+            "courtAnalytics": "Court Analytics",
+            "profile": "Profile"
+        },
+        "admin": {
+            "dashboard": "Dashboard",
+            "userManagement": "User Management",
+            "caseManagement": "Case Management",
+            "judgeAssignment": "Judge Assignment",
+            "reports": "Reports",
+            "settings": "Settings",
+            "profile": "Profile"
+        },
+        "techAdmin": {
+            "dashboard": "Dashboard",
+            "aiModels": "AI Models",
+            "videoSystem": "Video System",
+            "logs": "Logs",
+            "configuration": "Configuration",
+            "profile": "Profile"
+        },
+        "police": {
+            "dashboard": "Dashboard",
+            "investigationUnit": "Investigation Unit",
+            "uploadFIR": "Upload FIR",
+            "myFIRs": "My FIRs",
+            "profile": "Profile"
+        }
+    },
+    "litigant": {
+        "fileCaseFIR": "File Case / FIR",
+        "fileCaseDesc": "File a civil case or criminal FIR with AI assistance from Vakil Friend",
+        "getStarted": "Get Started",
+        "pendingApprovals": "Pending Approvals",
+        "reviewDraft": "Review Draft",
+        "actionRequired": "ACTION REQUIRED",
+        "sentBy": "Sent by",
+        "awaitingSignature": "Awaiting your digital signature",
+        "viewDetails": "View Details",
+        "approveSign": "Approve & E-Sign",
+        "myCases": "My Cases",
+        "upcomingHearings": "Upcoming Hearings",
+        "documents": "Documents",
+        "legalChat": "Legal Chat",
+        "active": "Active",
+        "chatWithLawyer": "Chat with Lawyer",
+        "thisMonth": "+1 this month",
+        "newDocs": "+2 new",
+        "recentCases": "Recent Cases",
+        "viewAll": "View All",
+        "noCases": "No cases filed yet",
+        "fileFirstCase": "File Your First Case",
+        "filed": "Filed",
+        "noUpcomingHearings": "No upcoming hearings",
+        "hearingsAppearHere": "Hearings will appear here once scheduled",
+        "joinVirtualCourt": "Join Virtual Court",
+        "startsIn": "Starts in {{minutes}} mins",
+        "loading": "Loading..."
+    },
+    "lawyer": {
+        "dashboard": "Dashboard",
+        "clientManagement": "Client Management",
+        "activeCases": "Active Cases",
+        "aiAssistant": "AI Legal Assistant",
+        "hearings": "Hearings",
+        "analytics": "Analytics",
+        "profile": "Profile"
+    },
+    "judge": {
+        "judicialOverview": "Judicial Overview",
+        "myDocket": "My Docket",
+        "unassignedPool": "Unassigned Pool",
+        "courtAnalytics": "Court Analytics"
+    },
+    "police": {
+        "dashboard": "Police Dashboard",
+        "investigationUnit": "Investigation Unit",
+        "uploadFIR": "Upload FIR",
+        "myFIRs": "My FIRs"
+    },
+    "common": {
+        "dashboard": "Dashboard",
+        "welcomeBack": "Welcome back",
+        "viewProfile": "View Profile",
+        "language": "Language",
+        "search": "Search...",
+        "notifications": "Notifications",
+        "profile": "Profile",
+        "logout": "Logout",
+        "loading": "Loading...",
+        "next": "Next",
+        "previous": "Previous",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "viewAll": "View All",
+        "noData": "No data available"
+    }
+}
