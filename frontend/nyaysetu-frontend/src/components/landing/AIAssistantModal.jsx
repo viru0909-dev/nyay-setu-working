@@ -2,6 +2,7 @@ import { X, Brain, MessageCircle, Send, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { brainAPI } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -86,7 +87,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
             "मेरे पास वकील कैसे खोजें?"
         ];
 
-    return (
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <motion.div
@@ -125,7 +126,8 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                             borderRadius: '2rem',
                             position: 'relative',
                             display: 'flex',
-                            flexDirection: 'column'
+                            flexDirection: 'column',
+                            overflow: 'hidden'
                         }}
                     >
                         {/* Close Button */}
@@ -165,7 +167,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
 
                         {!chatStarted ? (
                             /* Welcome Screen */
-                            <div style={{ padding: '3rem', overflow: 'auto' }}>
+                            <div style={{ padding: '3rem', overflow: 'auto', flex: 1 }}>
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -296,7 +298,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                             </div>
                         ) : (
                             /* Chat Interface */
-                            <div style={{ display: 'flex', flexDirection: 'column', height: '85vh', padding: '2rem', paddingTop: '4rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', padding: '2rem', paddingTop: '4rem' }}>
                                 <h2 style={{
                                     fontSize: '1.75rem',
                                     fontWeight: '800',
@@ -457,6 +459,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                     </motion.div>
                 </motion.div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 }
