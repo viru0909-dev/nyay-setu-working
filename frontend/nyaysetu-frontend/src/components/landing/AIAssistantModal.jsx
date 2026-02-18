@@ -2,6 +2,7 @@ import { X, Brain, MessageCircle, Send, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { brainAPI } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -86,7 +87,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
             "मेरे पास वकील कैसे खोजें?"
         ];
 
-    return (
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <motion.div
@@ -458,6 +459,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                     </motion.div>
                 </motion.div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 }
