@@ -9,7 +9,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const { logout } = useAuthStore();
     const navigate = useNavigate();
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation('dashboard');
 
     const handleLogout = () => {
         logout();
@@ -70,7 +70,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                         textOverflow: 'ellipsis',
                         letterSpacing: '-0.02em'
                     }}>
-                        {isMobile ? 'Dashboard' : `${user?.role?.replace('_', ' ')} Dashboard`}
+                        {isMobile ? t('common.dashboard', 'Dashboard') : `${user?.role?.replace('_', ' ')} ${t('common.dashboard', 'Dashboard')}`}
                     </h1>
                     {!isMobile && (
                         <p style={{
@@ -78,7 +78,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             color: 'var(--text-secondary)',
                             fontWeight: '500'
                         }}>
-                            Welcome back, {user?.name || 'User'}!
+                            {t('common.welcomeBack', 'Welcome back')}, {user?.name || 'User'}!
                         </p>
                     )}
                 </div>
@@ -193,7 +193,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                 }}
                             >
                                 <User size={16} />
-                                View Profile
+                                {t('common.viewProfile', 'View Profile')}
                             </button>
 
                             {/* Language Selector */}
@@ -205,7 +205,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.05em'
                             }}>
-                                Language
+                                {t('common.language', 'Language')}
                             </div>
                             <div style={{
                                 display: 'grid',
@@ -313,7 +313,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                 }}
                             >
                                 <LogOut size={16} />
-                                Logout
+                                {t('common.logout')}
                             </button>
                         </div>
                     )}
