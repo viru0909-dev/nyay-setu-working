@@ -1,0 +1,22 @@
+name: Keep Render Backend Alive
+
+on:
+  schedule:
+    # Ping every 14 minutes (Render shuts down after 15 min inactivity)
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Backend Health Endpoint
+        run: |
+          echo "Pinging backend to prevent Render cold start..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://nyaysetubackend.onrender.com/api/health --max-time 120)
+          echo "Response code: $response"
+          if [ "$response" = "200" ]; then
+            echo "✅ Backend is alive!"
+          else
+            echo "⚠️ Backend returned: $response (may be waking up)"
+          fi
