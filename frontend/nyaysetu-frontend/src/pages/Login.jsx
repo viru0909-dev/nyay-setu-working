@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { authAPI } from '../services/api';
 import useAuthStore from '../store/authStore';
 import { Mail, Lock, Eye, EyeOff, Camera, CheckCircle2, Scale, Shield, User, Briefcase, Gavel } from 'lucide-react';
@@ -8,6 +9,7 @@ import FaceLoginModal from '../components/auth/FaceLoginModal';
 import ForgotPasswordModal from '../components/auth/ForgotPasswordModal';
 
 export default function Login() {
+    const { t } = useTranslation('auth');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -28,10 +30,10 @@ export default function Login() {
     }, []);
 
     const roles = [
-        { value: '', label: 'All Roles', icon: <User size={18} />, color: '#64748b' },
-        { value: 'LITIGANT', label: 'Litigant', icon: <Briefcase size={18} />, color: '#3b82f6' },
-        { value: 'LAWYER', label: 'Lawyer', icon: <Scale size={18} />, color: '#8b5cf6' },
-        { value: 'JUDGE', label: 'Judge', icon: <Gavel size={18} />, color: '#ec4899' }
+        { value: '', label: t('auth:login.roles.allRoles'), icon: <User size={18} />, color: '#64748b' },
+        { value: 'LITIGANT', label: t('auth:login.roles.litigant'), icon: <Briefcase size={18} />, color: '#3b82f6' },
+        { value: 'LAWYER', label: t('auth:login.roles.lawyer'), icon: <Scale size={18} />, color: '#8b5cf6' },
+        { value: 'JUDGE', label: t('auth:login.roles.judge'), icon: <Gavel size={18} />, color: '#ec4899' }
     ];
 
     const handleSubmit = async (e) => {
@@ -141,7 +143,7 @@ export default function Login() {
                                     color: 'var(--color-primary)',
                                     lineHeight: '1.2'
                                 }}>
-                                    Welcome Back
+                                    {t('auth:login.pageTitle')}
                                 </h1>
                                 <p style={{
                                     fontSize: '1.25rem',
@@ -149,16 +151,16 @@ export default function Login() {
                                     lineHeight: '1.8',
                                     maxWidth: '500px'
                                 }}>
-                                    Access your dashboard and manage cases on India's most advanced virtual judiciary platform
+                                    {t('auth:login.pageSubtitle')}
                                 </p>
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                 {[
-                                    { icon: <Shield size={24} />, text: 'Secure encrypted authentication', color: '#10b981' },
-                                    { icon: <CheckCircle2 size={24} />, text: 'Real-time case status updates', color: '#1E2A44' },
-                                    { icon: <Scale size={24} />, text: 'Instant access to hearings', color: '#334155' },
-                                    { icon: <Camera size={24} />, text: 'Face recognition login', color: '#1E2A44' }
+                                    { icon: <Shield size={24} />, text: t('auth:login.features.secureAuth'), color: '#10b981' },
+                                    { icon: <CheckCircle2 size={24} />, text: t('auth:login.features.realtimeUpdates'), color: '#1E2A44' },
+                                    { icon: <Scale size={24} />, text: t('auth:login.features.instantAccess'), color: '#334155' },
+                                    { icon: <Camera size={24} />, text: t('auth:login.features.faceLogin'), color: '#1E2A44' }
                                 ].map((item, idx) => (
                                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                         <div style={{
@@ -200,10 +202,10 @@ export default function Login() {
                                 color: 'var(--text-main)',
                                 marginBottom: '0.5rem'
                             }}>
-                                Sign In
+                                {t('auth:login.title')}
                             </h2>
                             <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-                                Enter your credentials to continue
+                                {t('auth:login.subtitle')}
                             </p>
                         </div>
 
@@ -232,7 +234,7 @@ export default function Login() {
                                     color: 'var(--text-main)',
                                     fontSize: '0.875rem'
                                 }}>
-                                    Email Address
+                                    {t('auth:login.email')}
                                 </label>
                                 <div style={{ position: 'relative' }}>
                                     <Mail size={18} style={{
@@ -246,7 +248,7 @@ export default function Login() {
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="your.email@example.com"
+                                        placeholder={t('auth:login.emailPlaceholder')}
                                         required
                                         style={{
                                             width: '100%',
@@ -279,7 +281,7 @@ export default function Login() {
                                     color: 'var(--text-main)',
                                     fontSize: '0.875rem'
                                 }}>
-                                    Password
+                                    {t('auth:login.password')}
                                 </label>
                                 <div style={{ position: 'relative' }}>
                                     <Lock size={18} style={{
@@ -293,7 +295,7 @@ export default function Login() {
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="••••••••"
+                                        placeholder={t('auth:login.passwordPlaceholder')}
                                         required
                                         style={{
                                             width: '100%',
@@ -342,7 +344,7 @@ export default function Login() {
                                     color: 'var(--text-main)',
                                     fontSize: '0.875rem'
                                 }}>
-                                    Select Your Role
+                                    {t('auth:login.selectRole')}
                                 </label>
                                 <div style={{
                                     display: 'grid',
@@ -407,7 +409,7 @@ export default function Login() {
                                     color: 'var(--text-secondary)'
                                 }}>
                                     <input type="checkbox" style={{ cursor: 'pointer' }} />
-                                    Remember me
+                                    {t('auth:login.rememberMe')}
                                 </label>
                                 <button
                                     type="button"
@@ -421,7 +423,7 @@ export default function Login() {
                                         cursor: 'pointer'
                                     }}
                                 >
-                                    Forgot password?
+                                    {t('auth:login.forgotPassword')}
                                 </button>
                             </div>
 
@@ -446,7 +448,7 @@ export default function Login() {
                                     marginBottom: '1rem'
                                 }}
                             >
-                                {loading ? 'Signing in...' : 'Sign In'}
+                                {loading ? t('auth:login.signingIn') : t('auth:login.signIn')}
                             </button>
 
                             {/* Face Login */}
@@ -479,19 +481,19 @@ export default function Login() {
                                 }}
                             >
                                 <Camera size={20} />
-                                Login with Face
+                                {t('auth:login.loginWithFace')}
                             </button>
                         </form>
 
                         <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
                             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                                Don't have an account?{' '}
+                                {t('auth:login.noAccount')}{' '}
                                 <Link to="/signup" style={{
                                     color: 'var(--color-primary)',
                                     fontWeight: '600',
                                     textDecoration: 'none'
                                 }}>
-                                    Create Account
+                                    {t('auth:login.createAccount')}
                                 </Link>
                             </p>
                         </div>

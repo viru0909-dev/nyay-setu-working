@@ -2,6 +2,7 @@ import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/global.css'
 import './styles/responsive.css'
+import './i18n' // Initialize i18n before app
 import App from './App.jsx'
 
 /**

@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react';
-import { FolderOpen, Video, FileText, TrendingUp, Clock, Bot, MessageCircle, MessageSquare, Loader2, Scale } from 'lucide-react';
+import { FolderOpen, Video, FileText, TrendingUp, Clock, Bot, MessageCircle, MessageSquare, Loader2, Scale, AlertCircle, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { caseAPI, hearingAPI, documentAPI } from '../../services/api';
 
 export default function LitigantDashboard() {
     const navigate = useNavigate();
-    const { t } = useLanguage();
+    const { t } = useTranslation('dashboard');
 
     const [showReviewAction, setShowReviewAction] = useState(true);
     const [recentCases, setRecentCases] = useState([]);
     const [upcomingHearings, setUpcomingHearings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState([
-        { label: 'My Cases', value: '0', icon: FolderOpen, color: 'var(--color-primary)', change: 'Loading...' },
-        { label: 'Upcoming Hearings', value: '0', icon: Video, color: 'var(--color-primary)', change: 'Loading...' },
-        { label: 'Documents', value: '0', icon: FileText, color: 'var(--color-primary)', change: 'Loading...' },
-        { label: 'Legal Chat', value: 'Active', icon: MessageSquare, color: '#f59e0b', change: 'Chat with Lawyer', link: '/litigant/chat' }
+        { labelKey: 'litigant.myCases', value: '0', icon: FolderOpen, color: 'var(--color-primary)', changeKey: 'litigant.loading' },
+        { labelKey: 'litigant.upcomingHearings', value: '0', icon: Video, color: 'var(--color-primary)', changeKey: 'litigant.loading' },
+        { labelKey: 'litigant.documents', value: '0', icon: FileText, color: 'var(--color-primary)', changeKey: 'litigant.loading' },
+        { labelKey: 'litigant.legalChat', value: t('litigant.active'), icon: MessageSquare, color: '#f59e0b', changeKey: 'litigant.chatWithLawyer', link: '/litigant/chat' }
     ]);
 
     const [pendingDrafts, setPendingDrafts] = useState([]);
@@ -99,10 +99,10 @@ export default function LitigantDashboard() {
 
                 // Update Stats
                 setStats([
-                    { label: 'My Cases', value: cases.length.toString(), icon: FolderOpen, color: 'var(--color-primary)', change: '+1 this month' },
-                    { label: 'Upcoming Hearings', value: hearings.length.toString(), icon: Video, color: 'var(--color-primary)', change: 'Next: ' + (hearings[0]?.date || 'None') },
-                    { label: 'Documents', value: cases.reduce((acc, c) => acc + (c.documents?.length || 1), 0).toString(), icon: FileText, color: 'var(--color-primary)', change: '+2 new' },
-                    { label: 'Legal Chat', value: 'Active', icon: MessageSquare, color: '#f59e0b', change: 'Chat with Lawyer', link: '/litigant/chat' }
+                    { labelKey: 'litigant.myCases', value: cases.length.toString(), icon: FolderOpen, color: 'var(--color-primary)', changeKey: 'litigant.thisMonth' },
+                    { labelKey: 'litigant.upcomingHearings', value: hearings.length.toString(), icon: Video, color: 'var(--color-primary)', change: 'Next: ' + (hearings[0]?.date || 'None') },
+                    { labelKey: 'litigant.documents', value: cases.reduce((acc, c) => acc + (c.documents?.length || 1), 0).toString(), icon: FileText, color: 'var(--color-primary)', changeKey: 'litigant.newDocs' },
+                    { labelKey: 'litigant.legalChat', value: t('litigant.active'), icon: MessageSquare, color: '#f59e0b', changeKey: 'litigant.chatWithLawyer', link: '/litigant/chat' }
                 ]);
 
             } catch (error) {
@@ -159,10 +159,10 @@ export default function LitigantDashboard() {
                     </div>
                     <div>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
-                            📋 {t('File Case / FIR')}
+                            📋 {t('litigant.fileCaseFIR')}
                         </h2>
                         <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
-                            {t('File a civil case or criminal FIR with AI assistance from Vakil Friend')}
+                            {t('litigant.fileCaseDesc')}
                         </p>
                     </div>
                 </div>
@@ -177,7 +177,7 @@ export default function LitigantDashboard() {
                     gap: '0.5rem'
                 }}>
                     <Bot size={20} />
-                    {t('Get Started')}
+                    {t('litigant.getStarted')}
                 </div>
             </div>
 
@@ -185,7 +185,7 @@ export default function LitigantDashboard() {
             {pendingDrafts.length > 0 && (
                 <div style={{ marginBottom: '2rem' }}>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>
-                        Pending Approvals ({pendingDrafts.length})
+                        {t('litigant.pendingApprovals')} ({pendingDrafts.length})
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {pendingDrafts.map(draft => (
@@ -212,12 +212,12 @@ export default function LitigantDashboard() {
                                     <div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.2rem' }}>
                                             <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: '#1f2937' }}>
-                                                Review Draft: {draft.title}
+                                                {t('litigant.reviewDraft')}: {draft.title}
                                             </h4>
-                                            <span style={{ fontSize: '0.7rem', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', padding: '0.2rem 0.5rem', borderRadius: '0.5rem', fontWeight: '700' }}>ACTION REQUIRED</span>
+                                            <span style={{ fontSize: '0.7rem', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', padding: '0.2rem 0.5rem', borderRadius: '0.5rem', fontWeight: '700' }}>{t('litigant.actionRequired')}</span>
                                         </div>
                                         <p style={{ margin: 0, fontSize: '0.9rem', color: '#4b5563' }}>
-                                            Sent by <b>{draft.lawyerName || 'Your Lawyer'}</b> • Awaiting your digital signature
+                                            {t('litigant.sentBy')} <b>{draft.lawyerName || 'Your Lawyer'}</b> • {t('litigant.awaitingSignature')}
                                         </p>
                                     </div>
                                 </div>
@@ -231,7 +231,7 @@ export default function LitigantDashboard() {
                                             color: '#374151', borderRadius: '0.75rem', cursor: 'pointer', fontWeight: '600',
                                             display: 'flex', alignItems: 'center', gap: '0.5rem'
                                         }}>
-                                        <Eye size={16} /> View Details
+                                        <Eye size={16} /> {t('litigant.viewDetails')}
                                     </button>
                                     <button
                                         onClick={() => {
@@ -250,7 +250,7 @@ export default function LitigantDashboard() {
                                             border: 'none', color: 'white', borderRadius: '0.75rem', fontWeight: '700', cursor: 'pointer',
                                             boxShadow: '0 4px 10px rgba(245, 158, 11, 0.3)'
                                         }}>
-                                        Approve & E-Sign
+                                        {t('litigant.approveSign')}
                                     </button>
                                 </div>
                             </div>
@@ -292,7 +292,7 @@ export default function LitigantDashboard() {
                             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
                                 <div>
                                     <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                                        {t(stat.label)}
+                                        {t(stat.labelKey)}
                                     </p>
                                     <h3 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)' }}>
                                         {stat.value}
@@ -311,7 +311,7 @@ export default function LitigantDashboard() {
                                 </div>
                             </div>
                             <p style={{ fontSize: '0.875rem', color: stat.color, fontWeight: '600' }}>
-                                {stat.change}
+                                {stat.changeKey ? t(stat.changeKey) : stat.change}
                             </p>
                         </div>
                     );
@@ -329,7 +329,7 @@ export default function LitigantDashboard() {
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>
-                            {t('Recent Cases')}
+                            {t('litigant.recentCases')}
                         </h3>
                         <button
                             onClick={() => navigate('/litigant/case-diary')}
@@ -344,7 +344,7 @@ export default function LitigantDashboard() {
                                 cursor: 'pointer'
                             }}
                         >
-                            View All
+                            {t('litigant.viewAll')}
                         </button>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -355,7 +355,7 @@ export default function LitigantDashboard() {
                         ) : recentCases.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
                                 <FolderOpen size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
-                                <p>No cases filed yet</p>
+                                <p>{t('litigant.noCases')}</p>
                                 <button
                                     onClick={() => navigate('/litigant/file')}
                                     style={{
@@ -369,7 +369,7 @@ export default function LitigantDashboard() {
                                         cursor: 'pointer'
                                     }}
                                 >
-                                    File Your First Case
+                                    {t('litigant.fileFirstCase')}
                                 </button>
                             </div>
                         ) : (
@@ -413,7 +413,7 @@ export default function LitigantDashboard() {
                                         {caseItem.title}
                                     </h4>
                                     <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                                        Filed: {caseItem.date}
+                                        {t('litigant.filed')}: {caseItem.date}
                                     </p>
                                 </div>
                             ))
@@ -430,7 +430,7 @@ export default function LitigantDashboard() {
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>
-                            {t('Upcoming Hearings')}
+                            {t('litigant.upcomingHearings')}
                         </h3>
                         <button
                             onClick={() => navigate('/litigant/hearings')}
@@ -445,7 +445,7 @@ export default function LitigantDashboard() {
                                 cursor: 'pointer'
                             }}
                         >
-                            View All
+                            {t('litigant.viewAll')}
                         </button>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -456,8 +456,8 @@ export default function LitigantDashboard() {
                         ) : upcomingHearings.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
                                 <Video size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
-                                <p>No upcoming hearings</p>
-                                <p style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>Hearings will appear here once scheduled</p>
+                                <p>{t('litigant.noUpcomingHearings')}</p>
+                                <p style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>{t('litigant.hearingsAppearHere')}</p>
                             </div>
                         ) : (
                             upcomingHearings.map((hearing, index) => (
@@ -559,7 +559,7 @@ export default function LitigantDashboard() {
                                                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                                                             }}>
                                                             <Video size={14} />
-                                                            {t('Join Virtual Court')}
+                                                            {t('litigant.joinVirtualCourt')}
                                                         </button>
                                                     );
                                                 } else {

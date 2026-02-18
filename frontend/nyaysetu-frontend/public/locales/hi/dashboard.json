@@ -1,0 +1,126 @@
+{
+    "sidebar": {
+        "collapseSidebar": "साइडबार छोटा करें",
+        "litigant": {
+            "dashboard": "डैशबोर्ड",
+            "vakilFriendAI": "वकील फ्रेंड AI",
+            "fileCaseFIR": "केस / FIR दर्ज करें",
+            "caseDiary": "केस डायरी",
+            "hearings": "सुनवाई",
+            "lawyerChat": "वकील चैट",
+            "profile": "प्रोफ़ाइल"
+        },
+        "lawyer": {
+            "dashboard": "डैशबोर्ड",
+            "litigantDirectory": "वादी निर्देशिका",
+            "activeCases": "सक्रिय मामले",
+            "aiLegalAssistant": "AI कानूनी सहायक",
+            "hearings": "सुनवाई",
+            "analytics": "विश्लेषण",
+            "profile": "प्रोफ़ाइल"
+        },
+        "judge": {
+            "judicialOverview": "न्यायिक अवलोकन",
+            "myDocket": "मेरा डॉकेट",
+            "unassignedPool": "अनासाइन पूल",
+            "liveHearing": "लाइव सुनवाई",
+            "courtAnalytics": "न्यायालय विश्लेषण",
+            "profile": "प्रोफ़ाइल"
+        },
+        "admin": {
+            "dashboard": "डैशबोर्ड",
+            "userManagement": "उपयोगकर्ता प्रबंधन",
+            "caseManagement": "केस प्रबंधन",
+            "judgeAssignment": "न्यायाधीश नियुक्ति",
+            "reports": "रिपोर्ट",
+            "settings": "सेटिंग्स",
+            "profile": "प्रोफ़ाइल"
+        },
+        "techAdmin": {
+            "dashboard": "डैशबोर्ड",
+            "aiModels": "AI मॉडल",
+            "videoSystem": "वीडियो सिस्टम",
+            "logs": "लॉग",
+            "configuration": "कॉन्फिगरेशन",
+            "profile": "प्रोफ़ाइल"
+        },
+        "police": {
+            "dashboard": "डैशबोर्ड",
+            "investigationUnit": "जांच इकाई",
+            "uploadFIR": "FIR अपलोड करें",
+            "myFIRs": "मेरी FIRs",
+            "profile": "प्रोफ़ाइल"
+        }
+    },
+    "litigant": {
+        "fileCaseFIR": "केस / FIR दर्ज करें",
+        "fileCaseDesc": "वकील फ्रेंड की AI सहायता से नागरिक मामला या आपराधिक FIR दर्ज करें",
+        "getStarted": "शुरू करें",
+        "pendingApprovals": "लंबित अनुमोदन",
+        "reviewDraft": "ड्राफ्ट समीक्षा",
+        "actionRequired": "कार्रवाई आवश्यक",
+        "sentBy": "द्वारा भेजा गया",
+        "awaitingSignature": "आपके डिजिटल हस्ताक्षर की प्रतीक्षा है",
+        "viewDetails": "विवरण देखें",
+        "approveSign": "स्वीकृत और ई-हस्ताक्षर",
+        "myCases": "मेरे मामले",
+        "upcomingHearings": "आगामी सुनवाई",
+        "documents": "दस्तावेज़",
+        "legalChat": "कानूनी चैट",
+        "active": "सक्रिय",
+        "chatWithLawyer": "वकील से चैट करें",
+        "thisMonth": "+1 इस महीने",
+        "newDocs": "+2 नए",
+        "recentCases": "हाल के मामले",
+        "viewAll": "सभी देखें",
+        "noCases": "अभी तक कोई मामला दर्ज नहीं",
+        "fileFirstCase": "अपना पहला मामला दर्ज करें",
+        "filed": "दर्ज किया",
+        "noUpcomingHearings": "कोई आगामी सुनवाई नहीं",
+        "hearingsAppearHere": "सुनवाई निर्धारित होने पर यहां दिखाई देगी",
+        "joinVirtualCourt": "वर्चुअल कोर्ट में शामिल हों",
+        "startsIn": "{{minutes}} मिनट में शुरू",
+        "loading": "लोड हो रहा है..."
+    },
+    "lawyer": {
+        "dashboard": "डैशबोर्ड",
+        "clientManagement": "ग्राहक प्रबंधन",
+        "activeCases": "सक्रिय मामले",
+        "aiAssistant": "AI कानूनी सहायक",
+        "hearings": "सुनवाई",
+        "analytics": "विश्लेषण",
+        "profile": "प्रोफ़ाइल"
+    },
+    "judge": {
+        "judicialOverview": "न्यायिक अवलोकन",
+        "myDocket": "मेरा डॉकेट",
+        "unassignedPool": "अनअसाइन्ड पूल",
+        "courtAnalytics": "न्यायालय विश्लेषण"
+    },
+    "police": {
+        "dashboard": "पुलिस डैशबोर्ड",
+        "investigationUnit": "जांच इकाई",
+        "uploadFIR": "FIR अपलोड करें",
+        "myFIRs": "मेरी FIRs"
+    },
+    "common": {
+        "dashboard": "डैशबोर्ड",
+        "welcomeBack": "पुनः स्वागत है",
+        "viewProfile": "प्रोफ़ाइल देखें",
+        "language": "भाषा",
+        "search": "खोजें...",
+        "notifications": "सूचनाएं",
+        "profile": "प्रोफ़ाइल",
+        "logout": "लॉगआउट",
+        "loading": "लोड हो रहा है...",
+        "next": "अगला",
+        "previous": "पिछला",
+        "submit": "सबमिट करें",
+        "cancel": "रद्द करें",
+        "save": "सहेजें",
+        "delete": "हटाएं",
+        "edit": "संपादित करें",
+        "viewAll": "सभी देखें",
+        "noData": "कोई डेटा उपलब्ध नहीं"
+    }
+}

@@ -2,8 +2,10 @@ import { Link } from 'react-router-dom';
 import { FaLinkedin, FaTwitter, FaGithub, FaEnvelope, FaHeart } from 'react-icons/fa';
 import { Scale } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
+    const { t } = useTranslation(['landing', 'common']);
     const currentYear = new Date().getFullYear();
 
     const socialLinks = [
@@ -34,10 +36,10 @@ export default function Footer() {
     ];
 
     const quickLinks = [
-        { label: 'Features', href: '#features' },
-        { label: 'Constitution', href: '#constitution' },
-        { label: 'AI Assistant', href: '#chatbot' },
-        { label: 'About', href: '#about' }
+        { label: t('common:header.nav.features'), href: '#features' },
+        { label: t('common:header.nav.constitution'), href: '#constitution' },
+        { label: t('common:header.nav.aiAssistant'), href: '#chatbot' },
+        { label: t('common:header.nav.about'), href: '#about' }
     ];
 
     const legalLinks = [
@@ -107,7 +109,7 @@ export default function Footer() {
                             lineHeight: '1.6',
                             marginBottom: '1.5rem'
                         }}>
-                            India's first AI-powered virtual judiciary platform, making justice accessible to every citizen.
+                            {t('landing:footer.tagline')}
                         </p>
                         <div style={{ display: 'flex', gap: '1rem' }}>
                             {socialLinks.map((link) => (
@@ -153,7 +155,7 @@ export default function Footer() {
                             fontWeight: '700',
                             marginBottom: '1.5rem'
                         }}>
-                            Quick Links
+                            {t('landing:footer.quickLinks')}
                         </h3>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                             {quickLinks.map((link) => (
@@ -184,7 +186,7 @@ export default function Footer() {
                             fontWeight: '700',
                             marginBottom: '1.5rem'
                         }}>
-                            Legal
+                            {t('landing:footer.legal')}
                         </h3>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                             {legalLinks.map((link) => (
@@ -215,7 +217,7 @@ export default function Footer() {
                             fontWeight: '700',
                             marginBottom: '1.5rem'
                         }}>
-                            Get In Touch
+                            {t('landing:footer.getInTouch')}
                         </h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <a
@@ -250,7 +252,7 @@ export default function Footer() {
                                 onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.7)'}
                             >
                                 <FaGithub size={16} />
-                                View Repository
+                                {t('landing:footer.viewRepository')}
                             </a>
                         </div>
                     </div>
@@ -274,14 +276,14 @@ export default function Footer() {
                         alignItems: 'center',
                         gap: '0.5rem'
                     }}>
-                        © {currentYear} NyaySetu. Made with <FaHeart color="#ef4444" size={14} /> by Virendra Gadekar
+                        © {currentYear} {t('landing:footer.copyright')} <FaHeart color="#ef4444" size={14} /> {t('landing:footer.by')}
                     </p>
                     <p style={{
                         color: 'rgba(255, 255, 255, 0.5)',
                         fontSize: '0.875rem',
                         margin: 0
                     }}>
-                        All rights reserved.
+                        {t('landing:footer.allRightsReserved')}
                     </p>
                 </div>
             </div>

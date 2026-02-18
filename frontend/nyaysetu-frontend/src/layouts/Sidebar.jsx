@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     Home, FileText, FolderOpen, Upload, Brain,
     Archive, Video, User, Users, Briefcase,
@@ -8,60 +9,61 @@ import {
     WifiOff
 } from 'lucide-react';
 
-const roleMenuItems = {
+const getRoleMenuItems = (t) => ({
     LITIGANT: [
-        { icon: Home, label: 'Dashboard', path: '/litigant' },
-        { icon: Bot, label: 'Vakil Friend AI', path: '/litigant/vakil-friend' },
-        { icon: FileText, label: 'File Case / FIR', path: '/litigant/file' },
-        { icon: FolderOpen, label: 'Case Diary', path: '/litigant/case-diary' },
-        { icon: Video, label: 'Hearings', path: '/litigant/hearings' },
-        { icon: MessageSquare, label: 'Lawyer Chat', path: '/litigant/chat' },
-        { icon: User, label: 'Profile', path: '/litigant/profile' }
+        { icon: Home, label: t('dashboard:sidebar.litigant.dashboard'), path: '/litigant' },
+        { icon: Bot, label: t('dashboard:sidebar.litigant.vakilFriendAI'), path: '/litigant/vakil-friend' },
+        { icon: FileText, label: t('dashboard:sidebar.litigant.fileCaseFIR'), path: '/litigant/file' },
+        { icon: FolderOpen, label: t('dashboard:sidebar.litigant.caseDiary'), path: '/litigant/case-diary' },
+        { icon: Video, label: t('dashboard:sidebar.litigant.hearings'), path: '/litigant/hearings' },
+        { icon: MessageSquare, label: t('dashboard:sidebar.litigant.lawyerChat'), path: '/litigant/chat' },
+        { icon: User, label: t('dashboard:sidebar.litigant.profile'), path: '/litigant/profile' }
     ],
     LAWYER: [
-        { icon: Home, label: 'Dashboard', path: '/lawyer' },
-        { icon: Users, label: 'Litigant Directory', path: '/lawyer/clients' },
-        { icon: Briefcase, label: 'Active Cases', path: '/lawyer/cases' },
-        { icon: Brain, label: 'AI Legal Assistant', path: '/lawyer/ai-assistant' },
-        { icon: Video, label: 'Hearings', path: '/lawyer/hearings' },
-        { icon: BarChart3, label: 'Analytics', path: '/lawyer/analytics' },
-        { icon: User, label: 'Profile', path: '/lawyer/profile' }
+        { icon: Home, label: t('dashboard:sidebar.lawyer.dashboard'), path: '/lawyer' },
+        { icon: Users, label: t('dashboard:sidebar.lawyer.litigantDirectory'), path: '/lawyer/clients' },
+        { icon: Briefcase, label: t('dashboard:sidebar.lawyer.activeCases'), path: '/lawyer/cases' },
+        { icon: Brain, label: t('dashboard:sidebar.lawyer.aiLegalAssistant'), path: '/lawyer/ai-assistant' },
+        { icon: Video, label: t('dashboard:sidebar.lawyer.hearings'), path: '/lawyer/hearings' },
+        { icon: BarChart3, label: t('dashboard:sidebar.lawyer.analytics'), path: '/lawyer/analytics' },
+        { icon: User, label: t('dashboard:sidebar.lawyer.profile'), path: '/lawyer/profile' }
     ],
     JUDGE: [
-        { icon: Home, label: 'Judicial Overview', path: '/judge' },
-        { icon: Briefcase, label: 'My Docket', path: '/judge/docket' },
-        { icon: FolderOpen, label: 'Unassigned Pool', path: '/judge/unassigned' },
-        { icon: Video, label: 'Live Hearing', path: '/judge/live-hearing' },
-        { icon: BarChart3, label: 'Court Analytics', path: '/judge/analytics' },
-        { icon: User, label: 'Profile', path: '/judge/profile' }
+        { icon: Home, label: t('dashboard:sidebar.judge.judicialOverview'), path: '/judge' },
+        { icon: Briefcase, label: t('dashboard:sidebar.judge.myDocket'), path: '/judge/docket' },
+        { icon: FolderOpen, label: t('dashboard:sidebar.judge.unassignedPool'), path: '/judge/unassigned' },
+        { icon: Video, label: t('dashboard:sidebar.judge.liveHearing'), path: '/judge/live-hearing' },
+        { icon: BarChart3, label: t('dashboard:sidebar.judge.courtAnalytics'), path: '/judge/analytics' },
+        { icon: User, label: t('dashboard:sidebar.judge.profile'), path: '/judge/profile' }
     ],
     ADMIN: [
-        { icon: Home, label: 'Dashboard', path: '/admin' },
-        { icon: Users, label: 'User Management', path: '/admin/users' },
-        { icon: Scale, label: 'Case Management', path: '/admin/cases' },
-        { icon: Gavel, label: 'Judge Assignment', path: '/admin/judges' },
-        { icon: BarChart3, label: 'Reports', path: '/admin/reports' },
-        { icon: Settings, label: 'Settings', path: '/admin/settings' },
-        { icon: User, label: 'Profile', path: '/admin/profile' }
+        { icon: Home, label: t('dashboard:sidebar.admin.dashboard'), path: '/admin' },
+        { icon: Users, label: t('dashboard:sidebar.admin.userManagement'), path: '/admin/users' },
+        { icon: Scale, label: t('dashboard:sidebar.admin.caseManagement'), path: '/admin/cases' },
+        { icon: Gavel, label: t('dashboard:sidebar.admin.judgeAssignment'), path: '/admin/judges' },
+        { icon: BarChart3, label: t('dashboard:sidebar.admin.reports'), path: '/admin/reports' },
+        { icon: Settings, label: t('dashboard:sidebar.admin.settings'), path: '/admin/settings' },
+        { icon: User, label: t('dashboard:sidebar.admin.profile'), path: '/admin/profile' }
     ],
     TECH_ADMIN: [
-        { icon: Home, label: 'Dashboard', path: '/tech-admin' },
-        { icon: Brain, label: 'AI Models', path: '/tech-admin/ai' },
-        { icon: Video, label: 'Video System', path: '/tech-admin/video' },
-        { icon: BarChart3, label: 'Logs', path: '/tech-admin/logs' },
-        { icon: Settings, label: 'Configuration', path: '/tech-admin/config' },
-        { icon: User, label: 'Profile', path: '/tech-admin/profile' }
+        { icon: Home, label: t('dashboard:sidebar.techAdmin.dashboard'), path: '/tech-admin' },
+        { icon: Brain, label: t('dashboard:sidebar.techAdmin.aiModels'), path: '/tech-admin/ai' },
+        { icon: Video, label: t('dashboard:sidebar.techAdmin.videoSystem'), path: '/tech-admin/video' },
+        { icon: BarChart3, label: t('dashboard:sidebar.techAdmin.logs'), path: '/tech-admin/logs' },
+        { icon: Settings, label: t('dashboard:sidebar.techAdmin.configuration'), path: '/tech-admin/config' },
+        { icon: User, label: t('dashboard:sidebar.techAdmin.profile'), path: '/tech-admin/profile' }
     ],
     POLICE: [
-        { icon: Home, label: 'Dashboard', path: '/police' },
-        { icon: TrendingUp, label: 'Investigation Unit', path: '/police/investigations' },
-        { icon: Upload, label: 'Upload FIR', path: '/police/upload' },
-        { icon: FolderOpen, label: 'My FIRs', path: '/police/firs' },
-        { icon: User, label: 'Profile', path: '/police/profile' }
+        { icon: Home, label: t('dashboard:sidebar.police.dashboard'), path: '/police' },
+        { icon: TrendingUp, label: t('dashboard:sidebar.police.investigationUnit'), path: '/police/investigations' },
+        { icon: Upload, label: t('dashboard:sidebar.police.uploadFIR'), path: '/police/upload' },
+        { icon: FolderOpen, label: t('dashboard:sidebar.police.myFIRs'), path: '/police/firs' },
+        { icon: User, label: t('dashboard:sidebar.police.profile'), path: '/police/profile' }
     ]
-};
+});
 
 export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
+    const { t } = useTranslation('dashboard');
     const [isCollapsed, setIsCollapsed] = useState(() => {
         const saved = localStorage.getItem('sidebarCollapsed');
         return saved === 'true';
@@ -69,6 +71,7 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     const location = useLocation();
+    const roleMenuItems = getRoleMenuItems(t);
     const menuItems = roleMenuItems[userRole] || roleMenuItems.LITIGANT;
 
     // Listen for window resize to detect mobile/desktop
@@ -263,7 +266,7 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                             ) : (
                                 <>
                                     <X size={16} />
-                                    <span>Collapse Sidebar</span>
+                                    <span>{t('dashboard:sidebar.collapseSidebar')}</span>
                                 </>
                             )}
                         </button>

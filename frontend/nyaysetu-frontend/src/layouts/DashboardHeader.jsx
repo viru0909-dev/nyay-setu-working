@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ChevronDown, User, Menu } from 'lucide-react';
+import { LogOut, ChevronDown, User, Menu, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/authStore';
 import NotificationBell from '../components/NotificationBell';
 
@@ -8,6 +9,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const { logout } = useAuthStore();
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation('dashboard');
 
     const handleLogout = () => {
         logout();
@@ -68,7 +70,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                         textOverflow: 'ellipsis',
                         letterSpacing: '-0.02em'
                     }}>
-                        {isMobile ? 'Dashboard' : `${user?.role?.replace('_', ' ')} Dashboard`}
+                        {isMobile ? t('common.dashboard', 'Dashboard') : `${user?.role?.replace('_', ' ')} ${t('common.dashboard', 'Dashboard')}`}
                     </h1>
                     {!isMobile && (
                         <p style={{
@@ -76,7 +78,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             color: 'var(--text-secondary)',
                             fontWeight: '500'
                         }}>
-                            Welcome back, {user?.name || 'User'}!
+                            {t('common.welcomeBack', 'Welcome back')}, {user?.name || 'User'}!
                         </p>
                     )}
                 </div>
@@ -191,8 +193,93 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                 }}
                             >
                                 <User size={16} />
-                                View Profile
+                                {t('common.viewProfile', 'View Profile')}
                             </button>
+
+                            {/* Language Selector */}
+                            <div style={{
+                                padding: '0.5rem 1rem',
+                                fontSize: '0.75rem',
+                                color: '#64748B',
+                                fontWeight: '600',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                            }}>
+                                {t('common.language', 'Language')}
+                            </div>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(2, 1fr)',
+                                gap: '0.5rem',
+                                padding: '0 0.5rem'
+                            }}>
+                                <button
+                                    onClick={() => {
+                                        i18n.changeLanguage('en');
+                                        setShowProfileMenu(false);
+                                    }}
+                                    style={{
+                                        padding: '0.5rem',
+                                        background: i18n.language === 'en' ? 'rgba(63, 93, 204, 0.1)' : 'transparent',
+                                        border: i18n.language === 'en' ? '1px solid var(--color-secondary)' : '1px solid #E5E7EB',
+                                        borderRadius: '6px',
+                                        color: i18n.language === 'en' ? 'var(--color-secondary)' : 'var(--color-primary)',
+                                        fontSize: '0.8rem',
+                                        fontWeight: i18n.language === 'en' ? '700' : '600',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.25rem'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        if (i18n.language !== 'en') {
+                                            e.currentTarget.style.background = '#F8FAFC';
+                                        }
+                                    }}
+                                    onMouseOut={(e) => {
+                                        if (i18n.language !== 'en') {
+                                            e.currentTarget.style.background = 'transparent';
+                                        }
+                                    }}
+                                >
+                                    EN
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        i18n.changeLanguage('hi');
+                                        setShowProfileMenu(false);
+                                    }}
+                                    style={{
+                                        padding: '0.5rem',
+                                        background: i18n.language === 'hi' ? 'rgba(63, 93, 204, 0.1)' : 'transparent',
+                                        border: i18n.language === 'hi' ? '1px solid var(--color-secondary)' : '1px solid #E5E7EB',
+                                        borderRadius: '6px',
+                                        color: i18n.language === 'hi' ? 'var(--color-secondary)' : 'var(--color-primary)',
+                                        fontSize: '0.8rem',
+                                        fontWeight: i18n.language === 'hi' ? '700' : '600',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.25rem'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        if (i18n.language !== 'hi') {
+                                            e.currentTarget.style.background = '#F8FAFC';
+                                        }
+                                    }}
+                                    onMouseOut={(e) => {
+                                        if (i18n.language !== 'hi') {
+                                            e.currentTarget.style.background = 'transparent';
+                                        }
+                                    }}
+                                >
+                                    हिंदी
+                                </button>
+                            </div>
 
                             <div style={{
                                 height: '1px',
@@ -226,7 +313,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                 }}
                             >
                                 <LogOut size={16} />
-                                Logout
+                                {t('common.logout')}
                             </button>
                         </div>
                     )}
