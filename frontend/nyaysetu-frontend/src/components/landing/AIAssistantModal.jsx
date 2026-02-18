@@ -125,7 +125,8 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                             borderRadius: '2rem',
                             position: 'relative',
                             display: 'flex',
-                            flexDirection: 'column'
+                            flexDirection: 'column',
+                            overflow: 'hidden'
                         }}
                     >
                         {/* Close Button */}
@@ -165,7 +166,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
 
                         {!chatStarted ? (
                             /* Welcome Screen */
-                            <div style={{ padding: '3rem', overflow: 'auto' }}>
+                            <div style={{ padding: '3rem', overflow: 'auto', flex: 1 }}>
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -296,7 +297,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                             </div>
                         ) : (
                             /* Chat Interface */
-                            <div style={{ display: 'flex', flexDirection: 'column', height: '85vh', padding: '2rem', paddingTop: '4rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', padding: '2rem', paddingTop: '4rem' }}>
                                 <h2 style={{
                                     fontSize: '1.75rem',
                                     fontWeight: '800',
