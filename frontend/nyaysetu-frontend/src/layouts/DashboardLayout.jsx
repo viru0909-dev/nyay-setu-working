@@ -16,8 +16,11 @@ export default function DashboardLayout() {
     const hideAIBrainPaths = [
         '/client/vakil-friend',
         '/litigant/vakil-friend',
+        '/litigant/case-diary/',   // Has CaseChatWidget
+        '/judge/case/',            // Has JudgeChatWidget
         '/lawyer/chat',
         '/lawyer/ai-assistant',
+        '/lawyer/case/',           // Has CaseChatWidget
         '/ai-review'
     ];
 
