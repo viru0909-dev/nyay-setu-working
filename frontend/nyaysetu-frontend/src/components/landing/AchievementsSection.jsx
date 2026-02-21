@@ -271,6 +271,89 @@ export default function AchievementsSection() {
                                 )}
                             </AnimatePresence>
 
+                            {/* Interactive Overlay for e-Submit (idx === 1) */}
+                            <AnimatePresence>
+                                {idx === 1 && hoveredCard === 1 && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            background: 'rgba(192, 192, 192, 0.95)',
+                                            backdropFilter: 'blur(10px)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '1rem',
+                                            zIndex: 10,
+                                            borderRadius: '2rem',
+                                            padding: '1.5rem'
+                                        }}
+                                    >
+                                        <h4 style={{
+                                            color: '#1E2A44',
+                                            fontSize: '1.3rem',
+                                            fontWeight: '800',
+                                            textAlign: 'center',
+                                            margin: 0
+                                        }}>
+                                            {language === 'en' ? 'Certificate of Achievement' : 'उपलब्धि प्रमाणपत्र'}
+                                        </h4>
+
+                                        {/* Certificate Image */}
+                                        <motion.a
+                                            href="/esubmit_certificate.png"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            whileHover={{ scale: 1.03 }}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <img
+                                                src="/esubmit_certificate.png"
+                                                alt="e-Submit Certificate"
+                                                style={{
+                                                    width: '100%',
+                                                    maxWidth: '340px',
+                                                    borderRadius: '12px',
+                                                    border: '3px solid #1E2A44',
+                                                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+                                                }}
+                                            />
+                                        </motion.a>
+
+                                        <motion.a
+                                            href="/esubmit_certificate.png"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.75rem',
+                                                padding: '0.75rem 2rem',
+                                                background: '#1E2A44',
+                                                color: '#C0C0C0',
+                                                borderRadius: '12px',
+                                                border: '2px solid #1E2A44',
+                                                fontSize: '1rem',
+                                                fontWeight: '700',
+                                                textDecoration: 'none',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <Award size={20} />
+                                            {language === 'en' ? 'View Certificate' : 'प्रमाणपत्र देखें'}
+                                        </motion.a>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
                             {/* Icon */}
                             <div style={{
                                 width: '80px',
