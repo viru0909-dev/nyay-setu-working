@@ -200,14 +200,14 @@ export default function CaseDetailPage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
             {/* 1. Header Section */}
             <div style={{ marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', position: 'relative', zIndex: 9999, pointerEvents: 'auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <button
                         onClick={() => navigate('/litigant/case-diary')}
                         style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
                     >
                         <ArrowLeft size={20} /> Back to Diary
                     </button>
-                    <div style={{ display: 'flex', gap: '0.5rem', position: 'relative', zIndex: 9999, pointerEvents: 'auto' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button
                             onClick={downloadCaseReport}
                             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', borderRadius: '0.5rem', color: '#10b981', fontWeight: '600', cursor: 'pointer' }}
