@@ -45,8 +45,9 @@ public class BlockchainEvidenceController {
                 return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
             }
 
+            String uploadIp = getClientIp(request);
             EvidenceRecord evidence = evidenceService.uploadEvidence(
-                    caseId, file, title, description, evidenceType, currentUser, request.getRemoteAddr());
+                    caseId, file, title, description, evidenceType, currentUser, uploadIp);
 
             Map<String, Object> response = new HashMap<>();
             response.put("id", evidence.getId());
@@ -183,5 +184,22 @@ public class BlockchainEvidenceController {
         }
         String email = auth.getName();
         return userRepository.findByEmail(email).orElse(null);
+    }
+
+    /**
+     * Extract client IP address from request (proxy-aware)
+     */
+    private String getClientIp(jakarta.servlet.http.HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        return ip;
     }
 }
