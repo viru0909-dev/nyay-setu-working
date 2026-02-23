@@ -1031,8 +1031,8 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                         <div style={{ display: 'grid', gap: '1rem' }}>
                             {files.map(doc => {
                                 // Check if document has hash verification
-                                const isVerified = doc.type === 'EVIDENCE' || verificationMap[doc.id] === true;
-                                const showCertificate = doc.type === 'EVIDENCE' || verificationMap[doc.id] === true;
+                                const isVerified = doc.type === 'EVIDENCE' || verificationMap[doc.id] === true || !!doc.fileHash;
+                                const showCertificate = doc.type === 'EVIDENCE' || verificationMap[doc.id] === true || !!doc.fileHash;
 
                                 return (
                                     <div key={`${doc.source}-${doc.id}`} style={{ background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '1rem', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s' }}>
