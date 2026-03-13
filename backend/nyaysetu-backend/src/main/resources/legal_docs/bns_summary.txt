@@ -1,0 +1,60 @@
+# Bharatiya Nyaya Sanhita (BNS) & Procedural Guide for Nyay-Setu Vakil-Friend
+
+## General Advice
+When a user describes an incident, analyze it according to the Bharatiya Nyaya Sanhita (BNS) 2023, which replaced the Indian Penal Code (IPC).
+If a user is asking about filing a case for a serious crime (e.g., murder, rape, theft, assault), they MUST file a First Information Report (FIR) with the POLICE first, not the CIVIL COURT.
+For property disputes, divorces, or breach of contract, they should file with the COURT.
+
+## Common Offenses under BNS 2023
+
+1. **Theft (Chori)**
+   - BNS Section 303 (formerly IPC 379)
+   - Punishment: Up to 3 years imprisonment, or fine, or both.
+   - For theft in a dwelling house, Section 305 applies (up to 7 years).
+
+2. **Snatching**
+   - BNS Section 304 (New specific offense)
+   - Theft is "snatching" if the offender suddenly or quickly or forcibly seizes or secures or grabs or takes away from any person or from his possession any movable property.
+   - Punishment: Up to 3 years imprisonment, and fine.
+
+3. **Cheating (Dhokhadhadi) & Fraud**
+   - BNS Section 318 (formerly IPC 420)
+   - Cheating and dishonestly inducing delivery of property.
+   - Punishment: Up to 7 years imprisonment, and shall also be liable to fine.
+
+4. **Criminal Intimidation (Threatening)**
+   - BNS Section 351 (formerly IPC 506)
+   - Threatening another with injury to person, reputation, or property.
+   - Punishment: Up to 2 years, or fine, or both. If threat is to cause death or grievous hurt: up to 7 years.
+
+5. **Assault or Criminal Force**
+   - BNS Section 131 / 132 (formerly IPC 351/352)
+   - Using criminal force otherwise than on grave provocation.
+   - Punishment: Up to 3 months, or fine up to 500 rupees, or both.
+
+6. **Rape and Sexual Offenses**
+   - BNS Section 63 (formerly IPC 376)
+   - Rape.
+   - Punishment: Rigorous imprisonment not less than 10 years, which may extend to life imprisonment, and fine.
+
+7. **Murder (Hatya)**
+   - BNS Section 103 (formerly IPC 302)
+   - Punishment: Death or imprisonment for life, and fine.
+
+8. **Hit and Run**
+   - BNS Section 106 (2)
+   - Causing death by rash and negligent driving and escaping without reporting to police.
+   - Punishment: Up to 10 years imprisonment and fine. (Note: Non-reporting provision is currently under review, but rash driving causing death is strictly punishable).
+
+## Civil Cases & Family Law
+- **Divorce / Family Disputes:** Handled under Hindu Marriage Act, Special Marriage Act, etc. (Not BNS). Target is COURT. Case Type is FAMILY.
+- **Property Disputes:** Handled under Transfer of Property Act, Specific Relief Act. Target is COURT. Case Type is PROPERTY.
+- **Contract Breach:** Target is COURT. Case Type is COMMERCIAL or CIVIL.
+
+## Filing Urgency Guidelines
+- CRITICAL: Ongoing physical threat, murder, kidnapping, sexual assault.
+- URGENT: Recent theft, escalating domestic violence, imminent property destruction.
+- NORMAL: Past fraud, civil disputes, divorce filing, old property disagreements.
+
+## AI Instructions
+Always refer to the user's situation empathetically. If they describe a BNS offense, mention the relevant BNS Section (e.g., "Under Section 303 of the Bharatiya Nyaya Sanhita..."). Recommend whether they need to file an FIR (Police) or a civil suit (Court).
