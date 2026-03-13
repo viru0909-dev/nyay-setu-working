@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, FileText, X, Mic, StopCircle, Volume2, Shield, AlertTriangle, CheckCircle2, Eye } from 'lucide-react';
+import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, FileText, X, Mic, StopCircle, Volume2, Shield, AlertTriangle, CheckCircle2, Eye, UserCircle2 } from 'lucide-react';
 import { vakilFriendAPI } from '../../services/api';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { API_BASE_URL } from '../../config/apiConfig';
+import AvatarPanel from '../../components/avatar/AvatarPanel';
 
 export default function VakilFriendChat() {
     const [messages, setMessages] = useState([]);
@@ -24,7 +25,15 @@ export default function VakilFriendChat() {
     const [showAnalysisModal, setShowAnalysisModal] = useState(false); // Show analysis modal
     const [language, setLanguage] = useState('en'); // Default language
     const [isRecording, setIsRecording] = useState(false);
+    const [isListeningForCommand, setIsListeningForCommand] = useState(false); // New wake word state
     const [speakingIndex, setSpeakingIndex] = useState(null); // Track which message is speaking
+    const [avatarState, setAvatarState] = useState('idle');
+    const [showAvatar, setShowAvatar] = useState(false);
+
+    // Wake Word Buffers
+    const commandBufferRef = useRef('');
+    const silenceTimerRef = useRef(null);
+    const avatarTalkingTimeoutRef = useRef(null);
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
 
@@ -74,6 +83,47 @@ export default function VakilFriendChat() {
         loadSessions();
         startSession();
     }, []);
+
+    // Derive avatar state from chat lifecycle
+    useEffect(() => {
+        if (isRecording) {
+            setAvatarState('listening');
+        } else if (isLoading) {
+            setAvatarState('thinking');
+        } else {
+            // Don't immediately reset — let 'talking' state linger after response
+            if (avatarState === 'thinking') {
+                setAvatarState('talking');
+                // Clear any existing timeout
+                if (avatarTalkingTimeoutRef.current) clearTimeout(avatarTalkingTimeoutRef.current);
+                avatarTalkingTimeoutRef.current = setTimeout(() => setAvatarState('idle'), 3000);
+            } else if (avatarState !== 'talking') {
+                setAvatarState('idle');
+            }
+        }
+        return () => {
+            if (avatarTalkingTimeoutRef.current) clearTimeout(avatarTalkingTimeoutRef.current);
+        };
+    }, [isLoading, isRecording]);
+
+    // Handle Hologram Avatar Open Event (Auto-Greeting)
+    useEffect(() => {
+        if (showAvatar) {
+            const greeting = "Namaste. I am your AI Legal Assistant. You can speak to me anytime.";
+            speakText(greeting, -1);
+
+            // Auto-start recording after greeting (delayed to avoid recording TTS)
+            const timer = setTimeout(() => {
+                if (!isRecording) startRecording();
+            }, 5000);
+
+            return () => clearTimeout(timer);
+        } else {
+            // Cleanup on close
+            stopRecording();
+            setIsListeningForCommand(false);
+        }
+    }, [showAvatar]);
 
     // Load all chat sessions for history
     const loadSessions = async () => {
@@ -144,11 +194,14 @@ export default function VakilFriendChat() {
         }
     };
 
-    const sendMessage = async (audioData = null) => {
-        if ((!inputMessage.trim() && !audioData) || isLoading) return;
+    const sendMessage = async (audioData = null, overrideText = null) => {
+        const textToSend = overrideText || inputMessage;
+        if ((!textToSend.trim() && !audioData) || isLoading) return;
 
-        const userMessage = inputMessage.trim();
-        setInputMessage('');
+        const userMessage = textToSend.trim();
+        // Only clear the input message box if we aren't overriding it (standard UI flow)
+        if (!overrideText) setInputMessage('');
+
         shouldAutoScrollRef.current = true; // Enable auto-scroll for new messages
 
         // Optimistic UI update
@@ -204,11 +257,8 @@ export default function VakilFriendChat() {
                 content: data.message
             }]);
 
-            // Auto-speak if using voice - assume it's the last message
-            if (audioData) {
-                // We need to wait for state update, but we can't easily. 
-                // Simple hack: Set generic "active" state or just fire and accept we might not match index perfectly initially
-                // Better: just speak it, and rely on global cancel for the stop button if we don't pass index
+            // Auto-speak if using voice or if the 3D Hologram is open
+            if (audioData || showAvatar) {
                 speakText(data.message, -1); // -1 or generic ID
             }
 
@@ -256,44 +306,89 @@ export default function VakilFriendChat() {
             setIsRecording(true);
         };
 
+        // Make recognition continuous by automatically restarting it when it ends,
+        // UNLESS the user explicitly clicked the Stop button (handled by standard react state unmount)
         recognition.onend = () => {
-            setIsRecording(false);
+            // If the avatar is still open and we want continuous listening
+            if (showAvatar && !mediaRecorderRef.current?.manuallyStopped) {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.log("Recognition auto-restart suppressed");
+                    setIsRecording(false);
+                }
+            } else {
+                setIsRecording(false);
+            }
         };
 
         recognition.onError = (event) => {
             console.error("Speech recognition error", event.error);
-            setIsRecording(false);
+            if (event.error !== 'no-speech') {
+                setIsRecording(false);
+            }
         };
 
         recognition.onresult = (event) => {
-            let interimTranscript = '';
             let finalTranscript = '';
+            let interimTranscript = '';
 
-            // Process all results from the current event
+            // Get the latest results
             for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript;
                 if (event.results[i].isFinal) {
-                    finalTranscript += transcript;
+                    finalTranscript += event.results[i][0].transcript;
                 } else {
-                    interimTranscript += transcript;
+                    interimTranscript += event.results[i][0].transcript;
                 }
             }
 
-            // Update input with interim results during speech, final results at the end
-            const currentTranscript = finalTranscript || interimTranscript;
-            console.log("Transcribed:", currentTranscript, "(Final:", event.results[event.results.length - 1].isFinal, ")");
-            setInputMessage(currentTranscript);
+            const currentAudio = (finalTranscript || interimTranscript).toLowerCase().trim();
+            if (!currentAudio) return;
+
+            // We are always actively listening
+            if (finalTranscript) {
+                commandBufferRef.current += " " + finalTranscript;
+            }
+
+            // Show real-time progress
+            const displayBuffer = (commandBufferRef.current + " " + interimTranscript).trim();
+            setInputMessage(displayBuffer);
+
+            // Reset the "done speaking" timer every time we hear a new word
+            resetSilenceTimer();
         };
 
-        // Store verification reference if needed to stop manually
+        // Helper to detect when user finishes speaking their command (2.5 seconds of silence)
+        const resetSilenceTimer = () => {
+            if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+
+            silenceTimerRef.current = setTimeout(() => {
+                // If we have a buffer built up, send it!
+                if (commandBufferRef.current.trim().length > 2) {
+                    const finalCommand = commandBufferRef.current.trim();
+                    console.log("Silence detected. Sending command:", finalCommand);
+                    sendMessage(null, finalCommand);
+
+                    commandBufferRef.current = '';
+                } else {
+                    setInputMessage("");
+                }
+            }, 2500);
+        };
+
         mediaRecorderRef.current = recognition;
-        recognition.start();
+        mediaRecorderRef.current.manuallyStopped = false;
+        try {
+            recognition.start();
+        } catch (e) { }
     };
 
     const stopRecording = () => {
         if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.manuallyStopped = true;
             mediaRecorderRef.current.stop();
             setIsRecording(false);
+            setIsListeningForCommand(false);
         }
     };
 
@@ -311,7 +406,36 @@ export default function VakilFriendChat() {
         window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(text);
+
+        // Find a premium voice for a smoother, less robotic experience
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            // Preferences for modern smooth voices
+            const preferredVoices = voices.filter(v =>
+                v.name.includes('Google') ||
+                v.name.includes('Premium') ||
+                v.name.includes('Samantha') ||
+                v.name.includes('Victoria') ||
+                v.name.includes('Karen') ||
+                v.name.includes('Moira') ||
+                v.name.includes('Rishi') ||
+                v.name.includes('Veena')
+            );
+
+            // Priority: 1. Premium Indian accent, 2. Premium any English, 3. Any Indian accent
+            const targetVoice = preferredVoices.find(v => v.lang === (language === 'en' ? 'en-IN' : language + '-IN'))
+                || preferredVoices.find(v => v.lang.startsWith('en'))
+                || voices.find(v => v.lang === (language === 'en' ? 'en-IN' : language + '-IN'))
+                || voices[0];
+
+            if (targetVoice) {
+                utterance.voice = targetVoice;
+            }
+        }
+
         utterance.lang = language === 'en' ? 'en-IN' : language + '-IN';
+        utterance.pitch = 1.05; // Slightly higher pitch for natural feel
+        utterance.rate = 1.0;   // Normal speed
 
         utterance.onend = () => {
             setSpeakingIndex(null);
@@ -1063,14 +1187,21 @@ export default function VakilFriendChat() {
                 </div>
             )}
 
-            {/* Chat Container */}
-            <div style={{
-                background: '#FFFFFF',
-                border: '1px solid #E5E7EB',
-                borderRadius: '1.25rem',
-                overflow: 'hidden',
-                boxShadow: '0 10px 30px rgba(30, 42, 68, 0.06)'
-            }}>
+            {/* Main Content Layout */}
+            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'stretch' }}>
+                
+                {/* Chat Container (Left Side) */}
+                <div style={{
+                    flex: showAvatar ? '1' : '1', // taking full width if no avatar, or sharing width if avatar
+                    maxWidth: showAvatar ? '50%' : '100%',
+                    transition: 'max-width 0.3s ease',
+                    background: '#FFFFFF',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '1.25rem',
+                    overflow: 'hidden',
+                    boxShadow: '0 10px 30px rgba(30, 42, 68, 0.06)'
+                }}>
+
                 {/* Chat Header */}
                 <div style={{
                     padding: '1.25rem 1.5rem',
@@ -1400,6 +1531,43 @@ export default function VakilFriendChat() {
                             {isRecording ? <StopCircle size={20} /> : <Mic size={20} />}
                         </button>
 
+                        {/* Avatar Toggle Button */}
+                        <button
+                            onClick={() => setShowAvatar(prev => !prev)}
+                            style={{
+                                padding: '0.75rem',
+                                background: showAvatar
+                                    ? 'rgba(99, 102, 241, 0.15)'
+                                    : 'var(--bg-glass)',
+                                border: showAvatar
+                                    ? '1px solid rgba(99, 102, 241, 0.4)'
+                                    : 'var(--border-glass)',
+                                borderRadius: '0.625rem',
+                                color: showAvatar ? '#6366f1' : 'var(--text-secondary)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                                position: 'relative'
+                            }}
+                            title={showAvatar ? 'Hide AI Avatar' : 'Show AI Avatar'}
+                        >
+                            <UserCircle2 size={20} />
+                            {showAvatar && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-2px',
+                                    right: '-2px',
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    background: '#6366f1',
+                                    border: '2px solid white'
+                                }} />
+                            )}
+                        </button>
+
                         <button
                             onClick={() => sendMessage()}
                             disabled={!inputMessage.trim() || isLoading || isStarting}
@@ -1426,6 +1594,39 @@ export default function VakilFriendChat() {
                     </div>
                 </div>
             </div>
+
+            {/* 3D Avatar (Right Side) */}
+            {showAvatar && (
+                <div style={{
+                    flex: '1',
+                    background: '#080a0f',
+                    borderRadius: '1.25rem',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minHeight: '600px', // matches chat height roughly
+                }}>
+                    {/* Render Avatar Panel inline, removing its portal wrapper later or handling it specially */}
+                    <AvatarPanel
+                        state={avatarState}
+                        onClose={() => {
+                            setShowAvatar(false);
+                            window.speechSynthesis.cancel();
+                        }}
+                        isRecording={isRecording}
+                        isListeningForCommand={isListeningForCommand}
+                        startRecording={startRecording}
+                        stopRecording={stopRecording}
+                        inputMessage={inputMessage}
+                        language={language}
+                        setLanguage={setLanguage}
+                        inline={true} // pass a prop that we will use to not use portal
+                    />
+                </div>
+            )}
+        </div>
 
             {/* Keyframes for animations */}
             <style>{`
