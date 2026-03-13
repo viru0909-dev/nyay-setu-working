@@ -29,6 +29,7 @@ export default function AvatarPanel({
     inputMessage,
     language,
     setLanguage,
+    audioData,
     inline = false
 }) {
     const [entering, setEntering] = useState(true);
@@ -133,7 +134,7 @@ export default function AvatarPanel({
 
             {/* 3D Canvas — fills remaining space */}
             <div style={{ flex: 1, position: 'relative' }}>
-                <VakilAvatar3D state={state} />
+                <VakilAvatar3D state={state} audioData={audioData} />
 
                 {/* Language Selector (Top Left) */}
                 <div style={{
