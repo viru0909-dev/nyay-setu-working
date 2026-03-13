@@ -27,6 +27,7 @@ export default function VakilFriendChat() {
     const [isRecording, setIsRecording] = useState(false);
     const [isListeningForCommand, setIsListeningForCommand] = useState(false); // New wake word state
     const [speakingIndex, setSpeakingIndex] = useState(null); // Track which message is speaking
+    const [audioData, setAudioData] = useState(null); // Add audioData state for 3D Avatar lip sync
     const [avatarState, setAvatarState] = useState('idle');
     const [showAvatar, setShowAvatar] = useState(false);
 
@@ -398,12 +399,30 @@ export default function VakilFriendChat() {
         // If currently speaking THIS message, stop it
         if (speakingIndex === index && index !== -1) {
             window.speechSynthesis.cancel();
+
+            // Generate simulated audio data for lip-sync
+            let animationFrameId;
+            const simulateLipSync = () => {
+                const data = new Float32Array(32);
+                for(let i=0; i<32; i++) data[i] = Math.random() * 0.8 + 0.1;
+                setAudioData(data);
+                animationFrameId = requestAnimationFrame(simulateLipSync);
+            };
             setSpeakingIndex(null);
             return;
         }
 
         // Otherwise stop whatever was speaking and start this
         window.speechSynthesis.cancel();
+
+            // Generate simulated audio data for lip-sync
+            let animationFrameId;
+            const simulateLipSync = () => {
+                const data = new Float32Array(32);
+                for(let i=0; i<32; i++) data[i] = Math.random() * 0.8 + 0.1;
+                setAudioData(data);
+                animationFrameId = requestAnimationFrame(simulateLipSync);
+            };
 
         const utterance = new SpeechSynthesisUtterance(text);
 
@@ -1614,6 +1633,15 @@ export default function VakilFriendChat() {
                         onClose={() => {
                             setShowAvatar(false);
                             window.speechSynthesis.cancel();
+
+            // Generate simulated audio data for lip-sync
+            let animationFrameId;
+            const simulateLipSync = () => {
+                const data = new Float32Array(32);
+                for(let i=0; i<32; i++) data[i] = Math.random() * 0.8 + 0.1;
+                setAudioData(data);
+                animationFrameId = requestAnimationFrame(simulateLipSync);
+            };
                         }}
                         isRecording={isRecording}
                         isListeningForCommand={isListeningForCommand}
@@ -1622,6 +1650,7 @@ export default function VakilFriendChat() {
                         inputMessage={inputMessage}
                         language={language}
                         setLanguage={setLanguage}
+                        audioData={audioData}
                         inline={true} // pass a prop that we will use to not use portal
                     />
                 </div>
