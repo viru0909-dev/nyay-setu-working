@@ -75,3 +75,4 @@ mvnw.cmd
 # Test
 coverage/
 .nyc_output/
+nlp-orchestrator/.env

@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+sse-starlette
+httpx
+groq
+google-generativeai
+python-dotenv
+pydantic
+opencv-python-headless
+pydantic
+sqlalchemy
+psycopg2-binary

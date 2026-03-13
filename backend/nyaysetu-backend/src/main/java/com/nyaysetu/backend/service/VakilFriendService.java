@@ -59,6 +59,7 @@ public class VakilFriendService {
     private final OllamaService ollamaService;
     private final BhashiniService bhashiniService;
     private final VakilFriendDocumentService vakilFriendDocumentService;
+    private final RagService ragService;
     
 
     
@@ -279,8 +280,17 @@ public class VakilFriendService {
         userMsg.put("content", englishMessage); // Storing English
         conversation.add(userMsg);
 
+        // Retrieve relevant legal context from Vector Database using English query
+        String ragContext = "";
+        try {
+            ragContext = ragService.findRelevantContext(englishMessage, 3);
+            log.info("RAG Context retrieved for query: {}", englishMessage);
+        } catch (Exception e) {
+            log.warn("Failed to retrieve RAG context", e);
+        }
+
         // Get AI response (English)
-        String aiResponseEnglish = getAIResponse(conversation);
+        String aiResponseEnglish = getAIResponse(conversation, ragContext);
 
         // Check for specific "Complete Filing" instruction in AI response
         // Sometimes AI strictly follows the prompt, sometimes it chats.
@@ -491,37 +501,44 @@ public class VakilFriendService {
         return caseRepository.save(caseEntity);
     }
 
-    private String getAIResponse(List<Map<String, String>> conversation) {
+    private String getAIResponse(List<Map<String, String>> conversation, String ragContext) {
         // Log key presence (safely)
         if (groqApiKey == null || groqApiKey.trim().isEmpty()) {
             log.warn("⚠️ Groq API key is missing or empty. Falling back to scripted responses.");
         } else {
             try {
-                String groqResponse = callGroqAPI(conversation);
+                String groqResponse = callGroqAPI(conversation, ragContext);
                 if (groqResponse != null && !groqResponse.trim().isEmpty()) {
                     log.info("✅ Groq AI response received successfully.");
                     return groqResponse;
                 }
             } catch (Exception e) {
                 log.error("❌ Groq API error: {}. Falling back to basic assistance.", e.getMessage());
+                return getSmartFallbackResponse(conversation, "API Error: " + e.getMessage());
             }
         }
         
         // Final fallback - only used if AI is offline
-        return getSmartFallbackResponse(conversation);
+        return getSmartFallbackResponse(conversation, "No API Key");
     }
     
     /**
      * Call Groq API for full conversational AI (OpenAI-compatible format)
      */
-    private String callGroqAPI(List<Map<String, String>> conversation) throws Exception {
+    private String callGroqAPI(List<Map<String, String>> conversation, String ragContext) throws Exception {
         // Build messages array
         ArrayNode messagesArray = objectMapper.createArrayNode();
         
         // Add system message
         ObjectNode systemMsg = objectMapper.createObjectNode();
         systemMsg.put("role", "system");
-        systemMsg.put("content", SYSTEM_PROMPT);
+        
+        String finalSystemPrompt = SYSTEM_PROMPT;
+        if (ragContext != null && !ragContext.isEmpty() && !ragContext.equals("No specific legal context found.")) {
+            finalSystemPrompt += "\n\n### CRITICAL INDIAN LEGAL CONTEXT RELEVANT TO THIS USER ###\n" + ragContext + "\n\nUse this law to guide the user accurately.";
+        }
+        
+        systemMsg.put("content", finalSystemPrompt);
         messagesArray.add(systemMsg);
         
         // Add conversation history
@@ -566,14 +583,13 @@ public class VakilFriendService {
     /**
      * Smart fallback when API is unavailable
      */
-    private String getSmartFallbackResponse(List<Map<String, String>> conversation) {
+    private String getSmartFallbackResponse(List<Map<String, String>> conversation, String errorDetails) {
         int messageCount = conversation.size();
         
         // Return a response that encourages the user while the AI service is restored
-        return "I'm currently having a bit of trouble connecting to my central legal brain, but I'm still here to help! " +
+        return "I'm currently having a bit of trouble connecting to my central legal brain (" + errorDetails + "). " +
                "Please provide the details of your case (what happened, who is involved, and any evidence you have). " +
-               "Once our connection is stronger, I will summarize everything for you to file. " +
-               "\n\n(Tip: Ensure your GROQ_API_KEY is active!)";
+               "Once our connection is restored, I will process everything for you.";
     }
 
     /**
@@ -838,7 +854,7 @@ public class VakilFriendService {
                 return null; // Don't generate title for empty sessions
             }
             
-            String title = callGroqAPI(shortConversation);
+            String title = callGroqAPI(shortConversation, "");
             String trimmedTitle = (title != null && !title.trim().isEmpty()) ? title.trim() : "Legal Discussion";
             
             // Safety truncate to ensure it fits even if DB wasn't updated or for other constraints
@@ -897,7 +913,7 @@ public class VakilFriendService {
             prompt.add(userMsg);
             
             // Call AI
-            String jsonResponse = callGroqAPI(prompt);
+            String jsonResponse = callGroqAPI(prompt, "");
             
             // Parse JSON Response
             try {

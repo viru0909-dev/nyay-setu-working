@@ -5,7 +5,7 @@ import {
     Home, FileText, FolderOpen, Upload, Brain,
     Archive, Video, User, Users, Briefcase,
     Gavel, BarChart3, Settings, Menu, X,
-    Scale, MessageSquare, Calendar, Bot, TrendingUp,
+    Scale, MessageSquare, Calendar, Bot, TrendingUp, Search,
     WifiOff
 } from 'lucide-react';
 
@@ -17,6 +17,7 @@ const getRoleMenuItems = (t) => ({
         { icon: FolderOpen, label: t('dashboard:sidebar.litigant.caseDiary'), path: '/litigant/case-diary' },
         { icon: Video, label: t('dashboard:sidebar.litigant.hearings'), path: '/litigant/hearings' },
         { icon: MessageSquare, label: t('dashboard:sidebar.litigant.lawyerChat'), path: '/litigant/chat' },
+        { icon: Search, label: t('dashboard:sidebar.litigant.forensicAnalysis'), path: '/litigant/forensics' },
         { icon: User, label: t('dashboard:sidebar.litigant.profile'), path: '/litigant/profile' }
     ],
     LAWYER: [
