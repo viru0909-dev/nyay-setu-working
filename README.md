@@ -1,4 +1,4 @@
-# NyaySetu 🏛️
+# Nyay Saarthi 🏛️
 
 **AI-Powered Digital Judiciary Platform for India**
 
