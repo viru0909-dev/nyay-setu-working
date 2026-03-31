@@ -43,7 +43,7 @@
 **3 MAJOR JUDICIAL CHALLENGES:**
 
 1. **Inaccessibility** - 95% of citizens can't afford lawyers (₹15,000-₹30,000 per case)
-2. **Case Backlog** - 4.5 crore pending cases in Indian courts
+2. **Case Backlog** - 5.3crore pending cases in Indian courts
 3. **Inefficiency** - Judges spend 6-8 hours/day just reading case files
 
 ### Our Solution
