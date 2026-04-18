@@ -35,6 +35,12 @@ yarn-error.log*
 .env.*.local
 **/.env
 **/.env.local
+.venv
+.venv/
+**/.venv/
+venv
+venv/
+**/venv/
 *.key
 *.pem
 
