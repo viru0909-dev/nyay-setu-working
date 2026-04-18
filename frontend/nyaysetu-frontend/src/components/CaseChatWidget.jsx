@@ -108,7 +108,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                 }}
                 onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                title="Ask Vakil Friend about this case"
+                title="Ask Nyay Saarthi about this case"
             >
                 <Sparkles size={28} />
             </button>
@@ -148,7 +148,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <Sparkles size={20} color="white" />
                     <div>
-                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '600', color: 'white' }}>Vakil Friend</h3>
+                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '600', color: 'white' }}>Nyay Saarthi</h3>
                         <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.9)' }}>AI Case Assistant</p>
                     </div>
                 </div>

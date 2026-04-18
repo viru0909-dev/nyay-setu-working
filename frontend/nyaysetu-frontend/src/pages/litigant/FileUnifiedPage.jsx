@@ -76,7 +76,7 @@ export default function FileUnifiedPage() {
 
         } catch (e) {
             console.error(e);
-            alert("Vakil Friend is having trouble connecting right now. Please try again.");
+            alert("Nyay Saarthi is having trouble connecting right now. Please try again.");
         } finally {
             setAiThinking(false);
         }
@@ -308,7 +308,7 @@ export default function FileUnifiedPage() {
                         animation: 'pulse 2s infinite'
                     }}
                 >
-                    <Sparkles size={20} /> Ask Vakil Friend
+                    <Sparkles size={20} /> Ask Nyay Saarthi
                 </button>
                 <style>{`@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); } }`}</style>
             </div>
@@ -621,7 +621,7 @@ export default function FileUnifiedPage() {
                                     <Bot size={28} color="white" />
                                 </div>
                                 <div>
-                                    <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>Vakil Friend Assist</h2>
+                                    <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>Nyay Saarthi Assist</h2>
                                     <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Describe your situation, I'll help you file.</p>
                                 </div>
                             </div>

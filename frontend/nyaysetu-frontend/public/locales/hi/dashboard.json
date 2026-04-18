@@ -3,7 +3,7 @@
         "collapseSidebar": "साइडबार छोटा करें",
         "litigant": {
             "dashboard": "डैशबोर्ड",
-            "vakilFriendAI": "वकील फ्रेंड AI",
+            "vakilFriendAI": "न्याय सारथी",
             "fileCaseFIR": "केस / FIR दर्ज करें",
             "caseDiary": "केस डायरी",
             "hearings": "सुनवाई",
@@ -54,7 +54,7 @@
     },
     "litigant": {
         "fileCaseFIR": "केस / FIR दर्ज करें",
-        "fileCaseDesc": "वकील फ्रेंड की AI सहायता से नागरिक मामला या आपराधिक FIR दर्ज करें",
+        "fileCaseDesc": "न्याय सारथी की AI सहायता से नागरिक मामला या आपराधिक FIR दर्ज करें",
         "getStarted": "शुरू करें",
         "pendingApprovals": "लंबित अनुमोदन",
         "reviewDraft": "ड्राफ्ट समीक्षा",

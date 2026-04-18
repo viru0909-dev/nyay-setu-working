@@ -431,7 +431,7 @@ function OverviewTab({ caseData, onHireLawyer }) {
                             }}>
                                 <Sparkles size={20} style={{ color: 'var(--color-primary)' }} />
                             </div>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Vakil Friend Analysis</h3>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Nyay Saarthi Analysis</h3>
                         </div>
                         <div style={{ lineHeight: '1.8', color: 'var(--text-main)', fontSize: '1rem' }}>
                             <ReactMarkdown>{caseData.aiGeneratedSummary}</ReactMarkdown>
@@ -456,7 +456,7 @@ function OverviewTab({ caseData, onHireLawyer }) {
                         </div>
                         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
                             {caseData.aiGeneratedSummary && caseData.status === 'PENDING'
-                                ? 'Vakil Friend has generated a case analysis. Approve it to create a formal case draft.'
+                                ? 'Nyay Saarthi has generated a case analysis. Approve it to create a formal case draft.'
                                 : 'Your lawyer has submitted a draft petition. Please review and approve it to trigger the "Submit to Court" action for your lawyer.'}
                         </p>
                         <div style={{ display: 'flex', gap: '1rem' }}>

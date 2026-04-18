@@ -10,3 +10,5 @@ opencv-python-headless
 pydantic
 sqlalchemy
 psycopg2-binary
+aiohttp
+Pillow
