@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="./docs/assets/banner.png" alt="Nyay Saarthi Banner" width="900" />
-</p>
-
 <h1 align="center">Nyay Saarthi</h1>
 
 <p align="center">
@@ -93,7 +89,7 @@ We firmly believe in open source and we welcome your contributions. Whether you 
         <sub><b>Virendra Gadekar</b></sub>
       </a>
       <br />
-      <a href="https://github.com/viru0909-dev/nyay-setu-working/commits?author=viru0909-dev" title="Code">💻</a>
+      <a href="https://github.com/viru0909-dev/nyay-setu-working/commits?author=viru0909-dev" title="Code"></a>
     </td>
     <!-- Add new contributors here -->
   </tr>
