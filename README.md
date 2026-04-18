@@ -1,32 +1,54 @@
-# Nyay Saarthi 🏛️
+<p align="center">
+  <img src="./docs/assets/banner.png" alt="Nyay Saarthi Banner" width="900" />
+</p>
 
-Nyay Saarthi is a digital judiciary platform for India aimed at bridging the gap between citizens and the legal system. It provides an AI-powered legal assistant, an end-to-end case management dashboard, and secure virtual courts to make justice accessible, affordable, and fast.
+<h1 align="center">Nyay Saarthi</h1>
 
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-success)](https://github.com/viru0909-dev/nyay-setu-working)
-[![AI Powered](https://img.shields.io/badge/AI-Groq%20Llama%203.1-orange)](https://groq.com)
-[![Full Stack](https://img.shields.io/badge/Stack-Spring%20Boot%20%7C%20React-blue)](https://github.com/viru0909-dev/nyay-setu-working)
-[![Open Source](https://img.shields.io/badge/Open%20Source-Welcome-%234caf50)](#-contributing)
+<p align="center">
+  <em>A Digital Judiciary Platform for India</em>
+</p>
 
-Because over 90% of citizens can't afford legal fees and courts face a staggering case backlog, this platform is built to drastically automate the initial friction of filings and court proceedings. 
+<p align="center">
+  <a href="https://github.com/viru0909-dev/nyay-setu-working">
+    <img src="https://img.shields.io/badge/Status-Production%20Ready-success" alt="Status" />
+  </a>
+  <a href="https://groq.com">
+    <img src="https://img.shields.io/badge/AI-Groq%20Llama%203.1-orange" alt="AI Powered" />
+  </a>
+  <a href="https://github.com/viru0909-dev/nyay-setu-working">
+    <img src="https://img.shields.io/badge/Stack-Spring%20Boot%20%7C%20React-blue" alt="Full Stack" />
+  </a>
+  <a href="#contributors">
+    <img src="https://img.shields.io/badge/Open%20Source-Welcome-%234caf50" alt="Open Source" />
+  </a>
+</p>
 
-🌐 **Live Demo:** [nyaysetu-lovat.vercel.app](https://nyaysetu-lovat.vercel.app/)
+<hr>
 
-## ✨ Key Features
+> **Mission Statement**
+> 
+> Nyay Saarthi bridges the gap between citizens and the legal system. It provides an AI-powered legal assistant, an end-to-end case management dashboard, and secure virtual courts to make justice accessible, affordable, and fast.
 
-- **Vakil Friend:** An integrated AI legal companion that converses in plain language to help citizens file cases, check documents, and understand their rights—entirely free.
-- **Unified Dashboards:** Tailored experiences and management portals for Litigants, Lawyers, Judges, and Police across the lifecycle of a case.
-- **Evidence Vault:** Digital evidence uploads baked with SHA-256 hashing to ensure tamper-proof, legally compliant record keeping.
-- **Digital FIR Handling:** Allows police to upload first information reports, using AI to instantly summarize them and draft charge sheets.
-- **Virtual Courtrooms:** Native WebRTC-based video conferencing integrated directly into the case timeline for remote hearings.
+Because a large percentage of citizens cannot afford legal fees and courts face a staggering case backlog, this platform is built to automate the initial friction of filings and court proceedings. 
 
-## 🛠️ Built With
+**Live Demo:** [nyaysetu-lovat.vercel.app](https://nyaysetu-lovat.vercel.app/)
 
-- **Frontend:** React, Vite, Zustand, Tailwind/CSS variables (PWA ready).
-- **Backend:** Java 17, Spring Boot, Spring Security (JWT), PostgreSQL.
-- **AI Infrastructure:** Groq API (Llama 3.1) for extreme low-latency intelligence, and local Ollama backups for strict offline privacy.
+## Key Features
+
+- **Vakil Friend:** An integrated AI legal companion that converses in plain language to help citizens file cases, check documents, and understand their rights entirely for free.
+- **Unified Dashboards:** Tailored experiences and management portals designed for Litigants, Lawyers, Judges, and Police personnel across the lifecycle of a case.
+- **Evidence Vault:** Digital evidence uploads verified with SHA-256 hashing to ensure a tamper-proof and legally compliant record keeping process.
+- **Digital FIR Handling:** Allows police to securely upload first information reports, using AI to instantly summarize them and draft charge sheets.
+- **Virtual Courtrooms:** Native WebRTC-based video conferencing integrated directly into the case timeline for seamless remote hearings.
+
+## Built With
+
+- **Frontend:** React, Vite, Zustand, Tailwind and CSS Variables (PWA Ready)
+- **Backend:** Java 17, Spring Boot, Spring Security (JWT), PostgreSQL
+- **AI Infrastructure:** Groq API (Llama 3.1) for extreme low-latency processing, backed by local Ollama instances for strict offline privacy guarantees.
 - **Storage:** Local secure hashing block storage.
 
-## 🚀 Quick Start
+## Quick Start
 
 Getting started is simple. To spin up the platform locally:
 
@@ -45,29 +67,46 @@ cd ../../backend/nyaysetu-backend
 mvn spring-boot:run
 ```
 
-**Need the full setup details?** Check out our [Detailed Setup Guide](./docs/setup.md) for database queries, environment variables, and Docker information.
+**Need the full setup details?** Check out the [Detailed Setup Guide](./docs/setup.md) for database queries, environment variables, and Docker information.
 
-## 📚 Documentation
+## Documentation
 
-Dive deeper into how Nyay Saarthi ticks:
+Dive deeper into how Nyay Saarthi operates by checking our dedicated technical docs:
 
-- [**System Architecture & Diagrams**](./docs/architecture/overview.md)
-- [**AI Integration Guide**](./AI_INTEGRATION_GUIDE.md)
-- [**API Endpoints & Specs**](./SYSTEM_DOCUMENTATION.md)
-- [**Detailed Setup & Env Config**](./docs/setup.md)
+- [System Architecture & Diagrams](./docs/architecture/overview.md)
+- [AI Integration Guide](./AI_INTEGRATION_GUIDE.md)
+- [API Endpoints & Specs](./SYSTEM_DOCUMENTATION.md)
+- [Detailed Setup & Configuration](./docs/setup.md)
 
-## 🤝 Contributing
+## Contributors
 
-We strongly believe in open source, and **we welcome contributions!** Whether you're here from GSSoC or just want to help democratize legal tech, we'd love to have you.
+We firmly believe in open source and we welcome your contributions. Whether you are here from GSSoC or you simply want to help democratize legal technology, we would love to have you on board!
 
-To get started with contributing, please read our [**Contributing Guidelines**](./CONTRIBUTING.md) which explains our simple branching, committing, and PR approval process.
+<br>
 
-Don't have a specific issue in mind yet? Check our [Open Issues Tracker](https://github.com/viru0909-dev/nyay-setu-working/issues) for `good first issue` tags.
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/viru0909-dev">
+        <img src="https://github.com/viru0909-dev.png" width="100px;" alt="Virendra Gadekar"/>
+        <br />
+        <sub><b>Virendra Gadekar</b></sub>
+      </a>
+      <br />
+      <a href="https://github.com/viru0909-dev/nyay-setu-working/commits?author=viru0909-dev" title="Code">💻</a>
+    </td>
+    <!-- Add new contributors here -->
+  </tr>
+</table>
 
-## ⚖️ License & Contact
+<br>
 
-This software is maintained by Virendra Gadekar and contributors.  
-If you have questions or want to partner on deployment, reach out via [LinkedIn](https://linkedin.com/in/virendra-gadekar) or check out the [GitHub Profile](https://github.com/viru0909-dev).
+To get started with contributing, please read our [Contributing Guidelines](./CONTRIBUTING.md) which explains our branching strategy, local setup, and PR approval workflow.
 
----
-*Built with ❤️ for a More Accessible Indian Judiciary.*
+You can also check our [Open Issues Tracker](https://github.com/viru0909-dev/nyay-setu-working/issues) for `good first issue` tags.
+
+<hr>
+
+<p align="center">
+  <em>Built with purpose for a more accessible Indian Judiciary.</em>
+</p>
