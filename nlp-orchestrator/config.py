@@ -12,8 +12,12 @@ GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
 GEMINI_API_KEY: str = os.getenv("GOOGLE_GEMINI_API_KEY", "")
 
 # Model names
-GROQ_MODEL_FAST: str = "llama3-8b-8192"          # Fast, lightweight
+GROQ_MODEL_FAST: str = "llama-3.3-70b-versatile"   # Current recommended model
 GEMINI_MODEL: str = "gemini-1.5-flash"             # Fast + deep reasoning
+
+# Indian Kanoon API
+INDIAN_KANOON_TOKEN: str = os.getenv("INDIAN_KANOON_TOKEN", "")
+INDIAN_KANOON_API_URL: str = "https://api.indiankanoon.org"
 
 # CORS
 FRONTEND_ORIGIN: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")

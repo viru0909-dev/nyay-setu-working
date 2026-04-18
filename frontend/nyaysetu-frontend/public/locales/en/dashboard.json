@@ -3,7 +3,7 @@
         "collapseSidebar": "Collapse Sidebar",
         "litigant": {
             "dashboard": "Dashboard",
-            "vakilFriendAI": "Vakil Friend AI",
+            "vakilFriendAI": "Nyay Saarthi",
             "fileCaseFIR": "File Case / FIR",
             "caseDiary": "Case Diary",
             "hearings": "Hearings",
@@ -55,7 +55,7 @@
     },
     "litigant": {
         "fileCaseFIR": "File Case / FIR",
-        "fileCaseDesc": "File a civil case or criminal FIR with AI assistance from Vakil Friend",
+        "fileCaseDesc": "File a civil case or criminal FIR with AI assistance from Nyay Saarthi",
         "getStarted": "Get Started",
         "pendingApprovals": "Pending Approvals",
         "reviewDraft": "Review Draft",

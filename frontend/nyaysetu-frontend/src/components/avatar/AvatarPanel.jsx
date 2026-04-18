@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Sparkles, Mic, StopCircle, Globe } from 'lucide-react';
 import VakilAvatar3D from './VakilAvatar3D';
+import ReasoningPanel from './ReasoningPanel';
 
 const stateLabels = {
     idle: 'Online — Ready to assist',
@@ -30,7 +31,11 @@ export default function AvatarPanel({
     language,
     setLanguage,
     audioData,
-    inline = false
+    inline = false,
+    reasoningStages = {},
+    reasoningText = '',
+    kanoonResults = [],
+    isDeepResearching = false
 }) {
     const [entering, setEntering] = useState(true);
 
@@ -92,7 +97,7 @@ export default function AvatarPanel({
                             color: inline ? '#1e293b' : '#f1f5f9',
                             letterSpacing: '-0.01em'
                         }}>
-                            Vakil-Friend AI
+                            Nyay Saarthi
                         </h2>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
                             <div style={{
@@ -136,6 +141,16 @@ export default function AvatarPanel({
             <div style={{ flex: 1, position: 'relative' }}>
                 <VakilAvatar3D state={state} audioData={audioData} />
 
+                {/* Deep Research Reasoning Panel */}
+                <ReasoningPanel
+                    stages={reasoningStages}
+                    reasoningText={reasoningText}
+                    kanoonResults={kanoonResults}
+                    isActive={isDeepResearching}
+                />
+
+
+
                 {/* Language Selector (Top Left) */}
                 <div style={{
                     position: 'absolute',
@@ -150,7 +165,8 @@ export default function AvatarPanel({
                     alignItems: 'center',
                     gap: '0.5rem',
                     color: inline ? '#1e293b' : '#f1f5f9',
-                    boxShadow: inline ? '0 4px 6px -1px rgba(0, 0, 0, 0.05)' : 'none'
+                    boxShadow: inline ? '0 4px 6px -1px rgba(0, 0, 0, 0.05)' : 'none',
+                    zIndex: 20
                 }}>
                     <Globe size={16} color="#818cf8" />
                     <select
@@ -186,13 +202,14 @@ export default function AvatarPanel({
                 {isRecording && (
                     <div style={{
                         position: 'absolute',
-                        top: '25%',
+                        bottom: '22%',
                         left: '50%',
-                        transform: 'translate(-50%, -50%)',
+                        transform: 'translateX(-50%)',
                         width: '80%',
                         maxWidth: '600px',
                         textAlign: 'center',
-                        pointerEvents: 'none'
+                        pointerEvents: 'none',
+                        zIndex: 15
                     }}>
                         <div style={{
                             background: inline ? 'rgba(255,255,255,0.9)' : (isListeningForCommand ? 'rgba(239, 68, 68, 0.15)' : 'rgba(0,0,0,0.5)'),
@@ -230,7 +247,7 @@ export default function AvatarPanel({
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    padding: '6rem 2rem 2.5rem',
+                    padding: '6rem 2rem 1.5rem',
                     background: inline ? 'linear-gradient(transparent, rgba(255,255,255,0.95) 75%)' : 'linear-gradient(transparent, rgba(8,10,15,0.95) 75%)',
                     display: 'flex',
                     flexDirection: 'column',
@@ -298,15 +315,17 @@ export default function AvatarPanel({
                         textTransform: 'uppercase',
                         marginBottom: '0.25rem'
                     }}>
-                        Vakil-Friend AI
+                        Nyay Saarthi
                     </div>
                     <div style={{
                         fontSize: '0.8rem',
                         color: inline ? '#64748b' : '#64748b',
-                        fontWeight: '500'
+                        fontWeight: '500',
+                        marginBottom: '1rem'
                     }}>
                         Your AI-Powered Legal Assistant
                     </div>
+
                 </div>
             </div>
 

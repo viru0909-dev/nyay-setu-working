@@ -99,7 +99,7 @@ def get_interim_messages(query: str, count: int = 3) -> list[str]:
 
 
 HINGLISH_CONVERSION_PROMPT = """You are converting a formal English legal answer into a friendly, 
-conversational Hinglish dialogue spoken by an AI legal assistant avatar named "Vakil-Friend".
+conversational Hinglish dialogue spoken by an AI legal assistant avatar named "Nyay Saarthi".
 
 Rules:
 - Mix Hindi and English naturally, as a bilingual Indian would speak

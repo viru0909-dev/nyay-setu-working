@@ -31,6 +31,13 @@ export default function VakilFriendChat() {
     const [avatarState, setAvatarState] = useState('idle');
     const [showAvatar, setShowAvatar] = useState(false);
 
+    // Deep Research State
+    const [isDeepResearching, setIsDeepResearching] = useState(false);
+    const [reasoningStages, setReasoningStages] = useState({});
+    const [reasoningText, setReasoningText] = useState('');
+    const [kanoonResults, setKanoonResults] = useState([]);
+    const deepResearchAbortRef = useRef(null);
+
     // Wake Word Buffers
     const commandBufferRef = useRef('');
     const silenceTimerRef = useRef(null);
@@ -181,18 +188,43 @@ export default function VakilFriendChat() {
             setSessionId(response.data.sessionId);
             setMessages([{
                 role: 'assistant',
-                content: response.data.message || "🙏 Namaste! I am Vakil-Friend, your AI legal assistant. How can I help you today?"
+                content: response.data.message || "🙏 Namaste! I am Nyay Saarthi, your AI legal assistant. How can I help you today?"
             }]);
         } catch (err) {
             console.error('Failed to start session:', err);
             setError('Failed to connect. Please make sure the backend is running.');
             setMessages([{
                 role: 'assistant',
-                content: '🙏 Namaste! I am Vakil-Friend (offline mode). The backend server is not responding. Please start the backend and refresh.'
+                content: '🙏 Namaste! I am Nyay Saarthi (offline mode). The backend server is not responding. Please start the backend and refresh.'
             }]);
         } finally {
             setIsStarting(false);
         }
+    };
+
+    // Detect if a query is substantive enough for deep legal research
+    const isLegalQuery = (text) => {
+        const lower = text.toLowerCase().trim();
+        // Skip short messages (greetings, single words)
+        if (lower.split(/\s+/).length < 5) return false;
+        // Skip obvious greetings / casual
+        const casualPatterns = /^(hi|hello|hey|namaste|thanks|thank you|ok|okay|yes|no|bye|good morning|good evening|good night|how are you)/i;
+        if (casualPatterns.test(lower)) return false;
+        // Check for legal keywords
+        const legalKeywords = [
+            'ipc', 'bns', 'crpc', 'bnss', 'section', 'act', 'law', 'legal', 'court',
+            'case', 'crime', 'criminal', 'civil', 'penalty', 'punishment', 'bail',
+            'fir', 'complaint', 'police', 'advocate', 'lawyer', 'judge', 'judgment',
+            'rights', 'divorce', 'custody', 'property', 'tenant', 'landlord',
+            'accident', 'compensation', 'insurance', 'cheating', 'fraud', 'theft',
+            'murder', 'assault', 'dowry', 'harassment', 'defamation', 'negligence',
+            'contract', 'agreement', 'eviction', 'maintenance', 'alimony',
+            'consumer', 'arbitration', 'appeal', 'writ', 'petition', 'suo motu',
+            'motor vehicle', 'drunk driving', 'cybercrime', 'domestic violence',
+            'what is the', 'how to file', 'can i', 'is it legal', 'what are my rights',
+            'what happens if', 'what is punishment', 'how to get'
+        ];
+        return legalKeywords.some(kw => lower.includes(kw));
     };
 
     const sendMessage = async (audioData = null, overrideText = null) => {
@@ -273,6 +305,118 @@ export default function VakilFriendChat() {
         } finally {
             setIsLoading(false);
         }
+
+        // Trigger deep research ONLY for substantive legal queries when avatar is open
+        if (showAvatar && userMessage && isLegalQuery(userMessage)) {
+            startDeepResearch(userMessage);
+        }
+    };
+
+    // Deep Research SSE Connection
+    const startDeepResearch = async (query) => {
+        // Abort any previous deep research
+        if (deepResearchAbortRef.current) {
+            deepResearchAbortRef.current.abort();
+        }
+
+        const abortController = new AbortController();
+        deepResearchAbortRef.current = abortController;
+
+        // Reset state
+        setIsDeepResearching(true);
+        setReasoningStages({});
+        setReasoningText('');
+        setKanoonResults([]);
+
+        try {
+            const response = await fetch('http://localhost:8001/research/deep', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, language }),
+                signal: abortController.signal
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // Keep incomplete line in buffer
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            handleDeepResearchEvent(data);
+                        } catch (e) {
+                            // Ignore JSON parse errors for partial data
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error('Deep research error:', err);
+            }
+        } finally {
+            setIsDeepResearching(false);
+        }
+    };
+
+    const handleDeepResearchEvent = (data) => {
+        const { type, ...payload } = data;
+
+        switch (type) {
+            case 'stage':
+                setReasoningStages(prev => ({
+                    ...prev,
+                    [payload.stage]: { status: payload.status, message: payload.message }
+                }));
+                break;
+
+            case 'kanoon_results':
+                setKanoonResults(payload.results || []);
+                break;
+
+            case 'reasoning':
+                setReasoningText(prev => prev + (prev ? ' ' : '') + payload.text);
+                break;
+
+            case 'avatar_speak':
+                if (showAvatar && payload.message) {
+                    speakText(payload.message, -1);
+                }
+                break;
+
+            case 'final':
+                // Add the deep research answer to chat
+                if (payload.answer) {
+                    let finalContent = payload.answer;
+                    if (payload.citations && payload.citations.length > 0) {
+                        finalContent += '\n\n---\n**📚 Sources from Indian Kanoon:**\n';
+                        payload.citations.forEach(c => {
+                            finalContent += `- [${c.title}](https://indiankanoon.org/doc/${c.doc_id}/)\n`;
+                        });
+                    }
+                    setMessages(prev => [...prev, {
+                        role: 'assistant',
+                        content: finalContent
+                    }]);
+                }
+                break;
+
+            case 'done':
+                // Research complete — stages will show all green
+                break;
+
+            default:
+                break;
+        }
     };
 
     // Browser Native Speech Recognition
@@ -302,16 +446,20 @@ export default function VakilFriendChat() {
         recognition.lang = langMap[language] || 'en-IN';
         recognition.interimResults = true; // Enable real-time transcription
         recognition.maxAlternatives = 1;
+        recognition.continuous = true; // Keep listening until explicitly stopped
+
+        let errorOccurred = false;
 
         recognition.onstart = () => {
             setIsRecording(true);
+            errorOccurred = false;
         };
 
         // Make recognition continuous by automatically restarting it when it ends,
         // UNLESS the user explicitly clicked the Stop button (handled by standard react state unmount)
         recognition.onend = () => {
-            // If the avatar is still open and we want continuous listening
-            if (showAvatar && !mediaRecorderRef.current?.manuallyStopped) {
+            // If we haven't manually stopped AND no error killed it, restart it
+            if (!mediaRecorderRef.current?.manuallyStopped && !errorOccurred) {
                 try {
                     recognition.start();
                 } catch (e) {
@@ -323,9 +471,13 @@ export default function VakilFriendChat() {
             }
         };
 
-        recognition.onError = (event) => {
-            console.error("Speech recognition error", event.error);
-            if (event.error !== 'no-speech') {
+        recognition.onerror = (event) => {
+            errorOccurred = true;
+            console.error("Speech recognition error:", event.error);
+            if (event.error === 'not-allowed') {
+                console.warn("Microphone access denied by browser.");
+                setIsRecording(false);
+            } else if (event.error !== 'no-speech') {
                 setIsRecording(false);
             }
         };
@@ -574,7 +726,7 @@ export default function VakilFriendChat() {
         }]);
 
         try {
-            // Use Vakil Friend AI document analysis
+            // Use Nyay Saarthi AI document analysis
             if (sessionId) {
                 console.log('🔍 Analyzing document with AI...');
                 const response = await vakilFriendAPI.analyzeDocumentForSession(sessionId, file);
@@ -642,7 +794,7 @@ export default function VakilFriendChat() {
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('category', 'EVIDENCE');
-                formData.append('description', `Uploaded during case filing via Vakil-Friend chat`);
+                formData.append('description', `Uploaded during case filing via Nyay Saarthi chat`);
 
                 const token = localStorage.getItem('token');
                 const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
@@ -1132,7 +1284,7 @@ export default function VakilFriendChat() {
                     </button>
                     <div>
                         <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>
-                            Vakil-Friend AI
+                            Nyay Saarthi
                         </h1>
                         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                             Chat with our AI to file your legal case
@@ -1247,7 +1399,7 @@ export default function VakilFriendChat() {
                         </div>
                         <div>
                             <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--color-primary)', margin: 0, letterSpacing: '-0.01em' }}>
-                                Vakil-Friend AI
+                                Nyay Saarthi
                             </h3>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: sessionId ? '#10b981' : '#f59e0b' }} />
@@ -1281,7 +1433,7 @@ export default function VakilFriendChat() {
                             color: 'var(--text-secondary)'
                         }}>
                             <Loader2 size={36} style={{ marginBottom: '1rem', animation: 'spin 1s linear infinite', color: 'var(--color-primary)' }} />
-                            <p>Connecting to Vakil-Friend...</p>
+                            <p>Connecting to Nyay Saarthi...</p>
                         </div>
                     ) : (
                         <>
@@ -1651,7 +1803,11 @@ export default function VakilFriendChat() {
                         language={language}
                         setLanguage={setLanguage}
                         audioData={audioData}
-                        inline={true} // pass a prop that we will use to not use portal
+                        inline={true}
+                        reasoningStages={reasoningStages}
+                        reasoningText={reasoningText}
+                        kanoonResults={kanoonResults}
+                        isDeepResearching={isDeepResearching}
                     />
                 </div>
             )}
