@@ -9,6 +9,8 @@ Nyay Saarthi is a digital judiciary platform for India aimed at bridging the gap
 
 Because over 90% of citizens can't afford legal fees and courts face a staggering case backlog, this platform is built to drastically automate the initial friction of filings and court proceedings. 
 
+🌐 **Live Demo:** [nyaysetu-lovat.vercel.app](https://nyaysetu-lovat.vercel.app/)
+
 ## ✨ Key Features
 
 - **Vakil Friend:** An integrated AI legal companion that converses in plain language to help citizens file cases, check documents, and understand their rights—entirely free.
