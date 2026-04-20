@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # 1.Backend (Spring Boot)
+  backend-spring:
+    build:
+      context: ./backend-spring
+      dockerfile: Dockerfile
+    container_name: spring-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JAVA_OPTS=-Xmx512m -Xms256m  
+    deploy:
+      resources:
+        limits:
+          memory: 768M  
+    restart: always
+
+  # 2. Python (Data/AI/Microservice)
+  backend-python:
+    build:
+      context: ./backend-python
+      dockerfile: Dockerfile
+    container_name: python-service
+    ports:
+      - "5000:5000"
+    environment:
+      - ENV=production
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    restart: always
+
+  # 3. Frontend (React + Nginx)
+  frontend-react:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
+    container_name: react-app
+    ports:
+      - "80:80"
+    depends_on:
+      - backend-spring
+      - backend-python
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    restart: always
+
+networks:
+  default:
+    name: app-network
