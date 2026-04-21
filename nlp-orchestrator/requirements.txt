@@ -3,11 +3,9 @@ uvicorn[standard]
 sse-starlette
 httpx
 groq
-google-generativeai
+google-genai
 python-dotenv
-pydantic
 opencv-python-headless
-pydantic
 sqlalchemy
 psycopg2-binary
 aiohttp
