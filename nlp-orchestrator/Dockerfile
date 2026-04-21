@@ -13,7 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Runtime
 FROM python:3.9-slim
@@ -23,18 +25,16 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-ENV PATH=/root/.local/bin:$PATH
-
-
-COPY --from=builder /root/.local /root/.local
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 COPY . .
 
 # Port for the Python service
-EXPOSE 5000
+EXPOSE 8001
 
 
-# RUN useradd -m appuser && chown -R appuser /app
-# USER appuser
+RUN useradd -m appuser && chown -R appuser /app
+USER appuser
 
 CMD ["python", "main.py"]
