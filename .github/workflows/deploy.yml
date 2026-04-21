@@ -32,7 +32,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: ./backend/nyaysetu-backend
-        push: true
+        push: ${{ github.event_name == 'push' }}
         tags: ghcr.io/${{ github.repository }}/spring-backend:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
@@ -41,7 +41,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: ./nlp-orchestrator
-        push: true
+        push: ${{ github.event_name == 'push' }}
         tags: ghcr.io/${{ github.repository }}/python-service:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
@@ -50,7 +50,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: ./frontend/nyaysetu-frontend
-        push: true
+        push: ${{ github.event_name == 'push' }}
         tags: ghcr.io/${{ github.repository }}/react-frontend:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
