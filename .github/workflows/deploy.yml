@@ -28,7 +28,7 @@ jobs:
     - name: Build and Push Spring Boot
       uses: docker/build-push-action@v5
       with:
-        context: ./backend-spring
+        context: ./backend/nyaysetu-backend
         push: true
         tags: ghcr.io/${{ github.repository }}/spring-backend:latest
         cache-from: type=gha
@@ -37,7 +37,7 @@ jobs:
     - name: Build and Push Python
       uses: docker/build-push-action@v5
       with:
-        context: ./backend-python
+        context: ./nlp-orchestrator
         push: true
         tags: ghcr.io/${{ github.repository }}/python-service:latest
         cache-from: type=gha
@@ -46,7 +46,7 @@ jobs:
     - name: Build and Push React
       uses: docker/build-push-action@v5
       with:
-        context: ./frontend-react
+        context: ./frontend/nyaysetu-frontend
         push: true
         tags: ghcr.io/${{ github.repository }}/react-frontend:latest
         cache-from: type=gha
