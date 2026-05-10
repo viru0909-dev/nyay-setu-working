@@ -79,6 +79,16 @@ def sse_event(event_type: str, data: dict) -> str:
     """Return a JSON-encoded SSE event string."""
     return json.dumps({"type": event_type, **data})
 
+# ─── Query Length Check────────────────────────────────────────────────────────
+
+MAX_QUERY_LENGTH = 2000
+
+def validate_query(query: str):
+    if not query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+    if len(query) > MAX_QUERY_LENGTH:
+        raise HTTPException(status_code=400,
+                             detail=f"Query exceeds maximum length of {MAX_QUERY_LENGTH} characters")
 
 # ─── Core SSE Pipeline ────────────────────────────────────────────────────────
 
@@ -168,8 +178,9 @@ async def analyze_stream(body: LegalQuery, request: Request):
     Primary SSE endpoint — streams the full legal reasoning pipeline.
     Frontend connects using fetch + ReadableStream for real-time updates.
     """
-    if not body.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
+
+    validate_query(body.query)
+    
 
     logger.info(f"[Stream] New query: {body.query[:80]}")
 
@@ -189,8 +200,7 @@ async def analyze_sync(body: LegalQuery):
     Synchronous endpoint — runs the full pipeline and returns all results at once.
     Use only for testing. In production, use /analyze-stream for real-time UX.
     """
-    if not body.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
+    validate_query(body.query)
 
     logger.info(f"[Sync] Analyzing: {body.query[:80]}")
 
@@ -440,8 +450,7 @@ async def deep_research(body: LegalQuery, request: Request):
     Indian Kanoon context. Frontend connects directly to this for
     the reasoning panel + avatar speech updates.
     """
-    if not body.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
+    validate_query(body.query)
 
     logger.info(f"[Deep Research] New query: {body.query[:80]}")
 
