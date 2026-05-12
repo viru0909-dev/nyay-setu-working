@@ -15,11 +15,18 @@ public class HealthController {
     public ResponseEntity<Map<String, Object>> healthCheck() {
         long uptimeMs = ManagementFactory.getRuntimeMXBean().getUptime();
         Duration uptime = Duration.ofMillis(uptimeMs);
+        String version = getClass().getPackage().getImplementationVersion();
+        if (version == null) {
+            version = "dev";
+        }
+        String javaVersion = System.getProperty("java.version");
 
         return ResponseEntity.ok(Map.of(
                 "status", "UP",
                 "service", "nyaysetu-backend",
-                "uptime", String.format("%dh %dm %ds", uptime.toHours(), uptime.toMinutesPart(), uptime.toSecondsPart())
+                "uptime", String.format("%dh %dm %ds", uptime.toHours(), uptime.toMinutesPart(), uptime.toSecondsPart()),
+                "version", version,
+                "java", javaVersion
         ));
     }
 }

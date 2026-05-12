@@ -98,7 +98,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                         const isActive = false; // Add logic if needed
                         return item.isRoute ? (
                             <Link
-                                key={item.label}
+                                key={item.labelKey}
                                 to={item.href}
                                 style={{
                                     color: isActive ? 'var(--color-secondary)' : '#475569',
@@ -115,7 +115,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                             </Link>
                         ) : item.labelKey === 'header.nav.aiAssistant' ? (
                             <button
-                                key={item.label}
+                                key={item.labelKey}
                                 onClick={() => setShowAIModal(true)}
                                 style={{
                                     background: 'none',
@@ -134,7 +134,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                             </button>
                         ) : (
                             <a
-                                key={item.label}
+                                key={item.labelKey}
                                 href={item.href}
                                 style={{
                                     color: '#475569',
@@ -271,7 +271,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                         {navItems.map((item) => (
                             item.isRoute ? (
                                 <Link
-                                    key={item.label}
+                                    key={item.labelKey}
                                     to={item.href}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     style={{
@@ -288,7 +288,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 </Link>
                             ) : item.labelKey === 'header.nav.aiAssistant' ? (
                                 <button
-                                    key={item.label}
+                                    key={item.labelKey}
                                     onClick={() => {
                                         setShowAIModal(true);
                                         setIsMobileMenuOpen(false);
@@ -311,7 +311,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 </button>
                             ) : (
                                 <a
-                                    key={item.label}
+                                    key={item.labelKey}
                                     href={item.href}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     style={{

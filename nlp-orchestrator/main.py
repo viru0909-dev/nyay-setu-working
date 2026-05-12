@@ -170,6 +170,8 @@ async def analyze_stream(body: LegalQuery, request: Request):
     """
     if not body.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
+    if len(body.query) > 2000:
+        raise HTTPException(status_code=400, detail="Query exceeds maximum length of 2000 characters")
 
     logger.info(f"[Stream] New query: {body.query[:80]}")
 
@@ -191,6 +193,8 @@ async def analyze_sync(body: LegalQuery):
     """
     if not body.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
+    if len(body.query) > 2000:
+        raise HTTPException(status_code=400, detail="Query exceeds maximum length of 2000 characters")
 
     logger.info(f"[Sync] Analyzing: {body.query[:80]}")
 
@@ -442,6 +446,8 @@ async def deep_research(body: LegalQuery, request: Request):
     """
     if not body.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
+    if len(body.query) > 2000:
+        raise HTTPException(status_code=400, detail="Query exceeds maximum length of 2000 characters")
 
     logger.info(f"[Deep Research] New query: {body.query[:80]}")
 
