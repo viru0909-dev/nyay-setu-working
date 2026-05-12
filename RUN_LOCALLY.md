@@ -34,7 +34,7 @@ Run these Spring Boot applications in IntelliJ (any order):
 ### 3. Start Frontend (Port 5173)
 
 ```bash
-cd frontend/nyaysetu-frontend
+cd frontend
 npm run dev
 ```
 
@@ -117,7 +117,7 @@ Open: http://localhost:5173
 
 ### Frontend won't start
 ```bash
-cd frontend/nyaysetu-frontend
+cd frontend
 rm -rf node_modules dist .vite
 npm install
 npm run dev

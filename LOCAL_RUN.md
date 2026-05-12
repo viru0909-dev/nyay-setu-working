@@ -33,7 +33,7 @@ psql -U postgres -f local_setup.sql
 ### A. Backend (Spring Boot)
 Open a terminal:
 ```bash
-cd backend/nyaysetu-backend
+cd backend
 mvn spring-boot:run
 ```
 *The database tables will be created automatically via Flyway on the first start.*
@@ -41,7 +41,7 @@ mvn spring-boot:run
 ### B. Frontend (React + Vite)
 Open another terminal:
 ```bash
-cd frontend/nyaysetu-frontend
+cd frontend
 npm install
 npm run dev
 ```
@@ -49,7 +49,7 @@ npm run dev
 ---
 
 ## 🔑 AI Configuration (Optional)
-To use the AI features (Vakil Friend, Brain, etc.), add your **Groq API Key** to `backend/nyaysetu-backend/.env`:
+To use the AI features (Vakil Friend, Brain, etc.), add your **Groq API Key** to `backend/.env`:
 ```env
 GROQ_API_KEY=gsk_your_key_here
 ```

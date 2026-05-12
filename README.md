@@ -54,11 +54,11 @@ git clone https://github.com/viru0909-dev/nyay-setu-working.git
 cd nyay-setu-working
 
 # 2. Run the Frontend
-cd frontend/nyaysetu-frontend
+cd frontend
 npm install && npm run dev
 
 # 3. Run the Backend (in a separate terminal)
-cd ../../backend/nyaysetu-backend
+cd ../backend
 # Make sure to set up your database & env vars first!
 mvn spring-boot:run
 ```

@@ -896,11 +896,11 @@ VITE_GROQ_API_KEY=your_groq_api_key
 ### Development
 ```bash
 # Backend
-cd backend/nyaysetu-backend
+cd backend
 mvn spring-boot:run
 
 # Frontend
-cd frontend/nyaysetu-frontend
+cd frontend
 npm run dev  # Port 5173
 ```
 

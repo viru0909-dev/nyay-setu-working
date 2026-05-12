@@ -31,7 +31,7 @@ jobs:
     - name: Build and Push Spring Boot
       uses: docker/build-push-action@v5
       with:
-        context: ./backend/nyaysetu-backend
+        context: ./backend
         push: ${{ github.event_name == 'push' }}
         tags: ghcr.io/${{ github.repository }}/spring-backend:latest
         cache-from: type=gha
@@ -49,7 +49,7 @@ jobs:
     - name: Build and Push React
       uses: docker/build-push-action@v5
       with:
-        context: ./frontend/nyaysetu-frontend
+        context: ./frontend
         push: ${{ github.event_name == 'push' }}
         tags: ghcr.io/${{ github.repository }}/react-frontend:latest
         cache-from: type=gha

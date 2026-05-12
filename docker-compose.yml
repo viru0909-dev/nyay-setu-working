@@ -3,7 +3,7 @@ services:
   # 1.Backend (Spring Boot)
   backend-spring:
     build:
-      context: ./backend/nyaysetu-backend
+      context: ./backend
       dockerfile: Dockerfile
     container_name: spring-service
     ports:
@@ -36,7 +36,7 @@ services:
   # 3. Frontend (React + Nginx)
   frontend-react:
     build:
-      context: ./frontend/nyaysetu-frontend
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: react-app
     ports:

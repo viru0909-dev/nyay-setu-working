@@ -27,7 +27,7 @@ GRANT ALL PRIVILEGES ON DATABASE nyaysetu_db TO nyaysetu;
 
 Instead of relying on a fragile `.env` file at the root, the backend requires a proper Spring configuration.
 
-Create `backend/nyaysetu-backend/src/main/resources/application.properties` with the following:
+Create `backend/src/main/resources/application.properties` with the following:
 
 ```properties
 # Database
@@ -60,7 +60,7 @@ cors.allowed.origins=http://localhost:5173,http://localhost:4174
 
 **Backend (Spring Boot):**
 ```bash
-cd backend/nyaysetu-backend
+cd backend
 mvn clean install
 mvn spring-boot:run
 ```
@@ -68,7 +68,7 @@ mvn spring-boot:run
 
 **Frontend (React/Vite PWA):**
 ```bash
-cd frontend/nyaysetu-frontend
+cd frontend
 npm install
 npm run dev
 ```

@@ -11,7 +11,7 @@ Wait 2-3 minutes for services to start.
 
 ### 2. Start Frontend Locally
 ```bash
-cd frontend/nyaysetu-frontend
+cd frontend
 npm run dev
 ```
 
