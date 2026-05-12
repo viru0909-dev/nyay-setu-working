@@ -103,7 +103,8 @@ export const documentAPI = {
     analyze: (id) => api.post(`/api/documents/${id}/analyze`),
     getAnalysis: (id) => api.get(`/api/documents/${id}/analysis`),
     hasAnalysis: (id) => api.get(`/api/documents/${id}/has-analysis`),
-    downloadCertificate: (id) => api.get(`/api/documents/${id}/certificate`, { responseType: 'blob' })
+    downloadCertificate: (id) => api.get(`/api/documents/${id}/certificate`, { responseType: 'blob' }),
+    verify: (id) => api.get(`/api/evidence/${id}/verify`),
 };
 
 // Hearing API

@@ -39,6 +39,8 @@ export default function EvidenceVaultPage() {
     const [uploadDescription, setUploadDescription] = useState('');
     const [cases, setCases] = useState([]);
     const [selectedCaseId, setSelectedCaseId] = useState(filterCaseId || '');
+    const [verifyingId, setVerifyingId] = useState(null);
+    const [verifyResults, setVerifyResults] = useState({});
 
     // Document Analysis State
     const [showAnalysisModal, setShowAnalysisModal] = useState(false);
@@ -86,10 +88,8 @@ export default function EvidenceVaultPage() {
                 caseId: selectedCaseId || undefined
             });
 
-            // Refresh evidence list
             await fetchEvidence();
 
-            // Reset form
             setShowUploadModal(false);
             setUploadFile(null);
             setUploadCategory('EVIDENCE');
@@ -139,6 +139,18 @@ export default function EvidenceVaultPage() {
         }
     };
 
+    const handleVerify = async (item) => {
+        setVerifyingId(item.id);
+        try {
+            const response = await documentAPI.verify(item.id);
+            setVerifyResults(prev => ({ ...prev, [item.id]: response.data }));
+        } catch (error) {
+            setVerifyResults(prev => ({ ...prev, [item.id]: { status: 'ERROR' } }));
+        } finally {
+            setVerifyingId(null);
+        }
+    };
+
     const handleViewAnalysis = async (item) => {
         try {
             setIsAnalyzing(true);
@@ -153,7 +165,6 @@ export default function EvidenceVaultPage() {
         }
     };
 
-    // Calculate real stats
     const stats = [
         {
             label: 'Total Files',
@@ -181,7 +192,6 @@ export default function EvidenceVaultPage() {
         },
     ];
 
-    // Filter items by search term
     const filteredItems = evidenceItems.filter(item =>
         item.fileName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.category?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -229,7 +239,6 @@ export default function EvidenceVaultPage() {
                         }}
                         onClick={e => e.stopPropagation()}
                     >
-                        {/* Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -256,7 +265,6 @@ export default function EvidenceVaultPage() {
                             </button>
                         </div>
 
-                        {/* SHA-256 Hash Section */}
                         <div style={{
                             background: '#f8fafc',
                             borderRadius: '1.25rem',
@@ -273,9 +281,7 @@ export default function EvidenceVaultPage() {
                             </div>
                         </div>
 
-                        {/* Status Grid */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                            {/* Validity */}
                             <div style={{ background: 'rgba(16, 185, 129, 0.04)', borderRadius: '1.25rem', padding: '1.25rem 0.75rem', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.15)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                                 <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <CheckCircle size={20} color="#10b981" />
@@ -283,7 +289,6 @@ export default function EvidenceVaultPage() {
                                 <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Validity</div>
                                 <div style={{ color: '#10b981', fontWeight: '800', fontSize: '0.95rem' }}>{documentAnalysis.validityStatus || 'VALID'}</div>
                             </div>
-                            {/* Usefulness */}
                             <div style={{ background: 'rgba(99, 102, 241, 0.04)', borderRadius: '1.25rem', padding: '1.25rem 0.75rem', textAlign: 'center', border: '1px solid rgba(99, 102, 241, 0.15)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                                 <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <Eye size={20} color="#6366f1" />
@@ -291,7 +296,6 @@ export default function EvidenceVaultPage() {
                                 <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Usefulness</div>
                                 <div style={{ color: '#6366f1', fontWeight: '800', fontSize: '0.95rem' }}>{documentAnalysis.usefulnessLevel || 'HIGH'}</div>
                             </div>
-                            {/* Vault Status */}
                             <div style={{ background: '#f8fafc', borderRadius: '1.25rem', padding: '1.25rem 0.75rem', textAlign: 'center', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                                 <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <Shield size={20} color="#64748b" />
@@ -301,7 +305,6 @@ export default function EvidenceVaultPage() {
                             </div>
                         </div>
 
-                        {/* Document Details */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                             <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '1.25rem', border: '1px solid #e2e8f0' }}>
                                 <div style={{ color: '#64748b', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: '700' }}>Document Type</div>
@@ -313,7 +316,6 @@ export default function EvidenceVaultPage() {
                             </div>
                         </div>
 
-                        {/* AI Summary */}
                         <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '1.25rem', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
                             <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.75rem' }}>AI Summary</div>
                             <p style={{ color: '#334155', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
@@ -321,7 +323,6 @@ export default function EvidenceVaultPage() {
                             </p>
                         </div>
 
-                        {/* Key Points */}
                         {documentAnalysis.keyPoints && documentAnalysis.keyPoints.length > 0 && (
                             <div style={{ background: 'rgba(99, 102, 241, 0.03)', padding: '1.5rem', borderRadius: '1.25rem', border: '1px solid rgba(99, 102, 241, 0.1)', marginBottom: '2.4rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', color: '#6366f1' }}>
@@ -389,7 +390,6 @@ export default function EvidenceVaultPage() {
                             </button>
                         </div>
 
-                        {/* File Input */}
                         <div style={{ marginBottom: '1rem' }}>
                             <input
                                 type="file"
@@ -425,7 +425,6 @@ export default function EvidenceVaultPage() {
                             </div>
                         </div>
 
-                        {/* Category */}
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 Category
@@ -450,7 +449,6 @@ export default function EvidenceVaultPage() {
                             </select>
                         </div>
 
-                        {/* Case Selection */}
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 Link to Case (Optional)
@@ -475,7 +473,6 @@ export default function EvidenceVaultPage() {
                             </select>
                         </div>
 
-                        {/* Description */}
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 Description (Optional)
@@ -498,16 +495,13 @@ export default function EvidenceVaultPage() {
                             />
                         </div>
 
-                        {/* Upload Button */}
                         <button
                             onClick={handleUpload}
                             disabled={!uploadFile || uploading}
                             style={{
                                 width: '100%',
                                 padding: '0.875rem',
-                                background: uploadFile && !uploading
-                                    ? 'var(--color-accent)'
-                                    : 'var(--bg-glass)',
+                                background: uploadFile && !uploading ? 'var(--color-accent)' : 'var(--bg-glass)',
                                 color: uploadFile && !uploading ? 'white' : 'var(--text-secondary)',
                                 border: 'none',
                                 borderRadius: '0.75rem',
@@ -648,6 +642,7 @@ export default function EvidenceVaultPage() {
                                     <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800' }}>CATEGORY</th>
                                     <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800' }}>DATE ADDED</th>
                                     <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800' }}>VERIFICATION</th>
+                                    <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800' }}>INTEGRITY CHECK</th>
                                     <th style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800' }}>ACTIONS</th>
                                 </tr>
                             </thead>
@@ -693,8 +688,44 @@ export default function EvidenceVaultPage() {
                                             </div>
                                         </td>
                                         <td style={{ padding: '1rem' }}>
+                                            <button
+                                                onClick={() => handleVerify(item)}
+                                                disabled={verifyingId === item.id}
+                                                style={{
+                                                    background: verifyResults[item.id]?.status === 'VERIFIED'
+                                                        ? 'rgba(16, 185, 129, 0.1)'
+                                                        : verifyResults[item.id]?.status === 'TAMPERED'
+                                                        ? 'rgba(239, 68, 68, 0.1)'
+                                                        : 'rgba(99, 102, 241, 0.1)',
+                                                    border: '1px solid rgba(99, 102, 241, 0.2)',
+                                                    color: verifyResults[item.id]?.status === 'VERIFIED'
+                                                        ? '#10b981'
+                                                        : verifyResults[item.id]?.status === 'TAMPERED'
+                                                        ? '#ef4444'
+                                                        : '#6366f1',
+                                                    borderRadius: '0.5rem',
+                                                    padding: '0.4rem 0.75rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.4rem',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '700',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                {verifyingId === item.id ? (
+                                                    <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                                                ) : verifyResults[item.id]?.status === 'VERIFIED' ? (
+                                                    <><CheckCircle2 size={14} /> Verified</>
+                                                ) : verifyResults[item.id]?.status === 'TAMPERED' ? (
+                                                    <><AlertTriangle size={14} /> Tampered</>
+                                                ) : (
+                                                    <><ShieldCheck size={14} /> Verify</>
+                                                )}
+                                            </button>
+                                        </td>
+                                        <td style={{ padding: '1rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
-                                                {/* AI Insights Button */}
                                                 <button
                                                     onClick={() => handleViewAnalysis(item)}
                                                     disabled={isAnalyzing}
@@ -718,7 +749,6 @@ export default function EvidenceVaultPage() {
                                                     AI Insights
                                                 </button>
 
-                                                {/* Certificate Button (Only for Hashed Documents) */}
                                                 {(item.sha256Hash || item.blockchain) && (
                                                     <button
                                                         onClick={() => handleDownloadCertificate(item)}
@@ -767,7 +797,6 @@ export default function EvidenceVaultPage() {
                 )}
             </div>
 
-            {/* CSS for animations */}
             <style>{`
                 @keyframes spin {
                     from { transform: rotate(0deg); }
