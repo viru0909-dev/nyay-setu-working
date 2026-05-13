@@ -1,6 +1,6 @@
-var encoder = require('./meshopt_encoder.js');
-var decoder = require('./meshopt_decoder.js');
-var { performance } = require('perf_hooks');
+import { MeshoptEncoder as encoder } from './meshopt_encoder.js';
+import { MeshoptDecoder as decoder } from './meshopt_decoder.mjs';
+import { performance } from 'perf_hooks';
 
 process.on('unhandledRejection', (error) => {
 	console.log('unhandledRejection', error);
@@ -16,11 +16,15 @@ var tests = {
 		var N = 1024 * 1024;
 		var data = new Uint8Array(N * 16);
 
-		for (var i = 0; i < N * 16; i += 4) {
-			data[i + 0] = 0;
-			data[i + 1] = (i % 16) * 1;
-			data[i + 2] = (i % 16) * 2;
-			data[i + 3] = (i % 16) * 8;
+		var lcg = 1;
+
+		for (var i = 0; i < N * 16; ++i) {
+			// mindstd_rand
+			lcg = (lcg * 48271) % 2147483647;
+
+			var k = i % 16;
+			if (k <= 8) data[i] = lcg & ((1 << k) - 1);
+			else data[i] = i & ((1 << (k - 8)) - 1);
 		}
 
 		var decoded = new Uint8Array(N * 16);
@@ -76,9 +80,11 @@ var tests = {
 
 		var filters = [
 			{ name: 'none', filter: 'NONE', stride: 16 },
-			{ name: 'oct4', filter: 'OCTAHEDRAL', stride: 4 },
+			{ name: 'oct8', filter: 'OCTAHEDRAL', stride: 4 },
 			{ name: 'oct12', filter: 'OCTAHEDRAL', stride: 8 },
 			{ name: 'quat12', filter: 'QUATERNION', stride: 8 },
+			{ name: 'col8', filter: 'COLOR', stride: 4 },
+			{ name: 'col12', filter: 'COLOR', stride: 8 },
 			{ name: 'exp', filter: 'EXPONENTIAL', stride: 16 },
 		];
 
@@ -126,10 +132,15 @@ Promise.all([encoder.ready, decoder.ready]).then(() => {
 			if (idx != 'bytes') {
 				rep += idx;
 				rep += ' ';
-				rep += data[key][idx];
+				rep += data[key][idx].toFixed(3);
 				rep += ' ms (';
-				rep += (data[key].bytes / 1024 / 1024 / 1024 / data[key][idx]) * 1000;
+				rep += ((data[key].bytes / 1e9 / data[key][idx]) * 1000).toFixed(3);
 				rep += ' GB/s)';
+				if (key == 'decodeGltf' && idx != 'none') {
+					rep += '; filter ';
+					rep += ((data[key].bytes / 1e9 / (data[key][idx] - data[key]['none'])) * 1000).toFixed(3);
+					rep += ' GB/s';
+				}
 				rep += '\n';
 			}
 		}

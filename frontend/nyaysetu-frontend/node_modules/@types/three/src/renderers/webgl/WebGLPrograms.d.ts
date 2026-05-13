@@ -8,7 +8,7 @@ import { WebGLRenderer } from "../WebGLRenderer.js";
 import { WebGLBindingStates } from "./WebGLBindingStates.js";
 import { WebGLCapabilities } from "./WebGLCapabilities.js";
 import { WebGLClipping } from "./WebGLClipping.js";
-import { WebGLCubeMaps } from "./WebGLCubeMaps.js";
+import { WebGLEnvironments } from "./WebGLEnvironments.js";
 import { WebGLExtensions } from "./WebGLExtensions.js";
 import { WebGLLightsState } from "./WebGLLights.js";
 import { WebGLProgram } from "./WebGLProgram.js";
@@ -36,7 +36,6 @@ export interface WebGLProgramParameters {
     instancingColor: boolean;
     instancingMorph: boolean;
 
-    supportsVertexTextures: boolean;
     outputColorSpace: string;
     alphaToCoverage: boolean;
 
@@ -54,6 +53,7 @@ export interface WebGLProgramParameters {
 
     normalMapObjectSpace: boolean;
     normalMapTangentSpace: boolean;
+    packedNormalMap: boolean;
 
     metalnessMap: boolean;
     roughnessMap: boolean;
@@ -131,6 +131,7 @@ export interface WebGLProgramParameters {
     //
 
     vertexTangents: boolean;
+    vertexNormals: boolean;
     vertexColors: boolean;
     vertexAlphas: boolean;
     vertexUv1s: boolean;
@@ -171,6 +172,8 @@ export interface WebGLProgramParameters {
 
     numLightProbes: number;
 
+    numLightProbeGrids: number;
+
     numClippingPlanes: number;
     numClipIntersection: number;
 
@@ -209,7 +212,7 @@ export interface WebGLProgramParametersWithUniforms extends WebGLProgramParamete
 export class WebGLPrograms {
     constructor(
         renderer: WebGLRenderer,
-        cubemaps: WebGLCubeMaps,
+        environments: WebGLEnvironments,
         extensions: WebGLExtensions,
         capabilities: WebGLCapabilities,
         bindingStates: WebGLBindingStates,
@@ -224,6 +227,7 @@ export class WebGLPrograms {
         shadows: Light[],
         scene: Scene,
         object: Object3D,
+        lightProbeGrids: unknown[],
     ): WebGLProgramParameters;
 
     getProgramCacheKey(parameters: WebGLProgramParameters): string;

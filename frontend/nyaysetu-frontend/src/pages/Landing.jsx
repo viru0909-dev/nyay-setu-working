@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import {
@@ -18,7 +18,37 @@ import TrustIndicators from '../components/landing/TrustIndicators';
 
 export default function Landing() {
     const { t } = useTranslation(['landing', 'common']);
+    const location = useLocation();
     const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+    useEffect(() => {
+        if (location.pathname !== '/') return;
+        const id = location.hash?.replace(/^#/, '');
+        if (!id) return;
+
+        const scrollToSection = () => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return true;
+            }
+            return false;
+        };
+
+        if (scrollToSection()) return;
+
+        let cancelled = false;
+        const timers = [0, 50, 150, 300].map((delay) =>
+            window.setTimeout(() => {
+                if (!cancelled) scrollToSection();
+            }, delay)
+        );
+
+        return () => {
+            cancelled = true;
+            timers.forEach(clearTimeout);
+        };
+    }, [location.pathname, location.hash]);
 
     // Capture the PWA install prompt event
     useEffect(() => {
@@ -86,6 +116,7 @@ export default function Landing() {
             {/* Temporarily comment out 3D background */}
             {/* <AnimatedBackground /> */}
             <Header />
+            <div id="chatbot" style={{ scrollMarginTop: '5.5rem' }} aria-hidden="true" />
             <AIChatbot />
 
             <main style={{ position: 'relative', zIndex: 1 }}>

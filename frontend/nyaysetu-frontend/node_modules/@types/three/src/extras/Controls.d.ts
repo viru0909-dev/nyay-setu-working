@@ -1,10 +1,14 @@
 import { EventDispatcher } from "../core/EventDispatcher.js";
 import { Object3D } from "../core/Object3D.js";
 
+export interface ControlsEventMap {}
+
 /**
  * Abstract base class for controls.
  */
-declare abstract class Controls<TEventMap extends {}> extends EventDispatcher<TEventMap> {
+declare abstract class Controls<TEventMap extends ControlsEventMap = ControlsEventMap>
+    extends EventDispatcher<TEventMap>
+{
     /**
      * The 3D object that is managed by the controls.
      */
@@ -14,7 +18,7 @@ declare abstract class Controls<TEventMap extends {}> extends EventDispatcher<TE
      * The HTML element used for event listeners. If not provided via the constructor, {@link .connect} must be called
      * after `domElement` has been set.
      */
-    domElement: HTMLElement | null;
+    domElement: HTMLElement | SVGElement | null;
 
     /**
      * When set to `false`, the controls will not respond to user input. Default is `true`.
@@ -26,13 +30,13 @@ declare abstract class Controls<TEventMap extends {}> extends EventDispatcher<TE
      * @param object The object the controls should manage (usually the camera).
      * @param domElement The HTML element used for event listeners. (optional)
      */
-    constructor(object: Object3D, domElement?: HTMLElement | null);
+    constructor(object: Object3D, domElement?: HTMLElement | SVGElement | null);
 
     /**
      * Connects the controls to the DOM. This method has so called "side effects" since it adds the module's event
      * listeners to the DOM.
      */
-    connect(element: HTMLElement): void;
+    connect(element: HTMLElement | SVGElement): void;
 
     /**
      * Disconnects the controls from the DOM.

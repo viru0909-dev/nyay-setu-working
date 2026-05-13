@@ -8,31 +8,23 @@ import ChainMap from "./ChainMap.js";
 import ClippingContext from "./ClippingContext.js";
 import Geometries from "./Geometries.js";
 import Info from "./Info.js";
-import Nodes from "./nodes/Nodes.js";
+import NodeManager from "./nodes/NodeManager.js";
 import Pipelines from "./Pipelines.js";
 import RenderContext from "./RenderContext.js";
 import Renderer from "./Renderer.js";
 import RenderObject from "./RenderObject.js";
+
 /**
  * This module manages the render objects of the renderer.
  *
  * @private
  */
 declare class RenderObjects {
-    renderer: Renderer;
-    nodes: Nodes;
-    geometries: Geometries;
-    pipelines: Pipelines;
-    bindings: Bindings;
-    info: Info;
-    chainMaps: {
-        [passId: string]: ChainMap<readonly [Object3D, Material, RenderContext, LightsNode], RenderObject>;
-    };
     /**
      * Constructs a new render object management component.
      *
      * @param {Renderer} renderer - The renderer.
-     * @param {Nodes} nodes - Renderer component for managing nodes related logic.
+     * @param {NodeManager} nodes - Renderer component for managing nodes related logic.
      * @param {Geometries} geometries - Renderer component for managing geometries.
      * @param {Pipelines} pipelines - Renderer component for managing pipelines.
      * @param {Bindings} bindings - Renderer component for managing bindings.
@@ -40,12 +32,57 @@ declare class RenderObjects {
      */
     constructor(
         renderer: Renderer,
-        nodes: Nodes,
+        nodes: NodeManager,
         geometries: Geometries,
         pipelines: Pipelines,
         bindings: Bindings,
         info: Info,
     );
+    /**
+     * The renderer.
+     *
+     * @type {Renderer}
+     */
+    renderer: Renderer;
+    /**
+     * Renderer component for managing nodes related logic.
+     *
+     * @type {NodeManager}
+     */
+    nodes: NodeManager;
+    /**
+     * Renderer component for managing geometries.
+     *
+     * @type {Geometries}
+     */
+    geometries: Geometries;
+    /**
+     * Renderer component for managing pipelines.
+     *
+     * @type {Pipelines}
+     */
+    pipelines: Pipelines;
+    /**
+     * Renderer component for managing bindings.
+     *
+     * @type {Bindings}
+     */
+    bindings: Bindings;
+    /**
+     * Renderer component for managing metrics and monitoring data.
+     *
+     * @type {Info}
+     */
+    info: Info;
+    /**
+     * A dictionary that manages render contexts in chain maps
+     * for each pass ID.
+     *
+     * @type {Object<string,ChainMap>}
+     */
+    chainMaps: {
+        [x: string]: ChainMap;
+    };
     /**
      * Returns a render object for the given object and state data.
      *
@@ -66,8 +103,8 @@ declare class RenderObjects {
         camera: Camera,
         lightsNode: LightsNode,
         renderContext: RenderContext,
-        clippingContext: ClippingContext | null,
-        passId?: string | undefined,
+        clippingContext: ClippingContext,
+        passId?: string,
     ): RenderObject;
     /**
      * Returns a chain map for the given pass ID.
@@ -75,12 +112,7 @@ declare class RenderObjects {
      * @param {string} [passId='default'] - The pass ID.
      * @return {ChainMap} The chain map.
      */
-    getChainMap(
-        passId?: string,
-    ): ChainMap<
-        readonly [Object3D<import("../../core/Object3D.js").Object3DEventMap>, Material, RenderContext, LightsNode],
-        RenderObject
-    >;
+    getChainMap(passId?: string): ChainMap;
     /**
      * Frees internal resources.
      */
@@ -88,7 +120,7 @@ declare class RenderObjects {
     /**
      * Factory method for creating render objects with the given list of parameters.
      *
-     * @param {Nodes} nodes - Renderer component for managing nodes related logic.
+     * @param {NodeManager} nodes - Renderer component for managing nodes related logic.
      * @param {Geometries} geometries - Renderer component for managing geometries.
      * @param {Renderer} renderer - The renderer.
      * @param {Object3D} object - The 3D object.
@@ -102,7 +134,7 @@ declare class RenderObjects {
      * @return {RenderObject} The render object.
      */
     createRenderObject(
-        nodes: Nodes,
+        nodes: NodeManager,
         geometries: Geometries,
         renderer: Renderer,
         object: Object3D,
@@ -111,8 +143,9 @@ declare class RenderObjects {
         camera: Camera,
         lightsNode: LightsNode,
         renderContext: RenderContext,
-        clippingContext: ClippingContext | null,
-        passId: string | undefined,
+        clippingContext: ClippingContext,
+        passId?: string,
     ): RenderObject;
 }
+
 export default RenderObjects;

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, Suspense, lazy } from 'react';
 import useAuthStore from './store/authStore';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
@@ -85,6 +85,17 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return children;
 };
 
+function ScrollToTop() {
+    const { pathname, hash } = useLocation();
+    useEffect(() => {
+        if (pathname === '/' && hash) {
+            return;
+        }
+        window.scrollTo(0, 0);
+    }, [pathname, hash]);
+    return null;
+}
+
 function App({ swRegistration }) {
     const { initAuth } = useAuthStore();
 
@@ -105,6 +116,7 @@ function App({ swRegistration }) {
                         v7_relativeSplatPath: true
                     }}
                 >
+                    <ScrollToTop />
                     <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
                         <Routes>
                             <Route path="/" element={<Landing />} />

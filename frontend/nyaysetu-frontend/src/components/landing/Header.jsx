@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Scale, Menu, X, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,7 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showAIModal, setShowAIModal] = useState(false);
-    const navigate = useNavigate();
+    const location = useLocation();
 
     // Use react-i18next
     const { t, i18n } = useTranslation('common');
@@ -24,9 +24,9 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
 
     const navItems = [
         { labelKey: 'header.nav.home', href: '/', isRoute: true },
-        { labelKey: 'header.nav.features', href: '#features' },
+        { labelKey: 'header.nav.features', href: '/#features', isRoute: true },
         { labelKey: 'header.nav.constitution', href: '/constitution', isRoute: true },
-        { labelKey: 'header.nav.aiAssistant', href: '#chatbot' },
+        { labelKey: 'header.nav.aiAssistant', href: '/#chatbot' },
         { labelKey: 'header.nav.about', href: '/about', isRoute: true }
     ];
 
@@ -100,6 +100,18 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                             <Link
                                 key={item.labelKey}
                                 to={item.href}
+                                onClick={
+                                    item.href === '/#features' &&
+                                    location.pathname === '/' &&
+                                    location.hash === '#features'
+                                        ? (e) => {
+                                            e.preventDefault();
+                                            document
+                                                .getElementById('features')
+                                                ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        }
+                                        : undefined
+                                }
                                 style={{
                                     color: isActive ? 'var(--color-secondary)' : '#475569',
                                     textDecoration: 'none',
@@ -273,7 +285,19 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                                 <Link
                                     key={item.labelKey}
                                     to={item.href}
-                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    onClick={(e) => {
+                                        if (
+                                            item.href === '/#features' &&
+                                            location.pathname === '/' &&
+                                            location.hash === '#features'
+                                        ) {
+                                            e.preventDefault();
+                                            document
+                                                .getElementById('features')
+                                                ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        }
+                                        setIsMobileMenuOpen(false);
+                                    }}
                                     style={{
                                         display: 'block',
                                         padding: '0.75rem 0',

@@ -36,10 +36,10 @@ export default function Footer() {
     ];
 
     const quickLinks = [
-        { label: t('common:header.nav.features'), href: '#features' },
-        { label: t('common:header.nav.constitution'), href: '#constitution' },
-        { label: t('common:header.nav.aiAssistant'), href: '#chatbot' },
-        { label: t('common:header.nav.about'), href: '#about' }
+        { label: t('common:header.nav.features'), to: '/#features' },
+        { label: t('common:header.nav.constitution'), to: '/constitution' },
+        { label: t('common:header.nav.aiAssistant'), to: '/#chatbot' },
+        { label: t('common:header.nav.about'), to: '/about' }
     ];
 
     const legalLinks = [
@@ -160,8 +160,8 @@ export default function Footer() {
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                             {quickLinks.map((link) => (
                                 <li key={link.label} style={{ marginBottom: '0.75rem' }}>
-                                    <a
-                                        href={link.href}
+                                    <Link
+                                        to={link.to}
                                         style={{
                                             color: 'rgba(255, 255, 255, 0.7)',
                                             textDecoration: 'none',
@@ -172,7 +172,7 @@ export default function Footer() {
                                         onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.7)'}
                                     >
                                         {link.label}
-                                    </a>
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
