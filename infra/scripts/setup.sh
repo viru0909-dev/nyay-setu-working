@@ -29,6 +29,6 @@ fi
 
 echo "🚀 Setup Complete!"
 echo "Next steps:"
-echo "1. Run 'psql -f local_setup.sql' to create your database."
+echo "1. Run 'psql -f infra/database/local_setup.sql' to create your database."
 echo "2. Run 'mvn spring-boot:run' in backend/nyaysetu-backend."
 echo "3. Run 'npm install && npm run dev' in frontend/nyaysetu-frontend."

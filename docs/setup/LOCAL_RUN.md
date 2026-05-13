@@ -16,8 +16,8 @@ Follow these steps to get the full AI-powered judiciary platform running on your
 ### A. Environment Files
 Run the setup script to generate your `.env` files and a random JWT security key:
 ```bash
-chmod +x setup.sh
-./setup.sh
+chmod +x infra/scripts/setup.sh
+./infra/scripts/setup.sh
 ```
 
 ### B. Database Creation

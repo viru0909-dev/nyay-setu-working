@@ -70,8 +70,8 @@ mvn spring-boot:run
 Dive deeper into how Nyay Saarthi operates by checking our dedicated technical docs:
 
 - [System Architecture & Diagrams](./docs/architecture/overview.md)
-- [AI Integration Guide](./AI_INTEGRATION_GUIDE.md)
-- [API Endpoints & Specs](./SYSTEM_DOCUMENTATION.md)
+- [AI Integration Guide](./docs/guides/AI_INTEGRATION_GUIDE.md)
+- [API Endpoints & Specs](./docs/guides/SYSTEM_DOCUMENTATION.md)
 - [Detailed Setup & Configuration](./docs/setup.md)
 
 ## Contributors

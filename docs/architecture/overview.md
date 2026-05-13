@@ -94,4 +94,4 @@ sequenceDiagram
 | Constitution Q&A | Ollama (Local) | 30 tok/s | 100% Private |
 | Judge's Brief | Groq (Llama 3.1 70B) | 150 tok/s | Anonymized |
 
-For detailed 26 REST API controllers routing map, role-based access matrix, and database schemas, refer to the root `SYSTEM_DOCUMENTATION.md` and `AI_INTEGRATION_GUIDE.md` files.
+For detailed 26 REST API controllers routing map, role-based access matrix, and database schemas, refer to the root `docs/guides/SYSTEM_DOCUMENTATION.md` and `docs/guides/AI_INTEGRATION_GUIDE.md` files.

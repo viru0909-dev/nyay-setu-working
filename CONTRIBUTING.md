@@ -43,7 +43,7 @@ Ready to code? Awesome. Here is the standard workflow:
 
 ### 2. Set Up Your Local Environment
 Before you start coding, you need to get the app running locally!
-- Check out [RUN_LOCALLY.md](./RUN_LOCALLY.md) or [QUICKSTART.md](./QUICKSTART.md) for detailed instructions on spinning up the Java Spring Boot backend and the React frontend.
+- Check out [RUN_LOCALLY.md](./docs/setup/RUN_LOCALLY.md) or [QUICKSTART.md](./docs/setup/QUICKSTART.md) for detailed instructions on spinning up the Java Spring Boot backend and the React frontend.
 
 ### 3. Create a Branch
 Always create a new branch for your work. **Do not work directly on the `main` branch.**
