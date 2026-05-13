@@ -643,7 +643,6 @@ export default function Constitution() {
                                             top: '1rem',
                                             right: '1rem',
                                             padding: '0.5rem 1rem',
-                                            background: 'rgba(30, 42, 68, 0.05)',
                                             border: '1px solid rgba(30, 42, 68, 0.1)',
                                             borderRadius: '0.75rem',
                                             fontSize: '0.85rem',
