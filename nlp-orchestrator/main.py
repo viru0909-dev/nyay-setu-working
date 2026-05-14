@@ -28,6 +28,7 @@ from synthesizer import synthesize_answers
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
 from routers.forensics import router as forensics_router
+from cache import generate_cache_key, get_cached_response, set_cached_response
 
 # Initialize clients for deep research pipeline
 from groq import AsyncGroq
@@ -347,33 +348,56 @@ async def deep_research_pipeline(query: str, language: str):
         )
 
         # Call the AI model and stream reasoning
+        ai_answer = None
+        cached = False
+
         if model_choice == "gemini" and gemini_client:
-            try:
-                loop = asyncio.get_event_loop()
-                response = await loop.run_in_executor(
-                    None,
-                    lambda: gemini_client.models.generate_content(
-                        model=GEMINI_MODEL,
-                        contents=grounded_prompt
+            # Generate cache key for Gemini
+            cache_key = generate_cache_key("gemini", grounded_prompt, GEMINI_MODEL, user_query=query)
+            cached_response = get_cached_response(cache_key)
+            if cached_response:
+                ai_answer = cached_response
+                cached = True
+                logger.info(f"Deep Research: Cache HIT for Gemini")
+            else:
+                try:
+                    loop = asyncio.get_event_loop()
+                    response = await loop.run_in_executor(
+                        None,
+                        lambda: gemini_client.models.generate_content(
+                            model=GEMINI_MODEL,
+                            contents=grounded_prompt
+                        )
                     )
-                )
-                ai_answer = response.text.strip()
-            except Exception as e:
-                logger.error(f"Gemini failed, falling back to Groq: {e}")
-                model_choice = "groq"
-                ai_answer = None
+                    ai_answer = response.text.strip()
+                    set_cached_response(cache_key, ai_answer)
+                    logger.info(f"Deep Research: Cached Gemini response")
+                except Exception as e:
+                    logger.error(f"Gemini failed, falling back to Groq: {e}")
+                    model_choice = "groq"
         
         if model_choice == "groq" or (model_choice == "gemini" and not gemini_client):
-            response = await groq_client.chat.completions.create(
-                model=GROQ_MODEL_FAST,
-                messages=[
-                    {"role": "system", "content": grounded_prompt},
-                    {"role": "user", "content": query}
-                ],
-                temperature=0.2,
-                max_tokens=2048
-            )
-            ai_answer = response.choices[0].message.content.strip()
+            # Generate cache key for Groq
+            cache_key = generate_cache_key("groq", grounded_prompt, GROQ_MODEL_FAST, user_query=query)
+            cached_response = get_cached_response(cache_key)
+            if cached_response and not cached:  # Don't use cache if we already got from Gemini
+                ai_answer = cached_response
+                cached = True
+                logger.info(f"Deep Research: Cache HIT for Groq")
+            else:
+                response = await groq_client.chat.completions.create(
+                    model=GROQ_MODEL_FAST,
+                    messages=[
+                        {"role": "system", "content": grounded_prompt},
+                        {"role": "user", "content": query}
+                    ],
+                    temperature=0.2,
+                    max_tokens=2048
+                )
+                ai_answer = response.choices[0].message.content.strip()
+                if not cached:  # Only cache if we didn't get from cache
+                    set_cached_response(cache_key, ai_answer)
+                    logger.info(f"Deep Research: Cached Groq response")
 
         # Stream reasoning text in chunks for live display
         if ai_answer:
@@ -419,7 +443,8 @@ async def deep_research_pipeline(query: str, language: str):
             "hinglish": hinglish_verdict,
             "citations": citations,
             "model_used": model_choice,
-            "domain": domain_label
+            "domain": domain_label,
+            "cached": cached
         })
 
         yield sse_event("stage", {

@@ -2,6 +2,7 @@ from google import genai
 import asyncio
 from config import GEMINI_API_KEY, GEMINI_MODEL
 import logging
+from cache import generate_cache_key, get_cached_response, set_cached_response
 
 logger = logging.getLogger("gemini-analyzer")
 client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None

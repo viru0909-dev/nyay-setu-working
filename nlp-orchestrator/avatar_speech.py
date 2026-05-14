@@ -8,6 +8,7 @@ import asyncio
 import random
 from groq import AsyncGroq
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
+from cache import generate_cache_key, get_cached_response, set_cached_response
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
@@ -119,20 +120,34 @@ Convert to Hinglish dialogue:"""
 async def convert_to_hinglish(markdown_answer: str) -> str:
     """Convert the final markdown answer to spoken Hinglish for the avatar."""
     try:
+        prompt = HINGLISH_CONVERSION_PROMPT.format(markdown_answer=markdown_answer)
+
+        # Generate cache key
+        cache_key = generate_cache_key("groq", prompt, GROQ_MODEL_FAST)
+
+        # Check cache first
+        cached_response = get_cached_response(cache_key)
+        if cached_response:
+            return cached_response
+
         response = await client.chat.completions.create(
             model=GROQ_MODEL_FAST,
             messages=[
                 {
                     "role": "user",
-                    "content": HINGLISH_CONVERSION_PROMPT.format(
-                        markdown_answer=markdown_answer
-                    )
+                    "content": prompt
                 }
             ],
             temperature=0.6,
             max_tokens=512
         )
-        return response.choices[0].message.content.strip()
+        
+        result = response.choices[0].message.content.strip()
+
+        # Cache the response
+        set_cached_response(cache_key, result)
+
+        return result
     
     except Exception as e:
         print(f"[AvatarSpeech] Hinglish conversion error: {e}")
