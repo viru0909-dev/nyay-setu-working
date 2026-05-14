@@ -9,6 +9,7 @@ import asyncio
 from google import genai
 from groq import AsyncGroq
 from config import GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KEY, GEMINI_MODEL
+from cache import generate_cache_key, get_cached_response, set_cached_response
 
 # Initialize clients
 groq_client = AsyncGroq(api_key=GROQ_API_KEY)
@@ -30,6 +31,14 @@ Keep your answer focused, factual, and written for a common Indian citizen.
 
 async def call_groq_async(question: str) -> dict:
     """Call Groq LPU with a legal sub-question."""
+    # Generate cache key
+    cache_key = generate_cache_key("groq", question, GROQ_MODEL_FAST)
+
+    # Check cache first
+    cached_response = get_cached_response(cache_key)
+    if cached_response:
+        return {"question": question, "answer": cached_response, "source": "groq", "cached": True, "error": None}
+
     try:
         response = await groq_client.chat.completions.create(
             model=GROQ_MODEL_FAST,
@@ -41,10 +50,14 @@ async def call_groq_async(question: str) -> dict:
             max_tokens=800
         )
         answer = response.choices[0].message.content.strip()
-        return {"question": question, "answer": answer, "source": "groq", "error": None}
+
+        # Cache the response
+        set_cached_response(cache_key, answer)
+
+        return {"question": question, "answer": answer, "source": "groq", "cached": False, "error": None}
     except Exception as e:
         print(f"[Research/Groq] Error: {e}")
-        return {"question": question, "answer": "", "source": "groq", "error": str(e)}
+        return {"question": question, "answer": "", "source": "groq", "cached": False, "error": str(e)}
 
 
 async def call_gemini_async(question: str) -> dict:
@@ -52,6 +65,15 @@ async def call_gemini_async(question: str) -> dict:
     if not gemini_client:
         # Fallback to Groq if Gemini key not set
         return await call_groq_async(question)
+
+    # Generate cache key
+    cache_key = generate_cache_key("gemini", question, GEMINI_MODEL)
+
+    # Check cache first
+    cached_response = get_cached_response(cache_key)
+    if cached_response:
+        return {"question": question, "answer": cached_response, "source": "gemini", "cached": True, "error": None}
+
     try:
         full_prompt = f"{LEGAL_SYSTEM_PROMPT}\n\nQuestion: {question}"
         # Run synchronous Gemini call in executor to not block event loop
@@ -64,7 +86,11 @@ async def call_gemini_async(question: str) -> dict:
             )
         )
         answer = response.text.strip()
-        return {"question": question, "answer": answer, "source": "gemini", "error": None}
+
+        # Cache the response
+        set_cached_response(cache_key, answer)
+
+        return {"question": question, "answer": answer, "source": "gemini", "cached": False, "error": None}
     except Exception as e:
         print(f"[Research/Gemini] Error: {e}")
         # Fallback to Groq on Gemini failure

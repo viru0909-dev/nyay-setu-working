@@ -6,6 +6,7 @@ Breaks a complex legal question into 3-5 focused sub-questions using Groq LPU.
 import json
 from groq import AsyncGroq
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
+from cache import generate_cache_key, get_cached_response, set_cached_response
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
@@ -24,12 +25,22 @@ User's question: {query}
 async def decompose_query(query: str) -> list[str]:
     """Decompose a complex legal query into focused sub-questions."""
     try:
+        prompt = DECOMPOSE_PROMPT.format(query=query)
+
+        # Generate cache key
+        cache_key = generate_cache_key("groq", prompt, GROQ_MODEL_FAST)
+
+        # Check cache first
+        cached_response = get_cached_response(cache_key)
+        if cached_response:
+            return json.loads(cached_response)
+
         response = await client.chat.completions.create(
             model=GROQ_MODEL_FAST,
             messages=[
                 {
                     "role": "user",
-                    "content": DECOMPOSE_PROMPT.format(query=query)
+                    "content": prompt
                 }
             ],
             temperature=0.3,
@@ -43,7 +54,12 @@ async def decompose_query(query: str) -> list[str]:
         
         # Ensure it is a list of strings
         if isinstance(sub_questions, list) and all(isinstance(q, str) for q in sub_questions):
-            return sub_questions[:5]  # cap at 5
+            result = sub_questions[:5]  # cap at 5
+
+            # Cache the JSON string
+            set_cached_response(cache_key, json.dumps(result))
+
+            return result
         else:
             raise ValueError("Unexpected format from decomposer")
     

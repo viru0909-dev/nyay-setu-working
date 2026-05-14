@@ -1,6 +1,7 @@
 from groq import AsyncGroq
 import logging
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
+from cache import generate_cache_key, get_cached_response, set_cached_response
 
 logger = logging.getLogger("groq-router")
 client = AsyncGroq(api_key=GROQ_API_KEY)
@@ -25,13 +26,24 @@ async def legal_section_lookup(citizen_description: str, job_id: str) -> str:
         return "No description provided by the citizen to lookup specific legal sections."
         
     try:
+        prompt = LEGAL_LOOKUP_PROMPT.format(timeline_summary=citizen_description)
+        
+        # Generate cache key
+        cache_key = generate_cache_key("groq", prompt, GROQ_MODEL_FAST)
+
+        # Check cache first
+        cached_response = get_cached_response(cache_key)
+        if cached_response:
+            logger.info(f"[{job_id}] Cache HIT for legal section lookup")
+            return cached_response
+
         logger.info(f"[{job_id}] Sending legal lookup to Groq based on description...")
         response = await client.chat.completions.create(
             model=GROQ_MODEL_FAST,
             messages=[
                 {
                     "role": "user",
-                    "content": LEGAL_LOOKUP_PROMPT.format(timeline_summary=citizen_description)
+                    "content": prompt
                 }
             ],
             temperature=0.1,
@@ -39,6 +51,10 @@ async def legal_section_lookup(citizen_description: str, job_id: str) -> str:
         )
         
         result = response.choices[0].message.content.strip()
+
+        # Cache the response
+        set_cached_response(cache_key, result)
+
         logger.info(f"[{job_id}] Received legal sections from Groq.")
         return result
         

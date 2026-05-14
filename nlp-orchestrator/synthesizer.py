@@ -6,6 +6,7 @@ Includes relevant IPC / BNS / MVA section references.
 
 from groq import AsyncGroq
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
+from cache import generate_cache_key, get_cached_response, set_cached_response
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
@@ -54,23 +55,37 @@ async def synthesize_answers(
     """
     try:
         formatted_research = format_research_for_synthesis(research_results)
-        
+        synthesis_prompt = SYNTHESIS_PROMPT.format(
+            research_results=formatted_research,
+            original_query=original_query
+        )
+
+        # Generate cache key
+        cache_key = generate_cache_key("groq", synthesis_prompt, GROQ_MODEL_FAST)
+
+        # Check cache first
+        cached_response = get_cached_response(cache_key)
+        if cached_response:
+            return cached_response
+
         response = await client.chat.completions.create(
             model=GROQ_MODEL_FAST,
             messages=[
                 {
                     "role": "user",
-                    "content": SYNTHESIS_PROMPT.format(
-                        research_results=formatted_research,
-                        original_query=original_query
-                    )
+                    "content": synthesis_prompt
                 }
             ],
             temperature=0.3,
             max_tokens=2048
         )
         
-        return response.choices[0].message.content.strip()
+        result = response.choices[0].message.content.strip()
+
+        # Cache the response
+        set_cached_response(cache_key, result)
+
+        return result
     
     except Exception as e:
         print(f"[Synthesizer] Error: {e}")
