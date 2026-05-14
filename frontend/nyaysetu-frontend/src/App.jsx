@@ -4,6 +4,7 @@ import useAuthStore from './store/authStore';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
+import ScrollToTop from './components/ScrollToTop';
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
@@ -105,6 +106,7 @@ function App({ swRegistration }) {
                         v7_relativeSplatPath: true
                     }}
                 >
+                    <ScrollToTop />
                     <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
                         <Routes>
                             <Route path="/" element={<Landing />} />
