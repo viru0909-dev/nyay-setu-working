@@ -77,7 +77,7 @@ async def call_gemini_async(question: str, kanoon_context: str | None = None) ->
             f"Question: {user_prompt}"
         )
         # Run synchronous Gemini call in executor to not block event loop
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         response = await loop.run_in_executor(
             None,
             lambda: gemini_client.models.generate_content(
