@@ -18,21 +18,21 @@ pipeline {
             parallel {
                 stage('Backend Build') {
                     steps {
-                        dir('backend/nyaysetu-backend') {
+                        dir('backend') {
                             sh 'chmod +x mvnw'
                             sh './mvnw clean package -DskipTests=false'
                         }
                     }
                     post {
                         always {
-                            junit 'backend/nyaysetu-backend/target/surefire-reports/*.xml'
+                            junit 'backend/target/surefire-reports/*.xml'
                         }
                     }
                 }
 
                 stage('Frontend Build') {
                     steps {
-                        dir('frontend/nyaysetu-frontend') {
+                        dir('frontend') {
                             sh 'npm install'
                             sh 'npm run build'
                             // Add test command if available: sh 'npm test'
@@ -46,7 +46,7 @@ pipeline {
             parallel {
                 stage('Build Backend Image') {
                     steps {
-                        dir('backend/nyaysetu-backend') {
+                        dir('backend') {
                             script {
                                 docker.build("${DOCKER_REGISTRY}/${APP_NAME}-backend:${env.BUILD_NUMBER}")
                                 // docker.build("${DOCKER_REGISTRY}/${APP_NAME}-backend:latest")
@@ -57,7 +57,7 @@ pipeline {
 
                 stage('Build Frontend Image') {
                     steps {
-                        dir('frontend/nyaysetu-frontend') {
+                        dir('frontend') {
                             script {
                                 docker.build("${DOCKER_REGISTRY}/${APP_NAME}-frontend:${env.BUILD_NUMBER}")
                                 // docker.build("${DOCKER_REGISTRY}/${APP_NAME}-frontend:latest")
