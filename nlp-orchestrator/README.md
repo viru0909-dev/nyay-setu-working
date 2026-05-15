@@ -42,6 +42,16 @@ cp .env.example .env
 # Edit .env and fill in your GROQ_API_KEY and GOOGLE_GEMINI_API_KEY
 ```
 
+### 4a. Indian Kanoon (recommended)
+
+To ground responses with real judgments and sections, set the Indian Kanoon token:
+
+```bash
+INDIAN_KANOON_TOKEN=your_indian_kanoon_token_here
+# Optional override
+INDIAN_KANOON_API_URL=https://api.indiankanoon.org
+```
+
 ### 5. Run the service
 ```bash
 uvicorn main:app --port 8001 --reload

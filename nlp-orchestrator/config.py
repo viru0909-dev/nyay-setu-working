@@ -17,7 +17,7 @@ GEMINI_MODEL: str = "gemini-1.5-flash"             # Fast + deep reasoning
 
 # Indian Kanoon API
 INDIAN_KANOON_TOKEN: str = os.getenv("INDIAN_KANOON_TOKEN", "")
-INDIAN_KANOON_API_URL: str = "https://api.indiankanoon.org"
+INDIAN_KANOON_API_URL: str = os.getenv("INDIAN_KANOON_API_URL", "https://api.indiankanoon.org")
 
 # CORS
 FRONTEND_ORIGIN: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")

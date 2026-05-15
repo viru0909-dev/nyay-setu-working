@@ -10,3 +10,5 @@ sqlalchemy
 psycopg2-binary
 aiohttp
 Pillow
+pytest
+
