@@ -28,7 +28,13 @@
 Because a large percentage of citizens cannot afford legal fees and courts face a staggering case backlog, this platform is built to automate the initial friction of filings and court proceedings. 
 
 **Live Demo:** [nyaysetu-lovat.vercel.app](https://nyaysetu-lovat.vercel.app/)
+## Table of Contents
 
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
+- [Contributors](#contributors)
 ## Key Features
 
 - **Vakil Friend:** An integrated AI legal companion that converses in plain language to help citizens file cases, check documents, and understand their rights entirely for free.
@@ -37,7 +43,7 @@ Because a large percentage of citizens cannot afford legal fees and courts face 
 - **Digital FIR Handling:** Allows police to securely upload first information reports, using AI to instantly summarize them and draft charge sheets.
 - **Virtual Courtrooms:** Native WebRTC-based video conferencing integrated directly into the case timeline for seamless remote hearings.
 
-## Built With
+## Tech Stack
 
 - **Frontend:** React, Vite, Zustand, Tailwind and CSS Variables (PWA Ready)
 - **Backend:** Java 17, Spring Boot, Spring Security (JWT), PostgreSQL
@@ -65,6 +71,17 @@ mvn spring-boot:run
 
 **Need the full setup details?** Check out the [Detailed Setup Guide](./docs/setup.md) for database queries, environment variables, and Docker information.
 
+## Usage
+
+Nyay Saarthi helps citizens, lawyers, judges, and police personnel streamline legal workflows digitally through AI-powered assistance, secure evidence management, and virtual courtroom capabilities.
+
+Users can:
+- Interact with the AI legal assistant
+- Manage case workflows
+- Upload and verify evidence securely
+- Conduct virtual hearings
+- Access role-specific dashboards
+
 ## Documentation
 
 Dive deeper into how Nyay Saarthi operates by checking our dedicated technical docs:
@@ -73,7 +90,7 @@ Dive deeper into how Nyay Saarthi operates by checking our dedicated technical d
 - [AI Integration Guide](./AI_INTEGRATION_GUIDE.md)
 - [API Endpoints & Specs](./SYSTEM_DOCUMENTATION.md)
 - [Detailed Setup & Configuration](./docs/setup.md)
-
+---
 ## Contributors
 
 We firmly believe in open source and we welcome your contributions. Whether you are here from GSSoC or you simply want to help democratize legal technology, we would love to have you on board!
