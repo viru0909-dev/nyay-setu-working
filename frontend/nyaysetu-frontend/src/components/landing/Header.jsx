@@ -130,7 +130,7 @@ export default function Header({ hideAuthButtons = false }) {
                     margin: '0 auto',
                     padding: '0.7rem 2rem',
                     display: 'flex',
-                    justifyContent: 'space-between',
+                                        justifyContent: 'space-between',
                     alignItems: 'center',
                     gap: '1rem',
                 }}>
@@ -156,6 +156,7 @@ export default function Header({ hideAuthButtons = false }) {
                         >
                             <Scale size={22} color="white" />
                         </motion.div>
+
                         <span style={{
                             fontSize: '1.2rem',
                             fontWeight: '800',
