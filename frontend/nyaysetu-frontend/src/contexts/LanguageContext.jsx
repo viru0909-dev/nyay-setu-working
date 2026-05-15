@@ -70,7 +70,7 @@ export const translations = {
         getInTouch: 'Get In Touch',
         viewRepository: 'View Repository',
         allRightsReserved: 'All rights reserved.',
-        madeWith: 'Made with',
+        madeWith: 'Made with ❤️',
         by: 'by',
         privacyPolicy: 'Privacy Policy',
         termsOfService: 'Terms of Service',
