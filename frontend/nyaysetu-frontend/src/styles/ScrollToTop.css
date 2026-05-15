@@ -1,0 +1,55 @@
+.scroll-to-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #2b2b2b; /* Modern dark-themed background */
+  color: #ffffff; /* White icon for contrast */
+  border: none;
+  border-radius: 50%; /* Fully rounded styling */
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Shadow for floating effect */
+  z-index: 9999; /* High z-index to stay above other content */
+  
+  /* Initial state: hidden and slightly translated down */
+  opacity: 0;
+  transform: translateY(20px);
+  visibility: hidden;
+  
+  /* Transition animations */
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Shown state */
+.scroll-to-top-btn.show {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+/* Hover effects */
+.scroll-to-top-btn.show:hover {
+  background-color: #3b3b3b;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Active effects */
+.scroll-to-top-btn.show:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Responsive adjustments for mobile devices */
+@media (max-width: 768px) {
+  .scroll-to-top-btn {
+    bottom: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+  }
+}

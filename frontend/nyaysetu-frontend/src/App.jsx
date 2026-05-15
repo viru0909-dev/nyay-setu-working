@@ -8,6 +8,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
 import UpdateNotification from './components/UpdateNotification';
+import ScrollToTop from './components/common/ScrollToTop';
 
 // Lazy load pages for better performance
 const Landing = lazy(() => import('./pages/Landing'));
@@ -98,6 +99,7 @@ function App({ swRegistration }) {
                 {/* Global PWA Components */}
                 <OfflineIndicator />
                 <UpdateNotification registration={swRegistration} />
+                <ScrollToTop />
 
                 <BrowserRouter
                     future={{
