@@ -16,6 +16,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const About = lazy(() => import('./pages/About'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Dashboard Layout
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
@@ -211,6 +212,7 @@ function App({ swRegistration }) {
                                     <p>You don't have permission to access this page.</p>
                                 </div>
                             } />
+                            <Route path="*" element={<NotFound />} />
                         </Routes>
                     </Suspense>
                 </BrowserRouter>
