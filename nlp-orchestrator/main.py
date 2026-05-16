@@ -385,14 +385,9 @@ async def deep_research_pipeline(query: str, language: str):
                 cached = True
                 logger.info(f"Deep Research: Cache HIT for Groq")
             else:
-                response = await groq_client.chat.completions.create(
-                    model=GROQ_MODEL_FAST,
-                    messages=[
-                        {"role": "system", "content": grounded_prompt},
-                        {"role": "user", "content": query}
-                    ],
-                    temperature=0.2,
-                    max_tokens=2048
+                response = await call_groq_with_retry(
+                    grounded_prompt,
+                    query
                 )
                 ai_answer = response.choices[0].message.content.strip()
                 if not cached:  # Only cache if we didn't get from cache
