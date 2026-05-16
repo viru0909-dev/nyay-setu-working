@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Scale, Menu, X, Globe } from 'lucide-react';
+import { Scale, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import AIAssistantModal from './AIAssistantModal';
@@ -155,9 +155,10 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
 
                 {/* CTA Buttons */}
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }} className="desktop-cta">
-                    {/* Language Toggle */}
-                    <button
-                        onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'hi' : 'en')}
+                    {/* Language Dropdown */}
+                    <select
+                        value={i18n.language}
+                        onChange={(e) => i18n.changeLanguage(e.target.value)}
                         style={{
                             padding: '0.6rem 1rem',
                             background: 'transparent',
@@ -165,25 +166,17 @@ export default function Header({ hideAuthButtons = false, onConstitutionClick })
                             borderRadius: '10px',
                             color: 'var(--color-primary)',
                             cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
                             fontWeight: '600',
-                            fontSize: '0.875rem',
-                            transition: 'all 0.3s ease-out'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#F1F5F9';
-                            e.currentTarget.style.borderColor = 'var(--color-primary)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.borderColor = '#CBD5E1';
+                            fontSize: '0.875rem'
                         }}
                     >
-                        <Globe size={16} />
-                        {i18n.language === 'en' ? 'हिंदी' : 'EN'}
-                    </button>
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="ta">Tamil</option>
+                        <option value="te">Telugu</option>
+                        <option value="ml">Malayalam</option>
+                        <option value="kn">Kannada</option>
+                    </select>
 
                     {!hideAuthButtons && (
                         <>
