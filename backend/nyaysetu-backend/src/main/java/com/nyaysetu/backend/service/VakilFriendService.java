@@ -369,11 +369,9 @@ public class VakilFriendService {
         Map<String, String> caseData = extractCaseData(session.getConversationData());
         log.info("📋 Extracted case data: type={}, urgency={}, target={}", caseData.get("caseType"), caseData.get("urgency"), caseData.get("target"));
 
-        // Limit chatTranscript to prevent DB issues
+        // Removed artificial 10,000 character truncation.
+        // The database TEXT column can safely handle large transcripts without data loss.
         String chatTranscript = session.getConversationData();
-        if (chatTranscript != null && chatTranscript.length() > 10000) {
-            chatTranscript = chatTranscript.substring(0, 10000) + "... [truncated]";
-        }
 
         Object resultEntity;
         String target = caseData.getOrDefault("target", "COURT");
@@ -607,8 +605,8 @@ public class VakilFriendService {
                 }
             }
         }
-        // Fallback: if we have 8+ messages, we likely have enough info
-        return conversation.size() >= 8;
+        // Removed 8-message fallback to ensure mandatory fields are actually collected
+        return false;
     }
 
     /**

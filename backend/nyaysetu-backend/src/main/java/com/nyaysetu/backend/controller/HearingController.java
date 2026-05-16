@@ -7,6 +7,7 @@ import com.nyaysetu.backend.service.HearingService;
 import com.nyaysetu.backend.notification.service.NotificationService;
 import com.nyaysetu.backend.notification.entity.Notification;
 import com.nyaysetu.backend.entity.CaseEntity;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
 
+@Tag(name = "Hearings", description = "Schedule, manage and record virtual court hearings")
 @RestController
 @RequestMapping("/api/hearings")
 @RequiredArgsConstructor

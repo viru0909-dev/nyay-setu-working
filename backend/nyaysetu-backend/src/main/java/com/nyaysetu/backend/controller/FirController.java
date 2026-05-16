@@ -5,6 +5,7 @@ import com.nyaysetu.backend.dto.FirUploadResponse;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.FirService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -16,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
+@Tag(name = "FIR (Police)", description = "Police-facing FIR creation, upload and case submission")
 @RestController
 @RequestMapping("/api/police")
 @RequiredArgsConstructor

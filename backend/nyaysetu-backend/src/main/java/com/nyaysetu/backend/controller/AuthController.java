@@ -19,7 +19,10 @@ import jakarta.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "Authentication", description = "Register, login, password reset and face login")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -36,7 +39,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
         try {
             authService.register(
                     req.getEmail(),
@@ -75,7 +78,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         System.out.println("DEBUG: LOGIN ENDPOINT REACHED for email: " + req.getEmail());
         try {
             authenticationManager.authenticate(
