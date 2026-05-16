@@ -82,5 +82,39 @@
         "copyright": "NyaySetu. Made with",
         "by": "by Virendra Gadekar",
         "allRightsReserved": "All rights reserved."
+    },
+    "trustIndicators": {
+    "heading": "Trusted by Thousands",
+    "subtitle": "Your security and privacy are our top priorities",
+
+    "bankSecurity": {
+        "title": "Bank-Grade Security",
+        "description": "256-bit encryption protects your data"
+    },
+
+    "governmentCertified": {
+        "title": "Government Certified",
+        "description": "Approved by Ministry of Law & Justice"
+    },
+
+    "activeUsers": {
+        "title": "50,000+ Active Users",
+        "description": "Growing community of satisfied citizens"
+    },
+
+    "successRate": {
+        "title": "99% Success Rate",
+        "description": "Cases resolved efficiently and fairly"
+    },
+
+    "availability": {
+        "title": "24/7 Availability",
+        "description": "Access justice anytime, anywhere"
+    },
+
+    "dataPrivacy": {
+        "title": "Data Privacy",
+        "description": "GDPR compliant & ISO certified"
     }
+}
 }
