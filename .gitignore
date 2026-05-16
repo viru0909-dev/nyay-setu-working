@@ -6,6 +6,11 @@ build/
 dist/
 **/dist/
 
+venv/
+__pycache__/
+*.pyc
+.env
+
 # IDE
 .idea/
 .vscode/
@@ -41,6 +46,11 @@ yarn-error.log*
 venv
 venv/
 **/venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
 *.key
 *.pem
 
@@ -53,6 +63,10 @@ venv/
 # Logs
 logs/
 *.log
+
+# Python
+__pycache__/
+*.pyc
 
 # Database
 *.db

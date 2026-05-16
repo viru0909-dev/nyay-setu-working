@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { brainAPI } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import ScrollTopButton from './ScrollTopButton';
 
 export default function AIChatbot() {
     const [isOpen, setIsOpen] = useState(false);
@@ -45,6 +46,8 @@ export default function AIChatbot() {
     return (
         <>
             {/* Floating Button */}
+            <ScrollTopButton />
+
             <motion.button
                 onClick={() => setIsOpen(!isOpen)}
                 whileHover={{ scale: 1.05 }}

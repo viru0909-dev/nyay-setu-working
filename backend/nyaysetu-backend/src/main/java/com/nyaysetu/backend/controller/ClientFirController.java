@@ -5,6 +5,7 @@ import com.nyaysetu.backend.dto.FirUploadResponse;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.FirService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Client FIR", description = "Litigant-facing FIR filing — manual or AI-assisted")
 @RestController
 @RequestMapping("/api/client/fir")
 @RequiredArgsConstructor

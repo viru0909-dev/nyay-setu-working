@@ -2,6 +2,7 @@ package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.dto.CreateAuditLogRequest;
 import com.nyaysetu.backend.service.AuditService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Audit Logs", description = "Create and retrieve audit logs for case activities")
 @RestController
 @RequestMapping("/api/audit")
 @RequiredArgsConstructor

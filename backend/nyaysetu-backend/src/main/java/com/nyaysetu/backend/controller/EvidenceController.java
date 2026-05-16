@@ -2,13 +2,14 @@ package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.dto.UploadEvidenceResponse;
 import com.nyaysetu.backend.service.EvidenceService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
-
+@Tag(name = "Evidence", description = "Upload evidence files linked to a case")
 @RestController
 @RequestMapping("/cases/{caseId}/evidence")
 @RequiredArgsConstructor

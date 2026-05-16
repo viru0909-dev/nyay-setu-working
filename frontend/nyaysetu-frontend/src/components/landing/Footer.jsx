@@ -1,3 +1,5 @@
+// footer is always dark navy regardless of theme — conventional behavior
+// fixed GitHub icon hover from #333 (invisible on dark) to a visible grey
 import { Link } from 'react-router-dom';
 import { FaLinkedin, FaTwitter, FaGithub, FaEnvelope, FaHeart } from 'react-icons/fa';
 import { Scale } from 'lucide-react';
@@ -31,7 +33,7 @@ export default function Footer() {
             icon: <FaGithub size={20} />,
             href: 'https://github.com/viru0909-dev/nyay-setu-working',
             label: 'GitHub',
-            color: '#333'
+            color: '#8b949e'
         }
     ];
 
@@ -50,8 +52,8 @@ export default function Footer() {
 
     return (
         <footer style={{
-            background: 'var(--color-primary)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            background: '#111827',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
             padding: '4rem 0 2rem',
             position: 'relative',
             overflow: 'hidden',
