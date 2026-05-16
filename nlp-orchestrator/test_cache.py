@@ -3,7 +3,6 @@
 Test script for validating NLP cache functionality.
 """
 
-import asyncio
 import sys
 import os
 import time
@@ -20,7 +19,7 @@ from cache import (
 )
 
 
-async def test_cache():
+def test_cache():
     print("Testing NLP cache implementation")
     print("-" * 50)
 
@@ -144,4 +143,4 @@ async def test_cache():
 
 
 if __name__ == "__main__":
-    asyncio.run(test_cache())
+    test_cache()
