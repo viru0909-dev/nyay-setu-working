@@ -52,7 +52,7 @@ def get_cached_response(cache_key: str) -> str | None:
     logger.info(f"Cache HIT for key: {cache_key}")
     return data["response"]
 
-ddef set_cached_response(
+def set_cached_response(
     cache_key: str,
     response: str,
     ttl: int = CACHE_TTL
