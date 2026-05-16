@@ -6,12 +6,13 @@ import com.nyaysetu.backend.entity.CaseNote;
 import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.CaseNoteRepository;
 import com.nyaysetu.backend.service.CaseNoteService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.UUID;
-
+@Tag(name = "Case Notes", description = "Add and retrieve private notes on a case")
 @RestController
 @RequestMapping("/cases/{caseId}/notes")
 @RequiredArgsConstructor

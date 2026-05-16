@@ -3,6 +3,7 @@ package com.nyaysetu.backend.controller;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.NyaySetuBrainService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 /**
  * REST Controller for the Central AI Brain
  */
+@Tag(name = "NyaySetu Brain (AI)", description = "Central AI engine for legal analysis and recommendations")
 @RestController
 @RequestMapping("/api/brain")
 @RequiredArgsConstructor

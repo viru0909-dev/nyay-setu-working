@@ -30,8 +30,8 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                 justifyContent: 'space-between',
                 position: 'relative',
                 zIndex: 100,
-                background: '#FFFFFF',
-                borderBottom: '1px solid #E5E7EB',
+                background: 'var(--bg-nav)',
+                borderBottom: '1px solid var(--border-light)',
                 gap: '0.75rem'
             }}
         >
@@ -42,8 +42,8 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                     <button
                         onClick={onMobileMenuToggle}
                         style={{
-                            background: '#F8FAFC',
-                            border: '1px solid #E5E7EB',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-light)',
                             borderRadius: '10px',
                             padding: '0.625rem',
                             cursor: 'pointer',
@@ -60,18 +60,22 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
 
                 {/* Page Title */}
                 <div style={{ minWidth: 0 }}>
-                    <h1 style={{
-                        fontSize: isMobile ? '1.15rem' : '1.5rem',
-                        fontWeight: '800',
-                        color: 'var(--color-primary)',
-                        marginBottom: isMobile ? 0 : '0.1rem',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        letterSpacing: '-0.02em'
-                    }}>
+                    <div 
+                        role="heading" 
+                        aria-level="1"
+                        style={{
+                            fontSize: isMobile ? '1.15rem' : '1.5rem',
+                            fontWeight: '800',
+                            color: 'var(--color-primary)',
+                            marginBottom: isMobile ? 0 : '0.1rem',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            letterSpacing: '-0.02em'
+                        }}
+                    >
                         {isMobile ? t('common.dashboard', 'Dashboard') : `${user?.role?.replace('_', ' ')} ${t('common.dashboard', 'Dashboard')}`}
-                    </h1>
+                    </div>
                     {!isMobile && (
                         <p style={{
                             fontSize: '0.825rem',
@@ -104,20 +108,20 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             gap: isMobile ? '0.5rem' : '0.75rem',
                             padding: isMobile ? '0.25rem' : '0.5rem 0.75rem',
                             borderRadius: '12px',
-                            background: '#F8FAFC',
-                            border: '1px solid #E5E7EB',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-light)',
                             color: 'var(--color-primary)',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
                             fontWeight: '700'
                         }}
                         onMouseOver={(e) => {
-                            e.currentTarget.style.background = '#F1F5F9';
-                            e.currentTarget.style.borderColor = '#CBD5E1';
+                            e.currentTarget.style.background = 'var(--bg-hover)';
+                            e.currentTarget.style.borderColor = 'var(--border-medium)';
                         }}
                         onMouseOut={(e) => {
-                            e.currentTarget.style.background = '#F8FAFC';
-                            e.currentTarget.style.borderColor = '#E5E7EB';
+                            e.currentTarget.style.background = 'var(--bg-surface)';
+                            e.currentTarget.style.borderColor = 'var(--border-light)';
                         }}
                     >
                         <div style={{
@@ -154,8 +158,8 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             top: '110%',
                             right: 0,
                             width: '220px',
-                            background: '#FFFFFF',
-                            border: '1px solid #E5E7EB',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-light)',
                             borderRadius: '12px',
                             padding: '0.5rem',
                             boxShadow: '0 10px 25px rgba(30, 42, 68, 0.1)',
@@ -184,7 +188,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                     marginBottom: '0.25rem'
                                 }}
                                 onMouseOver={(e) => {
-                                    e.currentTarget.style.background = '#F8FAFC';
+                                    e.currentTarget.style.background = 'var(--bg-hover)';
                                     e.currentTarget.style.color = 'var(--color-secondary)';
                                 }}
                                 onMouseOut={(e) => {
@@ -221,7 +225,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                     style={{
                                         padding: '0.5rem',
                                         background: i18n.language === 'en' ? 'rgba(63, 93, 204, 0.1)' : 'transparent',
-                                        border: i18n.language === 'en' ? '1px solid var(--color-secondary)' : '1px solid #E5E7EB',
+                                        border: i18n.language === 'en' ? '1px solid var(--color-secondary)' : '1px solid var(--border-light)',
                                         borderRadius: '6px',
                                         color: i18n.language === 'en' ? 'var(--color-secondary)' : 'var(--color-primary)',
                                         fontSize: '0.8rem',
@@ -235,7 +239,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                     }}
                                     onMouseOver={(e) => {
                                         if (i18n.language !== 'en') {
-                                            e.currentTarget.style.background = '#F8FAFC';
+                                            e.currentTarget.style.background = 'var(--bg-hover)';
                                         }
                                     }}
                                     onMouseOut={(e) => {
@@ -254,7 +258,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                     style={{
                                         padding: '0.5rem',
                                         background: i18n.language === 'hi' ? 'rgba(63, 93, 204, 0.1)' : 'transparent',
-                                        border: i18n.language === 'hi' ? '1px solid var(--color-secondary)' : '1px solid #E5E7EB',
+                                        border: i18n.language === 'hi' ? '1px solid var(--color-secondary)' : '1px solid var(--border-light)',
                                         borderRadius: '6px',
                                         color: i18n.language === 'hi' ? 'var(--color-secondary)' : 'var(--color-primary)',
                                         fontSize: '0.8rem',
@@ -268,7 +272,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                     }}
                                     onMouseOver={(e) => {
                                         if (i18n.language !== 'hi') {
-                                            e.currentTarget.style.background = '#F8FAFC';
+                                            e.currentTarget.style.background = 'var(--bg-hover)';
                                         }
                                     }}
                                     onMouseOut={(e) => {

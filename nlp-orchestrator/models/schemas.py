@@ -17,3 +17,8 @@ class LiabilityReport(BaseModel):
     liabilityVerdict: str
     timelineEvents: List[dict]
     applicableSections: List[dict]
+
+class ModiOCRResponse(BaseModel):
+    status: str
+    predicted_text: str
+    processing_time: str

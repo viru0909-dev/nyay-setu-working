@@ -2,6 +2,7 @@ package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.service.CaseStateTransitionService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.util.UUID;
  * Controller for Case State Transitions (Chain Reaction Handover).
  * Handles role-to-role handoff operations.
  */
+@Tag(name = "Case Transitions", description = "Role-to-role handoff — Police to Court, Court to Judge, etc.")
 @RestController
 @RequestMapping("/api/cases/transition")
 @RequiredArgsConstructor

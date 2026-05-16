@@ -2,6 +2,7 @@ package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.entity.CaseEvent;
 import com.nyaysetu.backend.service.CaseEventService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.util.UUID;
  * Controller for Case Events (Audit Trail / Timeline).
  * Exposes endpoints for frontend Timeline component.
  */
+@Tag(name = "Case Events", description = "Audit trail and timeline events for each case")
 @RestController
 @RequestMapping("/api/cases")
 @RequiredArgsConstructor

@@ -3,11 +3,12 @@ package com.nyaysetu.backend.controller;
 import com.nyaysetu.backend.dto.ProfileRequest;
 import com.nyaysetu.backend.entity.UserProfile;
 import com.nyaysetu.backend.service.ProfileService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+@Tag(name = "User Profile", description = "Create and update user profile information and photo")
 @RestController
 @RequestMapping("/profile")
 @RequiredArgsConstructor

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
+import ScrollTopButton from '../components/landing/ScrollTopButton';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const techStack = [
@@ -520,6 +521,7 @@ export default function About() {
                 </motion.div>
             </section>
 
+            <ScrollTopButton className="scroll-top-bottom-low" />
             <Footer />
         </div>
     );
