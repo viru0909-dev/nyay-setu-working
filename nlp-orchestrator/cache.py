@@ -52,15 +52,20 @@ def get_cached_response(cache_key: str) -> str | None:
     logger.info(f"Cache HIT for key: {cache_key}")
     return data["response"]
 
-def set_cached_response(cache_key: str, response: str) -> None:
+ddef set_cached_response(
+    cache_key: str,
+    response: str,
+    ttl: int = CACHE_TTL
+) -> None:
     """
     Store response in cache with TTL.
     """
     cache_store[cache_key] = {
         "response": response,
-        "expires_at": time.time() + CACHE_TTL,
+        "expires_at": time.time() + ttl,
         "created_at": time.time()
     }
+
     logger.info(f"Cache STORED for key: {cache_key}")
 
 def clear_expired_cache() -> int:

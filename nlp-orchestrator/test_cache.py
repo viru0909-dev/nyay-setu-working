@@ -115,6 +115,7 @@ def test_cache():
     set_cached_response(
         key_ttl,
         "This cache entry should expire"
+        ttl=10
     )
 
     # Verify immediate retrieval
