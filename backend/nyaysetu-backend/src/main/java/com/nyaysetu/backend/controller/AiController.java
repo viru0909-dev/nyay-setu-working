@@ -3,9 +3,12 @@ package com.nyaysetu.backend.controller;
 import com.nyaysetu.backend.dto.*;
 import com.nyaysetu.backend.service.AiService;
 import com.nyaysetu.backend.service.OllamaService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+
+@Tag(name = "AI Services", description = "Text summarization and AI chat via Groq and Ollama")
 @RestController
 @RequestMapping("/ai")
 @RequiredArgsConstructor

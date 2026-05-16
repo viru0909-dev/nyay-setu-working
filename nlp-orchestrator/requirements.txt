@@ -10,5 +10,13 @@ sqlalchemy
 psycopg2-binary
 aiohttp
 Pillow
+transformers
+torch
+torchvision
+datasets
+accelerate
+sentencepiece
+protobuf
+python-multipart
 pytest
 

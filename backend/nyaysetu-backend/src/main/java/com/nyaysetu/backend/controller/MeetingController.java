@@ -4,6 +4,7 @@ import com.nyaysetu.backend.dto.CreateMeetingRequest;
 import com.nyaysetu.backend.dto.JoinMeetingRequest;
 import com.nyaysetu.backend.dto.MeetingResponse;
 import com.nyaysetu.backend.service.MeetingService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Meetings", description = "Create and join virtual meetings for hearings and consultations")
 @RestController
 @RequestMapping("/meetings")
 @RequiredArgsConstructor

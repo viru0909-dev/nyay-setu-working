@@ -1,15 +1,18 @@
-/* Extends .loading-skeleton from responsive.css with shimmer animation */
+/* Extends .loading-skeleton with shimmer animation — theme-aware */
 @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
 }
+
+/* Light mode shimmer */
 .loading-skeleton {
     min-height: 200px;
-    background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+    background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-hover, #f0f0f0) 50%, var(--bg-surface) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: 12px;
 }
+
 .skeleton-card {
     padding: 1.5rem;
     display: flex;
@@ -20,17 +23,17 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.06);
+    background: var(--border-light);
 }
 .skeleton-title {
     width: 60%;
     height: 14px;
     border-radius: 6px;
-    background: rgba(0, 0, 0, 0.06);
+    background: var(--border-light);
 }
 .skeleton-value {
     width: 40%;
     height: 24px;
     border-radius: 6px;
-    background: rgba(0, 0, 0, 0.06);
+    background: var(--border-light);
 }

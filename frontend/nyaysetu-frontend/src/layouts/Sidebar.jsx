@@ -139,8 +139,8 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                     left: 0,
                     zIndex: isMobile ? 999 : 100,
                     flexShrink: 0,
-                    background: '#FFFFFF',
-                    borderRight: '1px solid #E5E7EB',
+                    background: 'var(--bg-sidebar)',
+                    borderRight: '1px solid var(--border-light)',
                     transform: isMobile && !isMobileOpen ? 'translateX(-100%)' : 'translateX(0)',
                     boxShadow: isMobile ? '4px 0 24px rgba(0, 0, 0, 0.08)' : 'none'
                 }}
@@ -205,9 +205,9 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                                     marginBottom: '0.25rem',
                                     borderRadius: '0.75rem',
                                     background: isActive
-                                        ? 'rgba(30, 42, 68, 0.06)'
+                                        ? 'var(--bg-glass-hover)'
                                         : 'transparent',
-                                    color: isActive ? 'var(--color-secondary)' : '#64748B',
+                                    color: isActive ? 'var(--color-secondary)' : 'var(--text-secondary)',
                                     textDecoration: 'none',
                                     fontSize: '0.9rem',
                                     fontWeight: isActive ? '700' : '600',
@@ -215,7 +215,7 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                                     cursor: 'pointer',
                                     whiteSpace: 'nowrap',
                                     border: '1px solid transparent',
-                                    borderColor: isActive ? 'rgba(30, 42, 68, 0.1)' : 'transparent'
+                                    borderColor: isActive ? 'var(--border-glass)' : 'transparent'
                                 }}
                             >
                                 <Icon size={20} style={{
@@ -232,7 +232,7 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                 {!isMobile && (
                     <div style={{
                         padding: '1rem',
-                        borderTop: '1px solid #E5E7EB',
+                        borderTop: '1px solid var(--border-light)',
                         flexShrink: 0
                     }}>
                         <button
@@ -240,10 +240,10 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                             style={{
                                 width: '100%',
                                 padding: '0.75rem',
-                                background: '#F8FAFC',
-                                border: '1px solid #E5E7EB',
+                                background: 'var(--bg-surface)',
+                                border: '1px solid var(--border-light)',
                                 borderRadius: '0.5rem',
-                                color: '#64748B',
+                                color: 'var(--text-secondary)',
                                 fontSize: '0.85rem',
                                 fontWeight: '700',
                                 cursor: 'pointer',
@@ -254,12 +254,12 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                                 gap: '0.5rem'
                             }}
                             onMouseOver={(e) => {
-                                e.currentTarget.style.background = '#F1F5F9';
+                                e.currentTarget.style.background = 'var(--bg-hover)';
                                 e.currentTarget.style.color = 'var(--color-secondary)';
                             }}
                             onMouseOut={(e) => {
-                                e.currentTarget.style.background = '#F8FAFC';
-                                e.currentTarget.style.color = '#64748B';
+                                e.currentTarget.style.background = 'var(--bg-surface)';
+                                e.currentTarget.style.color = 'var(--text-secondary)';
                             }}
                         >
                             {isCollapsed ? (

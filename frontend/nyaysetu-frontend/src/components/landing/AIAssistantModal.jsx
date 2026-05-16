@@ -1,4 +1,4 @@
-import { X, Brain, MessageCircle, Send, Loader2, Sparkles } from 'lucide-react';
+import { X, Brain, Send, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useState, useRef, useEffect } from 'react';
@@ -9,7 +9,6 @@ import remarkGfm from 'remark-gfm';
 
 export default function AIAssistantModal({ isOpen, onClose }) {
     const { language } = useLanguage();
-    const [chatStarted, setChatStarted] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -20,13 +19,10 @@ export default function AIAssistantModal({ isOpen, onClose }) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+    useEffect(() => { scrollToBottom(); }, [messages]);
 
     useEffect(() => {
         if (!isOpen) {
-            setChatStarted(false);
             setMessages([]);
             setInputMessage('');
             setSessionId(null);
@@ -35,12 +31,10 @@ export default function AIAssistantModal({ isOpen, onClose }) {
 
     const sendMessage = async (text) => {
         if (!text.trim()) return;
-
         const userMessage = { role: 'user', content: text };
         setMessages(prev => [...prev, userMessage]);
         setInputMessage('');
         setIsLoading(true);
-
         try {
             const response = await brainAPI.chat(text, sessionId);
             const aiMessage = { role: 'ai', content: response.data.message };
@@ -58,15 +52,6 @@ export default function AIAssistantModal({ isOpen, onClose }) {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleQuestionClick = (question) => {
-        setChatStarted(true);
-        sendMessage(question);
-    };
-
-    const handleStartChat = () => {
-        setChatStarted(true);
     };
 
     if (!isOpen) return null;
@@ -98,362 +83,432 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                     onClick={onClose}
                     style={{
                         position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0, 0, 0, 0.4)',
-                        backdropFilter: 'var(--glass-blur)',
+                        inset: 0,
+                        background: 'rgba(0,0,0,0.55)',
+                        backdropFilter: 'blur(6px)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         zIndex: 9999,
-                        padding: '2rem'
+                        padding: '1.5rem'
                     }}
                 >
                     <motion.div
-                        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                        initial={{ scale: 0.96, opacity: 0, y: 16 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
-                        onClick={(e) => e.stopPropagation()}
+                        exit={{ scale: 0.96, opacity: 0, y: 16 }}
+                        transition={{ duration: 0.28, ease: [0.34, 1.56, 0.64, 1] }}
+                        onClick={e => e.stopPropagation()}
                         style={{
-                            maxWidth: '900px',
-                            width: '100%',
-                            maxHeight: '90vh',
-                            background: 'var(--bg-glass-strong)',
+                            width: '95vw',
+                            maxWidth: '1000px',
+                            height: '88vh',
+                            maxHeight: '88vh',
+                            background: 'var(--bg-surface)',
                             border: 'var(--border-glass-strong)',
-                            borderRadius: '2rem',
-                            position: 'relative',
+                            borderRadius: '1.25rem',
+                            boxShadow: 'var(--shadow-glass-strong)',
                             display: 'flex',
                             flexDirection: 'column',
-                            overflow: 'hidden'
+                            overflow: 'hidden',
+                            position: 'relative'
                         }}
                     >
-                        {/* Close Button */}
-                        <motion.button
-                            whileHover={{ scale: 1.1, rotate: 90 }}
-                            whileTap={{ scale: 0.9 }}
-                            transition={{ type: 'spring', stiffness: 300 }}
-                            onClick={onClose}
-                            style={{
-                                position: 'absolute',
-                                top: '1.5rem',
-                                right: '1.5rem',
-                                background: 'rgba(139, 92, 246, 0.1)',
-                                border: '1px solid rgba(139, 92, 246, 0.2)',
-                                borderRadius: '0.75rem',
-                                width: '3rem',
-                                height: '3rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                color: 'var(--color-accent)',
-                                transition: 'all 0.3s',
-                                zIndex: 10
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(139, 92, 246, 0.3)';
-                                e.currentTarget.style.borderColor = '#8b5cf6';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
-                                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
-                            }}
-                        >
-                            <X size={24} />
-                        </motion.button>
-
-                        {!chatStarted ? (
-                            /* Welcome Screen */
-                            <div style={{ padding: '3rem', overflow: 'auto', flex: 1 }}>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.1 }}
-                                    style={{ textAlign: 'center', marginBottom: '3rem' }}
-                                >
-                                    <motion.div
-                                        animate={{
-                                            rotate: [0, 5, -5, 0],
-                                            scale: [1, 1.05, 1]
-                                        }}
-                                        transition={{
-                                            duration: 2,
-                                            repeat: Infinity,
-                                            repeatType: 'reverse'
-                                        }}
-                                        style={{
-                                            display: 'inline-block',
-                                            padding: '1.5rem',
-                                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                            borderRadius: '1.5rem',
-                                            marginBottom: '1.5rem'
-                                        }}
-                                    >
-                                        <Brain size={48} color="white" />
-                                    </motion.div>
-
-                                    <h2 style={{
-                                        fontSize: '2.5rem',
-                                        fontWeight: '900',
-                                        color: 'var(--text-main)',
-                                        marginBottom: '1rem',
-                                        background: 'linear-gradient(135deg, var(--color-accent) 0%, #ec4899 100%)',
-                                        WebkitBackgroundClip: 'text',
-                                        WebkitTextFillColor: 'transparent'
-                                    }}>
-                                        {language === 'en' ? 'AI-Powered Legal Brain' : 'AI-संचालित कानूनी मस्तिष्क'}
-                                    </h2>
-
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', lineHeight: '1.6', maxWidth: '600px', margin: '0 auto' }}>
-                                        {language === 'en'
-                                            ? 'Your intelligent assistant that understands Indian law and provides instant answers to your legal queries.'
-                                            : 'आपका बुद्धिमान सहायक जो भारतीय कानून को समझता है और आपके कानूनी प्रश्नों के तत्काल उत्तर प्रदान करता है।'
-                                        }
-                                    </p>
-                                </motion.div>
-
-                                <motion.h3
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.2 }}
-                                    style={{
-                                        fontSize: '1.75rem',
-                                        fontWeight: '800',
-                                        color: 'var(--text-main)',
-                                        marginBottom: '1.5rem',
-                                        textAlign: 'center'
-                                    }}
-                                >
-                                    {language === 'en' ? '💡 Try Asking' : '💡 पूछने का प्रयास करें'}
-                                </motion.h3>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
-                                    {sampleQuestions.map((question, idx) => (
-                                        <motion.div
-                                            key={idx}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.3 + idx * 0.1 }}
-                                            whileHover={{ scale: 1.02, x: 5 }}
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={() => handleQuestionClick(question)}
-                                            style={{
-                                                padding: '1rem 1.5rem',
-                                                background: 'var(--bg-glass)',
-                                                border: 'var(--border-glass)',
-                                                borderRadius: '0.75rem',
-                                                color: 'var(--text-secondary)',
-                                                fontSize: '0.95rem',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.3s'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.background = 'var(--bg-glass-hover)';
-                                                e.currentTarget.style.borderColor = 'var(--color-accent)';
-                                                e.currentTarget.style.color = 'var(--color-accent)';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.background = 'var(--bg-glass)';
-                                                e.currentTarget.style.borderColor = 'var(--border-glass)';
-                                                e.currentTarget.style.color = 'var(--text-secondary)';
-                                            }}
-                                        >
-                                            "{question}"
-                                        </motion.div>
-                                    ))}
-                                </div>
-
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.8 }}
-                                    style={{ textAlign: 'center' }}
-                                >
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={handleStartChat}
-                                        style={{
-                                            padding: '1rem 2.5rem',
-                                            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                            border: 'none',
-                                            borderRadius: '0.75rem',
-                                            color: 'white',
-                                            fontSize: '1.125rem',
-                                            fontWeight: '700',
-                                            cursor: 'pointer',
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem',
-                                            transition: 'transform 0.2s'
-                                        }}
-                                    >
-                                        <Sparkles size={20} />
-                                        {language === 'en' ? 'Start Chatting Now!' : 'अभी चैट करना शुरू करें!'}
-                                    </motion.button>
-                                </motion.div>
-                            </div>
-                        ) : (
-                            /* Chat Interface */
-                            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', padding: '2rem', paddingTop: '4rem' }}>
-                                <h2 style={{
-                                    fontSize: '1.75rem',
-                                    fontWeight: '800',
-                                    color: 'var(--text-main)',
-                                    marginBottom: '1.5rem',
+                        {/* ── Header ── */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '1.25rem 1.5rem',
+                            borderBottom: '1px solid var(--border-light)',
+                            background: 'var(--bg-surface)',
+                            flexShrink: 0
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{
+                                    width: '2.5rem',
+                                    height: '2.5rem',
+                                    borderRadius: '0.75rem',
+                                    background: 'rgba(63,93,204,0.12)',
+                                    border: '1px solid rgba(63,93,204,0.25)',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '0.75rem'
+                                    justifyContent: 'center',
+                                    flexShrink: 0
                                 }}>
-                                    <Brain size={32} style={{ color: '#8b5cf6' }} />
-                                    {language === 'en' ? 'Legal AI Assistant' : 'कानूनी AI सहायक'}
-                                </h2>
-
-                                {/* Messages Area */}
-                                <div style={{
-                                    flex: 1,
-                                    overflow: 'auto',
-                                    marginBottom: '1.5rem',
-                                    padding: '1rem',
-                                    background: 'var(--bg-glass)',
-                                    borderRadius: '1rem',
-                                    border: 'var(--border-glass)'
-                                }}>
-                                    {messages.map((msg, idx) => (
-                                        <motion.div
-                                            key={idx}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            style={{
-                                                marginBottom: '1rem',
-                                                padding: '1rem',
-                                                borderRadius: '0.75rem',
-                                                background: msg.role === 'user'
-                                                    ? 'linear-gradient(135deg, var(--color-accent) 0%, #ec4899 100%)'
-                                                    : 'var(--bg-glass-strong)',
-                                                border: msg.role === 'ai' ? 'var(--border-glass)' : 'none',
-                                                marginLeft: msg.role === 'user' ? 'auto' : '0',
-                                                marginRight: msg.role === 'user' ? '0' : 'auto',
-                                                maxWidth: '85%'
-                                            }}
-                                        >
-                                            <div className="markdown-content">
-                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                    {msg.content}
-                                                </ReactMarkdown>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                    {isLoading && (
-                                        <div style={{
-                                            padding: '1rem',
-                                            borderRadius: '0.75rem',
-                                            background: 'rgba(139, 92, 246, 0.1)',
-                                            border: '1px solid rgba(139, 92, 246, 0.3)',
-                                            maxWidth: '85%'
-                                        }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <Loader2 size={16} style={{ color: '#8b5cf6', animation: 'spin 1s linear infinite' }} />
-                                                <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
-                                                    {language === 'en' ? 'Thinking...' : 'सोच रहा हूँ...'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div ref={messagesEndRef} />
+                                    <Brain size={20} style={{ color: 'var(--color-accent)' }} />
                                 </div>
-
-                                {/* Input Area */}
-                                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                    <input
-                                        type="text"
-                                        value={inputMessage}
-                                        onChange={(e) => setInputMessage(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && sendMessage(inputMessage)}
-                                        placeholder={language === 'en' ? 'Ask me anything about Indian law...' : 'भारतीय कानून के बारे में कुछ भी पूछें...'}
-                                        style={{
-                                            flex: 1,
-                                            padding: '1rem',
-                                            background: 'var(--bg-glass)',
-                                            border: 'var(--border-glass)',
-                                            borderRadius: '0.75rem',
-                                            color: 'var(--text-main)',
-                                            fontSize: '1rem',
-                                            outline: 'none'
-                                        }}
-                                        onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
-                                        onBlur={(e) => e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)'}
-                                    />
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => sendMessage(inputMessage)}
-                                        disabled={isLoading || !inputMessage.trim()}
-                                        style={{
-                                            padding: '1rem 1.5rem',
-                                            background: isLoading || !inputMessage.trim()
-                                                ? 'rgba(139, 92, 246, 0.3)'
-                                                : 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-                                            border: 'none',
-                                            borderRadius: '0.75rem',
-                                            color: 'white',
-                                            fontSize: '1rem',
-                                            fontWeight: '700',
-                                            cursor: isLoading || !inputMessage.trim() ? 'not-allowed' : 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem'
-                                        }}
-                                    >
-                                        <Send size={20} />
-                                    </motion.button>
+                                <div>
+                                    <h2 style={{
+                                        fontSize: '1.2rem',
+                                        fontWeight: '800',
+                                        color: 'var(--text-main)',
+                                        margin: 0,
+                                        lineHeight: 1.2,
+                                        fontFamily: 'var(--font-heading)'
+                                    }}>
+                                        {language === 'en' ? 'Legal AI Assistant' : 'कानूनी AI सहायक'}
+                                    </h2>
+                                    <p style={{
+                                        fontSize: '0.75rem',
+                                        color: 'var(--text-muted)',
+                                        margin: 0,
+                                        lineHeight: 1
+                                    }}>
+                                        {language === 'en' ? 'Powered by NyaySetu AI' : 'NyaySetu AI द्वारा संचालित'}
+                                    </p>
                                 </div>
                             </div>
-                        )}
+
+                            <motion.button
+                                whileHover={{ scale: 1.08, rotate: 90 }}
+                                whileTap={{ scale: 0.92 }}
+                                transition={{ type: 'spring', stiffness: 350 }}
+                                onClick={onClose}
+                                style={{
+                                    background: 'var(--bg-hover)',
+                                    border: '1px solid var(--border-medium)',
+                                    borderRadius: '0.625rem',
+                                    width: '2.5rem',
+                                    height: '2.5rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    color: 'var(--text-secondary)',
+                                    flexShrink: 0
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.background = 'rgba(63,93,204,0.1)';
+                                    e.currentTarget.style.borderColor = 'var(--color-accent)';
+                                    e.currentTarget.style.color = 'var(--color-accent)';
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.background = 'var(--bg-hover)';
+                                    e.currentTarget.style.borderColor = 'var(--border-medium)';
+                                    e.currentTarget.style.color = 'var(--text-secondary)';
+                                }}
+                            >
+                                <X size={18} />
+                            </motion.button>
+                        </div>
+
+                        {/* ── Chat Area ── */}
+                        <div style={{
+                            flex: 1,
+                            overflowY: 'auto',
+                            padding: '1.25rem 1.5rem',
+                            background: 'var(--bg-main)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0'
+                        }}>
+                            {/* Suggestions */}
+                            {messages.length === 0 && (
+                                <div>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.625rem',
+                                        marginBottom: '1rem'
+                                    }}>
+                                        <div style={{
+                                            width: '2rem',
+                                            height: '2rem',
+                                            borderRadius: '50%',
+                                            background: 'rgba(63,93,204,0.12)',
+                                            border: '1px solid rgba(63,93,204,0.2)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0
+                                        }}>
+                                            <Sparkles size={14} style={{ color: 'var(--color-accent)' }} />
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1 }}>
+                                                {language === 'en' ? 'Try Asking' : 'पूछ कर देखें'}
+                                            </div>
+                                            <div style={{
+                                                fontSize: '0.95rem',
+                                                fontWeight: '700',
+                                                color: 'var(--text-main)',
+                                                lineHeight: 1.2,
+                                                fontFamily: 'var(--font-heading)'
+                                            }}>
+                                                {language === 'en' ? 'Common Questions' : 'सामान्य प्रश्न'}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                                        {sampleQuestions.map((q, idx) => (
+                                            <motion.div
+                                                key={idx}
+                                                initial={{ opacity: 0, y: 8 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: idx * 0.06, duration: 0.22 }}
+                                                onClick={() => sendMessage(q)}
+                                                style={{
+                                                    padding: '0.9rem 1.1rem',
+                                                    background: 'var(--bg-surface)',
+                                                    border: '1px solid var(--border-medium)',
+                                                    borderRadius: '0.75rem',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    gap: '0.75rem',
+                                                    boxShadow: 'var(--shadow-sm)',
+                                                    transition: 'all 0.18s ease'
+                                                }}
+                                                onMouseEnter={e => {
+                                                    e.currentTarget.style.borderColor = 'var(--color-accent)';
+                                                    e.currentTarget.style.background = 'rgba(63,93,204,0.06)';
+                                                    e.currentTarget.style.transform = 'translateX(3px)';
+                                                    e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                                                }}
+                                                onMouseLeave={e => {
+                                                    e.currentTarget.style.borderColor = 'var(--border-medium)';
+                                                    e.currentTarget.style.background = 'var(--bg-surface)';
+                                                    e.currentTarget.style.transform = 'translateX(0)';
+                                                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                                                }}
+                                            >
+                                                <span style={{
+                                                    color: 'var(--text-main)',
+                                                    fontSize: '0.9rem',
+                                                    fontWeight: '500',
+                                                    lineHeight: 1.4
+                                                }}>
+                                                    {q}
+                                                </span>
+                                                <span style={{
+                                                    color: 'var(--color-accent)',
+                                                    fontWeight: '700',
+                                                    fontSize: '1rem',
+                                                    flexShrink: 0
+                                                }}>→</span>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Messages */}
+                            {messages.map((msg, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                                        marginBottom: '0.875rem'
+                                    }}
+                                >
+                                    {msg.role === 'ai' && (
+                                        <div style={{
+                                            width: '1.75rem',
+                                            height: '1.75rem',
+                                            borderRadius: '50%',
+                                            background: 'rgba(63,93,204,0.12)',
+                                            border: '1px solid rgba(63,93,204,0.25)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0,
+                                            marginRight: '0.5rem',
+                                            marginTop: '0.25rem'
+                                        }}>
+                                            <Brain size={12} style={{ color: 'var(--color-accent)' }} />
+                                        </div>
+                                    )}
+
+                                    <div style={{
+                                        maxWidth: '72%',
+                                        padding: '0.875rem 1rem',
+                                        borderRadius: msg.role === 'user'
+                                            ? '1rem 1rem 0.25rem 1rem'
+                                            : '1rem 1rem 1rem 0.25rem',
+                                        lineHeight: '1.6',
+                                        fontSize: '0.9rem',
+                                        background: msg.role === 'user'
+                                            ? 'var(--color-accent)'
+                                            : 'var(--bg-surface)',
+                                        color: msg.role === 'user'
+                                            ? '#fff'
+                                            : 'var(--text-main)',
+                                        border: msg.role === 'ai'
+                                            ? '1px solid var(--border-medium)'
+                                            : 'none',
+                                        boxShadow: msg.role === 'ai'
+                                            ? 'var(--shadow-md)'
+                                            : '0 2px 8px rgba(63,93,204,0.3)'
+                                    }}>
+                                        <div className="markdown-content">
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                {msg.content}
+                                            </ReactMarkdown>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+
+                            {isLoading && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.875rem' }}
+                                >
+                                    <div style={{
+                                        width: '1.75rem',
+                                        height: '1.75rem',
+                                        borderRadius: '50%',
+                                        background: 'rgba(63,93,204,0.12)',
+                                        border: '1px solid rgba(63,93,204,0.25)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        <Brain size={12} style={{ color: 'var(--color-accent)' }} />
+                                    </div>
+                                    <div style={{
+                                        padding: '0.75rem 1rem',
+                                        borderRadius: '1rem 1rem 1rem 0.25rem',
+                                        background: 'var(--bg-surface)',
+                                        border: '1px solid var(--border-medium)',
+                                        boxShadow: 'var(--shadow-sm)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem'
+                                    }}>
+                                        <Loader2 size={14} style={{ color: 'var(--color-accent)', animation: 'spin 1s linear infinite' }} />
+                                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                            {language === 'en' ? 'Thinking…' : 'सोच रहा हूँ…'}
+                                        </span>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* ── Input ── */}
+                        <div style={{
+                            padding: '1rem 1.5rem',
+                            borderTop: '1px solid var(--border-light)',
+                            background: 'var(--bg-surface)',
+                            display: 'flex',
+                            gap: '0.625rem',
+                            alignItems: 'center',
+                            flexShrink: 0
+                        }}>
+                            <input
+                                type="text"
+                                value={inputMessage}
+                                onChange={e => setInputMessage(e.target.value)}
+                                onKeyPress={e => e.key === 'Enter' && sendMessage(inputMessage)}
+                                placeholder={
+                                    language === 'en'
+                                        ? 'Ask about Indian law (e.g. Article 21, bail, FIR…)'
+                                        : 'भारतीय कानून के बारे में कुछ भी पूछें…'
+                                }
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem 1rem',
+                                    background: 'var(--bg-input)',
+                                    border: '1.5px solid var(--border-medium)',
+                                    color: 'var(--text-main)',
+                                    borderRadius: '0.75rem',
+                                    fontSize: '0.9rem',
+                                    outline: 'none',
+                                    fontFamily: 'var(--font-body)',
+                                    transition: 'border-color 0.18s, box-shadow 0.18s'
+                                }}
+                                onFocus={e => {
+                                    e.target.style.borderColor = 'var(--border-focus)';
+                                    e.target.style.boxShadow = '0 0 0 3px rgba(63,93,204,0.15)';
+                                }}
+                                onBlur={e => {
+                                    e.target.style.borderColor = 'var(--border-medium)';
+                                    e.target.style.boxShadow = 'none';
+                                }}
+                            />
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => sendMessage(inputMessage)}
+                                disabled={isLoading || !inputMessage.trim()}
+                                style={{
+                                    padding: '0.75rem',
+                                    width: '2.75rem',
+                                    height: '2.75rem',
+                                    background: isLoading || !inputMessage.trim()
+                                        ? 'var(--bg-hover)'
+                                        : 'var(--color-accent)',
+                                    border: isLoading || !inputMessage.trim()
+                                        ? '1.5px solid var(--border-medium)'
+                                        : 'none',
+                                    borderRadius: '0.75rem',
+                                    color: isLoading || !inputMessage.trim()
+                                        ? 'var(--text-muted)'
+                                        : '#fff',
+                                    cursor: isLoading || !inputMessage.trim() ? 'not-allowed' : 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                    boxShadow: isLoading || !inputMessage.trim()
+                                        ? 'none'
+                                        : '0 2px 8px rgba(63,93,204,0.35)',
+                                    transition: 'all 0.18s ease'
+                                }}
+                            >
+                                <Send size={17} />
+                            </motion.button>
+                        </div>
 
                         <style>{`
                             @keyframes spin {
                                 from { transform: rotate(0deg); }
-                                to { transform: rotate(360deg); }
-                            }
-                            
-                            .markdown-content h1, 
-                            .markdown-content h2, 
-                            .markdown-content h3 {
-                                font-size: 1.1rem !important;
-                                font-weight: 700 !important;
-                                margin-top: 0.75rem !important;
-                                margin-bottom: 0.5rem !important;
-                                color: var(--text-main) !important;
-                                line-height: 1.4 !important;
+                                to   { transform: rotate(360deg); }
                             }
                             .markdown-content p {
-                                margin-bottom: 0.75rem !important;
-                                line-height: 1.6 !important;
+                                margin-bottom: 0.6rem !important;
+                                line-height: 1.65 !important;
                                 color: inherit !important;
                             }
-                            .markdown-content ul, 
+                            .markdown-content p:last-child { margin-bottom: 0 !important; }
+                            .markdown-content h1,
+                            .markdown-content h2,
+                            .markdown-content h3 {
+                                font-size: 1rem !important;
+                                font-weight: 700 !important;
+                                margin: 0.75rem 0 0.4rem !important;
+                                color: var(--text-main) !important;
+                                font-family: var(--font-heading) !important;
+                            }
+                            .markdown-content ul,
                             .markdown-content ol {
-                                margin-bottom: 0.75rem !important;
+                                margin-bottom: 0.6rem !important;
                                 padding-left: 1.25rem !important;
                                 color: inherit !important;
                             }
-                            .markdown-content li {
-                                margin-bottom: 0.35rem !important;
-                            }
+                            .markdown-content li { margin-bottom: 0.3rem !important; }
                             .markdown-content strong {
                                 color: var(--color-accent) !important;
                                 font-weight: 700 !important;
                             }
                             .markdown-content code {
-                                background: var(--bg-glass-strong) !important;
-                                padding: 0.1rem 0.3rem !important;
-                                border-radius: 0.25rem !important;
+                                background: var(--bg-hover) !important;
+                                border: 1px solid var(--border-light) !important;
+                                padding: 0.1rem 0.35rem !important;
+                                border-radius: 0.3rem !important;
                                 font-family: monospace !important;
-                                font-size: 0.85rem !important;
+                                font-size: 0.82rem !important;
                             }
                         `}</style>
                     </motion.div>

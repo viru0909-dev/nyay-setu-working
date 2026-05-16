@@ -6,6 +6,11 @@ build/
 dist/
 **/dist/
 
+venv/
+__pycache__/
+*.pyc
+.env
+
 # IDE
 .idea/
 .vscode/

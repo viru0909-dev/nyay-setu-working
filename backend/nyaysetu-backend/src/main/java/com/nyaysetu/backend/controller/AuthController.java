@@ -20,7 +20,9 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "Authentication", description = "Register, login, password reset and face login")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

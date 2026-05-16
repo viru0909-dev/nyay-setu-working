@@ -4,6 +4,7 @@ import com.nyaysetu.backend.dto.LawyerDTO;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.service.CaseAssignmentService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.UUID;
 /**
  * Controller for case assignment operations
  */
+@Tag(name = "Case Assignment", description = "Assign judges and lawyers to cases automatically or manually")
 @RestController
 @RequestMapping("/api/cases")
 @RequiredArgsConstructor
