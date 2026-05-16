@@ -324,17 +324,19 @@ export const translations = {
 export function LanguageProvider({ children }) {
     const [language, setLanguage] = useState('en');
 
-    const toggleLanguage = () => {
-        setLanguage(prev => prev === 'en' ? 'hi' : 'en');
-    };
+    const changeLanguage = (lang) => {
+    setLanguage(lang);
+};
 
     const t = (key) => {
         return translations[language][key] || key;
     };
 
     return (
-        <LanguageContext.Provider value={{ language, toggleLanguage, t }}>
+        <LanguageContext.Provider value={{ language, changeLanguage, t }}>
             {children}
         </LanguageContext.Provider>
+
     );
 }
+ 

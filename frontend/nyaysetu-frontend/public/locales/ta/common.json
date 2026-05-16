@@ -1,0 +1,42 @@
+{
+    "header": {
+        "nav": {
+            "home": "Home",
+            "features": "Features",
+            "constitution": "Constitution",
+            "aiAssistant": "AI Assistant",
+            "about": "About"
+        },
+        "cta": {
+            "login": "Login",
+            "getStarted": "Get Started",
+            "signup": "Sign Up"
+        }
+    },
+    "footer": {
+        "tagline": "India's first AI-powered virtual judiciary platform, making justice accessible to every citizen.",
+        "quickLinks": "Quick Links",
+        "legal": "Legal",
+        "getInTouch": "Get In Touch",
+        "viewRepository": "View Repository",
+        "allRightsReserved": "All rights reserved.",
+        "madeWith": "Made with",
+        "by": "by",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfService": "Terms of Service",
+        "disclaimer": "Disclaimer"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "close": "Close",
+        "save": "Save",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "delete": "Delete",
+        "edit": "Edit",
+        "search": "Search",
+        "learnMore": "Learn More"
+    }
+}
