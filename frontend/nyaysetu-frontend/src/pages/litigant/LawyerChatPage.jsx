@@ -21,6 +21,7 @@ import { messageAPI, caseAPI, vakilFriendAPI, documentAPI } from '../../services
 import { useNavigate } from 'react-router-dom';
 
 export default function LawyerChatPage() {
+    
     const navigate = useNavigate();
     const [selectedCase, setSelectedCase] = useState(null);
     const [message, setMessage] = useState('');
