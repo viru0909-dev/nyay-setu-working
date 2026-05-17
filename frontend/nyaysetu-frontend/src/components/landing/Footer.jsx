@@ -1,12 +1,17 @@
+// footer is always dark navy regardless of theme — conventional behavior
+// fixed GitHub icon hover from #333 (invisible on dark) to a visible grey
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaLinkedin, FaTwitter, FaGithub, FaEnvelope, FaHeart } from 'react-icons/fa';
 import { Scale } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import AIAssistantModal from './AIAssistantModal';
 
 export default function Footer() {
     const { t } = useTranslation(['landing', 'common']);
     const currentYear = new Date().getFullYear();
+    const [showAIModal, setShowAIModal] = useState(false);
 
     const socialLinks = [
         {
@@ -31,15 +36,15 @@ export default function Footer() {
             icon: <FaGithub size={20} />,
             href: 'https://github.com/viru0909-dev/nyay-setu-working',
             label: 'GitHub',
-            color: '#333'
+            color: '#8b949e'
         }
     ];
 
     const quickLinks = [
         { label: t('common:header.nav.features'), href: '#features' },
-        { label: t('common:header.nav.constitution'), href: '#constitution' },
-        { label: t('common:header.nav.aiAssistant'), href: '#chatbot' },
-        { label: t('common:header.nav.about'), href: '#about' }
+        { label: t('common:header.nav.constitution'), href: '/constitution', isRoute: true },
+        { label: t('common:header.nav.aiAssistant'), action: () => setShowAIModal(true) },
+        { label: t('common:header.nav.about'), href: '/about', isRoute: true }
     ];
 
     const legalLinks = [
@@ -50,8 +55,8 @@ export default function Footer() {
 
     return (
         <footer style={{
-            background: 'var(--color-primary)',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            background: '#111827',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
             padding: '4rem 0 2rem',
             position: 'relative',
             overflow: 'hidden',
@@ -160,19 +165,55 @@ export default function Footer() {
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                             {quickLinks.map((link) => (
                                 <li key={link.label} style={{ marginBottom: '0.75rem' }}>
-                                    <a
-                                        href={link.href}
-                                        style={{
-                                            color: 'rgba(255, 255, 255, 0.7)',
-                                            textDecoration: 'none',
-                                            fontSize: '0.95rem',
-                                            transition: 'color 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.color = 'white'}
-                                        onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.7)'}
-                                    >
-                                        {link.label}
-                                    </a>
+                                    {link.action ? (
+                                        <button
+                                            type="button"
+                                            onClick={link.action}
+                                            style={{
+                                                color: 'rgba(255, 255, 255, 0.7)',
+                                                textDecoration: 'none',
+                                                fontSize: '0.95rem',
+                                                transition: 'color 0.2s',
+                                                background: 'none',
+                                                border: 'none',
+                                                padding: 0,
+                                                cursor: 'pointer',
+                                                fontFamily: 'inherit'
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.color = 'white'}
+                                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'}
+                                        >
+                                            {link.label}
+                                        </button>
+                                    ) : link.isRoute ? (
+                                        <Link
+                                            to={link.href}
+                                            style={{
+                                                color: 'rgba(255, 255, 255, 0.7)',
+                                                textDecoration: 'none',
+                                                fontSize: '0.95rem',
+                                                transition: 'color 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.color = 'white'}
+                                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'}
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    ) : (
+                                        <a
+                                            href={link.href}
+                                            style={{
+                                                color: 'rgba(255, 255, 255, 0.7)',
+                                                textDecoration: 'none',
+                                                fontSize: '0.95rem',
+                                                transition: 'color 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.color = 'white'}
+                                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'}
+                                        >
+                                            {link.label}
+                                        </a>
+                                    )}
                                 </li>
                             ))}
                         </ul>
@@ -287,6 +328,7 @@ export default function Footer() {
                     </p>
                 </div>
             </div>
+            <AIAssistantModal isOpen={showAIModal} onClose={() => setShowAIModal(false)} />
         </footer>
     );
 }

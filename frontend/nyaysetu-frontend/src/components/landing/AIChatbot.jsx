@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { brainAPI } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import ScrollTopButton from './ScrollTopButton';
 
 export default function AIChatbot() {
     const [isOpen, setIsOpen] = useState(false);
@@ -45,6 +46,8 @@ export default function AIChatbot() {
     return (
         <>
             {/* Floating Button */}
+            <ScrollTopButton />
+
             <motion.button
                 onClick={() => setIsOpen(!isOpen)}
                 whileHover={{ scale: 1.05 }}
@@ -157,7 +160,7 @@ export default function AIChatbot() {
                                         background: msg.role === 'user'
                                             ? 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)'
                                             : 'white', // Light background for bot
-                                        color: msg.role === 'user' ? 'white' : 'var(--text-main)',
+                                        color: msg.role === 'user' ? 'white' : '#4B5563',
                                         fontSize: '0.9rem',
                                         lineHeight: '1.5',
                                         boxShadow: msg.role === 'assistant' ? '0 2px 10px rgba(0,0,0,0.05)' : 'none',
@@ -194,7 +197,7 @@ export default function AIChatbot() {
                         <div style={{
                             padding: '1.25rem',
                             borderTop: 'var(--border-glass)',
-                            background: 'rgba(255, 255, 255, 0.5)'
+                            background: 'var(--bg-glass-strong)'
                         }}>
                             <div style={{ display: 'flex', gap: '0.75rem' }}>
                                 <input
@@ -209,7 +212,7 @@ export default function AIChatbot() {
                                         background: 'white',
                                         border: '1px solid rgba(0, 0, 0, 0.1)',
                                         borderRadius: '0.75rem',
-                                        color: 'var(--text-main)',
+                                        color: '#4B5563',
                                         fontSize: '0.95rem',
                                         outline: 'none'
                                     }}

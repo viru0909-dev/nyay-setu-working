@@ -10,5 +10,6 @@ public class NyaySetuBackendApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(NyaySetuBackendApplication.class, args);
+        System.out.println("application works");
     }
 }

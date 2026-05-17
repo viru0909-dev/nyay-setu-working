@@ -88,11 +88,11 @@ export default function Login() {
 
             <div style={{
                 minHeight: '100vh',
-                paddingTop: '100px',
+                paddingTop: '80px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: isMobile ? '80px 1rem 1rem 1rem' : '100px 2rem 2rem 2rem',
+                padding: isMobile ? '70px 1rem 1rem 1rem' : '80px 2rem 1.5rem 2rem',
                 position: 'relative',
                 overflow: 'hidden'
             }}>
@@ -124,10 +124,10 @@ export default function Login() {
 
                 <div style={{
                     width: '100%',
-                    maxWidth: isMobile ? '100%' : '1200px',
+                    maxWidth: isMobile ? '100%' : '1050px',
                     display: 'grid',
                     gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-                    gap: isMobile ? '1.5rem' : '4rem',
+                    gap: isMobile ? '1.5rem' : '3rem',
                     alignItems: 'center',
                     position: 'relative',
                     zIndex: 1
@@ -135,21 +135,21 @@ export default function Login() {
                     {/* Left Side - Welcome (hidden on mobile) */}
                     {!isMobile && (
                         <div style={{ color: 'var(--text-main)' }}>
-                            <div style={{ marginBottom: '3rem' }}>
+                            <div style={{ marginBottom: '2rem' }}>
                                 <h1 style={{
-                                    fontSize: '3.5rem',
+                                    fontSize: '2.8rem',
                                     fontWeight: '900',
-                                    marginBottom: '1rem',
+                                    marginBottom: '0.75rem',
                                     color: 'var(--color-primary)',
                                     lineHeight: '1.2'
                                 }}>
                                     {t('auth:login.pageTitle')}
                                 </h1>
                                 <p style={{
-                                    fontSize: '1.25rem',
+                                    fontSize: '1.1rem',
                                     color: 'var(--text-secondary)',
-                                    lineHeight: '1.8',
-                                    maxWidth: '500px'
+                                    lineHeight: '1.7',
+                                    maxWidth: '440px'
                                 }}>
                                     {t('auth:login.pageSubtitle')}
                                 </p>
@@ -189,22 +189,22 @@ export default function Login() {
                     <div style={{
                         background: 'var(--bg-glass-strong)',
                         backdropFilter: 'var(--glass-blur)',
-                        borderRadius: isMobile ? '1rem' : '2rem',
+                        borderRadius: isMobile ? '1rem' : '1.5rem',
                         border: 'var(--border-glass-strong)',
-                        padding: isMobile ? '1.5rem' : '3rem',
+                        padding: isMobile ? '1.25rem' : '2.25rem',
                         boxShadow: 'var(--shadow-glass)',
                         width: '100%'
                     }}>
-                        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
                             <h2 style={{
-                                fontSize: '2rem',
+                                fontSize: '1.75rem',
                                 fontWeight: '800',
                                 color: 'var(--text-main)',
-                                marginBottom: '0.5rem'
+                                marginBottom: '0.35rem'
                             }}>
                                 {t('auth:login.title')}
                             </h2>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 {t('auth:login.subtitle')}
                             </p>
                         </div>
@@ -226,7 +226,7 @@ export default function Login() {
 
                         <form onSubmit={handleSubmit}>
                             {/* Email */}
-                            <div style={{ marginBottom: '1.5rem' }}>
+                            <div style={{ marginBottom: '1.1rem' }}>
                                 <label style={{
                                     display: 'block',
                                     marginBottom: '0.5rem',
@@ -261,12 +261,12 @@ export default function Login() {
                                             transition: 'all 0.2s'
                                         }}
                                         onFocus={(e) => {
-                                            e.target.style.borderColor = 'var(--color-primary)';
-                                            e.target.style.background = 'rgba(255,255,255,0.8)';
+                                            e.target.style.borderColor = 'var(--border-focus)';
+                                            e.target.style.background = 'var(--bg-surface)';
                                         }}
                                         onBlur={(e) => {
-                                            e.target.style.borderColor = 'rgba(255,255,255,0.5)';
-                                            e.target.style.background = 'rgba(255,255,255,0.35)';
+                                            e.target.style.borderColor = 'var(--border-light)';
+                                            e.target.style.background = 'var(--bg-glass)';
                                         }}
                                     />
                                 </div>
@@ -308,12 +308,12 @@ export default function Login() {
                                             transition: 'all 0.2s'
                                         }}
                                         onFocus={(e) => {
-                                            e.target.style.borderColor = 'var(--color-primary)';
-                                            e.target.style.background = 'rgba(255,255,255,0.8)';
+                                            e.target.style.borderColor = 'var(--border-focus)';
+                                            e.target.style.background = 'var(--bg-surface)';
                                         }}
                                         onBlur={(e) => {
-                                            e.target.style.borderColor = 'rgba(255,255,255,0.5)';
-                                            e.target.style.background = 'rgba(255,255,255,0.35)';
+                                            e.target.style.borderColor = 'var(--border-light)';
+                                            e.target.style.background = 'var(--bg-glass)';
                                         }}
                                     />
                                     <button
@@ -336,7 +336,7 @@ export default function Login() {
                             </div>
 
                             {/* Role Selection - Tab Style */}
-                            <div style={{ marginBottom: '1.5rem' }}>
+                            <div style={{ marginBottom: '1.1rem' }}>
                                 <label style={{
                                     display: 'block',
                                     marginBottom: '0.75rem',
@@ -382,7 +382,7 @@ export default function Login() {
                                             }}
                                             onMouseOut={(e) => {
                                                 if (selectedRole !== role.value) {
-                                                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)';
+                                                    e.currentTarget.style.borderColor = 'var(--border-light)';
                                                 }
                                             }}
                                         >
@@ -398,7 +398,7 @@ export default function Login() {
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
-                                marginBottom: '2rem'
+                                marginBottom: '1.25rem'
                             }}>
                                 <label style={{
                                     display: 'flex',
@@ -433,19 +433,19 @@ export default function Login() {
                                 disabled={loading}
                                 style={{
                                     width: '100%',
-                                    padding: '1rem',
+                                    padding: '0.85rem',
                                     background: loading
                                         ? 'var(--bg-glass-hover)'
                                         : 'var(--color-primary)',
                                     border: 'none',
                                     borderRadius: '0.75rem',
                                     color: 'white',
-                                    fontSize: '1.05rem',
+                                    fontSize: '1rem',
                                     fontWeight: '700',
                                     cursor: loading ? 'not-allowed' : 'pointer',
                                     boxShadow: '0 10px 30px rgba(37, 99, 235, 0.2)',
                                     transition: 'all 0.3s',
-                                    marginBottom: '1rem'
+                                    marginBottom: '0.75rem'
                                 }}
                             >
                                 {loading ? t('auth:login.signingIn') : t('auth:login.signIn')}
@@ -457,12 +457,12 @@ export default function Login() {
                                 onClick={() => setShowFaceLogin(true)}
                                 style={{
                                     width: '100%',
-                                    padding: '1rem',
+                                    padding: '0.75rem',
                                     background: 'rgba(30, 42, 68, 0.08)',
                                     border: '1px solid rgba(30, 42, 68, 0.2)',
                                     borderRadius: '0.75rem',
                                     color: 'var(--color-primary)',
-                                    fontSize: '1rem',
+                                    fontSize: '0.95rem',
                                     fontWeight: '600',
                                     cursor: 'pointer',
                                     display: 'flex',
@@ -485,7 +485,7 @@ export default function Login() {
                             </button>
                         </form>
 
-                        <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+                        <div style={{ textAlign: 'center', marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
                             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 {t('auth:login.noAccount')}{' '}
                                 <Link to="/signup" style={{

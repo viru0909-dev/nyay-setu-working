@@ -8,7 +8,7 @@ Endpoints:
   POST /api/legal/analyze           — Sync version (testing only)
   GET  /health                      — Health check
 """
-
+from utils import async_retry
 import asyncio
 import json
 import logging
@@ -28,6 +28,7 @@ from synthesizer import synthesize_answers
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
 from routers.forensics import router as forensics_router
+from routers.modi_ocr import router as modi_ocr_router
 
 # Initialize clients for deep research pipeline
 from groq import AsyncGroq
@@ -64,6 +65,7 @@ app.add_middleware(
 )
 
 app.include_router(forensics_router)
+app.include_router(modi_ocr_router)
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
@@ -89,10 +91,15 @@ async def legal_reasoning_pipeline(query: str, language: str):
     Fix: Removed inner async generator — research now runs as a background
     asyncio.Task while interim messages are yielded from the outer generator.
     """
+    kanoon_task = None
+    research_task = None
+
     try:
         # ── Layer 1: Decompose ───────────────────────────────────
         logger.info(f"[Layer 1] Decomposing: {query[:60]}...")
         yield sse_event("avatar_update", {"message": "Aapka sawaal samajh raha hoon, thoda wait karein..."})
+
+        kanoon_task = asyncio.create_task(build_kanoon_context(query, max_results=3))
 
         sub_questions = await decompose_query(query)
         logger.info(f"[Layer 1] Got {len(sub_questions)} sub-questions")
@@ -102,6 +109,12 @@ async def legal_reasoning_pipeline(query: str, language: str):
         routed = route_questions(sub_questions)
         logger.info(f"[Layer 2] Routing: {[(r['question'][:30], r['model']) for r in routed]}")
 
+        try:
+            kanoon_context, _ = await kanoon_task
+        except Exception as e:
+            logger.error("[Layer 2] Indian Kanoon fetch failed: %s", e)
+            kanoon_context = ""
+
         # ── Layer 5a: Interim Avatar Messages (to stream while research runs) ──
         interim_messages = get_interim_messages(query, count=3)
 
@@ -109,7 +122,7 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("research_start", {"total": len(routed)})
 
         # Launch research as a background Task so we can yield interims concurrently
-        research_task = asyncio.create_task(run_parallel_research(routed))
+        research_task = asyncio.create_task(run_parallel_research(routed, kanoon_context=kanoon_context))
 
         # Yield interim avatar messages every 2.5s while research task completes
         for msg in interim_messages:
@@ -149,10 +162,29 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("done", {"message": "Research complete"})
         logger.info("[Pipeline] Done ✓")
 
+    except (GeneratorExit, asyncio.CancelledError):
+        logger.info("[Pipeline] Client disconnected — cleaning up tasks")
+        raise
+
     except Exception as e:
         logger.error(f"[Pipeline] Fatal error: {e}")
         yield sse_event("error", {"message": str(e)})
         yield sse_event("done", {"message": "Error occurred"})
+
+    finally:
+        if kanoon_task is not None and not kanoon_task.done():
+            kanoon_task.cancel()
+            try:
+                await kanoon_task
+            except (asyncio.CancelledError, BaseException):
+                pass
+
+        if research_task is not None and not research_task.done():
+            research_task.cancel()
+            try:
+                await research_task
+            except (asyncio.CancelledError, BaseException):
+                pass
 
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
@@ -176,11 +208,15 @@ async def analyze_stream(body: LegalQuery, request: Request):
     logger.info(f"[Stream] New query: {body.query[:80]}")
 
     async def event_generator():
-        async for event in legal_reasoning_pipeline(body.query, body.language):
-            if await request.is_disconnected():
-                logger.info("[Stream] Client disconnected")
-                break
-            yield {"data": event}
+        pipeline = legal_reasoning_pipeline(body.query, body.language)
+        try:
+            async for event in pipeline:
+                if await request.is_disconnected():
+                    logger.info("[Stream] Client disconnected")
+                    break
+                yield {"data": event}
+        finally:
+            await pipeline.aclose()
 
     return EventSourceResponse(event_generator())
 
@@ -200,7 +236,12 @@ async def analyze_sync(body: LegalQuery):
 
     sub_questions = await decompose_query(body.query)
     routed = route_questions(sub_questions)
-    results = await run_parallel_research(routed)
+    try:
+        kanoon_context, _ = await build_kanoon_context(body.query, max_results=3)
+    except Exception as e:
+        logger.error("[Sync] Indian Kanoon fetch failed: %s", e)
+        kanoon_context = ""
+    results = await run_parallel_research(routed, kanoon_context=kanoon_context)
     synthesized = await synthesize_answers(body.query, results)
     hinglish = await convert_to_hinglish(synthesized)
 
@@ -233,6 +274,21 @@ Structure your response with:
 5. Important caveats or disclaimers
 
 Format in Markdown. Be precise and cite sources."""
+
+@async_retry(max_attempts=3)
+async def call_groq_with_retry(grounded_prompt, query):
+
+    response = await groq_client.chat.completions.create(
+        model=GROQ_MODEL_FAST,
+        messages=[
+            {"role": "system", "content": grounded_prompt},
+            {"role": "user", "content": query}
+        ],
+        temperature=0.2,
+        max_tokens=2048
+    )
+
+    return response
 
 
 async def deep_research_pipeline(query: str, language: str):
@@ -347,6 +403,7 @@ async def deep_research_pipeline(query: str, language: str):
         )
 
         # Call the AI model and stream reasoning
+        ai_answer = None
         if model_choice == "gemini" and gemini_client:
             try:
                 loop = asyncio.get_event_loop()
@@ -364,16 +421,11 @@ async def deep_research_pipeline(query: str, language: str):
                 ai_answer = None
         
         if model_choice == "groq" or (model_choice == "gemini" and not gemini_client):
-            response = await groq_client.chat.completions.create(
-                model=GROQ_MODEL_FAST,
-                messages=[
-                    {"role": "system", "content": grounded_prompt},
-                    {"role": "user", "content": query}
-                ],
-                temperature=0.2,
-                max_tokens=2048
+           response = await call_groq_with_retry(
+               grounded_prompt,
+               query
             )
-            ai_answer = response.choices[0].message.content.strip()
+           ai_answer = response.choices[0].message.content.strip()
 
         # Stream reasoning text in chunks for live display
         if ai_answer:
@@ -431,6 +483,10 @@ async def deep_research_pipeline(query: str, language: str):
         yield sse_event("done", {"message": "Deep research complete"})
         logger.info("[Deep Research] Pipeline complete ✓")
 
+    except (GeneratorExit, asyncio.CancelledError):
+        logger.info("[Deep Research] Client disconnected")
+        raise
+
     except Exception as e:
         logger.error(f"[Deep Research] Fatal error: {e}")
         yield sse_event("error", {"message": str(e)})
@@ -452,11 +508,15 @@ async def deep_research(body: LegalQuery, request: Request):
     logger.info(f"[Deep Research] New query: {body.query[:80]}")
 
     async def event_generator():
-        async for event in deep_research_pipeline(body.query, body.language):
-            if await request.is_disconnected():
-                logger.info("[Deep Research] Client disconnected")
-                break
-            yield {"data": event}
+        pipeline = deep_research_pipeline(body.query, body.language)
+        try:
+            async for event in pipeline:
+                if await request.is_disconnected():
+                    logger.info("[Deep Research] Client disconnected")
+                    break
+                yield {"data": event}
+        finally:
+            await pipeline.aclose()
 
     return EventSourceResponse(event_generator())
 

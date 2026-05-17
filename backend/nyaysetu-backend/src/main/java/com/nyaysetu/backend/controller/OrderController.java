@@ -4,6 +4,7 @@ import com.nyaysetu.backend.entity.CourtOrder;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CourtOrderRepository;
 import com.nyaysetu.backend.service.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Tag(name = "Court Orders", description = "Issue and retrieve court orders for cases")
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor

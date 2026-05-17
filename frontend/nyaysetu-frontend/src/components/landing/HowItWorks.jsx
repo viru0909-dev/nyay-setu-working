@@ -1,3 +1,5 @@
+// fixed window.innerWidth checks (unreliable at render time) — replaced with CSS media queries
+// also fixed a broken JSX structure that was causing blank space below the steps grid
 import { motion } from 'framer-motion';
 import { UserPlus, FileSearch, Gavel, CheckCircle, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -38,8 +40,8 @@ export default function HowItWorks() {
 
     return (
         <section style={{
-            padding: '1rem 2rem 6rem',
-            background: 'transparent' // Let body background show through
+            padding: '5rem 2rem 6rem',
+            background: 'var(--bg-main)',
         }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                 {/* Header */}
@@ -104,7 +106,7 @@ export default function HowItWorks() {
                 {/* Steps */}
                 <div style={{ position: 'relative' }}>
                     {/* Connection Line */}
-                    <div style={{
+                    <div className="hiw-connector" style={{
                         position: 'absolute',
                         top: '80px',
                         left: '50%',
@@ -112,9 +114,8 @@ export default function HowItWorks() {
                         width: '80%',
                         height: '2px',
                         background: 'linear-gradient(90deg, #8b5cf6 0%, #6366f1 33%, #ec4899 66%, #10b981 100%)',
-                        opacity: 0.3,
+                        opacity: 0.25,
                         zIndex: 0,
-                        display: window.innerWidth > 768 ? 'block' : 'none'
                     }} />
 
                     <div style={{
@@ -214,13 +215,12 @@ export default function HowItWorks() {
 
                                 {/* Arrow for desktop */}
                                 {idx < steps.length - 1 && (
-                                    <div style={{
+                                    <div className="hiw-arrow" style={{
                                         position: 'absolute',
                                         top: '60px',
                                         right: '-50px',
                                         color: step.color,
                                         opacity: 0.5,
-                                        display: window.innerWidth > 768 ? 'block' : 'none'
                                     }}>
                                         <ArrowRight size={32} />
                                     </div>
@@ -269,6 +269,11 @@ export default function HowItWorks() {
                     </motion.button>
                 </motion.div>
             </div>
+            <style>{`
+                @media (max-width: 768px) {
+                    .hiw-connector, .hiw-arrow { display: none !important; }
+                }
+            `}</style>
         </section>
     );
 }

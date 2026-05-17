@@ -4,6 +4,7 @@ import com.nyaysetu.backend.entity.EvidenceRecord;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.BlockchainEvidenceService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.*;
 /**
  * Controller for blockchain-secured evidence management
  */
+@Tag(name = "Blockchain Evidence", description = "Upload and verify evidence secured with SHA-256 blockchain hashing")
 @RestController
 @RequestMapping("/api/evidence")
 @RequiredArgsConstructor
