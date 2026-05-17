@@ -1,0 +1,127 @@
+{
+    "sidebar": {
+        "collapseSidebar": "ಸೈಡ್‌ಬಾರ್ ಮುಚ್ಚಿ",
+        "litigant": {
+            "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+            "vakilFriendAI": "ನ್ಯಾಯ ಸಾರಥಿ",
+            "fileCaseFIR": "ಪ್ರಕರಣ / FIR ದಾಖಲಿಸಿ",
+            "caseDiary": "ಪ್ರಕರಣ ಡೈರಿ",
+            "hearings": "ವಿಚಾರಣೆಗಳು",
+            "lawyerChat": "ವಕೀಲರ ಚಾಟ್",
+            "forensicAnalysis": "ಫೋರೆನ್ಸಿಕ್ ವಿಶ್ಲೇಷಣೆ",
+            "profile": "ಪ್ರೊಫೈಲ್"
+        },
+        "lawyer": {
+            "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+            "litigantDirectory": "ವಾದಿ ಡೈರೆಕ್ಟರಿ",
+            "activeCases": "ಸಕ್ರಿಯ ಪ್ರಕರಣಗಳು",
+            "aiLegalAssistant": "AI ಕಾನೂನು ಸಹಾಯಕ",
+            "hearings": "ವಿಚಾರಣೆಗಳು",
+            "analytics": "ವಿಶ್ಲೇಷಣೆಗಳು",
+            "profile": "ಪ್ರೊಫೈಲ್"
+        },
+        "judge": {
+            "judicialOverview": "ನ್ಯಾಯಾಂಗ ಅವಲೋಕನ",
+            "myDocket": "ನನ್ನ ಡಾಕೆಟ್",
+            "unassignedPool": "ನಿಯೋಜಿಸದ ಪೂಲ್",
+            "liveHearing": "ನೇರ ವಿಚಾರಣೆ",
+            "courtAnalytics": "ನ್ಯಾಯಾಲಯ ವಿಶ್ಲೇಷಣೆಗಳು",
+            "profile": "ಪ್ರೊಫೈಲ್"
+        },
+        "admin": {
+            "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+            "userManagement": "ಬಳಕೆದಾರ ನಿರ್ವಹಣೆ",
+            "caseManagement": "ಪ್ರಕರಣ ನಿರ್ವಹಣೆ",
+            "judgeAssignment": "ನ್ಯಾಯಾಧೀಶರ ನಿಯೋಜನೆ",
+            "reports": "ವರದಿಗಳು",
+            "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+            "profile": "ಪ್ರೊಫೈಲ್"
+        },
+        "techAdmin": {
+            "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+            "aiModels": "AI ಮಾದರಿಗಳು",
+            "videoSystem": "ವೀಡಿಯೊ ಸಿಸ್ಟಮ್",
+            "logs": "ಲಾಗ್‌ಗಳು",
+            "configuration": "ಸಂರಚನೆ",
+            "profile": "ಪ್ರೊಫೈಲ್"
+        },
+        "police": {
+            "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+            "investigationUnit": "ತನಿಖಾ ವಿಭಾಗ",
+            "uploadFIR": "FIR ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+            "myFIRs": "ನನ್ನ FIRಗಳು",
+            "profile": "ಪ್ರೊಫೈಲ್"
+        }
+    },
+    "litigant": {
+        "fileCaseFIR": "ಪ್ರಕರಣ / FIR ದಾಖಲಿಸಿ",
+        "fileCaseDesc": "ನ್ಯಾಯ ಸಾರಥಿ AI ಸಹಾಯದಿಂದ ನಾಗರಿಕ ಪ್ರಕರಣ ಅಥವಾ ಕ್ರಿಮಿನಲ್ FIR ದಾಖಲಿಸಿ",
+        "getStarted": "ಪ್ರಾರಂಭಿಸಿ",
+        "pendingApprovals": "ಬಾಕಿ ಅನುಮೋದನೆಗಳು",
+        "reviewDraft": "ಕರಡು ಪರಿಶೀಲಿಸಿ",
+        "actionRequired": "ಕ್ರಮ ಅಗತ್ಯವಿದೆ",
+        "sentBy": "ಕಳುಹಿಸಿದವರು",
+        "awaitingSignature": "ನಿಮ್ಮ ಡಿಜಿಟಲ್ ಸಹಿಗಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ",
+        "viewDetails": "ವಿವರಗಳು ವೀಕ್ಷಿಸಿ",
+        "approveSign": "ಅನುಮೋದಿಸಿ & E-ಸಹಿ ಮಾಡಿ",
+        "myCases": "ನನ್ನ ಪ್ರಕರಣಗಳು",
+        "upcomingHearings": "ಮುಂಬರುವ ವಿಚಾರಣೆಗಳು",
+        "documents": "ದಾಖಲೆಗಳು",
+        "legalChat": "ಕಾನೂನು ಚಾಟ್",
+        "active": "ಸಕ್ರಿಯ",
+        "chatWithLawyer": "ವಕೀಲರೊಂದಿಗೆ ಚಾಟ್ ಮಾಡಿ",
+        "thisMonth": "ಈ ತಿಂಗಳು +1",
+        "newDocs": "+2 ಹೊಸದು",
+        "recentCases": "ಇತ್ತೀಚಿನ ಪ್ರಕರಣಗಳು",
+        "viewAll": "ಎಲ್ಲಾ ವೀಕ್ಷಿಸಿ",
+        "noCases": "ಇನ್ನೂ ಯಾವುದೇ ಪ್ರಕರಣ ದಾಖಲಿಸಲಾಗಿಲ್ಲ",
+        "fileFirstCase": "ನಿಮ್ಮ ಮೊದಲ ಪ್ರಕರಣ ದಾಖಲಿಸಿ",
+        "filed": "ದಾಖಲಿಸಲಾಗಿದೆ",
+        "noUpcomingHearings": "ಮುಂಬರುವ ವಿಚಾರಣೆಗಳಿಲ್ಲ",
+        "hearingsAppearHere": "ನಿಗದಿಪಡಿಸಿದ ನಂತರ ವಿಚಾರಣೆಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ",
+        "joinVirtualCourt": "ವರ್ಚುವಲ್ ನ್ಯಾಯಾಲಯಕ್ಕೆ ಸೇರಿ",
+        "startsIn": "{{minutes}} ನಿಮಿಷಗಳಲ್ಲಿ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ",
+        "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ..."
+    },
+    "lawyer": {
+        "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+        "clientManagement": "ಕ್ಲೈಂಟ್ ನಿರ್ವಹಣೆ",
+        "activeCases": "ಸಕ್ರಿಯ ಪ್ರಕರಣಗಳು",
+        "aiAssistant": "AI ಕಾನೂನು ಸಹಾಯಕ",
+        "hearings": "ವಿಚಾರಣೆಗಳು",
+        "analytics": "ವಿಶ್ಲೇಷಣೆಗಳು",
+        "profile": "ಪ್ರೊಫೈಲ್"
+    },
+    "judge": {
+        "judicialOverview": "ನ್ಯಾಯಾಂಗ ಅವಲೋಕನ",
+        "myDocket": "ನನ್ನ ಡಾಕೆಟ್",
+        "unassignedPool": "ನಿಯೋಜಿಸದ ಪೂಲ್",
+        "courtAnalytics": "ನ್ಯಾಯಾಲಯ ವಿಶ್ಲೇಷಣೆಗಳು"
+    },
+    "police": {
+        "dashboard": "ಪೊಲೀಸ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+        "investigationUnit": "ತನಿಖಾ ವಿಭಾಗ",
+        "uploadFIR": "FIR ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+        "myFIRs": "ನನ್ನ FIRಗಳು"
+    },
+    "common": {
+        "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+        "welcomeBack": "ಮರಳಿ ಸ್ವಾಗತ",
+        "viewProfile": "ಪ್ರೊಫೈಲ್ ವೀಕ್ಷಿಸಿ",
+        "language": "ಭಾಷೆ",
+        "search": "ಹುಡುಕಿ...",
+        "notifications": "ಅಧಿಸೂಚನೆಗಳು",
+        "profile": "ಪ್ರೊಫೈಲ್",
+        "logout": "ಲಾಗ್‌ಔಟ್",
+        "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+        "next": "ಮುಂದೆ",
+        "previous": "ಹಿಂದೆ",
+        "submit": "ಸಲ್ಲಿಸಿ",
+        "cancel": "ರದ್ದುಮಾಡಿ",
+        "save": "ಉಳಿಸಿ",
+        "delete": "ಅಳಿಸಿ",
+        "edit": "ಸಂಪಾದಿಸಿ",
+        "viewAll": "ಎಲ್ಲಾ ವೀಕ್ಷಿಸಿ",
+        "noData": "ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ"
+    }
+}
