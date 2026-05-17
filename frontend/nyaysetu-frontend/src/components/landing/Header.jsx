@@ -1,8 +1,6 @@
 // redesigned header — dark mode toggle, portal dropdown, sticky scroll, mobile drawer
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Scale, Menu, X } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import {Link, useNavigate ,useLocation} from 'react-router-dom';
 import { Scale, Menu, X, Globe, Sun, Moon, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -136,6 +134,7 @@ export default function Header({ hideAuthButtons = false }) {
                     alignItems: 'center',
                     gap: '1rem',
                 }}>
+                </div>
                     {/* Logo */}
                     <Link to="/" style={{
                         display: 'flex',
@@ -205,6 +204,7 @@ export default function Header({ hideAuthButtons = false }) {
                                 <ChevronDown size={14} style={{ transform: roleOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
                             </button>
 
+                </div>
                 {/* CTA Buttons */}
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }} className="desktop-cta">
                     {/* Language Dropdown */}
@@ -230,30 +230,7 @@ export default function Header({ hideAuthButtons = false }) {
                         <option value="kn">Kannada</option>
                     </select>
 
-                        {/* Language Toggle */}
-                        <button
-                            onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'hi' : 'en')}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.35rem',
-                                padding: '0.5rem 0.8rem',
-                                background: 'transparent',
-                                border: '1px solid var(--border-medium)',
-                                borderRadius: '8px',
-                                color: 'var(--text-main)',
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                fontSize: '0.8rem',
-                                fontFamily: 'inherit',
-                                transition: 'all 0.2s ease',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border-medium)'; }}
-                        >
-                            <Globe size={14} />
-                            {i18n.language === 'en' ? 'हिंदी' : 'EN'}
-                        </button>
+                        
 
                         {/* Dark Mode Toggle */}
                         <motion.button
