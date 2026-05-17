@@ -51,62 +51,118 @@ export default function Header({ hideAuthButtons = false }) {
     const isDark = theme === 'dark';
 
     const navLinkStyle = (href) => ({
-        color: location.pathname === href ? 'var(--color-primary)' : 'var(--text-secondary)',
-        textDecoration: 'none',
-        fontSize: '0.925rem',
-        fontWeight: location.pathname === href ? '600' : '500',
-        cursor: 'pointer',
-        padding: '0.25rem 0',
-        borderBottom: location.pathname === href
-            ? '2px solid var(--color-primary)'
-            : '2px solid transparent',
-        transition: 'color 0.2s ease, border-color 0.2s ease',
-        background: 'none',
-        border: 'none',
-        fontFamily: 'inherit',
-    });
+    color:
+        location.pathname === href
+            ? 'var(--color-primary)'
+            : 'var(--text-secondary)',
 
-    const renderNavItem = (item) => {
-        const baseStyle = navLinkStyle(item.href);
-        if (item.action) {
-            return (
-                <button
-                    key={item.labelKey}
-                    onClick={item.action}
-                    style={baseStyle}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
-                >
-                    {t(item.labelKey)}
-                </button>
-            );
-        }
-        if (item.isRoute) {
-            return (
-                <Link
-                    key={item.labelKey}
-                    to={item.href}
-                    style={baseStyle}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                    onMouseLeave={e => e.currentTarget.style.color = location.pathname === item.href ? 'var(--color-primary)' : 'var(--text-secondary)'}
-                >
-                    {t(item.labelKey)}
-                </Link>
-            );
-        }
+    textDecoration: 'none',
+    fontSize: '0.925rem',
+    fontWeight: location.pathname === href ? '600' : '500',
+    cursor: 'pointer',
+    padding: '0.35rem 0',
+    backgroundColor: 'transparent',
+    border: 'none',
+    fontFamily: 'inherit',
+
+    position: 'relative',
+    display: 'inline-block',
+
+    transition: 'all 0.3s ease',
+
+    backgroundImage:
+        'linear-gradient(var(--color-primary), var(--color-primary))',
+
+    backgroundRepeat: 'no-repeat',
+
+    backgroundSize:'0% 2px',
+
+    backgroundPosition: 'center bottom',
+});
+
+const renderNavItem = (item) => {
+    const baseStyle = navLinkStyle(item.href);
+
+    if (item.action) {
         return (
-            <a
+            <button
                 key={item.labelKey}
-                href={item.href}
+                onClick={item.action}
                 style={baseStyle}
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+
+                onMouseEnter={e => {
+                    e.currentTarget.style.color =
+                        'var(--color-primary)';
+
+                    e.currentTarget.style.backgroundSize =
+                        '75% 2px';
+                }}
+
+                onMouseLeave={e => {
+                    e.currentTarget.style.color =
+                        'var(--text-secondary)';
+
+                    e.currentTarget.style.backgroundSize =
+                        '0% 2px';
+                }}
             >
                 {t(item.labelKey)}
-            </a>
+            </button>
         );
-    };
+    }
 
+    if (item.isRoute) {
+        return (
+            <Link
+                key={item.labelKey}
+                to={item.href}
+                style={baseStyle}
+
+                onMouseEnter={e => {
+                    e.currentTarget.style.color =
+                        'var(--color-primary)';
+
+                    e.currentTarget.style.backgroundSize =
+                        '75% 2px';
+                }}
+
+                onMouseLeave={e => {
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+
+                    e.currentTarget.style.backgroundSize = '0% 2px';
+                }}
+            >
+                {t(item.labelKey)}
+            </Link>
+        );
+    }
+
+    return (
+        <a
+            key={item.labelKey}
+            href={item.href}
+            style={baseStyle}
+
+            onMouseEnter={e => {
+                e.currentTarget.style.color =
+                    'var(--color-primary)';
+
+                e.currentTarget.style.backgroundSize =
+                    '75% 2px';
+            }}
+
+            onMouseLeave={e => {
+                e.currentTarget.style.color =
+                    'var(--text-secondary)';
+
+                e.currentTarget.style.backgroundSize =
+                    '0% 2px';
+            }}
+        >
+            {t(item.labelKey)}
+        </a>
+    );
+};
     return (
         <>
             <motion.header
@@ -130,7 +186,7 @@ export default function Header({ hideAuthButtons = false }) {
                     margin: '0 auto',
                     padding: '0.7rem 2rem',
                     display: 'flex',
-                                        justifyContent: 'space-between',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
                     gap: '1rem',
                 }}>
