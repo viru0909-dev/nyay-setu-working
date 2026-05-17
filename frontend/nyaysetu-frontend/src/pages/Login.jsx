@@ -251,38 +251,21 @@ export default function Login() {
                                 }}>
                                     {t('auth:login.email')}
                                 </label>
-                                <div style={{ position: 'relative' }}>
-                                    <Mail size={18} style={{
-                                        position: 'absolute',
-                                        left: '1rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        color: 'var(--color-primary)'
-                                    }} />
+                                <div className="login-input-field">
+                                    <span className="login-input-icon" aria-hidden="true">
+                                        <Mail size={18} />
+                                    </span>
                                     <input
+                                        className="login-text-input"
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder={t('auth:login.emailPlaceholder')}
+                                        autoComplete="username"
+                                        data-lpignore="true"
+                                        data-1p-ignore="true"
+                                        data-form-type="other"
                                         required
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.875rem 1rem 0.875rem 3rem',
-                                            background: 'var(--bg-glass)',
-                                            border: 'var(--border-glass)',
-                                            borderRadius: '0.75rem',
-                                            color: 'var(--text-main)',
-                                            fontSize: '1rem',
-                                            transition: 'all 0.2s'
-                                        }}
-                                        onFocus={(e) => {
-                                            e.target.style.borderColor = 'var(--border-focus)';
-                                            e.target.style.background = 'var(--bg-surface)';
-                                        }}
-                                        onBlur={(e) => {
-                                            e.target.style.borderColor = 'var(--border-light)';
-                                            e.target.style.background = 'var(--bg-glass)';
-                                        }}
                                     />
                                 </div>
                             </div>
@@ -298,52 +281,24 @@ export default function Login() {
                                 }}>
                                     {t('auth:login.password')}
                                 </label>
-                                <div style={{ position: 'relative' }}>
-                                    <Lock size={18} style={{
-                                        position: 'absolute',
-                                        left: '1rem',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        color: 'var(--color-primary)'
-                                    }} />
+                                <div className="login-input-field">
+                                    <span className="login-input-icon" aria-hidden="true">
+                                        <Lock size={18} />
+                                    </span>
                                     <input
+                                        className="login-text-input"
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder={t('auth:login.passwordPlaceholder')}
+                                        autoComplete="current-password"
                                         required
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.875rem 3rem',
-                                            background: 'var(--bg-glass)',
-                                            border: 'var(--border-glass)',
-                                            borderRadius: '0.75rem',
-                                            color: 'var(--text-main)',
-                                            fontSize: '1rem',
-                                            transition: 'all 0.2s'
-                                        }}
-                                        onFocus={(e) => {
-                                            e.target.style.borderColor = 'var(--border-focus)';
-                                            e.target.style.background = 'var(--bg-surface)';
-                                        }}
-                                        onBlur={(e) => {
-                                            e.target.style.borderColor = 'var(--border-light)';
-                                            e.target.style.background = 'var(--bg-glass)';
-                                        }}
                                     />
                                     <button
+                                        className="login-password-toggle"
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        style={{
-                                            position: 'absolute',
-                                            right: '1rem',
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            background: 'none',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            color: 'var(--text-secondary)'
-                                        }}
+                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
                                     >
                                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                     </button>
@@ -543,6 +498,95 @@ export default function Login() {
                     @keyframes pulse {
                         0%, 100% { transform: scale(1); opacity: 0.8; }
                         50% { transform: scale(1.1); opacity: 1; }
+                    }
+
+                    .login-input-field {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        width: 100%;
+                        min-width: 0;
+                        height: 60px;
+                        padding: 0 1rem;
+                        background: var(--bg-glass);
+                        border: var(--border-glass);
+                        border-radius: 0.75rem;
+                        box-sizing: border-box;
+                        overflow: hidden;
+                        transition: background-color 0.2s ease, border-color 0.2s ease;
+                    }
+
+                    .login-input-field:focus-within {
+                        background: var(--bg-surface);
+                        border-color: var(--border-focus);
+                    }
+
+                    .login-input-icon,
+                    .login-password-toggle {
+                        width: 20px;
+                        height: 20px;
+                        min-width: 20px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: var(--color-primary);
+                        line-height: 0;
+                    }
+
+                    .login-text-input {
+                        flex: 1;
+                        width: 100%;
+                        min-width: 0;
+                        height: 100%;
+                        padding: 0;
+                        margin: 0;
+                        background: transparent !important;
+                        border: 0;
+                        outline: 0;
+                        box-shadow: none !important;
+                        color: var(--text-main);
+                        font: 400 1rem/1.2 var(--font-body);
+                        letter-spacing: 0;
+                        appearance: none;
+                        -webkit-appearance: none;
+                    }
+
+                    .login-text-input::placeholder {
+                        color: var(--text-muted);
+                        opacity: 1;
+                    }
+
+                    .login-text-input:-webkit-autofill,
+                    .login-text-input:-webkit-autofill:hover,
+                    .login-text-input:-webkit-autofill:focus,
+                    .login-text-input:-webkit-autofill:active {
+                        -webkit-text-fill-color: var(--text-main) !important;
+                        caret-color: var(--text-main);
+                        box-shadow: 0 0 0 1000px transparent inset !important;
+                        transition: background-color 9999s ease-out 0s;
+                    }
+
+                    .login-text-input::-webkit-contacts-auto-fill-button,
+                    .login-text-input::-webkit-credentials-auto-fill-button {
+                        visibility: hidden;
+                        display: none !important;
+                        pointer-events: none;
+                        position: absolute;
+                        right: 0;
+                    }
+
+                    .login-password-toggle {
+                        padding: 0;
+                        background: transparent;
+                        border: 0;
+                        color: var(--text-secondary);
+                        cursor: pointer;
+                        flex-shrink: 0;
+                        min-height: 20px !important;
+                    }
+
+                    .login-password-toggle:hover {
+                        color: var(--color-primary);
                     }
                 `}</style>
             </div>
