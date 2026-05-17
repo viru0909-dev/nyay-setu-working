@@ -4,6 +4,7 @@ import com.nyaysetu.backend.dto.CaseDTO;
 import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.service.CaseManagementService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Tag(name = "Case Management", description = "Create, update, retrieve and manage legal cases")
 @RestController
 @RequestMapping("/api/cases")
 @RequiredArgsConstructor

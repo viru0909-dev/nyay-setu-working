@@ -5,6 +5,7 @@ import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.repository.*;
 import com.nyaysetu.backend.service.AuthService;
 import com.nyaysetu.backend.service.GroqDocumentVerificationService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Tag(name = "Judge Portal", description = "Judge dashboard — assigned cases, hearings and verdict management")
 @RestController
 @RequestMapping("/api/judge")
 @RequiredArgsConstructor

@@ -46,24 +46,32 @@ Because a large percentage of citizens cannot afford legal fees and courts face 
 
 ## Quick Start
 
-Getting started is simple. To spin up the platform locally:
+Getting started is simple. To spin up the platform locally using Docker:
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/viru0909-dev/nyay-setu-working.git
 cd nyay-setu-working
 
-# 2. Run the Frontend
-cd frontend/nyaysetu-frontend
-npm install && npm run dev
+# 2. Setup Environment Variables
+# Copy the example file to .env at the repository root
+cp .env.example .env
+# Open .env and add your GROQ_API_KEY and other required keys
+# (Required: GROQ_API_KEY, JWT_SECRET)
 
-# 3. Run the Backend (in a separate terminal)
-cd ../../backend/nyaysetu-backend
-# Make sure to set up your database & env vars first!
-mvn spring-boot:run
+# 3. Spin up the entire system
+docker compose up --build
+# If your environment uses the legacy Docker Compose binary, use:
+# docker-compose up --build
 ```
 
-**Need the full setup details?** Check out the [Detailed Setup Guide](./docs/setup.md) for database queries, environment variables, and Docker information.
+The system will be available at:
+- **Frontend:** http://localhost
+- **Backend API:** http://localhost:8080
+- **NLP Service:** http://localhost:8001
+- **Database:** localhost:5432
+
+**Manual Setup?** Check out the [Detailed Setup Guide](./docs/setup.md) for database queries and manual run instructions.
 
 ## Documentation
 

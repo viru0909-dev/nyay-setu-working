@@ -1,14 +1,9 @@
+import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import {
-    Bot, BookOpen, FileText, Video, Shield, Zap,
-    ArrowRight, Download, Smartphone, Check
-} from 'lucide-react';
+import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Smartphone, Bot, BookOpen, Video, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-// Temporarily comment out problematic components
-// import AnimatedBackground from '../components/landing/AnimatedBackground';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
 import AIChatbot from '../components/landing/AIChatbot';
@@ -17,327 +12,460 @@ import HowItWorks from '../components/landing/HowItWorks';
 import TrustIndicators from '../components/landing/TrustIndicators';
 
 export default function Landing() {
-    const { t } = useTranslation(['landing', 'common']);
+    const { t } = useTranslation('landing');
+    const { theme } = useTheme();
     const [deferredPrompt, setDeferredPrompt] = useState(null);
 
-    // Capture the PWA install prompt event
     useEffect(() => {
-        const handleBeforeInstallPrompt = (e) => {
-            e.preventDefault();
-            setDeferredPrompt(e);
-            // Also store globally for access from anywhere
-            window.deferredPrompt = e;
-        };
-
-        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-        return () => {
-            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        };
+        const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); window.deferredPrompt = e; };
+        window.addEventListener('beforeinstallprompt', handler);
+        return () => window.removeEventListener('beforeinstallprompt', handler);
     }, []);
 
-    const features = [
-        {
-            icon: <Bot size={32} />,
-            title: t('landing:features.aiLegalAssistant.title'),
-            description: t('landing:features.aiLegalAssistant.description'),
-            color: '#1E2A44'
-        },
-        {
-            icon: <BookOpen size={32} />,
-            title: t('landing:features.constitutionReader.title'),
-            description: t('landing:features.constitutionReader.description'),
-            color: '#1E2A44'
-        },
-        {
-            icon: <FileText size={32} />,
-            title: t('landing:features.fileCases.title'),
-            description: t('landing:features.fileCases.description'),
-            color: '#1E2A44'
-        },
-        {
-            icon: <Video size={32} />,
-            title: t('landing:features.virtualHearings.title'),
-            description: t('landing:features.virtualHearings.description'),
-            color: '#1E2A44'
-        },
-        {
-            icon: <Shield size={32} />,
-            title: t('landing:features.securePrivate.title'),
-            description: t('landing:features.securePrivate.description'),
-            color: '#1E2A44'
-        },
-        {
-            icon: <Zap size={32} />,
-            title: t('landing:features.realTimeUpdates.title'),
-            description: t('landing:features.realTimeUpdates.description'),
-            color: '#1E2A44'
-        }
+    const handleInstall = async () => {
+        if (import.meta.env.DEV) { alert('PWA install works on port 4174 (preview), not dev.'); return; }
+        const ev = window.deferredPrompt || deferredPrompt;
+        if (ev) { await ev.prompt(); window.deferredPrompt = null; setDeferredPrompt(null); }
+        else alert('Already installed, or use browser menu.');
+    };
+
+    const TRUST_STATS = [
+        { value: '50K+', label: t('trustStats.activeUsers'), icon: Users },
+        { value: '99%',  label: t('trustStats.successRate'), icon: Star },
+        { value: '24/7', label: t('trustStats.availability'), icon: CheckCircle },
     ];
 
+    const QUICK_CARDS = [
+        {
+            icon: UserPlus,
+            title: t('quickCards.createAccount.title'),
+            desc:  t('quickCards.createAccount.desc'),
+            cta:   t('quickCards.createAccount.cta'),
+            color: '#7C5CFF',
+            bg: 'rgba(124,92,255,0.08)',
+        },
+        {
+            icon: FileText,
+            title: t('quickCards.submitCase.title'),
+            desc:  t('quickCards.submitCase.desc'),
+            cta:   t('quickCards.submitCase.cta'),
+            color: '#3F5DCC',
+            bg: 'rgba(63,93,204,0.08)',
+        },
+        {
+            icon: Zap,
+            title: t('quickCards.powerfulFeatures.title'),
+            desc:  t('quickCards.powerfulFeatures.desc'),
+            cta:   t('quickCards.powerfulFeatures.cta'),
+            color: '#10B981',
+            bg: 'rgba(16,185,129,0.08)',
+        },
+    ];
 
+    const FEATURES = [
+        { icon: Bot,         title: t('features.aiLegalAssistant.title'),   desc: t('features.aiLegalAssistant.description'),   color: '#3F5DCC' },
+        { icon: BookOpen,    title: t('features.constitutionReader.title'),  desc: t('features.constitutionReader.description'),  color: '#7C5CFF' },
+        { icon: FileText,    title: t('features.fileCases.title'),           desc: t('features.fileCases.description'),           color: '#10B981' },
+        { icon: Video,       title: t('features.virtualHearings.title'),     desc: t('features.virtualHearings.description'),     color: '#F59E0B' },
+        { icon: ShieldCheck, title: t('features.securePrivate.title'),       desc: t('features.securePrivate.description'),       color: '#EF4444' },
+        { icon: Zap,         title: t('features.realTimeUpdates.title'),     desc: t('features.realTimeUpdates.description'),     color: '#8B5CF6' },
+    ];
 
     return (
-        <div style={{
-            position: 'relative',
-            minHeight: '100vh',
-            background: 'var(--bg-main)',
-        }}>
-            {/* Temporarily comment out 3D background */}
-            {/* <AnimatedBackground /> */}
+        <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
             <Header />
             <AIChatbot />
 
-            <main style={{ position: 'relative', zIndex: 1 }}>
-                {/* Hero Section */}
-                <section id="home" style={{
+            <main>
+                {/* ── Hero ──────────────────────────────────────────── */}
+                <section style={{
                     minHeight: '100vh',
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: 'column',
                     justifyContent: 'center',
-                    padding: '8rem 2rem 1rem',
-                    textAlign: 'center'
+                    padding: '9rem 2rem 4rem',
+                    position: 'relative',
+                    overflow: 'hidden',
                 }}>
-                    <div className="container" style={{ maxWidth: '1400px', width: '100%' }}>
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
-                            style={{
-                                maxWidth: '1200px',
-                                margin: '0 auto'
-                            }}
-                        >
-                            <div style={{
-                                display: 'inline-block',
-                                padding: '0.5rem 1.25rem',
-                                background: 'rgba(63, 93, 204, 0.08)',
-                                border: '1px solid rgba(63, 93, 204, 0.15)',
-                                borderRadius: '2rem',
-                                marginBottom: '2.5rem'
-                            }}>
-                                <span style={{ color: 'var(--color-secondary)', fontSize: '0.875rem', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                                    INDIA'S FIRST AI-POWERED JUDICIARY PLATFORM
-                                </span>
-                            </div>
+                    <div style={{
+                        position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
+                        backgroundImage: `
+                            linear-gradient(rgba(124,92,255,0.04) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(124,92,255,0.04) 1px, transparent 1px)
+                        `,
+                        backgroundSize: '60px 60px',
+                    }} />
+                    <div style={{
+                        position: 'absolute', top: '-80px', right: '-80px',
+                        width: '500px', height: '500px', borderRadius: '50%',
+                        background: 'radial-gradient(circle, rgba(124,92,255,0.10) 0%, transparent 70%)',
+                        pointerEvents: 'none',
+                    }} />
+                    <div style={{
+                        position: 'absolute', bottom: '0', left: '-100px',
+                        width: '400px', height: '400px', borderRadius: '50%',
+                        background: 'radial-gradient(circle, rgba(63,93,204,0.07) 0%, transparent 70%)',
+                        pointerEvents: 'none',
+                    }} />
 
+                    <div style={{
+                        maxWidth: '1320px', margin: '0 auto', width: '100%',
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '4rem',
+                        alignItems: 'center',
+                        position: 'relative', zIndex: 1,
+                    }} className="hero-grid">
+                        {/* Left — text */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.7, ease: 'easeOut' }}
+                        >
                             <h1 style={{
-                                fontSize: 'clamp(2.5rem, 5vw, 4.25rem)',
-                                fontWeight: '800',
-                                color: 'var(--color-primary)',
-                                marginBottom: '1.5rem',
-                                lineHeight: '1.15',
-                                letterSpacing: '-0.03em'
+                                fontSize: 'clamp(2.6rem, 4.5vw, 4rem)',
+                                fontWeight: '900',
+                                color: 'var(--text-main)',
+                                lineHeight: '1.1',
+                                letterSpacing: '-0.04em',
+                                fontFamily: 'var(--font-heading)',
+                                marginBottom: '0.5rem',
                             }}>
-                                {t('landing:hero.title')}{' '}
-                                <span style={{
-                                    background: 'linear-gradient(135deg, #3F5DCC 0%, #7C5CFF 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text'
-                                }}>
-                                    {t('landing:hero.titleHighlight')}
-                                </span>
+                                {t('hero.title')}
+                            </h1>
+                            <h1 style={{
+                                fontSize: 'clamp(2.6rem, 4.5vw, 4rem)',
+                                fontWeight: '900',
+                                lineHeight: '1.1',
+                                letterSpacing: '-0.04em',
+                                fontFamily: 'var(--font-heading)',
+                                marginBottom: '1.75rem',
+                                background: 'linear-gradient(135deg, #7C5CFF 0%, #3F5DCC 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                            }}>
+                                {t('hero.titleHighlight')}
                             </h1>
 
                             <p style={{
-                                fontSize: 'clamp(1.1rem, 2vw, 1.25rem)',
+                                fontSize: '1.1rem',
                                 color: 'var(--text-secondary)',
-                                maxWidth: '750px',
-                                margin: '0 auto 3.5rem',
-                                lineHeight: '1.7'
+                                lineHeight: '1.75',
+                                marginBottom: '2.5rem',
+                                maxWidth: '480px',
                             }}>
-                                {t('landing:hero.subtitle')}
+                                {t('hero.subtitle')}
                             </p>
 
-                            <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                                <Link to="/signup" className="btn btn-primary" style={{
-                                    fontSize: '1.1rem',
-                                    padding: '1.1rem 2.75rem',
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '3.5rem' }}>
+                                <Link to="/signup" style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                    padding: '0.9rem 2rem',
+                                    background: 'var(--color-primary)',
+                                    color: '#fff',
+                                    textDecoration: 'none',
                                     borderRadius: '12px',
-                                    textDecoration: 'none'
-                                }}>
-                                    {t('landing:hero.getStartedFree')} <ArrowRight size={20} style={{ marginLeft: '0.5rem' }} />
+                                    fontWeight: '700',
+                                    fontSize: '1rem',
+                                    boxShadow: '0 4px 20px rgba(63,93,204,0.25)',
+                                    transition: 'all 0.2s ease',
+                                }}
+                                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(63,93,204,0.35)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(63,93,204,0.25)'; }}
+                                >
+                                    {t('hero.getStartedFree')} <ArrowRight size={18} />
                                 </Link>
 
                                 <motion.button
-                                    className="btn btn-secondary"
-                                    whileHover={{ scale: 1.05 }}
+                                    whileHover={{ scale: 1.08 }}
                                     whileTap={{ scale: 0.95 }}
-                                    transition={{ duration: 0.2 }}
-                                    onClick={async () => {
-                                        // Check if on preview server
-                                        const isDev = import.meta.env.DEV;
-                                        if (isDev) {
-                                            alert('⚠️ PWA installation only works on the preview server.\n\nPlease visit: http://localhost:4174');
-                                            return;
-                                        }
-
-                                        // Try to trigger install
-                                        const installEvent = window.deferredPrompt || deferredPrompt;
-                                        if (installEvent) {
-                                            try {
-                                                await installEvent.prompt();
-                                                const { outcome } = await installEvent.userChoice;
-
-                                                if (outcome === 'accepted') {
-                                                    alert('✅ App installed successfully! Check your home screen or app drawer.');
-                                                } else {
-                                                    alert('ℹ️ Installation cancelled. You can install anytime from your browser menu.');
-                                                }
-
-                                                window.deferredPrompt = null;
-                                                setDeferredPrompt(null);
-                                            } catch (error) {
-                                                console.error('Install error:', error);
-                                                alert('❌ Installation failed. Please try again or use your browser\'s install option.');
-                                            }
-                                        } else {
-                                            alert('ℹ️ App is already installed, or your browser doesn\'t support PWA installation.\n\nYou can also install from your browser menu (⋮ > Install NyaySetu).');
-                                        }
-                                    }}
+                                    onClick={handleInstall}
+                                    title={t('hero.installApp')}
                                     style={{
-                                        fontSize: '1.1rem',
-                                        padding: '1.1rem 2.75rem',
+                                        width: '48px', height: '48px',
                                         borderRadius: '12px',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem'
+                                        border: '1px solid var(--border-medium)',
+                                        background: 'var(--bg-surface)',
+                                        color: 'var(--text-secondary)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        boxShadow: 'var(--shadow-sm)',
                                     }}
                                 >
-                                    <Download size={20} />
-                                    Install App
+                                    <Smartphone size={20} />
                                 </motion.button>
+                            </div>
+
+                            {/* Trust stats */}
+                            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                                {TRUST_STATS.map((s, i) => (
+                                    <motion.div key={i}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.4 + i * 0.1 }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                    >
+                                        <s.icon size={15} style={{ color: 'var(--color-accent)' }} />
+                                        <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--text-main)' }}>{s.value}</span>
+                                        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{s.label}</span>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        {/* Right — scales image */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 30, scale: 0.95 }}
+                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                            transition={{ duration: 0.8, ease: 'easeOut' }}
+                            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}
+                        >
+                            <div style={{
+                                position: 'absolute',
+                                width: '420px', height: '420px', borderRadius: '50%',
+                                background: 'radial-gradient(circle, rgba(124,92,255,0.13) 0%, transparent 70%)',
+                                filter: 'blur(40px)',
+                                zIndex: 0,
+                            }} />
+                            <div className="hero-img-wrap">
+                                <motion.img
+                                    src={theme === 'dark' ? '/scales-dark.png' : '/scales-light.png'}
+                                    alt="Scales of Justice"
+                                    className="hero-img"
+                                    animate={{ y: [0, -14, 0] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                    style={{
+                                        width: '100%',
+                                        maxWidth: '480px',
+                                        height: 'auto',
+                                        display: 'block',
+                                        position: 'relative',
+                                        zIndex: 1,
+                                    }}
+                                />
                             </div>
                         </motion.div>
                     </div>
+
+                    {/* ── Quick cards strip ─────────────────────────── */}
+                    <div style={{
+                        maxWidth: '1320px', margin: '4rem auto 0',
+                        width: '100%',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '1.25rem',
+                        position: 'relative', zIndex: 1,
+                    }} className="quick-cards-grid">
+                        {QUICK_CARDS.map((card, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.6 + i * 0.1 }}
+                                whileHover={{ y: -5 }}
+                                style={{
+                                    background: 'var(--bg-glass-strong)',
+                                    backdropFilter: 'blur(16px)',
+                                    WebkitBackdropFilter: 'blur(16px)',
+                                    border: '1px solid var(--border-light)',
+                                    borderRadius: '20px',
+                                    padding: '1.75rem',
+                                    boxShadow: 'var(--shadow-glass)',
+                                    transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.borderColor = card.color + '50';
+                                    e.currentTarget.style.boxShadow = `0 10px 28px ${card.color}18`;
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.borderColor = 'var(--border-light)';
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
+                                }}
+                            >
+                                <div style={{
+                                    width: '44px', height: '44px', borderRadius: '12px',
+                                    background: card.bg,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    marginBottom: '1rem',
+                                }}>
+                                    <card.icon size={22} style={{ color: card.color }} />
+                                </div>
+                                <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                    {card.title}
+                                </h3>
+                                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '1.25rem' }}>
+                                    {card.desc}
+                                </p>
+                                <Link to="/signup" style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                                    color: card.color,
+                                    fontSize: '0.875rem', fontWeight: '700',
+                                    textDecoration: 'none',
+                                    transition: 'gap 0.2s ease',
+                                }}
+                                    onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
+                                    onMouseLeave={e => e.currentTarget.style.gap = '0.35rem'}
+                                >
+                                    {card.cta} <ArrowRight size={14} />
+                                </Link>
+                            </motion.div>
+                        ))}
+                    </div>
                 </section>
 
-
-
-                {/* How It Works Section */}
+                {/* ── How It Works ──────────────────────────────────── */}
                 <HowItWorks />
 
-                {/* Features Section */}
-                <section id="features" style={{ padding: '8rem 0', background: '#FFFFFF', borderTop: '1px solid #E5E7EB', borderBottom: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                    <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 2rem' }}>
-                        <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
-                            <h2 style={{
-                                fontSize: 'clamp(2rem, 4vw, 2.75rem)',
-                                fontWeight: '800',
-                                color: 'var(--color-primary)',
-                                marginBottom: '1.25rem',
-                                letterSpacing: '-0.02em'
+                {/* ── Features ──────────────────────────────────────── */}
+                <section id="features" style={{
+                    padding: '7rem 2rem',
+                    background: 'var(--bg-surface)',
+                    borderTop: '1px solid var(--border-light)',
+                    borderBottom: '1px solid var(--border-light)',
+                }}>
+                    <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                            <div style={{
+                                display: 'inline-block', padding: '0.4rem 1rem', marginBottom: '1rem',
+                                background: 'rgba(63,93,204,0.08)', border: '1px solid rgba(63,93,204,0.15)',
+                                borderRadius: '2rem',
                             }}>
-                                {t('landing:features.title')}{' '}
-                                <span style={{ color: 'var(--color-secondary)' }}>
-                                    {t('landing:features.titleHighlight')}
+                                <span style={{ color: 'var(--color-accent)', fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                                    {t('features.badge')}
                                 </span>
+                            </div>
+                            <h2 style={{ fontSize: 'clamp(1.9rem,3.5vw,2.6rem)', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem', letterSpacing: '-0.025em' }}>
+                                {t('features.title')}{' '}
+                                <span style={{ color: 'var(--color-secondary)' }}>{t('features.titleHighlight')}</span>
                             </h2>
-                            <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', maxWidth: '650px', margin: '0 auto', lineHeight: '1.7' }}>
-                                {t('landing:features.subtitle')}
+                            <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', maxWidth: '560px', margin: '0 auto' }}>
+                                {t('features.subtitle')}
                             </p>
                         </div>
 
-                        {/* Features Grid */}
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                            gap: '2.5rem'
-                        }}>
-                            {features.map((feature, idx) => (
-                                <motion.div
-                                    key={idx}
-                                    className="card"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    whileHover={{ y: -8, borderColor: 'var(--color-secondary)' }}
-                                    transition={{ duration: 0.3 }}
-                                    style={{
-                                        padding: '3rem 2.5rem',
-                                        cursor: 'pointer',
-                                        background: '#FFFFFF',
-                                        border: '1px solid #E5E7EB',
-                                        borderRadius: '20px',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center',
-                                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
-                                        transition: 'all 0.3s ease-out'
-                                    }}
-                                >
-                                    <div style={{
-                                        width: '64px',
-                                        height: '64px',
-                                        borderRadius: '16px',
-                                        background: 'rgba(63, 93, 204, 0.08)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        marginBottom: '2rem',
-                                        color: 'var(--color-secondary)'
-                                    }}>
-                                        {feature.icon}
-                                    </div>
-                                    <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.25rem' }}>
-                                        {feature.title}
-                                    </h3>
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.7', marginBottom: 0 }}>
-                                        {feature.description}
-                                    </p>
-                                </motion.div>
-                            ))}
+                        <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
+                            {FEATURES.map((f, i) => {
+                                const FeatureIcon = f.icon;
+                                return (
+                                    <motion.div key={i}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: i * 0.07 }}
+                                        whileHover={{ y: -5 }}
+                                        style={{
+                                            padding: '2.25rem',
+                                            background: 'var(--bg-main)',
+                                            border: '1px solid var(--border-light)',
+                                            borderRadius: '16px',
+                                            cursor: 'default',
+                                            transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
+                                        }}
+                                        onMouseEnter={e => { e.currentTarget.style.borderColor = f.color + '50'; e.currentTarget.style.boxShadow = `0 8px 24px ${f.color}15`; }}
+                                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.boxShadow = 'none'; }}
+                                    >
+                                        <div style={{
+                                            width: '52px', height: '52px', borderRadius: '14px',
+                                            background: f.color + '12',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            marginBottom: '1.1rem',
+                                        }}>
+                                            <FeatureIcon size={26} style={{ color: f.color }} />
+                                        </div>
+                                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.65rem' }}>{f.title}</h3>
+                                        <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
+                                    </motion.div>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>
 
-                {/* Trust Indicators */}
                 <TrustIndicators />
-
-                {/* Achievements Section */}
                 <AchievementsSection />
 
-                {/* CTA Section */}
-                <section style={{
-                    padding: '8rem 2rem',
-                    background: 'var(--bg-main)'
-                }}>
-                    <div className="container" style={{ maxWidth: '1100px', margin: '0 auto' }}>
-                        <div className="card" style={{
-                            padding: '7rem 3rem',
-                            textAlign: 'center',
-                            borderRadius: '24px',
-                            background: '#FFFFFF',
-                            border: 'none',
-                            boxShadow: '0 10px 40px rgba(30, 42, 68, 0.04)'
-                        }}>
-                            <h2 style={{
-                                fontSize: 'clamp(2rem, 4vw, 3rem)',
-                                fontWeight: '800',
-                                color: 'var(--color-primary)',
-                                marginBottom: '1.5rem',
-                                letterSpacing: '-0.02em'
+                {/* ── Final CTA ─────────────────────────────────────── */}
+                <section style={{ padding: '7rem 2rem', background: 'var(--bg-main)' }}>
+                    <div style={{ maxWidth: '860px', margin: '0 auto' }}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            style={{
+                                padding: '4.5rem 3rem',
+                                textAlign: 'center',
+                                borderRadius: '24px',
+                                background: 'var(--bg-surface)',
+                                border: '1px solid var(--border-light)',
+                                boxShadow: 'var(--shadow-glass)',
+                            }}
+                        >
+                            <div style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                padding: '0.4rem 1rem', marginBottom: '1.5rem',
+                                background: 'rgba(63,93,204,0.08)', border: '1px solid rgba(63,93,204,0.15)',
+                                borderRadius: '2rem',
                             }}>
-                                {t('landing:cta.title')}
+                                <span style={{ color: 'var(--color-accent)', fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                                    {t('cta.badge')}
+                                </span>
+                            </div>
+                            <h2 style={{ fontSize: 'clamp(1.75rem,3.5vw,2.5rem)', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem', letterSpacing: '-0.025em' }}>
+                                {t('cta.title')}
                             </h2>
-                            <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '3rem', maxWidth: '700px', margin: '0 auto 3rem' }}>
-                                {t('landing:cta.subtitle')}
+                            <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', maxWidth: '560px', margin: '0 auto 0.75rem', lineHeight: '1.7' }}>
+                                {t('cta.subtitle')}
                             </p>
-                            <Link to="/signup" className="btn btn-primary" style={{
-                                textDecoration: 'none',
-                                fontSize: '1.15rem',
-                                padding: '1.1rem 3rem',
-                                borderRadius: '12px'
+                            <p style={{
+                                fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '2rem',
+                                padding: '0.4rem 0.9rem', display: 'inline-block',
+                                background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '6px',
                             }}>
-                                {t('landing:cta.createAccount')} <ArrowRight size={22} style={{ marginLeft: '0.75rem' }} />
-                            </Link>
-                        </div>
+                                {t('cta.disclaimer')}
+                            </p>
+                            <div style={{ display: 'block' }}>
+                                <Link to="/signup" style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                    padding: '0.9rem 2.5rem',
+                                    background: 'var(--color-primary)', color: '#fff',
+                                    textDecoration: 'none', borderRadius: '12px',
+                                    fontWeight: '700', fontSize: '1rem',
+                                    boxShadow: '0 4px 20px rgba(63,93,204,0.25)',
+                                    transition: 'all 0.2s ease',
+                                }}
+                                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+                                >
+                                    {t('cta.createAccount')} <ArrowRight size={18} />
+                                </Link>
+                            </div>
+                        </motion.div>
                     </div>
                 </section>
             </main>
 
             <Footer />
+
+            <style>{`
+                .hero-img-wrap {
+                    position: relative;
+                    z-index: 1;
+                    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 45%, transparent 100%);
+                    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 45%, transparent 100%);
+                }
+                .hero-img { border-radius: 0; }
+                @media (max-width: 900px) {
+                    .hero-grid { grid-template-columns: 1fr !important; }
+                    .hero-grid > div:last-child { display: none; }
+                    .quick-cards-grid { grid-template-columns: 1fr !important; }
+                    .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
+                }
+                @media (max-width: 600px) {
+                    .quick-cards-grid { grid-template-columns: 1fr !important; }
+                    .features-grid { grid-template-columns: 1fr !important; }
+                }
+            `}</style>
         </div>
     );
 }

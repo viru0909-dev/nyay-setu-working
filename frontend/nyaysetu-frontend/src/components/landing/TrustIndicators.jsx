@@ -46,7 +46,7 @@ export default function TrustIndicators() {
     return (
         <section style={{
             padding: '5rem 2rem',
-            background: 'var(--bg-glass-strong)', // Use variable
+            background: 'var(--bg-glass-strong)',
             backdropFilter: 'var(--glass-blur)',
             borderTop: 'var(--border-glass)',
             borderBottom: 'var(--border-glass)'
@@ -89,7 +89,7 @@ export default function TrustIndicators() {
                     style={{
                         maxWidth: '100%',
                         overflow: 'hidden',
-                        padding: '1rem 0', // Extra vertical padding for hover effects
+                        padding: '1rem 0',
                         maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
                         WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)'
                     }}
@@ -100,13 +100,12 @@ export default function TrustIndicators() {
                             display: 'flex',
                             gap: '2rem',
                             width: 'max-content',
-                            padding: '1rem 0' // Internal padding to prevent border clipping
+                            padding: '1rem 0'
                         }}
                     >
-                        {/* Duplicate lists for seamless loop */}
                         {[...indicators, ...indicators].map((item, idx) => (
                             <motion.div
-                                key={`${idx}-${item.title}`} // Unique key using index and title
+                                key={`${idx}-${item.title}`}
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
@@ -114,7 +113,7 @@ export default function TrustIndicators() {
                                 whileHover={{ y: -10, transition: { duration: 0.3 } }}
                                 style={{
                                     padding: '4rem 3rem',
-                                    background: 'rgba(255, 255, 255, 0.4)', // Light glass
+                                    background: 'rgba(255, 255, 255, 0.4)',
                                     backdropFilter: 'blur(10px)',
                                     borderRadius: '24px',
                                     border: 'var(--border-glass)',
@@ -192,4 +191,3 @@ export default function TrustIndicators() {
         </section>
     );
 }
-

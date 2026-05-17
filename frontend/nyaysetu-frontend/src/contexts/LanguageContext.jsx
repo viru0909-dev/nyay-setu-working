@@ -148,7 +148,7 @@ export const translations = {
 
         // AI Chatbot
         aiChatbotTitle: 'AI Legal Assistant',
-        aiChatbotSubtitle: 'Powered by Anthropic Claude',
+        aiChatbotSubtitle: 'Powered by Groq (Llama 3.3) and Google Gemini',
         askQuestion: 'Ask me about law, cases, or the Constitution',
         typeMessage: 'Type your message...',
         send: 'Send',
@@ -302,7 +302,7 @@ export const translations = {
 
         // AI Chatbot
         aiChatbotTitle: 'AI कानूनी सहायक',
-        aiChatbotSubtitle: 'Anthropic Claude द्वारा संचालित',
+        aiChatbotSubtitle: 'Groq (Llama 3.3) और Google Gemini द्वारा संचालित',
         askQuestion: 'मुझसे कानून, मामलों या संविधान के बारे में पूछें',
         typeMessage: 'अपना संदेश टाइप करें...',
         send: 'भेजें',

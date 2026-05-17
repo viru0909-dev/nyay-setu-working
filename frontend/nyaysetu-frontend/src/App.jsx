@@ -2,8 +2,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, Suspense, lazy } from 'react';
 import useAuthStore from './store/authStore';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
+// CHANGED: ThemeProvider added — wraps the entire app so all components can access theme
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
+import ScrollToTop from './ScrollToTop';
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
@@ -16,6 +19,9 @@ const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const About = lazy(() => import('./pages/About'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Disclaimer = lazy(() => import('./pages/Disclaimer'));
 
 // Dashboard Layout
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
@@ -93,129 +99,137 @@ function App({ swRegistration }) {
     }, [initAuth]);
 
     return (
-        <ErrorBoundary>
-            <LanguageProvider>
-                {/* Global PWA Components */}
-                <OfflineIndicator />
-                <UpdateNotification registration={swRegistration} />
+        // CHANGED: ThemeProvider is the outermost wrapper so the theme CSS attribute
+        // is set on <html> before any child renders — prevents flash of wrong theme
+        <ThemeProvider>
+            <ErrorBoundary>
+                <LanguageProvider>
+                    {/* Global PWA Components */}
+                    <OfflineIndicator />
+                    <UpdateNotification registration={swRegistration} />
 
-                <BrowserRouter
-                    future={{
-                        v7_startTransition: true,
-                        v7_relativeSplatPath: true
-                    }}
-                >
-                    <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
-                        <Routes>
-                            <Route path="/" element={<Landing />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/signup" element={<Signup />} />
-                            <Route path="/reset-password/:token" element={<ResetPassword />} />
-                            <Route path="/constitution" element={<Constitution />} />
-                            <Route path="/about" element={<About />} />
+                    <BrowserRouter
+                        future={{
+                            v7_startTransition: true,
+                            v7_relativeSplatPath: true
+                        }}
+                    >
+                        <ScrollToTop />
+                        <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
+                            <Routes>
+                                <Route path="/" element={<Landing />} />
+                                <Route path="/login" element={<Login />} />
+                                <Route path="/signup" element={<Signup />} />
+                                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                                <Route path="/constitution" element={<Constitution />} />
+                                <Route path="/about" element={<About />} />
+                                <Route path="/privacy" element={<PrivacyPolicy />} />
+                                <Route path="/terms" element={<Terms />} />
+                                <Route path="/disclaimer" element={<Disclaimer />} />
 
-                            {/* Protected Dashboards */}
-                            <Route
-                                path="/litigant/*"
-                                element={
-                                    <ProtectedRoute allowedRoles={['LITIGANT']}>
-                                        <DashboardLayout />
-                                    </ProtectedRoute>
-                                }
-                            >
-                                <Route index element={<LitigantDashboard />} />
-                                <Route path="vakil-friend" element={<VakilFriendPage />} />
-                                <Route path="file" element={<FileUnifiedPage />} />
-                                <Route path="case-diary" element={<CaseDiaryPage />} />
-                                <Route path="case-diary/:caseId" element={<CaseDetailPage />} />
-                                <Route path="hearings" element={<HearingsPage />} />
-                                <Route path="chat" element={<LawyerChatPage />} />
-                                <Route path="profile" element={<ProfilePage />} />
-                                <Route path="forensics" element={<ForensicsPage />} />
-                            </Route>
+                                {/* Protected Dashboards */}
+                                <Route
+                                    path="/litigant/*"
+                                    element={
+                                        <ProtectedRoute allowedRoles={['LITIGANT']}>
+                                            <DashboardLayout />
+                                        </ProtectedRoute>
+                                    }
+                                >
+                                    <Route index element={<LitigantDashboard />} />
+                                    <Route path="vakil-friend" element={<VakilFriendPage />} />
+                                    <Route path="file" element={<FileUnifiedPage />} />
+                                    <Route path="case-diary" element={<CaseDiaryPage />} />
+                                    <Route path="case-diary/:caseId" element={<CaseDetailPage />} />
+                                    <Route path="hearings" element={<HearingsPage />} />
+                                    <Route path="chat" element={<LawyerChatPage />} />
+                                    <Route path="profile" element={<ProfilePage />} />
+                                    <Route path="forensics" element={<ForensicsPage />} />
+                                </Route>
 
-                            <Route
-                                path="/lawyer/*"
-                                element={
-                                    <ProtectedRoute allowedRoles={['LAWYER']}>
-                                        <DashboardLayout />
-                                    </ProtectedRoute>
-                                }
-                            >
-                                <Route index element={<LawyerDashboard />} />
-                                <Route path="cases" element={<LawyerCasesPage />} />
-                                <Route path="case/:caseId" element={<LawyerCaseDetailsPage />} />
-                                <Route path="case/:caseId/workspace" element={<CaseWorkspace />} />
-                                <Route path="clients" element={<MyClientsPage />} />
-                                <Route path="preparation" element={<CasePreparationPage />} />
-                                <Route path="evidence" element={<EvidenceVaultPage />} />
-                                <Route path="ai-assistant" element={<AILegalAssistantPage />} />
-                                <Route path="hearings" element={<LawyerHearingsPage />} />
-                                <Route path="analytics" element={<LawyerAnalyticsPage />} />
-                                <Route path="chat" element={<ClientChatPage />} />
-                                <Route path="profile" element={<LawyerProfilePage />} />
-                                <Route path="offline-drafts" element={<OfflineDraftsPage />} />
-                            </Route>
+                                <Route
+                                    path="/lawyer/*"
+                                    element={
+                                        <ProtectedRoute allowedRoles={['LAWYER']}>
+                                            <DashboardLayout />
+                                        </ProtectedRoute>
+                                    }
+                                >
+                                    <Route index element={<LawyerDashboard />} />
+                                    <Route path="cases" element={<LawyerCasesPage />} />
+                                    <Route path="case/:caseId" element={<LawyerCaseDetailsPage />} />
+                                    <Route path="case/:caseId/workspace" element={<CaseWorkspace />} />
+                                    <Route path="clients" element={<MyClientsPage />} />
+                                    <Route path="preparation" element={<CasePreparationPage />} />
+                                    <Route path="evidence" element={<EvidenceVaultPage />} />
+                                    <Route path="ai-assistant" element={<AILegalAssistantPage />} />
+                                    <Route path="hearings" element={<LawyerHearingsPage />} />
+                                    <Route path="analytics" element={<LawyerAnalyticsPage />} />
+                                    <Route path="chat" element={<ClientChatPage />} />
+                                    <Route path="profile" element={<LawyerProfilePage />} />
+                                    <Route path="offline-drafts" element={<OfflineDraftsPage />} />
+                                </Route>
 
-                            <Route
-                                path="/judge/*"
-                                element={
-                                    <ProtectedRoute allowedRoles={['JUDGE']}>
-                                        <DashboardLayout />
-                                    </ProtectedRoute>
-                                }
-                            >
-                                <Route index element={<JudicialOverview />} />
-                                {/* New Unified Workspace Routes */}
-                                <Route path="docket" element={<MyDocket />} />
-                                <Route path="unassigned" element={<UnassignedPool />} />
-                                <Route path="hearings" element={<JudgeHearingsPage />} />
-                                <Route path="live-hearing" element={<LiveHearing />} />
-                                <Route path="case/:caseId" element={<JudgeCaseWorkspace />} />
-                                {/* Keep only essential old routes */}
-                                <Route path="conduct" element={<ConductHearingPage />} />
-                                <Route path="analytics" element={<CourtAnalyticsPage />} />
-                                <Route path="profile" element={<ProfilePage />} />
-                            </Route>
+                                <Route
+                                    path="/judge/*"
+                                    element={
+                                        <ProtectedRoute allowedRoles={['JUDGE']}>
+                                            <DashboardLayout />
+                                        </ProtectedRoute>
+                                    }
+                                >
+                                    <Route index element={<JudicialOverview />} />
+                                    {/* New Unified Workspace Routes */}
+                                    <Route path="docket" element={<MyDocket />} />
+                                    <Route path="unassigned" element={<UnassignedPool />} />
+                                    <Route path="hearings" element={<JudgeHearingsPage />} />
+                                    <Route path="live-hearing" element={<LiveHearing />} />
+                                    <Route path="case/:caseId" element={<JudgeCaseWorkspace />} />
+                                    {/* Keep only essential old routes */}
+                                    <Route path="conduct" element={<ConductHearingPage />} />
+                                    <Route path="analytics" element={<CourtAnalyticsPage />} />
+                                    <Route path="profile" element={<ProfilePage />} />
+                                </Route>
 
-                            <Route
-                                path="/admin/*"
-                                element={
-                                    <ProtectedRoute allowedRoles={['ADMIN']}>
-                                        <DashboardLayout />
-                                    </ProtectedRoute>
-                                }
-                            >
-                                <Route index element={<AdminDashboard />} />
-                            </Route>
+                                <Route
+                                    path="/admin/*"
+                                    element={
+                                        <ProtectedRoute allowedRoles={['ADMIN']}>
+                                            <DashboardLayout />
+                                        </ProtectedRoute>
+                                    }
+                                >
+                                    <Route index element={<AdminDashboard />} />
+                                </Route>
 
-                            <Route
-                                path="/police/*"
-                                element={
-                                    <ProtectedRoute allowedRoles={['POLICE']}>
-                                        <DashboardLayout />
-                                    </ProtectedRoute>
-                                }
-                            >
-                                <Route index element={<PoliceDashboard />} />
-                                <Route path="upload" element={<UploadFirPage />} />
-                                <Route path="firs" element={<MyFirsPage />} />
-                                <Route path="investigations" element={<PoliceInvestigationsPage />} />
-                                <Route path="investigation/:id" element={<InvestigationDetailsPage />} />
-                                <Route path="profile" element={<ProfilePage />} />
-                            </Route>
+                                <Route
+                                    path="/police/*"
+                                    element={
+                                        <ProtectedRoute allowedRoles={['POLICE']}>
+                                            <DashboardLayout />
+                                        </ProtectedRoute>
+                                    }
+                                >
+                                    <Route index element={<PoliceDashboard />} />
+                                    <Route path="upload" element={<UploadFirPage />} />
+                                    <Route path="firs" element={<MyFirsPage />} />
+                                    <Route path="investigations" element={<PoliceInvestigationsPage />} />
+                                    <Route path="investigation/:id" element={<InvestigationDetailsPage />} />
+                                    <Route path="profile" element={<ProfilePage />} />
+                                </Route>
 
-                            <Route path="/unauthorized" element={
-                                <div style={{ textAlign: 'center', padding: '3rem' }}>
-                                    <h1>Unauthorized</h1>
-                                    <p>You don't have permission to access this page.</p>
-                                </div>
-                            } />
-                        </Routes>
-                    </Suspense>
-                </BrowserRouter>
-            </LanguageProvider>
-        </ErrorBoundary>
+                                <Route path="/unauthorized" element={
+                                    <div style={{ textAlign: 'center', padding: '3rem' }}>
+                                        <h1>Unauthorized</h1>
+                                        <p>You don't have permission to access this page.</p>
+                                    </div>
+                                } />
+                            </Routes>
+                        </Suspense>
+                    </BrowserRouter>
+                </LanguageProvider>
+            </ErrorBoundary>
+        </ThemeProvider>
     );
 }
 

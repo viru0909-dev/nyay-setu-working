@@ -158,7 +158,6 @@ export default function AchievementsSection() {
                                             {t('achievements.vois.overlayTitle')}
                                         </h4>
 
-                                        {/* Report Button */}
                                         <motion.a
                                             href="/VOIS_Submission/VOIS_Final_Report_NyaySetu.pdf"
                                             target="_blank"
@@ -188,7 +187,6 @@ export default function AchievementsSection() {
                                             {t('achievements.vois.viewReport')}
                                         </motion.a>
 
-                                        {/* Presentation Button */}
                                         <motion.a
                                             href="/VOIS_Submission/Nyay_Setu_VOIS_Presentation_PDF.pdf"
                                             target="_blank"
@@ -218,7 +216,6 @@ export default function AchievementsSection() {
                                             {t('achievements.vois.viewPresentation')}
                                         </motion.a>
 
-                                        {/* Video Button */}
                                         <motion.a
                                             href="/VOIS_Submission/NyaySetu_VOIS.mp4"
                                             target="_blank"
@@ -284,7 +281,6 @@ export default function AchievementsSection() {
                                             {t('achievements.esubmit.overlayTitle')}
                                         </h4>
 
-                                        {/* Certificate Image */}
                                         <motion.a
                                             href="/esubmit_certificate.png"
                                             target="_blank"
@@ -353,7 +349,6 @@ export default function AchievementsSection() {
 
                             {/* Content */}
                             <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                {/* Title */}
                                 <h3 style={{
                                     color: 'var(--text-main)',
                                     fontSize: '1.75rem',
@@ -364,7 +359,6 @@ export default function AchievementsSection() {
                                     {achievement.title}
                                 </h3>
 
-                                {/* Subtitle and Badge */}
                                 <div style={{
                                     display: 'flex',
                                     gap: '0.75rem',
@@ -384,7 +378,6 @@ export default function AchievementsSection() {
                                         {achievement.subtitle}
                                     </div>
 
-                                    {/* Ongoing Badge (only for VOIS) */}
                                     {achievement.badge && (
                                         <div style={{
                                             display: 'inline-block',
@@ -401,7 +394,6 @@ export default function AchievementsSection() {
                                     )}
                                 </div>
 
-                                {/* Description */}
                                 <p style={{
                                     color: 'var(--text-secondary)',
                                     fontSize: '1.1rem',

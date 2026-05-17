@@ -4,11 +4,13 @@ Searches for relevant judgments, IPC/BNS/MVA sections, and case precedents.
 Uses the Indian Kanoon REST API with token authentication.
 """
 
+import asyncio
 import aiohttp
 import logging
 from config import INDIAN_KANOON_TOKEN, INDIAN_KANOON_API_URL
 
 logger = logging.getLogger("kanoon-search")
+DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=10)
 
 
 async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
@@ -28,10 +30,11 @@ async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
     }
 
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, data=params, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+        async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as session:
+            async with session.post(url, data=params, headers=headers) as resp:
                 if resp.status != 200:
-                    logger.error(f"Indian Kanoon API returned status {resp.status}")
+                    body = await resp.text()
+                    logger.error("Indian Kanoon API returned status %s: %s", resp.status, body[:200])
                     return []
 
                 data = await resp.json(content_type=None)
@@ -45,7 +48,7 @@ async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
                         "snippet": _clean_snippet(doc.get("headline", "")),
                     })
 
-                logger.info(f"Indian Kanoon returned {len(results)} results for: {query[:50]}...")
+                logger.info("Indian Kanoon returned %s results for: %s...", len(results), query[:50])
                 return results
 
     except Exception as e:
@@ -53,7 +56,11 @@ async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
         return []
 
 
-async def get_kanoon_doc(doc_id: str, max_chars: int = 2000) -> str:
+async def get_kanoon_doc(
+    doc_id: str,
+    max_chars: int = 2000,
+    session: aiohttp.ClientSession | None = None
+) -> str:
     """
     Fetch the full text of a specific Indian Kanoon document.
     Returns truncated text suitable for RAG context injection.
@@ -67,16 +74,24 @@ async def get_kanoon_doc(doc_id: str, max_chars: int = 2000) -> str:
         "Accept": "application/json",
     }
 
+    async def _fetch_doc(active_session: aiohttp.ClientSession) -> str:
+        async with active_session.post(url, headers=headers) as resp:
+            if resp.status != 200:
+                body = await resp.text()
+                logger.error("Indian Kanoon doc fetch failed %s: %s", resp.status, body[:200])
+                return ""
+            data = await resp.json(content_type=None)
+            text = data.get("doc", "")
+            # Strip HTML tags
+            text = _strip_html(text)
+            return text[:max_chars]
+
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                if resp.status != 200:
-                    return ""
-                data = await resp.json(content_type=None)
-                text = data.get("doc", "")
-                # Strip HTML tags
-                text = _strip_html(text)
-                return text[:max_chars]
+        if session is not None:
+            return await _fetch_doc(session)
+
+        async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as new_session:
+            return await _fetch_doc(new_session)
 
     except Exception as e:
         logger.error(f"Indian Kanoon doc fetch error: {e}")
@@ -92,19 +107,24 @@ async def build_kanoon_context(query: str, max_results: int = 3) -> tuple[str, l
     if not results:
         return "", []
 
-    # Fetch full text for each result (in parallel-ish via sequential awaits)
     context_parts = []
-    for r in results:
-        doc_text = await get_kanoon_doc(r["doc_id"], max_chars=1500)
+    async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as session:
+        tasks = [
+            get_kanoon_doc(r["doc_id"], max_chars=1500, session=session)
+            for r in results
+        ]
+        doc_texts = await asyncio.gather(*tasks, return_exceptions=True)
+
+    for r, doc_text in zip(results, doc_texts):
+        if isinstance(doc_text, BaseException):
+            logger.error("Indian Kanoon doc fetch error for %s: %s", r.get("doc_id"), doc_text)
+            doc_text = ""
+
         if doc_text:
-            context_parts.append(
-                f"=== {r['title']} ===\n{doc_text}\n"
-            )
+            context_parts.append(f"=== {r['title']} ===\n{doc_text}\n")
         else:
             # Fallback to snippet
-            context_parts.append(
-                f"=== {r['title']} ===\n{r['snippet']}\n"
-            )
+            context_parts.append(f"=== {r['title']} ===\n{r['snippet']}\n")
 
     context = "\n".join(context_parts)
     return context, results

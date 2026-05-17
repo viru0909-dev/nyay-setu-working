@@ -6,6 +6,7 @@ import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.FaceRecognitionService;
 import com.nyaysetu.backend.service.JwtService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-
+@Tag(name = "Face Recognition", description = "Enroll and verify user identity using facial recognition")
 @RestController
 @RequestMapping("/api/face")
 @RequiredArgsConstructor

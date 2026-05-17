@@ -8,11 +8,11 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn package -DskipTests
 
-# Stage 2: Runtime 
-FROM eclipse-temurin:17-jre-alpine
+# Stage 2: Runtime (jammy for multi-arch: amd64 + arm64)
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN groupadd -r spring && useradd -r -g spring spring
 USER spring:spring
 
 COPY --from=build /app/target/*.jar app.jar

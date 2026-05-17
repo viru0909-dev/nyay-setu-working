@@ -88,19 +88,26 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  
   server: {
-    port: 5173,
-    host: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        secure: false
-      }
+  port: 5173,
+  host: true,
+  proxy: {
+    '/api': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+      secure: false
     }
-  },
-  build: {
-    outDir: 'dist',
-    sourcemap: false
   }
+},
+
+test: {
+  environment: 'jsdom',
+  globals: true,
+},
+
+build: {
+  outDir: 'dist',
+  sourcemap: false
+}
 })

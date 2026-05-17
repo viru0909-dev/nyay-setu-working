@@ -49,11 +49,57 @@ public class SecurityConfig {
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
         
-        // DEBUGGING: Allow ALL origins
-        configuration.setAllowedOriginPatterns(java.util.Collections.singletonList("*"));
+        // Use origins from application.properties / Env Var
+        if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
+            java.util.List<String> origins = java.util.Arrays.stream(allowedOrigins.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(java.util.stream.Collectors.toList());
+
+            if (origins.isEmpty()) {
+                // SAFE DEFAULT: Allow local development origins only
+                configuration.setAllowedOrigins(java.util.Arrays.asList(
+                    "http://localhost:5173",
+                    "http://localhost:3000",
+                    "http://localhost"
+                ));
+                configuration.setAllowCredentials(true);
+            } else {
+                // Security: reject bare "*" — it allows any origin to make credentialed requests
+                boolean hasBareWildcard = origins.stream().anyMatch(o -> o.trim().equals("*"));
+                if (hasBareWildcard) {
+                    java.util.logging.Logger.getLogger("SecurityConfig")
+                        .warning("CORS_ALLOWED_ORIGINS contains bare '*'. "
+                            + "This is unsafe with credentials. Falling back to localhost defaults.");
+                    configuration.setAllowedOrigins(java.util.Arrays.asList(
+                        "http://localhost:5173",
+                        "http://localhost:3000",
+                        "http://localhost"
+                    ));
+                } else {
+                    boolean hasPattern = origins.stream().anyMatch(o -> o.contains("*"));
+                    if (hasPattern) {
+                        // Specific patterns like https://*.example.com are safe with credentials
+                        configuration.setAllowedOriginPatterns(origins);
+                    } else {
+                        configuration.setAllowedOrigins(origins);
+                    }
+                }
+                configuration.setAllowCredentials(true);
+            }
+        } else {
+            // SAFE DEFAULT: Allow local development origins only
+            configuration.setAllowedOrigins(java.util.Arrays.asList(
+                "http://localhost:5173", 
+                "http://localhost:3000", 
+                "http://localhost"
+            ));
+            configuration.setAllowCredentials(true);
+        }
+        
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

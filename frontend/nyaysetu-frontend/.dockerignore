@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.git
+.idea
+.vscode
+.env
+Dockerfile
+.dockerignore
+.vercel

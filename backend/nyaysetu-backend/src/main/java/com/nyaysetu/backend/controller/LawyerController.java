@@ -8,6 +8,7 @@ import com.nyaysetu.backend.service.AuthService;
 import com.nyaysetu.backend.service.CaseManagementService;
 import com.nyaysetu.backend.service.HearingService;
 import com.nyaysetu.backend.service.LawyerService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Tag(name = "Lawyer Portal", description = "Lawyer dashboard — client cases, evidence and hearing schedule")
 @RestController
 @RequestMapping("/api/lawyer")
 @RequiredArgsConstructor

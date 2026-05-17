@@ -6,6 +6,11 @@ build/
 dist/
 **/dist/
 
+venv/
+__pycache__/
+*.pyc
+.env
+
 # IDE
 .idea/
 .vscode/
@@ -58,6 +63,10 @@ __pycache__/
 # Logs
 logs/
 *.log
+
+# Python
+__pycache__/
+*.pyc
 
 # Database
 *.db

@@ -11,6 +11,7 @@ import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.VakilFriendService;
 import com.nyaysetu.backend.service.VakilFriendDocumentService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 /**
  * Controller for Vakil-Friend AI Chat-First Case Filing
  */
+@Tag(name = "Vakil Friend (AI Chat)", description = "AI-powered chat-first case filing and legal document analysis")
 @RestController
 @RequestMapping("/api/vakil-friend")
 @RequiredArgsConstructor

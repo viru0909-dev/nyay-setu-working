@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 import { Search, BookOpen, Globe, Download, Bookmark, MessageCircle, Share2, X, BookmarkPlus, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -252,19 +253,22 @@ export default function Constitution() {
     };
 
     return (
-        <div style={{ minHeight: '100vh', background: '#FFFFFF' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
             <Header />
 
-            <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '6rem 2rem 4rem' }}>
-                {/* Enhanced Page Header */}
+            {/* geometric grid pattern — same as Landing hero */}
+            <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', backgroundImage: `linear-gradient(rgba(124,92,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,92,255,0.03) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />
+            <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '6rem 2rem 4rem', position: 'relative', zIndex: 1 }}>
+                {/* Page Header */}
                 <div style={{
                     padding: '3rem',
-                    background: 'rgba(255, 255, 255, 0.9)',
+                    background: 'var(--bg-glass)',
                     backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(226, 232, 240, 0.8)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    border: '1px solid var(--border-light)',
                     borderRadius: '2rem',
                     marginBottom: '3rem',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                    boxShadow: 'var(--shadow-glass)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -334,10 +338,10 @@ export default function Constitution() {
                                 onClick={() => setShowAIChat(!showAIChat)}
                                 style={{
                                     padding: '0.75rem 1.5rem',
-                                    background: showAIChat ? 'var(--color-primary)' : '#FFFFFF',
-                                    border: showAIChat ? '2px solid var(--color-primary)' : '1px solid #E2E8F0',
+                                    background: showAIChat ? 'var(--color-primary)' : 'var(--bg-surface)',
+                                    border: showAIChat ? '2px solid var(--color-primary)' : '1px solid var(--border-medium)',
                                     borderRadius: '0.75rem',
-                                    color: showAIChat ? '#FFFFFF' : 'var(--color-primary)',
+                                    color: showAIChat ? '#FFFFFF' : 'var(--text-main)',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -372,22 +376,22 @@ export default function Constitution() {
                             style={{
                                 width: '100%',
                                 padding: '1.5rem 1.5rem 1.5rem 4.5rem',
-                                background: '#FFFFFF',
-                                border: '1px solid #E2E8F0',
+                                background: 'var(--bg-input)',
+                                border: '1px solid var(--border-light)',
                                 borderRadius: '1.5rem',
                                 color: 'var(--text-main)',
                                 fontSize: '1.125rem',
                                 outline: 'none',
                                 transition: 'all 0.3s',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                                boxShadow: 'var(--shadow-sm)'
                             }}
                             onFocus={(e) => {
-                                e.target.style.borderColor = 'var(--color-primary)';
-                                e.target.style.boxShadow = '0 0 0 3px rgba(30, 42, 68, 0.1)';
+                                e.target.style.borderColor = 'var(--border-focus)';
+                                e.target.style.boxShadow = '0 0 0 3px rgba(63,93,204,0.12)';
                             }}
                             onBlur={(e) => {
-                                e.target.style.borderColor = '#E2E8F0';
-                                e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                                e.target.style.borderColor = 'var(--border-light)';
+                                e.target.style.boxShadow = 'var(--shadow-sm)';
                             }}
                         />
                     </div>
@@ -406,10 +410,10 @@ export default function Constitution() {
                                     onClick={() => setSelectedArticle(null)}
                                     style={{
                                         padding: '0.75rem 1.5rem',
-                                        background: 'rgba(30, 42, 68, 0.08)',
-                                        border: '1px solid rgba(30, 42, 68, 0.1)',
+                                        background: 'var(--bg-hover)',
+                                        border: '1px solid var(--border-light)',
                                         borderRadius: '0.75rem',
-                                        color: 'var(--color-primary)',
+                                        color: 'var(--text-main)',
                                         cursor: 'pointer',
                                         marginBottom: '2rem',
                                         fontWeight: '700',
@@ -421,10 +425,10 @@ export default function Constitution() {
 
                                 <div style={{
                                     padding: '3rem',
-                                    background: '#FFFFFF',
+                                    background: 'var(--bg-surface)',
                                     borderRadius: '2rem',
-                                    border: '1px solid #E2E8F0',
-                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                                    border: '1px solid var(--border-light)',
+                                    boxShadow: 'var(--shadow-glass)'
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '2rem' }}>
                                         <span style={{
@@ -503,10 +507,10 @@ export default function Constitution() {
                                     onClick={() => setSelectedPart(null)}
                                     style={{
                                         padding: '0.75rem 1.5rem',
-                                        background: 'rgba(30, 42, 68, 0.08)',
-                                        border: '1px solid rgba(30, 42, 68, 0.1)',
+                                        background: 'var(--bg-hover)',
+                                        border: '1px solid var(--border-light)',
                                         borderRadius: '0.75rem',
-                                        color: 'var(--color-primary)',
+                                        color: 'var(--text-main)',
                                         cursor: 'pointer',
                                         marginBottom: '2rem',
                                         fontWeight: '700',
@@ -518,11 +522,11 @@ export default function Constitution() {
 
                                 <div style={{
                                     padding: '2rem',
-                                    background: '#FFFFFF',
+                                    background: 'var(--bg-surface)',
                                     borderRadius: '1.5rem',
                                     marginBottom: '2rem',
-                                    border: '1px solid #E2E8F0',
-                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                                    border: '1px solid var(--border-light)',
+                                    boxShadow: 'var(--shadow-glass)'
                                 }}>
                                     <h2 style={{ color: 'var(--color-primary)', fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem' }}>
                                         {selectedPart.title}
@@ -543,20 +547,20 @@ export default function Constitution() {
                                             whileHover={{ x: 8 }}
                                             style={{
                                                 padding: '2rem',
-                                                background: '#FFFFFF',
+                                                background: 'var(--bg-surface)',
                                                 borderRadius: '1.5rem',
-                                                border: '1px solid #E2E8F0',
+                                                border: '1px solid var(--border-light)',
                                                 cursor: 'pointer',
                                                 transition: 'all 0.3s',
-                                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+                                                boxShadow: 'var(--shadow-sm)'
                                             }}
                                             onMouseEnter={(e) => {
-                                                e.currentTarget.style.borderColor = 'var(--color-primary)';
-                                                e.currentTarget.style.boxShadow = '0 10px 40px rgba(30, 42, 68, 0.1)';
+                                                e.currentTarget.style.borderColor = 'var(--border-focus)';
+                                                e.currentTarget.style.boxShadow = 'var(--shadow-hover)';
                                             }}
                                             onMouseLeave={(e) => {
-                                                e.currentTarget.style.borderColor = '#E2E8F0';
-                                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+                                                e.currentTarget.style.borderColor = 'var(--border-light)';
+                                                e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
                                             }}
                                         >
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
@@ -614,22 +618,22 @@ export default function Constitution() {
                                         onClick={() => setSelectedPart(part)}
                                         style={{
                                             padding: '2.5rem',
-                                            background: '#FFFFFF',
+                                            background: 'var(--bg-surface)',
                                             borderRadius: '1.5rem',
-                                            border: '1px solid #E2E8F0',
+                                            border: '1px solid var(--border-light)',
                                             cursor: 'pointer',
                                             transition: 'all 0.3s',
                                             position: 'relative',
                                             overflow: 'hidden',
-                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                                            boxShadow: 'var(--shadow-sm)'
                                         }}
                                         onMouseEnter={(e) => {
-                                            e.currentTarget.style.borderColor = 'var(--color-primary)';
-                                            e.currentTarget.style.boxShadow = '0 20px 50px rgba(30, 42, 68, 0.2)';
+                                            e.currentTarget.style.borderColor = 'var(--border-focus)';
+                                            e.currentTarget.style.boxShadow = 'var(--shadow-hover)';
                                         }}
                                         onMouseLeave={(e) => {
-                                            e.currentTarget.style.borderColor = '#E2E8F0';
-                                            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)';
+                                            e.currentTarget.style.borderColor = 'var(--border-light)';
+                                            e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
                                         }}
                                     >
                                         <div style={{
@@ -683,13 +687,13 @@ export default function Constitution() {
                             >
                                 <div style={{
                                     padding: '2rem',
-                                    background: '#FFFFFF',
+                                    background: 'var(--bg-surface)',
                                     borderRadius: '1.5rem',
-                                    border: '1px solid #E2E8F0',
+                                    border: '1px solid var(--border-light)',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     gap: '1.5rem',
-                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                                    boxShadow: 'var(--shadow-glass)'
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>
@@ -714,9 +718,9 @@ export default function Constitution() {
 
                                     <div style={{
                                         padding: '1.5rem',
-                                        background: 'rgba(30, 42, 68, 0.05)',
+                                        background: 'var(--bg-hover)',
                                         borderRadius: '1rem',
-                                        border: '1px solid rgba(30, 42, 68, 0.2)'
+                                        border: '1px solid var(--border-light)'
                                     }}>
                                         <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
                                             {language === 'en'
@@ -734,15 +738,16 @@ export default function Constitution() {
                                         placeholder={t('typeMessage')}
                                         style={{
                                             padding: '1rem',
-                                            background: '#F8FAFC',
-                                            border: '1px solid #E2E8F0',
+                                            background: 'var(--bg-input)',
+                                            border: '1px solid var(--border-light)',
                                             borderRadius: '0.75rem',
                                             color: 'var(--text-main)',
                                             fontSize: '1rem',
-                                            outline: 'none'
+                                            outline: 'none',
+                                            width: '100%'
                                         }}
-                                        onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
-                                        onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
+                                        onFocus={(e) => e.target.style.borderColor = 'var(--border-focus)'}
+                                        onBlur={(e) => e.target.style.borderColor = 'var(--border-light)'}
                                     />
 
                                     <button
@@ -782,9 +787,9 @@ export default function Constitution() {
                                         <div style={{
                                             marginTop: '1rem',
                                             padding: '1.5rem',
-                                            background: '#F8FAFC',
+                                            background: 'var(--bg-hover)',
                                             borderRadius: '1rem',
-                                            border: '1px solid #E2E8F0'
+                                            border: '1px solid var(--border-light)'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'start', gap: '1rem' }}>
                                                 <MessageCircle size={24} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
@@ -806,10 +811,11 @@ export default function Constitution() {
                                     <div style={{
                                         marginTop: '1.5rem',
                                         padding: '1.5rem',
-                                        background: 'rgba(30, 42, 68, 0.05)',
-                                        backdropFilter: 'blur(20px)',
+                                        background: 'var(--bg-glass)',
+                                        backdropFilter: 'blur(12px)',
+                                        WebkitBackdropFilter: 'blur(12px)',
                                         borderRadius: '1.5rem',
-                                        border: '1px solid rgba(30, 42, 68, 0.1)'
+                                        border: '1px solid var(--border-light)'
                                     }}>
                                         <h4 style={{ color: 'var(--color-primary)', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                             <Bookmark size={20} fill="var(--color-primary)" color="var(--color-primary)" />
