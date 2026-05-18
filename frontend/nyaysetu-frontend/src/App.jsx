@@ -7,6 +7,7 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import ScrollToTop from './ScrollToTop';
+import HearingReminder from './pages/HearingReminder';
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
@@ -126,6 +127,7 @@ function App({ swRegistration }) {
                                 <Route path="/privacy" element={<PrivacyPolicy />} />
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
+                                <Route path="/reminder" element={<HearingReminder />} />
 
                                 {/* Protected Dashboards */}
                                 <Route
