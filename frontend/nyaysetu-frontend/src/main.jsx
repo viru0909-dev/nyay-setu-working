@@ -4,6 +4,8 @@ import './styles/global.css'
 import './styles/responsive.css'
 import './i18n' // Initialize i18n before app
 import App from './App.jsx'
+import { useSessionMonitor } from './hooks/useSessionMonitor';
+import SessionWarningBanner from './components/SessionWarningBanner';
 
 /**
  * Register service worker and handle updates
@@ -47,12 +49,32 @@ const registerServiceWorker = (callback) => {
 const Root = () => {
     const [swRegistration, setSwRegistration] = useState(null);
 
+    // 1. Grab the user's token from local storage
+    const token = localStorage.getItem('token');
+
+    // 2. Start the background monitor engine
+    const { showWarning, setShowWarning } = useSessionMonitor(token);
+
+    // 3. The temporary function for the "Stay Logged In" button
+    const handleRefresh = () => {
+        console.log("User wants to stay logged in!");
+        setShowWarning(false);
+    };
+
     useEffect(() => {
         registerServiceWorker(setSwRegistration);
     }, []);
 
     return (
         <StrictMode>
+            {/* 4. The Session Banner renders here when showWarning is true */}
+            {showWarning && (
+                <SessionWarningBanner
+                    onRefresh={handleRefresh}
+                    onDismiss={() => setShowWarning(false)}
+                />
+            )}
+
             <App swRegistration={swRegistration} />
         </StrictMode>
     );

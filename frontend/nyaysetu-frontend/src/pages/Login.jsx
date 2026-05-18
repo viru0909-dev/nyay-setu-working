@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authAPI } from '../services/api';
 import useAuthStore from '../store/authStore';
@@ -9,6 +9,8 @@ import FaceLoginModal from '../components/auth/FaceLoginModal';
 import ForgotPasswordModal from '../components/auth/ForgotPasswordModal';
 
 export default function Login() {
+    const [searchParams] = useSearchParams();
+    const isSessionExpired = searchParams.get('reason') === 'session_expired';
     const { t } = useTranslation('auth');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -208,7 +210,20 @@ export default function Login() {
                                 {t('auth:login.subtitle')}
                             </p>
                         </div>
-
+                        {isSessionExpired && (
+                            <div style={{
+                                backgroundColor: '#fff3cd',
+                                color: '#856404',
+                                padding: '12px 16px',
+                                borderRadius: '6px',
+                                marginBottom: '20px',
+                                border: '1px solid #ffeeba',
+                                fontSize: '14px',
+                                textAlign: 'center'
+                            }}>
+                                Your session expired for your security. Please log in again to continue.
+                            </div>
+                        )}
                         {error && (
                             <div style={{
                                 padding: '1rem',

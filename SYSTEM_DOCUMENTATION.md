@@ -46,7 +46,7 @@
 - **Framework:** React 18 + Vite
 - **Routing:** React Router v6
 - **State Management:** Zustand
-- **Styling:** Custom CSS (no Tailwind)
+- **Styling:** Tailwind CSS, Custom CSS Variables
 - **UI Libraries:** Framer Motion, Lucide Icons
 - **PWA:** vite-plugin-pwa, Workbox
 

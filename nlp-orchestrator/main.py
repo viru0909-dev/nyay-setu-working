@@ -20,6 +20,11 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
+from cache import (
+    generate_cache_key,
+    get_cached_response,
+    set_cached_response
+)
 from config import FRONTEND_ORIGIN, GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KEY, GEMINI_MODEL
 from decomposer import decompose_query
 from router import route_questions
@@ -404,28 +409,78 @@ async def deep_research_pipeline(query: str, language: str):
 
         # Call the AI model and stream reasoning
         ai_answer = None
+        cached = False
         if model_choice == "gemini" and gemini_client:
-            try:
-                loop = asyncio.get_event_loop()
-                response = await loop.run_in_executor(
-                    None,
-                    lambda: gemini_client.models.generate_content(
-                        model=GEMINI_MODEL,
-                        contents=grounded_prompt
-                    )
-                )
-                ai_answer = response.text.strip()
-            except Exception as e:
-                logger.error(f"Gemini failed, falling back to Groq: {e}")
-                model_choice = "groq"
-                ai_answer = None
-        
-        if model_choice == "groq" or (model_choice == "gemini" and not gemini_client):
-           response = await call_groq_with_retry(
-               grounded_prompt,
-               query
+            cache_key = generate_cache_key(
+                "gemini",
+                grounded_prompt,
+                GEMINI_MODEL,
+                user_query=query
             )
-           ai_answer = response.choices[0].message.content.strip()
+
+            cached_response = get_cached_response(cache_key)
+
+            if cached_response:
+                logger.info("[Deep Research] Gemini cache hit")
+                ai_answer = cached_response
+                cached = True
+
+            else:
+                try:
+                    loop = asyncio.get_event_loop()
+
+                    response = await loop.run_in_executor(
+                        None,
+                        lambda: gemini_client.models.generate_content(
+                            model=GEMINI_MODEL,
+                            contents=grounded_prompt
+                        )
+                    )
+
+                    ai_answer = response.text.strip()
+
+                    set_cached_response(cache_key, ai_answer)
+
+                except Exception as e:
+                    logger.error(f"Gemini failed, falling back to Groq: {e}")
+
+                    model_choice = "groq"
+
+
+        if model_choice == "groq" or (
+            model_choice == "gemini" and not gemini_client
+        ):
+
+            cache_key = generate_cache_key(
+                "groq",
+                grounded_prompt,
+                GROQ_MODEL_FAST,
+                user_query=query
+            )
+
+            cached_response = get_cached_response(cache_key)
+
+            if cached_response and not cached:
+                logger.info("[Deep Research] Groq cache hit")
+
+                ai_answer = cached_response
+                cached = True
+
+            else:
+                response = await groq_client.chat.completions.create(
+                    model=GROQ_MODEL_FAST,
+                    messages=[
+                        {"role": "system", "content": grounded_prompt},
+                        {"role": "user", "content": query}
+                    ],
+                    temperature=0.2,
+                    max_tokens=2048
+                )
+
+                ai_answer = response.choices[0].message.content.strip()
+
+                if not cached:
+                    set_cached_response(cache_key, ai_answer)
 
         # Stream reasoning text in chunks for live display
         if ai_answer:

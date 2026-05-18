@@ -108,10 +108,10 @@ export default function CaseWorkspace() {
             </div>
 
             {/* Tab Content Area */}
-            <div style={{ flex: 1, overflow: 'hidden' }}>
+            <div style={{ flex: 1, overflowY: 'auto' }}>
                 {activeTab === 'BRIEF' && <TabCaseBrief caseData={caseData} />}
                 {activeTab === 'EVIDENCE' && <TabEvidence caseId={caseId} />}
-                {activeTab === 'DRAFTING' && <TabDrafting caseData={caseData} />}
+                {activeTab === 'DRAFTING' && <TabDrafting caseData={caseData} onRefresh={fetchCaseDetails} />}
                 {activeTab === 'CHAT' && <TabChat caseData={caseData} />}
             </div>
             <style>{`
@@ -608,12 +608,31 @@ function TabEvidence({ caseId }) {
     );
 }
 
-function TabDrafting({ caseData }) {
+// Derive initial draft UI status from the real backend case status
+function getDraftStatus(caseStatus) {
+    if (caseStatus === 'DRAFT_PENDING_CLIENT') return 'PENDING_APPROVAL';
+    if (caseStatus === 'APPROVED') return 'APPROVED';
+    // Only statuses that occur AFTER actual court filing show as FILED_SUCCESS
+    if (['COGNIZANCE_PERIOD', 'PENDING_COGNIZANCE', 'IN_ADMISSION', 'SUMMONS_SERVED',
+         'FIR_FILED', 'TRIAL_READY', 'JUDGMENT_PENDING', 'COMPLETED', 'CLOSED'].includes(caseStatus)) return 'FILED_SUCCESS';
+    // IN_PROGRESS, OPEN, PENDING, READY_FOR_COURT, UNDER_REVIEW → back to drafting interface
+    return 'DRAFT';
+}
+
+function TabDrafting({ caseData, onRefresh }) {
     const [template, setTemplate] = useState('Writ Petition');
-    const [content, setContent] = useState('');
-    const [status, setStatus] = useState('DRAFT'); // DRAFT, PENDING_APPROVAL, APPROVED, FILED, FILED_SUCCESS
+    const [content, setContent] = useState(caseData.draftPetition || '');
+    const [status, setStatus] = useState(() => getDraftStatus(caseData.status));
     const [loading, setLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Sync local status whenever caseData.status updates from a parent refresh
+    useEffect(() => {
+        setStatus(getDraftStatus(caseData.status));
+        if (caseData.draftPetition && !content) {
+            setContent(caseData.draftPetition);
+        }
+    }, [caseData.status, caseData.draftPetition]);
 
     // Derived Context
     const context = {
@@ -663,34 +682,50 @@ function TabDrafting({ caseData }) {
         if (!window.confirm("Send this document to the Client for digital signature? You will not be able to edit it until approved or rejected.")) return;
 
         setIsSaving(true);
-        // Mock API: lawyerAPI.sendForApproval(caseId, content);
-        await new Promise(r => setTimeout(r, 1000));
-
-        // Auto-Notify Client via Chat
         try {
-            await messageAPI.send(caseData.id, `System: A new draft (${template}) is ready for your approval. Please check your Action Items.`);
-        } catch (e) { console.error("Chat notify failed", e); }
+            // Call real backend — sets case status to DRAFT_PENDING_CLIENT
+            await caseAPI.submitDraft(caseData.id, content);
 
-        setStatus('PENDING_APPROVAL');
-        setIsSaving(false);
-        alert(`Draft sent to ${context.client}. Notification sent to Chat.`);
+            // Notify client via Chat
+            try {
+                await messageAPI.send(caseData.id, `System: A new draft (${template}) is ready for your approval. Please check your Action Items.`);
+            } catch (e) { console.error("Chat notify failed", e); }
+
+            // Refresh parent caseData so getDraftStatus reads the new DB value
+            if (onRefresh) await onRefresh();
+
+            setStatus('PENDING_APPROVAL');
+            alert(`Draft sent to ${context.client}. Notification sent to Chat.`);
+        } catch (error) {
+            console.error('Failed to submit draft:', error);
+            alert('Failed to send draft. Please try again.');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleFileInCourt = async () => {
         if (!window.confirm("This will digitally sign the document and file it with the Court Registry. Proceed?")) return;
         setIsSaving(true);
-        // Mock API: courtAPI.filePetition(caseId, content, signedToken);
-        await new Promise(r => setTimeout(r, 2000));
-        setStatus('FILED_SUCCESS');
-        setIsSaving(false);
-    };
+        try {
+            // Dedicated endpoint sets status → COGNIZANCE_PERIOD (advances stepper to Stage 2)
+            await caseAPI.fileInCourt(caseData.id);
 
-    // Dev helper to unlock flow
-    const simulateClientApproval = () => {
-        if (window.confirm("(DEV) Simulate Client approving the doc?")) {
-            setStatus('APPROVED');
+            // Refresh parent so caseData.status becomes COGNIZANCE_PERIOD
+            if (onRefresh) await onRefresh();
+
+            // getDraftStatus maps COGNIZANCE_PERIOD → FILED_SUCCESS, so useEffect will set it,
+            // but set it immediately too for instant UI feedback
+            setStatus('FILED_SUCCESS');
+            alert("Case successfully filed in court! The stepper will now advance to Stage 2.");
+        } catch (error) {
+            console.error('Failed to file in court:', error);
+            alert("Failed to file case. Please try again.");
+        } finally {
+            setIsSaving(false);
         }
     };
+
 
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem', height: '100%' }}>
@@ -750,11 +785,6 @@ function TabDrafting({ caseData }) {
                         {loading ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
                         {loading ? 'Generating...' : 'AI Auto-Draft'}
                     </button>
-                    {status === 'PENDING_APPROVAL' && (
-                        <button onClick={simulateClientApproval} style={{ width: '100%', marginTop: '0.5rem', padding: '0.5rem', background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}>
-                            (Dev: Force Client Approval)
-                        </button>
-                    )}
                 </div>
             </div>
 

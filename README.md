@@ -1,116 +1,177 @@
-<h1 align="center">Nyay Saarthi</h1>
-
 <p align="center">
-  <em>A Digital Judiciary Platform for India</em>
+  <img src="assets/banner.png" alt="Nyay Saarthi — Digital Judiciary Platform for India" width="100%" />
 </p>
 
 <p align="center">
-  <a href="https://github.com/viru0909-dev/nyay-setu-working">
-    <img src="https://img.shields.io/badge/Status-Production%20Ready-success" alt="Status" />
+  <a href="https://nyaysetu-lovat.vercel.app/">
+    <img src="https://img.shields.io/badge/Live%20Demo-nyaysetu.vercel.app-6C63FF?style=for-the-badge" alt="Live Demo" />
   </a>
-  <a href="https://groq.com">
-    <img src="https://img.shields.io/badge/AI-Groq%20Llama%203.1-orange" alt="AI Powered" />
+  &nbsp;
+  <a href="https://github.com/viru0909-dev/nyay-setu-working/issues">
+    <img src="https://img.shields.io/github/issues/viru0909-dev/nyay-setu-working?style=for-the-badge&color=E05C5C" alt="Open Issues" />
   </a>
-  <a href="https://github.com/viru0909-dev/nyay-setu-working">
-    <img src="https://img.shields.io/badge/Stack-Spring%20Boot%20%7C%20React-blue" alt="Full Stack" />
+  &nbsp;
+  <a href="https://github.com/viru0909-dev/nyay-setu-working/pulls">
+    <img src="https://img.shields.io/github/issues-pr/viru0909-dev/nyay-setu-working?style=for-the-badge&color=43A047" alt="Pull Requests" />
   </a>
-  <a href="#contributors">
-    <img src="https://img.shields.io/badge/Open%20Source-Welcome-%234caf50" alt="Open Source" />
+  &nbsp;
+  <a href="https://github.com/viru0909-dev/nyay-setu-working/stargazers">
+    <img src="https://img.shields.io/github/stars/viru0909-dev/nyay-setu-working?style=for-the-badge&color=FFB300" alt="Stars" />
   </a>
 </p>
 
-<hr>
+<p align="center">
+  <em>Democratizing Access to Justice Through Artificial Intelligence</em>
+</p>
+
+<hr/>
 
 > **Mission Statement**
-> 
-> Nyay Saarthi bridges the gap between citizens and the legal system. It provides an AI-powered legal assistant, an end-to-end case management dashboard, and secure virtual courts to make justice accessible, affordable, and fast.
+>
+> India has over 50 million pending court cases. Millions of citizens cannot afford legal counsel. Nyay Saarthi bridges this gap by putting an AI-powered legal assistant, end-to-end case management, and secure virtual courts in the hands of every Indian — entirely free of charge.
 
-Because a large percentage of citizens cannot afford legal fees and courts face a staggering case backlog, this platform is built to automate the initial friction of filings and court proceedings. 
+<hr/>
 
-**Live Demo:** [nyaysetu-lovat.vercel.app](https://nyaysetu-lovat.vercel.app/)
+## Table of Contents
+
+- [Why Nyay Saarthi?](#why-nyay-saarthi)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [Contributors](#contributors)
+- [License](#license)
+
+<hr/>
+
+## Why Nyay Saarthi?
+
+The Indian judiciary faces a systemic crisis that affects hundreds of millions of citizens:
+
+| Problem | Scale |
+|---|---|
+| Pending court cases | **50+ Million** |
+| Average time to resolve a civil case | **10–15 Years** |
+| Citizens unable to afford legal representation | **Hundreds of Millions** |
+
+Nyay Saarthi is built to address this directly. The platform removes the three biggest barriers to legal access — cost, complexity, and distance — by digitizing the entire judiciary workflow and placing an AI legal assistant at every citizen's fingertips.
+
+<hr/>
 
 ## Key Features
 
-- **Vakil Friend:** An integrated AI legal companion that converses in plain language to help citizens file cases, check documents, and understand their rights entirely for free.
-- **Unified Dashboards:** Tailored experiences and management portals designed for Litigants, Lawyers, Judges, and Police personnel across the lifecycle of a case.
-- **Evidence Vault:** Digital evidence uploads verified with SHA-256 hashing to ensure a tamper-proof and legally compliant record keeping process.
-- **Digital FIR Handling:** Allows police to securely upload first information reports, using AI to instantly summarize them and draft charge sheets.
-- **Virtual Courtrooms:** Native WebRTC-based video conferencing integrated directly into the case timeline for seamless remote hearings.
+**AI Legal Assistant (Vakil Friend)**
+A conversational AI companion powered by Groq's Llama 3.1 that helps citizens understand their legal rights, navigate case filings, review documents, and get real-time answers in plain, accessible language.
 
-## Built With
+**Role-Based Dashboards**
+Secure, tailored portals for every user type in the legal ecosystem: Litigants, Lawyers, Judges, Police, and Administrators — each with a workflow designed around their specific responsibilities.
 
-- **Frontend:** React, Vite, Zustand, Tailwind and CSS Variables (PWA Ready)
-- **Backend:** Java 17, Spring Boot, Spring Security (JWT), PostgreSQL
-- **AI Infrastructure:** Groq API (Llama 3.1) for extreme low-latency processing, backed by local Ollama instances for strict offline privacy guarantees.
-- **Storage:** Local secure hashing block storage.
+**End-to-End Case Management**
+Full case lifecycle support from initial filing to final order, including a case diary, hearing timelines, document management, and status tracking.
+
+**Evidence Vault**
+Structured digital evidence uploads with SHA-256 hash verification, creating a tamper-proof and legally admissible record for every case.
+
+**Digital FIR Handling**
+Police can upload FIRs digitally. The AI instantly generates a structured summary and draft charge sheet, significantly reducing manual paperwork and processing time.
+
+**Virtual Courtrooms**
+Native WebRTC-based video conferencing integrated directly into the case timeline for secure, seamless remote hearings — no third-party applications required.
+
+**Secure Authentication**
+JWT-based stateless authentication with Spring Security, role-based access control, and multi-layer request filtering.
+
+<hr/>
+
+## Tech Stack
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/Zustand-000000?style=for-the-badge&logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+  <img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" />
+  <img src="https://img.shields.io/badge/Java%2017-007396?style=for-the-badge&logo=openjdk&logoColor=white" />
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" />
+  <img src="https://img.shields.io/badge/Groq%20Llama%203.1-FF6B35?style=for-the-badge&logo=meta&logoColor=white" />
+  <img src="https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white" />
+  <img src="https://img.shields.io/badge/WebRTC-333333?style=for-the-badge&logo=webrtc&logoColor=white" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" />
+</p>
+
+<hr/>
 
 ## Quick Start
 
-Getting started is simple. To spin up the platform locally using Docker:
+For complete setup instructions, environment configuration, and Docker deployment details, refer to the **[Detailed Setup Guide](./docs/setup.md)**.
 
-```bash
-# 1. Clone the repository
-git clone https://github.com/viru0909-dev/nyay-setu-working.git
-cd nyay-setu-working
+At a high level, the platform consists of three services that need to run concurrently:
 
-# 2. Setup Environment Variables
-# Copy the example file to .env at the repository root
-cp .env.example .env
-# Open .env and add your GROQ_API_KEY and other required keys
-# (Required: GROQ_API_KEY, JWT_SECRET)
+| Service | Directory | Command |
+|---|---|---|
+| Frontend | `frontend/nyaysetu-frontend/` | `npm install && npm run dev` |
+| Backend | `backend/nyaysetu-backend/` | `mvn spring-boot:run` |
+| NLP Orchestrator | `nlp-orchestrator/` | `uvicorn main:app --reload` |
 
-# 3. Spin up the entire system
-docker compose up --build
-# If your environment uses the legacy Docker Compose binary, use:
-# docker-compose up --build
-```
+> **Prerequisites:** Node.js >= 20, Java 17, Maven 3.9+, PostgreSQL 15+, Python 3.12+
 
-The system will be available at:
-- **Frontend:** http://localhost
-- **Backend API:** http://localhost:8080
-- **NLP Service:** http://localhost:8001
-- **Database:** localhost:5432
+For environment variables, copy `.env.example` to `.env` and fill in your values. A full reference of all required variables is documented in the [Setup Guide](./docs/setup.md#environment-variables).
 
-**Manual Setup?** Check out the [Detailed Setup Guide](./docs/setup.md) for database queries and manual run instructions.
+<hr/>
 
 ## Documentation
 
-Dive deeper into how Nyay Saarthi operates by checking our dedicated technical docs:
+| Document | Description |
+|---|---|
+| [Setup Guide](./docs/setup.md) | Full database setup, environment variables, and Docker configuration |
+| [Architecture Overview](./docs/architecture/overview.md) | System design, component diagrams, and data flow |
+| [AI Integration Guide](./AI_INTEGRATION_GUIDE.md) | Groq API and NLP orchestrator technical deep-dive |
+| [API Documentation](./SYSTEM_DOCUMENTATION.md) | All REST endpoints with request and response specifications |
+| [Contributing Guidelines](./CONTRIBUTING.md) | Branching strategy, commit conventions, and PR workflow |
 
-- [System Architecture & Diagrams](./docs/architecture/overview.md)
-- [AI Integration Guide](./AI_INTEGRATION_GUIDE.md)
-- [API Endpoints & Specs](./SYSTEM_DOCUMENTATION.md)
-- [Detailed Setup & Configuration](./docs/setup.md)
+<hr/>
+
+## Contributing
+
+This project is part of **GSSoC (GirlScript Summer of Code) 2026**. Contributions are welcome from everyone, regardless of experience level.
+
+**Before opening a Pull Request:**
+
+| Requirement | Details |
+|---|---|
+| Read the guidelines | Review [CONTRIBUTING.md](./CONTRIBUTING.md) for our branching and commit conventions |
+| Link an issue | Every PR must reference the issue it closes (`Closes #123`) |
+| Include visuals | UI-affecting PRs must include screenshots or a screen recording |
+| Sync with main | Rebase or merge `main` into your branch before requesting review |
+| Pass all checks | CI checks for lint, tests, and build must all pass |
+
+Browse [open issues](https://github.com/viru0909-dev/nyay-setu-working/issues) and filter by `good first issue` to get started.
+
+<hr/>
 
 ## Contributors
 
-We firmly believe in open source and we welcome your contributions. Whether you are here from GSSoC or you simply want to help democratize legal technology, we would love to have you on board!
+<br/>
 
-<br>
+<a href="https://github.com/viru0909-dev/nyay-setu-working/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=viru0909-dev/nyay-setu-working" alt="Contributors" />
+</a>
 
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/viru0909-dev">
-        <img src="https://github.com/viru0909-dev.png" width="100px;" alt="Virendra Gadekar"/>
-        <br />
-        <sub><b>Virendra Gadekar</b></sub>
-      </a>
-      <br />
-      <a href="https://github.com/viru0909-dev/nyay-setu-working/commits?author=viru0909-dev" title="Code"></a>
-    </td>
-    <!-- Add new contributors here -->
-  </tr>
-</table>
+<br/><br/>
 
-<br>
+This chart updates automatically as new contributors merge pull requests. Want to see your avatar here? [Pick up an issue](https://github.com/viru0909-dev/nyay-setu-working/issues) and start contributing.
 
-To get started with contributing, please read our [Contributing Guidelines](./CONTRIBUTING.md) which explains our branching strategy, local setup, and PR approval workflow.
+<hr/>
 
-You can also check our [Open Issues Tracker](https://github.com/viru0909-dev/nyay-setu-working/issues) for `good first issue` tags.
+## License
 
-<hr>
+License to be added. All rights reserved until a license is formally declared.
+
+<hr/>
 
 <p align="center">
-  <em>Built with purpose for a more accessible Indian Judiciary.</em>
+  Built with purpose for a more accessible Indian Judiciary.<br/>
+  <em>Nyay Saarthi — न्याय हर किसी का अधिकार है।</em>
 </p>

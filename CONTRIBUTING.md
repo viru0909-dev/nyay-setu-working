@@ -1,99 +1,117 @@
-# Contributing to Nyay Saarthi 🤝
+# Contributing to Nyay Saarthi
 
-First off, **thank you so much** for considering contributing to Nyay Saarthi! 🎉 
+Thank you for your interest in contributing to Nyay Saarthi. We appreciate your time, effort, and dedication to helping us build a more accessible digital judiciary platform. 
 
-Whether you are a seasoned open-source veteran, a participant in programs like GSSoC (GirlScript Summer of Code), or someone making their very first pull request, **you are absolutely welcome here**. We believe that accessible justice is a mission we can only achieve together, and we truly value your time, effort, and passion.
+Whether you are a seasoned open-source contributor or participating in programs like GSSoC (GirlScript Summer of Code), you are welcome here. This document outlines the process for contributing to the project.
 
-We want to make your contribution experience as smooth, friendly, and rewarding as possible. Please read through this guide to understand how we collaborate.
+<hr/>
 
----
+## Table of Contents
+- [Community Guidelines](#community-guidelines)
+- [Finding an Issue](#finding-an-issue)
+- [Development Workflow](#development-workflow)
+- [Code Style Guidelines](#code-style-guidelines)
+- [Pull Request Requirements](#pull-request-requirements)
+- [Getting Help](#getting-help)
 
-## 🫂 Our Community Vibe
+<hr/>
 
-We are a community-driven project. We expect all contributors to be respectful, kind, and supportive of one another. We are all here to learn and build something meaningful. There are no "stupid" questions here!
+## Community Guidelines
 
----
+We expect all contributors to maintain a professional, respectful, and collaborative environment. By participating in this project, you agree to:
+- Be respectful and considerate of other contributors.
+- Provide constructive feedback during code reviews.
+- Focus on the project's mission of making justice accessible.
 
-## 🎯 How to Find Something to Work On
+<hr/>
 
-1. **Check the Issues Tab:** Browse our open issues to see what needs work.
-2. **Look for Tags:** If you're new, look for issues labeled `good first issue` or `help wanted`. If you are part of GSSoC, look for the `gssoc` or `gssoc'26` labels.
-3. **Ask to be Assigned:** 
-   - Found an issue you like? Great! **Please leave a comment asking to be assigned.**
-   - 🛑 **Important Rule:** Please **do not** start working on an issue or open a Pull Request for an issue that is already assigned to someone else. It creates duplicate work and confusion.
-   - *Note:* If an issue has been assigned to someone but there has been no activity or PR from them for **7 days**, we may unassign them so someone else (like you!) can take over.
+## Finding an Issue
 
----
+1. **Browse Open Issues:** Check the [Issues tab](https://github.com/viru0909-dev/nyay-setu-working/issues) for open tasks.
+2. **Look for Labels:** If you are new to the project, look for issues labeled `good first issue` or `help wanted`. For GSSoC participants, look for the `gssoc` or `gssoc'26` labels.
+3. **Request Assignment:** 
+   - Leave a comment on the issue you wish to work on asking to be assigned.
+   - **Do not** start working or open a Pull Request for an issue assigned to someone else.
+   - If an assignee shows no activity for **7 days**, the issue may be reassigned.
 
-## 🛠️ Step-by-Step Development Process
+<hr/>
 
-Ready to code? Awesome. Here is the standard workflow:
+## Development Workflow
 
-### 1. Fork & Clone
-1. **Fork** this repository using the button in the top right of the GitHub page.
-2. **Clone** your fork locally:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/nyay-setu-working.git
-   ```
-3. **Set the upstream remote** so you can pull the latest changes from our main repository:
-   ```bash
-   cd nyay-setu-working
-   git remote add upstream https://github.com/viru0909-dev/nyay-setu-working.git
-   ```
+Follow these steps to set up your environment and submit your contributions:
 
-### 2. Set Up Your Local Environment
-Before you start coding, you need to get the app running locally!
-- Check out [RUN_LOCALLY.md](./RUN_LOCALLY.md) or [QUICKSTART.md](./QUICKSTART.md) for detailed instructions on spinning up the Java Spring Boot backend and the React frontend.
+### 1. Fork and Clone
+Fork the repository to your GitHub account, then clone it locally:
+```bash
+git clone https://github.com/YOUR_USERNAME/nyay-setu-working.git
+cd nyay-setu-working
+```
+
+Add the original repository as the upstream remote to stay synced:
+```bash
+git remote add upstream https://github.com/viru0909-dev/nyay-setu-working.git
+```
+
+### 2. Set Up the Environment
+Refer to the [Setup Guide](./docs/setup.md) for detailed instructions on configuring the PostgreSQL database, Spring Boot backend, FastAPI NLP orchestrator, and React frontend.
 
 ### 3. Create a Branch
-Always create a new branch for your work. **Do not work directly on the `main` branch.**
+Always create a new branch for your work. Use descriptive names like `feat/login-ui`, `fix/navbar-bug`, or `docs/api-update`.
 ```bash
-git checkout -b feature/your-amazing-feature
+git checkout -b feat/your-feature-name
 ```
-*(Tip: Keep branch names descriptive, like `fix/navbar-bug` or `feature/login-ui`)*
 
-### 4. Code & Test
-Make your magic happen! Please ensure your code runs locally without errors before you commit your changes.
-
-### 5. Commit Your Changes
-We love clean commit history! We follow the [Conventional Commits](https://www.conventionalcommits.org/) standard.
+### 4. Commit Changes
+We strictly follow the [Conventional Commits](https://www.conventionalcommits.org/) standard. Keep your commit messages clear and concise.
 ```bash
-git commit -m "feat: add amazing login feature"
+git commit -m "feat: implement JWT authentication"
 ```
-**Common Prefixes:**
-- `feat:` - A new feature
-- `fix:` - A bug fix
-- `docs:` - Documentation only changes
-- `style:` - Code formatting, missing semicolons, etc.
-- `refactor:` - Code changes that neither fix a bug nor add a feature
 
-### 6. Push & Pull Request
+**Valid Prefixes:**
+- `feat:` New feature
+- `fix:` Bug fix
+- `docs:` Documentation updates
+- `style:` Formatting or stylistic changes (no code logic changes)
+- `refactor:` Code restructuring without changing behavior
+- `test:` Adding or updating tests
+
+### 5. Push and Open a PR
 Push your branch to your fork:
 ```bash
-git push origin feature/your-amazing-feature
+git push origin feat/your-feature-name
 ```
-Finally, go to the original Nyay Saarthi repository and click **Compare & pull request**. 
+Navigate to the main repository and open a Pull Request.
 
----
+<hr/>
 
-## 💻 Code Style Guidelines
+## Code Style Guidelines
 
-To keep our codebase clean and consistent:
+Maintain consistency across the codebase by following these standards:
 
-- **Java (Backend):** We adhere to the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
-- **React (Frontend):** 
-  - Use functional components and React Hooks exclusively.
-  - Follow our existing folder structure (`src/components/`, `src/pages/`, etc.).
-- **CSS:** Use our predefined custom CSS variables for colors and themes. Try to avoid writing new inline styles unless absolutely necessary.
+| Component | Guidelines |
+|---|---|
+| **Backend (Java)** | Follow the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html). Ensure proper exception handling and RESTful design principles. |
+| **Frontend (React)** | Use functional components and hooks exclusively. Follow the established folder structure (`src/components`, `src/pages`, etc.). Use Tailwind CSS for styling. |
+| **NLP Orchestrator (Python)** | Follow PEP 8 guidelines. Include type hints for all function signatures. |
 
----
+<hr/>
 
-## 🙋 Stuck? Need Help?
+## Pull Request Requirements
 
-Open source can be intimidating, but we've got your back! If you run into issues, get stuck on a bug, or just don't understand how a piece of code works:
-- Leave a comment on the GitHub Issue you are working on.
-- Tag the maintainers.
+Before a PR can be merged, it must meet the following criteria:
 
-We monitor the repository daily and we *want* to help you get your PR successfully merged.
+- **Issue Link:** The PR description must reference the issue it resolves (e.g., `Closes #123`).
+- **Visual Evidence:** UI modifications must include screenshots or a screen recording in the PR description.
+- **Sync with Main:** Your branch must be up-to-date with `main`. Rebase or merge before requesting a review.
+- **Passing Checks:** All automated CI checks (build, lint, tests) must pass.
+- **Clean History:** Avoid submitting PRs with unnecessary files (e.g., `.DS_Store`, `__pycache__`, or IDE configuration files).
 
-Thank you for making Nyay Saarthi better! Happy Coding! 🚀
+<hr/>
+
+## Getting Help
+
+If you encounter technical issues or have questions regarding the implementation:
+- Ask for clarification directly in the comments of your assigned GitHub Issue.
+- Tag the maintainers for guidance.
+
+We actively monitor the repository and are committed to helping you get your PR successfully merged.
