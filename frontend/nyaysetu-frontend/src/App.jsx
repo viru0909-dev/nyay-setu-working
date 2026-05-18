@@ -22,6 +22,7 @@ const About = lazy(() => import('./pages/About'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Disclaimer = lazy(() => import('./pages/Disclaimer'));
+const Unauthorized = lazy(() => import('./pages/Unauthorized'));
 
 // Dashboard Layout
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
@@ -218,12 +219,7 @@ function App({ swRegistration }) {
                                     <Route path="profile" element={<ProfilePage />} />
                                 </Route>
 
-                                <Route path="/unauthorized" element={
-                                    <div style={{ textAlign: 'center', padding: '3rem' }}>
-                                        <h1>Unauthorized</h1>
-                                        <p>You don't have permission to access this page.</p>
-                                    </div>
-                                } />
+                                <Route path="/unauthorized" element={<Unauthorized />} />
                             </Routes>
                         </Suspense>
                     </BrowserRouter>
