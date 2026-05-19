@@ -29,7 +29,7 @@ import java.util.*;
 @Slf4j
 public class DocumentGenerationService {
 
-    @Value("${lawgpt.service.url:http://localhost:8001}")
+    @Value("${lawgpt.service.url:http://localhost:8000}")
     private String lawgptUrl;
 
     private RestTemplate restTemplate;
