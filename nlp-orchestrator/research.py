@@ -6,13 +6,21 @@ Sends all sub-questions to their assigned models simultaneously using asyncio.ga
 """
 
 import asyncio
+import logging
 from google import genai
 from groq import AsyncGroq
 from config import GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KEY, GEMINI_MODEL
+from utils import CircuitBreaker, retry_transient
+
+logger = logging.getLogger(__name__)
 
 # Initialize clients
 groq_client = AsyncGroq(api_key=GROQ_API_KEY)
 gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
+
+# Module-level circuit-breakers for persistent state across requests
+groq_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
+gemini_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 
 LEGAL_SYSTEM_PROMPT = """You are an expert Indian legal advisor with deep knowledge of:
 - Indian Penal Code (IPC) and Bharatiya Nyaya Sanhita (BNS) 2023
@@ -44,52 +52,96 @@ def _build_user_prompt(question: str, kanoon_context: str | None) -> str:
     )
 
 
-async def call_groq_async(question: str, kanoon_context: str | None = None) -> dict:
-    """Call Groq LPU with a legal sub-question."""
-    try:
-        user_prompt = _build_user_prompt(question, kanoon_context)
-        response = await groq_client.chat.completions.create(
-            model=GROQ_MODEL_FAST,
-            messages=[
-                {"role": "system", "content": f"{LEGAL_SYSTEM_PROMPT}\n\n{KANOON_CONTEXT_PROMPT}"},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.2,
-            max_tokens=800
+def _fallback_response(question: str, source: str) -> dict:
+    """Structured fallback response when all retries are exhausted or circuit is open."""
+    return {
+        "question": question,
+        "answer": "Our legal research service is temporarily unavailable. Please try again shortly.",
+        "source": source,
+        "error": "circuit_open",
+        "is_fallback": True
+    }
+
+
+@retry_transient
+async def _call_groq_with_retry(question: str, kanoon_context: str | None = None) -> dict:
+    """Helper to call Groq LPU with retry logic."""
+    user_prompt = _build_user_prompt(question, kanoon_context)
+    response = await groq_client.chat.completions.create(
+        model=GROQ_MODEL_FAST,
+        messages=[
+            {"role": "system", "content": f"{LEGAL_SYSTEM_PROMPT}\n\n{KANOON_CONTEXT_PROMPT}"},
+            {"role": "user", "content": user_prompt}
+        ],
+        temperature=0.2,
+        max_tokens=800
+    )
+    return {
+        "question": question,
+        "answer": response.choices[0].message.content.strip(),
+        "source": "groq",
+        "error": None
+    }
+
+
+@retry_transient
+async def _call_gemini_with_retry(question: str, kanoon_context: str | None = None) -> dict:
+    """Helper to call Gemini with retry logic."""
+    user_prompt = _build_user_prompt(question, kanoon_context)
+    full_prompt = (
+        f"{LEGAL_SYSTEM_PROMPT}\n\n"
+        f"{KANOON_CONTEXT_PROMPT}\n\n"
+        f"Question: {user_prompt}"
+    )
+    loop = asyncio.get_event_loop()
+    response = await loop.run_in_executor(
+        None,
+        lambda: gemini_client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=full_prompt,
+            config={
+                "temperature": 0.2,
+                "max_output_tokens": 800
+            }
         )
-        answer = response.choices[0].message.content.strip()
-        return {"question": question, "answer": answer, "source": "groq", "error": None}
+    )
+    return {
+        "question": question,
+        "answer": response.text.strip(),
+        "source": "gemini",
+        "error": None
+    }
+
+
+async def call_groq_async(question: str, kanoon_context: str | None = None) -> dict:
+    """Call Groq LPU with circuit breaker + retry logic."""
+    if not groq_breaker.is_available():
+        logger.warning("[CircuitBreaker/Groq] OPEN - fast failing")
+        return _fallback_response(question, "groq")
+    try:
+        result = await _call_groq_with_retry(question, kanoon_context)
+        groq_breaker.call_succeeded()
+        return result
     except Exception as e:
-        print(f"[Research/Groq] Error: {e}")
-        return {"question": question, "answer": "", "source": "groq", "error": str(e)}
+        groq_breaker.call_failed()
+        logger.error(f"[Research/Groq] Failed after retries: {e}")
+        return _fallback_response(question, "groq")
 
 
 async def call_gemini_async(question: str, kanoon_context: str | None = None) -> dict:
-    """Call Gemini with a complex legal sub-question via asyncio."""
+    """Call Gemini with circuit breaker + retry logic, falls back to Groq."""
     if not gemini_client:
-        # Fallback to Groq if Gemini key not set
+        return await call_groq_async(question, kanoon_context)
+    if not gemini_breaker.is_available():
+        logger.warning("[CircuitBreaker/Gemini] OPEN — falling back to Groq")
         return await call_groq_async(question, kanoon_context)
     try:
-        user_prompt = _build_user_prompt(question, kanoon_context)
-        full_prompt = (
-            f"{LEGAL_SYSTEM_PROMPT}\n\n"
-            f"{KANOON_CONTEXT_PROMPT}\n\n"
-            f"Question: {user_prompt}"
-        )
-        # Run synchronous Gemini call in executor to not block event loop
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: gemini_client.models.generate_content(
-                model=GEMINI_MODEL,
-                contents=full_prompt
-            )
-        )
-        answer = response.text.strip()
-        return {"question": question, "answer": answer, "source": "gemini", "error": None}
+        result = await _call_gemini_with_retry(question, kanoon_context)
+        gemini_breaker.call_succeeded()
+        return result
     except Exception as e:
-        print(f"[Research/Gemini] Error: {e}")
-        # Fallback to Groq on Gemini failure
+        gemini_breaker.call_failed()
+        logger.error(f"[Research/Gemini] Failed after retries: {e}")
         return await call_groq_async(question, kanoon_context)
 
 
@@ -111,6 +163,5 @@ async def run_parallel_research(
         else:
             tasks.append(call_groq_async(question, kanoon_context))
 
-    # All tasks fire simultaneously
     results = await asyncio.gather(*tasks, return_exceptions=False)
     return list(results)

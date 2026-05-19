@@ -193,10 +193,85 @@
     div[style*="position: absolute"][style*="width: 600px"] {
         display: none !important;
     }
+
+    /* Hearings Page */
+    .hearings-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .hearings-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+    }
+
+    .hearings-search-bar {
+        padding: 1rem !important;
+    }
+
+    .search-input {
+        width: 100% !important;
+    }
+
+    .hearing-card {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1.25rem !important;
+    }
+
+    .hearing-date-box {
+        width: 100% !important;
+        height: auto !important;
+        flex-direction: row !important;
+        justify-content: flex-start !important;
+        padding: 0.75rem 1rem !important;
+        gap: 1rem !important;
+    }
+
+    .hearing-info {
+        width: 100% !important;
+    }
+
+    .hearing-action {
+        width: 100% !important;
+    }
+
+    .hearing-action button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    .active-call-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem !important;
+    }
+
+    .active-call-status {
+        width: 100% !important;
+        justify-content: space-between !important;
+        padding-top: 0.5rem !important;
+        border-top: 1px solid var(--border-glass) !important;
+    }
 }
 
 /* Tablet adjustments */
 @media (min-width: 769px) and (max-width: 1024px) {
+    .hearings-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .hearings-sidebar {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+    }
+
+    .hearings-sidebar > div {
+        flex: 1 !important;
+        min-width: 300px !important;
+    }
 
     .features-grid,
     .news-grid,

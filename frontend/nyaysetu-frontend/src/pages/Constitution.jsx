@@ -52,6 +52,55 @@ export default function Constitution() {
                     ]
                 },
                 {
+                    id: 2,
+                    title: "Part II - Citizenship",
+                    description: "Articles related to citizenship of India",
+                    articles: [
+                        {
+                            number: "5",
+                            title: "Citizenship at the commencement of the Constitution",
+                            content: "At the commencement of this Constitution, every person who has his domicile in the territory of India and who was born in the territory of India, or either of whose parents was born in the territory of India, or who has been ordinarily resident in the territory of India for not less than five years immediately preceding such commencement, shall be a citizen of India.",
+                            keywords: ["citizenship", "constitution", "domicile", "india"]
+                        },
+                        {
+                            number: "6",
+                            title: "Rights of citizenship of certain persons who have migrated from Pakistan to India",
+                            content: "A person who has migrated to the territory of India from Pakistan shall be deemed to be a citizen of India if he or either of his parents or grandparents was born in India as defined in the Government of India Act, 1935, and if certain conditions relating to migration and registration are fulfilled.",
+                            keywords: ["migration", "pakistan", "citizenship", "registration"]
+                        },
+                        {
+                            number: "7",
+                            title: "Rights of citizenship of certain migrants to Pakistan",
+                            content: "A person who has after the first day of March, 1947, migrated from the territory of India to Pakistan shall not be deemed to be a citizen of India unless he has returned to India under a permit for resettlement or permanent return.",
+                            keywords: ["migration", "pakistan", "permit", "citizenship"]
+                        },
+                        {
+                            number: "8",
+                            title: "Rights of citizenship of certain persons of Indian origin residing outside India",
+                            content: "Any person of Indian origin residing outside India who or either of whose parents or grandparents was born in India may register as a citizen of India through diplomatic or consular representatives of India in the country where they reside.",
+                            keywords: ["indian origin", "outside india", "citizenship", "registration"]
+                        },
+                        {
+                            number: "9",
+                            title: "Persons voluntarily acquiring citizenship of a foreign State not to be citizens",
+                            content: "No person shall be a citizen of India if he has voluntarily acquired the citizenship of any foreign State.",
+                            keywords: ["foreign state", "citizenship", "voluntary"]
+                        },
+                        {
+                            number: "10",
+                            title: "Continuance of the rights of citizenship",
+                            content: "Every person who is or is deemed to be a citizen of India under the foregoing provisions shall continue to be such citizen, subject to the provisions of any law made by Parliament.",
+                            keywords: ["rights", "citizenship", "parliament"]
+                        },
+                         {
+                            number: "11",
+                            title: "Parliament to regulate the right of citizenship by law",
+                            content: "Nothing in the foregoing provisions shall derogate from the power of Parliament to make any provision with respect to the acquisition and termination of citizenship and all other matters relating to citizenship.",
+                            keywords: ["parliament", "citizenship", "law", "termination"]
+                        }
+                    ]
+                },
+                {
                     id: 3,
                     title: "Part III - Fundamental Rights",
                     description: "Basic human rights guaranteed to all citizens",
@@ -140,6 +189,55 @@ export default function Constitution() {
                             title: "नए राज्यों का निर्माण और क्षेत्रों का परिवर्तन",
                             content: "संसद विधि द्वारा: (क) नया राज्य बना सकेगी; (ख) किसी राज्य के क्षेत्र को बढ़ा या घटा सकेगी; (ग) किसी राज्य की सीमाओं को बदल सकेगी; (घ) किसी राज्य का नाम बदल सकेगी।",
                             keywords: ["निर्माण", "सीमाएं", "क्षेत्र"]
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "भाग II - नागरिकता",
+                    description: "भारत की नागरिकता से संबंधित अनुच्छेद",
+                    articles: [
+                        {
+                            number: "5",
+                            title: "संविधान के प्रारंभ पर नागरिकता",
+                            content: "इस संविधान के प्रारंभ पर प्रत्येक व्यक्ति, जिसका भारत के राज्यक्षेत्र में अधिवास है और जो भारत के राज्यक्षेत्र में जन्मा था या जिसके माता या पिता में से कोई भारत के राज्यक्षेत्र में जन्मा था या जो ऐसे प्रारंभ से ठीक पहले कम से कम पाँच वर्ष तक भारत में सामान्य रूप से निवास कर रहा था, भारत का नागरिक होगा।",
+                            keywords: ["नागरिकता", "संविधान", "अधिवास", "भारत"]
+                        },
+                        {
+                            number: "6",
+                            title: "पाकिस्तान से भारत आए कुछ व्यक्तियों के नागरिकता के अधिकार",
+                            content: "जो व्यक्ति पाकिस्तान से भारत आया है, वह भारत का नागरिक माना जाएगा यदि वह या उसके माता-पिता या दादा-दादी में से कोई भारत में जन्मा था तथा प्रव्रजन और पंजीकरण से संबंधित शर्तें पूरी करता हो।",
+                            keywords: ["प्रव्रजन", "पाकिस्तान", "नागरिकता", "पंजीकरण"]
+                        },
+                        {
+                            number: "7",
+                            title: "पाकिस्तान जाने वाले कुछ प्रवासियों के नागरिकता के अधिकार",
+                            content: "जो व्यक्ति 1 मार्च 1947 के बाद भारत से पाकिस्तान चला गया है, वह भारत का नागरिक नहीं माना जाएगा, जब तक कि वह पुनर्वास या स्थायी वापसी के परमिट के अंतर्गत भारत वापस न आया हो।",
+                            keywords: ["प्रवास", "पाकिस्तान", "परमिट", "नागरिकता"]
+                        },
+                        {
+                            number: "8",
+                            title: "भारत के बाहर रहने वाले भारतीय मूल के कुछ व्यक्तियों के नागरिकता के अधिकार",
+                            content: "भारत के बाहर रहने वाला भारतीय मूल का कोई व्यक्ति, जिसके माता-पिता या दादा-दादी में से कोई भारत में जन्मा था, उस देश में भारत के राजनयिक या वाणिज्य दूतावास प्रतिनिधि के समक्ष पंजीकरण कराकर भारत का नागरिक बन सकता है।",
+                            keywords: ["भारतीय मूल", "विदेश", "नागरिकता", "पंजीकरण"]
+                        },
+                        {
+                            number: "9",
+                            title: "विदेशी राज्य की नागरिकता स्वेच्छा से ग्रहण करने वाले व्यक्ति भारत के नागरिक नहीं होंगे",
+                            content: "यदि किसी व्यक्ति ने स्वेच्छा से किसी विदेशी राज्य की नागरिकता ग्रहण कर ली है, तो वह भारत का नागरिक नहीं होगा।",
+                            keywords: ["विदेशी राज्य", "नागरिकता", "स्वेच्छा"]
+                        },
+                        {
+                            number: "10",
+                            title: "नागरिकता के अधिकारों का बना रहना",
+                            content: "जो व्यक्ति उपर्युक्त उपबंधों के अधीन भारत का नागरिक है या माना गया है, वह संसद द्वारा बनाई गई विधि के अधीन नागरिक बना रहेगा।",
+                            keywords: ["अधिकार", "नागरिकता", "संसद"]
+                        },  
+                        {   
+                           number: "11",
+                            title: "संसद द्वारा नागरिकता के अधिकार का विनियमन",
+                            content: "उपर्युक्त उपबंध संसद की उस शक्ति को प्रभावित नहीं करेंगे जिसके द्वारा वह नागरिकता के अर्जन और समाप्ति तथा नागरिकता से संबंधित अन्य विषयों पर विधि बना सके।",
+                            keywords: ["संसद", "नागरिकता", "विधि", "समाप्ति"]
                         }
                     ]
                 },

@@ -106,8 +106,8 @@ export default function HearingsPage() {
 
     if (activeCall) {
         return (
-            <div style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{
+            <div className="active-call-container" style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="active-call-header" style={{
                     ...glassStyle, padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     background: 'var(--bg-glass-strong)', borderRadius: '1rem'
                 }}>
@@ -122,7 +122,7 @@ export default function HearingsPage() {
                             </div>
                         </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <div className="active-call-status" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontWeight: '800', fontSize: '0.875rem' }}>
                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', animation: 'blink 1.5s infinite' }} /> SESSION LIVE
                         </div>
@@ -130,7 +130,7 @@ export default function HearingsPage() {
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: '600' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                 </div>
-                <div style={{ flex: 1, position: 'relative', borderRadius: '1.5rem', overflow: 'hidden', border: 'var(--border-glass-strong)', boxShadow: 'var(--shadow-glass)' }}>
+                <div className="active-call-video" style={{ flex: 1, position: 'relative', borderRadius: '1.5rem', overflow: 'hidden', border: 'var(--border-glass-strong)', boxShadow: 'var(--shadow-glass)' }}>
                     <iframe
                         src={`https://meet.jit.si/${activeCall.room}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=true&config.startWithVideoMuted=true`}
                         style={{ width: '100%', height: '100%', border: 'none' }}
@@ -153,8 +153,8 @@ export default function HearingsPage() {
     }
 
     return (
-        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-            <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="hearings-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+            <div className="hearings-header" style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{
                         width: '56px', height: '56px', borderRadius: '16px',
@@ -175,16 +175,17 @@ export default function HearingsPage() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '2rem' }}>
+            <div className="hearings-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '2rem' }}>
                 {/* List Column */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                    <div style={{ ...glassStyle, padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="hearings-list-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div className="hearings-search-bar" style={{ ...glassStyle, padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ position: 'relative', flex: 1 }}>
                             <input
                                 type="text"
                                 placeholder="Search hearings..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                className="search-input"
                                 style={{
                                     background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem',
                                     padding: '0.6rem 1rem 0.6rem 2.5rem', color: 'var(--text-main)', outline: 'none', width: '300px'
@@ -210,12 +211,12 @@ export default function HearingsPage() {
                         filteredHearings.map(hearing => {
                             const isToday = hearing.fullDate.toDateString() === today.toDateString();
                             return (
-                                <div key={hearing.id} style={{
+                                <div key={hearing.id} className="hearing-card" style={{
                                     ...glassStyle, padding: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'center',
                                     transition: 'all 0.2s', opacity: hearing.canJoin || hearing.isUpcoming ? 1 : 0.7
                                 }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}>
 
-                                    <div style={{
+                                    <div className="hearing-date-box" style={{
                                         width: '70px', height: '70px', borderRadius: '15px',
                                         background: isToday ? 'rgba(74, 222, 128, 0.1)' : 'rgba(30, 42, 68, 0.05)',
                                         border: isToday ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(30, 42, 68, 0.2)',
@@ -229,37 +230,39 @@ export default function HearingsPage() {
                                         </span>
                                     </div>
 
-                                    <div style={{ flex: 1 }}>
+                                    <div className="hearing-info" style={{ flex: 1 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                             <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)', fontSize: '1.25rem' }}>
                                                 {hearing.caseTitle}
                                             </h3>
                                             {isToday && hearing.isUpcoming && (
-                                                <span style={{ padding: '0.25rem 0.75rem', borderRadius: '1rem', background: 'rgba(74, 222, 128, 0.1)', color: '#22c55e', fontSize: '0.65rem', fontWeight: '800' }}>TODAY</span>
+                                                <span className="today-badge" style={{ padding: '0.25rem 0.75rem', borderRadius: '1rem', background: 'rgba(74, 222, 128, 0.1)', color: '#22c55e', fontSize: '0.65rem', fontWeight: '800' }}>TODAY</span>
                                             )}
                                         </div>
-                                        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                        <div className="hearing-meta" style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Clock size={14} /> {hearing.time}</div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><MapPin size={14} /> Virtual Court</div>
                                         </div>
                                     </div>
 
-                                    {hearing.canJoin ? (
-                                        <button onClick={() => joinHearing(hearing)} style={{
-                                            background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '0.75rem',
-                                            padding: '0.75rem 1.5rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                            boxShadow: '0 4px 12px rgba(30, 42, 68, 0.3)'
-                                        }}>
-                                            <Video size={18} /> Join Now
-                                        </button>
-                                    ) : (
-                                        <div style={{
-                                            padding: '0.75rem 1.5rem', borderRadius: '0.75rem', background: 'rgba(100, 116, 139, 0.1)',
-                                            color: 'var(--text-secondary)', fontWeight: '600', fontSize: '0.9rem'
-                                        }}>
-                                            {hearing.isUpcoming ? 'upcoming' : 'Completed'}
-                                        </div>
-                                    )}
+                                    <div className="hearing-action">
+                                        {hearing.canJoin ? (
+                                            <button onClick={() => joinHearing(hearing)} style={{
+                                                background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '0.75rem',
+                                                padding: '0.75rem 1.5rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                                boxShadow: '0 4px 12px rgba(30, 42, 68, 0.3)'
+                                            }}>
+                                                <Video size={18} /> Join Now
+                                            </button>
+                                        ) : (
+                                            <div style={{
+                                                padding: '0.75rem 1.5rem', borderRadius: '0.75rem', background: 'rgba(100, 116, 139, 0.1)',
+                                                color: 'var(--text-secondary)', fontWeight: '600', fontSize: '0.9rem'
+                                            }}>
+                                                {hearing.isUpcoming ? 'upcoming' : 'Completed'}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })
@@ -267,12 +270,12 @@ export default function HearingsPage() {
                 </div>
 
                 {/* Sidebar */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    <div style={glassStyle}>
+                <div className="hearings-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div className="overview-card" style={glassStyle}>
                         <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <Calendar size={18} color="var(--color-primary)" /> Weekly Overview
                         </h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem', marginBottom: '1rem' }}>
+                        <div className="calendar-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem', marginBottom: '1rem' }}>
                             {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
                                 <div key={i} style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800' }}>{day}</div>
                             ))}
@@ -298,7 +301,7 @@ export default function HearingsPage() {
                         </div>
                     </div>
 
-                    <div style={{ ...glassStyle, background: 'rgba(30, 42, 68, 0.05)', border: '1px solid rgba(30, 42, 68, 0.2)' }}>
+                    <div className="legal-aid-card" style={{ ...glassStyle, background: 'rgba(30, 42, 68, 0.05)', border: '1px solid rgba(30, 42, 68, 0.2)' }}>
                         <div style={{ color: 'var(--color-primary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <BookOpen size={14} /> Legal Aid
                         </div>

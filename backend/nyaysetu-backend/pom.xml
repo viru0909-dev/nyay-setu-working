@@ -181,6 +181,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- H2 In-Memory Database for tests -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
 
         <!-- LangChain4j Core & Vector DB -->
         <dependency>

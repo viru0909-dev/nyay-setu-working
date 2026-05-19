@@ -1,0 +1,6 @@
+vector_store/
+legal_corpus/
+__pycache__/
+*.pyc
+.env
+venv/

@@ -1,3 +1,9 @@
+.git
+.gitignore
+target
+.env
+.env.*
+.DS_Store
 target/
 *.jar
 .mvn/

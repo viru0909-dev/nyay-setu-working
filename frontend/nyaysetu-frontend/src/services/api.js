@@ -113,6 +113,12 @@ export const documentAPI = {
     downloadCertificate: (id) => api.get(`/api/documents/${id}/certificate`, { responseType: 'blob' })
 };
 
+// Document Generation API (AI-powered legal document drafting)
+export const documentGenerateAPI = {
+    preview: (data) => api.post('/api/documents/generate/preview', data),
+    download: (data) => api.post('/api/documents/generate/download', data, { responseType: 'blob' }),
+};
+
 // Hearing API
 export const hearingAPI = {
     schedule: (hearingData) => api.post('/api/hearings/schedule', hearingData),

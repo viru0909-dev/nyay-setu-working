@@ -59,6 +59,8 @@ FRONTEND_URL=http://localhost:5173
 CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost
 ```
 
+> **Production requirement:** When running with `SPRING_PROFILES_ACTIVE=prod`, you **must** set `JWT_SECRET` as an environment variable. The backend now fails fast at startup in production if `JWT_SECRET` is missing or falls back to the default development secret.
+
 <hr/>
 
 ## Option A: Docker Deployment (Recommended)

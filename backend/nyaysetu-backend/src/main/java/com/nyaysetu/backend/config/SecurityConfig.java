@@ -2,7 +2,12 @@ package com.nyaysetu.backend.config;
 
 import com.nyaysetu.backend.filter.JwtAuthFilter;
 import com.nyaysetu.backend.filter.RateLimitFilter;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,11 +26,39 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+    private static final String DEFAULT_JWT_SECRET = "nyaysetu-2024-secure-jwt-signing-key-minimum-256-bits-required";
+
     private final UserDetailsService userDetailsService;
     private final RateLimitFilter rateLimitFilter;
+    private final Environment environment;
 
-    @org.springframework.beans.factory.annotation.Value("${cors.allowed.origins}")
+    @Value("${cors.allowed.origins}")
     private String allowedOrigins;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @PostConstruct
+    public void validateJwtSecretConfiguration() {
+        boolean isProd = java.util.Arrays.stream(environment.getActiveProfiles())
+                .anyMatch("prod"::equalsIgnoreCase);
+        boolean isDev = java.util.Arrays.stream(environment.getActiveProfiles())
+                .anyMatch("dev"::equalsIgnoreCase);
+        String jwtSecretEnv = System.getenv("JWT_SECRET");
+        boolean isJwtSecretEnvMissing = jwtSecretEnv == null || jwtSecretEnv.trim().isEmpty();
+        boolean isUsingDefaultSecret = DEFAULT_JWT_SECRET.equals(jwtSecret);
+
+        if (isProd && (isJwtSecretEnvMissing || isUsingDefaultSecret)) {
+            throw new IllegalStateException(
+                    "Security configuration error: JWT_SECRET environment variable is required in production. "
+                            + "Application startup is blocked to prevent using an insecure default JWT signing key.");
+        }
+
+        if (isDev && isUsingDefaultSecret) {
+            logger.warn("JWT secret is using the default fallback value. Set JWT_SECRET in your environment for safer development setup.");
+        }
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

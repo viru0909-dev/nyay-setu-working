@@ -8,9 +8,37 @@ import asyncio
 import aiohttp
 import logging
 from config import INDIAN_KANOON_TOKEN, INDIAN_KANOON_API_URL
+from utils import CircuitBreaker, retry_transient
 
 logger = logging.getLogger("kanoon-search")
 DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=10)
+
+# Module-level circuit breaker
+kanoon_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
+
+@retry_transient
+async def _search_kanoon_with_retry(query: str, url: str, params: dict, headers: dict, max_results: int = 3) -> list[dict]:
+    async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as session:
+        async with session.post(url, data=params, headers=headers) as resp:
+            if resp.status != 200:
+                body = await resp.text()
+                logger.error("Indian Kanoon API returned status %s: %s", resp.status, body[:200])
+                raise aiohttp.ClientResponseError(
+                    resp.request_info,
+                    resp.history,
+                    status=resp.status
+                )
+            data = await resp.json(content_type=None)
+            docs = data.get("docs", [])
+            results = []
+            for doc in docs[:max_results]:
+                results.append({
+                    "title": doc.get("title", "Untitled"),
+                    "doc_id": str(doc.get("tid", "")),
+                    "snippet": _clean_snippet(doc.get("headline", "")),
+                })
+            logger.info("Indian Kanoon returned %s results for: %s...", len(results), query[:50])
+            return results
 
 
 async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
@@ -21,6 +49,10 @@ async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
     if not INDIAN_KANOON_TOKEN:
         logger.warning("Indian Kanoon API token not set. Skipping search.")
         return []
+    
+    if not kanoon_breaker.is_available():
+        logger.warning("[CircuitBreaker/Kanoon] OPEN — skipping search")
+        return []
 
     url = f"{INDIAN_KANOON_API_URL}/search/"
     params = {"formInput": query, "pagenum": 0}
@@ -30,30 +62,31 @@ async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
     }
 
     try:
-        async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as session:
-            async with session.post(url, data=params, headers=headers) as resp:
-                if resp.status != 200:
-                    body = await resp.text()
-                    logger.error("Indian Kanoon API returned status %s: %s", resp.status, body[:200])
-                    return []
-
-                data = await resp.json(content_type=None)
-                docs = data.get("docs", [])
-
-                results = []
-                for doc in docs[:max_results]:
-                    results.append({
-                        "title": doc.get("title", "Untitled"),
-                        "doc_id": str(doc.get("tid", "")),
-                        "snippet": _clean_snippet(doc.get("headline", "")),
-                    })
-
-                logger.info("Indian Kanoon returned %s results for: %s...", len(results), query[:50])
-                return results
-
+        result = await _search_kanoon_with_retry(query, url, params, headers, max_results)
+        kanoon_breaker.call_succeeded()
+        return result
     except Exception as e:
+        kanoon_breaker.call_failed()
         logger.error(f"Indian Kanoon search error: {e}")
         return []
+
+
+@retry_transient
+async def _fetch_doc(active_session: aiohttp.ClientSession, url: str, headers: dict, max_chars: int) -> str:
+    async with active_session.post(url, headers=headers) as resp:
+        if resp.status != 200:
+            body = await resp.text()
+            logger.error("Indian Kanoon doc fetch failed %s: %s", resp.status, body[:200])
+            raise aiohttp.ClientResponseError(
+                resp.request_info,
+                resp.history,
+                status=resp.status
+            )
+        data = await resp.json(content_type=None)
+        text = data.get("doc", "")
+        # Strip HTML tags
+        text = _strip_html(text)
+        return text[:max_chars]
 
 
 async def get_kanoon_doc(
@@ -67,33 +100,27 @@ async def get_kanoon_doc(
     """
     if not INDIAN_KANOON_TOKEN or not doc_id:
         return ""
+    
+    if not kanoon_breaker.is_available():
+        logger.warning("[CircuitBreaker/Kanoon] OPEN — skipping doc fetch")
+        return ""
 
     url = f"{INDIAN_KANOON_API_URL}/doc/{doc_id}/"
     headers = {
         "Authorization": f"Token {INDIAN_KANOON_TOKEN}",
         "Accept": "application/json",
     }
-
-    async def _fetch_doc(active_session: aiohttp.ClientSession) -> str:
-        async with active_session.post(url, headers=headers) as resp:
-            if resp.status != 200:
-                body = await resp.text()
-                logger.error("Indian Kanoon doc fetch failed %s: %s", resp.status, body[:200])
-                return ""
-            data = await resp.json(content_type=None)
-            text = data.get("doc", "")
-            # Strip HTML tags
-            text = _strip_html(text)
-            return text[:max_chars]
-
     try:
         if session is not None:
-            return await _fetch_doc(session)
-
-        async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as new_session:
-            return await _fetch_doc(new_session)
+            result = await _fetch_doc(session, url, headers, max_chars)
+        else :
+            async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as new_session:
+                result = await _fetch_doc(new_session, url, headers, max_chars)
+        kanoon_breaker.call_succeeded()
+        return result
 
     except Exception as e:
+        kanoon_breaker.call_failed()
         logger.error(f"Indian Kanoon doc fetch error: {e}")
         return ""
 

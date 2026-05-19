@@ -96,3 +96,7 @@ mvnw.cmd
 coverage/
 .nyc_output/
 nlp-orchestrator/.env
+__pycache__/
+*.pyc
+.pytest_cache/
+backend/nyaysetu-backend/src/main/resources/application.properties
