@@ -2,6 +2,7 @@ package com.nyaysetu.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ny_user")
@@ -24,4 +25,16 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean emailVerified = false;
+
+    /** One-time UUID token sent in the verification email. Null once verified. */
+    @Column(unique = true)
+    private String verificationToken;
+
+    /** Token expires 24 hours after registration. */
+    @Column
+    private LocalDateTime verificationTokenExpiry;
 }

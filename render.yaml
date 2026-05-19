@@ -30,6 +30,16 @@ services:
         value: https://nyay-setu-frontend.vercel.app # Replace with actual Vercel URL
       - key: FRONTEND_URL
         value: https://nyay-setu-frontend.vercel.app
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
 
   - type: web
     name: nlp-orchestrator

@@ -20,9 +20,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import jakarta.validation.Valid;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "Authentication", description = "Register, login, password reset and face login")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -41,20 +39,42 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
         try {
-            authService.register(
+            String verificationToken = authService.register(
                     req.getEmail(),
                     req.getName(),
                     req.getPassword(),
-                    req.getRole() != null ? req.getRole() : Role.LITIGANT // default to LITIGANT
+                    req.getRole() != null ? req.getRole() : Role.LITIGANT
             );
-            
-            // Auto-login after registration
-            UserDetails userDetails = userDetailsService.loadUserByUsername(req.getEmail());
-            String token = jwtService.generateToken(new HashMap<>(), userDetails);
-            var user = authService.findByEmail(req.getEmail());
-            
+
+            // Send verification email asynchronously — does not block the response
+            emailService.sendVerificationEmail(req.getEmail(), req.getName(), verificationToken);
+
             return ResponseEntity.ok(Map.of(
-                    "token", token,
+                    "message", "Registration successful. Please check your email to verify your account before logging in."
+            ));
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Email already registered. Please log in or use a different email."));
+        } catch (Exception e) {
+            log.error("Registration error", e);
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Registration failed: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        try {
+            User user = authService.verifyEmail(token);
+
+            // Auto-login after successful verification
+            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+            String jwt = jwtService.generateToken(new HashMap<>(), userDetails);
+
+            log.info("Email verified and account activated for: {}", user.getEmail());
+            return ResponseEntity.ok(Map.of(
+                    "message", "Email verified successfully. Welcome to NyaySetu!",
+                    "token", jwt,
                     "user", Map.of(
                             "id", user.getId(),
                             "email", user.getEmail(),
@@ -62,13 +82,24 @@ public class AuthController {
                             "role", user.getRole().name()
                     )
             ));
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Email already exists. Please use a different email or login."));
         } catch (Exception e) {
-            log.error("Registration error", e);
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Registration failed: " + e.getMessage()));
+            log.warn("Email verification failed: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestBody Map<String, String> body) {
+        try {
+            String email = body.get("email");
+            String newToken = authService.refreshVerificationToken(email);
+            User user = authService.findByEmail(email);
+            emailService.sendVerificationEmail(email, user.getName(), newToken);
+            return ResponseEntity.ok(Map.of("message", "Verification email resent. Please check your inbox."));
+        } catch (Exception e) {
+            // Return 200 even on error to avoid exposing whether an email exists
+            log.warn("Resend verification failed: {}", e.getMessage());
+            return ResponseEntity.ok(Map.of("message", "If that email is registered and unverified, a new link has been sent."));
         }
     }
 
@@ -79,7 +110,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
-        log.debug("Login endpoint reached for email: {}", req.getEmail());
+        log.debug("Login attempt for: {}", req.getEmail());
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
