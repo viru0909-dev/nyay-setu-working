@@ -30,6 +30,7 @@ from decomposer import decompose_query
 from router import route_questions
 from research import run_parallel_research
 from synthesizer import synthesize_answers
+from validators.citation_validator import validate_citations_from_text
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
 from routers.forensics import router as forensics_router
@@ -154,6 +155,9 @@ async def legal_reasoning_pipeline(query: str, language: str):
 
         logger.info("[Layer 4] Synthesizing...")
         synthesized_md = await synthesize_answers(query, results)
+        validation_results = validate_citations_from_text(synthesized_md)
+        if validation_results:
+            logger.info("[Layer 4] Citation validation results: %s", validation_results)
 
         # ── Layer 5b: Hinglish Conversion ────────────────────────
         logger.info("[Layer 5] Converting to Hinglish...")
@@ -161,7 +165,8 @@ async def legal_reasoning_pipeline(query: str, language: str):
 
         yield sse_event("final_answer", {
             "markdown": synthesized_md,
-            "hinglish": hinglish_dialogue
+            "hinglish": hinglish_dialogue,
+            "citation_validation": validation_results
         })
 
         yield sse_event("done", {"message": "Research complete"})
@@ -248,6 +253,9 @@ async def analyze_sync(body: LegalQuery):
         kanoon_context = ""
     results = await run_parallel_research(routed, kanoon_context=kanoon_context)
     synthesized = await synthesize_answers(body.query, results)
+    validation_results = validate_citations_from_text(synthesized)
+    if validation_results:
+        logger.info("[Sync] Citation validation results: %s", validation_results)
     hinglish = await convert_to_hinglish(synthesized)
 
     return JSONResponse({
@@ -256,7 +264,8 @@ async def analyze_sync(body: LegalQuery):
         "research": results,
         "final_answer": {
             "markdown": synthesized,
-            "hinglish": hinglish
+            "hinglish": hinglish,
+            "citation_validation": validation_results
         }
     })
 
