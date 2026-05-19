@@ -23,3 +23,14 @@ protobuf
 python-multipart
 pytest
 
+
+langchain
+langchain-community
+langchain-groq
+langchain-google-genai
+faiss-cpu
+sentence-transformers
+pymupdf
+ollama
+reportlab
+

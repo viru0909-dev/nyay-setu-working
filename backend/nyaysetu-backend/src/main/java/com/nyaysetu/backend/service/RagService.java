@@ -15,7 +15,7 @@ import java.util.Map;
 @Slf4j
 public class RagService {
 
-    @Value("${lawgpt.service.url:http://localhost:8001}")
+    @Value("${lawgpt.service.url:http://localhost:8000}")
     private String lawgptUrl;
 
     private RestTemplate restTemplate;

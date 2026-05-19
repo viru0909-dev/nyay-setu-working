@@ -35,6 +35,10 @@ from services.kanoon_search import build_kanoon_context
 from routers.forensics import router as forensics_router
 from routers.modi_ocr import router as modi_ocr_router
 
+from lawgpt.retriever import load_vectorstore, get_chunk_count
+from routers.context import router as context_router
+from routers.document import router as document_router
+
 # Initialize clients for deep research pipeline
 from groq import AsyncGroq
 from google import genai
@@ -50,7 +54,15 @@ logger = logging.getLogger("nlp-orchestrator")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🧠 Nyay Saarthi NLP Orchestrator starting on port 8001")
+    logger.info("🧠 Nyay Saarthi NLP Orchestrator starting on port 8000")
+    try:
+        load_vectorstore()
+        count = get_chunk_count()
+        logger.info(f"✅ FAISS index loaded — RAG ready ({count} vectors)")
+    except FileNotFoundError:
+        logger.warning("⚠️ FAISS index not found — run python lawgpt/ingest.py")
+    except Exception as e:
+        logger.error(f"❌ Failed to load FAISS index: {e}")
     yield
     logger.info("NLP Orchestrator shutting down")
 
@@ -71,6 +83,8 @@ app.add_middleware(
 
 app.include_router(forensics_router)
 app.include_router(modi_ocr_router)
+app.include_router(context_router)
+app.include_router(document_router)
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
