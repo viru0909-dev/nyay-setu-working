@@ -41,6 +41,7 @@ const HearingsPage = lazy(() => import('./pages/litigant/HearingsPage'));
 const LawyerChatPage = lazy(() => import('./pages/litigant/LawyerChatPage'));
 const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
 const ForensicsPage = lazy(() => import('./pages/litigant/ForensicsPage'));
+const DocumentGeneratePage = lazy(() => import('./pages/litigant/DocumentGeneratePage'));
 
 
 // Judge Pages (keep only those still used)
@@ -145,6 +146,7 @@ function App({ swRegistration }) {
                                     <Route path="chat" element={<LawyerChatPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
                                     <Route path="forensics" element={<ForensicsPage />} />
+                                    <Route path="generate-document" element={<DocumentGeneratePage />} />
                                 </Route>
 
                                 <Route
