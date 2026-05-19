@@ -508,12 +508,17 @@ async def deep_research_pipeline(query: str, language: str):
 
         # ── Stage 5: VERDICT ──────────────────────────────────────
         logger.info("[Deep Research] Stage 5: Verdict...")
-        
+
         yield sse_event("stage", {
             "stage": "verdict",
             "status": "active",
             "message": "Preparing final legal conclusion..."
         })
+
+        # Validate citations in AI response
+        citation_validation = validate_citations_from_text(ai_answer) if ai_answer else []
+        if citation_validation:
+            logger.info("[Deep Research] Citation validation: %s", citation_validation)
 
         # Convert to Hinglish for avatar speech
         hinglish_verdict = await convert_to_hinglish(ai_answer or "Analysis could not be completed.")
@@ -534,6 +539,7 @@ async def deep_research_pipeline(query: str, language: str):
             "answer": ai_answer or "Unable to generate analysis.",
             "hinglish": hinglish_verdict,
             "citations": citations,
+            "citation_validation": citation_validation,
             "model_used": model_choice,
             "domain": domain_label
         })
