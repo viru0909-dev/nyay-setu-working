@@ -155,9 +155,14 @@ async def legal_reasoning_pipeline(query: str, language: str):
 
         logger.info("[Layer 4] Synthesizing...")
         synthesized_md = await synthesize_answers(query, results)
-        validation_results = validate_citations_from_text(synthesized_md)
-        if validation_results:
-            logger.info("[Layer 4] Citation validation results: %s", validation_results)
+
+        try:
+            validation_results = validate_citations_from_text(synthesized_md)
+            if validation_results:
+                logger.info("[Layer 4] Citation validation results: %s", validation_results)
+        except Exception as e:
+            logger.warning("[Layer 4] Citation validation failed (non-blocking): %s", e)
+            validation_results = []
 
         # ── Layer 5b: Hinglish Conversion ────────────────────────
         logger.info("[Layer 5] Converting to Hinglish...")
@@ -253,9 +258,15 @@ async def analyze_sync(body: LegalQuery):
         kanoon_context = ""
     results = await run_parallel_research(routed, kanoon_context=kanoon_context)
     synthesized = await synthesize_answers(body.query, results)
-    validation_results = validate_citations_from_text(synthesized)
-    if validation_results:
-        logger.info("[Sync] Citation validation results: %s", validation_results)
+
+    try:
+        validation_results = validate_citations_from_text(synthesized)
+        if validation_results:
+            logger.info("[Sync] Citation validation results: %s", validation_results)
+    except Exception as e:
+        logger.warning("[Sync] Citation validation failed (non-blocking): %s", e)
+        validation_results = []
+
     hinglish = await convert_to_hinglish(synthesized)
 
     return JSONResponse({
