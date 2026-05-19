@@ -99,12 +99,33 @@ export default function DashboardLayout() {
 
                 {/* Scrollable Content Area */}
                 <main style={{
-                    flex: 1,
-                    padding: isMobile ? '1rem' : '2rem',
-                    overflowY: 'auto',
-                    overflowX: 'hidden'
-                }}>
-                    <Outlet />
+                        flex: 1,
+                        padding: isMobile ? '1rem' : '2rem',
+                        overflowY: 'auto',
+                         overflowX: 'hidden'
+                        }}>
+
+                    {/* Hearing Reminder Card */}
+                    <div
+                        onClick={() => navigate("/reminder")}
+                     style={{
+                         border: '1px solid #ccc',
+                         borderRadius: '12px',
+                         padding: '15px',
+                         marginBottom: '20px',
+                         cursor: 'pointer',
+                         background: '#f8f9fa',
+                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                       }}
+                          >
+                           <h3>📅 Hearing Reminder</h3>
+
+                                  <p>
+                                   Track and manage upcoming hearing dates.
+                                 </p>
+                    </div>
+
+                   <Outlet />
                 </main>
 
                 {/* Global AI Brain Assistant - Hidden on chat pages to avoid UI clashes */}
