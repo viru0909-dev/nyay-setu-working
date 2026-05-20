@@ -1,9 +1,72 @@
 import { motion } from 'framer-motion';
 import { Shield, Award, Users, TrendingUp, Clock, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useEffect, useRef } from 'react';
 
 export default function TrustIndicators() {
     const { t } = useTranslation('landing');
+
+    // Manual Infinite Scroll With Custom Drag Logic
+    const trackRef = useRef(null);
+    const posRef = useRef(0);
+    const rafRef = useRef(null);
+    const isDragging = useRef(false);
+    const dragStartX = useRef(0);
+    const dragStartPos = useRef(0);
+
+    const getHalfWidth = () => trackRef.current.scrollWidth / 2;
+
+    const applyPos = (pos) => {
+        const half = getHalfWidth();
+        if (pos >= half) pos = 0;
+        if (pos < 0) pos = half - 1;
+        posRef.current = pos;
+        trackRef.current.style.transform = `translateX(-${pos}px)`;
+    };
+
+    const startScroll = () => {
+        const tick = () => {
+            applyPos(posRef.current + 0.8);
+            rafRef.current = requestAnimationFrame(tick);
+        };
+        rafRef.current = requestAnimationFrame(tick);
+    };
+
+    const stopScroll = () => cancelAnimationFrame(rafRef.current);
+
+    const handleMouseEnter = () => {
+        stopScroll();
+        trackRef.current.style.cursor = 'grab';
+    };
+
+    const handleMouseLeave = () => {
+        isDragging.current = false;
+        trackRef.current.style.cursor = 'default';
+        startScroll();
+    };
+
+    const handleMouseDown = (e) => {
+        isDragging.current = true;
+        dragStartX.current = e.clientX;
+        dragStartPos.current = posRef.current;
+        trackRef.current.style.cursor = 'grabbing';
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDragging.current) return;
+        const delta = dragStartX.current - e.clientX;
+        applyPos(dragStartPos.current + delta);
+    };
+
+    const handleMouseUp = () => {
+        isDragging.current = false;
+        trackRef.current.style.cursor = 'grab';
+    };
+
+    useEffect(() => {
+        startScroll();
+        return () => stopScroll();
+    }, []);
 
     const indicators = [
         {
@@ -87,6 +150,11 @@ export default function TrustIndicators() {
                 {/* Indicators Scroll Container - Infinite Marquee */}
                 <div
                     className="trust-scroll-mask"
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
                     style={{
                         maxWidth: '100%',
                         overflow: 'hidden',
@@ -96,6 +164,7 @@ export default function TrustIndicators() {
                     }}
                 >
                     <div
+                        ref={trackRef}
                         className="trust-track"
                         style={{
                             display: 'flex',
@@ -176,7 +245,7 @@ export default function TrustIndicators() {
                         ))}
                     </div>
                 </div>
-                <style>{`
+                {/* <style>{`
                     @keyframes scroll {
                         0% { transform: translateX(0); }
                         100% { transform: translateX(-50%); }
@@ -187,7 +256,7 @@ export default function TrustIndicators() {
                     .trust-track:hover {
                         animation-play-state: paused;
                     }
-                `}</style>
+                `}</style> */}
             </div>
         </section>
     );

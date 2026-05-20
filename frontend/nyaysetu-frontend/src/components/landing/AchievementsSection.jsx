@@ -72,7 +72,7 @@ export default function AchievementsSection() {
                 {/* Achievements Grid */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                     gap: '3rem',
                     padding: '2rem 1rem',
                     maxWidth: '1200px',
@@ -142,10 +142,10 @@ export default function AchievementsSection() {
                                             flexDirection: 'column',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            gap: '1.25rem',
+                                            gap: '0.75rem',
                                             zIndex: 10,
                                             borderRadius: '2rem',
-                                            padding: '2rem'
+                                            padding: '1rem'
                                         }}
                                     >
                                         <h4 style={{
