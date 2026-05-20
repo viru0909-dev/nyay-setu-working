@@ -12,6 +12,8 @@ import ScrollToTop from './ScrollToTop';
 import OfflineIndicator from './components/OfflineIndicator';
 import UpdateNotification from './components/UpdateNotification';
 
+import OAuthSuccess from './pages/OAuthSuccess';
+
 // Lazy load pages for better performance
 const Landing = lazy(() => import('./pages/Landing'));
 const Constitution = lazy(() => import('./pages/Constitution'));
@@ -119,6 +121,7 @@ function App({ swRegistration }) {
                             <Routes>
                                 <Route path="/" element={<Landing />} />
                                 <Route path="/login" element={<Login />} />
+                                <Route path="/oauth-success" element={<OAuthSuccess />} />
                                 <Route path="/signup" element={<Signup />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                                 <Route path="/constitution" element={<Constitution />} />

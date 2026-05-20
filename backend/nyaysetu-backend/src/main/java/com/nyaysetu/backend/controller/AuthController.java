@@ -1,10 +1,12 @@
 package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.dto.*;
+import com.nyaysetu.backend.entity.AuthProvider;
 import com.nyaysetu.backend.entity.PasswordResetToken;
 import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.PasswordResetTokenRepository;
+import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ public class AuthController {
     private final FaceRecognitionService faceRecognitionService;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
@@ -81,6 +84,16 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         System.out.println("DEBUG: LOGIN ENDPOINT REACHED for email: " + req.getEmail());
         try {
+            User user1 = userRepository.findByEmail(req.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (user1.getAuthProvider() == AuthProvider.GOOGLE) {
+                return ResponseEntity.status(400)
+                        .body(Map.of(
+                                "message",
+                                "This account uses Google Sign-In. Please login with Google."
+                        ));
+            }
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
             );
