@@ -262,7 +262,20 @@ public class VakilFriendService {
             englishMessage = bhashiniService.translate(userMessage, userLang, "en");
             log.info("Translated 'search' to English: {}", englishMessage);
         }
+        if (request.getOcrContext() != null && !request.getOcrContext().isBlank()) {
+            englishMessage =
+                """
+                Historical document OCR context:
 
+                %s
+
+                User question:
+                %s
+                """.formatted(
+                    request.getOcrContext(),
+                    englishMessage
+                );
+        }
         // Parse existing conversation
         List<Map<String, String>> conversation;
         try {

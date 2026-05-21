@@ -22,6 +22,7 @@ const About = lazy(() => import('./pages/About'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Disclaimer = lazy(() => import('./pages/Disclaimer'));
+const UpcomingFeatures = lazy(() => import('./pages/UpcomingFeatures'));
 
 // Dashboard Layout
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
@@ -127,6 +128,7 @@ function App({ swRegistration }) {
                                 <Route path="/privacy" element={<PrivacyPolicy />} />
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
+                                <Route path="/upcoming-features" element={<UpcomingFeatures />} />
 
                                 {/* Protected Dashboards */}
                                 <Route
