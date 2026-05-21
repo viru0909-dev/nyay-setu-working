@@ -1,8 +1,37 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, X, MessageSquare, Loader2, MinusCircle, Maximize2, Minimize2, Sparkles } from 'lucide-react';
+import { Send, X, Loader2, Maximize2, Minimize2, Sparkles } from 'lucide-react';
 import { vakilFriendAPI } from '../services/api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+
+function useMediaQuery(query) {
+    const getInitial = () => {
+        if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+        return window.matchMedia(query).matches;
+    };
+
+    const [matches, setMatches] = useState(getInitial);
+
+    useEffect(() => {
+        if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+
+        const mql = window.matchMedia(query);
+        const handler = (e) => setMatches(e.matches);
+
+        setMatches(mql.matches);
+
+        if (typeof mql.addEventListener === 'function') {
+            mql.addEventListener('change', handler);
+            return () => mql.removeEventListener('change', handler);
+        }
+
+        // Safari fallback
+        mql.addListener(handler);
+        return () => mql.removeListener(handler);
+    }, [query]);
+
+    return matches;
+}
 
 export default function CaseChatWidget({ caseId, caseTitle }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +42,8 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
     const [isLoading, setIsLoading] = useState(false);
     const [isStarting, setIsStarting] = useState(false);
     const messagesEndRef = useRef(null);
+
+    const isMobile = useMediaQuery('(max-width: 640px)');
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -91,9 +122,9 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                 onClick={handleToggle}
                 style={{
                     position: 'fixed',
-                    bottom: '2rem',
-                    right: '2rem',
-                    padding: '1rem',
+                    bottom: isMobile ? 'calc(1rem + env(safe-area-inset-bottom))' : '2rem',
+                    right: isMobile ? 'calc(1rem + env(safe-area-inset-right))' : '2rem',
+                    padding: isMobile ? '0.9rem' : '1rem',
                     borderRadius: '50%',
                     background: 'var(--color-primary)',
                     color: 'white',
@@ -104,7 +135,8 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    transition: 'transform 0.2s'
+                    transition: 'transform 0.2s',
+                    touchAction: 'manipulation'
                 }}
                 onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -116,24 +148,41 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
     }
 
     return (
-        <div style={{
-            position: 'fixed',
-            bottom: '2rem',
-            right: '2rem',
-            width: isMinimized ? '300px' : '400px',
-            height: isMinimized ? 'auto' : '600px',
-            maxHeight: '80vh',
-            background: 'var(--bg-glass-strong)',
-            backdropFilter: 'var(--glass-blur)',
-            border: 'var(--border-glass-strong)',
-            borderRadius: '1rem',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            transition: 'all 0.3s ease'
-        }}>
+        <div
+            style={{
+                position: 'fixed',
+
+                // Mobile: keep fully inside viewport (prevents horizontal cut-off)
+                bottom: isMobile ? 'calc(1rem + env(safe-area-inset-bottom))' : '2rem',
+                right: isMobile ? 'calc(1rem + env(safe-area-inset-right))' : '2rem',
+                ...(isMobile
+                    ? { left: 'calc(1rem + env(safe-area-inset-left))', width: 'auto' }
+                    : { width: isMinimized ? '300px' : '400px' }
+                ),
+
+                height: isMinimized
+                    ? 'auto'
+                    : isMobile
+                        ? 'min(600px, calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)))'
+                        : '600px',
+
+                maxHeight: isMobile
+                    ? 'calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom))'
+                    : '80vh',
+
+                background: 'var(--bg-glass-strong)',
+                backdropFilter: 'var(--glass-blur)',
+                border: 'var(--border-glass-strong)',
+                borderRadius: '1rem',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+                zIndex: 9999,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                transition: 'all 0.3s ease',
+                boxSizing: 'border-box'
+            }}
+        >
             {/* Header */}
             <div style={{
                 padding: '1rem',
@@ -175,6 +224,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                         flex: 1,
                         padding: '1rem',
                         overflowY: 'auto',
+                        WebkitOverflowScrolling: 'touch',
                         background: 'transparent',
                         display: 'flex',
                         flexDirection: 'column',
@@ -223,7 +273,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                             type="text"
                             value={inputMessage}
                             onChange={(e) => setInputMessage(e.target.value)}
-                            onKeyPress={handleKeyPress}
+                            onKeyDown={handleKeyPress}
                             placeholder="Ask about this case..."
                             disabled={isLoading || isStarting}
                             style={{
@@ -233,7 +283,8 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                                 border: 'var(--border-glass)',
                                 background: 'var(--bg-white)',
                                 color: 'var(--text-main)',
-                                outline: 'none'
+                                outline: 'none',
+                                fontSize: '16px' // avoids iOS zoom-on-focus
                             }}
                         />
                         <button
