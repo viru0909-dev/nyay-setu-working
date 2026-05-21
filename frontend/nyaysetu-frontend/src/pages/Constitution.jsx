@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 export default function Constitution() {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation('constitution');
-    const { language, toggleLanguage, t } = useLanguage();
+    
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedPartId, setSelectedPartId] = useState(null);

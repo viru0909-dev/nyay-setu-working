@@ -2,7 +2,6 @@ import { Trophy, Award, Sparkles, FileText, Presentation, Video } from 'lucide-r
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 export default function AchievementsSection() {
     const { t } = useTranslation('landing');
