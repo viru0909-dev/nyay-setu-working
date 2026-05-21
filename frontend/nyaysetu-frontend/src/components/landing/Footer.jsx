@@ -34,7 +34,7 @@ export default function Footer() {
         },
         {
             icon: <FaGithub size={20} />,
-            href: 'https://github.com/viru0909-dev/nyay-setu-working',
+            href: 'https://github.com/viru0909-dev',
             label: 'GitHub',
             color: '#8b949e'
         }
@@ -121,7 +121,7 @@ export default function Footer() {
                                 <motion.a
                                     key={link.label}
                                     href={link.href}
-                                    target="_blank"
+                                    target={link.href.startsWith('mailto:') ? '_self' : '_blank'}
                                     rel="noopener noreferrer"
                                     whileHover={{ scale: 1.1, y: -3 }}
                                     whileTap={{ scale: 0.95 }}
