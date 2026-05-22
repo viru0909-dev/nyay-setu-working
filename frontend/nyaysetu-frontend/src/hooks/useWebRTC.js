@@ -30,7 +30,10 @@ export const useWebRTC = (roomId, userId, userName) => {
                 localStreamRef.current = stream;
 
                 // Connect to signaling server
-                socketRef.current = io(SIGNALING_SERVER);
+                const token = localStorage.getItem('token');
+                socketRef.current = io(SIGNALING_SERVER, {
+                    auth: { token }
+                });
 
                 socketRef.current.on('connect', () => {
                   //  console.log('Connected to signaling server');
