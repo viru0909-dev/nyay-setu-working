@@ -16,8 +16,10 @@ const ROLES = [
 
 const LANGUAGES = [
     { code: 'en', label: 'English', flag: 'EN' },
-    { code: 'hi', label: 'हिंदी',   flag: 'HI' },
-    { code: 'mr', label: 'मराठी',   flag: 'MR' },
+    { code: 'hi', label: 'हिंदी', flag: 'HI' },
+    { code: 'mr', label: 'मराठी', flag: 'MR' },
+    { code: 'ta', label: 'தமிழ்', flag: 'TA' },
+    { code: 'te', label: 'తెలుగు', flag: 'TE' }
 ];
 
 export default function Header({ hideAuthButtons = false }) {
