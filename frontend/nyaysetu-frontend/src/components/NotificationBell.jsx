@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, X, Check, CheckCheck, Loader2 } from 'lucide-react';
+import { Bell, X, Check, CheckCheck, Loader2, WifiOff, RefreshCw } from 'lucide-react';
 import NotificationService from '../services/NotificationService';
 import useAuthStore from '../store/authStore';
 
@@ -9,6 +9,7 @@ export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [connState, setConnState] = useState('DISCONNECTED');
 
     // Connect to WebSocket and fetch initial history
     useEffect(() => {
@@ -47,6 +48,8 @@ export default function NotificationBell() {
             // Increment unread count for new notifications
             setUnreadCount(prev => prev + 1);
         });
+        // Listen for websocket connection status updates
+        NotificationService.subscribeToStatus(setConnState);
 
         return () => {
             unsubscribe();
@@ -95,6 +98,69 @@ export default function NotificationBell() {
         if (hours < 24) return `${hours}h ago`;
         return date.toLocaleDateString();
     };
+
+
+    // status banner UI
+    const ConnectionBanner = () => {
+
+    // Hide banner when fully connected
+    if (connState === 'CONNECTED') return null;
+
+    const isReconnecting =
+        connState === 'RECONNECTING' ||
+        connState === 'CONNECTING';
+
+    return (
+        <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.5rem 1.25rem',
+            background: isReconnecting
+                ? 'rgba(234,179,8,0.1)'
+                : 'rgba(239,68,68,0.1)',
+            borderBottom: '1px solid var(--border-glass)',
+            fontSize: '0.75rem',
+            color: isReconnecting
+                ? '#ca8a04'
+                : '#dc2626',
+        }}>
+
+            {isReconnecting ? (
+                <>
+                    <Loader2 size={12} className="spin" />
+                    Reconnecting...
+                </>
+            ) : (
+                <>
+                    <WifiOff size={12} />
+
+                    Notifications offline
+
+                    <button
+                        onClick={() => NotificationService.reconnect()}
+                        style={{
+                            marginLeft: 'auto',
+                            background: 'none',
+                            border: 'none',
+                            color: 'inherit',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                        }}
+                    >
+                        <RefreshCw size={12} />
+                        Retry
+                    </button>
+                </>
+            )}
+        </div>
+    );
+};
+
 
     return (
         <div style={{ position: 'relative' }}>
@@ -216,6 +282,8 @@ export default function NotificationBell() {
                             </button>
                         )}
                     </div>
+
+                    <ConnectionBanner />
 
                     {/* Notifications List */}
                     <div style={{
@@ -354,11 +422,32 @@ export default function NotificationBell() {
                 />
             )}
             <style>{`
-                @keyframes slideDown {
-                    from { opacity: 0; transform: translateY(-10px); }
-                    to { opacity: 1; transform: translateY(0); }
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
                 }
-            `}</style>
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg);
+                }
+
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .spin {
+                animation: spin 1s linear infinite;
+            }
+`       }</style>
         </div>
     );
 }

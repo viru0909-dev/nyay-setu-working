@@ -3,6 +3,7 @@ import { API_BASE_URL } from '../config/apiConfig';
 
 class NotificationService {
     constructor() {
+        this.token = token;
         this.ws = null;
         this.listeners = [];
         this.reconnectAttempts = 0;
@@ -48,6 +49,12 @@ class NotificationService {
                 }
                 this.reconnectAttempts = 0;
                 this.isConnecting = false;
+                 // Notify all subscribers that connection is restored
+                (this.statusListeners || []).forEach(cb => {
+                    try {
+                        cb('CONNECTED');
+                    } catch (_) {}
+                });
             };
 
             this.ws.onmessage = (event) => {
@@ -66,6 +73,14 @@ class NotificationService {
 
             this.ws.onclose = () => {
                 this.isConnecting = false;
+
+                // Notify subscribers that reconnecting has started
+                (this.statusListeners || []).forEach(cb => {
+                    try {
+                        cb('RECONNECTING');
+                    } catch (_) {}
+                });
+
                 if (!this.connectionFailed) {
                     this.attemptReconnect(token);
                 }
@@ -91,6 +106,13 @@ class NotificationService {
         } else {
             // Stop trying after max attempts
             this.connectionFailed = true;
+
+            // Notify subscribers that connection is fully offline
+            (this.statusListeners || []).forEach(cb => {
+                try {
+                    cb('OFFLINE');
+                } catch (_) {}
+            });
         }
     }
 
@@ -120,6 +142,27 @@ class NotificationService {
         this.reconnectAttempts = 0;
         this.isConnecting = false;
         this.connectionFailed = false;
+    }
+
+    subscribeToStatus(callback) {
+        this.statusListeners = this.statusListeners || [];
+        this.statusListeners.push(callback);
+        callback(
+            this.ws?.readyState === WebSocket.OPEN
+                ? 'CONNECTED'
+                : 'DISCONNECTED'
+        );
+
+        return () => {
+            this.statusListeners =
+                this.statusListeners.filter(cb => cb !== callback);
+        };
+    }
+
+    reconnect() {
+        this.connectionFailed = false;
+        this.reconnectAttempts = 0;
+        this.connect(this.token || localStorage.getItem('token'));
     }
 
     // --- REST API Methods ---
