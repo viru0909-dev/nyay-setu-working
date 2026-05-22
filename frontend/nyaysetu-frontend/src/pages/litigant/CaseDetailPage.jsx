@@ -14,6 +14,7 @@ import { caseAPI, documentAPI, brainAPI, caseAssignmentAPI } from '../../service
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../config/apiConfig';
 import CaseChatWidget from '../../components/CaseChatWidget';
+import CaseStepper from '../../components/common/CaseStepper';
 
 // -----------------------------------------------------------------------------
 // HELPER CONSTANTS & FUNCTIONS
@@ -273,7 +274,7 @@ export default function CaseDetailPage() {
             {/* 3. Tab Content */}
 
             {/* OVERVIEW TAB */}
-            {activeTab === 'overview' && <OverviewTab caseData={caseData} onHireLawyer={handleHireLawyer} />}
+            {activeTab === 'overview' && <OverviewTab caseData={caseData} onHireLawyer={handleHireLawyer} onRefresh={fetchCaseDetails} />}
 
             {/* CASE FILES TAB */}
             {activeTab === 'files' && <CaseFilesTab caseId={caseId} caseType={caseData.caseType} caseDescription={caseData.description} />}
@@ -399,271 +400,278 @@ export default function CaseDetailPage() {
 // SUB-COMPONENTS (TABS)
 // -----------------------------------------------------------------------------
 
-function OverviewTab({ caseData, onHireLawyer }) {
+function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                {/* Description */}
-                <div style={{ background: 'var(--bg-glass-strong)', padding: '2rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>Case Description</h3>
-                    <p style={{ lineHeight: '1.7', color: 'var(--text-secondary)' }}>{caseData.description}</p>
-                </div>
+        <div>
+            {/* 7-Stage Judicial Workflow Stepper */}
+            <CaseStepper currentStatus={caseData.status} judicialStage={caseData.currentJudicialStage} />
 
-                {/* AI Summary */}
-                {caseData.aiGeneratedSummary && (
-                    <div style={{
-                        background: 'linear-gradient(135deg, rgba(30, 42, 68, 0.03) 0%, rgba(30, 42, 68, 0.01) 100%)',
-                        padding: '2rem',
-                        borderRadius: '1.5rem',
-                        border: '1px solid rgba(30, 42, 68, 0.1)',
-                        boxShadow: '0 4px 20px rgba(30, 42, 68, 0.05)',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }}>
-                        <div style={{
-                            position: 'absolute', top: 0, left: 0, width: '4px', height: '100%',
-                            background: 'var(--color-primary)'
-                        }} />
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
-                            <div style={{
-                                width: '40px', height: '40px', borderRadius: '12px',
-                                background: 'rgba(30, 42, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                            }}>
-                                <Sparkles size={20} style={{ color: 'var(--color-primary)' }} />
-                            </div>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Nyay Saarthi Analysis</h3>
-                        </div>
-                        <div style={{ lineHeight: '1.8', color: 'var(--text-main)', fontSize: '1rem' }}>
-                            <ReactMarkdown>{caseData.aiGeneratedSummary}</ReactMarkdown>
-                        </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {/* Description */}
+                    <div style={{ background: 'var(--bg-glass-strong)', padding: '2rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>Case Description</h3>
+                        <p style={{ lineHeight: '1.7', color: 'var(--text-secondary)' }}>{caseData.description}</p>
                     </div>
-                )}
 
-                {/* Client Consent Portal (Review & Approve Petition) */}
-                {(caseData.documentStatus === 'PENDING_REVIEW' || caseData.status === 'DRAFT_PENDING_CLIENT' || (caseData.aiGeneratedSummary && caseData.status === 'PENDING')) && (
-                    <div style={{
-                        padding: '1.5rem',
-                        borderRadius: '0.75rem',
-                        background: 'rgba(30, 42, 68, 0.05)',
-                        border: '1px solid rgba(30, 42, 68, 0.3)',
-                        marginTop: '0.5rem'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                            <FileText size={24} color="var(--color-primary)" />
-                            <h4 style={{ margin: 0, color: 'var(--text-main)' }}>
-                                {caseData.aiGeneratedSummary && caseData.status === 'PENDING' ? 'AI Draft Ready for Review' : 'Review & Approve Petition'}
-                            </h4>
+                    {/* AI Summary */}
+                    {caseData.aiGeneratedSummary && (
+                        <div style={{
+                            background: 'linear-gradient(135deg, rgba(30, 42, 68, 0.03) 0%, rgba(30, 42, 68, 0.01) 100%)',
+                            padding: '2rem',
+                            borderRadius: '1.5rem',
+                            border: '1px solid rgba(30, 42, 68, 0.1)',
+                            boxShadow: '0 4px 20px rgba(30, 42, 68, 0.05)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}>
+                            <div style={{
+                                position: 'absolute', top: 0, left: 0, width: '4px', height: '100%',
+                                background: 'var(--color-primary)'
+                            }} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+                                <div style={{
+                                    width: '40px', height: '40px', borderRadius: '12px',
+                                    background: 'rgba(30, 42, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <Sparkles size={20} style={{ color: 'var(--color-primary)' }} />
+                                </div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Nyay Saarthi Analysis</h3>
+                            </div>
+                            <div style={{ lineHeight: '1.8', color: 'var(--text-main)', fontSize: '1rem' }}>
+                                <ReactMarkdown>{caseData.aiGeneratedSummary}</ReactMarkdown>
+                            </div>
                         </div>
-                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                            {caseData.aiGeneratedSummary && caseData.status === 'PENDING'
-                                ? 'Nyay Saarthi has generated a case analysis. Approve it to create a formal case draft.'
-                                : 'Your lawyer has submitted a draft petition. Please review and approve it to trigger the "Submit to Court" action for your lawyer.'}
-                        </p>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button
-                                onClick={() => {
-                                    if (confirm('Are you sure you want to approve this draft? This will notify your lawyer.')) {
-                                        import('../../services/api').then(({ caseAssignmentAPI, default: api }) => {
-                                            api.put(`/api/cases/${caseData.id}/approve-draft`, { approved: true })
+                    )}
+
+                    {/* Client Consent Portal (Review & Approve Petition) */}
+                    {((caseData.status === 'DRAFT_PENDING_CLIENT') || (caseData.aiGeneratedSummary && caseData.status === 'PENDING')) && (
+                        <div style={{
+                            padding: '1.5rem',
+                            borderRadius: '0.75rem',
+                            background: 'rgba(30, 42, 68, 0.05)',
+                            border: '1px solid rgba(30, 42, 68, 0.3)',
+                            marginTop: '0.5rem'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                                <FileText size={24} color="var(--color-primary)" />
+                                <h4 style={{ margin: 0, color: 'var(--text-main)' }}>
+                                    {caseData.aiGeneratedSummary && caseData.status === 'PENDING' ? 'AI Draft Ready for Review' : 'Review & Approve Petition'}
+                                </h4>
+                            </div>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                                {caseData.aiGeneratedSummary && caseData.status === 'PENDING'
+                                    ? 'Nyay Saarthi has generated a case analysis. Approve it to create a formal case draft.'
+                                    : 'Your lawyer has submitted a draft petition. Please review and approve it to trigger the "Submit to Court" action for your lawyer.'}
+                            </p>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button
+                                    onClick={() => {
+                                        if (confirm('Are you sure you want to approve this draft? This will notify your lawyer.')) {
+                                            caseAPI.reviewDraft(caseData.id, true, "Approved by client")
                                                 .then(() => {
                                                     alert('Draft Approved! Your lawyer can now submit to court.');
-                                                    window.location.reload();
+                                                    if (onRefresh) onRefresh();
+                                                })
+                                                .catch(err => {
+                                                    console.error('Failed to approve:', err);
+                                                    alert('Failed to approve draft. Please try again.');
                                                 });
-                                        });
-                                    }
-                                }}
-                                style={{
+                                        }
+                                    }}
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        background: 'var(--color-primary)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '0.5rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer'
+                                    }}>
+                                    Approve & E-Sign
+                                </button>
+                                <button style={{
                                     padding: '0.5rem 1rem',
-                                    background: 'var(--color-primary)',
-                                    color: 'white',
-                                    border: 'none',
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    color: '#ef4444',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
                                     borderRadius: '0.5rem',
                                     fontWeight: '600',
                                     cursor: 'pointer'
                                 }}>
-                                Approve & E-Sign
-                            </button>
-                            <button style={{
-                                padding: '0.5rem 1rem',
-                                background: 'rgba(239, 68, 68, 0.1)',
-                                color: '#ef4444',
-                                border: '1px solid rgba(239, 68, 68, 0.3)',
-                                borderRadius: '0.5rem',
-                                fontWeight: '600',
-                                cursor: 'pointer'
-                            }}>
-                                Request Changes
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                {/* Key Details Card */}
-                <div style={{ background: 'var(--bg-glass-strong)', padding: '1.5rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Key Details</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                        <div>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Case Type</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Scale size={16} color="var(--color-primary)" />
-                                <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{caseData.caseType}</span>
+                                    Request Changes
+                                </button>
                             </div>
                         </div>
-                        <div>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Filed Date</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Calendar size={16} color="#10b981" />
-                                <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formatDate(caseData.filedDate)}</span>
-                            </div>
-                        </div>
-                        <div>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Next Hearing</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Clock size={16} color="#ef4444" />
-                                <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formatDate(caseData.nextHearing) || 'TBA'}</span>
-                            </div>
-                            {/* Virtual Court Join Button - appears 15 min before hearing */}
-                            {caseData.nextHearing && (() => {
-                                const hearingTime = new Date(caseData.nextHearing);
-                                const now = new Date();
-                                const timeDiff = (hearingTime - now) / (1000 * 60); // difference in minutes
-                                const showJoinButton = timeDiff <= 15 && timeDiff > -60; // 15 min before to 60 min after
+                    )}
+                </div>
 
-                                return showJoinButton ? (
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    {/* Key Details Card */}
+                    <div style={{ background: 'var(--bg-glass-strong)', padding: '1.5rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Key Details</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                            <div>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Case Type</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Scale size={16} color="var(--color-primary)" />
+                                    <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{caseData.caseType}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Filed Date</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Calendar size={16} color="#10b981" />
+                                    <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formatDate(caseData.filedDate)}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Next Hearing</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Clock size={16} color="#ef4444" />
+                                    <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formatDate(caseData.nextHearing) || 'TBA'}</span>
+                                </div>
+                                {/* Virtual Court Join Button - appears 15 min before hearing */}
+                                {caseData.nextHearing && (() => {
+                                    const hearingTime = new Date(caseData.nextHearing);
+                                    const now = new Date();
+                                    const timeDiff = (hearingTime - now) / (1000 * 60); // difference in minutes
+                                    const showJoinButton = timeDiff <= 15 && timeDiff > -60; // 15 min before to 60 min after
+
+                                    return showJoinButton ? (
+                                        <button
+                                            onClick={() => window.open('https://meet.google.com/new', '_blank')}
+                                            style={{
+                                                marginTop: '0.5rem',
+                                                padding: '0.5rem 1rem',
+                                                background: 'linear-gradient(135deg, #10b981, #059669)',
+                                                border: 'none',
+                                                borderRadius: '0.5rem',
+                                                color: 'white',
+                                                fontWeight: '700',
+                                                fontSize: '0.8rem',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.5rem',
+                                                animation: 'pulse 2s infinite'
+                                            }}
+                                        >
+                                            📹 Join VOIS 5G Virtual Court
+                                        </button>
+                                    ) : null;
+                                })()}
+                            </div>
+                            <div>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Assigned Judge</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Gavel size={16} color="#f59e0b" />
+                                    <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{caseData.assignedJudge || 'Pending Assignment'}</span>
+                                </div>
+                            </div>
+
+                            {/* Hire Lawyer Button in Key Details - Hide if pending */}
+                            {!caseData.assignedLawyer && caseData.status !== 'CLOSED' && caseData.lawyerProposalStatus !== 'PENDING' && (
+                                <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: 'var(--border-glass)' }}>
                                     <button
-                                        onClick={() => window.open('https://meet.google.com/new', '_blank')}
+                                        onClick={onHireLawyer}
                                         style={{
-                                            marginTop: '0.5rem',
-                                            padding: '0.5rem 1rem',
-                                            background: 'linear-gradient(135deg, #10b981, #059669)',
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'var(--color-primary)',
                                             border: 'none',
-                                            borderRadius: '0.5rem',
+                                            borderRadius: '0.75rem',
                                             color: 'white',
                                             fontWeight: '700',
-                                            fontSize: '0.8rem',
                                             cursor: 'pointer',
                                             display: 'flex',
                                             alignItems: 'center',
+                                            justifyContent: 'center',
                                             gap: '0.5rem',
-                                            animation: 'pulse 2s infinite'
+                                            boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.3)'
                                         }}
                                     >
-                                        📹 Join VOIS 5G Virtual Court
+                                        <Gavel size={18} />
+                                        Hire Lawyer
                                     </button>
-                                ) : null;
-                            })()}
-                        </div>
-                        <div>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Assigned Judge</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Gavel size={16} color="#f59e0b" />
-                                <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{caseData.assignedJudge || 'Pending Assignment'}</span>
-                            </div>
-                        </div>
+                                </div>
+                            )}
 
-                        {/* Hire Lawyer Button in Key Details - Hide if pending */}
-                        {!caseData.assignedLawyer && caseData.status !== 'CLOSED' && caseData.lawyerProposalStatus !== 'PENDING' && (
-                            <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: 'var(--border-glass)' }}>
-                                <button
-                                    onClick={onHireLawyer}
-                                    style={{
+                            {/* Proposal Sent Status */}
+                            {!caseData.assignedLawyer && caseData.lawyerProposalStatus === 'PENDING' && (
+                                <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: 'var(--border-glass)' }}>
+                                    <div style={{
                                         width: '100%',
                                         padding: '0.75rem',
-                                        background: 'var(--color-primary)',
-                                        border: 'none',
+                                        background: 'rgba(245, 158, 11, 0.1)',
+                                        border: '1px solid rgba(245, 158, 11, 0.3)',
                                         borderRadius: '0.75rem',
-                                        color: 'white',
+                                        color: '#d97706',
                                         fontWeight: '700',
-                                        cursor: 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        gap: '0.5rem',
-                                        boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.3)'
-                                    }}
-                                >
-                                    <Gavel size={18} />
-                                    Hire Lawyer
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Proposal Sent Status */}
-                        {!caseData.assignedLawyer && caseData.lawyerProposalStatus === 'PENDING' && (
-                            <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: 'var(--border-glass)' }}>
-                                <div style={{
-                                    width: '100%',
-                                    padding: '0.75rem',
-                                    background: 'rgba(245, 158, 11, 0.1)',
-                                    border: '1px solid rgba(245, 158, 11, 0.3)',
-                                    borderRadius: '0.75rem',
-                                    color: '#d97706',
-                                    fontWeight: '700',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.5rem'
-                                }}>
-                                    <Clock size={18} />
-                                    Proposal Sent
-                                </div>
-                                <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Waiting for lawyer response</p>
-                            </div>
-                        )}
-
-                        {/* Assigned Lawyer Display */}
-                        {caseData.assignedLawyer && (
-                            <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: 'var(--border-glass)' }}>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Legal Representative</p>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                    <div style={{
-                                        width: '40px', height: '40px', borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: 'white', fontWeight: '700'
+                                        gap: '0.5rem'
                                     }}>
-                                        <Scale size={20} />
+                                        <Clock size={18} />
+                                        Proposal Sent
                                     </div>
-                                    <div>
-                                        <p style={{ fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
-                                            {caseData.lawyerName || 'Private Counsel'}
-                                        </p>
-                                        <p style={{ fontSize: '0.8rem', color: '#10b981', margin: 0 }}>
-                                            ✓ Case Accepted
-                                        </p>
+                                    <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Waiting for lawyer response</p>
+                                </div>
+                            )}
+
+                            {/* Assigned Lawyer Display */}
+                            {caseData.assignedLawyer && (
+                                <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: 'var(--border-glass)' }}>
+                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Legal Representative</p>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                        <div style={{
+                                            width: '40px', height: '40px', borderRadius: '50%',
+                                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            color: 'white', fontWeight: '700'
+                                        }}>
+                                            <Scale size={20} />
+                                        </div>
+                                        <div>
+                                            <p style={{ fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
+                                                {caseData.lawyerName || 'Private Counsel'}
+                                            </p>
+                                            <p style={{ fontSize: '0.8rem', color: '#10b981', margin: 0 }}>
+                                                ✓ Case Accepted
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                </div>
 
-                {/* Parties Card */}
-                <div style={{ background: 'var(--bg-glass-strong)', padding: '1.5rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Parties Involved</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                        <div>
-                            <p style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '700', marginBottom: '0.25rem' }}>PETITIONER</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <User size={18} color="var(--text-secondary)" />
-                                <span style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.petitioner}</span>
+                    {/* Parties Card */}
+                    <div style={{ background: 'var(--bg-glass-strong)', padding: '1.5rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Parties Involved</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                            <div>
+                                <p style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '700', marginBottom: '0.25rem' }}>PETITIONER</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <User size={18} color="var(--text-secondary)" />
+                                    <span style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.petitioner}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div style={{ height: '1px', background: 'var(--border-glass)' }}></div>
-                        <div>
-                            <p style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: '700', marginBottom: '0.25rem' }}>RESPONDENT</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <User size={18} color="var(--text-secondary)" />
-                                <span style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.respondent}</span>
+                            <div style={{ height: '1px', background: 'var(--border-glass)' }}></div>
+                            <div>
+                                <p style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: '700', marginBottom: '0.25rem' }}>RESPONDENT</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <User size={18} color="var(--text-secondary)" />
+                                    <span style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.respondent}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div >
+            </div >
+        </div>
     );
 }
 

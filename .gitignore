@@ -5,6 +5,7 @@ build/
 **/build/
 dist/
 **/dist/
+backend/nyaysetu-backend/src/main/resources/application.properties
 
 venv/
 __pycache__/
@@ -53,6 +54,8 @@ __pycache__/
 *.pyd
 *.key
 *.pem
+nlp-orchestrator/.env
+nlp-orchestrator/.env.example
 
 # API Keys and Secrets - IMPORTANT
 **/apiKey.js
@@ -96,3 +99,10 @@ mvnw.cmd
 coverage/
 .nyc_output/
 nlp-orchestrator/.env
+__pycache__/
+*.pyc
+.pytest_cache/
+backend/nyaysetu-backend/src/main/resources/application.properties
+
+*.zip
+

@@ -9,6 +9,7 @@ import com.nyaysetu.backend.service.CaseManagementService;
 import com.nyaysetu.backend.service.DocumentManagementService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+@Slf4j
 @Tag(name = "Documents", description = "Upload, download and manage case documents")
 @RestController
 @RequestMapping("/api/documents")
@@ -69,7 +71,7 @@ public class DocumentManagementController {
                 documentManagementService.triggerAnalysis(document.getId());
             } catch (Exception e) {
                 // Log but don't fail upload if analysis fails
-                System.out.println("AI analysis trigger failed: " + e.getMessage());
+                log.warn("AI analysis trigger failed: {}", e.getMessage());
             }
             
             return ResponseEntity.ok(document);

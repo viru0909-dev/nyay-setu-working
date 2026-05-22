@@ -79,7 +79,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
-        System.out.println("DEBUG: LOGIN ENDPOINT REACHED for email: " + req.getEmail());
+        log.debug("Login endpoint reached for email: {}", req.getEmail());
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())

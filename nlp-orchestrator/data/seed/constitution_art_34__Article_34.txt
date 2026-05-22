@@ -1,0 +1,5 @@
+# <b>Article</b> <b>34</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=846153
+# Fetch query: Constitution of India Article 34
+
+Article 34 in Constitution of India 34. Restriction on rights conferred by this Part while martial law is in force in any area Notwithstanding anything in the foregoing provisions of this Part, Parliament may by law indemnify any person in the service of the Union or of a State or any other person in respect of any act done by him in connection with the maintenance or restoration of order in any area within the territory of India where martial law was in force or validate any sentence passed, punishment inflicted, forfeiture ordered or other act done under martial law in such area.

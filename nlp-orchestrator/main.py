@@ -8,6 +8,7 @@ Endpoints:
   POST /api/legal/analyze           — Sync version (testing only)
   GET  /health                      — Health check
 """
+import os
 from utils import async_retry
 import asyncio
 import json
@@ -20,15 +21,20 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
+from cache import (
+    generate_cache_key,
+    get_cached_response,
+    set_cached_response
+)
 from config import FRONTEND_ORIGIN, GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KEY, GEMINI_MODEL
 from decomposer import decompose_query
 from router import route_questions
 from research import run_parallel_research
 from synthesizer import synthesize_answers
+from validators.citation_validator import validate_citations_from_text
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
-from routers.forensics import router as forensics_router
-from routers.modi_ocr import router as modi_ocr_router
+
 
 # Initialize clients for deep research pipeline
 from groq import AsyncGroq
@@ -58,14 +64,31 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_ORIGIN, "http://localhost:3000", "http://localhost:8080"],
+    allow_origins=[
+        FRONTEND_ORIGIN,
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8080",
+        "https://nyaysetu-lovat.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(forensics_router)
-app.include_router(modi_ocr_router)
+try:
+    from routers.forensics import router as forensics_router
+    app.include_router(forensics_router)
+    logger.info("Loaded forensics router.")
+except ImportError:
+    logger.warning("Skipping forensics router due to missing dependencies.")
+
+try:
+    from routers.modi_ocr import router as modi_ocr_router
+    app.include_router(modi_ocr_router)
+    logger.info("Loaded modi_ocr router.")
+except ImportError:
+    logger.warning("Skipping modi_ocr router due to missing dependencies.")
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
@@ -150,13 +173,22 @@ async def legal_reasoning_pipeline(query: str, language: str):
         logger.info("[Layer 4] Synthesizing...")
         synthesized_md = await synthesize_answers(query, results)
 
+        try:
+            validation_results = validate_citations_from_text(synthesized_md)
+            if validation_results:
+                logger.info("[Layer 4] Citation validation results: %s", validation_results)
+        except Exception as e:
+            logger.warning("[Layer 4] Citation validation failed (non-blocking): %s", e)
+            validation_results = []
+
         # ── Layer 5b: Hinglish Conversion ────────────────────────
         logger.info("[Layer 5] Converting to Hinglish...")
         hinglish_dialogue = await convert_to_hinglish(synthesized_md)
 
         yield sse_event("final_answer", {
             "markdown": synthesized_md,
-            "hinglish": hinglish_dialogue
+            "hinglish": hinglish_dialogue,
+            "citation_validation": validation_results
         })
 
         yield sse_event("done", {"message": "Research complete"})
@@ -193,6 +225,18 @@ async def legal_reasoning_pipeline(query: str, language: str):
 async def health():
     return {"status": "ok", "service": "nlp-orchestrator", "port": 8001}
 
+@app.get("/models")
+async def get_models():
+    return {
+        "groq": {
+            "model": GROQ_MODEL_FAST,
+            "available": bool(GROQ_API_KEY)
+        },
+        "gemini": {
+            "model": GEMINI_MODEL,
+            "available": bool(GEMINI_API_KEY)
+        }
+    }
 
 @app.post("/api/legal/analyze-stream")
 async def analyze_stream(body: LegalQuery, request: Request):
@@ -209,14 +253,12 @@ async def analyze_stream(body: LegalQuery, request: Request):
 
     async def event_generator():
         pipeline = legal_reasoning_pipeline(body.query, body.language)
-        try:
-            async for event in pipeline:
-                if await request.is_disconnected():
-                    logger.info("[Stream] Client disconnected")
-                    break
-                yield {"data": event}
-        finally:
-            await pipeline.aclose()
+
+        async for event in pipeline:
+            if await request.is_disconnected():
+                logger.info("[Stream] Client disconnected")
+                break
+            yield {"data": event}
 
     return EventSourceResponse(event_generator())
 
@@ -243,6 +285,15 @@ async def analyze_sync(body: LegalQuery):
         kanoon_context = ""
     results = await run_parallel_research(routed, kanoon_context=kanoon_context)
     synthesized = await synthesize_answers(body.query, results)
+
+    try:
+        validation_results = validate_citations_from_text(synthesized)
+        if validation_results:
+            logger.info("[Sync] Citation validation results: %s", validation_results)
+    except Exception as e:
+        logger.warning("[Sync] Citation validation failed (non-blocking): %s", e)
+        validation_results = []
+
     hinglish = await convert_to_hinglish(synthesized)
 
     return JSONResponse({
@@ -251,29 +302,36 @@ async def analyze_sync(body: LegalQuery):
         "research": results,
         "final_answer": {
             "markdown": synthesized,
-            "hinglish": hinglish
+            "hinglish": hinglish,
+            "citation_validation": validation_results
         }
     })
 
 # ─── Deep Research Pipeline ──────────────────────────────────────────────────
 
-DEEP_RESEARCH_SYSTEM_PROMPT = """You are Nyay Saarthi legal AI. Answer ONLY using the provided Indian Kanoon legal context below.
-If the answer is not in the context, say "I need to verify this — please consult an advocate."
+DEEP_RESEARCH_SYSTEM_PROMPT = """You are Nyay Saarthi, a specialized Indian Legal AI Assistant. 
+Your SOLE purpose is to provide legal information, analysis, and guidance based on Indian Law (IPC, BNS, MVA, Constitution, etc.).
+
+STRICT MANDATE:
+- If the user query is NOT related to Indian Law, legal procedures, or the Indian justice system, you MUST politely refuse to answer.
+- State: "I am a specialized Legal AI Assistant. I can only assist with queries related to Indian Law and legal procedures. Your question seems to be outside my legal domain."
+- DO NOT answer questions about technology, science, general history, or other non-legal topics.
+- Answer ONLY using the provided Indian Kanoon legal context below when possible.
 
 CONTEXT FROM INDIAN KANOON:
 {kanoon_context}
 
 USER QUERY: {user_query}
 
-Provide a thorough legal analysis. Cite the exact section or judgment you used.
+If the topic is legal but not found in the context, use your internal legal knowledge but cite relevant sections and add a disclaimer.
 Structure your response with:
 1. Direct answer to the question
 2. Relevant legal sections with exact numbers
-3. Key case precedents cited
+3. Key case precedents cited (if any)
 4. Practical steps for the citizen
 5. Important caveats or disclaimers
 
-Format in Markdown. Be precise and cite sources."""
+Format in Markdown. Be precise and professional."""
 
 @async_retry(max_attempts=3)
 async def call_groq_with_retry(grounded_prompt, query):
@@ -398,15 +456,17 @@ async def deep_research_pipeline(query: str, language: str):
 
         # Build grounded prompt with Kanoon context
         grounded_prompt = DEEP_RESEARCH_SYSTEM_PROMPT.format(
-            kanoon_context=kanoon_context if kanoon_context else "No specific Indian Kanoon context found. Use your general legal knowledge but clearly state you cannot verify specific judgments.",
+            kanoon_context=kanoon_context if kanoon_context else "No specific Indian Kanoon judgments found for this query. If the query is legal in nature, provide general legal guidance based on Indian statutes. If the query is non-legal, follow the refusal mandate in your system prompt.",
             user_query=query
         )
 
         # Call the AI model and stream reasoning
         ai_answer = None
+
         if model_choice == "gemini" and gemini_client:
             try:
                 loop = asyncio.get_event_loop()
+
                 response = await loop.run_in_executor(
                     None,
                     lambda: gemini_client.models.generate_content(
@@ -414,18 +474,28 @@ async def deep_research_pipeline(query: str, language: str):
                         contents=grounded_prompt
                     )
                 )
+
                 ai_answer = response.text.strip()
+
             except Exception as e:
                 logger.error(f"Gemini failed, falling back to Groq: {e}")
                 model_choice = "groq"
-                ai_answer = None
-        
-        if model_choice == "groq" or (model_choice == "gemini" and not gemini_client):
-           response = await call_groq_with_retry(
-               grounded_prompt,
-               query
+
+        if model_choice == "groq" or (
+            model_choice == "gemini" and not gemini_client
+        ):
+
+            response = await groq_client.chat.completions.create(
+                model=GROQ_MODEL_FAST,
+                messages=[
+                    {"role": "system", "content": grounded_prompt},
+                    {"role": "user", "content": query}
+                ],
+                temperature=0.2,
+                max_tokens=2048
             )
-           ai_answer = response.choices[0].message.content.strip()
+
+            ai_answer = response.choices[0].message.content.strip()
 
         # Stream reasoning text in chunks for live display
         if ai_answer:
@@ -444,12 +514,17 @@ async def deep_research_pipeline(query: str, language: str):
 
         # ── Stage 5: VERDICT ──────────────────────────────────────
         logger.info("[Deep Research] Stage 5: Verdict...")
-        
+
         yield sse_event("stage", {
             "stage": "verdict",
             "status": "active",
             "message": "Preparing final legal conclusion..."
         })
+
+        # Validate citations in AI response
+        citation_validation = validate_citations_from_text(ai_answer) if ai_answer else []
+        if citation_validation:
+            logger.info("[Deep Research] Citation validation: %s", citation_validation)
 
         # Convert to Hinglish for avatar speech
         hinglish_verdict = await convert_to_hinglish(ai_answer or "Analysis could not be completed.")
@@ -470,6 +545,7 @@ async def deep_research_pipeline(query: str, language: str):
             "answer": ai_answer or "Unable to generate analysis.",
             "hinglish": hinglish_verdict,
             "citations": citations,
+            "citation_validation": citation_validation,
             "model_used": model_choice,
             "domain": domain_label
         })
@@ -509,14 +585,12 @@ async def deep_research(body: LegalQuery, request: Request):
 
     async def event_generator():
         pipeline = deep_research_pipeline(body.query, body.language)
-        try:
-            async for event in pipeline:
-                if await request.is_disconnected():
-                    logger.info("[Deep Research] Client disconnected")
-                    break
-                yield {"data": event}
-        finally:
-            await pipeline.aclose()
+
+        async for event in pipeline:
+            if await request.is_disconnected():
+                logger.info("[Deep Research] Client disconnected")
+                break
+            yield {"data": event}
 
     return EventSourceResponse(event_generator())
 
@@ -525,5 +599,6 @@ async def deep_research(body: LegalQuery, request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+    port = int(os.getenv("PORT", 8001))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
 

@@ -1,0 +1,5 @@
+# <b>Article</b> <b>11</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=1678224
+# Fetch query: Constitution of India Article 11
+
+Article 11 in Constitution of India 11. Parliament to regulate the right of citizenship by law Nothing in the foregoing provisions of this Part shall derogate from the power of Parliament to make any provision with respect to the acquisition and termination of citizenship and all other matters relating to citizenship.

@@ -6,8 +6,10 @@ import {
     Archive, Video, User, Users, Briefcase,
     Gavel, BarChart3, Settings, Menu, X,
     Scale, MessageSquare, Calendar, Bot, TrendingUp, Search,
-    WifiOff
+    WifiOff, Sun, Moon
 } from 'lucide-react';
+
+import { useTheme } from '../contexts/ThemeContext';
 
 const getRoleMenuItems = (t) => ({
     LITIGANT: [
@@ -18,6 +20,7 @@ const getRoleMenuItems = (t) => ({
         { icon: Video, label: t('dashboard:sidebar.litigant.hearings'), path: '/litigant/hearings' },
         { icon: MessageSquare, label: t('dashboard:sidebar.litigant.lawyerChat'), path: '/litigant/chat' },
         { icon: Search, label: t('dashboard:sidebar.litigant.forensicAnalysis'), path: '/litigant/forensics' },
+        { icon: FileText, label: t('dashboard:sidebar.litigant.generateDocument'), path: '/litigant/generate-document' },
         { icon: User, label: t('dashboard:sidebar.litigant.profile'), path: '/litigant/profile' }
     ],
     LAWYER: [
@@ -65,6 +68,7 @@ const getRoleMenuItems = (t) => ({
 
 export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
     const { t } = useTranslation('dashboard');
+    const { theme, toggleTheme } = useTheme();
     const [isCollapsed, setIsCollapsed] = useState(() => {
         const saved = localStorage.getItem('sidebarCollapsed');
         return saved === 'true';
@@ -233,8 +237,41 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                     <div style={{
                         padding: '1rem',
                         borderTop: '1px solid var(--border-light)',
-                        flexShrink: 0
+                        flexShrink: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.5rem'
                     }}>
+                        <button
+                            onClick={toggleTheme}
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem',
+                                background: 'var(--bg-surface)',
+                                border: '1px solid var(--border-light)',
+                                borderRadius: '0.5rem',
+                                color: 'var(--text-secondary)',
+                                fontSize: '0.85rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.5rem'
+                            }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.background = 'var(--bg-hover)';
+                                e.currentTarget.style.color = 'var(--color-secondary)';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.background = 'var(--bg-surface)';
+                                e.currentTarget.style.color = 'var(--text-secondary)';
+                            }}
+                        >
+                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                            {!isCollapsed && <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
+                        </button>
                         <button
                             onClick={() => setIsCollapsed(!isCollapsed)}
                             style={{

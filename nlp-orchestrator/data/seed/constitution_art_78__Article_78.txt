@@ -1,0 +1,5 @@
+# <b>Article</b> <b>78</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=220543
+# Fetch query: Constitution of India Article 78
+
+Article 78 in Constitution of India 78. Duties of Prime Minister as respects the furnishing of information to the President, etc. It shall be the duty of the Prime Minister--(a)to communicate to the President all decisions of the Council of Ministers relating to the administration of the affairs of the Union and proposals for legislation;(b)to furnish such information relating to the administration of the affairs of the Union and proposals for legislation as the President may call for; and(c)if the President so requires, to submit for the consideration of the Council of Ministers any matter on which a decision has been taken by a Minister but which has not been considered by the Council.

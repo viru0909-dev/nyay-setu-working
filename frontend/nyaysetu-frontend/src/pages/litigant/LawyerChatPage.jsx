@@ -369,10 +369,31 @@ export default function LawyerChatPage() {
                         <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
                             <Loader2 className="animate-spin" color="var(--color-primary)" />
                         </div>
-                    ) : cases.length === 0 ? (
-                        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                            <p>No lawyers assigned to your cases yet.</p>
-                        </div>
+                    )  : cases.length === 0 ? (
+    <div style={{ 
+      padding: '2rem', 
+      textAlign: 'center', 
+      color: 'var(--text-secondary)' 
+    }}>
+        <p style={{ marginBottom: '1rem' }}>
+          No lawyers assigned to your cases yet.
+        </p>
+        <button
+          onClick={() => navigate('/litigant/find-lawyer')}
+          style={{
+            padding: '0.75rem 1.5rem',
+            background: 'var(--color-primary)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            fontSize: '0.95rem',
+            fontWeight: '600'
+          }}
+        >
+          🔍 Find a Lawyer
+        </button>
+    </div>
                     ) : cases.map(c => (
                         <div
                             key={c.id}

@@ -22,6 +22,7 @@ const About = lazy(() => import('./pages/About'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Disclaimer = lazy(() => import('./pages/Disclaimer'));
+const UpcomingFeatures = lazy(() => import('./pages/UpcomingFeatures'));
 
 // Dashboard Layout
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
@@ -41,6 +42,10 @@ const HearingsPage = lazy(() => import('./pages/litigant/HearingsPage'));
 const LawyerChatPage = lazy(() => import('./pages/litigant/LawyerChatPage'));
 const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
 const ForensicsPage = lazy(() => import('./pages/litigant/ForensicsPage'));
+const DocumentGeneratePage = lazy(() => import('./pages/litigant/DocumentGeneratePage'));
+const FindLawyerPage = lazy(() => import('./pages/litigant/FindLawyerPage'));
+const LawyerFeedbackPage = lazy(() => 
+  import('./pages/litigant/LawyerFeedbackPage'));
 
 
 // Judge Pages (keep only those still used)
@@ -126,6 +131,7 @@ function App({ swRegistration }) {
                                 <Route path="/privacy" element={<PrivacyPolicy />} />
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
+                                <Route path="/upcoming-features" element={<UpcomingFeatures />} />
 
                                 {/* Protected Dashboards */}
                                 <Route
@@ -143,8 +149,11 @@ function App({ swRegistration }) {
                                     <Route path="case-diary/:caseId" element={<CaseDetailPage />} />
                                     <Route path="hearings" element={<HearingsPage />} />
                                     <Route path="chat" element={<LawyerChatPage />} />
+                                    <Route path="find-lawyer" element={<FindLawyerPage />} />
+                                    <Route path="feedback" element={<LawyerFeedbackPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
                                     <Route path="forensics" element={<ForensicsPage />} />
+                                    <Route path="generate-document" element={<DocumentGeneratePage />} />
                                 </Route>
 
                                 <Route
@@ -217,7 +226,7 @@ function App({ swRegistration }) {
                                     <Route path="investigation/:id" element={<InvestigationDetailsPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
                                 </Route>
-
+                                
                                 <Route path="/unauthorized" element={
                                     <div style={{ textAlign: 'center', padding: '3rem' }}>
                                         <h1>Unauthorized</h1>

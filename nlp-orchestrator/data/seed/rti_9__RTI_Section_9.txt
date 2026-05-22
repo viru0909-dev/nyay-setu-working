@@ -1,0 +1,5 @@
+# <b>Section</b> <b>9</b> in The <b>Right</b> to <b>Information</b> <b>Act</b>, <b>2005</b>
+# Source: Indian Kanoon, doc_id=1053993
+# Fetch query: Right to Information Act 2005 Section 9
+
+Section 9 in The Right to Information Act, 2005 9. Grounds for rejection to access in certain cases. - Without prejudice to the provisions of section 8, a Central Public Information Officer or a State Public Information Officer, as the case may be, may reject a request for information where such a request for providing access would involve an infringement of copyright subsisting in a person other than the State.

@@ -2,6 +2,7 @@ package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.dto.CaseDTO;
 import com.nyaysetu.backend.dto.CreateCaseRequest;
+import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.service.CaseManagementService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -119,12 +120,80 @@ public class CaseManagementController {
         ));
     }
 
+    /**
+     * Handover D: Lawyer files the approved petition in court
+     * Transitions case to COGNIZANCE_PERIOD (stepper Stage 2 - Notice Issued)
+     */
+    @PostMapping("/{id}/file-in-court")
+    public ResponseEntity<Map<String, Object>> fileInCourt(@PathVariable UUID id) {
+        CaseEntity caseEntity = caseManagementService.getCaseEntity(id);
+        caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.COGNIZANCE_PERIOD);
+        caseEntity.setStage(com.nyaysetu.backend.entity.CaseStage.COGNIZANCE);
+        caseEntity.setCurrentJudicialStage(1);
+        caseManagementService.saveCaseEntity(caseEntity);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Case filed in court successfully",
+            "newStatus", "COGNIZANCE_PERIOD"
+        ));
+    }
+
     @PostMapping("/{id}/order-notice")
     public ResponseEntity<Map<String, Object>> orderNotice(@PathVariable UUID id) {
         caseManagementService.orderRespondentNotice(id);
         return ResponseEntity.ok(Map.of(
             "success", true,
             "message", "Notice ordered successfully"
+        ));
+    }
+
+    @PostMapping("/{id}/start-hearings")
+    public ResponseEntity<Map<String, Object>> startHearings(@PathVariable UUID id) {
+        caseManagementService.startHearings(id);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Hearings started successfully",
+            "newStatus", "IN_PROGRESS"
+        ));
+    }
+
+    @PostMapping("/{id}/start-evidence")
+    public ResponseEntity<Map<String, Object>> startEvidence(@PathVariable UUID id) {
+        caseManagementService.startEvidence(id);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Evidence phase started successfully"
+        ));
+    }
+
+    @PostMapping("/{id}/start-arguments")
+    public ResponseEntity<Map<String, Object>> startArguments(@PathVariable UUID id) {
+        caseManagementService.startArguments(id);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Arguments phase started successfully"
+        ));
+    }
+
+    @PostMapping("/{id}/start-judgment")
+    public ResponseEntity<Map<String, Object>> startJudgment(@PathVariable UUID id) {
+        caseManagementService.startJudgment(id);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Judgment phase started successfully"
+        ));
+    }
+
+    @PostMapping("/{id}/deliver-verdict")
+    public ResponseEntity<Map<String, Object>> deliverVerdict(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> payload) {
+        String verdictDetails = payload.getOrDefault("verdictDetails", "Final judgment passed.");
+        caseManagementService.deliverVerdict(id, verdictDetails);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Verdict delivered successfully",
+            "newStatus", "COMPLETED"
         ));
     }
 

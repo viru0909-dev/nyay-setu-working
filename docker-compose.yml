@@ -1,23 +1,49 @@
 
 services:
-  # 1.Backend (Spring Boot)
+  # 1. Database (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: nyaysetu-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-nyaysetu}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-nyaysetu}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Backend (Spring Boot)
   backend-spring:
     build:
       context: ./backend/nyaysetu-backend
       dockerfile: Dockerfile
     container_name: spring-service
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - JAVA_OPTS=-Xmx512m -Xms256m  
-    deploy:
-      resources:
-        limits:
-          memory: 768M  
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-}
+      - DB_URL=jdbc:postgresql://db:5432/${DB_NAME:-nyaysetu}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - GROQ_API_KEY=${GROQ_API_KEY:?Please set GROQ_API_KEY in your .env file}
+      - JWT_SECRET=${JWT_SECRET:?Please set JWT_SECRET in your .env file}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+      - JAVA_TOOL_OPTIONS=-Xmx512m -Xms256m
+    mem_limit: 768M
     restart: always
 
-  # 2. Python (Data/AI/Microservice)
+  # 3. Python (Data/AI/Microservice)
   backend-python:
     build:
       context: ./nlp-orchestrator
@@ -27,13 +53,14 @@ services:
       - "8001:8001"
     environment:
       - ENV=production
-    deploy:
-      resources:
-        limits:
-          memory: 256M
+      - GROQ_API_KEY=${GROQ_API_KEY:?Please set GROQ_API_KEY in your .env file}
+      - GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY}
+      # Keep this aligned with FRONTEND_URL; set both explicitly in .env when needed.
+      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-http://localhost}
+    mem_limit: 256M
     restart: always
 
-  # 3. Frontend (React + Nginx)
+  # 4. Frontend (React + Nginx)
   frontend-react:
     build:
       context: ./frontend/nyaysetu-frontend
@@ -41,14 +68,14 @@ services:
     container_name: react-app
     ports:
       - "80:80"
+    mem_limit: 128M
     depends_on:
       - backend-spring
       - backend-python
-    deploy:
-      resources:
-        limits:
-          memory: 128M
     restart: always
+
+volumes:
+  postgres_data:
 
 networks:
   default:

@@ -149,6 +149,74 @@ export default function JudgeCaseWorkspace() {
         }
     };
 
+    const handleStartHearings = async () => {
+        if (!confirm('Are you sure you want to officially start hearings for this case? This will update the case status to IN_PROGRESS.')) return;
+
+        try {
+            await caseAPI.startHearings(caseId);
+            alert('✅ Hearings Started! Status updated to IN_PROGRESS.');
+            fetchCaseDetails();
+        } catch (error) {
+            console.error('Error starting hearings:', error);
+            alert('Failed to start hearings. Please try again.');
+        }
+    };
+
+    const handleStartEvidence = async () => {
+        if (!confirm('Are you sure you want to advance this case to the Evidence phase?')) return;
+
+        try {
+            await caseAPI.startEvidence(caseId);
+            alert('Evidence Phase Started!');
+            fetchCaseDetails();
+        } catch (error) {
+            console.error('Error starting evidence phase:', error);
+            alert('Failed to start evidence phase. Please try again.');
+        }
+    };
+
+    const handleStartArguments = async () => {
+        if (!confirm('Are you sure you want to advance this case to the final Arguments phase?')) return;
+
+        try {
+            await caseAPI.startArguments(caseId);
+            alert('Arguments Phase Started!');
+            fetchCaseDetails();
+        } catch (error) {
+            console.error('Error starting arguments phase:', error);
+            alert('Failed to start arguments phase. Please try again.');
+        }
+    };
+
+    const handleStartJudgment = async () => {
+        if (!confirm('Are you sure you want to conclude arguments and set this case to Judgment Pending?')) return;
+
+        try {
+            await caseAPI.startJudgment(caseId);
+            alert('✅ Judgment Pending Phase Started! Stage 6 activated.');
+            fetchCaseDetails();
+        } catch (error) {
+            console.error('Error starting judgment phase:', error);
+            alert('Failed to start judgment phase. Please try again.');
+        }
+    };
+
+    const handleDeliverVerdict = async () => {
+        const verdictDetails = prompt("Enter the final verdict summary:");
+        if (!verdictDetails) return;
+        
+        if (!confirm('Are you sure you want to deliver this verdict? This will mark the case as COMPLETED.')) return;
+
+        try {
+            await caseAPI.deliverVerdict(caseId, verdictDetails);
+            alert('Verdict Delivered! Case marked as COMPLETED.');
+            fetchCaseDetails();
+        } catch (error) {
+            console.error('Error delivering verdict:', error);
+            alert('Failed to deliver verdict. Please try again.');
+        }
+    };
+
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -196,34 +264,191 @@ export default function JudgeCaseWorkspace() {
                     </button>
 
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button
-                            onClick={handleOrderNotice}
-                            style={{
-                                padding: '0.6rem 1.2rem',
-                                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '0.75rem',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
-                                transition: 'all 0.2s',
-                                fontSize: '0.9rem'
-                            }}
-                            onMouseOver={e => {
-                                e.currentTarget.style.transform = 'translateY(-2px)';
-                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(245, 158, 11, 0.4)';
-                            }}
-                            onMouseOut={e => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
-                            }}
-                        >
-                            <Send size={16} /> Order Notice
-                        </button>
+                        {(caseData.status === 'COGNIZANCE_PERIOD' || caseData.status === 'PENDING_COGNIZANCE') && (
+                            <button
+                                onClick={handleOrderNotice}
+                                style={{
+                                    padding: '0.6rem 1.2rem',
+                                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '0.75rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                                    transition: 'all 0.2s',
+                                    fontSize: '0.9rem'
+                                }}
+                                onMouseOver={e => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(245, 158, 11, 0.4)';
+                                }}
+                                onMouseOut={e => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
+                                }}
+                            >
+                                <Send size={16} /> Order Notice
+                            </button>
+                        )}
+                        
+                        {caseData.status === 'SUMMONS_SERVED' && (
+                            <button
+                                onClick={handleStartHearings}
+                                style={{
+                                    padding: '0.6rem 1.2rem',
+                                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '0.75rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                                    transition: 'all 0.2s',
+                                    fontSize: '0.9rem'
+                                }}
+                                onMouseOver={e => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.4)';
+                                }}
+                                onMouseOut={e => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                                }}
+                            >
+                                <Gavel size={16} /> Start Hearings
+                            </button>
+                        )}
+
+                        {caseData.status === 'IN_PROGRESS' && caseData.currentJudicialStage === 3 && (
+                            <button
+                                onClick={handleStartEvidence}
+                                style={{
+                                    padding: '0.6rem 1.2rem',
+                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '0.75rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                                    transition: 'all 0.2s',
+                                    fontSize: '0.9rem'
+                                }}
+                                onMouseOver={e => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(139, 92, 246, 0.4)';
+                                }}
+                                onMouseOut={e => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
+                                }}
+                            >
+                                <FileText size={16} /> Start Evidence
+                            </button>
+                        )}
+
+                        {caseData.status === 'IN_PROGRESS' && caseData.currentJudicialStage === 4 && (
+                            <button
+                                onClick={handleStartArguments}
+                                style={{
+                                    padding: '0.6rem 1.2rem',
+                                    background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '0.75rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    boxShadow: '0 4px 12px rgba(236, 72, 153, 0.3)',
+                                    transition: 'all 0.2s',
+                                    fontSize: '0.9rem'
+                                }}
+                                onMouseOver={e => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(236, 72, 153, 0.4)';
+                                }}
+                                onMouseOut={e => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(236, 72, 153, 0.3)';
+                                }}
+                            >
+                                <Scale size={16} /> Start Arguments
+                            </button>
+                        )}
+
+                        {caseData.status === 'IN_PROGRESS' && caseData.currentJudicialStage === 5 && (
+                            <button
+                                onClick={handleStartJudgment}
+                                style={{
+                                    padding: '0.6rem 1.2rem',
+                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '0.75rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                                    transition: 'all 0.2s',
+                                    fontSize: '0.9rem'
+                                }}
+                                onMouseOver={e => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(16, 185, 129, 0.4)';
+                                }}
+                                onMouseOut={e => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                                }}
+                            >
+                                <Scale size={16} /> Set Judgment Pending
+                            </button>
+                        )}
+
+                        {caseData.status === 'JUDGMENT_PENDING' && caseData.currentJudicialStage === 6 && (
+                            <button
+                                onClick={handleDeliverVerdict}
+                                style={{
+                                    padding: '0.6rem 1.2rem',
+                                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '0.75rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+                                    transition: 'all 0.2s',
+                                    fontSize: '0.9rem'
+                                }}
+                                onMouseOver={e => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(239, 68, 68, 0.4)';
+                                }}
+                                onMouseOut={e => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)';
+                                }}
+                            >
+                                <Gavel size={16} /> Deliver Verdict
+                            </button>
+                        )}
                     </div>
                 </div>
 
