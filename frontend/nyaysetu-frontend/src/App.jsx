@@ -46,6 +46,9 @@ const DocumentGeneratePage = lazy(() => import('./pages/litigant/DocumentGenerat
 const FindLawyerPage = lazy(() => import('./pages/litigant/FindLawyerPage'));
 const LawyerFeedbackPage = lazy(() => 
   import('./pages/litigant/LawyerFeedbackPage'));
+const LitigantConsultations = lazy(() => import('./pages/litigant/LitigantConsultations'));
+const LawyerConsultations = lazy(() => import('./pages/lawyer/LawyerConsultations'));
+const ConsultationRoom = lazy(() => import('./pages/shared/ConsultationRoom'));
 
 
 // Judge Pages (keep only those still used)
@@ -151,6 +154,8 @@ function App({ swRegistration }) {
                                     <Route path="chat" element={<LawyerChatPage />} />
                                     <Route path="find-lawyer" element={<FindLawyerPage />} />
                                     <Route path="feedback" element={<LawyerFeedbackPage />} />
+                                    <Route path="consultations" element={<LitigantConsultations />} />
+                                    <Route path="consultation/:id" element={<ConsultationRoom />} />
                                     <Route path="profile" element={<ProfilePage />} />
                                     <Route path="forensics" element={<ForensicsPage />} />
                                     <Route path="generate-document" element={<DocumentGeneratePage />} />
@@ -177,6 +182,8 @@ function App({ swRegistration }) {
                                     <Route path="chat" element={<ClientChatPage />} />
                                     <Route path="profile" element={<LawyerProfilePage />} />
                                     <Route path="offline-drafts" element={<OfflineDraftsPage />} />
+                                    <Route path="consultations" element={<LawyerConsultations />} />
+                                    <Route path="consultation/:id" element={<ConsultationRoom />} />
                                 </Route>
 
                                 <Route
