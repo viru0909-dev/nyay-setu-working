@@ -352,81 +352,110 @@ export default function About() {
                         </p>
                     </motion.div>
 
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '2rem'
-                    }}>
-                        {roadmapPhases.map((phase, index) => (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.15 }}
-                                style={{
-                                    background: 'var(--bg-glass)',
-                                    border: 'var(--border-glass)',
-                                    borderRadius: '1.5rem',
-                                    padding: '2rem',
-                                    boxShadow: 'var(--shadow-glass)'
-                                }}
-                            >
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    marginBottom: '1rem'
-                                }}>
-                                    <span style={{
-                                        padding: '0.25rem 0.75rem',
-                                        background: `${phase.color}15`,
-                                        borderRadius: '0.5rem',
-                                        color: phase.color,
-                                        fontWeight: '700',
-                                        fontSize: '0.85rem'
-                                    }}>
-                                        {phase.phase}
-                                    </span>
-                                    <span style={{
-                                        fontSize: '0.75rem',
-                                        fontWeight: '700',
-                                        textTransform: 'uppercase',
-                                        color: phase.color
-                                    }}>
-                                        {phase.status === 'live' ? '✓ Live' :
-                                            phase.status === 'in-progress' ? '⏳ In Progress' : '📅 Planned'}
-                                    </span>
-                                </div>
+                   <div style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: '2rem'
+}}>
+    {roadmapPhases.map((phase, index) => (
+        <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
 
-                                <h3 style={{
-                                    fontSize: '1.5rem',
-                                    fontWeight: '800',
-                                    color: 'var(--text-main)',
-                                    marginBottom: '1.5rem'
-                                }}>
-                                    {phase.title}
-                                </h3>
+            whileHover={{
+                y: -8,
+                scale: 1.02
+            }}
 
-                                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                    {phase.items.map((item, idx) => (
-                                        <li key={idx} style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.75rem',
-                                            padding: '0.75rem 0',
-                                            borderBottom: idx < phase.items.length - 1 ? '1px solid var(--border-glass)' : 'none',
-                                            color: 'var(--text-secondary)',
-                                            fontSize: '0.95rem'
-                                        }}>
-                                            <CheckCircle2 size={16} style={{ color: phase.color, flexShrink: 0 }} />
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </motion.div>
-                        ))}
-                    </div>
+            viewport={{ once: true }}
+
+            transition={{
+                delay: index * 0.15,
+                duration: 0.3
+            }}
+
+            style={{
+                background: 'var(--bg-glass)',
+                border: 'var(--border-glass)',
+                borderRadius: '1.5rem',
+                padding: '2rem',
+                boxShadow: '0 12px 30px rgba(0,0,0,0.12)',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+            }}
+        >
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1rem'
+            }}>
+                <span style={{
+                    padding: '0.25rem 0.75rem',
+                    background: `${phase.color}15`,
+                    borderRadius: '0.5rem',
+                    color: phase.color,
+                    fontWeight: '700',
+                    fontSize: '0.85rem'
+                }}>
+                    {phase.phase}
+                </span>
+
+                <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    color: phase.color
+                }}>
+                    {phase.status === 'live'
+                        ? '✓ Live'
+                        : phase.status === 'in-progress'
+                        ? '⏳ In Progress'
+                        : '📅 Planned'}
+                </span>
+            </div>
+
+            <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: '800',
+                color: 'var(--text-main)',
+                marginBottom: '1.5rem'
+            }}>
+                {phase.title}
+            </h3>
+
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {phase.items.map((item, idx) => (
+                    <li
+                        key={idx}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: '0.75rem 0',
+                            borderBottom:
+                                idx < phase.items.length - 1
+                                    ? '1px solid var(--border-glass)'
+                                    : 'none',
+                            color: 'var(--text-secondary)',
+                            fontSize: '0.95rem'
+                        }}
+                    >
+                        <CheckCircle2
+                            size={16}
+                            style={{
+                                color: phase.color,
+                                flexShrink: 0
+                            }}
+                        />
+                        {item}
+                    </li>
+                ))}
+            </ul>
+        </motion.div>
+    ))}
+</div>
 
                     {/* OpenNyAI Link */}
                     <motion.div
