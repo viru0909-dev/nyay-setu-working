@@ -33,6 +33,75 @@ public class EmailService {
     @Value("${app.password-reset.token-validity:1800000}") // 30 min default
     private Long tokenValidityMs;
 
+    @Value("${app.mail.from:noreply@nyaysetu.in}")
+    private String fromAddress;
+
+    @Async
+    public void sendVerificationEmail(String email, String name, String token) {
+        String verifyLink = frontendUrl + "/verify-email/" + token;
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(email);
+            helper.setSubject("NyaySetu – Verify your email address");
+            helper.setText(buildVerificationEmailContent(name, verifyLink), true);
+            mailSender.send(message);
+            log.info("Verification email sent to: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to send verification email to {}: {}", email, e.getMessage());
+            log.info("====================================================================");
+            log.info("DEVELOPMENT FALLBACK — VERIFICATION LINK FOR {}:", email);
+            log.info(verifyLink);
+            log.info("====================================================================");
+        }
+    }
+
+    private String buildVerificationEmailContent(String userName, String verifyLink) {
+        return String.format("""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+                        .container { max-width: 600px; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+                        .header { background: linear-gradient(135deg, #6366f1 0%%, #8b5cf6 100%%); padding: 40px 30px; text-align: center; }
+                        .header h1 { color: white; margin: 0; font-size: 32px; font-weight: 800; }
+                        .content { padding: 40px 30px; }
+                        .content p { color: #4b5563; line-height: 1.6; font-size: 16px; }
+                        .button { display: inline-block; padding: 16px 36px; background: linear-gradient(135deg, #818cf8 0%%, #c084fc 100%%); color: white; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; margin: 20px 0; }
+                        .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0; border-radius: 8px; }
+                        .warning p { margin: 0; color: #92400e; }
+                        .footer { background: #1e293b; color: #94a3b8; padding: 30px; text-align: center; font-size: 14px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header"><h1>⚖️ NyaySetu</h1></div>
+                        <div class="content">
+                            <h2 style="color:#1e293b;margin-top:0;">Verify your email address</h2>
+                            <p>Hello %s,</p>
+                            <p>Thank you for registering on NyaySetu. Please verify your email address to activate your account:</p>
+                            <center><a href="%s" class="button">Verify My Email</a></center>
+                            <div class="warning">
+                                <p><strong>⏰ Important:</strong> This link expires in 24 hours.</p>
+                            </div>
+                            <p>If you did not create this account, you can safely ignore this email.</p>
+                            <p style="margin-top:30px;font-size:14px;color:#6b7280;">
+                                If the button doesn't work, copy and paste this link:<br>
+                                <a href="%s" style="color:#8b5cf6;word-break:break-all;">%s</a>
+                            </p>
+                        </div>
+                        <div class="footer">
+                            <p style="margin:0 0 10px 0;font-weight:600;color:white;">NyaySetu – Virtual Judiciary Platform</p>
+                            <p style="margin:0;">Delivering justice through technology 🇮🇳</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """, userName, verifyLink, verifyLink, verifyLink);
+    }
+
     @Async
     public void sendPasswordResetEmail(String email) throws MessagingException {
         User user = userRepository.findByEmail(email)
@@ -62,7 +131,7 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
+            helper.setFrom(fromAddress);
             helper.setTo(email);
             helper.setSubject("NyaySetu - Password Reset Request");
             helper.setText(buildEmailContent(user.getName(), resetLink), true);
@@ -142,7 +211,7 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
+            helper.setFrom(fromAddress);
             helper.setTo(recipientEmail);
             helper.setSubject("URGENT: Legal Summons - Case " + caseNumber);
             helper.setText(buildSummonsContent(respondentName, caseNumber, hearingDate), true);
