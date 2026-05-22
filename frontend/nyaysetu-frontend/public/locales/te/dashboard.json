@@ -1,0 +1,127 @@
+{
+    "sidebar": {
+        "collapseSidebar": "సైడ్‌బార్ మూసివేయి",
+        "litigant": {
+            "dashboard": "డాష్‌బోర్డ్",
+            "vakilFriendAI": "న్యాయ సారథి",
+            "fileCaseFIR": "కేసు / FIR దాఖలు చేయండి",
+            "caseDiary": "కేసు డైరీ",
+            "hearings": "విచారణలు",
+            "lawyerChat": "న్యాయవాది చాట్",
+            "forensicAnalysis": "ఫోరెన్సిక్ విశ్లేషణ",
+            "profile": "ప్రొఫైల్"
+        },
+        "lawyer": {
+            "dashboard": "డాష్‌బోర్డ్",
+            "litigantDirectory": "వాది డైరెక్టరీ",
+            "activeCases": "చురుకైన కేసులు",
+            "aiLegalAssistant": "AI న్యాయ సహాయకుడు",
+            "hearings": "విచారణలు",
+            "analytics": "విశ్లేషణలు",
+            "profile": "ప్రొఫైల్"
+        },
+        "judge": {
+            "judicialOverview": "న్యాయ అవలోకనం",
+            "myDocket": "నా డాకెట్",
+            "unassignedPool": "కేటాయించని పూల్",
+            "liveHearing": "లైవ్ విచారణ",
+            "courtAnalytics": "కోర్టు విశ్లేషణలు",
+            "profile": "ప్రొఫైల్"
+        },
+        "admin": {
+            "dashboard": "డాష్‌బోర్డ్",
+            "userManagement": "వినియోగదారు నిర్వహణ",
+            "caseManagement": "కేసు నిర్వహణ",
+            "judgeAssignment": "న్యాయమూర్తి నియామకం",
+            "reports": "నివేదికలు",
+            "settings": "సెట్టింగులు",
+            "profile": "ప్రొఫైల్"
+        },
+        "techAdmin": {
+            "dashboard": "డాష్‌బోర్డ్",
+            "aiModels": "AI మోడళ్లు",
+            "videoSystem": "వీడియో సిస్టమ్",
+            "logs": "లాగ్‌లు",
+            "configuration": "కాన్ఫిగరేషన్",
+            "profile": "ప్రొఫైల్"
+        },
+        "police": {
+            "dashboard": "డాష్‌బోర్డ్",
+            "investigationUnit": "దర్యాప్తు విభాగం",
+            "uploadFIR": "FIR అప్‌లోడ్ చేయండి",
+            "myFIRs": "నా FIRలు",
+            "profile": "ప్రొఫైల్"
+        }
+    },
+    "litigant": {
+        "fileCaseFIR": "కేసు / FIR దాఖలు చేయండి",
+        "fileCaseDesc": "న్యాయ సారథి AI సహాయంతో సివిల్ కేసు లేదా క్రిమినల్ FIR దాఖలు చేయండి",
+        "getStarted": "ప్రారంభించండి",
+        "pendingApprovals": "పెండింగ్ ఆమోదాలు",
+        "reviewDraft": "డ్రాఫ్ట్ సమీక్షించండి",
+        "actionRequired": "చర్య అవసరం",
+        "sentBy": "పంపినవారు",
+        "awaitingSignature": "మీ డిజిటల్ సంతకం కోసం వేచి ఉంది",
+        "viewDetails": "వివరాలు చూడండి",
+        "approveSign": "ఆమోదించి E-సైన్ చేయండి",
+        "myCases": "నా కేసులు",
+        "upcomingHearings": "రాబోయే విచారణలు",
+        "documents": "పత్రాలు",
+        "legalChat": "న్యాయ చాట్",
+        "active": "చురుకుగా ఉంది",
+        "chatWithLawyer": "న్యాయవాదితో చాట్ చేయండి",
+        "thisMonth": "ఈ నెల +1",
+        "newDocs": "+2 కొత్తవి",
+        "recentCases": "ఇటీవలి కేసులు",
+        "viewAll": "అన్నీ చూడండి",
+        "noCases": "ఇంకా కేసులు దాఖలు చేయలేదు",
+        "fileFirstCase": "మీ మొదటి కేసు దాఖలు చేయండి",
+        "filed": "దాఖలు చేయబడింది",
+        "noUpcomingHearings": "రాబోయే విచారణలు లేవు",
+        "hearingsAppearHere": "షెడ్యూల్ చేసిన తర్వాత విచారణలు ఇక్కడ కనిపిస్తాయి",
+        "joinVirtualCourt": "వర్చువల్ కోర్టులో చేరండి",
+        "startsIn": "{{minutes}} నిమిషాలలో ప్రారంభమవుతుంది",
+        "loading": "లోడ్ అవుతోంది..."
+    },
+    "lawyer": {
+        "dashboard": "డాష్‌బోర్డ్",
+        "clientManagement": "క్లయింట్ నిర్వహణ",
+        "activeCases": "చురుకైన కేసులు",
+        "aiAssistant": "AI న్యాయ సహాయకుడు",
+        "hearings": "విచారణలు",
+        "analytics": "విశ్లేషణలు",
+        "profile": "ప్రొఫైల్"
+    },
+    "judge": {
+        "judicialOverview": "న్యాయ అవలోకనం",
+        "myDocket": "నా డాకెట్",
+        "unassignedPool": "కేటాయించని పూల్",
+        "courtAnalytics": "కోర్టు విశ్లేషణలు"
+    },
+    "police": {
+        "dashboard": "పోలీసు డాష్‌బోర్డ్",
+        "investigationUnit": "దర్యాప్తు విభాగం",
+        "uploadFIR": "FIR అప్‌లోడ్ చేయండి",
+        "myFIRs": "నా FIRలు"
+    },
+    "common": {
+        "dashboard": "డాష్‌బోర్డ్",
+        "welcomeBack": "తిరిగి స్వాగతం",
+        "viewProfile": "ప్రొఫైల్ చూడండి",
+        "language": "భాష",
+        "search": "వెతకండి...",
+        "notifications": "నోటిఫికేషన్లు",
+        "profile": "ప్రొఫైల్",
+        "logout": "లాగ్అవుట్",
+        "loading": "లోడ్ అవుతోంది...",
+        "next": "తదుపరి",
+        "previous": "మునుపటి",
+        "submit": "సమర్పించండి",
+        "cancel": "రద్దు చేయి",
+        "save": "సేవ్ చేయి",
+        "delete": "తొలగించు",
+        "edit": "సవరించు",
+        "viewAll": "అన్నీ చూడండి",
+        "noData": "డేటా అందుబాటులో లేదు"
+    }
+}

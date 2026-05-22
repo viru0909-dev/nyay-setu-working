@@ -10,8 +10,7 @@ import { brainAPI } from '../services/api';
 
 export default function Constitution() {
     const navigate = useNavigate();
-    const { language, toggleLanguage, t } = useLanguage();
-    const { theme } = useTheme();
+    const { language, changeLanguage,t } = useLanguage();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedPart, setSelectedPart] = useState(null);
     const [selectedArticle, setSelectedArticle] = useState(null);
@@ -389,33 +388,27 @@ export default function Constitution() {
                         </div>
 
                         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                            <button
-                                onClick={toggleLanguage}
+                            <select
+                                value={language}
+                                onChange={(e) => changeLanguage(e.target.value)}
                                 style={{
                                     padding: '0.75rem 1.5rem',
                                     background: 'var(--color-primary)',
-                                    border: 'none',
+                                    border:'none',
                                     borderRadius: '0.75rem',
                                     color: '#FFFFFF',
                                     cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
                                     fontWeight: '700',
-                                    fontSize: '1rem',
-                                    transition: 'all 0.3s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.opacity = '0.9';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.opacity = '1';
+                                    fontSize: '1rem'
                                 }}
                             >
-                                <Globe size={20} />
-                                {language === 'en' ? 'हिंदी में पढ़ें' : 'Read in English'}
-                            </button>
-
+                                <option value="en">English</option>
+                                <option value="hi">Hindi</option>
+                                <option value="ta">Tamil</option>
+                                <option value="te">Telugu</option>
+                                <option value="ml">Malayalam</option>
+                                <option value="kn">Kannada</option>
+                            </select>
                             <button
                                 onClick={handleDownloadPDF}
                                 style={{

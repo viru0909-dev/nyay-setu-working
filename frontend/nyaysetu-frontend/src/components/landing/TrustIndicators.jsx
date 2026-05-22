@@ -4,18 +4,17 @@ import { useTranslation } from 'react-i18next';
 
 export default function TrustIndicators() {
     const { t } = useTranslation('landing');
-
     const indicators = [
         {
             icon: Shield,
-            title: t('trustIndicators.bankSecurity.title'),
-            description: t('trustIndicators.bankSecurity.description'),
+            title:t('trustIndicators.bankSecurity.title'),
+            description:t('trustIndicators.bankSecurity.description'),
             color: "#8b5cf6"
         },
         {
             icon: Award,
-            title: t('trustIndicators.govCertified.title'),
-            description: t('trustIndicators.govCertified.description'),
+            title: t('trustIndicators.governmentCertified.title'),
+            description: t('trustIndicators.governmentCertified.description'),
             color: "#10b981"
         },
         {
@@ -33,7 +32,7 @@ export default function TrustIndicators() {
         {
             icon: Clock,
             title: t('trustIndicators.availability.title'),
-            description: t('trustIndicators.availability.description'),
+            description:  t('trustIndicators.availability.description'),
             color: "#f59e0b"
         },
         {
@@ -80,7 +79,7 @@ export default function TrustIndicators() {
                         </span>
                     </h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>
-                        {t('trustIndicators.subheading')}
+                        {t('trustIndicators.subtitle')}
                     </p>
                 </motion.div>
 

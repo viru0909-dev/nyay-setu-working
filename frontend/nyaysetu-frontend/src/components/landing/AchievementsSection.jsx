@@ -25,7 +25,7 @@ export default function AchievementsSection() {
             color: '#C0C0C0',
             bgGradient: 'linear-gradient(135deg, #C0C0C0 0%, #808080 100%)'
         }
-    ];
+    ]  
 
     return (
         <section style={{ padding: '6rem 2rem', background: 'var(--bg-glass)' }}>
@@ -54,7 +54,7 @@ export default function AchievementsSection() {
                         color: 'var(--text-main)',
                         marginBottom: '1rem'
                     }}>
-                        {t('achievements.heading')}
+                        {t('achievements.headingPrefix')}
                         <span style={{
                             background: 'linear-gradient(135deg, #3F5DCC 0%, #7C5CFF 100%)',
                             WebkitBackgroundClip: 'text',
@@ -65,7 +65,7 @@ export default function AchievementsSection() {
                     </h2>
 
                     <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
-                        {t('achievements.subheading')}
+                        {t('achievements.subtitle')}
                     </p>
                 </div>
 
@@ -155,7 +155,7 @@ export default function AchievementsSection() {
                                             marginBottom: '1rem',
                                             textAlign: 'center'
                                         }}>
-                                            {t('achievements.overlay.viewMaterials')}
+                                            {t('achievements.vois.overlayTitle')}
                                         </h4>
 
                                         <motion.a
@@ -184,7 +184,7 @@ export default function AchievementsSection() {
                                             }}
                                         >
                                             <FileText size={22} />
-                                            {t('achievements.overlay.viewReport')}
+                                            {t('achievements.vois.viewReport')}
                                         </motion.a>
 
                                         <motion.a
@@ -213,7 +213,7 @@ export default function AchievementsSection() {
                                             }}
                                         >
                                             <Presentation size={22} />
-                                            {t('achievements.overlay.viewPresentation')}
+                                            {t('achievements.vois.viewPresentation')}
                                         </motion.a>
 
                                         <motion.a
@@ -242,7 +242,7 @@ export default function AchievementsSection() {
                                             }}
                                         >
                                             <Video size={22} />
-                                            {t('achievements.overlay.watchVideo')}
+                                            {t('achievements.vois.watchVideo')}
                                         </motion.a>
                                     </motion.div>
                                 )}
@@ -278,7 +278,7 @@ export default function AchievementsSection() {
                                             textAlign: 'center',
                                             margin: 0
                                         }}>
-                                            {t('achievements.overlay.certificateTitle')}
+                                            {t('achievements.esubmit.overlayTitle')}
                                         </h4>
 
                                         <motion.a
@@ -324,7 +324,7 @@ export default function AchievementsSection() {
                                             }}
                                         >
                                             <Award size={20} />
-                                            {t('achievements.overlay.viewCertificate')}
+                                            {t('achievements.esubmit.viewCertificate')}
                                         </motion.a>
                                     </motion.div>
                                 )}

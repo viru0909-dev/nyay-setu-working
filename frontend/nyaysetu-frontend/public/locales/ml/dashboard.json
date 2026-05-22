@@ -1,0 +1,127 @@
+{
+    "sidebar": {
+        "collapseSidebar": "സൈഡ്ബാർ ചുരുക്കുക",
+        "litigant": {
+            "dashboard": "ഡാഷ്ബോർഡ്",
+            "vakilFriendAI": "ന്യായ സാരഥി",
+            "fileCaseFIR": "കേസ് / FIR ഫയൽ ചെയ്യുക",
+            "caseDiary": "കേസ് ഡയറി",
+            "hearings": "വിചാരണകൾ",
+            "lawyerChat": "അഭിഭാഷക ചാറ്റ്",
+            "forensicAnalysis": "ഫോറൻസിക് വിശകലനം",
+            "profile": "പ്രൊഫൈൽ"
+        },
+        "lawyer": {
+            "dashboard": "ഡാഷ്ബോർഡ്",
+            "litigantDirectory": "വാദി ഡയറക്ടറി",
+            "activeCases": "സജീവ കേസുകൾ",
+            "aiLegalAssistant": "AI നിയമ സഹായി",
+            "hearings": "വിചാരണകൾ",
+            "analytics": "വിശകലനങ്ങൾ",
+            "profile": "പ്രൊഫൈൽ"
+        },
+        "judge": {
+            "judicialOverview": "ജുഡീഷ്യൽ അവലോകനം",
+            "myDocket": "എന്റെ ഡോക്കറ്റ്",
+            "unassignedPool": "നിയോഗിക്കാത്ത പൂൾ",
+            "liveHearing": "തൽസമയ വിചാരണ",
+            "courtAnalytics": "കോടതി വിശകലനങ്ങൾ",
+            "profile": "പ്രൊഫൈൽ"
+        },
+        "admin": {
+            "dashboard": "ഡാഷ്ബോർഡ്",
+            "userManagement": "ഉപയോക്തൃ മാനേജ്മെന്റ്",
+            "caseManagement": "കേസ് മാനേജ്മെന്റ്",
+            "judgeAssignment": "ന്യായാധിപ നിയോഗം",
+            "reports": "റിപ്പോർട്ടുകൾ",
+            "settings": "ക്രമീകരണങ്ങൾ",
+            "profile": "പ്രൊഫൈൽ"
+        },
+        "techAdmin": {
+            "dashboard": "ഡാഷ്ബോർഡ്",
+            "aiModels": "AI മോഡലുകൾ",
+            "videoSystem": "വീഡിയോ സിസ്റ്റം",
+            "logs": "ലോഗുകൾ",
+            "configuration": "കോൺഫിഗറേഷൻ",
+            "profile": "പ്രൊഫൈൽ"
+        },
+        "police": {
+            "dashboard": "ഡാഷ്ബോർഡ്",
+            "investigationUnit": "അന്വേഷണ വിഭാഗം",
+            "uploadFIR": "FIR അപ്‌ലോഡ് ചെയ്യുക",
+            "myFIRs": "എന്റെ FIRകൾ",
+            "profile": "പ്രൊഫൈൽ"
+        }
+    },
+    "litigant": {
+        "fileCaseFIR": "കേസ് / FIR ഫയൽ ചെയ്യുക",
+        "fileCaseDesc": "ന്യായ സാരഥി AI സഹായത്തോടെ സിവിൽ കേസ് അല്ലെങ്കിൽ ക്രിമിനൽ FIR ഫയൽ ചെയ്യുക",
+        "getStarted": "ആരംഭിക്കുക",
+        "pendingApprovals": "തീർപ്പാക്കാത്ത അനുമതികൾ",
+        "reviewDraft": "ഡ്രാഫ്റ്റ് പരിശോധിക്കുക",
+        "actionRequired": "നടപടി ആവശ്യമാണ്",
+        "sentBy": "അയച്ചത്",
+        "awaitingSignature": "നിങ്ങളുടെ ഡിജിറ്റൽ ഒപ്പിനായി കാത്തിരിക്കുന്നു",
+        "viewDetails": "വിശദാംശങ്ങൾ കാണുക",
+        "approveSign": "അംഗീകരിക്കുക & E-ഒപ്പിടുക",
+        "myCases": "എന്റെ കേസുകൾ",
+        "upcomingHearings": "വരാനിരിക്കുന്ന വിചാരണകൾ",
+        "documents": "രേഖകൾ",
+        "legalChat": "നിയമ ചാറ്റ്",
+        "active": "സജീവം",
+        "chatWithLawyer": "അഭിഭാഷകനുമായി ചാറ്റ് ചെയ്യുക",
+        "thisMonth": "ഈ മാസം +1",
+        "newDocs": "+2 പുതിയത്",
+        "recentCases": "സമീപകാല കേസുകൾ",
+        "viewAll": "എല്ലാം കാണുക",
+        "noCases": "ഇതുവരെ കേസുകൾ ഫയൽ ചെയ്തിട്ടില്ല",
+        "fileFirstCase": "നിങ്ങളുടെ ആദ്യ കേസ് ഫയൽ ചെയ്യുക",
+        "filed": "ഫയൽ ചെയ്തു",
+        "noUpcomingHearings": "വരാനിരിക്കുന്ന വിചാരണകൾ ഇല്ല",
+        "hearingsAppearHere": "ഷെഡ്യൂൾ ചെയ്തുകഴിഞ്ഞാൽ വിചാരണകൾ ഇവിടെ കാണിക്കും",
+        "joinVirtualCourt": "വെർച്വൽ കോടതിയിൽ ചേരുക",
+        "startsIn": "{{minutes}} മിനിറ്റിൽ ആരംഭിക്കും",
+        "loading": "ലോഡ് ആകുന്നു..."
+    },
+    "lawyer": {
+        "dashboard": "ഡാഷ്ബോർഡ്",
+        "clientManagement": "ക്ലയന്റ് മാനേജ്മെന്റ്",
+        "activeCases": "സജീവ കേസുകൾ",
+        "aiAssistant": "AI നിയമ സഹായി",
+        "hearings": "വിചാരണകൾ",
+        "analytics": "വിശകലനങ്ങൾ",
+        "profile": "പ്രൊഫൈൽ"
+    },
+    "judge": {
+        "judicialOverview": "ജുഡീഷ്യൽ അവലോകനം",
+        "myDocket": "എന്റെ ഡോക്കറ്റ്",
+        "unassignedPool": "നിയോഗിക്കാത്ത പൂൾ",
+        "courtAnalytics": "കോടതി വിശകലനങ്ങൾ"
+    },
+    "police": {
+        "dashboard": "പോലീസ് ഡാഷ്ബോർഡ്",
+        "investigationUnit": "അന്വേഷണ വിഭാഗം",
+        "uploadFIR": "FIR അപ്‌ലോഡ് ചെയ്യുക",
+        "myFIRs": "എന്റെ FIRകൾ"
+    },
+    "common": {
+        "dashboard": "ഡാഷ്ബോർഡ്",
+        "welcomeBack": "തിരിച്ചു സ്വാഗതം",
+        "viewProfile": "പ്രൊഫൈൽ കാണുക",
+        "language": "ഭാഷ",
+        "search": "തിരയുക...",
+        "notifications": "അറിയിപ്പുകൾ",
+        "profile": "പ്രൊഫൈൽ",
+        "logout": "ലോഗൗട്ട്",
+        "loading": "ലോഡ് ആകുന്നു...",
+        "next": "അടുത്തത്",
+        "previous": "മുൻപത്തേത്",
+        "submit": "സമർപ്പിക്കുക",
+        "cancel": "റദ്ദാക്കുക",
+        "save": "സംരക്ഷിക്കുക",
+        "delete": "ഇല്ലാതാക്കുക",
+        "edit": "തിരുത്തുക",
+        "viewAll": "എല്ലാം കാണുക",
+        "noData": "ഡാറ്റ ലഭ്യമല്ല"
+    }
+}

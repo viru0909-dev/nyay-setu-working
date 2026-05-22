@@ -1,6 +1,6 @@
 // redesigned header — dark mode toggle, portal dropdown, sticky scroll, mobile drawer
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import {Link, useNavigate ,useLocation} from 'react-router-dom';
 import { Scale, Menu, X, Globe, Sun, Moon, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -155,6 +155,7 @@ export default function Header({ hideAuthButtons = false }) {
                     alignItems: 'center',
                     gap: '1rem',
                 }}>
+                </div>
                     {/* Logo */}
                     <Link to="/" style={{
                         display: 'flex',
@@ -224,77 +225,33 @@ export default function Header({ hideAuthButtons = false }) {
                                 <ChevronDown size={14} style={{ transform: roleOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
                             </button>
 
-                            <AnimatePresence>
-                                {roleOpen && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                                        transition={{ duration: 0.15 }}
-                                        style={{
-                                            position: 'absolute',
-                                            top: 'calc(100% + 8px)',
-                                            right: 0,
-                                            background: 'var(--bg-surface)',
-                                            border: '1px solid var(--border-light)',
-                                            borderRadius: '10px',
-                                            boxShadow: 'var(--shadow-hover)',
-                                            minWidth: '150px',
-                                            overflow: 'hidden',
-                                            zIndex: 100,
-                                        }}
-                                    >
-                                        {ROLES.map(role => (
-                                            <Link
-                                                key={role.id}
-                                                to={role.href}
-                                                onClick={() => setRoleOpen(false)}
-                                                style={{
-                                                    display: 'block',
-                                                    padding: '0.65rem 1rem',
-                                                    color: 'var(--text-main)',
-                                                    fontSize: '0.9rem',
-                                                    fontWeight: '500',
-                                                    textDecoration: 'none',
-                                                    transition: 'background 0.15s ease',
-                                                }}
-                                                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
-                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                            >
-                                                {role.label}
-                                            </Link>
-                                        ))}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
+                </div>
+                {/* CTA Buttons */}
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }} className="desktop-cta">
+                    {/* Language Dropdown */}
+                    <select
+                        value={i18n.language}
+                        onChange={(e) => i18n.changeLanguage(e.target.value)}
+                        style={{
+                            padding: '0.6rem 1rem',
+                            background: 'transparent',
+                            border: '1px solid #CBD5E1',
+                            borderRadius: '10px',
+                            color: 'var(--color-primary)',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            fontSize: '0.875rem'
+                        }}
+                    >
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="ta">Tamil</option>
+                        <option value="te">Telugu</option>
+                        <option value="ml">Malayalam</option>
+                        <option value="kn">Kannada</option>
+                    </select>
 
-                        {/* Language Toggle */}
-                        <div style={{ position: 'relative' }} id="lang-selector">
-                        <button
-                            onClick={() => setLangOpen(o => !o)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.35rem',
-                                padding: '0.5rem 0.8rem',
-                                background: 'transparent',
-                                border: '1px solid var(--border-medium)',
-                                borderRadius: '8px',
-                                color: 'var(--text-main)',
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                fontSize: '0.8rem',
-                                fontFamily: 'inherit',
-                                transition: 'all 0.2s ease',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border-medium)'; }}
-                        >
-                            <Globe size={14} />
-                            {LANGUAGES.find(l => l.code === i18n.language)?.label ?? 'EN'}
-                            <ChevronDown size={12} style={{ transform: langOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
-                        </button>
+                        
 
                         <AnimatePresence>
                             {langOpen && (
