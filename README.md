@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Nyay Saarthi — Digital Judiciary Platform for India" width="100%" />
+  <img src="assets/banner.png" alt="Nyay Setu — Digital Judiciary Platform for India" width="100%" />
 </p>
 
 <p align="center">
@@ -28,13 +28,13 @@
 
 > **Mission Statement**
 >
-> India has over 50 million pending court cases. Millions of citizens cannot afford legal counsel. Nyay Saarthi bridges this gap by putting an AI-powered legal assistant, end-to-end case management, and secure virtual courts in the hands of every Indian — entirely free of charge.
+> India has over 50 million pending court cases. Millions of citizens cannot afford legal counsel. Nyay Setu bridges this gap by putting an AI-powered legal assistant, end-to-end case management, and secure virtual courts in the hands of every Indian — entirely free of charge.
 
 <hr/>
 
 ## Table of Contents
 
-- [Why Nyay Saarthi?](#why-nyay-saarthi)
+- [Why Nyay Setu?](#why-nyay-setu)
 - [Key Features](#key-features)
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
@@ -55,7 +55,7 @@ The Indian judiciary faces a systemic crisis that affects hundreds of millions o
 | Average time to resolve a civil case | **10–15 Years** |
 | Citizens unable to afford legal representation | **Hundreds of Millions** |
 
-Nyay Saarthi is built to address this directly. The platform removes the three biggest barriers to legal access — cost, complexity, and distance — by digitizing the entire judiciary workflow and placing an AI legal assistant at every citizen's fingertips.
+Nyay Setu is built to address this directly. The platform removes the three biggest barriers to legal access — cost, complexity, and distance — by digitizing the entire judiciary workflow and placing an AI legal assistant at every citizen's fingertips.
 
 <hr/>
 
@@ -173,5 +173,5 @@ License to be added. All rights reserved until a license is formally declared.
 
 <p align="center">
   Built with purpose for a more accessible Indian Judiciary.<br/>
-  <em>Nyay Saarthi — न्याय हर किसी का अधिकार है।</em>
+  <em>Nyay Setu — न्याय हर किसी का अधिकार है।</em>
 </p>
