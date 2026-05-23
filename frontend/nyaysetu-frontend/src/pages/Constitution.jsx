@@ -8,7 +8,9 @@ import Footer from '../components/landing/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { brainAPI } from '../services/api';
 
+
 export default function Constitution() {
+    const isMobile = window.innerWidth < 768;
     const navigate = useNavigate();
     const { language, toggleLanguage, t } = useLanguage();
     const { theme } = useTheme();
@@ -21,6 +23,7 @@ export default function Constitution() {
     const [aiResponse, setAiResponse] = useState('');
     const [isAiLoading, setIsAiLoading] = useState(false);
     const [sessionId, setSessionId] = useState(null);
+    
 
     // Enhanced Constitution Data with more articles
     const constitutionData = {
@@ -502,7 +505,15 @@ export default function Constitution() {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: showAIChat ? '1fr 400px' : '1fr', gap: '2rem' }}>
+               <div style={{
+    display: 'grid',
+    gridTemplateColumns: isMobile
+        ? '1fr'
+        : showAIChat
+            ? '1fr 400px'
+            : '1fr',
+    gap: '2rem'
+}}>
                     {/* Main Content */}
                     <div>
                         {selectedArticle ? (
@@ -781,10 +792,16 @@ export default function Constitution() {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 100 }}
                                 style={{
-                                    position: 'sticky',
-                                    top: '6rem',
-                                    height: 'fit-content',
-                                    maxHeight: 'calc(100vh - 8rem)',
+                                   position: isMobile ? 'fixed' : 'sticky',
+                                    bottom: isMobile ? '1rem' : 'auto',
+                                    right: isMobile ? '1rem' : 'auto',
+                                    left: isMobile ? '1rem' : 'auto',
+                                    zIndex: isMobile ? 999 : 'auto',
+                                    width: isMobile ? 'calc(100% - 2rem)' : 'auto',
+                                   top: isMobile ? '5rem' : '6rem',
+                                   height: isMobile ? '75vh' : 'fit-content',
+                                    maxHeight: isMobile ? '80vh' : 'calc(100vh - 8rem)',
+                                    overflowY: 'auto',
                                     display: 'flex',
                                     flexDirection: 'column'
                                 }}
