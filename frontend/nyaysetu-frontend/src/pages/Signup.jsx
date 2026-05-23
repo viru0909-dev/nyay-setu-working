@@ -558,8 +558,7 @@ export default function Signup() {
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            window.location.href =
-                                                '${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/google';
+                                            window.location.href = 'http://localhost:8080/oauth2/authorization/google';
                                         }}
                                         style={{
                                             width: '100%',

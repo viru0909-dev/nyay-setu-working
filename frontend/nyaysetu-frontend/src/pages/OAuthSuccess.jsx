@@ -7,9 +7,7 @@ export default function OAuthSuccess() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { setAuth } = useAuthStore();
-    console.log("AFTER SET AUTH:");
-    console.log(localStorage.getItem("auth-storage"));
-
+   
     useEffect(() => {
 
         const token = searchParams.get('token');
@@ -30,8 +28,7 @@ export default function OAuthSuccess() {
                     name
                 };
     
-                console.log("ROLE FROM URL:", cleanRole);
-                console.log("USER OBJECT:", user);
+                
     
                 setAuth(user, token);
     
@@ -61,7 +58,7 @@ export default function OAuthSuccess() {
     
             } catch (error) {
     
-                console.error('OAuth parsing failed:', error);
+               
     
                 navigate('/login');
             }

@@ -14,7 +14,6 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [selectedRole, setSelectedRole] = useState('');
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showFaceLogin, setShowFaceLogin] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -23,6 +22,15 @@ export default function Login() {
     const { setAuth } = useAuthStore();
     const [searchParams] = useSearchParams();
     const oauthError = searchParams.get('error');
+    const [error, setError] = useState('');
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const oauthError = params.get("error");
+    
+        if (oauthError) {
+            setError(oauthError);
+        }
+    }, []);
 
     // Mobile detection
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -492,11 +500,13 @@ export default function Login() {
                                 }} />
                             </div>
 
+                            console.log("ENV VALUE =", import.meta.env.VITE_API_BASE_URL);
+
                             {/* Google Login */}
                             <button
                                 type="button"
                                 onClick={() => {
-                                    window.location.href = '${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/google';
+                                    window.location.href = `http://localhost:8080/oauth2/authorization/google`;
                                 }}
                                 style={{
                                     width: '100%',
