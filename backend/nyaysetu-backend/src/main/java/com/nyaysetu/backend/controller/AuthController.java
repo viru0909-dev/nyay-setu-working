@@ -10,14 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import jakarta.mail.MessagingException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,12 +28,11 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final AuthService authService;
-    private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
     private final EmailService emailService;
     private final FaceRecognitionService faceRecognitionService;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
@@ -49,19 +45,9 @@ public class AuthController {
             );
             
             // Auto-login after registration
-            UserDetails userDetails = userDetailsService.loadUserByUsername(req.getEmail());
-            String token = jwtService.generateToken(new HashMap<>(), userDetails);
             var user = authService.findByEmail(req.getEmail());
-            
-            return ResponseEntity.ok(Map.of(
-                    "token", token,
-                    "user", Map.of(
-                            "id", user.getId(),
-                            "email", user.getEmail(),
-                            "name", user.getName(),
-                            "role", user.getRole().name()
-                    )
-            ));
+
+            return ResponseEntity.ok(refreshTokenService.issueTokens(user));
         } catch (org.springframework.dao.DataIntegrityViolationException e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "Email already exists. Please use a different email or login."));
@@ -85,24 +71,23 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
             );
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(req.getEmail());
-            String token = jwtService.generateToken(new HashMap<>(), userDetails);
-
             var user = authService.findByEmail(req.getEmail());
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("user", Map.of(
-                "id", user.getId(),
-                "name", user.getName(),
-                "email", user.getEmail(),
-                "role", user.getRole().name()
-            ));
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(refreshTokenService.issueTokens(user));
         }
         catch (BadCredentialsException ex) {
             return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@Valid @RequestBody RefreshTokenRequest req) {
+        try {
+            return ResponseEntity.ok(refreshTokenService.refresh(req.getRefreshToken()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(401).body(Map.of("message", ex.getMessage()));
+        } catch (Exception ex) {
+            log.error("Refresh token exchange failed", ex);
+            return ResponseEntity.status(500).body(Map.of("message", "Unable to refresh session"));
         }
     }
 
@@ -195,20 +180,8 @@ public class AuthController {
             User user = faceRecognitionService.verifyFace(req.getEmail(), req.getFaceDescriptor());
 
             // Generate JWT token
-            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-            String token = jwtService.generateToken(new HashMap<>(), userDetails);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("user", Map.of(
-                "id", user.getId(),
-                "name", user.getName(),
-                "email", user.getEmail(),
-                "role", user.getRole().name()
-            ));
-
             log.info("Face login successful for user: {}", user.getEmail());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(refreshTokenService.issueTokens(user));
         } catch (Exception e) {
             log.error("Face login failed", e);
             return ResponseEntity.status(401).body(Map.of("message", "Face verification failed"));

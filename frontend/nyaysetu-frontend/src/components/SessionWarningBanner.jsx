@@ -1,6 +1,6 @@
 import React from 'react';
 
-const SessionWarningBanner = ({ onRefresh, onDismiss }) => {
+const SessionWarningBanner = ({ onRefresh, onDismiss, refreshing = false, errorMessage = '' }) => {
     return (
         <div style={{
             position: 'fixed',
@@ -18,19 +18,26 @@ const SessionWarningBanner = ({ onRefresh, onDismiss }) => {
         }}>
             <div>
                 <strong>Warning:</strong> Your session will expire in 5 minutes. Unsaved work may be lost.
+                {errorMessage && (
+                    <div style={{ marginTop: '6px', fontSize: '14px', color: '#8a1c1c' }}>
+                        {errorMessage}
+                    </div>
+                )}
             </div>
             <div>
                 <button
                     onClick={onRefresh}
-                    style={{ marginRight: '10px', padding: '6px 12px', cursor: 'pointer' }}
+                    disabled={refreshing}
+                    style={{ marginRight: '10px', padding: '6px 12px', cursor: refreshing ? 'not-allowed' : 'pointer' }}
                 >
-                    Stay Logged In
+                    {refreshing ? 'Refreshing...' : 'Stay Logged In'}
                 </button>
                 <button
                     onClick={onDismiss}
-                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+                    disabled={refreshing}
+                    style={{ background: 'transparent', border: 'none', cursor: refreshing ? 'not-allowed' : 'pointer', fontSize: '16px' }}
                 >
-                    ✕
+                    x
                 </button>
             </div>
         </div>

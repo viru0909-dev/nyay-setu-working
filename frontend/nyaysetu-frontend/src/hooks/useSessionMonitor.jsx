@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import useAuthStore from '../store/authStore';
 
 export const useSessionMonitor = (token) => {
     const [showWarning, setShowWarning] = useState(false);
+    const logout = useAuthStore((state) => state.logout);
 
 
     useEffect(() => {
-        if (!token) return;
+        if (!token) {
+            setShowWarning(false);
+            return;
+        }
 
         try {
             const decoded = jwtDecode(token);
@@ -38,9 +43,9 @@ export const useSessionMonitor = (token) => {
         } catch (error) {
             console.error("Invalid token format", error);
         }
-    }, [token]);
+    }, [logout, token]);
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        logout();
         setShowWarning(false);
         // Redirects to login with a special parameter so we can show a nice message later
         window.location.href = '/login?reason=session_expired';

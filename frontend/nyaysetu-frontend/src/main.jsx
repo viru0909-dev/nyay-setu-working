@@ -6,6 +6,8 @@ import './i18n' // Initialize i18n before app
 import App from './App.jsx'
 import { useSessionMonitor } from './hooks/useSessionMonitor';
 import SessionWarningBanner from './components/SessionWarningBanner';
+import { refreshSession } from './services/api';
+import useAuthStore from './store/authStore';
 
 /**
  * Register service worker and handle updates
@@ -17,7 +19,7 @@ const registerServiceWorker = (callback) => {
     const isDev = import.meta.env.DEV;
 
     if (isDev) {
-      //  console.log('🔧 Dev mode detected - Service Worker registration skipped');
+        //  console.log('🔧 Dev mode detected - Service Worker registration skipped');
         return;
     }
 
@@ -27,7 +29,7 @@ const registerServiceWorker = (callback) => {
                 const registration = await navigator.serviceWorker.register('/sw.js', {
                     scope: '/',
                 });
-             //   console.log('✅ Service Worker registered successfully:', registration);
+                //   console.log('✅ Service Worker registered successfully:', registration);
 
                 // Pass registration to callback
                 if (callback) {
@@ -48,17 +50,33 @@ const registerServiceWorker = (callback) => {
 
 const Root = () => {
     const [swRegistration, setSwRegistration] = useState(null);
+    const [refreshing, setRefreshing] = useState(false);
+    const [refreshError, setRefreshError] = useState('');
 
-    // 1. Grab the user's token from local storage
-    const token = localStorage.getItem('token');
+    // 1. Subscribe to the current access token so monitor timers reset after refresh
+    const token = useAuthStore((state) => state.token);
 
     // 2. Start the background monitor engine
     const { showWarning, setShowWarning } = useSessionMonitor(token);
 
-    // 3. The temporary function for the "Stay Logged In" button
-    const handleRefresh = () => {
-        console.log("User wants to stay logged in!");
-        setShowWarning(false);
+    // 3. Refresh the user's session and restart warning/expiry timers
+    const handleRefresh = async () => {
+        if (refreshing) {
+            return;
+        }
+
+        setRefreshing(true);
+        setRefreshError('');
+
+        try {
+            await refreshSession();
+            setShowWarning(false);
+        } catch (error) {
+            console.error('Session refresh failed', error);
+            setRefreshError(error.response?.data?.message || 'Unable to extend your session. Please sign in again.');
+        } finally {
+            setRefreshing(false);
+        }
     };
 
     useEffect(() => {
@@ -72,6 +90,8 @@ const Root = () => {
                 <SessionWarningBanner
                     onRefresh={handleRefresh}
                     onDismiss={() => setShowWarning(false)}
+                    refreshing={refreshing}
+                    errorMessage={refreshError}
                 />
             )}
 
