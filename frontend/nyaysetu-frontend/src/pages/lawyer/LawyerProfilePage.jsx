@@ -16,6 +16,45 @@ export default function LawyerProfilePage() {
     const { enrollFace, deleteFace } = useFaceRecognition();
     const [faceEnabled, setFaceEnabled] = useState(false);
 
+    // Profile fields form state
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '+91 98765 43210' // Kept matching your default mockup data
+    });
+
+    // Synchronize form state once user data loads from auth store
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                name: user.name || '',
+                email: user.email || '',
+                phone: user.phone || '+91 98765 43210'
+            });
+        }
+    }, [user]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSaveChanges = async () => {
+        try {
+            // TODO: Connect this to an actual API endpoint via your authStore or axios instance
+            // e.g., await updateProfile(formData, token);
+            
+            console.log('Saving profile data:', formData);
+            alert('Profile updated successfully!');
+            setIsEditing(false);
+        } catch (err) {
+            alert('Failed to save changes: ' + err.message);
+        }
+    };
+
     const handleEnrollFace = async (descriptor) => {
         try {
             await enrollFace(descriptor, token);
@@ -48,6 +87,20 @@ export default function LawyerProfilePage() {
         boxShadow: 'var(--shadow-glass-strong)'
     };
 
+    // Shared input element styling using your CSS variables
+    const inputStyle = {
+        background: 'var(--bg-glass-subtle)',
+        border: 'var(--border-glass-subtle)',
+        borderRadius: '0.5rem',
+        padding: '0.4rem 0.75rem',
+        color: 'var(--text-main)',
+        fontSize: '0.95rem',
+        fontWeight: '600',
+        outline: 'none',
+        width: '100%',
+        boxSizing: 'border-box'
+    };
+
     const sections = [
         { title: 'Bar Council ID', value: 'BAR/2015/ND/4821', icon: Award },
         { title: 'Specialization', value: 'Criminal & Constitutional Law', icon: Briefcase },
@@ -69,7 +122,7 @@ export default function LawyerProfilePage() {
                                 color: 'var(--text-main)', fontSize: '3rem', fontWeight: '800',
                                 boxShadow: 'var(--shadow-glass)'
                             }}>
-                                {user?.name?.charAt(0) || 'L'}
+                                {formData.name?.charAt(0) || user?.name?.charAt(0) || 'L'}
                             </div>
                             <button style={{
                                 position: 'absolute', bottom: -5, right: -5,
@@ -81,7 +134,7 @@ export default function LawyerProfilePage() {
                                 <Camera size={18} />
                             </button>
                         </div>
-                        <h2 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.5rem', fontWeight: '800' }}>{user?.name || 'Vakil Sahib'}</h2>
+                        <h2 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.5rem', fontWeight: '800' }}>{formData.name || 'Vakil Sahib'}</h2>
                         <p style={{ color: 'var(--color-accent)', fontSize: '0.9rem', fontWeight: '700', marginTop: '0.25rem' }}>Senior Advocate</p>
 
                         <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -146,30 +199,66 @@ export default function LawyerProfilePage() {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                 <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Full Name</label>
-                                <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>{user?.name || 'Adv. Unknown'}</div>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        style={inputStyle}
+                                    />
+                                ) : (
+                                    <div style={{ color: 'var(--text-main)', fontWeight: '600', padding: '0.4rem 0' }}>{formData.name || 'Adv. Unknown'}</div>
+                                )}
                             </div>
+                            
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                 <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Email Address</label>
-                                <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>{user?.email || 'lawyer@nyaysetu.gov.in'}</div>
+                                {isEditing ? (
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        style={inputStyle}
+                                    />
+                                ) : (
+                                    <div style={{ color: 'var(--text-main)', fontWeight: '600', padding: '0.4rem 0' }}>{formData.email || 'lawyer@nyaysetu.gov.in'}</div>
+                                )}
                             </div>
+
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                 <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Phone Number</label>
-                                <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>+91 98765 43210</div>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        name="phone"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                        style={inputStyle}
+                                    />
+                                ) : (
+                                    <div style={{ color: 'var(--text-main)', fontWeight: '600', padding: '0.4rem 0' }}>{formData.phone}</div>
+                                )}
                             </div>
+
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                 <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Role</label>
-                                <div style={{ color: 'var(--color-accent)', fontWeight: '800', fontSize: '0.85rem' }}>{user?.role}</div>
+                                <div style={{ color: 'var(--color-accent)', fontWeight: '800', fontSize: '0.85rem', padding: '0.4rem 0' }}>{user?.role || 'Lawyer'}</div>
                             </div>
                         </div>
 
                         {isEditing && (
                             <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: 'var(--border-glass)', display: 'flex', justifyContent: 'flex-end' }}>
-                                <button style={{
-                                    background: 'var(--color-accent)',
-                                    color: 'var(--text-main)', border: 'none', borderRadius: '0.75rem',
-                                    padding: '0.7rem 1.75rem', fontWeight: '700', cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}>
+                                <button 
+                                    onClick={handleSaveChanges}
+                                    style={{
+                                        background: 'var(--color-accent)',
+                                        color: 'var(--text-main)', border: 'none', borderRadius: '0.75rem',
+                                        padding: '0.7rem 1.75rem', fontWeight: '700', cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', gap: '0.5rem'
+                                    }}
+                                >
                                     <Save size={18} /> Save Changes
                                 </button>
                             </div>
