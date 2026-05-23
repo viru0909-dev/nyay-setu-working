@@ -9,6 +9,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { brainAPI } from '../services/api';
 
 export default function Constitution() {
+    const isMobile = window.innerWidth < 768;
     const navigate = useNavigate();
     const { language, toggleLanguage, t } = useLanguage();
     const { theme } = useTheme();
@@ -357,10 +358,10 @@ export default function Constitution() {
 
             {/* geometric grid pattern — same as Landing hero */}
             <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', backgroundImage: `linear-gradient(rgba(124,92,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,92,255,0.03) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />
-            <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '6rem 2rem 4rem', position: 'relative', zIndex: 1 }}>
+            <div style={{ maxWidth: '1600px', margin: '0 auto', padding: isMobile ? '5rem 1rem 2rem' : '6rem 2rem 4rem', position: 'relative', zIndex: 1 }}>
                 {/* Page Header */}
                 <div style={{
-                    padding: '3rem',
+                    padding: isMobile ? '1.5rem' : '3rem',
                     background: 'var(--bg-glass)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
@@ -379,7 +380,7 @@ export default function Constitution() {
                                 <BookOpen size={48} color="white" />
                             </div>
                             <div>
-                                <h1 style={{ color: 'var(--color-primary)', fontSize: '2.5rem', fontWeight: '900', margin: '0 0 0.5rem 0' }}>
+                                <h1 style={{ color: 'var(--color-primary)', fontSize: isMobile ? '1.8rem' : '2.5rem', fontWeight: '900', margin: '0 0 0.5rem 0' }}>
                                     {t('constitutionOfIndia')}
                                 </h1>
                                 <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: 0 }}>
@@ -480,7 +481,7 @@ export default function Constitution() {
                             placeholder={t('searchArticles')}
                             style={{
                                 width: '100%',
-                                padding: '1.5rem 1.5rem 1.5rem 4.5rem',
+                                padding: isMobile ? '1rem 1rem 1rem 3.5rem' : '1.5rem 1.5rem 1.5rem 4.5rem',
                                 background: 'var(--bg-input)',
                                 border: '1px solid var(--border-light)',
                                 borderRadius: '1.5rem',
@@ -502,7 +503,11 @@ export default function Constitution() {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: showAIChat ? '1fr 400px' : '1fr', gap: '2rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile
+                        ? '1fr'
+                        : showAIChat
+                            ? '1fr 400px'
+                            : '1fr', gap: '2rem' }}>
                     {/* Main Content */}
                     <div>
                         {selectedArticle ? (
@@ -710,7 +715,9 @@ export default function Constitution() {
                             // Parts List View
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                                gridTemplateColumns: isMobile
+                              ? '1fr'
+                                  : 'repeat(auto-fill, minmax(350px, 1fr))',
                                 gap: '2rem'
                             }}>
                                 {filteredParts.map((part, idx) => (
@@ -722,7 +729,7 @@ export default function Constitution() {
                                         whileHover={{ y: -8, scale: 1.02 }}
                                         onClick={() => setSelectedPart(part)}
                                         style={{
-                                            padding: '2.5rem',
+                                            padding: isMobile ? '1.5rem' : '2.5rem',
                                             background: 'var(--bg-surface)',
                                             borderRadius: '1.5rem',
                                             border: '1px solid var(--border-light)',
@@ -781,10 +788,17 @@ export default function Constitution() {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 100 }}
                                 style={{
-                                    position: 'sticky',
+                                    position: isMobile ? 'fixed' : 'sticky',
+                                    bottom: isMobile ? '1rem' : 'auto',
+                                    right: isMobile ? '1rem' : 'auto',
+                                    left: isMobile ? '1rem' : 'auto',
+                                    zIndex: isMobile ? 999 : 'auto',
+                                    width: isMobile ? '90%' : 'auto',
+                                    maxWidth: isMobile ? '360px' : '400px',
                                     top: '6rem',
                                     height: 'fit-content',
-                                    maxHeight: 'calc(100vh - 8rem)',
+                                    maxHeight: isMobile ? '80vh' : 'calc(100vh - 8rem)',
+                                    overflowY: 'auto',
                                     display: 'flex',
                                     flexDirection: 'column'
                                 }}
