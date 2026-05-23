@@ -6,12 +6,35 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
+import { lawyerAPI } from '../../services/api';
 import FaceCapture from '../../components/auth/FaceCapture';
 import { useFaceRecognition } from '../../hooks/useFaceRecognition';
 
 export default function LawyerProfilePage() {
     const { user, token, logout } = useAuthStore();
     const [isEditing, setIsEditing] = useState(false);
+    const [profileData, setProfileData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        barCouncilId: '',
+        specialization: '',
+        experience: '',
+        location: ''
+    });
+    useEffect(() => {
+        if (user) {
+            setProfileData({
+                name: user.name || '',
+                email: user.email || '',
+                phone: user.phone || '',
+                barCouncilId: user.barCouncilId || '',
+                specialization: user.specialization || '',
+                experience: user.experience || '',
+                location: user.location || ''
+            });
+        }
+    }, [user]);
     const [showFaceEnrollment, setShowFaceEnrollment] = useState(false);
     const { enrollFace, deleteFace } = useFaceRecognition();
     const [faceEnabled, setFaceEnabled] = useState(false);
@@ -38,6 +61,28 @@ export default function LawyerProfilePage() {
             }
         }
     };
+    const handleSaveChanges = async () => {
+        try {
+            await lawyerAPI.updateProfile(profileData);
+
+            alert('Profile updated successfully!');
+            setIsEditing(false);
+        } catch (err) {
+            console.error(err);
+            alert('Failed to update profile');
+        }
+    };
+    const handleSaveChanges = async () => {
+        try {
+            await lawyerAPI.updateProfile(profileData);
+
+            alert('Profile updated successfully!');
+            setIsEditing(false);
+        } catch (err) {
+            console.error(err);
+            alert('Failed to update profile');
+        }
+    };
 
     const glassStyle = {
         background: 'var(--bg-glass-strong)',
@@ -49,10 +94,10 @@ export default function LawyerProfilePage() {
     };
 
     const sections = [
-        { title: 'Bar Council ID', value: 'BAR/2015/ND/4821', icon: Award },
-        { title: 'Specialization', value: 'Criminal & Constitutional Law', icon: Briefcase },
-        { title: 'Experience', value: '12+ Years', icon: Shield },
-        { title: 'Location', value: 'New Delhi, India', icon: MapPin },
+        { title: 'Bar Council ID', key: 'barCouncilId', icon: Award },
+        { title: 'Specialization', key: 'specialization', icon: Briefcase },
+        { title: 'Experience', key: 'experience', icon: Shield },
+        { title: 'Location', key: 'location', icon: MapPin },
     ];
 
     return (
@@ -146,15 +191,143 @@ export default function LawyerProfilePage() {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                 <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Full Name</label>
-                                <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>{user?.name || 'Adv. Unknown'}</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+
+                                    <label
+                                        style={{
+                                            color: 'var(--text-secondary)',
+                                            fontSize: '0.75rem',
+                                            fontWeight: '800',
+                                            textTransform: 'uppercase'
+                                        }}
+                                    >
+                                        Full Name
+                                    </label>
+
+                                    {
+                                        isEditing ? (
+                                            <input
+                                                type="text"
+                                                value={profileData.name}
+                                                onChange={(e) =>
+                                                    setProfileData({
+                                                        ...profileData,
+                                                        name: e.target.value
+                                                    })
+                                                }
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.75rem',
+                                                    borderRadius: '0.5rem',
+                                                    border: 'var(--border-glass)',
+                                                    background: 'var(--bg-glass)',
+                                                    color: 'var(--text-main)',
+                                                    outline: 'none'
+                                                }}
+                                            />
+                                        ) : (
+                                            <div
+                                                style={{
+                                                    color: 'var(--text-main)',
+                                                    fontWeight: '600'
+                                                }}
+                                            >
+                                                {profileData.name || 'Adv. Unknown'}
+                                            </div>
+                                        )
+                                    }
+
+                                </div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Email Address</label>
-                                <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>{user?.email || 'lawyer@nyaysetu.gov.in'}</div>
+                                <label
+                                    style={{
+                                        color: 'var(--text-secondary)',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '800',
+                                        textTransform: 'uppercase'
+                                    }}
+                                >
+                                    Email Address
+                                </label>
+
+                                {
+                                    isEditing ? (
+                                        <input
+                                            type="email"
+                                            value={profileData.email}
+                                            onChange={(e) =>
+                                                setProfileData({
+                                                    ...profileData,
+                                                    email: e.target.value
+                                                })
+                                            }
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                borderRadius: '0.5rem',
+                                                border: 'var(--border-glass)',
+                                                background: 'var(--bg-glass)',
+                                                color: 'var(--text-main)',
+                                                outline: 'none'
+                                            }}
+                                        />
+                                    ) : (
+                                        <div
+                                            style={{
+                                                color: 'var(--text-main)',
+                                                fontWeight: '600'
+                                            }}
+                                        >
+                                            {profileData.email || 'lawyer@nyaysetu.gov.in'}
+                                        </div>
+                                    )
+                                }
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Phone Number</label>
-                                <div style={{ color: 'var(--text-main)', fontWeight: '600' }}>+91 98765 43210</div>
+                                <label
+                                    style={{
+                                        color: 'var(--text-secondary)',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '800',
+                                        textTransform: 'uppercase'
+                                    }}
+                                >
+                                    Phone Number
+                                </label>
+
+                                {
+                                    isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={profileData.phone}
+                                            onChange={(e) =>
+                                                setProfileData({
+                                                    ...profileData,
+                                                    phone: e.target.value
+                                                })
+                                            }
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                borderRadius: '0.5rem',
+                                                border: 'var(--border-glass)',
+                                                background: 'var(--bg-glass)',
+                                                color: 'var(--text-main)',
+                                                outline: 'none'
+                                            }}
+                                        />
+                                    ) : (
+                                        <div
+                                            style={{
+                                                color: 'var(--text-main)',
+                                                fontWeight: '600'
+                                            }}
+                                        >
+                                            {profileData.phone || '+91 98765 43210'}
+                                        </div>
+                                    )
+                                }
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                 <label style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Role</label>
@@ -164,12 +337,14 @@ export default function LawyerProfilePage() {
 
                         {isEditing && (
                             <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: 'var(--border-glass)', display: 'flex', justifyContent: 'flex-end' }}>
-                                <button style={{
-                                    background: 'var(--color-accent)',
-                                    color: 'var(--text-main)', border: 'none', borderRadius: '0.75rem',
-                                    padding: '0.7rem 1.75rem', fontWeight: '700', cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem'
-                                }}>
+                                <button
+                                    onClick={handleSaveChanges}
+                                    style={{
+                                        background: 'var(--color-accent)',
+                                        color: 'var(--text-main)', border: 'none', borderRadius: '0.75rem',
+                                        padding: '0.7rem 1.75rem', fontWeight: '700', cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', gap: '0.5rem'
+                                    }}>
                                     <Save size={18} /> Save Changes
                                 </button>
                             </div>
@@ -183,7 +358,39 @@ export default function LawyerProfilePage() {
                                     <div style={{ color: 'var(--color-accent)' }}><sec.icon size={20} /></div>
                                     <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>{sec.title}</span>
                                 </div>
-                                <div style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '1.1rem' }}>{sec.value}</div>
+                                {
+                                    isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={profileData[sec.key]}
+                                            onChange={(e) =>
+                                                setProfileData({
+                                                    ...profileData,
+                                                    [sec.key]: e.target.value
+                                                })
+                                            }
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                borderRadius: '0.5rem',
+                                                border: 'var(--border-glass)',
+                                                background: 'var(--bg-glass)',
+                                                color: 'var(--text-main)',
+                                                outline: 'none'
+                                            }}
+                                        />
+                                    ) : (
+                                        <div
+                                            style={{
+                                                color: 'var(--text-main)',
+                                                fontWeight: '700',
+                                                fontSize: '1.1rem'
+                                            }}
+                                        >
+                                            {profileData[sec.key]}
+                                        </div>
+                                    )
+                                }
                             </div>
                         ))}
                     </div>
