@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "case_entity")
@@ -17,6 +18,10 @@ public class CaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    @Version
+    private Long version;
+
+    @Column(length = 200)
 
     private String title;
 
