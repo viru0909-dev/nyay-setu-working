@@ -18,6 +18,7 @@ const Constitution = lazy(() => import('./pages/Constitution'));
 const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const OAuth2Callback = lazy(() => import('./pages/OAuth2Callback'));
 const About = lazy(() => import('./pages/About'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -126,6 +127,7 @@ function App({ swRegistration }) {
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/signup" element={<Signup />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
+                                <Route path="/oauth2/callback" element={<OAuth2Callback />} />
                                 <Route path="/constitution" element={<Constitution />} />
                                 <Route path="/about" element={<About />} />
                                 <Route path="/privacy" element={<PrivacyPolicy />} />

@@ -2,6 +2,7 @@ package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.entity.AuthProvider;
 import com.nyaysetu.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class AuthService implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(u.getEmail())
-                .password(u.getPassword())
+                .password(u.getPassword() != null ? u.getPassword() : "")
                 .roles(u.getRole().name())
                 .build();
     }
@@ -41,6 +42,7 @@ public class AuthService implements UserDetailsService {
         u.setName(name);
         u.setPassword(passwordEncoder.encode(password));
         u.setRole(role);
+        u.setAuthProvider(AuthProvider.LOCAL);
         userRepository.save(u);
     }
 

@@ -2,6 +2,7 @@ package com.nyaysetu.backend;
 
 import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.entity.AuthProvider;
 import com.nyaysetu.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,7 @@ public class DataLoader implements CommandLineRunner {
                     .name(name)
                     .password(encoder.encode(pass))
                     .role(role)
+                    .authProvider(AuthProvider.LOCAL)
                     .build();
             userRepository.save(u);
             log.info("New user created: {}", email);
