@@ -132,13 +132,25 @@ export default function TrustIndicators() {
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.borderColor = item.color;
                                     e.currentTarget.style.boxShadow = `0 15px 40px ${item.color}20`;
-                                    e.currentTarget.style.background = 'var(--bg-glass-strong)';
+                                    e.currentTarget.style.background = '#ffffff';
+
+                                    const title = e.currentTarget.querySelector('.trust-title');
+                                    const description = e.currentTarget.querySelector('.trust-description');
+
+                                    if (title) title.style.color = '#111827';
+                                    if (description) description.style.color = '#374151';
                                 }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.borderColor = 'var(--border-light)';
-                                    e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
-                                    e.currentTarget.style.background = 'var(--bg-glass)';
-                                }}
+                              onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = 'var(--border-light)';
+                            e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
+                            e.currentTarget.style.background = 'var(--bg-glass)';
+
+                            const title = e.currentTarget.querySelector('.trust-title');
+                            const description = e.currentTarget.querySelector('.trust-description');
+
+                            if (title) title.style.color = 'var(--text-main)';
+                            if (description) description.style.color = 'var(--text-secondary)';
+                        }}
                             >
                                 {/* Icon */}
                                 <div style={{
@@ -156,21 +168,27 @@ export default function TrustIndicators() {
                                 </div>
 
                                 {/* Title */}
-                                <h3 style={{
+                                <h3
+                                className="trust-title"
+                                style={{
                                     color: 'var(--text-main)',
                                     fontSize: '1.75rem',
                                     fontWeight: '800',
                                     marginBottom: '1rem'
-                                }}>
-                                    {item.title}
-                                </h3>
+                                }}
+                            >
+                                {item.title}
+                            </h3>
 
-                                {/* Description */}
-                                <p style={{
-                                    color: 'var(--text-secondary)',
-                                    fontSize: '1.15rem',
-                                    lineHeight: '1.6'
-                                }}>
+                               {/* Description */}
+                                <p
+                                    className="trust-description"
+                                    style={{
+                                        color: 'var(--text-secondary)',
+                                        fontSize: '1.15rem',
+                                        lineHeight: '1.6'
+                                    }}
+                                >
                                     {item.description}
                                 </p>
                             </motion.div>
