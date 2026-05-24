@@ -55,7 +55,8 @@ export default function DashboardLayout() {
     };
 
     const handleMobileClose = () => {
-        setIsMobileSidebarOpen(false);
+        // Sidebar should close only using toggle button
+        return;
     };
 
     return (
