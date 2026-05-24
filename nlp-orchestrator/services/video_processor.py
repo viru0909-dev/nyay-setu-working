@@ -75,7 +75,7 @@ async def extract_frames(video_path: str, job_id: str, frame_interval: int = 30)
         cap.release()
         return extracted_frames
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _extract)
 
 def cleanup_job(job_id: str):

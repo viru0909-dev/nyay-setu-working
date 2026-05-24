@@ -143,7 +143,7 @@ async def _call_gemini_with_retry(
         f"{KANOON_CONTEXT_PROMPT}\n\n"
         f"Question: {user_prompt}"
     )
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     response = await loop.run_in_executor(
         None,
         lambda: gemini_client.models.generate_content(

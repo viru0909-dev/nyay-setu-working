@@ -44,10 +44,17 @@ export default function Signup() {
     ];
 
     const getPasswordStrength = (pass) => {
-        if (pass.length < 6) return { label: t('auth:signup.passwordStrength.tooShort', 'Too Short'), color: '#f87171', width: '25%' };
-        if (pass.length < 8) return { label: t('auth:signup.passwordStrength.weak', 'Weak'), color: '#fb923c', width: '50%' };
-        if (!/[A-Z]/.test(pass) || !/[0-9]/.test(pass)) return { label: t('auth:signup.passwordStrength.fair', 'Fair'), color: '#fbbf24', width: '75%' };
-        return { label: t('auth:signup.passwordStrength.strong', 'Strong'), color: '#10b981', width: '100%' };
+        const checks = {
+            minLength: pass.length >= 8,
+            hasUpper: /[A-Z]/.test(pass),
+            hasNumber: /[0-9]/.test(pass),
+            hasSpecial: /[@#$!%*?&]/.test(pass),
+        };
+        const passed = Object.values(checks).filter(Boolean).length;
+        if (passed <= 1) return { label: t('auth:signup.passwordStrength.weak', 'Weak'), color: '#f87171', width: '25%', checks };
+        if (passed === 2) return { label: t('auth:signup.passwordStrength.fair', 'Fair'), color: '#fb923c', width: '50%', checks };
+        if (passed === 3) return { label: t('auth:signup.passwordStrength.good', 'Good'), color: '#fbbf24', width: '75%', checks };
+        return { label: t('auth:signup.passwordStrength.strong', 'Strong'), color: '#10b981', width: '100%', checks };
     };
 
     const handleSubmit = async (e) => {
@@ -59,8 +66,14 @@ export default function Signup() {
             return;
         }
 
-        if (formData.password.length < 6) {
-            setError(t('auth:signup.errors.passwordTooShort', 'Password must be at least 6 characters'));
+        const pwChecks = {
+            minLength: formData.password.length >= 8,
+            hasUpper: /[A-Z]/.test(formData.password),
+            hasNumber: /[0-9]/.test(formData.password),
+            hasSpecial: /[@#$!%*?&]/.test(formData.password),
+        };
+        if (!Object.values(pwChecks).every(Boolean)) {
+            setError('Password must be at least 8 characters, include an uppercase letter, a number, and a special character (@#$!%*?&).');
             return;
         }
 
@@ -443,6 +456,18 @@ export default function Signup() {
                                                 <div style={{ height: '4px', background: 'rgba(148, 163, 184, 0.2)', borderRadius: '2px' }}>
                                                     <div style={{ width: strength.width, height: '100%', background: strength.color, borderRadius: '2px', transition: 'width 0.3s' }} />
                                                 </div>
+                                                <ul style={{ margin: '0.5rem 0 0 0', padding: 0, listStyle: 'none' }}>
+                                                    {[
+                                                        [strength.checks?.minLength, 'At least 8 characters'],
+                                                        [strength.checks?.hasUpper,  'At least one uppercase letter'],
+                                                        [strength.checks?.hasNumber, 'At least one number'],
+                                                        [strength.checks?.hasSpecial,'At least one special character (@#$!%*?&)'],
+                                                    ].map(([ok, label]) => (
+                                                        <li key={label} style={{ fontSize: '0.75rem', color: ok ? '#10b981' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.2rem' }}>
+                                                            <span>{ok ? '✓' : '○'}</span> {label}
+                                                        </li>
+                                                    ))}
+                                                </ul>
                                             </div>
                                         )}
                                     </div>

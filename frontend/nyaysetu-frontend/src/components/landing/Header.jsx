@@ -1,6 +1,6 @@
 // redesigned header — dark mode toggle, portal dropdown, sticky scroll, mobile drawer
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Scale, Menu, X, Globe, Sun, Moon, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -10,25 +10,40 @@ import AIAssistantModal from './AIAssistantModal';
 // role links for the portal dropdown
 const ROLES = [
     { id: 'litigant', label: 'Litigant', href: '/litigant' },
-    { id: 'lawyer',   label: 'Lawyer',   href: '/lawyer' },
-    { id: 'judge',    label: 'Judge',    href: '/judge' },
+    { id: 'lawyer', label: 'Lawyer', href: '/lawyer' },
+    { id: 'judge', label: 'Judge', href: '/judge' },
 ];
 
 const LANGUAGES = [
     { code: 'en', label: 'English', flag: 'EN' },
-    { code: 'hi', label: 'हिंदी',   flag: 'HI' },
-    { code: 'mr', label: 'मराठी',   flag: 'MR' },
+    { code: 'hi', label: 'हिंदी', flag: 'HI' },
+    { code: 'mr', label: 'मराठी', flag: 'MR' },
+    { code: 'ta', label: 'தமிழ்', flag: 'TA' },
+    { code: 'te', label: 'తెలుగు', flag: 'TE' }
 ];
 
 export default function Header({ hideAuthButtons = false }) {
-    const [isScrolled, setIsScrolled]            = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [showAIModal, setShowAIModal]            = useState(false);
-    const [roleOpen, setRoleOpen]                  = useState(false);
-    const [langOpen, setLangOpen]                  = useState(false);
-    const { theme, toggleTheme }                   = useTheme();
-    const { t, i18n }                              = useTranslation('common');
-    const location                                 = useLocation();
+    const navigate = useNavigate();
+    const { t, i18n } = useTranslation('common');
+    const [showAIModal, setShowAIModal] = useState(false);
+    const [roleOpen, setRoleOpen] = useState(false);
+    const [langOpen, setLangOpen] = useState(false);
+    const { theme, toggleTheme } = useTheme();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (isMobileMenuOpen) {
+            document.body.style.overflowX = 'hidden';
+        } else {
+            document.body.style.overflowX = 'unset';
+        }
+
+        return () => {
+            document.body.style.overflowX = 'unset';
+        };
+    }, [isMobileMenuOpen]);
 
     // add shadow to nav after scrolling 50px
     useEffect(() => {
@@ -39,12 +54,12 @@ export default function Header({ hideAuthButtons = false }) {
 
     // Close role dropdown on outside click
     useEffect(() => {
-    if (!roleOpen) return;
-    const close = (e) => {
-        if (!e.target.closest('#role-selector')) setRoleOpen(false);
-    };
-    document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
+        if (!roleOpen) return;
+        const close = (e) => {
+            if (!e.target.closest('#role-selector')) setRoleOpen(false);
+        };
+        document.addEventListener('mousedown', close);
+        return () => document.removeEventListener('mousedown', close);
     }, [roleOpen]);
 
     // Close language dropdown on outside click
@@ -58,12 +73,12 @@ export default function Header({ hideAuthButtons = false }) {
     }, [langOpen]);
 
     const navItems = [
-        { labelKey: 'header.nav.home',        href: '/',            isRoute: true },
-        { labelKey: 'header.nav.features',    href: '/#features' },
-        { labelKey: 'Upcoming Features',      href: '/upcoming-features', isRoute: true },
-        { labelKey: 'header.nav.constitution',href: '/constitution', isRoute: true },
+        { labelKey: 'header.nav.home', href: '/', isRoute: true },
+        { labelKey: 'header.nav.features', href: '/#features' },
+        { labelKey: 'Upcoming Features', href: '/upcoming-features', isRoute: true },
+        { labelKey: 'header.nav.constitution', href: '/constitution', isRoute: true },
         { labelKey: 'header.nav.aiAssistant', action: () => setShowAIModal(true) },
-        { labelKey: 'header.nav.about',       href: '/about',       isRoute: true },
+        { labelKey: 'header.nav.about', href: '/about', isRoute: true },
     ];
 
     const isDark = theme === 'dark';
@@ -88,7 +103,7 @@ export default function Header({ hideAuthButtons = false }) {
         const baseStyle = navLinkStyle(item.href);
         // Fallback to labelKey directly if translation returns the exact key
         const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
-        
+
         if (item.action) {
             return (
                 <button
@@ -146,14 +161,9 @@ export default function Header({ hideAuthButtons = false }) {
                     transition: 'box-shadow 0.3s ease, background 0.25s ease',
                 }}
             >
-                <div style={{
+                <div className="header-container" style={{
                     maxWidth: '1400px',
                     margin: '0 auto',
-                    padding: '0.7rem 2rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    gap: '1rem',
                 }}>
                     {/* Logo */}
                     <Link to="/" style={{
@@ -271,93 +281,93 @@ export default function Header({ hideAuthButtons = false }) {
 
                         {/* Language Toggle */}
                         <div style={{ position: 'relative' }} id="lang-selector">
-                        <button
-                            onClick={() => setLangOpen(o => !o)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.35rem',
-                                padding: '0.5rem 0.8rem',
-                                background: 'transparent',
-                                border: '1px solid var(--border-medium)',
-                                borderRadius: '8px',
-                                color: 'var(--text-main)',
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                fontSize: '0.8rem',
-                                fontFamily: 'inherit',
-                                transition: 'all 0.2s ease',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border-medium)'; }}
-                        >
-                            <Globe size={14} />
-                            {LANGUAGES.find(l => l.code === i18n.language)?.label ?? 'EN'}
-                            <ChevronDown size={12} style={{ transform: langOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
-                        </button>
+                            <button
+                                onClick={() => setLangOpen(o => !o)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                    padding: '0.5rem 0.8rem',
+                                    background: 'transparent',
+                                    border: '1px solid var(--border-medium)',
+                                    borderRadius: '8px',
+                                    color: 'var(--text-main)',
+                                    cursor: 'pointer',
+                                    fontWeight: '600',
+                                    fontSize: '0.8rem',
+                                    fontFamily: 'inherit',
+                                    transition: 'all 0.2s ease',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border-medium)'; }}
+                            >
+                                <Globe size={14} />
+                                {LANGUAGES.find(l => l.code === i18n.language)?.label ?? 'EN'}
+                                <ChevronDown size={12} style={{ transform: langOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                            </button>
 
-                        <AnimatePresence>
-                            {langOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                                    transition={{ duration: 0.15 }}
-                                    style={{
-                                        position: 'absolute',
-                                        top: 'calc(100% + 8px)',
-                                        right: 0,
-                                        background: 'var(--bg-surface)',
-                                        border: '1px solid var(--border-light)',
-                                        borderRadius: '10px',
-                                        boxShadow: 'var(--shadow-hover)',
-                                        minWidth: '130px',
-                                        overflow: 'hidden',
-                                        zIndex: 100,
-                                    }}
-                                >
-                                    {LANGUAGES.map(lang => (
-                                        <button
-                                            key={lang.code}
-                                            onClick={() => { i18n.changeLanguage(lang.code); setLangOpen(false); }}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '0.5rem',
-                                                width: '100%',
-                                                padding: '0.65rem 1rem',
-                                                background: i18n.language === lang.code ? 'var(--bg-hover)' : 'transparent',
-                                                border: 'none',
-                                                color: i18n.language === lang.code ? 'var(--color-primary)' : 'var(--text-main)',
-                                                fontSize: '0.875rem',
-                                                fontWeight: i18n.language === lang.code ? '700' : '500',
-                                                cursor: 'pointer',
-                                                fontFamily: 'inherit',
-                                                textAlign: 'left',
-                                                transition: 'background 0.15s ease',
-                                            }}
-                                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
-                                            onMouseLeave={e => e.currentTarget.style.background = i18n.language === lang.code ? 'var(--bg-hover)' : 'transparent'}
-                                        >
-                                            <span style={{
-                                            fontSize: '0.65rem',
-                                            fontWeight: '800',
-                                            padding: '0.1rem 0.3rem',
-                                            borderRadius: '4px',
-                                            background: 'var(--color-primary)',
-                                            color: '#fff',
-                                            letterSpacing: '0.03em',
-                                            flexShrink: 0,
-                                        }}>
-                                            {lang.flag}
-                                        </span>
-                                            {lang.label}
-                                        </button>
-                                    ))}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                            <AnimatePresence>
+                                {langOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                                        transition={{ duration: 0.15 }}
+                                        style={{
+                                            position: 'absolute',
+                                            top: 'calc(100% + 8px)',
+                                            right: 0,
+                                            background: 'var(--bg-surface)',
+                                            border: '1px solid var(--border-light)',
+                                            borderRadius: '10px',
+                                            boxShadow: 'var(--shadow-hover)',
+                                            minWidth: '130px',
+                                            overflow: 'hidden',
+                                            zIndex: 100,
+                                        }}
+                                    >
+                                        {LANGUAGES.map(lang => (
+                                            <button
+                                                key={lang.code}
+                                                onClick={() => { i18n.changeLanguage(lang.code); setLangOpen(false); }}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem',
+                                                    width: '100%',
+                                                    padding: '0.65rem 1rem',
+                                                    background: i18n.language === lang.code ? 'var(--bg-hover)' : 'transparent',
+                                                    border: 'none',
+                                                    color: i18n.language === lang.code ? 'var(--color-primary)' : 'var(--text-main)',
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: i18n.language === lang.code ? '700' : '500',
+                                                    cursor: 'pointer',
+                                                    fontFamily: 'inherit',
+                                                    textAlign: 'left',
+                                                    transition: 'background 0.15s ease',
+                                                }}
+                                                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+                                                onMouseLeave={e => e.currentTarget.style.background = i18n.language === lang.code ? 'var(--bg-hover)' : 'transparent'}
+                                            >
+                                                <span style={{
+                                                    fontSize: '0.65rem',
+                                                    fontWeight: '800',
+                                                    padding: '0.1rem 0.3rem',
+                                                    borderRadius: '4px',
+                                                    background: 'var(--color-primary)',
+                                                    color: '#fff',
+                                                    letterSpacing: '0.03em',
+                                                    flexShrink: 0,
+                                                }}>
+                                                    {lang.flag}
+                                                </span>
+                                                {lang.label}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
 
                         {/* Dark Mode Toggle */}
                         <motion.button
@@ -444,14 +454,27 @@ export default function Header({ hideAuthButtons = false }) {
                 <AnimatePresence>
                     {isMobileMenuOpen && (
                         <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
+                            initial={{ x: '100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '100%' }}
+                            transition={{ type: 'tween', duration: 0.25 }}
                             style={{
+                                position: 'fixed',
+                                top: '75px', // Start below the header
+                                right: 0,
+                                width: '85%',
+                                maxWidth: '360px',
+                                height: 'calc(100vh - 75px)', // Crucial: Restricts height to viewport minus header
                                 background: 'var(--bg-surface)',
-                                borderTop: '1px solid var(--border-light)',
-                                padding: '1.25rem 1.5rem',
+                                borderLeft: '1px solid var(--border-light)',
+                                padding: '1.5rem',
                                 boxShadow: 'var(--shadow-glass)',
+                                zIndex: 999,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                overflowY: 'auto', // Crucial: Enables internal scrolling
+                                WebkitOverflowScrolling: 'touch',
+                                overscrollBehavior: 'contain',
                             }}
                         >
                             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '1rem' }}>
@@ -473,7 +496,7 @@ export default function Header({ hideAuthButtons = false }) {
                                         cursor: 'pointer',
                                         fontFamily: 'inherit',
                                     };
-                                    
+
                                     const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
                                     if (item.action) {
@@ -545,42 +568,42 @@ export default function Header({ hideAuthButtons = false }) {
                                         {isDark ? <><Sun size={16} /> Light Mode</> : <><Moon size={16} /> Dark Mode</>}
                                     </button>
                                     <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                                    {LANGUAGES.map(lang => (
-                                        <button
-                                            key={lang.code}
-                                            onClick={() => i18n.changeLanguage(lang.code)}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '0.35rem',
-                                                padding: '0.5rem 0.85rem',
-                                                background: i18n.language === lang.code ? 'var(--color-primary)' : 'transparent',
-                                                border: '1px solid var(--border-medium)',
-                                                borderRadius: '8px',
-                                                color: i18n.language === lang.code ? '#fff' : 'var(--text-main)',
-                                                cursor: 'pointer',
-                                                fontSize: '0.85rem',
-                                                fontWeight: '600',
-                                                fontFamily: 'inherit',
-                                                transition: 'all 0.2s ease',
-                                            }}
-                                        >
-                                            <span style={{
-                                            fontSize: '0.65rem',
-                                            fontWeight: '800',
-                                            padding: '0.1rem 0.3rem',
-                                            borderRadius: '4px',
-                                            background: 'var(--color-primary)',
-                                            color: '#fff',
-                                            letterSpacing: '0.03em',
-                                            flexShrink: 0,
-                                        }}>
-                                            {lang.flag}
-                                        </span>
-                                            {lang.label}
-                                        </button>
-                                    ))}
-                                </div>
+                                        {LANGUAGES.map(lang => (
+                                            <button
+                                                key={lang.code}
+                                                onClick={() => i18n.changeLanguage(lang.code)}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.35rem',
+                                                    padding: '0.5rem 0.85rem',
+                                                    background: i18n.language === lang.code ? 'var(--color-primary)' : 'transparent',
+                                                    border: '1px solid var(--border-medium)',
+                                                    borderRadius: '8px',
+                                                    color: i18n.language === lang.code ? '#fff' : 'var(--text-main)',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: '600',
+                                                    fontFamily: 'inherit',
+                                                    transition: 'all 0.2s ease',
+                                                }}
+                                            >
+                                                <span style={{
+                                                    fontSize: '0.65rem',
+                                                    fontWeight: '800',
+                                                    padding: '0.1rem 0.3rem',
+                                                    borderRadius: '4px',
+                                                    background: 'var(--color-primary)',
+                                                    color: '#fff',
+                                                    letterSpacing: '0.03em',
+                                                    flexShrink: 0,
+                                                }}>
+                                                    {lang.flag}
+                                                </span>
+                                                {lang.label}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                                 {!hideAuthButtons && (
                                     <>
@@ -598,7 +621,21 @@ export default function Header({ hideAuthButtons = false }) {
                 </AnimatePresence>
 
                 <style>{`
+                    /* Protect header from global responsive.css wildcards */
+                    header .header-container {
+                        display: flex !important;
+                        flex-direction: row !important;
+                        justify-content: space-between !important;
+                        align-items: center !important;
+                        flex-wrap: nowrap !important;
+                        gap: 1rem !important;
+                        padding: 0.7rem 2rem;
+                    }
+
                     @media (max-width: 900px) {
+                        header .header-container {
+                            padding: 0.7rem 1.2rem;
+                        }
                         .desktop-nav, .desktop-cta { display: none !important; }
                         .mobile-menu-btn { display: flex !important; }
                     }

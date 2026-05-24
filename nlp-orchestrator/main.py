@@ -16,6 +16,10 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, HTTPException
+import time
+import uuid
+import os
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -45,7 +49,46 @@ gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nlp-orchestrator")
+# ─── Sensitive fields to redact in production ─────────────────────────────────
+SENSITIVE_FIELDS = {"authorization", "password", "token", "api_key", "secret"}
 
+def redact(headers: dict) -> dict:
+    """Mask sensitive header values in production."""
+    if os.getenv("ENV", "development") != "production":
+        return dict(headers)
+    return {
+        k: "***REDACTED***" if k.lower() in SENSITIVE_FIELDS else v
+        for k, v in headers.items()
+    }
+
+# ─── Logging Middleware ───────────────────────────────────────────────────────
+class LoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        request_id = str(uuid.uuid4())
+
+        logger.info({
+            "event": "request_received",
+            "request_id": request_id,
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": request.client.host,
+            "headers": redact(dict(request.headers)),
+        })
+
+        start_time = time.perf_counter()
+        response = await call_next(request)
+        duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
+
+        response.headers["X-Request-ID"] = request_id
+
+        logger.info({
+            "event": "request_completed",
+            "request_id": request_id,
+            "status_code": response.status_code,
+            "duration_ms": duration_ms,
+        })
+
+        return response
 
 # ─── App Setup ────────────────────────────────────────────────────────────────
 
@@ -61,7 +104,7 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
-
+app.add_middleware(LoggingMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -465,8 +508,7 @@ async def deep_research_pipeline(query: str, language: str):
 
         if model_choice == "gemini" and gemini_client:
             try:
-                loop = asyncio.get_event_loop()
-
+                loop = asyncio.get_running_loop()
                 response = await loop.run_in_executor(
                     None,
                     lambda: gemini_client.models.generate_content(

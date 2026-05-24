@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import AvatarPanel from '../../components/avatar/AvatarPanel';
+import { useTranslation } from 'react-i18next';
 
 const ForensicsPage = () => {
     const navigate = useNavigate();
@@ -24,6 +25,7 @@ const ForensicsPage = () => {
     const [avatarState, setAvatarState] = useState('idle');
     const [audioData, setAudioData] = useState(null);
     const [speakingText, setSpeakingText] = useState("");
+    const { t } = useTranslation('litigant');
 
     const fileInputRef = useRef(null);
     const sseRef = useRef(null);
@@ -44,37 +46,37 @@ const ForensicsPage = () => {
 
     const startStreamingAnalysis = () => {
         setAnalysisStatus('analyzing');
-        addEvent("AI: Starting Forensic Frame Extraction...", "info");
+        addEvent(t('forensics.events.startExtraction'), "info");
         
         // Simulating SSE events
         setTimeout(() => {
             addEvent("Gemini: Extracting timeline from video frames...", "search");
             setTimeline([
-                { time: "00:02", desc: "Vehicle A entering intersection at 45km/h", type: "observation" },
-                { time: "00:04", desc: "Vehicle B fails to stop at red light", type: "violation" },
-                { time: "00:05", desc: "Point of Impact at Center-Left lane", type: "accident" }
+                { time: "00:02", desc: t('forensics.timelineEvents.vehicleA'), type: "observation" },
+                { time: "00:04", desc: t('forensics.timelineEvents.vehicleB'), type: "violation" },
+                { time: "00:05", desc: t('forensics.timelineEvents.impact'), type: "accident" }
             ]);
-            avatarSpeak("I am analyzing the video footage. I can see a collision at the intersection where vehicle B failed to yield.");
+            avatarSpeak(t('forensics.avatar.analysisStart'));
         }, 2000);
 
         setTimeout(() => {
-            addEvent("Groq: Looking up relevant legal sections (MVA, IPC)...", "search");
+            addEvent(t('forensics.events.legalLookup'), "search");
             setLegalSections([
-                { section: "MVA 184", title: "Dangerous Driving", penalty: "Imprisonment up to 6 months or fine" },
-                { section: "IPC 279", title: "Rash Driving on a Public Way", penalty: "Standard legal penalty applies" }
+                { section: "MVA 184", title: t('forensics.legalSections.dangerousDriving'), penalty: t('forensics.legalSections.mvaPenalty') },
+                { section: "IPC 279", title: t('forensics.legalSections.rashDriving'), penalty: t('forensics.legalSections.ipcPenalty') }
             ]);
-            avatarSpeak("Based on my analysis, sections IPC 279 and MVA 184 are applicable here due to rash driving and signal violation.");
+            avatarSpeak(t('forensics.avatar.legalSections'));
         }, 5000);
 
         setTimeout(() => {
             setAnalysisStatus('complete');
-            addEvent("Success: Liability Report Generated", "success");
+            addEvent(t('forensics.events.reportGenerated'), "success");
             setLiabilityReport({
-                primaryLiability: "Vehicle B (White SUV)",
-                contributoryFactors: ["Signal violation", "Overspeeding"],
+                primaryLiability: t('forensics.report.vehicleB'),
+                contributoryFactors: [t('forensics.report.signalViolation'),t('forensics.report.overspeeding')],
                 confidence: "94%"
             });
-            avatarSpeak("The final liability report is ready. Vehicle B is primarily liable for the accident.");
+            avatarSpeak(t('forensics.avatar.finalReport'));
         }, 8000);
     };
 
@@ -140,8 +142,8 @@ const ForensicsPage = () => {
                     <ArrowLeft size={20} />
                 </button>
                 <div>
-                    <h1 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Accident Forensic Analysis</h1>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>Video Crime Scene Reconstruction</p>
+                    <h1 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>{t('forensics.title')}</h1>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>{t('forensics.subtitle')}</p>
                 </div>
             </header>
 
@@ -176,7 +178,7 @@ const ForensicsPage = () => {
                         ) : (
                             <div style={{ textAlign: 'center', color: '#666' }}>
                                 <Video size={48} style={{ marginBottom: '1rem', opacity: 0.3 }} />
-                                <p style={{ fontSize: '0.9rem' }}>No Video Uploaded</p>
+                                <p style={{ fontSize: '0.9rem' }}>{t('forensics.noVideo')}</p>
                             </div>
                         )}
                     </div>
@@ -234,8 +236,8 @@ const ForensicsPage = () => {
                             <div style={{ width: '64px', height: '64px', background: 'rgba(37, 99, 235, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justify: 'center', margin: '0 auto 1rem' }}>
                                 <Upload color="var(--color-primary)" size={32} />
                             </div>
-                            <h2 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Upload Accident Footage</h2>
-                            <p style={{ color: '#666', fontSize: '0.9rem' }}>MP4, MOV or AVI files up to 500MB</p>
+                            <h2 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{t('forensics.uploadTitle')}</h2>
+                            <p style={{ color: '#666', fontSize: '0.9rem' }}>{t('forensics.uploadDescription')}</p>
                         </motion.div>
                     )}
 
@@ -243,9 +245,9 @@ const ForensicsPage = () => {
                     {analysisStatus !== 'idle' && analysisStatus !== 'complete' && (
                         <div style={{ background: 'white', border: '1px solid var(--color-border)', borderRadius: '1rem', padding: '1.5rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
-                                <h3 style={{ margin: 0, fontSize: '1rem' }}>Forensic Engine Status</h3>
+                                <h3 style={{ margin: 0, fontSize: '1rem' }}>{t('forensics.engineStatus')}</h3>
                                 <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 600 }}>
-                                    {analysisStatus === 'uploading' ? `Uploading ${uploadProgress}%` : 'Processing...'}
+                                    {analysisStatus === 'uploading' ? `Uploading ${uploadProgress}%` : t('forensics.processing')}
                                 </span>
                             </div>
                             <div style={{ width: '100%', height: '8px', background: '#eee', borderRadius: '4px', overflow: 'hidden' }}>
@@ -263,7 +265,7 @@ const ForensicsPage = () => {
                             {/* Incident Timeline */}
                             <div style={{ background: 'white', border: '1px solid var(--color-border)', borderRadius: '1rem', padding: '1.5rem' }}>
                                 <h3 style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <Clock size={16} /> RECONSTRUCTED TIMELINE
+                                    <Clock size={16} /> {t('forensics.timeline')}
                                 </h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     {timeline.length > 0 ? timeline.map((item, i) => (
@@ -274,7 +276,7 @@ const ForensicsPage = () => {
                                             <div style={{ fontSize: '0.85rem' }}>{item.desc}</div>
                                         </div>
                                     )) : (
-                                        <div style={{ color: '#999', fontSize: '0.8rem', fontStyle: 'italic' }}>Waiting for frame analysis...</div>
+                                        <div style={{ color: '#999', fontSize: '0.8rem', fontStyle: 'italic' }}>{t('forensics.waitingAnalysis')}</div>
                                     )}
                                 </div>
                             </div>
@@ -282,7 +284,7 @@ const ForensicsPage = () => {
                             {/* Legal Implications */}
                             <div style={{ background: 'white', border: '1px solid var(--color-border)', borderRadius: '1rem', padding: '1.5rem' }}>
                                 <h3 style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <AlertTriangle size={16} /> LEGAL IMPLICATIONS
+                                    <AlertTriangle size={16} /> {t('forensics.legalImplications')}
                                 </h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     {legalSections.length > 0 ? legalSections.map((item, i) => (
@@ -291,7 +293,7 @@ const ForensicsPage = () => {
                                             <div style={{ fontSize: '0.8rem' }}>{item.title}</div>
                                         </div>
                                     )) : (
-                                        <div style={{ color: '#999', fontSize: '0.8rem', fontStyle: 'italic' }}>Analyzing violations...</div>
+                                        <div style={{ color: '#999', fontSize: '0.8rem', fontStyle: 'italic' }}>{t('forensics.analyzingViolations')}</div>
                                     )}
                                 </div>
                             </div>
@@ -302,7 +304,7 @@ const ForensicsPage = () => {
                     {analysisStatus !== 'idle' && (
                         <div style={{ background: '#1a1a1a', borderRadius: '1rem', padding: '1rem', fontFamily: 'monospace', color: '#10b981', fontSize: '0.8rem', flex: 1, minHeight: '200px' }}>
                             <div style={{ borderBottom: '1px solid #333', paddingBottom: '0.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Terminal size={14} /> FORENSIC_ENGINE_LOGS
+                                <Terminal size={14} /> {t('forensics.logs')}
                             </div>
                             <div style={{ overflowY: 'auto', flex: 1 }}>
                                 {events.map((e, i) => (
@@ -331,8 +333,8 @@ const ForensicsPage = () => {
                               }}
                             >
                                 <div>
-                                    <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Liability Assessment Ready</h2>
-                                    <p style={{ margin: '0.25rem 0 0', opacity: 0.9 }}>Primary Liable Party detected: {liabilityReport.primaryLiability}</p>
+                                    <h2 style={{ fontSize: '1.25rem', margin: 0 }}>{t('forensics.reportReady')}</h2>
+                                    <p style={{ margin: '0.25rem 0 0', opacity: 0.9 }}>{t('forensics.primaryLiable')} {liabilityReport.primaryLiability}</p>
                                 </div>
                                 <button style={{
                                     background: 'white',
@@ -346,7 +348,7 @@ const ForensicsPage = () => {
                                     alignItems: 'center',
                                     gap: '0.5rem'
                                 }}>
-                                    <FileText size={18} /> View Case Report
+                                    <FileText size={18} /> {t('forensics.viewReport')}
                                 </button>
                             </motion.div>
                         )}

@@ -1,5 +1,17 @@
 import { create } from 'zustand';
+const isTokenExpired = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
 
+    if (!payload.exp) return true;
+
+    const currentTime = Date.now() / 1000;
+
+    return payload.exp < currentTime;
+  } catch (error) {
+    return true;
+  }
+};
 const useAuthStore = create((set) => ({
     user: null,
     token: null,
@@ -24,6 +36,18 @@ const useAuthStore = create((set) => ({
         // Only parse if both exist and user is valid JSON
         if (token && userStr && token !== 'null' && userStr !== 'null' && token !== 'undefined' && userStr !== 'undefined') {
             try {
+                if (isTokenExpired(token)) {
+                   localStorage.removeItem('token');
+                   localStorage.removeItem('user');
+
+                    set({
+                         token: null,
+                         user: null,
+                         isAuthenticated: false
+                      });
+
+                  return;
+              }
                 const user = JSON.parse(userStr);
                 set({ token, user, isAuthenticated: true });
             } catch (error) {
