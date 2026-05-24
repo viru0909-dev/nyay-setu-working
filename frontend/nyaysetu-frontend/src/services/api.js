@@ -1,4 +1,5 @@
 import axios from 'axios';
+import useAuthStore from '../store/authStore';
 
 // Use explicit backend URL - Vite proxy can be unreliable
 // In development: http://localhost:8080
@@ -23,9 +24,48 @@ const api = axios.create({
     },
 });
 
+let refreshPromise = null;
+
+const redirectToLogin = () => {
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.href = '/login?reason=session_expired';
+    }
+};
+
+export const refreshSession = async () => {
+    if (refreshPromise) {
+        return refreshPromise;
+    }
+
+    const { refreshToken, updateTokens, logout } = useAuthStore.getState();
+
+    if (!refreshToken) {
+        logout();
+        redirectToLogin();
+        throw new Error('No refresh token available');
+    }
+
+    refreshPromise = api.post('/api/auth/refresh', { refreshToken }, { skipAuthRefresh: true })
+        .then((response) => {
+            const { token, refreshToken: nextRefreshToken } = response.data;
+            updateTokens(token, nextRefreshToken);
+            return response.data;
+        })
+        .catch((error) => {
+            logout();
+            redirectToLogin();
+            throw error;
+        })
+        .finally(() => {
+            refreshPromise = null;
+        });
+
+    return refreshPromise;
+};
+
 // Add token to requests if available
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
+    const token = useAuthStore.getState().token || localStorage.getItem('token');
 
     // Only add Authorization header if token exists and is not null/undefined
     if (token && token !== 'null' && token !== 'undefined') {
@@ -49,13 +89,44 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        const requestUrl = originalRequest?.url || '';
+        const isAuthRoute = requestUrl.includes('/api/auth/login')
+            || requestUrl.includes('/api/auth/register')
+            || requestUrl.includes('/api/auth/refresh')
+            || requestUrl.includes('/api/auth/face/');
+
+        if (!originalRequest || originalRequest.skipAuthRefresh || isAuthRoute) {
+            return Promise.reject(error);
+        }
+
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            try {
+                const refreshedAuth = await refreshSession();
+                originalRequest.headers = originalRequest.headers || {};
+                originalRequest.headers.Authorization = `Bearer ${refreshedAuth.token}`;
+                return api(originalRequest);
+            } catch (refreshError) {
+                return Promise.reject(refreshError);
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 // Auth API
 export const authAPI = {
     login: (credentials) => api.post('/api/auth/login', credentials),
     register: (userData) => api.post('/api/auth/register', userData),
+    refresh: (refreshToken) => api.post('/api/auth/refresh', { refreshToken }, { skipAuthRefresh: true }),
     logout: () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        useAuthStore.getState().logout();
     },
 };
 

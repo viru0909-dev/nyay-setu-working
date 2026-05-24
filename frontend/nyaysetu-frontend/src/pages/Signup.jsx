@@ -25,6 +25,7 @@ export default function Signup() {
     const [step, setStep] = useState(1); // 1: Form, 2: Face Registration
     const [registeredUser, setRegisteredUser] = useState(null);
     const [registeredToken, setRegisteredToken] = useState(null);
+    const [registeredRefreshToken, setRegisteredRefreshToken] = useState(null);
     const navigate = useNavigate();
     const { setAuth } = useAuthStore();
     const { enrollFace } = useFaceRecognition();
@@ -87,9 +88,10 @@ export default function Signup() {
                 role: formData.role
             });
 
-            const { token, user } = response.data;
+            const { token, refreshToken, user } = response.data;
             setRegisteredUser(user);
             setRegisteredToken(token);
+            setRegisteredRefreshToken(refreshToken);
             setStep(2); // Move to face registration
         } catch (err) {
             setError(err.response?.data?.message || t('auth:signup.errors.registrationFailed', 'Registration failed'));
@@ -111,7 +113,7 @@ export default function Signup() {
     };
 
     const completeSignup = () => {
-        setAuth(registeredUser, registeredToken);
+        setAuth(registeredUser, registeredToken, registeredRefreshToken);
         const roleRoutes = {
             ADMIN: '/admin',
             JUDGE: '/judge',
