@@ -15,6 +15,17 @@ export default function Landing() {
     const { t } = useTranslation('landing');
     const { theme } = useTheme();
     const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const heroImage = theme === 'dark'
+        ? {
+            fallbackSrc: '/scales-dark-720.jpg',
+            fallbackSrcSet: '/scales-dark-480.jpg 480w, /scales-dark-720.jpg 720w',
+            webpSrcSet: '/scales-dark-480.webp 480w, /scales-dark-720.webp 720w',
+        }
+        : {
+            fallbackSrc: '/scales-light-720.jpg',
+            fallbackSrcSet: '/scales-light-480.jpg 480w, /scales-light-720.jpg 720w',
+            webpSrcSet: '/scales-light-480.webp 480w, /scales-light-720.webp 720w',
+        };
 
     useEffect(() => {
         const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); window.deferredPrompt = e; };
@@ -229,21 +240,35 @@ export default function Landing() {
                                 zIndex: 0,
                             }} />
                             <div className="hero-img-wrap">
-                                <motion.img
-                                    src={theme === 'dark' ? '/scales-dark.png' : '/scales-light.png'}
-                                    alt="Scales of Justice"
-                                    className="hero-img"
-                                    animate={{ y: [0, -14, 0] }}
-                                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                                    style={{
-                                        width: '100%',
-                                        maxWidth: '480px',
-                                        height: 'auto',
-                                        display: 'block',
-                                        position: 'relative',
-                                        zIndex: 1,
-                                    }}
-                                />
+                                <picture>
+                                    <source
+                                        type="image/webp"
+                                        srcSet={heroImage.webpSrcSet}
+                                        sizes="(max-width: 900px) 480px, min(50vw, 480px)"
+                                    />
+                                    <motion.img
+                                        src={heroImage.fallbackSrc}
+                                        srcSet={heroImage.fallbackSrcSet}
+                                        sizes="(max-width: 900px) 480px, min(50vw, 480px)"
+                                        alt="Scales of Justice"
+                                        className="hero-img"
+                                        width="720"
+                                        height="720"
+                                        loading="eager"
+                                        fetchPriority="high"
+                                        decoding="async"
+                                        animate={{ y: [0, -14, 0] }}
+                                        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                        style={{
+                                            width: '100%',
+                                            maxWidth: '480px',
+                                            height: 'auto',
+                                            display: 'block',
+                                            position: 'relative',
+                                            zIndex: 1,
+                                        }}
+                                    />
+                                </picture>
                             </div>
                         </motion.div>
                     </div>

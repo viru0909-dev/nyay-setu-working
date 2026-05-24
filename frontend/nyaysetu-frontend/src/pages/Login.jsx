@@ -51,7 +51,7 @@ export default function Login() {
                 role: selectedRole || 'LITIGANT' // Default to LITIGANT if no role selected
             };
 
-            console.log('Sending login request:', loginPayload);
+          //  console.log('Sending login request:', loginPayload);
             const response = await authAPI.login(loginPayload);
             const { token, user } = response.data;
 

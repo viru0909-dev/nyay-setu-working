@@ -1,0 +1,678 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "myCases": "என் வழக்குகள்",
+    "upcomingHearings": "வரவிருக்கும் விசாரணைகள்",
+    "documents": "ஆவணங்கள்",
+    "legalChat": "சட்ட Chat",
+    "active": "செயலில்",
+    "chatWithLawyer": "வழக்கறிஞருடன் Chat செய்க",
+    "loading": "ஏற்றுகிறது...",
+    "thisMonth": "இந்த மாதம்",
+    "newDocs": "புதிய ஆவணங்கள்",
+    "reviewDraft": "வரைவை மதிப்பாய்வு செய்க",
+    "approve": "அனுமதி",
+    "reject": "நிராகரி",
+    "recentCases": "சமீபத்திய வழக்குகள்"
+  },
+
+  "caseDiary": {
+    "title": "வழக்கு டைரி",
+    "backToDiary": "டைரிக்கு திரும்பு",
+    "downloadReport": "அறிக்கையை Download செய்க",
+    "subtitle": "உங்கள் நீதிமன்ற வழக்குகள் மற்றும் போலீஸ் FIR-களை நிர்வகிக்கவும்",
+    "fileNewCase": "புதிய வழக்கு தாக்கல் செய்க",
+    "searchPlaceholder": "வழக்குகள் அல்லது FIR தேடுக...",
+    "allStatuses": "அனைத்து நிலைகள்",
+    "cases": "வழக்குகள்",
+    "firs": "FIR",
+    "download": "Download",
+    "noCases": "வழக்குகள் எதுவும் கிடைக்கவில்லை",
+    "gridView": "Grid View",
+    "listView": "List View",
+    "filter": "வடிகட்டு",
+    "status": "நிலை",
+    "total": "மொத்தம்",
+    "action": "நடவடிக்கை",
+    "court": "நீதிமன்றம்",
+    "police": "போலீஸ்",
+    "searchCasePlaceholder": "தலைப்பு அல்லது Case ID மூலம் தேடுக...",
+    "searchFirPlaceholder": "தலைப்பு அல்லது FIR ID மூலம் தேடுக...",
+    "loadingDiary": "உங்கள் டைரியை ஏற்றுகிறது...",
+    "noEntries": "பதிவுகள் எதுவும் கிடைக்கவில்லை",
+    "fileNew": "புதியதை தாக்கல் செய்க",
+    "noType": "வகை இல்லை",
+    "policeFir": "போலீஸ் FIR",
+    "noLocation": "இடம் இல்லை",
+    "viewDetails": "விவரங்களை காண்க",
+    "requestSent": "கோரிக்கை அனுப்பப்பட்டது",
+    "hireLawyer": "வழக்கறிஞரை நியமிக்கவும்",
+    "viewLinkedCourtCase": "இணைந்த நீதிமன்ற வழக்கை காண்க",
+    "applicationRejected": "விண்ணப்பம் நிராகரிக்கப்பட்டது",
+    "processing": "செயலாக்கம் நடக்கிறது"
+  },
+
+  "caseDetail": {
+    "tabs": {
+      "overview": "கண்ணோட்டம்",
+      "caseFiles": "வழக்கு கோப்புகள்",
+      "timeline": "Timeline",
+      "proceduralHealth": "நடைமுறை ஆரோக்கியம்"
+    },
+    "aiDraftReady": "மதிப்பாய்விற்கான AI வரைவு தயாராக உள்ளது",
+    "reviewApprovePetition": "மனுவை மதிப்பாய்வு செய்து அங்கீகரிக்கவும்",
+    "aiDraftDescription": "நியாய சாரதி ஒரு வழக்கு பகுப்பாய்வை உருவாக்கியுள்ளது. அதிகாரப்பூர்வ வழக்கு வரைவினை உருவாக்க இதை அங்கீகரிக்கவும்.",
+    "lawyerDraftDescription": "உங்கள் வழக்கறிஞர் ஒரு வரைவு மனுவை சமர்ப்பித்துள்ளார். உங்கள் வழக்கறிஞருக்கான \"நீதிமன்றத்தில் சமர்ப்பிக்க\" செயல்பாட்டைத் தொடங்க இதை மதிப்பாய்வு செய்து அங்கீகரிக்கவும்.",
+    "confirmApproveDraft": "இந்த வரைவினை அங்கீகரிக்க விரும்புகிறீர்களா? இது உங்கள் வழக்கறிஞருக்கு அறிவிக்கப்படும்.",
+    "draftApproved": "வரைவு அங்கீகரிக்கப்பட்டது! உங்கள் வழக்கறிஞர் இப்போது அதை நீதிமன்றத்தில் சமர்ப்பிக்கலாம்.",
+    "failedApproveDraft": "வரைவினை அங்கீகரிக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    "approveESign": "அங்கீகரித்து மின் கையொப்பமிடவும்",
+    "hireLawyer": "வழக்கறிஞரை நியமிக்கவும்",
+    "selectVerifiedLawyer": "சரிபார்க்கப்பட்ட சட்ட நிபுணரை தேர்ந்தெடுக்கவும்",
+    "noLawyersAvailable": "வழக்கறிஞர்கள் யாரும் இல்லை",
+    "noLawyersAvailableDescription": "தற்போது எந்த verified வழக்கறிஞரும் வழக்குகளை ஏற்கவில்லை.",
+    "sendProposal": "முன்மொழிவை அனுப்புக",
+    "failedToLoadLawyers": "கிடைக்கக்கூடிய வழக்கறிஞர்களை ஏற்றுவது தோல்வியடைந்தது",
+
+    "proposalSentSuccess": "✅ முன்மொழிவு வெற்றிகரமாக அனுப்பப்பட்டது! வழக்கறிஞர் உங்கள் வழக்கை மதிப்பாய்வு செய்து ஏற்பார் அல்லது மறுப்பார்.",
+    "proposalSendFailed": "முன்மொழிவை அனுப்புவது தோல்வியடைந்தது. இந்த வழக்கில் ஏற்கனவே நிலுவையில் உள்ள முன்மொழிவு இருக்கலாம்.",
+
+    "joinVirtualCourt": "VOIS 5G Virtual Court-ல் சேரவும்",
+
+    "caseDescription": "வழக்கு விவரம்",
+    "aiAnalysis": "நியாய சாரதி பகுப்பாய்வு",
+    
+    "approveAndESign": "அனுமதித்து E-Sign செய்க",
+    "requestChanges": "மாற்றங்களை கோருக",
+
+    
+
+    "aiDraftGenerated": "நியாய சாரதி வழக்கு பகுப்பாய்வை உருவாக்கியுள்ளது. முறையான வழக்கு வரைவை உருவாக்க அனுமதிக்கவும்.",
+    "reviewLawyerDraft": "உங்கள் வழக்கறிஞர் வரைவு மனு சமர்ப்பித்துள்ளார். நீதிமன்றத்தில் சமர்ப்பிக்க மதிப்பாய்வு செய்து அனுமதிக்கவும்.",
+
+    "keyDetails": "முக்கிய விவரங்கள்",
+    "caseType": "வழக்கு வகை",
+    "filedDate": "தாக்கல் தேதி",
+    "nextHearing": "அடுத்த விசாரணை",
+    "assignedJudge": "நியமிக்கப்பட்ட நீதிபதி",
+    "pendingAssignment": "நியமனம் நிலுவையில்",
+    "toBeAnnounced": "TBA",
+
+    "proposalSent": "முன்மொழிவு அனுப்பப்பட்டது",
+    "waitingLawyerResponse": "வழக்கறிஞரின் பதிலுக்காக காத்திருக்கிறோம்",
+
+    "legalRepresentative": "சட்ட பிரதிநிதி",
+    "privateCounsel": "தனியார் வழக்கறிஞர்",
+    "caseAccepted": "✓ வழக்கு ஏற்கப்பட்டது",
+
+    "partiesInvolved": "சம்பந்தப்பட்ட தரப்பினர்",
+    "petitioner": "மனுதாரர்",
+    "respondent": "பதிலளிப்பவர்",
+
+    "aiSuggestedDocuments": "AI பரிந்துரைத்த ஆவணங்கள்",
+    "analyzingCaseDetails": "வழக்கு விவரங்களை பகுப்பாய்வு செய்கிறது...",
+    "noSuggestionsFound": "குறிப்பிட்ட பரிந்துரைகள் எதுவும் இல்லை.",
+
+    "uploadedFiles": "Upload செய்த கோப்புகள்",
+    "uploading": "Upload ஆகிறது...",
+    "uploadFile": "கோப்பை Upload செய்க",
+    "noFilesFound": "கோப்புகள் எதுவும் இல்லை.",
+
+    "uploadedFromCaseFiles": "வழக்கு கோப்புகளிலிருந்து Upload செய்யப்பட்டது",
+    "uploadFailed": "Upload தோல்வி",
+    "analysisNotAvailable": "பகுப்பாய்வு இன்னும் கிடைக்கவில்லை",
+    "evidenceDownloadUnavailable": "சான்று Download இன்னும் கிடைக்கவில்லை. Blockchain-ல் சரிபார்க்கவும்.",
+    "downloadFailed": "Download தோல்வி",
+    "certificateLoadFailed": "❌ Certificate ஏற்றுவது தோல்வியடைந்தது. இந்த ஆவணத்தில் சரிபார்ப்பு தரவு இல்லாமல் இருக்கலாம்.",
+
+    "basedOnCaseType": "உங்கள் வழக்கு வகையின் அடிப்படையில்",
+    "aiRecommendsDocuments": "Groq AI இவற்றை Upload செய்ய பரிந்துரைக்கிறது:",
+
+    "uploadThisDocument": "இந்த ஆவணத்தை Upload செய்க",
+
+    "documentType": "ஆவண வகை",
+    "generalDocument": "பொது ஆவணம்",
+
+    "keyEntitiesExtracted": "முக்கிய அலகுகள் பிரித்தெடுக்கப்பட்டன",
+    "noEntitiesDetected": "எந்த அலகுகளும் கண்டுபிடிக்கப்படவில்லை",
+
+    "analysisSummary": "பகுப்பாய்வு சுருக்கம்",
+    "noSummaryAvailable": "சுருக்கம் எதுவும் இல்லை.",
+
+    "evidenceCertificate": "Section 63(4) சான்று Certificate",
+    "downloadPdf": "PDF Download செய்க",
+
+    "aiInsights": "AI நுண்ணறிவு",
+    "analyzing": "பகுப்பாய்வு செய்கிறது...",
+    "certificate": "Certificate",
+
+    "caseId": "Case ID",
+    "verified": "சரிபார்க்கப்பட்டது",
+    "hash": "Hash",
+
+    "aiDocumentAnalysis": "AI ஆவண பகுப்பாய்வு",
+
+    "priority": {
+      "normal": "சாதாரண முன்னுரிமை",
+      "urgent": "அவசர முன்னுரிமை",
+      "critical": "தீவிர முன்னுரிமை"
+    },
+
+    "system": "System",
+    "completed": "முடிந்தது",
+    "step": "படி",
+
+    "lawyerInitial": "வ",
+
+    "timeline": {
+      "caseFiled": "வழக்கு தாக்கல்",
+      "initialFilingCompleted": "ஆரம்ப தாக்கல் முடிந்தது",
+      "cognizanceTaken": "அறிவிப்பு எடுக்கப்பட்டது",
+      "caseAdmitted": "வழக்கு ஏற்கப்பட்டது",
+      "courtAcceptedCase": "நீதிமன்றம் வழக்கை ஏற்றுக்கொண்டது",
+      "liveCaseRoadmap": "Live வழக்கு வரைபடம்",
+      "currentStage": "தற்போதைய நிலை",
+      "viewPreparationKit": "தயாரிப்பு கிட்டை காண்க"
+    },
+
+    "timelineStages": {
+      "firFiled": "FIR / புகார் தாக்கல்",
+      "caseInitiation": "வழக்கு தொடக்கம்",
+      "cognizance": "அறிவிப்பு",
+      "magistrateReviewsFir": "மாஜிஸ்திரேட் FIR-ஐ மதிப்பாய்வு செய்கிறார்",
+      "appearance": "ஆஜர்",
+      "accusedAppears": "குற்றவாளி நீதிமன்றத்தில் ஆஜராகிறார்",
+      "framingCharges": "குற்றச்சாட்டுகள் உருவாக்கல்",
+      "chargesRead": "குற்றவாளிக்கு எதிராக குற்றச்சாட்டுகள் படிக்கப்பட்டன",
+      "prosecutionEvidence": "வழக்கு நடத்துபவரின் சான்று",
+      "witnessProof": "சாட்சிகள் மற்றும் ஆதாரங்கள்",
+      "defenceEvidence": "பாதுகாப்பு சான்று",
+      "accusedDefence": "குற்றவாளியின் பாதுகாப்பு",
+      "finalArguments": "இறுதி வாதங்கள்",
+      "lawyersDebate": "வழக்கறிஞர்களின் தகுதி விவாதம்",
+      "judgment": "தீர்ப்பு",
+      "finalVerdict": "இறுதி தீர்ப்பு",
+
+      "plaintFiled": "வழக்கு தாக்கல்",
+      "summonsServed": "சம்மன் வழங்கப்பட்டது",
+      "noticeRespondent": "பதிலளிப்பவருக்கு அறிவிப்பு",
+      "writtenStatement": "எழுத்துப்பூர்வ அறிக்கை",
+      "replyFiled": "பதில் தாக்கல்",
+      "framingIssues": "பிரச்சினைகளை உருவாக்குதல்",
+      "keyDisputePoints": "தர்க்கத்தின் முக்கிய புள்ளிகள்",
+      "evidence": "சான்று",
+      "documentsWitnesses": "ஆவணங்கள் மற்றும் சாட்சிகள்",
+      "arguments": "வாதங்கள்",
+      "finalHearing": "இறுதி விசாரணை",
+      "decreePassed": "ஆணை பிறப்பிக்கப்பட்டது"
+    },
+
+    "preparationKit": {
+      "title": "தயாரிப்பு கிட்",
+      "for": "க்காக",
+      "whatToExpect": "என்ன எதிர்பார்க்கலாம்",
+      "prepareDocuments": "உங்கள் ஆவணங்களை தயாராக வைத்திருங்கள் மற்றும் இந்த நிலை தொடர்பான கேள்விகளுக்கு பதிலளிக்க தயாராக இருங்கள்.",
+      "recommendedActions": "பரிந்துரைக்கப்பட்ட நடவடிக்கைகள்",
+      "reviewDocuments": "இந்த நிலை தொடர்பான அனைத்து தாக்கல் ஆவணங்களையும் மதிப்பாய்வு செய்யுங்கள்.",
+      "consultLawyer": "2 நாட்கள் முன்பே உங்கள் வழக்கறிஞரிடம் ஆலோசனை பெறுங்கள்.",
+      "organizeEvidence": "சான்றுகளின் அசல் பிரதிகளை ஒழுங்கமைக்கவும்.",
+      "gotIt": "புரிந்தது, நன்றி!"
+    },
+
+    "aiPrepKit": {
+      "title": "AI விசாரணை தயாரிப்பு கிட்",
+      "forStage": "நிலைக்காக:",
+      "whatToExpect": "என்ன எதிர்பார்க்கலாம்",
+      "physicalPresence": "உங்கள் நேரடி இருப்பு தேவைப்படலாம்.",
+      "ensureDocuments": "அனைத்து தொடர்பான ஆவணங்களும் Upload ஆனதை உறுதிப்படுத்தவும்.",
+      "recommendedActions": "பரிந்துரைக்கப்பட்ட நடவடிக்கைகள்",
+      "reviewEvidence": "வழக்கறிஞருடன் சமர்ப்பிக்கப்பட்ட சான்றுகளை மதிப்பாய்வு செய்யுங்கள்",
+      "dontMissCourt": "நீதிமன்ற தேதியை தவறவிடாதீர்கள்",
+      "gotIt": "புரிந்தது!",
+      "judgeReview": "நீதிபதி மதிப்பாய்வு செய்வார்",
+      "thisStage": "இந்த நிலை"
+    },
+
+    "bsaGenerator": {
+      "title": "BSA Section 63(4) Generator",
+      "subtitle": "Digital Evidence Certification Utility",
+      "scanMetadata": "Evidence Metadata ஸ்கேன் செய்கிறது...",
+      "generateHash": "SHA-256 Hash உருவாக்குகிறது...",
+      "esignVerification": "Aadhaar e-Sign சரிபார்ப்பு",
+      "authenticate": "4 சான்று கோப்புகளின் ஒருமைப்பாட்டை சான்றளிக்க Aadhaar e-Sign மூலம் அங்கீகரிக்கவும்.",
+      "certificateGenerated": "Certificate வெற்றிகரமாக உருவாக்கப்பட்டது! (Mock)",
+      "esignWithAadhaar": "Aadhaar மூலம் e-Sign செய்க"
+    },
+
+    "certificatePreview": "Certificate Preview",
+
+    "proceduralHealth": {
+      "title": "நடைமுறை ஆரோக்கியம் மற்றும் இணக்கம்",
+      "subtitle": "உங்கள் வழக்கு அடுத்த விசாரணைக்கு தயாராக உள்ளதை உறுதிப்படுத்தவும்.",
+      "criticalRequirements": "முக்கியமான தேவைகள்",
+      "bsaCertificate": "Section 63(4) BSA Certificate",
+      "certificateVerified": "Certificate வழங்கப்பட்டு Blockchain-ல் சரிபார்க்கப்பட்டது.",
+      "certificateMissing": "Digital சான்றுகளின் ஏற்பிற்கு தேவையானது. Certificate இல்லாவிட்டால் சான்று நிராகரிக்கப்படலாம்.",
+      "generateCertificate": "Certificate உருவாக்கி Sign செய்க",
+      "summonsStatus": "சம்மன் சேவை நிலை",
+      "summonsServed": "அனைத்து பதிலளிப்பவர்களுக்கும் சம்மன் வெற்றிகரமாக வழங்கப்பட்டது.",
+      "summonsPending": "சேவை நிலுவையில். சம்மன் வழங்கப்படும் வரை நீதிமன்றம் முன்னேறாது.",
+      "trackStatus": "நிலையை கண்காணிக்கவும்",
+      "readinessScore": "தயார்நிலை மதிப்பெண்",
+      "ready": "தயார்",
+      "impactAnalysis": "தாக்க பகுப்பாய்வு",
+      "impactDescription": "உங்கள் வழக்கு தற்போது நிலுவையில் உள்ள நடைமுறைகள் காரணமாக Admission நிலையில் நிறுத்தப்பட்டுள்ளது. சிவப்பு உருப்படிகளை தீர்த்தால் உங்கள் தயார்நிலை மதிப்பெண் மேம்படும்."
+    }
+  },
+
+  "fileUnified": {
+    "selectCategory": "வகையை தேர்ந்தெடுக்கவும்",
+    "provideInformation": "தகவல் வழங்குக",
+    "uploadFiles": "கோப்புகளை Upload செய்க",
+    "confirmSubmit": "உறுதிப்படுத்தி சமர்ப்பிக்கவும்",
+    "caseFiledSuccess": "வழக்கு வெற்றிகரமாக தாக்கல் செய்யப்பட்டது!",
+    "firSubmittedSuccess": "FIR வெற்றிகரமாக சமர்ப்பிக்கப்பட்டது!",
+    "caseRegistered": "உங்கள் வழக்கு நீதிமன்றத்தில் பதிவு செய்யப்பட்டது",
+    "firSentReview": "உங்கள் FIR போலீஸ் மதிப்பாய்வுக்கு அனுப்பப்பட்டது",
+    "goToCaseDiary": "வழக்கு டைரிக்கு செல்லுங்கள்",
+    "fileAnother": "மற்றொன்றை தாக்கல் செய்க",
+    "fileCaseFir": "வழக்கு / FIR தாக்கல் செய்க",
+    "chooseFilingType": "நீதிமன்ற வழக்கு அல்லது போலீஸ் FIR தாக்கல் செய்வதில் தேர்ந்தெடுக்கவும்",
+    "askNyaySaarthi": "நியாய சாரதியிடம் கேளுங்கள்",
+    "courtCase": "நீதிமன்ற வழக்கு",
+    "policeFir": "போலீஸ் FIR",
+    "caseType": "வழக்கு வகை",
+    "caseDetails": "வழக்கு விவரங்கள்",
+    "documents": "ஆவணங்கள்",
+    "review": "மதிப்பாய்வு",
+    "selectCaseType": "வழக்கு வகையை தேர்ந்தெடுக்கவும்",
+    "civilCase": "சிவில் வழக்கு",
+    "civilCaseDesc": "சொத்து, ஒப்பந்தங்கள், தகராறுகள்",
+    "criminalCase": "கிரிமினல் வழக்கு",
+    "criminalCaseDesc": "குற்றவியல் குற்றங்கள்",
+    "familyLaw": "குடும்ப சட்டம்",
+    "familyLawDesc": "விவாகரத்து, காவல், வாரிசு",
+    "propertyDispute": "சொத்து தகராறு",
+    "propertyDisputeDesc": "நிலம், உரிமை தகராறுகள்",
+    "commercial": "வணிக",
+    "commercialDesc": "வணிகம், வர்த்தக விஷயங்கள்",
+    "caseTitle": "வழக்கு தலைப்பு",
+    "caseTitlePlaceholder": "உங்கள் வழக்கின் சுருக்கமான தலைப்பு",
+    "caseDescription": "வழக்கு விவரம்",
+    "caseDescriptionPlaceholder": "விரிவான விவரம்...",
+    "petitioner": "மனுதாரர்",
+    "petitionerPlaceholder": "உங்கள் பெயர்",
+    "respondent": "பதிலளிப்பவர்",
+    "respondentPlaceholder": "மற்ற தரப்பினர்",
+    "urgency": "அவசரம்",
+    "normal": "சாதாரண",
+    "urgent": "அவசரம்",
+    "critical": "தீவிரம்",
+    "uploadDocuments": "ஆவணங்களை Upload செய்க",
+    "clickUploadFiles": "கோப்புகளை Upload செய்ய கிளிக் செய்க",
+    "supportedFormats": "PDF, DOC, JPG, PNG (அதிகபட்சம் 10MB)",
+    "thinking": "யோசிக்கிறது...",
+    "analyzeDocument": "✨ ஆவணத்தை பகுப்பாய்வு செய்க",
+    "reviewConfirm": "மதிப்பாய்வு செய்து உறுதிப்படுத்தவும்",
+    "title": "தலைப்பு",
+    "petitionerRespondent": "மனுதாரர் எதிர் பதிலளிப்பவர்",
+    "files": "கோப்புகள்",
+    "previous": "முந்தைய",
+    "next": "அடுத்த",
+    "submitting": "சமர்ப்பிக்கிறது...",
+    "submitCase": "வழக்கை சமர்ப்பிக்கவும்",
+    "filePoliceFir": "போலீஸ் FIR தாக்கல் செய்க",
+    "incidentTitle": "சம்பவத்தின் தலைப்பு",
+    "incidentTitlePlaceholder": "எ.கா., வீட்டில் திருட்டு",
+    "incidentDate": "சம்பவ தேதி",
+    "location": "இடம்",
+    "locationPlaceholder": "எ.கா., City Mall அருகே, புனே",
+    "incidentDescription": "சம்பவத்தின் விவரம்",
+    "incidentDescriptionPlaceholder": "என்ன நடந்தது என விரிவாக விவரிக்கவும்...",
+    "evidenceOptional": "சான்று (விருப்பத்திற்கு ஏற்ப)",
+    "clickUploadEvidence": "சான்றை Upload செய்ய கிளிக் செய்க",
+    "supportedEvidenceFormats": "ஆதரிக்கப்படுவது: PDF, JPG, PNG, MP4",
+    "submitFirPolice": "போலீஸுக்கு FIR சமர்ப்பிக்கவும்",
+    "nyaySaarthiAssist": "நியாய சாரதி உதவி",
+    "aiAssistDescription": "உங்கள் நிலைமையை விவரிக்கவும், நான் தாக்கல் செய்ய உதவுவேன்.",
+    "aiPlaceholder": "எ.கா., என் வீட்டு உரிமையாளர் நோட்டீஸ் கொடுத்த பிறகும் வைப்பை திருப்பித் தர மறுக்கிறார்...",
+    "analyzingCase": "உங்கள் வழக்கை பகுப்பாய்வு செய்கிறது...",
+    "analyzeSuggest": "பகுப்பாய்வு செய்து பரிந்துரைக்கவும்",
+    "recommendedFiling": "பரிந்துரைக்கப்பட்ட தாக்கல்",
+    "category": "வகை",
+    "criminal": "கிரிமினல்",
+    "civil": "சிவில்",
+    "suggestedTitle": "பரிந்துரைக்கப்பட்ட தலைப்பு",
+    "convertToFiling": "தாக்கலாக மாற்றவும்",
+    "backToDashboard": "Dashboard-க்கு திரும்பவும்"
+  },
+
+  "forensics": {
+    "title": "விபத்து Forensic பகுப்பாய்வு",
+    "subtitle": "Video Crime Scene Reconstruction",
+    "noVideo": "Video எதுவும் Upload ஆகவில்லை",
+    "uploadTitle": "விபத்து காட்சிப்படத்தை Upload செய்க",
+    "uploadDescription": "MP4, MOV அல்லது AVI கோப்புகள் 500MB வரை",
+    "engineStatus": "Forensic Engine நிலை",
+    "processing": "செயலாக்கம் நடக்கிறது...",
+    "timeline": "மறுகட்டமைக்கப்பட்ட Timeline",
+    "waitingAnalysis": "Frame பகுப்பாய்வுக்காக காத்திருக்கிறது...",
+    "legalImplications": "சட்ட தாக்கங்கள்",
+    "analyzingViolations": "மீறல்களை பகுப்பாய்வு செய்கிறது...",
+    "logs": "FORENSIC_ENGINE_LOGS",
+    "reportReady": "பொறுப்பு மதிப்பீடு தயார்",
+    "primaryLiable": "முதன்மை பொறுப்பு தரப்பு கண்டறியப்பட்டது:",
+    "viewReport": "வழக்கு அறிக்கையை காண்க",
+
+    "events": {
+      "startExtraction": "AI: Forensic Frame Extraction தொடங்குகிறது...",
+      "timelineExtraction": "Gemini: Video frames-லிருந்து Timeline பிரித்தெடுக்கிறது...",
+      "legalLookup": "Groq: தொடர்பான சட்ட பிரிவுகளை (MVA, IPC) தேடுகிறது...",
+      "reportGenerated": "வெற்றி: பொறுப்பு அறிக்கை உருவாக்கப்பட்டது"
+    },
+
+    "avatar": {
+      "analysisStart": "நான் Video footage-ஐ பகுப்பாய்வு செய்கிறேன். சந்திப்பில் வாகனம் B வழி விடாமல் மோதியது தெரிகிறது.",
+      "legalSections": "என் பகுப்பாய்வின் அடிப்படையில், பொறுப்பற்ற வாகன ஓட்டல் மற்றும் சிக்னல் மீறல் காரணமாக IPC 279 மற்றும் MVA 184 பிரிவுகள் இங்கு பொருந்தும்.",
+      "finalReport": "இறுதி பொறுப்பு அறிக்கை தயார். வாகனம் B விபத்திற்கு முதன்மையாக பொறுப்பாகும்."
+    },
+
+    "timelineEvents": {
+      "vehicleA": "வாகனம் A 45 km/h வேகத்தில் சந்திப்பில் நுழைகிறது",
+      "vehicleB": "வாகனம் B சிவப்பு சிக்னலில் நிறுத்தவில்லை",
+      "impact": "மத்திய-இடது பாதையில் மோதல் புள்ளி"
+    },
+
+    "legalSections": {
+      "dangerousDriving": "ஆபத்தான வாகன ஓட்டல்",
+      "rashDriving": "பொது சாலையில் பொறுப்பற்ற வாகன ஓட்டல்",
+      "mvaPenalty": "6 மாதம் வரை சிறைவாசம் அல்லது அபராதம்",
+      "ipcPenalty": "நிலையான சட்ட தண்டனை பொருந்தும்"
+    },
+
+    "report": {
+      "vehicleB": "வாகனம் B (வெள்ளை SUV)",
+      "signalViolation": "சிக்னல் மீறல்",
+      "overspeeding": "அதிக வேகம்"
+    }
+  },
+
+  "hearings": {
+    "title": "விசாரணைகள்",
+    "subtitle": "உங்கள் திட்டமிட்ட virtual நீதிமன்ற அமர்வுகள்",
+    "searchPlaceholder": "விசாரணைகளை தேடுக...",
+    "loading": "விசாரணைகளை ஏற்றுகிறது...",
+    "noHearings": "விசாரணைகள் எதுவும் கிடைக்கவில்லை",
+    "noHearingsDescription": "உங்களுக்கு பொருந்தக்கூடிய விசாரணைகள் எதுவும் இல்லை.",
+    "courtHearing": "நீதிமன்ற விசாரணை",
+    "secureLine": "End-to-End Encrypted பாதுகாப்பான நீதி இணைப்பு",
+    "sessionLive": "அமர்வு LIVE",
+    "leaveSession": "அமர்வை விடுக",
+    "today": "இன்று",
+    "virtualCourt": "Virtual நீதிமன்றம்",
+    "joinNow": "இப்போது சேரவும்",
+    "upcoming": "வரவிருக்கும்",
+    "completed": "முடிந்தவை",
+    "weeklyOverview": "வார கண்ணோட்டம்",
+    "yourHearings": "உங்கள் விசாரணைகள்",
+    "legalAid": "சட்ட உதவி",
+    "legalAidDescription": "நீதிமன்றத்திற்கு தயாராவதில் உதவி வேண்டுமா? வாதியின் உரிமைகள் மற்றும் நடைமுறை வழிகாட்டுதல்களின் நூலகத்தை அணுகுங்கள்.",
+    "viewResources": "வளங்களை காண்க",
+    "fetchError": "விசாரணைகளை ஏற்றுவது தோல்வியடைந்தது."
+  },
+
+  "lawyerChat": {
+    "myLawyers": "என் வழக்கறிஞர்கள்",
+    "noLawyers": "உங்கள் வழக்குகளில் இன்னும் வழக்கறிஞர்கள் யாரும் நியமிக்கப்படவில்லை.",
+    "selectLawyer": "வழக்கறிஞரை தேர்ந்தெடுக்கவும்",
+    "selectConversation": "உங்கள் வழக்கறிஞருடன் Chat தொடங்க ஒரு உரையாடலை தேர்ந்தெடுக்கவும்.",
+    "sharedViaChat": "வாடிக்கையாளர் Chat மூலம் பகிர்ந்தார்",
+    "sharedFile": "பகிர்ந்த கோப்பு:",
+    "voiceMessage": "Voice Message",
+    "defaultAiMessage": "என் வழக்கின் தற்போதைய நிலையை புதுப்பிக்க முடியுமா?",
+    "microphoneError": "Microphone-ஐ அணுக முடியவில்லை.",
+    "joinVideoCall": "Video Call-ல் சேரவும்",
+    "joinAudioCall": "Audio Call-ல் சேரவும்",
+    "recordingAudio": "Audio பதிவு செய்கிறது...",
+    "typeMessage": "செய்தி தட்டச்சு செய்க...",
+    "aiHelp": "AI உதவி",
+    "videoCallRequest": "நான் Video Call தொடங்க விரும்புகிறேன்.",
+    "phoneCallRequest": "நான் Phone Call செய்ய விரும்புகிறேன்.",
+    "downloadFile": "கோப்பை Download செய்க",
+    "requestMeeting": "கூட்டத்தை கோருக",
+    "defaultLawyer": "வழக்கறிஞர்",
+    "casePrefix": "வழக்கு:",
+    "regardingCase": "வழக்கு தொடர்பாக",
+    "fileUploadError": "கோப்பை Upload செய்வது தோல்வியடைந்தது.",
+    "voiceUploadError": "Voice message Upload செய்வது தோல்வியடைந்தது.",
+    "sendMessageError": "செய்தி அனுப்புவது தோல்வியடைந்தது.",
+    "fetchCasesError": "வழக்குகளை ஏற்றுவது தோல்வியடைந்தது.",
+    "fetchMessagesError": "செய்திகளை ஏற்றுவது தோல்வியடைந்தது.",
+    "aiHelpError": "AI உதவியை உருவாக்குவது தோல்வியடைந்தது.",
+    "findLawyer": "🔍 வழக்கறிஞரை கண்டுபிடிக்கவும்"
+  },
+
+  "profile": {
+    "checking": "சரிபார்க்கிறது...",
+
+    "profileSettings": "Profile அமைப்புகள்",
+    "manageAccount": "உங்கள் கணக்கு தகவல் மற்றும் பாதுகாப்பு அமைப்புகளை நிர்வகிக்கவும்",
+
+    "faceLogin": "Face Login",
+    "enabled": "இயக்கப்பட்டது",
+    "notConfigured": "உள்ளமைக்கப்படவில்லை",
+
+    "enableFaceLogin": "Face Login இயக்கவும்",
+    "updateFaceLogin": "Face Login புதுப்பிக்கவும்",
+
+    "personalInformation": "தனிப்பட்ட தகவல்",
+
+    "save": "சேமிக்கவும்",
+    "edit": "திருத்தவும்",
+
+    "fullName": "முழு பெயர்",
+    "email": "Email",
+    "phone": "தொலைபேசி",
+    "profession": "தொழில்",
+    "address": "முகவரி",
+
+    "securitySettings": "பாதுகாப்பு அமைப்புகள்",
+    "changePassword": "Password மாற்றவும்",
+    "currentPassword": "தற்போதைய Password",
+    "newPassword": "புதிய Password",
+    "confirmNewPassword": "புதிய Password உறுதிப்படுத்தவும்",
+    "updatePassword": "Password புதுப்பிக்கவும்",
+
+    "biometricEnrollment": "Biometric பதிவு",
+    "neuralSignature": "Neural Signature பதிவு அமைப்பு",
+
+    "faceEnrolled": "Face வெற்றிகரமாக பதிவு செய்யப்பட்டது!",
+    "faceEnrollmentFailed": "Face பதிவு தோல்வியடைந்தது",
+    "confirmDeleteFace": "Face Login-ஐ முடக்க விரும்புகிறீர்களா? இது உங்கள் Biometric தரவை நீக்கும்.",
+    "faceDeleted": "Face தரவு நீக்கப்பட்டது.",
+    "deleteFaceFailed": "Face தரவை நீக்குவது தோல்வியடைந்தது",
+
+    "professions": {
+      "judge": "உயர் நீதிமன்ற நீதிபதி",
+      "lawyer": "மூத்த வழக்கறிஞர்",
+      "police": "போலீஸ் அதிகாரி",
+      "default": "Software Engineer"
+    },
+
+    "bio": {
+      "judge": "நீதிக்கான அர்ப்பணிப்புடன் சிவில் மற்றும் கிரிமினல் விஷயங்களில் தலைமை தாங்குகிறேன்.",
+      "lawyer": "அரசியலமைப்பு மற்றும் கிரிமினல் சட்டத்தில் நிபுணத்துவம் பெற்ற சட்ட ஆலோசகர்.",
+      "police": "சட்டம் மற்றும் ஒழுங்கை பராமரிக்கவும் சமுதாயத்திற்கு சேவை செய்யவும் அர்ப்பணித்தவர்.",
+      "default": "சொத்து விஷயங்களுக்கு சட்ட உதவி நாடும் அனுபவமிக்க நிபுணர்."
+    }
+  },
+
+  "vakilFriend": {
+    "welcome": "🙏 வணக்கம்! நான் நியாய சாரதி, உங்கள் AI சட்ட உதவியாளர். இன்று நான் உங்களுக்கு எப்படி உதவலாம்?",
+    "offlineMessage": "🙏 வணக்கம்! நான் நியாய சாரதி (offline mode). Backend Server பதிலளிக்கவில்லை. Backend-ஐ தொடங்கி பக்கத்தை refresh செய்யவும்.",
+    "deepResearchError": "ஆழமான ஆராய்ச்சி தோல்வியடைந்தது.",
+    "speechNotSupported": "உங்கள் Browser speech recognition-ஐ ஆதரிக்கவில்லை. Chrome அல்லது Edge பயன்படுத்தவும்.",
+    "noSession": "⚠️ செயலில் உள்ள அமர்வு இல்லை. பக்கத்தை refresh செய்யவும்.",
+    "sendError": "❌ மன்னிக்கவும், பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.",
+    "fileCaseError": "❌ வழக்கு தாக்கல் தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும் அல்லது Support-ஐ தொடர்பு கொள்ளவும்.",
+    "fileTypeNotSupported": "கோப்பு வகை ஆதரிக்கப்படவில்லை:",
+    "fileTooLarge": "கோப்பு மிகவும் பெரியது:",
+    "analyzingDocument": "ஆவணத்தை பகுப்பாய்வு செய்கிறது:",
+    "attachedDocument": "இணைக்கப்பட்ட ஆவணம்:",
+    "analyzeFailed": "பகுப்பாய்வு தோல்வி",
+
+    "chatHistory": "Chat வரலாறு",
+    "newChat": "புதிய Chat",
+    "noHistory": "இன்னும் Chat வரலாறு இல்லை",
+    "recentSessions": "சமீபத்திய அமர்வுகள்",
+
+    "aiDocumentAnalysis": "AI ஆவண பகுப்பாய்வு",
+    "analyzing": "ஆவணத்தை பகுப்பாய்வு செய்கிறது...",
+    "shaProtected": "SHA-256 பாதுகாக்கப்பட்டது",
+    "validity": "செல்லுபடியாகும் தன்மை",
+    "usefulness": "பயன்பாடு",
+    "evidenceVault": "சான்று Vault",
+    "documentType": "ஆவண வகை",
+    "category": "வகை",
+    "aiSummary": "AI சுருக்கம்",
+    "summaryPending": "பகுப்பாய்வு சுருக்கம் நிலுவையில்...",
+    "keyPoints": "முக்கிய புள்ளிகள்",
+    "criticalIssues": "தீவிர பிரச்சினைகள்",
+    "closeAnalysis": "பகுப்பாய்வை மூடவும்",
+
+    "title": "நியாய சாரதி",
+    "subtitle": "உங்கள் சட்ட வழக்கை தாக்கல் செய்ய எங்கள் AI-உடன் Chat செய்யுங்கள்",
+    "language": "மொழி:",
+
+    "filing": "தாக்கல் ஆகிறது...",
+    "completeFiling": "தாக்கலை முடிக்கவும்",
+
+    "connecting": "நியாய சாரதியுடன் இணைக்கிறது...",
+    "securedAssistant": "பாதுகாப்பான AI உதவியாளர்",
+    "connectingShort": "இணைக்கிறது...",
+
+    "attachDocument": "ஆவணத்தை இணைக்கவும்",
+    "placeholder": "உங்கள் சட்ட பிரச்சினையை விவரிக்கவும்...",
+    "stopRecording": "பதிவை நிறுத்தவும்",
+    "speak": "பேசுங்கள் (Bhashini AI)",
+    "hideAvatar": "AI Avatar மறைக்கவும்",
+    "showAvatar": "AI Avatar காட்டவும்",
+    "avatarGreeting": "வணக்கம். நான் உங்கள் AI சட்ட உதவியாளர். நீங்கள் எப்போதும் என்னிடம் பேசலாம்.",
+    "history": "வரலாறு"
+  },
+
+  "common": {
+    "save": "சேமிக்கவும்",
+    "cancel": "ரத்து செய்க",
+    "delete": "நீக்கவும்",
+    "close": "மூடவும்",
+    "loading": "ஏற்றுகிறது...",
+    "retry": "மீண்டும் முயற்சிக்கவும்",
+    "refresh": "Refresh செய்க",
+    "search": "தேடுக",
+    "filter": "வடிகட்டு",
+    "download": "Download",
+    "upload": "Upload",
+    "edit": "திருத்தவும்",
+    "view": "காண்க",
+    "yes": "ஆம்",
+    "no": "இல்லை",
+    "submit": "சமர்ப்பிக்கவும்",
+    "back": "பின்செல்",
+    "next": "அடுத்து",
+    "continue": "தொடர்க",
+    "status": "நிலை",
+    "success": "வெற்றி",
+    "error": "பிழை",
+    "notAvailable": "N/A",
+    "zeroBytes": "0 B"
+  },
+
+  "popups": {
+    "caseUpdated": "வழக்கு வெற்றிகரமாக புதுப்பிக்கப்பட்டது!",
+    "updateFailed": "வழக்கை புதுப்பிப்பது தோல்வியடைந்தது.",
+    "proposalSent": "முன்மொழிவு வெற்றிகரமாக அனுப்பப்பட்டது!",
+    "proposalFailed": "முன்மொழிவை அனுப்புவது தோல்வியடைந்தது.",
+    "uploadFailed": "Upload தோல்வியடைந்தது.",
+    "downloadFailed": "Download தோல்வியடைந்தது.",
+    "networkError": "Network பிழை. உங்கள் இணைப்பை சரிபார்க்கவும்.",
+    "somethingWentWrong": "ஏதோ தவறு நடந்தது.",
+    "sessionExpired": "அமர்வு காலாவதியானது. மீண்டும் Login செய்யவும்.",
+    "confirmDelete": "இந்த உருப்படியை நீக்க விரும்புகிறீர்களா?",
+    "confirmLogout": "Logout செய்ய விரும்புகிறீர்களா?",
+    "draftApproved": "வரைவு அனுமதிக்கப்பட்டது!",
+    "draftRejected": "மாற்றங்கள் கோரப்பட்டு திரும்ப அனுப்பப்பட்டது.",
+    "faceEnrollSuccess": "Face வெற்றிகரமாக பதிவு செய்யப்பட்டது!",
+    "faceEnrollFailed": "Face பதிவு தோல்வியடைந்தது.",
+    "faceDeleteSuccess": "Face தரவு வெற்றிகரமாக நீக்கப்பட்டது.",
+    "faceDeleteFailed": "Face தரவை நீக்குவது தோல்வியடைந்தது.",
+    "passwordChanged": "Password வெற்றிகரமாக மாற்றப்பட்டது.",
+    "passwordFailed": "Password மாற்றுவது தோல்வியடைந்தது.",
+    "aiRefineFailed": "AI மேம்படுத்தல் தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.",
+    "loadLawyersFailed": "கிடைக்கக்கூடிய வழக்கறிஞர்களை ஏற்றுவது தோல்வியடைந்தது.",
+    "analysisUnavailable": "பகுப்பாய்வு இன்னும் கிடைக்கவில்லை.",
+    "fileTooLarge": "கோப்பு அளவு அனுமதிக்கப்பட்ட வரம்பை மீறியது.",
+    "unsupportedFile": "ஆதரிக்கப்படாத கோப்பு வடிவம்.",
+    "uploadSuccess": "கோப்பு வெற்றிகரமாக Upload ஆனது!",
+    "saveSuccess": "மாற்றங்கள் வெற்றிகரமாக சேமிக்கப்பட்டன!",
+    "saveFailed": "மாற்றங்களை சேமிப்பது தோல்வியடைந்தது.",
+    "hearingJoinFailed": "விசாரணையில் சேர முடியவில்லை.",
+    "messageSendFailed": "செய்தி அனுப்புவது தோல்வியடைந்தது.",
+    "caseFiledSuccess": "வழக்கு வெற்றிகரமாக தாக்கல் ஆனது!",
+    "firFiledSuccess": "FIR வெற்றிகரமாக தாக்கல் ஆனது!",
+    "firFiledFailed": "FIR தாக்கல் தோல்வியடைந்தது.",
+    "documentDeleted": "ஆவணம் வெற்றிகரமாக நீக்கப்பட்டது.",
+    "confirmFaceDelete": "Face Login-ஐ முடக்க விரும்புகிறீர்களா?",
+    "approveDraft": "இந்த வரைவை Digitally Sign செய்து அனுமதிக்க விரும்புகிறீர்களா?",
+    "rejectDraft": "உங்கள் கருத்து அல்லது கோரப்பட்ட மாற்றங்களை உள்ளிடவும்."
+  },
+
+  "statuses": {
+    "active": "செயலில்",
+    "inactive": "செயலில் இல்லை",
+    "pending": "நிலுவையில்",
+    "approved": "அனுமதிக்கப்பட்டது",
+    "rejected": "நிராகரிக்கப்பட்டது",
+    "completed": "முடிந்தது",
+    "closed": "மூடப்பட்டது",
+    "open": "திறந்தது",
+    "online": "Online",
+    "offline": "Offline",
+    "live": "Live",
+    "upcoming": "வரவிருக்கும்",
+    "in_progress": "நடந்து கொண்டிருக்கிறது",
+    "under_review": "மதிப்பாய்வில்",
+    "awaiting_documents": "ஆவணங்களுக்காக காத்திருக்கிறது",
+    "verified": "சரிபார்க்கப்பட்டது",
+    "failed": "தோல்வி",
+    "success": "வெற்றி",
+    "pending_police_review": "போலீஸ் மதிப்பாய்வு நிலுவையில்"
+  },
+
+  "lawyers": {
+    "matchExperts": "சட்ட நிபுணர்களுடன் பொருத்துக",
+    "sourcingExperts": "கிடைக்கக்கூடிய சட்ட நிபுணர்களை தேடுகிறது...",
+    "noLawyersAvailable": "தற்போது வழக்கறிஞர்கள் யாரும் இல்லை",
+    "experience": "அனுபவம்",
+    "selectBestLawyer": "இதற்கான சிறந்த வழக்கறிஞரை தேர்ந்தெடுக்கவும்:",
+    "noLawyersDescription": "எங்கள் கூட்டாளி வழக்கறிஞர்கள் தற்போது மற்ற வழக்குகளை கையாளுகிறார்கள். சிறிது நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
+    "experienceValue": "8+ ஆண்டுகள்",
+    "cases": "வழக்குகள்",
+    "selectAndSendProposal": "தேர்ந்தெடுத்து முன்மொழிவை அனுப்புக"
+  },
+
+  "aiBrain": {
+    "title": "NyaySetu Brain",
+    "subtitle": "செயலில் உள்ள Reasoning Engine",
+    "placeholder": "உங்கள் கேள்வியை தட்டச்சு செய்க...",
+    "connectionError": "⚠️ Brain-உடன் இணைப்பு துண்டிக்கப்பட்டது. சிறிது நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
+
+    "judgeWelcome": "🙏 NyaySetu Judicial Brain Online-ல் உள்ளது. Dossier பகுப்பாய்வு, சான்று செல்லுபடியாகும் தன்மை சரிபார்ப்பு, அல்லது உங்கள் நிலுவை வழக்குகளுக்கான நடைமுறை படிகளை பரிந்துரைக்க உதவ முடியும். மாண்பமிக்க நீதிபதி அவர்களே, எவ்வாறு உதவட்டும்?",
+
+    "lawyerWelcome": "வணக்கம், வழக்கறிஞர் அவர்களே. வழக்கு வரைவு, IPC/BNS ஆராய்ச்சி, அல்லது வாடிக்கையாளர் தொடர்பு உத்திகளில் உதவ தயாராக உள்ளேன். இன்றைய நிகழ்ச்சி நிரல் என்ன?",
+
+    "litigantWelcome": "🙏 வணக்கம். நான் உங்கள் NyaySetu சட்ட வழிகாட்டி. உங்கள் உரிமைகளை புரிந்துகொள்ள, புதிய வழக்கு தாக்கல் செய்ய, அல்லது சட்ட பிரதிநிதியை கண்டுபிடிக்க உதவ முடியும். நீங்கள் என்ன தெரிந்துகொள்ள விரும்புகிறீர்கள்?",
+
+    "defaultWelcome": "வணக்கம். நான் NyaySetu AI Brain. இன்று நான் உங்களுக்கு எப்படி உதவலாம்?"
+  }
+}

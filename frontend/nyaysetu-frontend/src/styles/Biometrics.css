@@ -130,7 +130,9 @@
     align-items: center;
     gap: 8px;
     z-index: 20;
-    white-space: nowrap;
+    white-space: normal;
+    max-width: 90%;
+    text-align: center;
     box-shadow: var(--shadow-glass);
 }
 

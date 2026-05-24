@@ -62,6 +62,7 @@ DOMAIN_KEYWORDS = {
     "consumer": ["consumer", "product", "defect", "refund", "company", "service", "complaint"],
     "family": ["divorce", "marriage", "custody", "alimony", "maintenance", "wife", "husband", "child"],
     "labour": ["job", "employment", "salary", "fired", "boss", "company", "labour", "worker", "wage"],
+    "legal": ["law", "court", "judge", "advocate", "lawyer", "justice", "legal", "section", "article", "constitution", "act", "rule"],
 }
 
 

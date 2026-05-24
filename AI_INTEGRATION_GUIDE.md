@@ -1290,7 +1290,7 @@ if (recomputedHash.equals(entry.getSha256Hash())) {
 | Metric | Without AI | With AI | Improvement |
 |--------|------------|---------|-------------|
 | **Case Filing Time** | 7-14 days | 30-45 min | **95% faster** |
-| **Case Filing Cost** | ₹15,000-₹30,000 | ₹0 | **100%savings** |
+| **Case Filing Cost** | ₹15,000-₹30,000 | ₹0 | **100% savings** |
 | **Judge Review Time** | 30-45 min/case | 5 min/case | **85% faster** |
 | **Document Verification** | Manual (2-3 hrs) | Auto (2 sec) | **99.9% faster** |
 | **Evidence Tampering** | Undetectable | Auto-detected | **100% security** |

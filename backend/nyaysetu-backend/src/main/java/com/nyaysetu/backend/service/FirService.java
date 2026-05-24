@@ -37,10 +37,10 @@ public class FirService {
     private final GroqDocumentVerificationService groqService;
     private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
 
-    @Value("${app.upload.fir-path:uploads/fir}")
+    @Value("${app.upload.fir-path:backend/uploads/fir}")
     private String firUploadPath;
 
-    @Value("${app.upload.evidence-path:uploads/evidence}")
+    @Value("${app.upload.evidence-path:backend/uploads/evidence}")
     private String evidenceUploadPath;
 
     /**
@@ -557,4 +557,3 @@ public class FirService {
         private long rejectedFirs;
     }
 }
-

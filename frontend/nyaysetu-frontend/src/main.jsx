@@ -17,7 +17,7 @@ const registerServiceWorker = (callback) => {
     const isDev = import.meta.env.DEV;
 
     if (isDev) {
-        console.log('🔧 Dev mode detected - Service Worker registration skipped');
+      //  console.log('🔧 Dev mode detected - Service Worker registration skipped');
         return;
     }
 
@@ -27,7 +27,7 @@ const registerServiceWorker = (callback) => {
                 const registration = await navigator.serviceWorker.register('/sw.js', {
                     scope: '/',
                 });
-                console.log('✅ Service Worker registered successfully:', registration);
+             //   console.log('✅ Service Worker registered successfully:', registration);
 
                 // Pass registration to callback
                 if (callback) {

@@ -33,13 +33,13 @@ export const useWebRTC = (roomId, userId, userName) => {
                 socketRef.current = io(SIGNALING_SERVER);
 
                 socketRef.current.on('connect', () => {
-                    console.log('Connected to signaling server');
+                  //  console.log('Connected to signaling server');
                     socketRef.current.emit('join-room', roomId, userId, userName);
                 });
 
                 // Handle existing participants
                 socketRef.current.on('existing-participants', (participants) => {
-                    console.log('Existing participants:', participants);
+                    //console.log('Existing participants:', participants);
                     participants.forEach(participantId => {
                         createPeer(participantId, true, stream);
                     });
@@ -47,7 +47,7 @@ export const useWebRTC = (roomId, userId, userName) => {
 
                 // Handle new user joining
                 socketRef.current.on('user-connected', (remoteUserId, remoteUserName) => {
-                    console.log(`User connected: ${remoteUserName}`);
+                 //   console.log(`User connected: ${remoteUserName}`);
                 });
 
                 // Handle WebRTC signaling
@@ -61,7 +61,7 @@ export const useWebRTC = (roomId, userId, userName) => {
 
                 // Handle user disconnect
                 socketRef.current.on('user-disconnected', (userId) => {
-                    console.log(`User disconnected: ${userId}`);
+                  //  console.log(`User disconnected: ${userId}`);
                     if (peersRef.current[userId]) {
                         peersRef.current[userId].destroy();
                         delete peersRef.current[userId];
