@@ -31,11 +31,16 @@ export default function Header({ hideAuthButtons = false }) {
     const location                                 = useLocation();
 
     // add shadow to nav after scrolling 50px
-    useEffect(() => {
-        const onScroll = () => setIsScrolled(window.scrollY > 50);
-        window.addEventListener('scroll', onScroll);
-        return () => window.removeEventListener('scroll', onScroll);
-    }, []);
+      useEffect(() => {
+  const updateScroll = () => {
+    setIsScrolled(window.scrollY > 50);
+  };
+
+  updateScroll(); // initial sync
+
+  window.addEventListener('scroll', updateScroll);
+  return () => window.removeEventListener('scroll', updateScroll);
+}, []);
 
     // Close role dropdown on outside click
     useEffect(() => {
@@ -69,7 +74,7 @@ export default function Header({ hideAuthButtons = false }) {
     const isDark = theme === 'dark';
 
     const navLinkStyle = (href) => ({
-        color: location.pathname === href ? 'var(--color-primary)' : 'var(--text-secondary)',
+        color: location.pathname === href ? 'var(--color-primary)': (isScrolled ? '#000000' : 'var(--text-secondary)'),
         textDecoration: 'none',
         fontSize: '0.925rem',
         fontWeight: location.pathname === href ? '600' : '500',
@@ -109,7 +114,8 @@ export default function Header({ hideAuthButtons = false }) {
                     to={item.href}
                     style={baseStyle}
                     onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                    onMouseLeave={e => e.currentTarget.style.color = location.pathname === item.href ? 'var(--color-primary)' : 'var(--text-secondary)'}
+                    onMouseLeave={e =>e.currentTarget.style.color =location.pathname === item.href? 'var(--color-primary)': (isScrolled ? '#000000' : 'var(--text-secondary)')
+}
                 >
                     {displayLabel}
                 </Link>
@@ -142,7 +148,8 @@ export default function Header({ hideAuthButtons = false }) {
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
                     borderBottom: '1px solid var(--border-light)',
-                    boxShadow: isScrolled ? 'var(--shadow-nav)' : 'none',
+                    boxShadow: isScrolled ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
+                    background: isScrolled ? 'rgba(255,255,255,0.9)' : 'var(--bg-nav)',
                     transition: 'box-shadow 0.3s ease, background 0.25s ease',
                 }}
             >
@@ -181,7 +188,7 @@ export default function Header({ hideAuthButtons = false }) {
                             fontSize: '1.2rem',
                             fontWeight: '800',
                             letterSpacing: '-0.03em',
-                            color: 'var(--text-main)',
+                            color: isScrolled ? '#000000' : 'var(--text-main)',
                             fontFamily: 'var(--font-heading)',
                         }}>
                             NyaySetu
@@ -210,7 +217,7 @@ export default function Header({ hideAuthButtons = false }) {
                                     background: 'transparent',
                                     border: '1px solid var(--border-medium)',
                                     borderRadius: '8px',
-                                    color: 'var(--text-main)',
+                                    color: isScrolled ? '#000000' : 'var(--text-main)',
                                     fontSize: '0.875rem',
                                     fontWeight: '600',
                                     cursor: 'pointer',
@@ -281,7 +288,7 @@ export default function Header({ hideAuthButtons = false }) {
                                 background: 'transparent',
                                 border: '1px solid var(--border-medium)',
                                 borderRadius: '8px',
-                                color: 'var(--text-main)',
+                                color: isScrolled ? '#000000' : 'var(--text-main)',
                                 cursor: 'pointer',
                                 fontWeight: '600',
                                 fontSize: '0.8rem',
@@ -387,7 +394,7 @@ export default function Header({ hideAuthButtons = false }) {
                                     to="/login"
                                     style={{
                                         padding: '0.55rem 1.1rem',
-                                        color: 'var(--text-main)',
+                                        color: isScrolled ? '#000000' : 'var(--text-main)',
                                         border: '1px solid var(--border-medium)',
                                         background: 'transparent',
                                         textDecoration: 'none',
