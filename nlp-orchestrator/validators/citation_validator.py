@@ -10,10 +10,15 @@ from legal_utils.citation_extractor import extract_legal_citations
 DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "legal_sections.json"
 
 
-@lru_cache(maxsize=1)  
+@lru_cache(maxsize=1)
 def _load_legal_sections() -> dict[str, Any]:
-    with open(DATA_PATH, "r", encoding="utf-8") as handle:
-        return json.load(handle)
+    try:
+        with open(DATA_PATH, "r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Legal sections file not found at {DATA_PATH}")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Legal sections file is malformed: {e}")
 
 
 def _parse_numeric_section(section: str) -> tuple[int, str] | None:
@@ -29,7 +34,6 @@ def _parse_numeric_section(section: str) -> tuple[int, str] | None:
     suffix = match.group("suffix") or ""
 
     return number, suffix
-
 
 def validate_citation(
     act: str,
