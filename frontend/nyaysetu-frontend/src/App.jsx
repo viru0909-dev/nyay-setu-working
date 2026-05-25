@@ -23,6 +23,7 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Disclaimer = lazy(() => import('./pages/Disclaimer'));
 const UpcomingFeatures = lazy(() => import('./pages/UpcomingFeatures'));
+const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
 
 // Dashboard Layout
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
@@ -132,6 +133,7 @@ function App({ swRegistration }) {
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
+                                <Route path="/feedback" element={<FeedbackPage />} />
 
                                 {/* Protected Dashboards */}
                                 <Route
@@ -150,7 +152,8 @@ function App({ swRegistration }) {
                                     <Route path="hearings" element={<HearingsPage />} />
                                     <Route path="chat" element={<LawyerChatPage />} />
                                     <Route path="find-lawyer" element={<FindLawyerPage />} />
-                                    <Route path="feedback" element={<LawyerFeedbackPage />} />
+                                    <Route path="feedback" element={<FeedbackPage />} />
+                                    <Route path="lawyer-feedback" element={<LawyerFeedbackPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
                                     <Route path="forensics" element={<ForensicsPage />} />
                                     <Route path="generate-document" element={<DocumentGeneratePage />} />
@@ -176,6 +179,7 @@ function App({ swRegistration }) {
                                     <Route path="analytics" element={<LawyerAnalyticsPage />} />
                                     <Route path="chat" element={<ClientChatPage />} />
                                     <Route path="profile" element={<LawyerProfilePage />} />
+                                    <Route path="feedback" element={<FeedbackPage />} />
                                     <Route path="offline-drafts" element={<OfflineDraftsPage />} />
                                 </Route>
 
@@ -198,6 +202,7 @@ function App({ swRegistration }) {
                                     <Route path="conduct" element={<ConductHearingPage />} />
                                     <Route path="analytics" element={<CourtAnalyticsPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
+                                    <Route path="feedback" element={<FeedbackPage />} />
                                 </Route>
 
                                 <Route
@@ -209,6 +214,7 @@ function App({ swRegistration }) {
                                     }
                                 >
                                     <Route index element={<AdminDashboard />} />
+                                    <Route path="feedback" element={<FeedbackPage />} />
                                 </Route>
 
                                 <Route
@@ -225,8 +231,9 @@ function App({ swRegistration }) {
                                     <Route path="investigations" element={<PoliceInvestigationsPage />} />
                                     <Route path="investigation/:id" element={<InvestigationDetailsPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
+                                    <Route path="feedback" element={<FeedbackPage />} />
                                 </Route>
-                                
+
                                 <Route path="/unauthorized" element={
                                     <div style={{ textAlign: 'center', padding: '3rem' }}>
                                         <h1>Unauthorized</h1>
