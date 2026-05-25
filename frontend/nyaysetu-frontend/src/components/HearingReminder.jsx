@@ -28,12 +28,22 @@ const HearingReminder = () => {
       return;
     }
 
-    alert("Reminder has been scheduled successfully!");
+    alert("Reminder scheduled successfully!");
 
     setTimeout(() => {
+
+      // Play alarm sound
+      const audio = new Audio(
+        "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
+      );
+
+      audio.play();
+
+      // Show browser notification
       new Notification("⚖️ Upcoming Hearing Reminder", {
         body: `${hearingTitle} is scheduled now.`,
       });
+
     }, delay);
   };
 
@@ -41,23 +51,24 @@ const HearingReminder = () => {
     <div
       style={{
         background: "#111827",
-        padding: "24px",
-        borderRadius: "16px",
+        padding: "30px",
+        borderRadius: "18px",
         width: "100%",
-        maxWidth: "450px",
+        maxWidth: "500px",
         margin: "20px auto",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.35)",
       }}
     >
-      <h2
+      <h1
         style={{
           color: "#ffffff",
-          marginBottom: "20px",
           textAlign: "center",
+          marginBottom: "25px",
+          fontSize: "40px",
         }}
       >
         Smart Hearing Reminder
-      </h2>
+      </h1>
 
       <input
         type="text"
@@ -66,12 +77,13 @@ const HearingReminder = () => {
         onChange={(e) => setHearingTitle(e.target.value)}
         style={{
           width: "100%",
-          padding: "12px",
-          marginBottom: "16px",
-          borderRadius: "8px",
+          padding: "14px",
+          marginBottom: "18px",
+          borderRadius: "10px",
           border: "1px solid #374151",
           background: "#1F2937",
           color: "white",
+          fontSize: "16px",
         }}
       />
 
@@ -81,12 +93,13 @@ const HearingReminder = () => {
         onChange={(e) => setHearingTime(e.target.value)}
         style={{
           width: "100%",
-          padding: "12px",
-          marginBottom: "20px",
-          borderRadius: "8px",
+          padding: "14px",
+          marginBottom: "22px",
+          borderRadius: "10px",
           border: "1px solid #374151",
           background: "#1F2937",
           color: "white",
+          fontSize: "16px",
         }}
       />
 
@@ -94,14 +107,15 @@ const HearingReminder = () => {
         onClick={scheduleReminder}
         style={{
           width: "100%",
-          padding: "12px",
-          borderRadius: "8px",
+          padding: "14px",
+          borderRadius: "10px",
           border: "none",
           background: "#6C63FF",
           color: "white",
           fontWeight: "bold",
+          fontSize: "16px",
           cursor: "pointer",
-          transition: "0.3s",
+          transition: "0.3s ease",
         }}
       >
         Set Hearing Reminder
