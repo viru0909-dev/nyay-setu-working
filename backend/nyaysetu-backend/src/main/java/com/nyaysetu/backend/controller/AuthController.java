@@ -47,11 +47,19 @@ public class AuthController {
                     return ResponseEntity.badRequest()
                         .body(Map.of("message", "Password must be at least 8 characters and include an uppercase letter, a number, and a special character (@#$!%*?&)."));
                 }
+            // If the client supplies an invalid or privileged role, override it to LITIGANT.
+                if (req.getRole() == null) {
+                    req.setRole(Role.LITIGANT);
+                } else if (req.getRole() != Role.LITIGANT && req.getRole() != Role.LAWYER && req.getRole() != Role.JUDGE) {
+                    log.warn("Ignoring client-supplied privileged/invalid role on registration: {}", req.getRole());
+                    req.setRole(Role.LITIGANT);
+            }
+
             authService.register(
                     req.getEmail(),
                     req.getName(),
                     req.getPassword(),
-                    req.getRole() != null ? req.getRole() : Role.LITIGANT // default to LITIGANT
+                    req.getRole()
             );
             
             // Auto-login after registration
