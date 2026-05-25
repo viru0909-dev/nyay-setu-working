@@ -4,6 +4,7 @@ import { LogOut, ChevronDown, User, Menu, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/authStore';
 import NotificationBell from '../components/NotificationBell';
+import { languages } from '../utils/languages';
 
 export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -15,18 +16,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
         logout();
         navigate('/login');
     };
-    const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'hi', label: 'हिंदी' },
-    { code: 'mr', label: 'मराठी' },
-    { code: 'ta', label: 'தமிழ்' },
-    { code: 'te', label: 'తెలుగు' },
-    { code: 'gu', label: 'ગુજરાતી' },
-    { code: 'kn', label: 'ಕನ್ನಡ' },
-    { code: 'bn', label: 'বাংলা' },
-    { code: 'ml', label: 'മലയാളം' },
-    { code: 'pa', label: 'ਪੰਜਾਬੀ' }
-];
+
     return (
         <header
             className="navbar"
@@ -235,6 +225,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                     key={lang.code}
                                     onClick={() => {
                                         i18n.changeLanguage(lang.code);
+                                        localStorage.setItem('preferredLanguage', lang.code);
                                         setShowProfileMenu(false);
                                     }}
                                     style={{

@@ -322,10 +322,15 @@ export const translations = {
 };
 
 export function LanguageProvider({ children }) {
-    const [language, setLanguage] = useState('en');
+    const [language, setLanguage] = useState(
+        localStorage.getItem('preferredLanguage') || 'en'
+    );
 
     const toggleLanguage = () => {
-        setLanguage(prev => prev === 'en' ? 'hi' : 'en');
+    const newLanguage = language === 'en' ? 'hi' : 'en';
+
+    setLanguage(newLanguage);
+    localStorage.setItem('preferredLanguage', newLanguage);
     };
 
     const t = (key) => {
