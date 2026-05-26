@@ -5,12 +5,16 @@ const HearingReminder = () => {
   const [hearingTime, setHearingTime] = useState("");
 
   const requestPermission = async () => {
-    if (
-      typeof window !== "undefined" &&
-      "Notification" in window &&
-      Notification.permission !== "granted"
-    ) {
-      await Notification.requestPermission();
+    try {
+      if (
+        typeof window !== "undefined" &&
+        "Notification" in window &&
+        Notification.permission !== "granted"
+      ) {
+        await Notification.requestPermission();
+      }
+    } catch (error) {
+      console.log("Notification permission error:", error);
     }
   };
 
@@ -35,25 +39,31 @@ const HearingReminder = () => {
     alert("Reminder scheduled successfully!");
 
     setTimeout(() => {
-      if (typeof window !== "undefined") {
-        // Play alarm sound
-        const audio = new Audio(
-          "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
-        );
+      try {
+        // Browser-only execution
+        if (typeof window !== "undefined") {
 
-        audio.play().catch((error) => {
-          console.log("Audio playback blocked:", error);
-        });
+          // Audio alert
+          const audio = document.createElement("audio");
+          audio.src =
+            "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg";
 
-        // Show browser notification
-        if (
-          "Notification" in window &&
-          Notification.permission === "granted"
-        ) {
-          new Notification("⚖️ Upcoming Hearing Reminder", {
-            body: `${hearingTitle} is scheduled now.`,
+          audio.play().catch((err) => {
+            console.log("Audio blocked:", err);
           });
+
+          // Notification alert
+          if (
+            "Notification" in window &&
+            Notification.permission === "granted"
+          ) {
+            new Notification("⚖️ Upcoming Hearing Reminder", {
+              body: `${hearingTitle} is scheduled now.`,
+            });
+          }
         }
+      } catch (error) {
+        console.log("Reminder error:", error);
       }
     }, delay);
   };
@@ -75,7 +85,7 @@ const HearingReminder = () => {
           color: "#ffffff",
           textAlign: "center",
           marginBottom: "25px",
-          fontSize: "40px",
+          fontSize: "38px",
         }}
       >
         Smart Hearing Reminder
@@ -126,7 +136,6 @@ const HearingReminder = () => {
           fontWeight: "bold",
           fontSize: "16px",
           cursor: "pointer",
-          transition: "0.3s ease",
         }}
       >
         Set Hearing Reminder
