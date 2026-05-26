@@ -5,7 +5,11 @@ const HearingReminder = () => {
   const [hearingTime, setHearingTime] = useState("");
 
   const requestPermission = async () => {
-    if (Notification.permission !== "granted") {
+    if (
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      Notification.permission !== "granted"
+    ) {
       await Notification.requestPermission();
     }
   };
@@ -31,19 +35,26 @@ const HearingReminder = () => {
     alert("Reminder scheduled successfully!");
 
     setTimeout(() => {
+      if (typeof window !== "undefined") {
+        // Play alarm sound
+        const audio = new Audio(
+          "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
+        );
 
-      // Play alarm sound
-      const audio = new Audio(
-        "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
-      );
+        audio.play().catch((error) => {
+          console.log("Audio playback blocked:", error);
+        });
 
-      audio.play();
-
-      // Show browser notification
-      new Notification("⚖️ Upcoming Hearing Reminder", {
-        body: `${hearingTitle} is scheduled now.`,
-      });
-
+        // Show browser notification
+        if (
+          "Notification" in window &&
+          Notification.permission === "granted"
+        ) {
+          new Notification("⚖️ Upcoming Hearing Reminder", {
+            body: `${hearingTitle} is scheduled now.`,
+          });
+        }
+      }
     }, delay);
   };
 
