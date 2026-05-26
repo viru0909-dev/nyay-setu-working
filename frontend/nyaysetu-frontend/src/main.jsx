@@ -1,4 +1,4 @@
-`import { StrictMode, useState, useEffect } from 'react'
+import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/global.css'
 import './styles/responsive.css'

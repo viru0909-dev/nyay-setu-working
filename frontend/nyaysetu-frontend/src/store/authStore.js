@@ -58,7 +58,7 @@ const useAuthStore = create((set, get) => ({
     // Indicates whether persisted auth has been restored from localStorage
     authInitialized: false,
 
-    setAuth: (user, token) => {t
+    setAuth: (user, token) => {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         clearGuestStorage();
