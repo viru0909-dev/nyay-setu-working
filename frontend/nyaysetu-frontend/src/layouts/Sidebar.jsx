@@ -14,6 +14,8 @@ import { useTheme } from '../contexts/ThemeContext';
 const getRoleMenuItems = (t) => ({
     LITIGANT: [
         { icon: Home, label: t('dashboard:sidebar.litigant.dashboard'), path: '/litigant' },
+        { icon: Search, label: t('dashboard:sidebar.litigant.findLawyer', 'Find a Lawyer'), path: '/litigant/find-lawyer' },
+        { icon: Calendar, label: t('dashboard:sidebar.litigant.consultations', 'My Consultations'), path: '/litigant/consultations' },
         { icon: Bot, label: t('dashboard:sidebar.litigant.vakilFriendAI'), path: '/litigant/vakil-friend' },
         { icon: FileText, label: t('dashboard:sidebar.litigant.fileCaseFIR'), path: '/litigant/file' },
         { icon: FolderOpen, label: t('dashboard:sidebar.litigant.caseDiary'), path: '/litigant/case-diary' },
@@ -25,6 +27,7 @@ const getRoleMenuItems = (t) => ({
     ],
     LAWYER: [
         { icon: Home, label: t('dashboard:sidebar.lawyer.dashboard'), path: '/lawyer' },
+        { icon: Calendar, label: t('dashboard:sidebar.lawyer.consultations', 'Consultations'), path: '/lawyer/consultations' },
         { icon: Users, label: t('dashboard:sidebar.lawyer.litigantDirectory'), path: '/lawyer/clients' },
         { icon: Briefcase, label: t('dashboard:sidebar.lawyer.activeCases'), path: '/lawyer/cases' },
         { icon: Brain, label: t('dashboard:sidebar.lawyer.aiLegalAssistant'), path: '/lawyer/ai-assistant' },

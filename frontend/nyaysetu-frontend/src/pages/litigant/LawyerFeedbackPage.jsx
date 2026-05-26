@@ -1,23 +1,39 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Star, ThumbsUp, ThumbsDown, Send, CheckCircle } from 'lucide-react';
-
-const mockLawyer = {
-  id: 1,
-  name: "Adv. Rajesh Kumar",
-  specialization: "Criminal Law",
-  caseTitle: "Property Dispute Case #2024",
-  avatar: "R"
-};
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Star, ThumbsUp, ThumbsDown, Send, CheckCircle, Loader2 } from 'lucide-react';
+import { consultationAPI } from '../../services/api';
 
 export default function LawyerFeedbackPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const consultationId = searchParams.get('consultationId');
+
+  const [consultation, setConsultation] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [review, setReview] = useState('');
   const [recommend, setRecommend] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    async function loadConsultation() {
+      if (!consultationId) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const response = await consultationAPI.getConsultationDetails(consultationId);
+        setConsultation(response.data);
+      } catch (error) {
+        console.error("Error loading consultation for feedback:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadConsultation();
+  }, [consultationId]);
 
   const ratingLabels = {
     1: 'Poor',
@@ -33,10 +49,18 @@ export default function LawyerFeedbackPage() {
       return;
     }
     setSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setSubmitting(false);
-    setSubmitted(true);
+    try {
+      await consultationAPI.completeConsultation(consultationId, {
+        rating: parseFloat(rating),
+        feedback: review
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Failed to submit feedback", err);
+      alert("Failed to submit feedback. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const glassStyle = {
@@ -129,6 +153,14 @@ export default function LawyerFeedbackPage() {
       </div>
     );
   }
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '50vh', color: 'var(--text-main)' }}>
+        <Loader2 size={32} style={{ animation: 'spin 1.5s linear infinite', color: 'var(--color-primary)' }} />
+        <p style={{ marginTop: '1rem', fontSize: '0.9rem' }}>Loading consultation details...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
@@ -181,7 +213,7 @@ export default function LawyerFeedbackPage() {
             alignItems: 'center', justifyContent: 'center',
             fontSize: '1.4rem', fontWeight: '700'
           }}>
-            {mockLawyer.avatar}
+            {consultation?.lawyer?.name?.[0] || 'A'}
           </div>
           <div>
             <h3 style={{
@@ -189,19 +221,19 @@ export default function LawyerFeedbackPage() {
               margin: 0, fontSize: '1.1rem',
               fontWeight: '700'
             }}>
-              {mockLawyer.name}
+              {consultation?.lawyer?.name || 'Advocate'}
             </h3>
             <p style={{
               color: 'var(--color-primary)',
               margin: 0, fontSize: '0.85rem'
             }}>
-              {mockLawyer.specialization}
+              {consultation?.lawyer?.specialization || 'Legal Specialist'}
             </p>
             <p style={{
               color: 'var(--text-secondary)',
               margin: 0, fontSize: '0.8rem'
             }}>
-              📁 {mockLawyer.caseTitle}
+              📁 Notes: {consultation?.notes ? (consultation.notes.length > 40 ? consultation.notes.substring(0, 40) + '...' : consultation.notes) : 'General Consultation'}
             </p>
           </div>
         </div>

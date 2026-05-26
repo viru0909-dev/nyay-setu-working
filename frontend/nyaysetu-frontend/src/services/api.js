@@ -314,4 +314,30 @@ export const caseTransitionAPI = {
     getCaseHealth: (caseId) => api.get(`/api/v1/cases/transition/${caseId}/health`),
 };
 
+// Consultation & Payments API
+export const consultationAPI = {
+    getAllLawyers: (page = 0, size = 10) => api.get('/api/lawyers', { params: { page, size } }),
+    searchLawyers: (searchText, minRating, page = 0, size = 10) => 
+        api.get('/api/lawyers/search', { params: { searchText, minRating, page, size } }),
+    getLawyerDetails: (lawyerId) => api.get(`/api/lawyers/${lawyerId}`),
+    getAvailableSlots: (lawyerId, from, to) => 
+        api.get(`/api/consultations/lawyer/${lawyerId}/available-slots`, { params: { from, to } }),
+    bookConsultation: (bookingData) => api.post('/api/consultations/book', bookingData),
+    getMyConsultations: (page = 0, size = 10) => 
+        api.get('/api/consultations/my-consultations', { params: { page, size } }),
+    getLawyerConsultations: (page = 0, size = 10) => 
+        api.get('/api/consultations/lawyer-consultations', { params: { page, size } }),
+    addConsultationSlots: (slotsData) => 
+        api.post('/api/consultations/lawyer/add-slots', slotsData),
+    getConsultationDetails: (consultationId) => api.get(`/api/consultations/${consultationId}`),
+    cancelConsultation: (consultationId, reason) => 
+        api.post(`/api/consultations/${consultationId}/cancel`, { reason }),
+    completeConsultation: (consultationId, rating, feedback) => 
+        api.post(`/api/consultations/${consultationId}/complete`, { rating, feedback }),
+    createPaymentIntent: (paymentData) => api.post('/api/consultations/payment/create-intent', paymentData),
+    refundPayment: (paymentId, reason) => 
+        api.post(`/api/consultations/payment/${paymentId}/refund`, { reason }),
+    downloadInvoiceUrl: (paymentId) => `${api.defaults.baseURL}/api/consultations/payment/${paymentId}/invoice`
+};
+
 export default api;

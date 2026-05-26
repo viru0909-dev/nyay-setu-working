@@ -13,6 +13,8 @@
     "@anthropic-ai/sdk": "^0.71.2",
     "@react-three/drei": "^9.117.3",
     "@react-three/fiber": "^8.17.10",
+    "@stripe/react-stripe-js": "^6.4.0",
+    "@stripe/stripe-js": "^9.6.0",
     "aos": "^2.3.4",
     "axios": "^1.6.2",
     "dexie": "^4.2.1",
