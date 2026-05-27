@@ -2,7 +2,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Smartphone, Bot, BookOpen, Video, ShieldCheck } from 'lucide-react';
+import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Download, Bot, BookOpen, Video, ShieldCheck, Cpu, Cuboid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
@@ -10,11 +10,35 @@ import AIChatbot from '../components/landing/AIChatbot';
 import AchievementsSection from '../components/landing/AchievementsSection';
 import HowItWorks from '../components/landing/HowItWorks';
 import TrustIndicators from '../components/landing/TrustIndicators';
+import useProtectedFeature from '../hooks/useProtectedFeature';
+import useGuest from '../hooks/useGuest';
+import GuestAccessDeniedModal from '../components/guest/GuestAccessDeniedModal';
+import GuestInlineCTA from '../components/guest/GuestInlineCTA';
+import GuestLockedCard from '../components/guest/GuestLockedCard';
 
 export default function Landing() {
     const { t } = useTranslation('landing');
     const { theme } = useTheme();
     const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const heroImage = theme === 'dark'
+        ? {
+            fallbackSrc: '/scales-dark-720.jpg',
+            fallbackSrcSet: '/scales-dark-480.jpg 480w, /scales-dark-720.jpg 720w',
+            webpSrcSet: '/scales-dark-480.webp 480w, /scales-dark-720.webp 720w',
+        }
+        : {
+            fallbackSrc: '/scales-light-720.jpg',
+            fallbackSrcSet: '/scales-light-480.jpg 480w, /scales-light-720.jpg 720w',
+            webpSrcSet: '/scales-light-480.webp 480w, /scales-light-720.webp 720w',
+        };
+    const { isGuest } = useGuest();
+    const {
+        showDeniedModal,
+        setShowDeniedModal,
+        inlineMessage,
+        tryAccess,
+        goToSignup,
+    } = useProtectedFeature('file a case', { intentPath: '/litigant/file' });
 
     useEffect(() => {
         const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); window.deferredPrompt = e; };
@@ -61,6 +85,10 @@ export default function Landing() {
             bg: 'rgba(16,185,129,0.08)',
         },
     ];
+
+    const handleSubmitCaseClick = () => {
+        tryAccess();
+    };
 
     const FEATURES = [
         { icon: Bot,         title: t('features.aiLegalAssistant.title'),   desc: t('features.aiLegalAssistant.description'),   color: '#3F5DCC' },
@@ -178,12 +206,12 @@ export default function Landing() {
                                 </Link>
 
                                 <motion.button
-                                    whileHover={{ scale: 1.08 }}
+                                    whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleInstall}
                                     title={t('hero.installApp')}
                                     style={{
-                                        width: '48px', height: '48px',
+                                        gap:'0.5rem',padding:'0.8rem 1rem',
                                         borderRadius: '12px',
                                         border: '1px solid var(--border-medium)',
                                         background: 'var(--bg-surface)',
@@ -191,9 +219,12 @@ export default function Landing() {
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         cursor: 'pointer',
                                         boxShadow: 'var(--shadow-sm)',
+                                        fontWeight:'600',
+                                        whiteSpace:'nowrap',
                                     }}
                                 >
-                                    <Smartphone size={20} />
+                                    <Download size={18} />
+                                    {t('hero.installApp')}
                                 </motion.button>
                             </div>
 
@@ -229,21 +260,35 @@ export default function Landing() {
                                 zIndex: 0,
                             }} />
                             <div className="hero-img-wrap">
-                                <motion.img
-                                    src={theme === 'dark' ? '/scales-dark.png' : '/scales-light.png'}
-                                    alt="Scales of Justice"
-                                    className="hero-img"
-                                    animate={{ y: [0, -14, 0] }}
-                                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                                    style={{
-                                        width: '100%',
-                                        maxWidth: '480px',
-                                        height: 'auto',
-                                        display: 'block',
-                                        position: 'relative',
-                                        zIndex: 1,
-                                    }}
-                                />
+                                <picture>
+                                    <source
+                                        type="image/webp"
+                                        srcSet={heroImage.webpSrcSet}
+                                        sizes="(max-width: 900px) 480px, min(50vw, 480px)"
+                                    />
+                                    <motion.img
+                                        src={heroImage.fallbackSrc}
+                                        srcSet={heroImage.fallbackSrcSet}
+                                        sizes="(max-width: 900px) 480px, min(50vw, 480px)"
+                                        alt="Scales of Justice"
+                                        className="hero-img"
+                                        width="720"
+                                        height="720"
+                                        loading="eager"
+                                        fetchPriority="high"
+                                        decoding="async"
+                                        animate={{ y: [0, -14, 0] }}
+                                        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                        style={{
+                                            width: '100%',
+                                            maxWidth: '480px',
+                                            height: 'auto',
+                                            display: 'block',
+                                            position: 'relative',
+                                            zIndex: 1,
+                                        }}
+                                    />
+                                </picture>
                             </div>
                         </motion.div>
                     </div>
@@ -297,22 +342,58 @@ export default function Landing() {
                                 <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '1.25rem' }}>
                                     {card.desc}
                                 </p>
-                                <Link to="/signup" style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                                    color: card.color,
-                                    fontSize: '0.875rem', fontWeight: '700',
-                                    textDecoration: 'none',
-                                    transition: 'gap 0.2s ease',
-                                }}
-                                    onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
-                                    onMouseLeave={e => e.currentTarget.style.gap = '0.35rem'}
-                                >
-                                    {card.cta} <ArrowRight size={14} />
-                                </Link>
+                                {i === 1 ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmitCaseClick}
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '0.35rem',
+                                            color: card.color,
+                                            fontSize: '0.875rem',
+                                            fontWeight: '700',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            padding: 0,
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        {card.cta} <ArrowRight size={14} />
+                                    </button>
+                                ) : (
+                                    <Link to="/signup" style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                                        color: card.color,
+                                        fontSize: '0.875rem', fontWeight: '700',
+                                        textDecoration: 'none',
+                                        transition: 'gap 0.2s ease',
+                                    }}
+                                        onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
+                                        onMouseLeave={e => e.currentTarget.style.gap = '0.35rem'}
+                                    >
+                                        {card.cta} <ArrowRight size={14} />
+                                    </Link>
+                                )}
+
+                                {inlineMessage && i === 1 && (
+                                    <GuestInlineCTA message={inlineMessage} onSignUp={goToSignup} compact />
+                                )}
                             </motion.div>
                         ))}
                     </div>
                 </section>
+
+                <GuestAccessDeniedModal
+                    isOpen={showDeniedModal}
+                    feature="file a case"
+                    onClose={() => setShowDeniedModal(false)}
+                    onUpgrade={() => {
+                        setShowDeniedModal(false);
+                        goToSignup();
+                    }}
+                    onContinue={() => setShowDeniedModal(false)}
+                />
 
                 {/* ── How It Works ──────────────────────────────────── */}
                 <HowItWorks />
@@ -373,7 +454,47 @@ export default function Landing() {
                                         }}>
                                             <FeatureIcon size={26} style={{ color: f.color }} />
                                         </div>
-                                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.65rem' }}>{f.title}</h3>
+                                        <div
+    style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '0.75rem',
+        marginBottom: '0.65rem',
+    }}
+>
+    <h3
+        style={{
+            fontSize: '1.1rem',
+            fontWeight: '700',
+            color: 'var(--text-main)',
+            margin: 0,
+        }}
+    >
+        {f.title}
+    </h3>
+
+    {isGuest && (
+        f.title === t('features.fileCases.title') ||
+        f.title === t('features.virtualHearings.title')
+    ) && (
+        <span
+            style={{
+                padding: '0.28rem 0.55rem',
+                borderRadius: '999px',
+                fontSize: '0.68rem',
+                fontWeight: '700',
+                background: 'rgba(245,158,11,0.10)',
+                border: '1px solid rgba(245,158,11,0.18)',
+                color: '#f59e0b',
+                letterSpacing: '0.02em',
+                whiteSpace: 'nowrap',
+            }}
+        >
+            Account Required
+        </span>
+    )}
+</div>
                                         <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
                                     </motion.div>
                                 );
@@ -384,6 +505,109 @@ export default function Landing() {
 
                 <TrustIndicators />
                 <AchievementsSection />
+
+                {/* ── Vision Preview ───────────────────────────────────── */}
+                <section style={{
+                    padding: '6rem 2rem',
+                    background: 'var(--bg-surface)',
+                    borderTop: '1px solid var(--border-light)',
+                    borderBottom: '1px solid var(--border-light)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        position: 'absolute', top: '50%', right: '-5%', transform: 'translateY(-50%)',
+                        width: '600px', height: '600px', borderRadius: '50%',
+                        background: 'radial-gradient(circle, rgba(124,92,255,0.06) 0%, transparent 60%)',
+                        pointerEvents: 'none', zIndex: 0
+                    }} />
+                    
+                    <div style={{ maxWidth: '1320px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+                        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                            <div style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                padding: '0.4rem 1rem', marginBottom: '1rem',
+                                background: 'rgba(124,92,255,0.08)', border: '1px solid rgba(124,92,255,0.15)',
+                                borderRadius: '2rem',
+                            }}>
+                                <Star size={14} color="#7C5CFF" />
+                                <span style={{ color: '#7C5CFF', fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                                    Nyay-GPT Vision
+                                </span>
+                            </div>
+                            <h2 style={{ fontSize: 'clamp(1.9rem,3.5vw,2.6rem)', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem', letterSpacing: '-0.025em' }}>
+                                The Next Generation of <br />
+                                <span style={{ color: '#7C5CFF' }}>Multimodal Legal Intelligence</span>
+                            </h2>
+                            <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', maxWidth: '650px', margin: '0 auto' }}>
+                                We are actively developing a self-hosted, multimodal legal workspace designed to demolish cognitive barriers and forensic dimensional voids.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
+                            {[
+                                { icon: Cpu, title: 'Conversational Workspace', desc: 'Dynamic split-screen analysis with generated artifacts.', color: '#7C5CFF' },
+                                { icon: Cuboid, title: '3D Spatial Forensics', desc: 'Navigate photorealistic 3D reconstructions of accident scenes.', color: '#F59E0B' },
+                                { icon: Video, title: 'Live Multimodal Streaming', desc: 'Real-time WebRTC streaming for immediate legal guidance.', color: '#EF4444' }
+                            ].map((item, i) => {
+                                const Icon = item.icon;
+                                return (
+                                    <motion.div key={i}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: i * 0.1 }}
+                                        whileHover={{ y: -5 }}
+                                        style={{
+                                            background: 'var(--bg-main)',
+                                            border: '1px solid var(--border-light)',
+                                            borderRadius: '20px',
+                                            padding: '2.5rem 2rem',
+                                            boxShadow: 'var(--shadow-sm)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            textAlign: 'center',
+                                            transition: 'border-color 0.25s ease, box-shadow 0.25s ease'
+                                        }}
+                                        onMouseEnter={e => { e.currentTarget.style.borderColor = item.color + '50'; e.currentTarget.style.boxShadow = `0 10px 30px ${item.color}15`; }}
+                                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
+                                    >
+                                        <div style={{
+                                            width: '60px', height: '60px', borderRadius: '16px',
+                                            background: `${item.color}15`, border: `1px solid ${item.color}30`,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            marginBottom: '1.5rem',
+                                        }}>
+                                            <Icon size={30} color={item.color} />
+                                        </div>
+                                        <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+                                            {item.title}
+                                        </h3>
+                                        <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6' }}>
+                                            {item.desc}
+                                        </p>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                        
+                        <div style={{ textAlign: 'center' }}>
+                            <Link to="/upcoming-features" style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                padding: '0.8rem 1.8rem', background: 'transparent',
+                                color: '#7C5CFF', border: '2px solid #7C5CFF',
+                                borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
+                                textDecoration: 'none', transition: 'all 0.2s ease',
+                            }}
+                                onMouseEnter={e => { e.currentTarget.style.background = '#7C5CFF'; e.currentTarget.style.color = '#FFF'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#7C5CFF'; }}
+                            >
+                                Explore the Full Roadmap <ArrowRight size={18} />
+                            </Link>
+                        </div>
+                    </div>
+                </section>
 
                 {/* ── Final CTA ─────────────────────────────────────── */}
                 <section style={{ padding: '7rem 2rem', background: 'var(--bg-main)' }}>

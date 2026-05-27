@@ -23,13 +23,13 @@ class HealthControllerTest {
 
     @Test
     void healthEndpoint_shouldReturn200() throws Exception {
-        mockMvc.perform(get("/api/health"))
+        mockMvc.perform(get("/api/v1/health"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void healthEndpoint_shouldReturnExpectedFields() throws Exception {
-        mockMvc.perform(get("/api/health"))
+        mockMvc.perform(get("/api/v1/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"))
                 .andExpect(jsonPath("$.service").value("nyaysetu-backend"))

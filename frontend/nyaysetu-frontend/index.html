@@ -9,6 +9,24 @@
     href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet">
   <link rel="icon" type="image/png" href="/favicon-32x32.png" />
+  <link
+    rel="preload"
+    as="image"
+    type="image/webp"
+    href="/scales-light-720.webp"
+    imagesrcset="/scales-light-480.webp 480w, /scales-light-720.webp 720w"
+    imagesizes="min(50vw, 480px)"
+    media="(min-width: 901px) and (prefers-color-scheme: light)"
+  />
+  <link
+    rel="preload"
+    as="image"
+    type="image/webp"
+    href="/scales-dark-720.webp"
+    imagesrcset="/scales-dark-480.webp 480w, /scales-dark-720.webp 720w"
+    imagesizes="min(50vw, 480px)"
+    media="(min-width: 901px) and (prefers-color-scheme: dark)"
+  />
 
   <!-- PWA Meta Tags -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />

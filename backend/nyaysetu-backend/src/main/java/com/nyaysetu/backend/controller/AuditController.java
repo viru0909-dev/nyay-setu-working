@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Audit Logs", description = "Create and retrieve audit logs for case activities")
 @RestController
-@RequestMapping("/api/audit")
+@RequestMapping("/audit")
 @RequiredArgsConstructor
 public class AuditController {
 

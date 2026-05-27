@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Tag(name = "Case Messages", description = "Send and retrieve messages between parties in a case")
 @RestController
-@RequestMapping("/api/cases/{caseId}/messages")
+@RequestMapping("/cases/{caseId}/messages")
 @RequiredArgsConstructor
 public class MessageController {
 

@@ -1,0 +1,39 @@
+{
+  "acts": {
+    "IPC": {
+      "display_name": "Indian Penal Code",
+      "section_range": [1, 511],
+      "aliases": ["indian penal code", "penal code", "ipc"]
+    },
+    "CrPC": {
+      "display_name": "Code of Criminal Procedure",
+      "section_range": [1, 484],
+      "aliases": ["criminal procedure code", "code of criminal procedure", "crpc"]
+    },
+    "CPC": {
+      "display_name": "Civil Procedure Code",
+      "section_range": [1, 484],
+      "aliases": ["civil procedure code", "cpc"]
+    },
+    "MVA": {
+      "display_name": "Motor Vehicles Act",
+      "section_range": [1, 303],
+      "aliases": ["motor vehicles act", "mva"]
+    },
+    "BNS": {
+      "display_name": "BNS",
+      "section_range": [1, 200],
+      "aliases": ["bns"]
+    },
+    "BNSS": {
+      "display_name": "BNSS",
+      "section_range": [1, 200],
+      "aliases": ["bnss"]
+    },
+    "Article": {
+      "display_name": "Constitutional Article",
+      "section_range": [1, 448],
+      "aliases": ["article", "art"]
+    }
+  }
+}

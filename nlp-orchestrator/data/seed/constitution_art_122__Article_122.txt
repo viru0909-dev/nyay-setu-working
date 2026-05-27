@@ -1,0 +1,5 @@
+# <b>Article</b> <b>122</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=1283667
+# Fetch query: Constitution of India Article 122
+
+Article 122 in Constitution of India 122. Courts not to inquire into proceedings of Parliament (1)The validity of any proceedings in Parliament shall not be called in question on the ground of any alleged irregularity of procedure.(2)No officer or member of Parliament in whom powers are vested by or under this Constitution for regulating procedure or the conduct of business, or for maintaining order, in Parliament shall be subject to the jurisdiction of any court in respect of the exercise by him of those powers.

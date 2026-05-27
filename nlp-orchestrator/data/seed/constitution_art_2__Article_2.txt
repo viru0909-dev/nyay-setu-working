@@ -1,0 +1,5 @@
+# <b>Article</b> <b>2</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=1456610
+# Fetch query: Constitution of India Article 2
+
+Article 2 in Constitution of India 2. Admission or establishment of new States Parliament may by law admit into the Union, or establish, new States on such terms and conditions, as it thinks fit.

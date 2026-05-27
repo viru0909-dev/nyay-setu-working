@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 @Tag(name = "Face Recognition", description = "Enroll and verify user identity using facial recognition")
 @RestController
-@RequestMapping("/api/face")
+@RequestMapping("/face")
 @RequiredArgsConstructor
 @Slf4j
 public class FaceRecognitionController {

@@ -1,0 +1,5 @@
+# <b>Article</b> <b>50</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=192717
+# Fetch query: Constitution of India Article 50
+
+Article 50 in Constitution of India 50. Separation of judiciary from executive The State shall take steps to separate the judiciary from the executive in the public services of the State.

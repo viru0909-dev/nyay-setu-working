@@ -37,14 +37,20 @@ class NotificationService {
 
             // Only log in development
             if (!isProduction) {
-                console.log('Connecting to WebSocket:', wsUrl);
+                if (import.meta.env.DEV) {
+                      console.log('Connecting to WebSocket:', wsUrl);
+                  }
+                
             }
 
             this.ws = new WebSocket(wsUrl);
 
             this.ws.onopen = () => {
                 if (!isProduction) {
-                    console.log('✅ WebSocket connected');
+                   if (import.meta.env.DEV) {
+                       console.log('✅ WebSocket connected');
+                  }
+                    
                 }
                 this.reconnectAttempts = 0;
                 this.isConnecting = false;

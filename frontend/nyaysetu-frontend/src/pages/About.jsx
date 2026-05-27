@@ -9,6 +9,8 @@ import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
 import ScrollTopButton from '../components/landing/ScrollTopButton';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
+
 
 const techStack = [
     { icon: Code2, name: 'React + Spring Boot', color: '#61dafb' },
@@ -17,47 +19,94 @@ const techStack = [
     { icon: Database, name: 'PostgreSQL', color: '#336791' }
 ];
 
+// const roadmapPhases = [
+//     {
+//         phase: 'Phase 1',
+//         title: 'Current Release',
+//         status: 'live',
+//         color: '#10b981',
+//         items: [
+//             'Vakil-Friend AI Assistant (Groq LPU)',
+//             'Blockchain Evidence Vault (SHA-256)',
+//             'Virtual Courtroom & Hearings',
+//             'Multi-role Dashboard'
+//         ]
+//     },
+//     {
+//         phase: 'Phase 2',
+//         title: 'Indigenous AI',
+//         status: 'in-progress',
+//         color: '#f59e0b',
+//         items: [
+//             'OpenNyAI Legal NER Integration',
+//             'Bhashini Translation (22 Languages)',
+//             'Voice Input for Rural Users',
+//             'Section 63(4) Certificate Generator'
+//         ]
+//     },
+//     {
+//         phase: 'Phase 3',
+//         title: 'National Scale',
+//         status: 'planned',
+//         color: '#8b5cf6',
+//         items: [
+//             'Offline-First PWA Architecture',
+//             'ISO 27037 Compliance',
+//             'e-Courts Phase III Integration',
+//             'MeghRaj Sovereign Cloud'
+//         ]
+//     },
+// ];
+
 const roadmapPhases = [
     {
-        phase: 'Phase 1',
-        title: 'Current Release',
-        status: 'live',
+        phase: 'about:phase1.name',
+        title: 'about:phase1.title',
+        status: 'about:phase1.status',
         color: '#10b981',
+
         items: [
-            'Vakil-Friend AI Assistant (Groq LPU)',
-            'Blockchain Evidence Vault (SHA-256)',
-            'Virtual Courtroom & Hearings',
-            'Multi-role Dashboard'
+            'about:phase1.item1',
+            'about:phase1.item2',
+            'about:phase1.item3',
+            'about:phase1.item4'
         ]
     },
+
     {
-        phase: 'Phase 2',
-        title: 'Indigenous AI',
-        status: 'in-progress',
+        phase: 'about:phase2.name',
+        title: 'about:phase2.title',
+        status: 'about:phase2.status',
         color: '#f59e0b',
+
         items: [
-            'OpenNyAI Legal NER Integration',
-            'Bhashini Translation (22 Languages)',
-            'Voice Input for Rural Users',
-            'Section 63(4) Certificate Generator'
+            'about:phase2.item1',
+            'about:phase2.item2',
+            'about:phase2.item3',
+            'about:phase2.item4'
         ]
     },
+
     {
-        phase: 'Phase 3',
-        title: 'National Scale',
-        status: 'planned',
+        phase: 'about:phase3.name',
+        title: 'about:phase3.title',
+        status: 'about:phase3.status',
         color: '#8b5cf6',
+
         items: [
-            'Offline-First PWA Architecture',
-            'ISO 27037 Compliance',
-            'e-Courts Phase III Integration',
-            'MeghRaj Sovereign Cloud'
+            'about:phase3.item1',
+            'about:phase3.item2',
+            'about:phase3.item3',
+            'about:phase3.item4'
         ]
     },
 ];
 
 export default function About() {
-    const { t } = useLanguage();
+    // const { t } = useLanguage();
+    const { t } = useTranslation(['about']);
+
+
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
             <Header />
@@ -88,7 +137,7 @@ export default function About() {
                         letterSpacing: '0.05em',
                         marginBottom: '2rem'
                     }}>
-                        {t('aboutHeroTag')}
+                        {t('about:aboutHeroTag')}
                     </span>
 
                     <h1 style={{
@@ -99,16 +148,16 @@ export default function About() {
                         lineHeight: '1.2',
                         letterSpacing: '-0.02em'
                     }}>
-                        Building India's{' '}
+                        {t('about:heroTitleStart')}{' '}
                         <span style={{
                             background:'linear-gradient(135deg, #7C5CFF 0%, #3F5DCC 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             backgroundClip: 'text'
                         }}>
-                            Sovereign Legal-Tech
+                            {t('about:heroTitleHighlight')}
                         </span>
-                        {' '}Infrastructure
+                        {' '}{t('about:heroTitleEnd')}
                     </h1>
 
                     <p style={{
@@ -118,8 +167,7 @@ export default function About() {
                         maxWidth: '750px',
                         margin: '0 auto'
                     }}>
-                        NyaySetu combines AI intelligence with blockchain integrity to modernize
-                        India's judicial system — aligned with the e-Courts Phase III mandate.
+                        {t('about:heroDescription')}
                     </p>
                 </motion.div>
             </section>
@@ -223,15 +271,14 @@ export default function About() {
                             fontWeight: '700',
                             marginBottom: '1.5rem'
                         }}>
-                            Founder & Lead Developer
+                            {t('about:founderRole')}
                         </p>
 
                         <p style={{
                             color: 'var(--text-secondary)',
                             lineHeight: '1.7'
                         }}>
-                            Passionate about democratizing access to justice through
-                            AI innovation and blockchain integrity.
+                            {t('about:founderDescription')}
                         </p>
 
                         {/* GitHub Link */}
@@ -272,16 +319,14 @@ export default function About() {
                                 color: 'var(--color-primary)',
                                 marginBottom: '1rem'
                             }}>
-                                Our Vision
+                                {t('about:visionTitle')}
                             </h2>
                             <p style={{
                                 color: 'var(--text-secondary)',
                                 lineHeight: '1.8',
                                 fontSize: '1.1rem'
                             }}>
-                                To create a future where justice is not delayed, where legal rights are
-                                universally understood, and where technology empowers citizens to navigate
-                                the judicial system with confidence.
+                                {t('about:visionDescription')}
                             </p>
                         </div>
 
@@ -293,7 +338,7 @@ export default function About() {
                             textTransform: 'uppercase',
                             letterSpacing: '0.1em'
                         }}>
-                            Powered By
+                            {t('about:poweredBy')}
                         </h4>
 
                         <div style={{
@@ -345,10 +390,10 @@ export default function About() {
                             marginBottom: '1rem',
                             letterSpacing: '-0.02em'
                         }}>
-                            Development Roadmap
+                            {t('about:roadmapTitle')}
                         </h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
-                            Our journey to building India's sovereign legal-tech platform
+                            {t('about:roadmapSubtitle')}
                         </p>
                     </motion.div>
 
@@ -386,7 +431,7 @@ export default function About() {
                                         fontWeight: '700',
                                         fontSize: '0.85rem'
                                     }}>
-                                        {phase.phase}
+                                        {t(phase.phase)}
                                     </span>
                                     <span style={{
                                         fontSize: '0.75rem',
@@ -394,8 +439,9 @@ export default function About() {
                                         textTransform: 'uppercase',
                                         color: phase.color
                                     }}>
-                                        {phase.status === 'live' ? '✓ Live' :
-                                            phase.status === 'in-progress' ? '⏳ In Progress' : '📅 Planned'}
+                                        {/* {t(phase.status) === 'live' ? '✓ Live' :
+                                            t(phase.status) === 'in-progress' ? '⏳ In Progress' : '📅 Planned'} */}
+                                        {t(phase.status)}
                                     </span>
                                 </div>
 
@@ -405,7 +451,7 @@ export default function About() {
                                     color: 'var(--text-main)',
                                     marginBottom: '1.5rem'
                                 }}>
-                                    {phase.title}
+                                    {t(phase.title)}
                                 </h3>
 
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -420,7 +466,7 @@ export default function About() {
                                             fontSize: '0.95rem'
                                         }}>
                                             <CheckCircle2 size={16} style={{ color: phase.color, flexShrink: 0 }} />
-                                            {item}
+                                            {t(item)}
                                         </li>
                                     ))}
                                 </ul>
@@ -444,11 +490,10 @@ export default function About() {
                     >
                         <Sparkles size={32} style={{ color: 'var(--color-primary)', marginBottom: '1rem' }} />
                         <h4 style={{ color: 'var(--text-main)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-                            Indigenous NLP Model - OpenNyAI
+                            {t('about:openNyAiTitle')}
                         </h4>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', maxWidth: '600px', margin: '0 auto 1.5rem' }}>
-                            We're building a specialized legal language model trained on Indian case law,
-                            statutes, and multilingual legal documents.
+                            {t('about:openNyAiDescription')}
                         </p>
                         <a
                             href="https://github.com/viru0909-dev/OpenNyAI"
@@ -467,7 +512,7 @@ export default function About() {
                                 transition: 'all 0.3s'
                             }}
                         >
-                            <Github size={20} /> View on GitHub <ExternalLink size={16} />
+                            <Github size={20} /> {t('about:viewGithub')} <ExternalLink size={16} />
                         </a>
                     </motion.div>
                 </div>
@@ -496,7 +541,7 @@ export default function About() {
                         marginBottom: '1.25rem',
                         letterSpacing: '-0.02em'
                     }}>
-                        Ready to Experience NyaySetu?
+                        {t('about:ctaTitle')}
                     </h2>
                     <p style={{
                         color: 'var(--text-secondary)',
@@ -504,7 +549,7 @@ export default function About() {
                         marginBottom: '3rem',
                         lineHeight: '1.7'
                     }}>
-                        Join us in transforming India's judicial system
+                        {t('about:ctaDescription')}
                     </p>
                     <Link to="/signup" style={{ textDecoration: 'none' }}>
                         <button className="btn btn-primary" style={{
@@ -515,7 +560,7 @@ export default function About() {
                             alignItems: 'center',
                             gap: '0.75rem'
                         }}>
-                            Get Started <ArrowRight size={22} />
+                            {t('about:getStarted')} <ArrowRight size={22} />
                         </button>
                     </Link>
                 </motion.div>

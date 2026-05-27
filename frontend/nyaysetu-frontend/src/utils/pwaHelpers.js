@@ -65,7 +65,7 @@ export const clearAllCaches = async () => {
             await Promise.all(
                 cacheNames.map(cacheName => caches.delete(cacheName))
             );
-            console.log('All caches cleared successfully');
+            //console.log('All caches cleared successfully');
             return true;
         } catch (error) {
             console.error('Error clearing caches:', error);

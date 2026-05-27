@@ -48,9 +48,9 @@ export default function Footer() {
     ];
 
     const legalLinks = [
-        { label: 'Privacy Policy', href: '/privacy' },
-        { label: 'Terms of Service', href: '/terms' },
-        { label: 'Disclaimer', href: '/disclaimer' }
+        { label: t('landing:footer.privacyPolicy'), href: '/privacy' },
+        { label: t('landing:footer.termsOfService'), href: '/terms' },
+        { label: t('landing:footer.disclaimer'), href: '/disclaimer' }
     ];
 
     return (

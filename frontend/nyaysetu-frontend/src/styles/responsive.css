@@ -194,6 +194,113 @@
         display: none !important;
     }
 
+
+        /* ===== CASE FILING FORM MOBILE FIXES ===== */
+
+    /* Fix form containers - use full width */
+    .form-container,
+    div[class*="form"],
+    div[class*="case-filing"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 16px !important;
+        margin: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Stack the 3-column layout vertically */
+    div[class*="columns"],
+    div[class*="grid"][class*="case"],
+    div[style*="display: flex"][style*="gap"] {
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+
+    /* Make each column take full width */
+    div[class*="column"],
+    div[class*="col-"] {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Fix text wrapping - prevents cut off text */
+    h3, 
+    div[class*="title"],
+    div[class*="card"] p,
+    span[class*="type"] {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        word-break: break-word !important;
+    }
+
+    /* Fix the case type cards (Civil Case, Criminal Case, etc.) */
+    div[class*="case-card"],
+    div[class*="option-card"],
+    div[class*="type-card"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 12px !important;
+        padding: 16px !important;
+    }
+
+    /* Fix the step indicator (1 2 3 4) */
+    div[class*="step"],
+    div[class*="stepper"] {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: center !important;
+    }
+
+    div[class*="step"] span,
+    div[class*="step-number"] {
+        display: inline-block !important;
+        padding: 8px 12px !important;
+        font-size: 14px !important;
+    }
+
+    /* Make buttons visible and touch-friendly */
+    button,
+    .next-btn,
+    .prev-btn,
+    button[type="submit"],
+    div[class*="button"] {
+        min-height: 48px !important;
+        padding: 12px 20px !important;
+        font-size: 16px !important;
+        margin: 8px 0 !important;
+        width: auto !important;
+    }
+
+    /* Stack Previous/Next buttons */
+    div[class*="navigation"],
+    div[class*="actions"] {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+
+    div[class*="navigation"] button,
+    div[class*="actions"] button {
+        width: 100% !important;
+    }
+
+    /* Fix the "Case Type | Details | Documents" header */
+    div[class*="header"][class*="case"],
+    div[style*="display: flex"][style*="justify-content"] {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    /* Prevent horizontal scroll on body */
+    body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+    }
+
+    /* Fix any overflowing elements */
+    * {
+        max-width: 100vw !important;
+
     /* Hearings Page */
     .hearings-header {
         flex-direction: column !important;
@@ -254,6 +361,7 @@
         justify-content: space-between !important;
         padding-top: 0.5rem !important;
         border-top: 1px solid var(--border-glass) !important;
+
     }
 }
 

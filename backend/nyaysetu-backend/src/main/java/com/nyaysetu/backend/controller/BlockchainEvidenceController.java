@@ -20,7 +20,7 @@ import java.util.*;
  */
 @Tag(name = "Blockchain Evidence", description = "Upload and verify evidence secured with SHA-256 blockchain hashing")
 @RestController
-@RequestMapping("/api/evidence")
+@RequestMapping("/evidence")
 @RequiredArgsConstructor
 @Slf4j
 public class BlockchainEvidenceController {
