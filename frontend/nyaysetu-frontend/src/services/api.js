@@ -57,6 +57,9 @@ export const authAPI = {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
     },
+
+
+    switchRole: (role) => api.put('/api/auth/switch-role', { role }),
 };
 
 // Case API
@@ -179,7 +182,6 @@ export const assignmentAPI = {
     getLawyers: () => api.get('/api/users/lawyers'),
 };
 
-// Message API
 // Message API
 export const messageAPI = {
     send: (caseId, messageOrPayload) => {

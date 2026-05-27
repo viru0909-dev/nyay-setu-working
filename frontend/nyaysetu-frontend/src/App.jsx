@@ -24,6 +24,14 @@ const Terms = lazy(() => import('./pages/Terms'));
 const Disclaimer = lazy(() => import('./pages/Disclaimer'));
 const UpcomingFeatures = lazy(() => import('./pages/UpcomingFeatures'));
 
+// ============================================================
+// CHANGE 4 — NEW IMPORT: SelectRole page
+// WHY: The /select-role route needs a page component to render.
+// Lazy loaded like all other pages in this file for consistency
+// and to keep the initial bundle size small.
+// ============================================================
+const SelectRole = lazy(() => import('./pages/SelectRole'));
+
 // Dashboard Layout
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 
@@ -44,7 +52,7 @@ const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
 const ForensicsPage = lazy(() => import('./pages/litigant/ForensicsPage'));
 const DocumentGeneratePage = lazy(() => import('./pages/litigant/DocumentGeneratePage'));
 const FindLawyerPage = lazy(() => import('./pages/litigant/FindLawyerPage'));
-const LawyerFeedbackPage = lazy(() => 
+const LawyerFeedbackPage = lazy(() =>
   import('./pages/litigant/LawyerFeedbackPage'));
 
 
@@ -132,6 +140,16 @@ function App({ swRegistration }) {
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
+
+                                
+                                <Route
+                                    path="/select-role"
+                                    element={
+                                        <ProtectedRoute>
+                                            <SelectRole />
+                                        </ProtectedRoute>
+                                    }
+                                />
 
                                 {/* Protected Dashboards */}
                                 <Route
@@ -226,7 +244,7 @@ function App({ swRegistration }) {
                                     <Route path="investigation/:id" element={<InvestigationDetailsPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
                                 </Route>
-                                
+
                                 <Route path="/unauthorized" element={
                                     <div style={{ textAlign: 'center', padding: '3rem' }}>
                                         <h1>Unauthorized</h1>
