@@ -1,3 +1,4 @@
+import HearingReminder from './components/HearingReminder';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, Suspense, lazy } from 'react';
 import useAuthStore from './store/authStore';
@@ -13,7 +14,9 @@ import UpdateNotification from './components/UpdateNotification';
 import GuestWelcomeToast from './components/guest/GuestWelcomeToast';
 import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
 
-import HearingReminder from "./components/HearingReminder";
+// PWA Components
+import OfflineIndicator from './components/OfflineIndicator';
+import UpdateNotification from './components/UpdateNotification';
 
 // Public Pages
 const Landing = lazy(() => import('./pages/Landing'));
@@ -116,6 +119,7 @@ function App({ swRegistration }) {
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
+                                <Route path="/hearing-reminder" element={<HearingReminder />} />
 
                                 {/* Hearing Reminder Route */}
                                 <Route
