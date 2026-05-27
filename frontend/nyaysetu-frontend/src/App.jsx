@@ -1,41 +1,35 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import React from "react";
+
 import HearingReminder from "./components/HearingReminder";
+
+// Existing Pages
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import About from "./pages/About";
+import Constitution from "./pages/Constitution";
 
 function App() {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#0F172A",
-        color: "white",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-      }}
-    >
-      <h1
-        style={{
-          fontSize: "42px",
-          marginBottom: "10px",
-        }}
-      >
-        ⚖️ NyaySetu
-      </h1>
+    <BrowserRouter>
+      <Routes>
 
-      <p
-        style={{
-          color: "#CBD5E1",
-          marginBottom: "40px",
-          textAlign: "center",
-        }}
-      >
-        Smart Hearing Reminder & Notification System
-      </p>
+        {/* Existing Routes */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/constitution" element={<Constitution />} />
 
-      <HearingReminder />
-    </div>
+        {/* New Reminder Feature Route */}
+        <Route
+          path="/hearing-reminder"
+          element={<HearingReminder />}
+        />
+
+      </Routes>
+    </BrowserRouter>
   );
 }
 

@@ -5,16 +5,12 @@ const HearingReminder = () => {
   const [hearingTime, setHearingTime] = useState("");
 
   const requestPermission = async () => {
-    try {
-      if (
-        typeof window !== "undefined" &&
-        "Notification" in window &&
-        Notification.permission !== "granted"
-      ) {
-        await Notification.requestPermission();
-      }
-    } catch (error) {
-      console.log("Notification permission error:", error);
+    if (
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      Notification.permission !== "granted"
+    ) {
+      await Notification.requestPermission();
     }
   };
 
@@ -39,107 +35,105 @@ const HearingReminder = () => {
     alert("Reminder scheduled successfully!");
 
     setTimeout(() => {
-      try {
-        // Browser-only execution
-        if (typeof window !== "undefined") {
-
-          // Audio alert
-          const audio = document.createElement("audio");
-          audio.src =
-            "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg";
-
-          audio.play().catch((err) => {
-            console.log("Audio blocked:", err);
-          });
-
-          // Notification alert
-          if (
-            "Notification" in window &&
-            Notification.permission === "granted"
-          ) {
-            new Notification("⚖️ Upcoming Hearing Reminder", {
-              body: `${hearingTitle} is scheduled now.`,
-            });
-          }
-        }
-      } catch (error) {
-        console.log("Reminder error:", error);
+      // Browser notification
+      if (
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
+        new Notification("⚖️ Hearing Reminder", {
+          body: `${hearingTitle} is scheduled now.`,
+        });
       }
+
+      // Audio alert
+      const audio = new Audio(
+        "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
+      );
+
+      audio.play().catch((err) => {
+        console.log("Audio blocked:", err);
+      });
     }, delay);
   };
 
   return (
     <div
       style={{
-        background: "#111827",
-        padding: "30px",
-        borderRadius: "18px",
-        width: "100%",
-        maxWidth: "500px",
-        margin: "20px auto",
-        boxShadow: "0 6px 18px rgba(0,0,0,0.35)",
+        minHeight: "100vh",
+        background: "#0F172A",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
       }}
     >
-      <h1
+      <div
         style={{
-          color: "#ffffff",
-          textAlign: "center",
-          marginBottom: "25px",
-          fontSize: "38px",
+          background: "#111827",
+          padding: "30px",
+          borderRadius: "16px",
+          width: "100%",
+          maxWidth: "500px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
         }}
       >
-        Smart Hearing Reminder
-      </h1>
+        <h1
+          style={{
+            color: "white",
+            marginBottom: "20px",
+            textAlign: "center",
+          }}
+        >
+          Smart Hearing Reminder
+        </h1>
 
-      <input
-        type="text"
-        placeholder="Enter Hearing Title"
-        value={hearingTitle}
-        onChange={(e) => setHearingTitle(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "14px",
-          marginBottom: "18px",
-          borderRadius: "10px",
-          border: "1px solid #374151",
-          background: "#1F2937",
-          color: "white",
-          fontSize: "16px",
-        }}
-      />
+        <input
+          type="text"
+          placeholder="Enter Hearing Title"
+          value={hearingTitle}
+          onChange={(e) => setHearingTitle(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginBottom: "15px",
+            borderRadius: "8px",
+            border: "1px solid #374151",
+            background: "#1F2937",
+            color: "white",
+          }}
+        />
 
-      <input
-        type="datetime-local"
-        value={hearingTime}
-        onChange={(e) => setHearingTime(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "14px",
-          marginBottom: "22px",
-          borderRadius: "10px",
-          border: "1px solid #374151",
-          background: "#1F2937",
-          color: "white",
-          fontSize: "16px",
-        }}
-      />
+        <input
+          type="datetime-local"
+          value={hearingTime}
+          onChange={(e) => setHearingTime(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginBottom: "20px",
+            borderRadius: "8px",
+            border: "1px solid #374151",
+            background: "#1F2937",
+            color: "white",
+          }}
+        />
 
-      <button
-        onClick={scheduleReminder}
-        style={{
-          width: "100%",
-          padding: "14px",
-          borderRadius: "10px",
-          border: "none",
-          background: "#6C63FF",
-          color: "white",
-          fontWeight: "bold",
-          fontSize: "16px",
-          cursor: "pointer",
-        }}
-      >
-        Set Hearing Reminder
-      </button>
+        <button
+          onClick={scheduleReminder}
+          style={{
+            width: "100%",
+            padding: "12px",
+            border: "none",
+            borderRadius: "8px",
+            background: "#6C63FF",
+            color: "white",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+        >
+          Set Hearing Reminder
+        </button>
+      </div>
     </div>
   );
 };
