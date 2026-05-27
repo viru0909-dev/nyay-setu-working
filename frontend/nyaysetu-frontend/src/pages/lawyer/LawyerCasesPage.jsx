@@ -30,6 +30,7 @@ export default function LawyerCasesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('ALL');
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'proposals'
+    const [showAllSearchResults, setShowAllSearchResults] = useState(false);
     const navigate = useNavigate();
 
     const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -100,6 +101,14 @@ export default function LawyerCasesPage() {
         const matchesFilter = filterStatus === 'ALL' || c.status === filterStatus;
         return matchesSearch && matchesFilter;
     });
+
+    const previewLimit = 4;
+    const visibleCases = showAllSearchResults ? filteredCases : filteredCases.slice(0, previewLimit);
+    const hiddenCases = showAllSearchResults ? [] : filteredCases.slice(previewLimit);
+
+    useEffect(() => {
+        setShowAllSearchResults(false);
+    }, [searchTerm, filterStatus, activeTab]);
 
     const glassStyle = {
         background: 'var(--bg-glass-strong)',
@@ -287,7 +296,8 @@ export default function LawyerCasesPage() {
                         </p>
                     </div>
                 ) : (
-                    filteredCases.map((caseItem) => (
+                    <>
+                        {visibleCases.map((caseItem) => (
                         <div
                             key={caseItem.id}
                             style={{
@@ -451,7 +461,79 @@ export default function LawyerCasesPage() {
                                 )}
                             </div>
                         </div>
-                    ))
+                        ))}
+
+                        {!showAllSearchResults && hiddenCases.length > 0 && (
+                            <div
+                                style={{
+                                    position: 'relative',
+                                    background: 'var(--bg-glass-strong)',
+                                    backdropFilter: 'var(--glass-blur)',
+                                    border: 'var(--border-glass)',
+                                    borderRadius: '1.5rem',
+                                    padding: '1.5rem',
+                                    overflow: 'hidden'
+                                }}
+                            >
+                                <div style={{ filter: 'blur(3px)', opacity: 0.75, pointerEvents: 'none' }}>
+                                    <div style={{ display: 'flex', gap: '2rem' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1rem' }}>
+                                                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)' }} />
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ width: '65%', height: '18px', borderRadius: '999px', background: 'rgba(148,163,184,0.22)', marginBottom: '0.55rem' }} />
+                                                    <div style={{ width: '35%', height: '10px', borderRadius: '999px', background: 'rgba(148,163,184,0.16)' }} />
+                                                </div>
+                                            </div>
+                                            <div style={{ width: '92%', height: '12px', borderRadius: '999px', background: 'rgba(148,163,184,0.18)', marginBottom: '0.6rem' }} />
+                                            <div style={{ width: '76%', height: '12px', borderRadius: '999px', background: 'rgba(148,163,184,0.14)' }} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '1rem',
+                                    textAlign: 'center'
+                                }}>
+                                    <div style={{
+                                        background: 'rgba(255,255,255,0.9)',
+                                        border: '1px solid rgba(59, 130, 246, 0.15)',
+                                        borderRadius: '1rem',
+                                        padding: '1rem 1.25rem',
+                                        boxShadow: '0 12px 30px rgba(15, 23, 42, 0.08)',
+                                        maxWidth: '360px'
+                                    }}>
+                                        <p style={{ margin: '0 0 0.75rem 0', color: 'var(--text-main)', fontWeight: 700 }}>
+                                            {hiddenCases.length} more case{hiddenCases.length > 1 ? 's' : ''} matched your search.
+                                        </p>
+                                        <p style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                            Expand the list to review the rest of the results.
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAllSearchResults(true)}
+                                            style={{
+                                                padding: '0.7rem 1rem',
+                                                border: 'none',
+                                                borderRadius: '0.75rem',
+                                                background: 'var(--color-primary)',
+                                                color: 'white',
+                                                fontWeight: 700,
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            Show remaining results
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>

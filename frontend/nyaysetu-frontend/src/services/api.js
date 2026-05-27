@@ -1,4 +1,5 @@
 import axios from 'axios';
+import useAuthStore from '../store/authStore';
 
 // Use explicit backend URL - Vite proxy can be unreliable
 // In development: http://localhost:8080
@@ -52,6 +53,38 @@ api.interceptors.request.use((config) => {
 
     return config;
 });
+
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const status = error.response?.status;
+        if (status === 401 || status === 403) {
+            const token = localStorage.getItem('token');
+            const hasValidToken = token && token !== 'null' && token !== 'undefined';
+
+            if (!hasValidToken) {
+                try {
+                    window.dispatchEvent(
+                        new CustomEvent('guest:api-blocked', {
+                            detail: {
+                                message: 'Create an account to use this feature.',
+                                url: error.config?.url,
+                            },
+                        })
+                    );
+                } catch {
+                    // ignore
+                }
+            } else {
+                useAuthStore.getState().logout();
+                if (!window.location.pathname.startsWith('/login')) {
+                    window.location.assign('/login');
+                }
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 // Auth API
 export const authAPI = {
