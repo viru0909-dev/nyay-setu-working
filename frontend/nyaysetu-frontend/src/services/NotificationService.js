@@ -5,27 +5,71 @@ class NotificationService {
     constructor() {
         this.ws = null;
         this.listeners = [];
+        this.statusListeners = [];
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 3;
+        this.maxBackoffDelay = 30000;
         this.API_BASE_URL = API_BASE_URL;
-        this.isConnecting = false;
-        this.connectionFailed = false;
+        this.pingInterval = null;
+        this.reconnectTimer = null;
+
+        // Connection status: 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'failed'
+        this.status = 'disconnected';
+    }
+
+    getStatus() {
+        return this.status;
+    }
+
+    subscribeToStatus(callback) {
+        this.statusListeners.push(callback);
+        return () => {
+            this.statusListeners = this.statusListeners.filter(cb => cb !== callback);
+        };
+    }
+
+    _setStatus(newStatus) {
+        if (this.status === newStatus) return;
+        this.status = newStatus;
+        this.statusListeners.forEach(cb => {
+            try { cb(newStatus); } catch (e) { /* silent */ }
+        });
     }
 
     /**
-     * Connects to the WebSocket for real-time notifications
-     * Silently fails if WebSocket is not available
+     * Sends a lightweight ping every 30 seconds to prevent Render's
+     * 50-second idle timeout from killing the connection.
      */
-    connect(token) {
-        // Skip if already connected, connecting, or permanently failed
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            return;
-        }
-        if (this.isConnecting || this.connectionFailed) {
-            return;
-        }
+    _startHeartbeat() {
+        this._stopHeartbeat();
+        this.pingInterval = setInterval(() => {
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                try {
+                    this.ws.send('ping');
+                } catch (e) {
+                    // Connection likely died; onclose will clean up
+                }
+            }
+        }, 30000);
+    }
 
-        // Detect production environment
+    _stopHeartbeat() {
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval);
+            this.pingInterval = null;
+        }
+    }
+
+    _clearReconnectTimer() {
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
+    }
+
+    connect(token) {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) return;
+        if (this.status === 'connecting') return;
+
         const isProduction = !window.location.hostname.includes('localhost');
 
         try {
@@ -33,71 +77,72 @@ class NotificationService {
             const host = new URL(this.API_BASE_URL).host;
             const wsUrl = `${protocol}//${host}/api/ws/notifications?token=${token}`;
 
-            this.isConnecting = true;
-
-            // Only log in development
-            if (!isProduction) {
-                if (import.meta.env.DEV) {
-                      console.log('Connecting to WebSocket:', wsUrl);
-                  }
-                
-            }
+            this._setStatus('connecting');
 
             this.ws = new WebSocket(wsUrl);
 
             this.ws.onopen = () => {
-                if (!isProduction) {
-                   if (import.meta.env.DEV) {
-                       console.log('✅ WebSocket connected');
-                  }
-                    
-                }
                 this.reconnectAttempts = 0;
-                this.isConnecting = false;
+                this._setStatus('connected');
+                this._startHeartbeat();
             };
 
             this.ws.onmessage = (event) => {
+                if (event.data === 'pong') return;
                 try {
                     const notification = JSON.parse(event.data);
                     this.notifyListeners(notification);
-                } catch (error) {
+                } catch (e) {
                     // Silent fail on parse errors
                 }
             };
 
             this.ws.onerror = () => {
-                // Suppress error logs
-                this.isConnecting = false;
+                // Suppress error logs; onclose will fire next
             };
 
             this.ws.onclose = () => {
-                this.isConnecting = false;
-                if (!this.connectionFailed) {
-                    this.attemptReconnect(token);
-                }
+                this._stopHeartbeat();
+                this._setStatus('disconnected');
+                this._attemptReconnect();
             };
         } catch (error) {
-            // Silent fail
-            this.isConnecting = false;
-            this.connectionFailed = true;
+            this._setStatus('failed');
         }
     }
 
     /**
-     * Reconnection logic with exponential backoff
+     * Exponential backoff: 1s, 2s, 4s, 8s, 16s, then caps at 30s.
+     * Re-fetches the token on each attempt so new sockets stay authorized.
      */
-    attemptReconnect(token) {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.reconnectAttempts++;
-            const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+    _attemptReconnect() {
+        this._clearReconnectTimer();
 
-            setTimeout(() => {
+        const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), this.maxBackoffDelay);
+        this.reconnectAttempts++;
+        this._setStatus('reconnecting');
+
+        this.reconnectTimer = setTimeout(() => {
+            const token = localStorage.getItem('token');
+            if (token) {
                 this.connect(token);
-            }, delay);
-        } else {
-            // Stop trying after max attempts
-            this.connectionFailed = true;
+            } else {
+                this._setStatus('failed');
+            }
+        }, delay);
+    }
+
+    disconnect() {
+        this._clearReconnectTimer();
+        this._stopHeartbeat();
+        if (this.ws) {
+            this.ws.onclose = null;
+            this.ws.close();
+            this.ws = null;
         }
+        this.reconnectAttempts = 0;
+        this.listeners = [];
+        this._setStatus('disconnected');
     }
 
     subscribe(callback) {
@@ -115,17 +160,6 @@ class NotificationService {
                 // Silent fail
             }
         });
-    }
-
-    disconnect() {
-        if (this.ws) {
-            this.ws.close();
-            this.ws = null;
-        }
-        this.listeners = [];
-        this.reconnectAttempts = 0;
-        this.isConnecting = false;
-        this.connectionFailed = false;
     }
 
     // --- REST API Methods ---
