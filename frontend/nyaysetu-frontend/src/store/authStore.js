@@ -55,13 +55,15 @@ const useAuthStore = create((set, get) => ({
     token: null,
     isAuthenticated: false,
     isGuest: false,
+    // Indicates whether persisted auth has been restored from localStorage
+    authInitialized: false,
 
-    setAuth: (user, token) => {
+    setAuth: (user, token) => {t
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         clearGuestStorage();
         localStorage.removeItem(GUEST_INTENT_KEY);
-        set({ user, token, isAuthenticated: true, isGuest: false });
+        set({ user, token, isAuthenticated: true, isGuest: false, authInitialized: true });
     },
 
     setGuest: () => {
@@ -99,7 +101,7 @@ const useAuthStore = create((set, get) => ({
         localStorage.removeItem('user');
         clearGuestStorage();
         localStorage.removeItem(GUEST_INTENT_KEY);
-        set({ user: null, token: null, isAuthenticated: false, isGuest: false });
+        set({ user: null, token: null, isAuthenticated: false, isGuest: false, authInitialized: true });
     },
 
     hasSeenGuestModal: () => localStorage.getItem(GUEST_MODAL_SHOWN_KEY) === 'true',
@@ -155,17 +157,19 @@ const useAuthStore = create((set, get) => ({
                     set({
                         token: null,
                         user: null,
-                        isAuthenticated: false
+                        isAuthenticated: false,
+                         authInitialized: true,
                     });
 
                     return;
                 }
                 const user = JSON.parse(userStr);
-                set({ token, user, isAuthenticated: true, isGuest: false });
+                set({ token, user, isAuthenticated: true, isGuest: false, authInitialized: true });
             } catch (error) {
                 console.error('Failed to parse user from localStorage:', error);
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
+                set({ token: null, user: null, isAuthenticated: false, authInitialized: true });
             }
             return;
         }
@@ -212,6 +216,8 @@ const useAuthStore = create((set, get) => ({
         } else {
             // No guest session and no auth token
             set({ user: null, token: null, isAuthenticated: false, isGuest: false });
+            // No persisted session — still mark initialization complete so guards can run
+            set({ authInitialized: true });
         }
     },
 }));
