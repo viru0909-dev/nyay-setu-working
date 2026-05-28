@@ -9,10 +9,12 @@ export const useWebRTC = (roomId, userId, userName) => {
     const [localStream, setLocalStream] = useState(null);
     const [isAudioOn, setIsAudioOn] = useState(true);
     const [isVideoOn, setIsVideoOn] = useState(true);
+    const [connectionStatus, setConnectionStatus] = useState('CONNECTING');
 
     const socketRef = useRef();
     const peersRef = useRef({});
     const localStreamRef = useRef();
+    const messageQueueRef = useRef([]);
 
     // Initialize media and socket connection
     useEffect(() => {
@@ -30,11 +32,46 @@ export const useWebRTC = (roomId, userId, userName) => {
                 localStreamRef.current = stream;
 
                 // Connect to signaling server
-                socketRef.current = io(SIGNALING_SERVER);
+                socketRef.current = io(SIGNALING_SERVER, {
+                    reconnection: true,
+                    reconnectionAttempts: 8,
+                    reconnectionDelay: 1000,
+                    reconnectionDelayMax: 30000,
+                    randomizationFactor: 0.3,
+                });
 
                 socketRef.current.on('connect', () => {
+                    console.log('Connected to signaling server');
+                    setConnectionStatus('CONNECTED');
                   //  console.log('Connected to signaling server');
                     socketRef.current.emit('join-room', roomId, userId, userName);
+                });
+
+                // disconnection and reconnection
+                socketRef.current.on('disconnect', () => {
+                    console.log('Disconnected from signaling server');
+                    setConnectionStatus('RECONNECTING');
+                });
+
+                socketRef.current.io.on('reconnect_attempt', () => {
+                    console.log('Attempting reconnection...');
+                    setConnectionStatus('RECONNECTING');
+                });
+
+                socketRef.current.io.on('reconnect', () => {
+                    console.log('Reconnected successfully');
+                    setConnectionStatus('CONNECTED');
+                    socketRef.current.emit('join-room', roomId, userId, userName);
+
+                while (messageQueueRef.current.length > 0) {
+                    const { event, args } = messageQueueRef.current.shift();
+                    socketRef.current.emit(event, ...args);
+                }
+                });
+
+                socketRef.current.io.on('reconnect_failed', () => {
+                    console.log('Reconnection failed permanently');
+                    setConnectionStatus('OFFLINE');
                 });
 
                 // Handle existing participants
@@ -153,13 +190,25 @@ export const useWebRTC = (roomId, userId, userName) => {
         peersRef.current[remotePeerId] = peer;
     };
 
+    const emitWithBuffer = useCallback((event, ...args) => {
+    if (socketRef.current?.connected) {
+        socketRef.current.emit(event, ...args);
+    } else {
+        console.log(`Buffering event: ${event}`);
+
+        messageQueueRef.current.push({ event, args });
+
+        setConnectionStatus('RECONNECTING');
+    }
+    }, []);
+
     const toggleAudio = useCallback(() => {
         if (localStreamRef.current) {
             const audioTrack = localStreamRef.current.getAudioTracks()[0];
             if (audioTrack) {
                 audioTrack.enabled = !audioTrack.enabled;
                 setIsAudioOn(audioTrack.enabled);
-                socketRef.current.emit('toggle-audio', roomId, audioTrack.enabled);
+                emitWithBuffer('toggle-audio', roomId, audioTrack.enabled);
             }
         }
     }, [roomId]);
@@ -170,7 +219,7 @@ export const useWebRTC = (roomId, userId, userName) => {
             if (videoTrack) {
                 videoTrack.enabled = !videoTrack.enabled;
                 setIsVideoOn(videoTrack.enabled);
-                socketRef.current.emit('toggle-video', roomId, videoTrack.enabled);
+                emitWithBuffer('toggle-video', roomId, videoTrack.enabled);
             }
         }
     }, [roomId]);
@@ -188,6 +237,7 @@ export const useWebRTC = (roomId, userId, userName) => {
         isVideoOn,
         toggleAudio,
         toggleVideo,
-        leaveCall
+        leaveCall,
+        connectionStatus
     };
 };
