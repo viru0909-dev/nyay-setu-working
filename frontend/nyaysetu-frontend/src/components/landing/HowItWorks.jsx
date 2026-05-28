@@ -108,12 +108,13 @@ export default function HowItWorks() {
                     {/* Connection Line */}
                     <div className="hiw-connector" style={{
                         position: 'absolute',
-                        top: '80px',
+                        top: '70px',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         width: '80%',
                         height: '2px',
-                        background: 'linear-gradient(90deg, #8b5cf6 0%, #6366f1 33%, #ec4899 66%, #10b981 100%)',
+                        background:  'repeating-linear-gradient(90deg, #8b5cf6 0px, #8b5cf6 10px, transparent 10px, transparent 20px)',
+                        animation: 'moveDash 0.5s linear infinite',
                         opacity: 0.25,
                         zIndex: 0,
                     }} />
@@ -225,7 +226,7 @@ export default function HowItWorks() {
                                 {idx < steps.length - 1 && (
                                     <div className="hiw-arrow" style={{
                                         position: 'absolute',
-                                        top: '60px',
+                                        top: '55px',
                                         right: '-50px',
                                         color: step.color,
                                         opacity: 0.5,
@@ -278,6 +279,9 @@ export default function HowItWorks() {
                 </motion.div>
             </div>
             <style>{`
+            @keyframes moveDash {
+                to { background-position: 20px 0; }
+            }
                 @media (max-width: 768px) {
                     .hiw-connector, .hiw-arrow { display: none !important; }
                 }
