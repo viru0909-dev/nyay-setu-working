@@ -16,7 +16,7 @@ export default function Footer() {
     const socialLinks = [
         {
             icon: <FaEnvelope size={20} />,
-            href: 'mailto:gadekarvidera4@gmail.com',
+            href: 'mailto:gadekarvirendra@gmail.com',
             label: 'Email',
             color: '#ea4335'
         },
@@ -34,7 +34,7 @@ export default function Footer() {
         },
         {
             icon: <FaGithub size={20} />,
-            href: 'https://github.com/viru0909-dev/nyay-setu-working',
+            href: 'https://github.com/viru0909-dev',
             label: 'GitHub',
             color: '#8b949e'
         }
@@ -275,10 +275,10 @@ export default function Footer() {
                                 onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.7)'}
                             >
                                 <FaEnvelope size={16} />
-                                gadekarvidera4@gmail.com
+                                gadekarvirendra@gmail.com
                             </a>
                             <a
-                                href="https://github.com/viru0909-dev/nyay-setu-working"
+                                href="https://github.com/viru0909-dev"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{
