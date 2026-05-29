@@ -11,6 +11,9 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { brainAPI } from '../services/api';
 import { useTranslation } from 'react-i18next';
 
+import useGuest from '../hooks/useGuest';
+import useAuthStore from '../store/authStore';
+import GuestBlurredResults from '../components/guest/GuestBlurredResults';
 
 // ── Reactive mobile breakpoint hook ──────────────────────────────────────────
 function useIsMobile(breakpoint = 768) {
@@ -30,7 +33,7 @@ function useIsMobile(breakpoint = 768) {
 export default function Constitution() {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation('constitution');
-    
+
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedPartId, setSelectedPartId] = useState(null);
@@ -43,6 +46,9 @@ export default function Constitution() {
     const [isAiLoading, setIsAiLoading] = useState(false);
     const [sessionId, setSessionId] = useState(null);
     const language = i18n.language;
+    const { isGuest } = useGuest();
+    const updateGuestPrefs = useAuthStore((s) => s.updateGuestPrefs);
+    const setGuestIntent = useAuthStore((s) => s.setGuestIntent);
 
     // Responsive
     const isMobile = useIsMobile();
@@ -53,9 +59,9 @@ export default function Constitution() {
     const responseEndRef = useRef(null);
 
     // Enhanced Constitution Data with more articles
-    
 
-    
+
+
     const parts = useMemo(() => {
         return i18n.getResource(
             i18n.language,
@@ -76,7 +82,7 @@ export default function Constitution() {
         );
     }, [selectedPart, selectedArticleNumber]);
 
-    
+
     const filteredParts = parts.filter(part =>
         part.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         part.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -84,6 +90,58 @@ export default function Constitution() {
             article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             article.content.toLowerCase().includes(searchQuery.toLowerCase())
         )
+    );
+
+    const searchMatches = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) return [];
+
+        const matches = [];
+        parts.forEach((part) => {
+            part.articles.forEach((article) => {
+                if (
+                    article.title.toLowerCase().includes(q) ||
+                    article.content.toLowerCase().includes(q) ||
+                    part.title.toLowerCase().includes(q)
+                ) {
+                    matches.push({
+                        ...article,
+                        partTitle: part.title,
+                        matchId: `${part.id}-${article.number}`,
+                    });
+                }
+            });
+        });
+        return matches;
+    }, [parts, searchQuery]);
+
+    useEffect(() => {
+        if (isGuest) {
+            updateGuestPrefs({ visitedConstitution: true });
+        }
+    }, [isGuest, updateGuestPrefs]);
+
+    const handleGuestSignUp = () => {
+        setGuestIntent({ path: '/constitution', feature: 'view all search matches' });
+        navigate('/signup', { state: { from: { pathname: '/constitution' } } });
+    };
+
+    const renderSearchMatchCard = (article, _index, isLockedPreview) => (
+        <div
+            className={`guest-search-card${isLockedPreview ? ' guest-search-card--locked' : ''}`}
+            onClick={isLockedPreview ? undefined : () => { setSelectedPartId(article.partId); setSelectedArticleNumber(article.number); }}
+            onKeyDown={isLockedPreview ? undefined : (e) => { if (e.key === 'Enter') { setSelectedPartId(article.partId); setSelectedArticleNumber(article.number); } }}
+            role={isLockedPreview ? undefined : 'button'}
+            tabIndex={isLockedPreview ? undefined : 0}
+        >
+            <span className="guest-search-card__part">{article.partTitle}</span>
+            <h3 style={{ color: 'var(--color-primary)', fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.45rem', lineHeight: 1.35 }}>
+                {t('article')} {article.number}: {article.title}
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>
+                {article.content.substring(0, 140)}…
+            </p>
+        </div>
     );
 
     const toggleBookmark = (article) => {
@@ -275,7 +333,7 @@ export default function Constitution() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
                     {/* Main Content */}
                     <div>
-                        {selectedArticleNumber && selectedArticle  ? (
+                        {selectedArticleNumber && selectedArticle ? (
                             // Article Detail View
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -476,6 +534,35 @@ export default function Constitution() {
                                     ))}
                                 </div>
                             </div>
+                        ) : searchQuery.trim() && searchMatches.length > 0 ? (
+                            <div>
+                                <p className="guest-search-banner">
+                                    <Search size={16} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+                                    <span>
+                                        <strong style={{ color: 'var(--text-main)' }}>{searchMatches.length}</strong>
+                                        {' '}article{searchMatches.length > 1 ? 's' : ''} found
+                                        {isGuest && ' · Showing a preview — sign up for full results'}
+                                    </span>
+                                </p>
+                                {isGuest ? (
+                                    <GuestBlurredResults
+                                        items={searchMatches.map((m) => ({ ...m, id: m.matchId }))}
+                                        renderItem={renderSearchMatchCard}
+                                        onSignUp={handleGuestSignUp}
+                                        signUpLabel="Sign up to view all matches"
+                                    />
+                                ) : (
+                                    <div style={{ display: 'grid', gap: '1rem' }}>
+                                        {searchMatches.map((article, idx) => (
+                                            <div key={article.matchId}>{renderSearchMatchCard(article, idx, false)}</div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : searchQuery.trim() ? (
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>
+                                {language === 'en' ? 'No articles matched your search.' : 'आपकी खोज से कोई अनुच्छेद मेल नहीं खाता।'}
+                            </p>
                         ) : (
                             // Parts List View
                             <div style={{
@@ -826,27 +913,71 @@ export default function Constitution() {
                                                         ))}
                                                     </div>
                                                 </div>
+                                                
+                                                
                                             )}
 
                                             {/* Loading dots */}
-                                            {isAiLoading && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '28px 20px' }}>
-                                                    <div style={{ display: 'flex', gap: '6px' }}>
-                                                        {[0, 1, 2].map((i) => (
-                                                            <span key={i} style={{
-                                                                width: '9px', height: '9px',
-                                                                background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-                                                                borderRadius: '50%',
-                                                                display: 'inline-block',
-                                                                animation: `al-bounce-dot 1.2s ease-in-out ${i * 0.2}s infinite`,
-                                                            }} />
-                                                        ))}
-                                                    </div>
-                                                    <p style={{ color: '#94a3b8', fontSize: '13px', margin: 0 }}>
-                                                        {language === 'en' ? 'Consulting legal knowledge…' : 'कानूनी ज्ञान खोज रहा हूँ…'}
-                                                    </p>
-                                                </div>
-                                            )}
+{isAiLoading && (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '28px 20px' }}>
+        <div style={{ display: 'flex', gap: '6px' }}>
+            {[0, 1, 2].map((i) => (
+                <span key={i} style={{
+                    width: '9px', height: '9px',
+                    background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                    animation: `al-bounce-dot 1.2s ease-in-out ${i * 0.2}s infinite`,
+                }} />
+            ))}
+        </div>
+        <p style={{ color: '#94a3b8', fontSize: '13px', margin: 0 }}>
+            {language === 'en' ? 'Consulting legal knowledge…' : 'कानूनी ज्ञान खोज रहा हूँ…'}
+        </p>       
+    </div>         
+)}                 
+
+
+                                {/* Bookmarks */}
+{bookmarks.length > 0 && (
+    <div style={{
+        marginTop: '1.5rem',
+        padding: '1.5rem',
+        background: 'var(--bg-glass)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '1.5rem',
+        border: '1px solid var(--border-light)'
+    }}>
+        <h4 style={{ color: 'var(--color-primary)', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Bookmark size={20} fill="var(--color-primary)" color="var(--color-primary)" />
+            {t('bookmarks')}
+        </h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {bookmarks.map((bookmark, idx) => (
+                <div
+                    key={idx}
+                    onClick={() => setSelectedArticleNumber(bookmark.number)}
+                    style={{
+                        padding: '0.75rem',
+                        background: 'rgba(30, 42, 68, 0.05)',
+                        borderRadius: '0.75rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = 'rgba(30, 42, 68, 0.1)'}
+                    onMouseLeave={(e) => e.target.style.background = 'rgba(30, 42, 68, 0.05)'}
+                >
+                    <p style={{ color: 'var(--color-primary)', fontSize: '0.85rem', fontWeight: '700', margin: '0 0 0.25rem 0' }}>
+                        {t('article')} {bookmark.number}
+                    </p>
+                </div>
+            ))}            
+        </div>             
+    </div>                 
+)}                         
+
+                                            
 
                                             {/* Response bubble */}
                                             {aiResponse && !isAiLoading && (

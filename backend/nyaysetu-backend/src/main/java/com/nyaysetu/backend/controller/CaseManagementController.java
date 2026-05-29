@@ -19,7 +19,7 @@ import java.util.UUID;
 
 @Tag(name = "Case Management", description = "Create, update, retrieve and manage legal cases")
 @RestController
-@RequestMapping("/api/cases")
+@RequestMapping("/cases")
 @RequiredArgsConstructor
 @Slf4j
 public class CaseManagementController {

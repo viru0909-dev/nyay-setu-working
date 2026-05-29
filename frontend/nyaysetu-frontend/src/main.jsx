@@ -2,49 +2,13 @@ import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/global.css'
 import './styles/responsive.css'
+import './styles/guest.css'
 import './i18n' // Initialize i18n before app
 import App from './App.jsx'
 import { useSessionMonitor } from './hooks/useSessionMonitor';
 import SessionWarningBanner from './components/SessionWarningBanner';
-
-/**
- * Register service worker and handle updates
- * Only runs on production builds (preview/production), not on dev server
- */
-const registerServiceWorker = (callback) => {
-    // Skip service worker registration on dev server (port 5173)
-    // Only register on production builds (preview/production)
-    const isDev = import.meta.env.DEV;
-
-    if (isDev) {
-      //  console.log('🔧 Dev mode detected - Service Worker registration skipped');
-        return;
-    }
-
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-            try {
-                const registration = await navigator.serviceWorker.register('/sw.js', {
-                    scope: '/',
-                });
-             //   console.log('✅ Service Worker registered successfully:', registration);
-
-                // Pass registration to callback
-                if (callback) {
-                    callback(registration);
-                }
-
-                // Check for updates periodically (every hour)
-                setInterval(() => {
-                    registration.update();
-                }, 60 * 60 * 1000);
-
-            } catch (error) {
-                console.error('❌ Service Worker registration failed:', error);
-            }
-        });
-    }
-};
+import { Toaster } from "react-hot-toast";
+import { registerSW } from 'virtual:pwa-register';
 
 const Root = () => {
     const [swRegistration, setSwRegistration] = useState(null);
@@ -62,12 +26,21 @@ const Root = () => {
     };
 
     useEffect(() => {
-        registerServiceWorker(setSwRegistration);
+        if (!import.meta.env.DEV) {
+            const updateSW = registerSW({
+                onNeedRefresh() {
+                    console.log('🔄 New update found! Reloading to clear cache...');
+                    updateSW(true);
+                },
+                onOfflineReady() {
+                    console.log('✅ App is ready to work offline');
+                },
+            });
+        }
     }, []);
 
     return (
         <StrictMode>
-            {/* 4. The Session Banner renders here when showWarning is true */}
             {showWarning && (
                 <SessionWarningBanner
                     onRefresh={handleRefresh}
@@ -75,7 +48,10 @@ const Root = () => {
                 />
             )}
 
-            <App swRegistration={swRegistration} />
+            <>
+                <Toaster position="top-right" />
+                <App swRegistration={swRegistration} />
+            </>
         </StrictMode>
     );
 };

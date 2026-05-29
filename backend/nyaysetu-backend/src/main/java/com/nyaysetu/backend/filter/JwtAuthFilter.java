@@ -30,6 +30,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/api/v1/auth/") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/api-docs") ||
+                path.equals("/api/v1/health");
+    }
+
+    @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
@@ -45,6 +54,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 username = jwtService.extractUsername(jwt);
             } catch (Exception e) {
                 logger.warn("JWT validation failed: " + e.getMessage());
+                // Return 401 immediately — don't let request reach the controller
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write(
+                        "{\"error\":\"Unauthorized\"," +
+                                "\"message\":\"Access token is expired or invalid. Please refresh your token.\"," +
+                                "\"status\":401}"
+                );
+                return;
             }
         }
 
@@ -55,6 +73,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                // Token is structurally valid but expired — return clean 401
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write(
+                        "{\"error\":\"Unauthorized\"," +
+                                "\"message\":\"Access token expired. Please use your refresh token.\"," +
+                                "\"status\":401}"
+                );
+                return;
             }
         }
 

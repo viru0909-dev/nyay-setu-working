@@ -300,6 +300,13 @@ sequenceDiagram
 
 <hr/>
 
+## API Versioning Strategy
+
+This project implements a robust API versioning strategy starting from `v1`. 
+- The stable release of our APIs is accessible under the `/api/v1/` prefix.
+- A global `WebMvcConfigurer` automatically prefixes all backend controllers. 
+- Any future breaking changes will be introduced under a new version (e.g., `/api/v2/`), ensuring backward compatibility for existing client applications.
+
 ## Quick Start
 
 For complete setup instructions, environment configuration, and Docker deployment details, refer to the **[Detailed Setup Guide](./docs/setup.md)**.

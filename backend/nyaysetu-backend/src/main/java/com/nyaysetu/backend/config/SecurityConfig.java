@@ -2,6 +2,7 @@ package com.nyaysetu.backend.config;
 
 import com.nyaysetu.backend.filter.JwtAuthFilter;
 import com.nyaysetu.backend.filter.RateLimitFilter;
+import com.nyaysetu.backend.filter.XssSanitizationFilter;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -149,25 +150,31 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            JwtAuthFilter jwtAuthFilter) throws Exception {
+            JwtAuthFilter jwtAuthFilter,
+            XssSanitizationFilter xssSanitizationFilter) throws Exception {
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("frame-ancestors 'none';"))
+                )
                 .authorizeHttpRequests(auth -> auth
 
                         // ── Public endpoints ──────────────────────────────────────────────
                         .requestMatchers(
-                                "/api/auth/register",
-                                "/api/auth/login",
-                                "/api/auth/forgot-password",
-                                "/api/auth/verify-reset-token",
-                                "/api/auth/reset-password",
-                                "/api/auth/face/login",
-                                "/api/auth/ping",
-                                "/api/auth/test",
-                                "/api/health",
-                                "/api/police/health"
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/forgot-password",
+                                "/api/v1/auth/verify-reset-token",
+                                "/api/v1/auth/reset-password",
+                                "/api/v1/auth/face/login",
+                                "/api/v1/auth/ping",
+                                "/api/v1/auth/test",
+                                "/api/v1/health",
+                                "/api/v1/police/health"
                         ).permitAll()
 
                         // ── WebSocket endpoints ───────────────────────────────────────────
@@ -181,75 +188,75 @@ public class SecurityConfig {
                                 "/ai/constitution/qa",
                                 "/ai/ollama/status",
                                 "/ai/ollama/models",
-                                "/api/brain/analyze-case",
-                                "/api/brain/suggest-documents"
+                                "/api/v1/brain/analyze-case",
+                                "/api/v1/brain/suggest-documents"
                         ).permitAll()
 
                         // ── Auth-only: any authenticated user ─────────────────────────────
                         .requestMatchers(
-                                "/api/auth/face/enroll",
-                                "/api/auth/face/disable",
-                                "/api/auth/face/status",
-                                "/api/face/enroll",
-                                "/api/face/verify",
-                                "/api/face/status",
-                                "/api/face/remove",
+                                "/api/v1/auth/face/enroll",
+                                "/api/v1/auth/face/disable",
+                                "/api/v1/auth/face/status",
+                                "/api/v1/face/enroll",
+                                "/api/v1/face/verify",
+                                "/api/v1/face/status",
+                                "/api/v1/face/remove",
                                 "/profile/**"
                         ).authenticated()
 
                         // ── Brain / AI (authenticated) ────────────────────────────────────
-                        .requestMatchers("/api/brain/**").authenticated()
+                        .requestMatchers("/api/v1/brain/**").authenticated()
 
                         // ── Judge-only endpoints ──────────────────────────────────────────
                         .requestMatchers(
-                                "/api/judge/**",
-                                "/api/hearings/schedule",
-                                "/api/hearings/*/complete",
-                                "/api/hearings/*/outcome",
-                                "/api/hearings/*/participants",
-                                "/api/orders",
-                                "/api/orders/*",
-                                "/api/orders/my-orders",
-                                "/api/cases/*/assign-judge",
-                                "/api/cases/*/take-cognizance",
-                                "/api/cases/*/order-notice",
-                                "/api/cases/transition/*/take-cognizance",
-                                "/api/cases/transition/*/advance-stage"
+                                "/api/v1/judge/**",
+                                "/api/v1/hearings/schedule",
+                                "/api/v1/hearings/*/complete",
+                                "/api/v1/hearings/*/outcome",
+                                "/api/v1/hearings/*/participants",
+                                "/api/v1/orders",
+                                "/api/v1/orders/*",
+                                "/api/v1/orders/my-orders",
+                                "/api/v1/cases/*/assign-judge",
+                                "/api/v1/cases/*/take-cognizance",
+                                "/api/v1/cases/*/order-notice",
+                                "/api/v1/cases/transition/*/take-cognizance",
+                                "/api/v1/cases/transition/*/advance-stage"
                         ).hasAnyRole("JUDGE", "SUPER_JUDGE", "ADMIN")
 
                         // ── Police-only endpoints ─────────────────────────────────────────
                         .requestMatchers(
-                                "/api/police/summons/**",
-                                "/api/police/fir/**",
-                                "/api/police/investigation/**",
-                                "/api/police/stats"
+                                "/api/v1/police/summons/**",
+                                "/api/v1/police/fir/**",
+                                "/api/v1/police/investigation/**",
+                                "/api/v1/police/stats"
                         ).hasAnyRole("POLICE", "ADMIN")
 
                         // ── Lawyer-only endpoints ─────────────────────────────────────────
                         .requestMatchers(
-                                "/api/lawyer/**",
-                                "/api/cases/transition/*/save-draft"
+                                "/api/v1/lawyer/**",
+                                "/api/v1/cases/transition/*/save-draft"
                         ).hasAnyRole("LAWYER", "ADMIN")
 
                         // ── Litigant endpoints ────────────────────────────────────────────
                         .requestMatchers(
-                                "/api/client/fir/**",
-                                "/api/cases/transition/*/approve-draft",
-                                "/api/cases/transition/*/reject-draft"
+                                "/api/v1/client/fir/**",
+                                "/api/v1/cases/transition/*/approve-draft",
+                                "/api/v1/cases/transition/*/reject-draft"
                         ).hasAnyRole("LITIGANT", "ADMIN")
 
                         // ── Admin/oversight-only endpoints ────────────────────────────────
                         .requestMatchers(
-                                "/api/cases/pending-assignment",
-                                "/api/cases/judge-workload",
+                                "/api/v1/cases/pending-assignment",
+                                "/api/v1/cases/judge-workload",
                                 "/verify/admin/**",
-                                "/api/audit/log"
+                                "/api/v1/audit/log"
                         ).hasAnyRole("ADMIN", "SUPER_JUDGE", "TECH_ADMIN")
 
                         // ── Summons & transition (police + judge + admin) ──────────────────
                         .requestMatchers(
-                                "/api/cases/*/update-summons",
-                                "/api/cases/transition/*/summons-served"
+                                "/api/v1/cases/*/update-summons",
+                                "/api/v1/cases/transition/*/summons-served"
                         ).hasAnyRole("POLICE", "JUDGE", "SUPER_JUDGE", "ADMIN")
 
                         // ── Everything else requires authentication ────────────────────────
@@ -257,6 +264,7 @@ public class SecurityConfig {
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(xssSanitizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

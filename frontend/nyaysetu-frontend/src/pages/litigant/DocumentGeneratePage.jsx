@@ -144,7 +144,7 @@ const DocumentGeneratePage = () => {
     // ── Shared styles ────────────────────────────────────────────────────────
 
     const cardStyle = {
-        background: 'white',
+        background: 'var(--bg-surface)',
         border: '1px solid var(--color-border)',
         borderRadius: '1rem',
         padding: '1.5rem',
@@ -153,20 +153,21 @@ const DocumentGeneratePage = () => {
     const inputStyle = {
         width: '100%',
         padding: '0.75rem 1rem',
-        border: '1px solid #E5E7EB',
+        border: 'var(--color-border)',
         borderRadius: '0.5rem',
         fontSize: '0.9rem',
         outline: 'none',
         transition: 'border-color 0.2s',
-        background: '#FAFBFC',
+        background: 'var(--bg-surface)',
         fontFamily: 'inherit',
+        color:'var(--text-main)'
     };
 
     const labelStyle = {
         display: 'block',
         fontSize: '0.85rem',
         fontWeight: 600,
-        color: '#374151',
+        color: 'var(--text-main)',
         marginBottom: '0.35rem',
     };
 
@@ -205,7 +206,7 @@ const DocumentGeneratePage = () => {
             {/* Header */}
             <header style={{
                 padding: '1rem 1.5rem',
-                background: 'white',
+                background: 'var(--bg-surface)',
                 borderBottom: '1px solid var(--color-border)',
                 display: 'flex',
                 alignItems: 'center',
@@ -230,7 +231,7 @@ const DocumentGeneratePage = () => {
                             width: s === step ? '2rem' : '0.5rem',
                             height: '0.5rem',
                             borderRadius: '0.25rem',
-                            background: s <= step ? 'var(--color-primary)' : '#E5E7EB',
+                            background: s <= step ? 'var(--color-primary)' : 'var(--color-border)',
                             transition: 'all 0.3s',
                         }} />
                     ))}
@@ -250,7 +251,7 @@ const DocumentGeneratePage = () => {
                             exit={{ opacity: 0, x: 20 }}
                             transition={{ duration: 0.25 }}
                         >
-                            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', color: '#1F2937' }}>
+                            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-main)' }}>
                                 Select Document Type
                             </h2>
                             <div style={{
@@ -286,10 +287,10 @@ const DocumentGeneratePage = () => {
                                             }}>
                                                 <Icon size={24} color={docType.color} />
                                             </div>
-                                            <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: '0 0 0.25rem', color: '#1F2937' }}>
+                                            <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: '0 0 0.25rem', color: 'var(--text-main)' }}>
                                                 {docType.title}
                                             </h3>
-                                            <p style={{ fontSize: '0.8rem', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
+                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
                                                 {docType.description}
                                             </p>
                                         </motion.div>
@@ -498,7 +499,7 @@ const DocumentGeneratePage = () => {
                                 <div style={{
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                     marginBottom: '1rem', paddingBottom: '0.75rem',
-                                    borderBottom: '1px solid #F3F4F6',
+                                    borderBottom: '1px solid var(--color-border)',
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <FileText size={18} color="var(--color-primary)" />
@@ -518,14 +519,14 @@ const DocumentGeneratePage = () => {
                                         width: '100%',
                                         minHeight: '400px',
                                         padding: '1rem',
-                                        border: '1px solid #E5E7EB',
+                                        border: '1px solid var(--color-border)',
                                         borderRadius: '0.5rem',
                                         fontFamily: '"Courier New", Courier, monospace',
                                         fontSize: '0.88rem',
                                         lineHeight: 1.6,
-                                        background: '#FAFBFC',
+                                        background: 'var(--bg-surface)',
                                         resize: 'vertical',
-                                        color: '#1F2937',
+                                        color: 'var(--text-main)',
                                     }}
                                 />
                             </div>

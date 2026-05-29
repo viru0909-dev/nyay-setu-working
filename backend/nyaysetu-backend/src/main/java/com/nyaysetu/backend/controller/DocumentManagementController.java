@@ -24,7 +24,7 @@ import java.util.UUID;
 @Slf4j
 @Tag(name = "Documents", description = "Upload, download and manage case documents")
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/documents")
 @RequiredArgsConstructor
 public class DocumentManagementController {
 

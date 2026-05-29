@@ -6,6 +6,7 @@ import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.PasswordResetTokenRepository;
 import com.nyaysetu.backend.service.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ import java.util.regex.Pattern;
 
 @Tag(name = "Authentication", description = "Register, login, password reset and face login")
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
@@ -39,6 +40,7 @@ public class AuthController {
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @SecurityRequirements
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
         try {
@@ -83,6 +85,7 @@ public class AuthController {
         return ResponseEntity.ok("pong");
     }
 
+    @SecurityRequirements
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         log.debug("Login endpoint reached for email: {}", req.getEmail());
@@ -93,11 +96,14 @@ public class AuthController {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(req.getEmail());
             String token = jwtService.generateToken(new HashMap<>(), userDetails);
+            String refreshToken = jwtService.generateRefreshToken(userDetails);
 
             var user = authService.findByEmail(req.getEmail());
 
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
+            response.put("accessToken", token);
+            response.put("refreshToken", refreshToken);
             response.put("user", Map.of(
                 "id", user.getId(),
                 "name", user.getName(),
@@ -112,8 +118,40 @@ public class AuthController {
         }
     }
 
+    @SecurityRequirements
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest req) {
+        try {
+            String refreshToken = req.getRefreshToken();
+            String username = jwtService.extractUsername(refreshToken);
+
+            if (username == null) {
+                return ResponseEntity.status(401).body(Map.of("message", "Invalid refresh token"));
+            }
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            if (!jwtService.isTokenValid(refreshToken, userDetails)) {
+                return ResponseEntity.status(401).body(Map.of("message", "Refresh token expired or invalid. Please login again."));
+            }
+
+            // Issue a new short-lived access token
+            String newAccessToken = jwtService.generateToken(new HashMap<>(), userDetails);
+
+            return ResponseEntity.ok(Map.of(
+                    "accessToken", newAccessToken,
+                    "message", "Token refreshed successfully"
+            ));
+
+        } catch (Exception e) {
+            log.error("Token refresh failed", e);
+            return ResponseEntity.status(401).body(Map.of("message", "Token refresh failed. Please login again."));
+        }
+    }
+
     // ==================== PASSWORD RESET ENDPOINTS ====================
 
+    @SecurityRequirements
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest req) {
         try {

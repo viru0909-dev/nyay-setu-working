@@ -22,7 +22,7 @@ import os
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sse_starlette.sse import EventSourceResponse
 
 from cache import (
@@ -33,12 +33,12 @@ from cache import (
 from config import FRONTEND_ORIGIN, GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KEY, GEMINI_MODEL
 from decomposer import decompose_query
 from router import route_questions
-from research import run_parallel_research
-from synthesizer import synthesize_answers
+from research import run_parallel_research, stream_groq_chat
+from synthesizer import synthesize_answers, stream_synthesize_answers
 from validators.citation_validator import validate_citations_from_text
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
-
+from sanitizer import sanitize_user_input, sanitize_prompt_input
 
 # Initialize clients for deep research pipeline
 from groq import AsyncGroq
@@ -140,6 +140,24 @@ class LegalQuery(BaseModel):
     query: str
     language: str = "en"
 
+    @field_validator("query")
+    @classmethod
+    def validate_and_sanitize_query(cls, v):
+        v = sanitize_user_input(v)
+        if not v:
+            raise ValueError("Query cannot be empty")
+        if len(v) > 2000:
+            raise ValueError("Query exceeds maximum length of 2000 characters")
+        return v
+
+    @field_validator("language")
+    @classmethod
+    def validate_language(cls, v):
+        allowed = {"en", "hi", "hinglish"}
+        if v not in allowed:
+            raise ValueError(f"Language must be one of: {allowed}")
+        return v
+
 
 # ─── SSE Event Builder ────────────────────────────────────────────────────────
 
@@ -162,12 +180,14 @@ async def legal_reasoning_pipeline(query: str, language: str):
 
     try:
         # ── Layer 1: Decompose ───────────────────────────────────
-        logger.info(f"[Layer 1] Decomposing: {query[:60]}...")
+        # Sanitize query for prompt injection before sending to AI
+        safe_query = sanitize_prompt_input(query)
+        logger.info(f"[Layer 1] Decomposing: {safe_query[:60]}...")
         yield sse_event("avatar_update", {"message": "Aapka sawaal samajh raha hoon, thoda wait karein..."})
 
         kanoon_task = asyncio.create_task(build_kanoon_context(query, max_results=3))
 
-        sub_questions = await decompose_query(query)
+        sub_questions = await decompose_query(safe_query)
         logger.info(f"[Layer 1] Got {len(sub_questions)} sub-questions")
         yield sse_event("sub_questions", {"questions": sub_questions})
 
@@ -213,8 +233,15 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("synthesis_start", {})
         yield sse_event("avatar_update", {"message": "Sab information mila di, ab aapke liye summary bana raha hoon..."})
 
-        logger.info("[Layer 4] Synthesizing...")
-        synthesized_md = await synthesize_answers(query, results)
+        logger.info("[Layer 4] Synthesizing with streaming...")
+        
+        synthesized_md = ""
+        # Stream synthesis tokens directly
+        async for token in stream_synthesize_answers(safe_query, results):
+            synthesized_md += token
+            yield sse_event("synthesis_token", {"chunk": token})
+        
+        logger.info("[Layer 4] Synthesis complete")
 
         try:
             validation_results = validate_citations_from_text(synthesized_md)
@@ -286,22 +313,22 @@ async def analyze_stream(body: LegalQuery, request: Request):
     """
     Primary SSE endpoint — streams the full legal reasoning pipeline.
     Frontend connects using fetch + ReadableStream for real-time updates.
+    Input validation and sanitization is handled by the LegalQuery Pydantic model.
     """
-    if not body.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
-    if len(body.query) > 2000:
-        raise HTTPException(status_code=400, detail="Query exceeds maximum length of 2000 characters")
 
     logger.info(f"[Stream] New query: {body.query[:80]}")
 
     async def event_generator():
         pipeline = legal_reasoning_pipeline(body.query, body.language)
 
-        async for event in pipeline:
-            if await request.is_disconnected():
-                logger.info("[Stream] Client disconnected")
-                break
-            yield {"data": event}
+        try:
+            async for event in pipeline:
+                if await request.is_disconnected():
+                    logger.info("[Stream] Client disconnected")
+                    break
+                yield {"data": event}
+        finally:
+            await pipeline.aclose()
 
     return EventSourceResponse(event_generator())
 
@@ -311,11 +338,8 @@ async def analyze_sync(body: LegalQuery):
     """
     Synchronous endpoint — runs the full pipeline and returns all results at once.
     Use only for testing. In production, use /analyze-stream for real-time UX.
+    Input validation and sanitization is handled by the LegalQuery Pydantic model.
     """
-    if not body.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
-    if len(body.query) > 2000:
-        raise HTTPException(status_code=400, detail="Query exceeds maximum length of 2000 characters")
 
     logger.info(f"[Sync] Analyzing: {body.query[:80]}")
 
@@ -399,7 +423,9 @@ async def deep_research_pipeline(query: str, language: str):
     """
     try:
         # ── Stage 1: UNDERSTANDING ────────────────────────────────
-        logger.info(f"[Deep Research] Stage 1: Understanding query: {query[:60]}...")
+        # Sanitize query for prompt injection before sending to AI
+        safe_query = sanitize_prompt_input(query)
+        logger.info(f"[Deep Research] Stage 1: Understanding query: {safe_query[:60]}...")
         
         domain = detect_domain(query)
         domain_label = domain.upper() if domain != "general" else "GENERAL LEGAL"
@@ -522,31 +548,21 @@ async def deep_research_pipeline(query: str, language: str):
             except Exception as e:
                 logger.error(f"Gemini failed, falling back to Groq: {e}")
                 model_choice = "groq"
-
         if model_choice == "groq" or (
             model_choice == "gemini" and not gemini_client
         ):
-
-            response = await groq_client.chat.completions.create(
-                model=GROQ_MODEL_FAST,
+            # Stream tokens directly from Groq
+            logger.info("[Deep Research] Streaming from Groq...")
+            async for token in stream_groq_chat(
                 messages=[
                     {"role": "system", "content": grounded_prompt},
                     {"role": "user", "content": query}
                 ],
-                temperature=0.2,
+                model=GROQ_MODEL_FAST,
                 max_tokens=2048
-            )
-
-            ai_answer = response.choices[0].message.content.strip()
-
-        # Stream reasoning text in chunks for live display
-        if ai_answer:
-            words = ai_answer.split()
-            chunk_size = 8
-            for i in range(0, len(words), chunk_size):
-                chunk = " ".join(words[i:i + chunk_size])
-                yield sse_event("reasoning", {"text": chunk})
-                await asyncio.sleep(0.1)  # Small delay for streaming effect
+            ):
+                yield sse_event("reasoning", {"text": token})
+                ai_answer = (ai_answer or "") + token
 
         yield sse_event("stage", {
             "stage": "reasoning",
@@ -618,21 +634,20 @@ async def deep_research(body: LegalQuery, request: Request):
     Indian Kanoon context. Frontend connects directly to this for
     the reasoning panel + avatar speech updates.
     """
-    if not body.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
-    if len(body.query) > 2000:
-        raise HTTPException(status_code=400, detail="Query exceeds maximum length of 2000 characters")
-
+    # Input validation and sanitization is handled by the LegalQuery Pydantic model.
     logger.info(f"[Deep Research] New query: {body.query[:80]}")
 
     async def event_generator():
         pipeline = deep_research_pipeline(body.query, body.language)
 
-        async for event in pipeline:
-            if await request.is_disconnected():
-                logger.info("[Deep Research] Client disconnected")
-                break
-            yield {"data": event}
+        try:
+            async for event in pipeline:
+                if await request.is_disconnected():
+                    logger.info("[Deep Research] Client disconnected")
+                    break
+                yield {"data": event}
+        finally:
+            await pipeline.aclose()
 
     return EventSourceResponse(event_generator())
 

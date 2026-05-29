@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Tag(name = "Hearings", description = "Schedule, manage and record virtual court hearings")
 @RestController
-@RequestMapping("/api/hearings")
+@RequestMapping("/hearings")
 @RequiredArgsConstructor
 @Slf4j
 public class HearingController {
