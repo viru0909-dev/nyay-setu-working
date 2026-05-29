@@ -72,17 +72,7 @@ export default function LawyerProfilePage() {
             alert('Failed to update profile');
         }
     };
-    // const handleSaveChanges = async () => {
-    //     try {
-    //         await lawyerAPI.updateProfile(profileData);
-
-    //         alert('Profile updated successfully!');
-    //         setIsEditing(false);
-    //     } catch (err) {
-    //         console.error(err);
-    //         alert('Failed to update profile');
-    //     }
-    // };
+    
 
     const glassStyle = {
         background: 'var(--bg-glass-strong)',
