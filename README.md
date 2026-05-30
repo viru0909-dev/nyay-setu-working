@@ -45,8 +45,8 @@
 - [License](#license)
 
 <hr/>
-
-## Why Nyay Saarthi?
+<!-- Fix: Corrected heading from 'Why Nyay Saarthi?' to 'Why Nyay Setu?' to match project name and fix broken TOC link -->
+## Why Nyay Setu?
 
 The Indian judiciary faces a systemic crisis that affects hundreds of millions of citizens:
 
