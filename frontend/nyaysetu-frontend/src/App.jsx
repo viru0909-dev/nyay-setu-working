@@ -99,10 +99,16 @@ const GuestAuthRedirect = ({ location }) => {
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const location = useLocation();
-    const { isAuthenticated, isGuest, user } = useAuthStore();
+    const { isAuthenticated, isGuest, user, authInitialized } = useAuthStore();
 
     if (isGuest) {
         return <GuestAuthRedirect location={location} />;
+    }
+
+    // If auth restoration from localStorage is still in progress,
+    // don't make a redirect decision yet — show a small loader instead.
+    if (!authInitialized) {
+        return <LoadingSpinner fullScreen={false} message="Restoring session..." />;
     }
 
     if (!isAuthenticated) {
