@@ -33,8 +33,8 @@ from cache import (
 from config import FRONTEND_ORIGIN, GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KEY, GEMINI_MODEL
 from decomposer import decompose_query
 from router import route_questions
-from research import run_parallel_research
-from synthesizer import synthesize_answers
+from research import run_parallel_research, stream_groq_chat
+from synthesizer import synthesize_answers, stream_synthesize_answers
 from validators.citation_validator import validate_citations_from_text
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
@@ -233,8 +233,15 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("synthesis_start", {})
         yield sse_event("avatar_update", {"message": "Sab information mila di, ab aapke liye summary bana raha hoon..."})
 
-        logger.info("[Layer 4] Synthesizing...")
-        synthesized_md = await synthesize_answers(safe_query, results)
+        logger.info("[Layer 4] Synthesizing with streaming...")
+        
+        synthesized_md = ""
+        # Stream synthesis tokens directly
+        async for token in stream_synthesize_answers(safe_query, results):
+            synthesized_md += token
+            yield sse_event("synthesis_token", {"chunk": token})
+        
+        logger.info("[Layer 4] Synthesis complete")
 
         try:
             validation_results = validate_citations_from_text(synthesized_md)
@@ -314,11 +321,14 @@ async def analyze_stream(body: LegalQuery, request: Request):
     async def event_generator():
         pipeline = legal_reasoning_pipeline(body.query, body.language)
 
-        async for event in pipeline:
-            if await request.is_disconnected():
-                logger.info("[Stream] Client disconnected")
-                break
-            yield {"data": event}
+        try:
+            async for event in pipeline:
+                if await request.is_disconnected():
+                    logger.info("[Stream] Client disconnected")
+                    break
+                yield {"data": event}
+        finally:
+            await pipeline.aclose()
 
     return EventSourceResponse(event_generator())
 
@@ -541,27 +551,18 @@ async def deep_research_pipeline(query: str, language: str):
         if model_choice == "groq" or (
             model_choice == "gemini" and not gemini_client
         ):
-
-            response = await groq_client.chat.completions.create(
-                model=GROQ_MODEL_FAST,
+            # Stream tokens directly from Groq
+            logger.info("[Deep Research] Streaming from Groq...")
+            async for token in stream_groq_chat(
                 messages=[
                     {"role": "system", "content": grounded_prompt},
                     {"role": "user", "content": query}
                 ],
-                temperature=0.2,
+                model=GROQ_MODEL_FAST,
                 max_tokens=2048
-            )
-
-            ai_answer = response.choices[0].message.content.strip()
-
-        # Stream reasoning text in chunks for live display
-        if ai_answer:
-            words = ai_answer.split()
-            chunk_size = 8
-            for i in range(0, len(words), chunk_size):
-                chunk = " ".join(words[i:i + chunk_size])
-                yield sse_event("reasoning", {"text": chunk})
-                await asyncio.sleep(0.1)  # Small delay for streaming effect
+            ):
+                yield sse_event("reasoning", {"text": token})
+                ai_answer = (ai_answer or "") + token
 
         yield sse_event("stage", {
             "stage": "reasoning",
@@ -639,11 +640,14 @@ async def deep_research(body: LegalQuery, request: Request):
     async def event_generator():
         pipeline = deep_research_pipeline(body.query, body.language)
 
-        async for event in pipeline:
-            if await request.is_disconnected():
-                logger.info("[Deep Research] Client disconnected")
-                break
-            yield {"data": event}
+        try:
+            async for event in pipeline:
+                if await request.is_disconnected():
+                    logger.info("[Deep Research] Client disconnected")
+                    break
+                yield {"data": event}
+        finally:
+            await pipeline.aclose()
 
     return EventSourceResponse(event_generator())
 

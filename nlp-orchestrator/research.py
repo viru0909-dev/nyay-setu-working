@@ -131,6 +131,27 @@ async def _call_groq_with_retry(
     }
 
 
+async def stream_groq_chat(messages, model, max_tokens=1024):
+
+    async with groq_client.chat.with_streaming_response.completions.create(
+        model=model,
+        messages=messages,
+        temperature=0.3,
+        max_tokens=max_tokens,
+    ) as stream:
+
+        async for chunk in stream:
+
+            try:
+                content = chunk.choices[0].delta.content
+
+                if content:
+                    yield content
+
+            except Exception:
+                continue
+
+
 @retry_transient
 async def _call_gemini_with_retry(
     question: str,

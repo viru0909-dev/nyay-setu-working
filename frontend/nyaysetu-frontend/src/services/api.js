@@ -1,5 +1,7 @@
 import axios from 'axios';
-
+import toast from "react-hot-toast";
+import { getErrorMessage } from "../utils/errorHandler";
+import useAuthStore from '../store/authStore';
 // Use explicit backend URL - Vite proxy can be unreliable
 // In development: http://localhost:8080
 // In production: Replace with actual backend URL via environment variable
@@ -7,13 +9,16 @@ import axios from 'axios';
 // In development: http://localhost:8080
 // In production: Replace with actual backend URL via environment variable
 // Check multiple variable names to be safe
-// Smart Base URL detection
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// Smart Base URL detection with safe fallbacks
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const PROD_BACKEND = 'https://nyaysetubackend.onrender.com';
 
-if (!API_BASE_URL) {
-  throw new Error(
-    "VITE_API_BASE_URL is missing. Please check your .env file."
-  );
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_API_URL ||
+    (isLocalhost ? 'http://localhost:8080' : PROD_BACKEND);
+
+if (import.meta.env.DEV) {
+    console.log('[api.js] Using API_BASE_URL:', API_BASE_URL);
 }
 
 const api = axios.create({
@@ -49,7 +54,47 @@ api.interceptors.request.use((config) => {
 
     return config;
 });
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const message = getErrorMessage(error);
 
+        // Show user-friendly toast notification
+        toast.error(message);
+
+        // Log detailed errors in development only
+        if (import.meta.env.DEV) {
+            console.error("API Error:", error);
+        }
+
+        const status = error.response?.status;
+        if (status === 401 || status === 403) {
+            const token = localStorage.getItem('token');
+            const hasValidToken = token && token !== 'null' && token !== 'undefined';
+
+            if (!hasValidToken) {
+                try {
+                    window.dispatchEvent(
+                        new CustomEvent('guest:api-blocked', {
+                            detail: {
+                                message: 'Create an account to use this feature.',
+                                url: error.config?.url,
+                            },
+                        })
+                    );
+                } catch {
+                    // ignore
+                }
+            } else {
+                useAuthStore.getState().logout();
+                if (!window.location.pathname.startsWith('/login')) {
+                    window.location.assign('/login');
+                }
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 // Auth API
 export const authAPI = {
     login: (credentials) => api.post('/api/v1/auth/login', credentials),

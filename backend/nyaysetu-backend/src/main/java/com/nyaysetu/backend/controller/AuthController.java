@@ -104,6 +104,12 @@ public class AuthController {
             response.put("token", token);
             response.put("accessToken", token);
             response.put("refreshToken", refreshToken);
+            response.put("user", Map.of(
+                "id", user.getId(),
+                "name", user.getName(),
+                "email", user.getEmail(),
+                "role", user.getRole().name()
+            ));
 
             return ResponseEntity.ok(response);
         }

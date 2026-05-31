@@ -27,6 +27,8 @@ sqlalchemy==2.0.26
 sse-starlette==2.0.0
 tenacity==9.1.4
 uvicorn[standard]==0.27.1
+
+pytest-asyncio
  
 # ─── RAG retrieval (new in this PR) ───────────────────────────────────────────
 sentence-transformers>=2.7.0   # bi-encoder embeddings + cross-encoder rerank

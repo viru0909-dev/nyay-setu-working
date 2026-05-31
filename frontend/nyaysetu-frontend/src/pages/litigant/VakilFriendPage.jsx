@@ -397,6 +397,10 @@ export default function VakilFriendChat() {
                 setReasoningText(prev => prev + (prev ? ' ' : '') + payload.text);
                 break;
 
+            case 'synthesis_token':
+                setReasoningText(prev => prev + payload.chunk);
+                break;
+
             case 'avatar_speak':
                 if (showAvatar && payload.message) {
                     speakText(payload.message, -1);
