@@ -103,7 +103,7 @@ public class SecurityConfig {
                 configuration.setAllowedOrigins(java.util.Arrays.asList(
                     "http://localhost:5173",
                     "http://localhost:3000",
-                    "http://localhost"                  
+                    "http://localhost"
                 ));
                 configuration.setAllowCredentials(true);
             } else {

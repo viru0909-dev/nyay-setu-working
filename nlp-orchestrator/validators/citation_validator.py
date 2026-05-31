@@ -10,19 +10,10 @@ from legal_utils.citation_extractor import extract_legal_citations
 DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "legal_sections.json"
 
 
-@lru_cache(maxsize=1)
+@lru_cache(maxsize=1)  
 def _load_legal_sections() -> dict[str, Any]:
-    try:
-        with open(DATA_PATH, "r", encoding="utf-8") as handle:
-            return json.load(handle)
-
-    except FileNotFoundError:
-        print(f"Error: {DATA_PATH} file not found.")
-        return {}
-
-    except json.JSONDecodeError:
-        print(f"Error: Invalid JSON format in {DATA_PATH}.")
-        return {}
+    with open(DATA_PATH, "r", encoding="utf-8") as handle:
+        return json.load(handle)
 
 
 def _parse_numeric_section(section: str) -> tuple[int, str] | None:

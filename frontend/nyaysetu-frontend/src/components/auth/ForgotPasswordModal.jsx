@@ -23,12 +23,12 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
             });
 
             if (!response.ok) {
-                let errorMessage='Failed to send reset email';
-                try{
-                    const text=await response.text();
-                    const data=text? JSON.parse(text) : {};
-                    errorMessage=data.message||errorMessage;
-                }catch(e){
+                let errorMessage = 'Failed to send reset email';
+                try {
+                    const text = await response.text();
+                    const data = text ? JSON.parse(text) : {};
+                    errorMessage = data.message || errorMessage;
+                } catch (e) {
                     console.error('Invalid JSON response');
                 }
                 throw new Error(errorMessage);
