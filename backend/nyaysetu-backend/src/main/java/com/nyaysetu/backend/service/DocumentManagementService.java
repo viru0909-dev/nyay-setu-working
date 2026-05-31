@@ -96,6 +96,15 @@ public class DocumentManagementService {
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+
+    public void ensureDocumentAccess(UUID id, Long userId, String userRole) {
+        DocumentEntity document = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        if (!hasDocumentAccess(document, userId, userRole)) {
+            throw new RuntimeException("Unauthorized to access this document");
+        }
+    }
     
     /**
      * Check if user has access to a document
