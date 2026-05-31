@@ -405,23 +405,49 @@ export default function FileUnifiedPage() {
                                     background: 'var(--color-primary)', transition: 'width 0.3s'
                                 }} />
                             </div>
-                            {steps.map((step) => (
-                                <div key={step.number} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, position: 'relative', zIndex: 1 }}>
+                            {steps.map((step) => {
+                                const isCompleted = step.number < currentStep;
+                                return (
+                                <div 
+                                    key={step.number} 
+                                    onClick={() => {
+                                        if (isCompleted) {
+                                            setCurrentStep(step.number);
+                                        }
+                                    }}
+                                    style={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        alignItems: 'center', 
+                                        flex: 1, 
+                                        position: 'relative', 
+                                        zIndex: 1,
+                                        cursor: isCompleted ? 'pointer' : 'default',
+                                        transition: 'opacity 0.2s'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        if (isCompleted) e.currentTarget.style.opacity = '0.7';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        if (isCompleted) e.currentTarget.style.opacity = '1';
+                                    }}
+                                >
                                     <div style={{
                                         width: '40px', height: '40px', borderRadius: '50%',
                                         background: step.number <= currentStep ? 'var(--color-primary)' : 'var(--bg-glass)',
                                         border: step.number === currentStep ? '3px solid rgba(30, 42, 68, 0.4)' : 'none',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700',
-                                        color: step.number <= currentStep ? 'white' : 'var(--text-secondary)', marginBottom: '0.75rem'
+                                        color: step.number <= currentStep ? 'white' : 'var(--text-secondary)', marginBottom: '0.75rem',
+                                        transition: 'all 0.2s'
                                     }}>
-                                        {step.number < currentStep ? <CheckCircle2 size={20} /> : step.number}
+                                        {isCompleted ? <CheckCircle2 size={20} /> : step.number}
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.875rem', fontWeight: '600', color: step.number <= currentStep ? 'var(--color-primary)' : 'var(--text-secondary)' }}>{step.name}</div>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{step.desc}</div>
                                     </div>
                                 </div>
-                            ))}
+                            )})}
                         </div>
                     </div>
 
