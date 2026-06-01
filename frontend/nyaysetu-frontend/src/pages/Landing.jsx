@@ -15,6 +15,7 @@ import useGuest from '../hooks/useGuest';
 import GuestAccessDeniedModal from '../components/guest/GuestAccessDeniedModal';
 import GuestInlineCTA from '../components/guest/GuestInlineCTA';
 import GuestLockedCard from '../components/guest/GuestLockedCard';
+import QuickCard from '../components/landing/QuickCard';
 
 export default function Landing() {
     const { t } = useTranslation('landing');
@@ -303,83 +304,15 @@ export default function Landing() {
                         position: 'relative', zIndex: 1,
                     }} className="quick-cards-grid">
                         {QUICK_CARDS.map((card, i) => (
-                            <motion.div
+                            <QuickCard
                                 key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.6 + i * 0.1 }}
-                                whileHover={{ y: -5 }}
-                                style={{
-                                    background: 'var(--bg-glass-strong)',
-                                    backdropFilter: 'blur(16px)',
-                                    WebkitBackdropFilter: 'blur(16px)',
-                                    border: '1px solid var(--border-light)',
-                                    borderRadius: '20px',
-                                    padding: '1.75rem',
-                                    boxShadow: 'var(--shadow-glass)',
-                                    transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
-                                }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.borderColor = card.color + '50';
-                                    e.currentTarget.style.boxShadow = `0 10px 28px ${card.color}18`;
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.borderColor = 'var(--border-light)';
-                                    e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
-                                }}
-                            >
-                                <div style={{
-                                    width: '44px', height: '44px', borderRadius: '12px',
-                                    background: card.bg,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    marginBottom: '1rem',
-                                }}>
-                                    <card.icon size={22} style={{ color: card.color }} />
-                                </div>
-                                <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                                    {card.title}
-                                </h3>
-                                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '1.25rem' }}>
-                                    {card.desc}
-                                </p>
-                                {i === 1 ? (
-                                    <button
-                                        type="button"
-                                        onClick={handleSubmitCaseClick}
-                                        style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: '0.35rem',
-                                            color: card.color,
-                                            fontSize: '0.875rem',
-                                            fontWeight: '700',
-                                            background: 'transparent',
-                                            border: 'none',
-                                            padding: 0,
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        {card.cta} <ArrowRight size={14} />
-                                    </button>
-                                ) : (
-                                    <Link to="/signup" style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                                        color: card.color,
-                                        fontSize: '0.875rem', fontWeight: '700',
-                                        textDecoration: 'none',
-                                        transition: 'gap 0.2s ease',
-                                    }}
-                                        onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
-                                        onMouseLeave={e => e.currentTarget.style.gap = '0.35rem'}
-                                    >
-                                        {card.cta} <ArrowRight size={14} />
-                                    </Link>
-                                )}
-
-                                {inlineMessage && i === 1 && (
-                                    <GuestInlineCTA message={inlineMessage} onSignUp={goToSignup} compact />
-                                )}
-                            </motion.div>
+                                card={card}
+                                i={i}
+                                isSubmitCase={i === 1}
+                                handleSubmitCaseClick={handleSubmitCaseClick}
+                                inlineMessage={inlineMessage}
+                                goToSignup={goToSignup}
+                            />
                         ))}
                     </div>
                 </section>
