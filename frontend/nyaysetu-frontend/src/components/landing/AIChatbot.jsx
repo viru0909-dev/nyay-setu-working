@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { MessageCircle, X, Send, Mic, StopCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { brainAPI } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
@@ -14,6 +14,8 @@ export default function AIChatbot() {
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [sessionId, setSessionId] = useState(null);
+    const [isRecording, setIsRecording] = useState(false);
+    const recognitionRef = useRef(null);
 
     const handleSend = async () => {
         if (!input.trim()) return;
@@ -42,6 +44,48 @@ export default function AIChatbot() {
             setIsTyping(false);
         }
     };
+
+    const startRecording = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Speech recognition is not supported in this browser.');
+        return;
+    }
+
+    const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+        setIsRecording(true);
+    };
+
+    recognition.onend = () => {
+        setIsRecording(false);
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput((prev) => prev + ' ' + transcript);
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+};
+
+const stopRecording = () => {
+    if (recognitionRef.current) {
+        recognitionRef.current.stop();
+    }
+};
 
     return (
         <>
@@ -217,6 +261,26 @@ export default function AIChatbot() {
                                         outline: 'none'
                                     }}
                                 />
+                                
+                                <button
+    onClick={isRecording ? stopRecording : startRecording}
+    style={{
+        padding: '0.75rem',
+        background: isRecording
+            ? '#ef4444'
+            : 'rgba(139, 92, 246, 0.15)',
+        border: 'none',
+        borderRadius: '0.75rem',
+        color: isRecording ? 'white' : '#8b5cf6',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    }}
+>
+    {isRecording ? <StopCircle size={18} /> : <Mic size={18} />}
+</button>
+
                                 <button
                                     onClick={handleSend}
                                     disabled={!input.trim()}

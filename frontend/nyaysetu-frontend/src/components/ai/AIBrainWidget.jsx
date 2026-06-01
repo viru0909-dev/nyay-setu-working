@@ -3,6 +3,7 @@ import { Bot, X, Send, User, ChevronDown, Minimize2, Maximize2, Sparkles, Loader
 import { brainAPI } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useTranslation } from 'react-i18next';
 
 export default function AIBrainWidget({ user }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,7 @@ export default function AIBrainWidget({ user }) {
     const [sessionId, setSessionId] = useState(null);
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef(null);
+    const { t } = useTranslation('litigant');
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -28,10 +30,17 @@ export default function AIBrainWidget({ user }) {
 
     const getWelcomeMessage = (role) => {
         switch (role) {
-            case 'JUDGE': return "🙏 NyaySetu Judicial Brain online. I can help analyze dossiers, check evidence validity, or suggest procedural steps for your pending cases. How may I assist you, Your Honor?";
-            case 'LAWYER': return "Greetings, Counselor. I'm ready to assist with case drafting, IPC/BNS research, or client communication strategies. What's on the agenda today?";
-            case 'LITIGANT': return "🙏 Namaste. I am your NyaySetu legal guide. I can help you understand your rights, file a new case, or find a legal representative. What would you like to know?";
-            default: return "Hello. I am the NyaySetu AI Brain. How can I help you today?";
+            case 'JUDGE':
+                return t('aiBrain.judgeWelcome');
+
+            case 'LAWYER':
+                return t('aiBrain.lawyerWelcome');
+
+            case 'LITIGANT':
+                return t('aiBrain.litigantWelcome');
+
+            default:
+                return t('aiBrain.defaultWelcome');
         }
     };
 
@@ -48,7 +57,7 @@ export default function AIBrainWidget({ user }) {
             setMessages(prev => [...prev, { role: 'assistant', content: response.data.message }]);
             if (response.data.sessionId) setSessionId(response.data.sessionId);
         } catch (error) {
-            setMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Connection to Brain interrupted. Please try again shortly." }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: t('aiBrain.connectionError') }]);
         } finally {
             setLoading(false);
         }
@@ -105,8 +114,8 @@ export default function AIBrainWidget({ user }) {
                             }} />
                         </div>
                         <div>
-                            <span style={{ fontWeight: '800', fontSize: '1rem', display: 'block' }}>NyaySetu Brain</span>
-                            <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>Active Reasoning Engine</span>
+                            <span style={{ fontWeight: '800', fontSize: '1rem', display: 'block' }}>{t('aiBrain.title')}</span>
+                            <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>{t('aiBrain.subtitle')}</span>
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -183,7 +192,7 @@ export default function AIBrainWidget({ user }) {
                             <div style={{ position: 'relative' }}>
                                 <input
                                     type="text"
-                                    placeholder="Type your inquiry..."
+                                    placeholder={t('aiBrain.placeholder')}
                                     value={input}
                                     onChange={e => setInput(e.target.value)}
                                     onKeyPress={e => e.key === 'Enter' && handleSend()}

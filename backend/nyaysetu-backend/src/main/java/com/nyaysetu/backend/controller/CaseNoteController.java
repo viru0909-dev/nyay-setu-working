@@ -7,6 +7,7 @@ import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.CaseNoteRepository;
 import com.nyaysetu.backend.service.CaseNoteService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class CaseNoteController {
     @PostMapping
     public CaseNote addNote(
             @PathVariable UUID caseId,
-            @RequestBody AddNoteRequest request
+           @Valid @RequestBody AddNoteRequest request
     ) {
         return caseNoteService.addNote(caseId, request);
     }

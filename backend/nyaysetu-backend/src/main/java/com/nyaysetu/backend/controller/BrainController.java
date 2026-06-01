@@ -22,7 +22,7 @@ import java.util.ArrayList;
  */
 @Tag(name = "NyaySetu Brain (AI)", description = "Central AI engine for legal analysis and recommendations")
 @RestController
-@RequestMapping("/api/brain")
+@RequestMapping("/brain")
 @RequiredArgsConstructor
 @Slf4j
 public class BrainController {

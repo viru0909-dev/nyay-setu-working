@@ -4,6 +4,7 @@ import com.nyaysetu.backend.dto.ProfileRequest;
 import com.nyaysetu.backend.entity.UserProfile;
 import com.nyaysetu.backend.service.ProfileService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @PostMapping("/create-or-update")
-    public ResponseEntity<?> createOrUpdate(@RequestBody ProfileRequest request) {
+    public ResponseEntity<?> createOrUpdate(@Valid  @RequestBody ProfileRequest request) {
         UserProfile p = profileService.createOrUpdate(request);
         return ResponseEntity.ok(p);
     }

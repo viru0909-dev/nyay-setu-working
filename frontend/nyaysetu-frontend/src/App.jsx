@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, Suspense, lazy } from 'react';
 import useAuthStore from './store/authStore';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
@@ -11,6 +11,8 @@ import ScrollToTop from './ScrollToTop';
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
 import UpdateNotification from './components/UpdateNotification';
+import GuestWelcomeToast from './components/guest/GuestWelcomeToast';
+import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
 
 // Lazy load pages for better performance
 const Landing = lazy(() => import('./pages/Landing'));
@@ -81,12 +83,30 @@ const MyFirsPage = lazy(() => import('./pages/police/MyFirsPage'));
 const PoliceInvestigationsPage = lazy(() => import('./pages/police/PoliceInvestigationsPage'));
 const InvestigationDetailsPage = lazy(() => import('./pages/police/InvestigationDetailsPage'));
 
+const GuestAuthRedirect = ({ location }) => {
+    const setGuestIntent = useAuthStore((s) => s.setGuestIntent);
+
+    useEffect(() => {
+        setGuestIntent({
+            path: `${location.pathname}${location.search}`,
+            feature: 'access your dashboard',
+        });
+    }, [location.pathname, location.search, setGuestIntent]);
+
+    return <Navigate to="/signup" replace state={{ from: location }} />;
+};
+
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
-    const { isAuthenticated, user } = useAuthStore();
+    const location = useLocation();
+    const { isAuthenticated, isGuest, user } = useAuthStore();
+
+    if (isGuest) {
+        return <GuestAuthRedirect location={location} />;
+    }
 
     if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
     if (allowedRoles && !allowedRoles.includes(user?.role)) {
@@ -119,6 +139,8 @@ function App({ swRegistration }) {
                             v7_relativeSplatPath: true
                         }}
                     >
+                        <GuestWelcomeToast />
+                        <GuestOnboardingHint />
                         <ScrollToTop />
                         <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
                             <Routes>

@@ -8,6 +8,7 @@ import com.nyaysetu.backend.repository.CaseEvidenceRepository;
 import com.nyaysetu.backend.repository.LegalCaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +27,8 @@ public class EvidenceService {
 
     private final GroqDocumentVerificationService groqService;
 
-    private final String uploadDir = "uploads/evidence/";
+    @Value("${app.upload.evidence-path:backend/uploads/evidence/}")
+    private String uploadDir;
 
     @Transactional
     public UploadEvidenceResponse upload(UUID caseId, MultipartFile file, Long uploaderId) {

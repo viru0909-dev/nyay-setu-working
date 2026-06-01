@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 @Tag(name = "Case Events", description = "Audit trail and timeline events for each case")
 @RestController
-@RequestMapping("/api/cases")
+@RequestMapping("/cases")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class CaseEventController {

@@ -1,0 +1,678 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "myCases": "నా కేసులు",
+    "upcomingHearings": "రాబోయే విచారణలు",
+    "documents": "పత్రాలు",
+    "legalChat": "న్యాయ Chat",
+    "active": "చురుకుగా",
+    "chatWithLawyer": "న్యాయవాదితో Chat చేయండి",
+    "loading": "లోడ్ అవుతోంది...",
+    "thisMonth": "ఈ నెల",
+    "newDocs": "కొత్త పత్రాలు",
+    "reviewDraft": "ముసాయిదాను సమీక్షించండి",
+    "approve": "ఆమోదించండి",
+    "reject": "తిరస్కరించండి",
+    "recentCases": "ఇటీవలి కేసులు"
+  },
+
+  "caseDiary": {
+    "title": "కేసు డైరీ",
+    "backToDiary": "డైరీకి తిరిగి వెళ్ళండి",
+    "downloadReport": "నివేదికను Download చేయండి",
+    "subtitle": "మీ న్యాయస్థాన కేసులు మరియు పోలీస్ FIR-లను నిర్వహించండి",
+    "fileNewCase": "కొత్త కేసు దాఖలు చేయండి",
+    "searchPlaceholder": "కేసులు లేదా FIR వెతకండి...",
+    "allStatuses": "అన్ని స్థితులు",
+    "cases": "కేసులు",
+    "firs": "FIR",
+    "download": "Download",
+    "noCases": "కేసులేమీ కనుగొనబడలేదు",
+    "gridView": "Grid View",
+    "listView": "List View",
+    "filter": "వడపోత",
+    "status": "స్థితి",
+    "total": "మొత్తం",
+    "action": "చర్య",
+    "court": "న్యాయస్థానం",
+    "police": "పోలీస్",
+    "searchCasePlaceholder": "శీర్షిక లేదా Case ID ద్వారా వెతకండి...",
+    "searchFirPlaceholder": "శీర్షిక లేదా FIR ID ద్వారా వెతకండి...",
+    "loadingDiary": "మీ డైరీ లోడ్ అవుతోంది...",
+    "noEntries": "నమోదులేమీ కనుగొనబడలేదు",
+    "fileNew": "కొత్తది దాఖలు చేయండి",
+    "noType": "రకం లేదు",
+    "policeFir": "పోలీస్ FIR",
+    "noLocation": "స్థానం లేదు",
+    "viewDetails": "వివరాలు చూడండి",
+    "requestSent": "అభ్యర్థన పంపబడింది",
+    "hireLawyer": "న్యాయవాదిని నియమించుకోండి",
+    "viewLinkedCourtCase": "అనుసంధానించబడిన న్యాయస్థాన కేసు చూడండి",
+    "applicationRejected": "దరఖాస్తు తిరస్కరించబడింది",
+    "processing": "ప్రాసెసింగ్ జరుగుతోంది"
+  },
+
+  "caseDetail": {
+    "tabs": {
+      "overview": "సమీక్ష",
+      "caseFiles": "కేసు ఫైల్లు",
+      "timeline": "Timeline",
+      "proceduralHealth": "విధానపరమైన ఆరోగ్యం"
+    },
+    "aiDraftReady": "மதிப்பாய்விற்கான AI வரைவு தயாராக உள்ளது",
+    "reviewApprovePetition": "மனுவை மதிப்பாய்வு செய்து அங்கீகரிக்கவும்",
+    "aiDraftDescription": "நியாய சாரதி ஒரு வழக்கு பகுப்பாய்வை உருவாக்கியுள்ளது. அதிகாரப்பூர்வ வழக்கு வரைவினை உருவாக்க இதை அங்கீகரிக்கவும்.",
+    "lawyerDraftDescription": "உங்கள் வழக்கறிஞர் ஒரு வரைவு மனுவை சமர்ப்பித்துள்ளார். உங்கள் வழக்கறிஞருக்கான \"நீதிமன்றத்தில் சமர்ப்பிக்க\" செயல்பாட்டைத் தொடங்க இதை மதிப்பாய்வு செய்து அங்கீகரிக்கவும்.",
+    "confirmApproveDraft": "இந்த வரைவினை அங்கீகரிக்க விரும்புகிறீர்களா? இது உங்கள் வழக்கறிஞருக்கு அறிவிக்கப்படும்.",
+    "draftApproved": "வரைவு அங்கீகரிக்கப்பட்டது! உங்கள் வழக்கறிஞர் இப்போது அதை நீதிமன்றத்தில் சமர்ப்பிக்கலாம்.",
+    "failedApproveDraft": "வரைவினை அங்கீகரிக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    "approveESign": "அங்கீகரித்து மின் கையொப்பமிடவும்",
+    "hireLawyer": "న్యాయవాదిని నియమించుకోండి",
+    "selectVerifiedLawyer": "ధృవీకరించబడిన న్యాయ నిపుణుడిని ఎంచుకోండి",
+    "noLawyersAvailable": "న్యాయవాదులెవరూ అందుబాటులో లేరు",
+    "noLawyersAvailableDescription": "ప్రస్తుతం verified న్యాయవాదులెవరూ కేసులు స్వీకరించడం లేదు.",
+    "sendProposal": "ప్రతిపాదన పంపండి",
+    "failedToLoadLawyers": "అందుబాటులో ఉన్న న్యాయవాదులను లోడ్ చేయడం విఫలమైంది",
+
+    "proposalSentSuccess": "✅ ప్రతిపాదన విజయవంతంగా పంపబడింది! న్యాయవాది మీ కేసును సమీక్షించి స్వీకరిస్తారు లేదా తిరస్కరిస్తారు.",
+    "proposalSendFailed": "ప్రతిపాదన పంపడం విఫలమైంది. ఈ కేసుకు ఇప్పటికే పెండింగ్ ప్రతిపాదన ఉండవచ్చు.",
+
+    "joinVirtualCourt": "VOIS 5G Virtual Court లో చేరండి",
+
+    "caseDescription": "కేసు వివరణ",
+    "aiAnalysis": "న్యాయ సారథి విశ్లేషణ",
+    
+    "approveAndESign": "ఆమోదించి E-Sign చేయండి",
+    "requestChanges": "మార్పులు అభ్యర్థించండి",
+
+    
+
+    "aiDraftGenerated": "న్యాయ సారథి కేసు విశ్లేషణ రూపొందించింది. అధికారిక కేసు ముసాయిదా రూపొందించడానికి ఆమోదించండి.",
+    "reviewLawyerDraft": "మీ న్యాయవాది ముసాయిదా పిటిషన్ సమర్పించారు. న్యాయస్థానంలో సమర్పించడానికి దయచేసి సమీక్షించి ఆమోదించండి.",
+
+    "keyDetails": "ముఖ్యమైన వివరాలు",
+    "caseType": "కేసు రకం",
+    "filedDate": "దాఖలు తేదీ",
+    "nextHearing": "తదుపరి విచారణ",
+    "assignedJudge": "నియమించబడిన న్యాయమూర్తి",
+    "pendingAssignment": "నియామకం పెండింగ్‌లో",
+    "toBeAnnounced": "TBA",
+
+    "proposalSent": "ప్రతిపాదన పంపబడింది",
+    "waitingLawyerResponse": "న్యాయవాది స్పందన కోసం వేచి ఉంది",
+
+    "legalRepresentative": "న్యాయ ప్రతినిధి",
+    "privateCounsel": "ప్రైవేట్ న్యాయవాది",
+    "caseAccepted": "✓ కేసు స్వీకరించబడింది",
+
+    "partiesInvolved": "సంబంధిత పక్షాలు",
+    "petitioner": "పిటిషనర్",
+    "respondent": "ప్రతివాది",
+
+    "aiSuggestedDocuments": "AI సూచించిన పత్రాలు",
+    "analyzingCaseDetails": "కేసు వివరాలు విశ్లేషిస్తోంది...",
+    "noSuggestionsFound": "నిర్దిష్ట సూచనలేమీ కనుగొనబడలేదు.",
+
+    "uploadedFiles": "Upload చేసిన ఫైల్లు",
+    "uploading": "Upload అవుతోంది...",
+    "uploadFile": "ఫైల్ Upload చేయండి",
+    "noFilesFound": "ఫైల్లేమీ కనుగొనబడలేదు.",
+
+    "uploadedFromCaseFiles": "కేసు ఫైల్ల నుండి Upload చేయబడింది",
+    "uploadFailed": "Upload విఫలమైంది",
+    "analysisNotAvailable": "విశ్లేషణ ఇంకా అందుబాటులో లేదు",
+    "evidenceDownloadUnavailable": "సాక్ష్యం Download ఇంకా అమలు చేయబడలేదు. Blockchain లో ధృవీకరించండి.",
+    "downloadFailed": "Download విఫలమైంది",
+    "certificateLoadFailed": "❌ Certificate లోడ్ చేయడం విఫలమైంది. ఈ పత్రంలో ధృవీకరణ డేటా లేకపోవచ్చు.",
+
+    "basedOnCaseType": "మీ కేసు రకం ఆధారంగా",
+    "aiRecommendsDocuments": "Groq AI వీటిని Upload చేయాలని సిఫారసు చేస్తోంది:",
+
+    "uploadThisDocument": "ఈ పత్రాన్ని Upload చేయండి",
+
+    "documentType": "పత్రం రకం",
+    "generalDocument": "సాధారణ పత్రం",
+
+    "keyEntitiesExtracted": "ముఖ్యమైన అంశాలు సేకరించబడ్డాయి",
+    "noEntitiesDetected": "ఏ అంశాలూ గుర్తించబడలేదు",
+
+    "analysisSummary": "విశ్లేషణ సారాంశం",
+    "noSummaryAvailable": "సారాంశమేదీ అందుబాటులో లేదు.",
+
+    "evidenceCertificate": "Section 63(4) సాక్ష్య Certificate",
+    "downloadPdf": "PDF Download చేయండి",
+
+    "aiInsights": "AI అంతర్దృష్టులు",
+    "analyzing": "విశ్లేషిస్తోంది...",
+    "certificate": "Certificate",
+
+    "caseId": "Case ID",
+    "verified": "ధృవీకరించబడింది",
+    "hash": "Hash",
+
+    "aiDocumentAnalysis": "AI పత్రం విశ్లేషణ",
+
+    "priority": {
+      "normal": "సాధారణ ప్రాధాన్యత",
+      "urgent": "అత్యవసర ప్రాధాన్యత",
+      "critical": "క్లిష్టమైన ప్రాధాన్యత"
+    },
+
+    "system": "System",
+    "completed": "పూర్తయింది",
+    "step": "దశ",
+
+    "lawyerInitial": "న్యా",
+
+    "timeline": {
+      "caseFiled": "కేసు దాఖలు",
+      "initialFilingCompleted": "ప్రారంభ దాఖలు పూర్తయింది",
+      "cognizanceTaken": "సంజ్ఞానం తీసుకోబడింది",
+      "caseAdmitted": "కేసు అంగీకరించబడింది",
+      "courtAcceptedCase": "న్యాయస్థానం కేసును స్వీకరించింది",
+      "liveCaseRoadmap": "Live కేసు రోడ్‌మాప్",
+      "currentStage": "ప్రస్తుత దశ",
+      "viewPreparationKit": "తయారీ కిట్ చూడండి"
+    },
+
+    "timelineStages": {
+      "firFiled": "FIR / ఫిర్యాదు దాఖలు",
+      "caseInitiation": "కేసు ప్రారంభం",
+      "cognizance": "సంజ్ఞానం",
+      "magistrateReviewsFir": "మేజిస్ట్రేట్ FIR సమీక్షిస్తారు",
+      "appearance": "హాజరు",
+      "accusedAppears": "నిందితుడు న్యాయస్థానంలో హాజరవుతాడు",
+      "framingCharges": "నేరారోపణలు రూపొందించడం",
+      "chargesRead": "నిందితుడిపై నేరారోపణలు చదవబడ్డాయి",
+      "prosecutionEvidence": "ప్రాసిక్యూషన్ సాక్ష్యం",
+      "witnessProof": "సాక్షులు మరియు ఆధారాలు",
+      "defenceEvidence": "రక్షణ సాక్ష్యం",
+      "accusedDefence": "నిందితుడి రక్షణ",
+      "finalArguments": "తుది వాదనలు",
+      "lawyersDebate": "న్యాయవాదుల గుణవివాదన",
+      "judgment": "తీర్పు",
+      "finalVerdict": "తుది తీర్పు",
+
+      "plaintFiled": "దావా దాఖలు",
+      "summonsServed": "సమన్లు అందజేయబడ్డాయి",
+      "noticeRespondent": "ప్రతివాదికి నోటీసు",
+      "writtenStatement": "లిఖిత ప్రకటన",
+      "replyFiled": "జవాబు దాఖలు",
+      "framingIssues": "సమస్యలు రూపొందించడం",
+      "keyDisputePoints": "వివాదంలోని కీలక అంశాలు",
+      "evidence": "సాక్ష్యం",
+      "documentsWitnesses": "పత్రాలు మరియు సాక్షులు",
+      "arguments": "వాదనలు",
+      "finalHearing": "తుది విచారణ",
+      "decreePassed": "డిక్రీ జారీ చేయబడింది"
+    },
+
+    "preparationKit": {
+      "title": "తయారీ కిట్",
+      "for": "కోసం",
+      "whatToExpect": "ఏమి ఆశించాలి",
+      "prepareDocuments": "మీ పత్రాలను సిద్ధంగా ఉంచుకోండి మరియు ఈ దశకు సంబంధించిన ప్రశ్నలకు సమాధానం ఇవ్వడానికి సిద్ధంగా ఉండండి.",
+      "recommendedActions": "సిఫారసు చేయబడిన చర్యలు",
+      "reviewDocuments": "ఈ దశకు సంబంధించిన అన్ని దాఖలు పత్రాలను సమీక్షించండి.",
+      "consultLawyer": "2 రోజుల ముందే మీ న్యాయవాదిని సంప్రదించండి.",
+      "organizeEvidence": "సాక్ష్యం యొక్క అసలు ప్రతులను వ్యవస్థీకరించండి.",
+      "gotIt": "అర్థమైంది, ధన్యవాదాలు!"
+    },
+
+    "aiPrepKit": {
+      "title": "AI విచారణ తయారీ కిట్",
+      "forStage": "దశ కోసం:",
+      "whatToExpect": "ఏమి ఆశించాలి",
+      "physicalPresence": "మీ శారీరక హాజరు అవసరం కావచ్చు.",
+      "ensureDocuments": "అన్ని సంబంధిత పత్రాలు Upload అయ్యాయని నిర్ధారించుకోండి.",
+      "recommendedActions": "సిఫారసు చేయబడిన చర్యలు",
+      "reviewEvidence": "న్యాయవాదితో సమర్పించిన సాక్ష్యాన్ని సమీక్షించండి",
+      "dontMissCourt": "న్యాయస్థాన తేదీని మిస్ చేయకండి",
+      "gotIt": "అర్థమైంది!",
+      "judgeReview": "న్యాయమూర్తి సమీక్షిస్తారు",
+      "thisStage": "ఈ దశ"
+    },
+
+    "bsaGenerator": {
+      "title": "BSA Section 63(4) Generator",
+      "subtitle": "Digital Evidence Certification Utility",
+      "scanMetadata": "Evidence Metadata స్కాన్ చేస్తోంది...",
+      "generateHash": "SHA-256 Hash రూపొందిస్తోంది...",
+      "esignVerification": "Aadhaar e-Sign ధృవీకరణ",
+      "authenticate": "4 సాక్ష్య ఫైల్ల సమగ్రతను ధృవీకరించడానికి Aadhaar e-Sign ద్వారా ప్రమాణీకరించండి.",
+      "certificateGenerated": "Certificate విజయవంతంగా రూపొందించబడింది! (Mock)",
+      "esignWithAadhaar": "Aadhaar తో e-Sign చేయండి"
+    },
+
+    "certificatePreview": "Certificate Preview",
+
+    "proceduralHealth": {
+      "title": "విధానపరమైన ఆరోగ్యం మరియు అనుపాలన",
+      "subtitle": "మీ కేసు తదుపరి విచారణకు సిద్ధంగా ఉందని నిర్ధారించుకోండి.",
+      "criticalRequirements": "తప్పనిసరి అవసరాలు",
+      "bsaCertificate": "Section 63(4) BSA Certificate",
+      "certificateVerified": "Certificate అందించబడింది మరియు Blockchain లో ధృవీకరించబడింది.",
+      "certificateMissing": "Digital సాక్ష్యం స్వీకారయోగ్యతకు అవసరం. Certificate లేకుంటే సాక్ష్యం తిరస్కరించబడవచ్చు.",
+      "generateCertificate": "Certificate రూపొందించి Sign చేయండి",
+      "summonsStatus": "సమన్స్ సేవా స్థితి",
+      "summonsServed": "అందరు ప్రతివాదులకు సమన్లు విజయవంతంగా అందజేయబడ్డాయి.",
+      "summonsPending": "సేవ పెండింగ్‌లో. సమన్లు అందజేయబడే వరకు న్యాయస్థానం ముందుకు వెళ్ళదు.",
+      "trackStatus": "స్థితిని ట్రాక్ చేయండి",
+      "readinessScore": "సంసిద్ధత స్కోర్",
+      "ready": "సిద్ధంగా",
+      "impactAnalysis": "ప్రభావ విశ్లేషణ",
+      "impactDescription": "మీ కేసు ప్రస్తుతం పెండింగ్ విధానాల కారణంగా Admission దశలో ఆగిపోయింది. ఎర్రటి అంశాలను పరిష్కరిస్తే మీ సంసిద్ధత స్కోర్ మెరుగుపడుతుంది."
+    }
+  },
+
+  "fileUnified": {
+    "selectCategory": "వర్గాన్ని ఎంచుకోండి",
+    "provideInformation": "సమాచారం అందించండి",
+    "uploadFiles": "ఫైల్లు Upload చేయండి",
+    "confirmSubmit": "నిర్ధారించి సమర్పించండి",
+    "caseFiledSuccess": "కేసు విజయవంతంగా దాఖలు అయింది!",
+    "firSubmittedSuccess": "FIR విజయవంతంగా సమర్పించబడింది!",
+    "caseRegistered": "మీ కేసు న్యాయస్థానంలో నమోదు చేయబడింది",
+    "firSentReview": "మీ FIR పోలీస్ సమీక్షకు పంపబడింది",
+    "goToCaseDiary": "కేసు డైరీకి వెళ్ళండి",
+    "fileAnother": "మరొకటి దాఖలు చేయండి",
+    "fileCaseFir": "కేసు / FIR దాఖలు చేయండి",
+    "chooseFilingType": "న్యాయస్థాన కేసు లేదా పోలీస్ FIR దాఖలు చేయడంలో ఎంచుకోండి",
+    "askNyaySaarthi": "న్యాయ సారథిని అడగండి",
+    "courtCase": "న్యాయస్థాన కేసు",
+    "policeFir": "పోలీస్ FIR",
+    "caseType": "కేసు రకం",
+    "caseDetails": "కేసు వివరాలు",
+    "documents": "పత్రాలు",
+    "review": "సమీక్ష",
+    "selectCaseType": "కేసు రకాన్ని ఎంచుకోండి",
+    "civilCase": "సివిల్ కేసు",
+    "civilCaseDesc": "ఆస్తి, ఒప్పందాలు, వివాదాలు",
+    "criminalCase": "క్రిమినల్ కేసు",
+    "criminalCaseDesc": "నేర నిర్వహణ",
+    "familyLaw": "కుటుంబ చట్టం",
+    "familyLawDesc": "విడాకులు, సంరక్షణ, వారసత్వం",
+    "propertyDispute": "ఆస్తి వివాదం",
+    "propertyDisputeDesc": "భూమి, యాజమాన్య వివాదాలు",
+    "commercial": "వాణిజ్య",
+    "commercialDesc": "వ్యాపారం, వర్తక విషయాలు",
+    "caseTitle": "కేసు శీర్షిక",
+    "caseTitlePlaceholder": "మీ కేసు యొక్క సంక్షిప్త శీర్షిక",
+    "caseDescription": "కేసు వివరణ",
+    "caseDescriptionPlaceholder": "వివరణాత్మక వివరణ...",
+    "petitioner": "పిటిషనర్",
+    "petitionerPlaceholder": "మీ పేరు",
+    "respondent": "ప్రతివాది",
+    "respondentPlaceholder": "మరొక పక్షం",
+    "urgency": "అత్యవసరం",
+    "normal": "సాధారణ",
+    "urgent": "అత్యవసరం",
+    "critical": "క్లిష్టం",
+    "uploadDocuments": "పత్రాలు Upload చేయండి",
+    "clickUploadFiles": "ఫైల్లు Upload చేయడానికి క్లిక్ చేయండి",
+    "supportedFormats": "PDF, DOC, JPG, PNG (గరిష్టంగా 10MB)",
+    "thinking": "ఆలోచిస్తోంది...",
+    "analyzeDocument": "✨ పత్రాన్ని విశ్లేషించండి",
+    "reviewConfirm": "సమీక్షించి నిర్ధారించండి",
+    "title": "శీర్షిక",
+    "petitionerRespondent": "పిటిషనర్ వర్సస్ ప్రతివాది",
+    "files": "ఫైల్లు",
+    "previous": "మునుపటి",
+    "next": "తదుపరి",
+    "submitting": "సమర్పిస్తోంది...",
+    "submitCase": "కేసు సమర్పించండి",
+    "filePoliceFir": "పోలీస్ FIR దాఖలు చేయండి",
+    "incidentTitle": "సంఘటన శీర్షిక",
+    "incidentTitlePlaceholder": "ఉదా., నివాసంలో దొంగతనం",
+    "incidentDate": "సంఘటన తేదీ",
+    "location": "స్థానం",
+    "locationPlaceholder": "ఉదా., City Mall సమీపంలో, పుణే",
+    "incidentDescription": "సంఘటన వివరణ",
+    "incidentDescriptionPlaceholder": "ఏమి జరిగిందో వివరంగా వివరించండి...",
+    "evidenceOptional": "సాక్ష్యం (ఐచ్ఛికం)",
+    "clickUploadEvidence": "సాక్ష్యం Upload చేయడానికి క్లిక్ చేయండి",
+    "supportedEvidenceFormats": "మద్దతు ఇచ్చేవి: PDF, JPG, PNG, MP4",
+    "submitFirPolice": "పోలీసులకు FIR సమర్పించండి",
+    "nyaySaarthiAssist": "న్యాయ సారథి సహాయం",
+    "aiAssistDescription": "మీ పరిస్థితిని వివరించండి, నేను దాఖలు చేయడంలో సహాయపడతాను.",
+    "aiPlaceholder": "ఉదా., నా ఇంటి యజమాని నోటీసు ఇచ్చినా డిపాజిట్ తిరిగి ఇవ్వడానికి నిరాకరిస్తున్నారు...",
+    "analyzingCase": "మీ కేసు విశ్లేషిస్తోంది...",
+    "analyzeSuggest": "విశ్లేషించి సూచించండి",
+    "recommendedFiling": "సిఫారసు చేయబడిన దాఖలు",
+    "category": "వర్గం",
+    "criminal": "క్రిమినల్",
+    "civil": "సివిల్",
+    "suggestedTitle": "సూచించబడిన శీర్షిక",
+    "convertToFiling": "దాఖలుగా మార్చండి",
+    "backToDashboard": "Dashboard కి తిరిగి వెళ్ళండి"
+  },
+
+  "forensics": {
+    "title": "ప్రమాద Forensic విశ్లేషణ",
+    "subtitle": "Video Crime Scene Reconstruction",
+    "noVideo": "Video ఏదీ Upload కాలేదు",
+    "uploadTitle": "ప్రమాద footage Upload చేయండి",
+    "uploadDescription": "MP4, MOV లేదా AVI ఫైల్లు 500MB వరకు",
+    "engineStatus": "Forensic Engine స్థితి",
+    "processing": "ప్రాసెసింగ్ జరుగుతోంది...",
+    "timeline": "పునర్నిర్మించిన Timeline",
+    "waitingAnalysis": "Frame విశ్లేషణ కోసం వేచి ఉంది...",
+    "legalImplications": "న్యాయ చిక్కులు",
+    "analyzingViolations": "ఉల్లంఘనలు విశ్లేషిస్తోంది...",
+    "logs": "FORENSIC_ENGINE_LOGS",
+    "reportReady": "బాధ్యతా అంచనా సిద్ధంగా ఉంది",
+    "primaryLiable": "ప్రాథమిక బాధ్యత పక్షం గుర్తించబడింది:",
+    "viewReport": "కేసు నివేదిక చూడండి",
+
+    "events": {
+      "startExtraction": "AI: Forensic Frame Extraction ప్రారంభిస్తోంది...",
+      "timelineExtraction": "Gemini: Video frames నుండి Timeline సేకరిస్తోంది...",
+      "legalLookup": "Groq: సంబంధిత న్యాయ విభాగాలను (MVA, IPC) వెతుకుతోంది...",
+      "reportGenerated": "విజయం: బాధ్యతా నివేదిక రూపొందించబడింది"
+    },
+
+    "avatar": {
+      "analysisStart": "నేను Video footage విశ్లేషిస్తున్నాను. జంక్షన్‌లో వాహనం B దారి ఇవ్వకుండా ఢీకొన్నట్లు కనిపిస్తోంది.",
+      "legalSections": "నా విశ్లేషణ ప్రకారం, బాధ్యతారాహిత్యంగా వాహనం నడపడం మరియు సిగ్నల్ ఉల్లంఘన కారణంగా ఇక్కడ IPC 279 మరియు MVA 184 విభాగాలు వర్తిస్తాయి.",
+      "finalReport": "తుది బాధ్యతా నివేదిక సిద్ధంగా ఉంది. వాహనం B ప్రమాదానికి ప్రాథమికంగా బాధ్యత వహిస్తుంది."
+    },
+
+    "timelineEvents": {
+      "vehicleA": "వాహనం A 45 km/h వేగంతో జంక్షన్‌లోకి ప్రవేశిస్తోంది",
+      "vehicleB": "వాహనం B ఎర్ర సిగ్నల్‌లో ఆగడం లేదు",
+      "impact": "మధ్య-ఎడమ లేన్‌లో ఢీకొనే స్థానం"
+    },
+
+    "legalSections": {
+      "dangerousDriving": "ప్రమాదకరమైన వాహనం నడపడం",
+      "rashDriving": "పబ్లిక్ రోడ్డుపై బాధ్యతారాహిత్యంగా వాహనం నడపడం",
+      "mvaPenalty": "6 నెలల వరకు జైలు లేదా జరిమానా",
+      "ipcPenalty": "ప్రమాణిత న్యాయ శిక్ష వర్తిస్తుంది"
+    },
+
+    "report": {
+      "vehicleB": "వాహనం B (తెల్ల SUV)",
+      "signalViolation": "సిగ్నల్ ఉల్లంఘన",
+      "overspeeding": "అతి వేగం"
+    }
+  },
+
+  "hearings": {
+    "title": "విచారణలు",
+    "subtitle": "మీ షెడ్యూల్ చేయబడిన virtual న్యాయస్థాన సెషన్లు",
+    "searchPlaceholder": "విచారణలు వెతకండి...",
+    "loading": "విచారణలు లోడ్ అవుతున్నాయి...",
+    "noHearings": "విచారణలేమీ కనుగొనబడలేదు",
+    "noHearingsDescription": "మీకు సరిపోలే విచారణలేమీ లేవు.",
+    "courtHearing": "న్యాయస్థాన విచారణ",
+    "secureLine": "End-to-End Encrypted సురక్షిత న్యాయిక కనెక్షన్",
+    "sessionLive": "సెషన్ LIVE",
+    "leaveSession": "సెషన్ వదిలిపెట్టండి",
+    "today": "నేడు",
+    "virtualCourt": "Virtual న్యాయస్థానం",
+    "joinNow": "ఇప్పుడు చేరండి",
+    "upcoming": "రాబోయేవి",
+    "completed": "పూర్తయినవి",
+    "weeklyOverview": "వారపు సమీక్ష",
+    "yourHearings": "మీ విచారణలు",
+    "legalAid": "న్యాయ సహాయం",
+    "legalAidDescription": "న్యాయస్థానానికి తయారవడంలో సహాయం కావాలా? వాదుల హక్కులు మరియు విధానపరమైన మార్గదర్శకాల లైబ్రరీని యాక్సెస్ చేయండి.",
+    "viewResources": "వనరులు చూడండి",
+    "fetchError": "విచారణలు లోడ్ చేయడం విఫలమైంది."
+  },
+
+  "lawyerChat": {
+    "myLawyers": "నా న్యాయవాదులు",
+    "noLawyers": "మీ కేసులకు ఇంకా న్యాయవాదులెవరూ నియమించబడలేదు.",
+    "selectLawyer": "న్యాయవాదిని ఎంచుకోండి",
+    "selectConversation": "మీ న్యాయవాదితో Chat ప్రారంభించడానికి సంభాషణను ఎంచుకోండి.",
+    "sharedViaChat": "క్లయింట్ Chat ద్వారా షేర్ చేశారు",
+    "sharedFile": "షేర్ చేయబడిన ఫైల్:",
+    "voiceMessage": "Voice Message",
+    "defaultAiMessage": "నా కేసు స్థితిని అప్‌డేట్ చేయగలరా?",
+    "microphoneError": "Microphone యాక్సెస్ సాధ్యం కాలేదు.",
+    "joinVideoCall": "Video Call లో చేరండి",
+    "joinAudioCall": "Audio Call లో చేరండి",
+    "recordingAudio": "Audio రికార్డ్ అవుతోంది...",
+    "typeMessage": "సందేశం టైప్ చేయండి...",
+    "aiHelp": "AI సహాయం",
+    "videoCallRequest": "నేను Video Call ప్రారంభించాలనుకుంటున్నాను.",
+    "phoneCallRequest": "నేను Phone Call చేయాలనుకుంటున్నాను.",
+    "downloadFile": "ఫైల్ Download చేయండి",
+    "requestMeeting": "మీటింగ్ అభ్యర్థించండి",
+    "defaultLawyer": "న్యాయవాది",
+    "casePrefix": "కేసు:",
+    "regardingCase": "కేసు గురించి",
+    "fileUploadError": "ఫైల్ Upload చేయడం విఫలమైంది.",
+    "voiceUploadError": "Voice message Upload చేయడం విఫలమైంది.",
+    "sendMessageError": "సందేశం పంపడం విఫలమైంది.",
+    "fetchCasesError": "కేసులు లోడ్ చేయడం విఫలమైంది.",
+    "fetchMessagesError": "సందేశాలు లోడ్ చేయడం విఫలమైంది.",
+    "aiHelpError": "AI సహాయం రూపొందించడం విఫలమైంది.",
+    "findLawyer": "🔍 న్యాయవాదిని కనుగొనండి"
+  },
+
+  "profile": {
+    "checking": "తనిఖీ చేస్తోంది...",
+
+    "profileSettings": "Profile సెట్టింగ్‌లు",
+    "manageAccount": "మీ ఖాతా సమాచారం మరియు భద్రతా సెట్టింగ్‌లను నిర్వహించండి",
+
+    "faceLogin": "Face Login",
+    "enabled": "ప్రారంభించబడింది",
+    "notConfigured": "కాన్ఫిగర్ చేయబడలేదు",
+
+    "enableFaceLogin": "Face Login ప్రారంభించండి",
+    "updateFaceLogin": "Face Login అప్‌డేట్ చేయండి",
+
+    "personalInformation": "వ్యక్తిగత సమాచారం",
+
+    "save": "సేవ్ చేయండి",
+    "edit": "సవరించండి",
+
+    "fullName": "పూర్తి పేరు",
+    "email": "Email",
+    "phone": "ఫోన్",
+    "profession": "వృత్తి",
+    "address": "చిరునామా",
+
+    "securitySettings": "భద్రతా సెట్టింగ్‌లు",
+    "changePassword": "Password మార్చండి",
+    "currentPassword": "ప్రస్తుత Password",
+    "newPassword": "కొత్త Password",
+    "confirmNewPassword": "కొత్త Password నిర్ధారించండి",
+    "updatePassword": "Password అప్‌డేట్ చేయండి",
+
+    "biometricEnrollment": "Biometric నమోదు",
+    "neuralSignature": "Neural Signature నమోదు వ్యవస్థ",
+
+    "faceEnrolled": "Face విజయవంతంగా నమోదు చేయబడింది!",
+    "faceEnrollmentFailed": "Face నమోదు విఫలమైంది",
+    "confirmDeleteFace": "Face Login ని నిలిపివేయాలనుకుంటున్నారా? ఇది మీ Biometric డేటాను తొలగిస్తుంది.",
+    "faceDeleted": "Face డేటా తొలగించబడింది.",
+    "deleteFaceFailed": "Face డేటాను తొలగించడం విఫలమైంది",
+
+    "professions": {
+      "judge": "హైకోర్టు న్యాయమూర్తి",
+      "lawyer": "సీనియర్ న్యాయవాది",
+      "police": "పోలీస్ అధికారి",
+      "default": "Software Engineer"
+    },
+
+    "bio": {
+      "judge": "న్యాయానికి అంకితభావంతో సివిల్ మరియు క్రిమినల్ విషయాలను నిర్వహిస్తున్నాను.",
+      "lawyer": "రాజ్యాంగ మరియు క్రిమినల్ చట్టంలో నిపుణత కలిగిన న్యాయ సలహాదారు.",
+      "police": "చట్టం మరియు క్రమాన్ని నిర్వహించడానికి మరియు సమాజానికి సేవ చేయడానికి అంకితమైన వ్యక్తి.",
+      "default": "ఆస్తి విషయాలకు న్యాయ సహాయం కోరుతున్న అనుభవజ్ఞుడైన నిపుణుడు."
+    }
+  },
+
+  "vakilFriend": {
+    "welcome": "🙏 నమస్కారం! నేను న్యాయ సారథి, మీ AI న్యాయ సహాయకుడిని. నేను ఈరోజు మీకు ఎలా సహాయపడగలను?",
+    "offlineMessage": "🙏 నమస్కారం! నేను న్యాయ సారథి (offline mode). Backend Server స్పందించడం లేదు. Backend ప్రారంభించి పేజీని refresh చేయండి.",
+    "deepResearchError": "లోతైన పరిశోధన విఫలమైంది.",
+    "speechNotSupported": "మీ Browser speech recognition కు మద్దతు ఇవ్వదు. Chrome లేదా Edge ఉపయోగించండి.",
+    "noSession": "⚠️ చురుకైన సెషన్ లేదు. పేజీని refresh చేయండి.",
+    "sendError": "❌ క్షమించండి, లోపం ఏర్పడింది. మళ్ళీ ప్రయత్నించండి.",
+    "fileCaseError": "❌ కేసు దాఖలు విఫలమైంది. మళ్ళీ ప్రయత్నించండి లేదా Support సంప్రదించండి.",
+    "fileTypeNotSupported": "ఫైల్ రకం మద్దతు లేదు:",
+    "fileTooLarge": "ఫైల్ చాలా పెద్దది:",
+    "analyzingDocument": "పత్రం విశ్లేషిస్తోంది:",
+    "attachedDocument": "జోడించిన పత్రం:",
+    "analyzeFailed": "విశ్లేషణ విఫలమైంది",
+
+    "chatHistory": "Chat చరిత్ర",
+    "newChat": "కొత్త Chat",
+    "noHistory": "ఇంకా Chat చరిత్ర లేదు",
+    "recentSessions": "ఇటీవలి సెషన్లు",
+
+    "aiDocumentAnalysis": "AI పత్రం విశ్లేషణ",
+    "analyzing": "పత్రం విశ్లేషిస్తోంది...",
+    "shaProtected": "SHA-256 రక్షించబడింది",
+    "validity": "చెల్లుబాటు",
+    "usefulness": "ఉపయోగం",
+    "evidenceVault": "సాక్ష్య Vault",
+    "documentType": "పత్రం రకం",
+    "category": "వర్గం",
+    "aiSummary": "AI సారాంశం",
+    "summaryPending": "విశ్లేషణాత్మక సారాంశం పెండింగ్‌లో...",
+    "keyPoints": "ముఖ్య అంశాలు",
+    "criticalIssues": "క్లిష్టమైన సమస్యలు",
+    "closeAnalysis": "విశ్లేషణ మూసివేయండి",
+
+    "title": "న్యాయ సారథి",
+    "subtitle": "మీ న్యాయ కేసు దాఖలు చేయడానికి మా AI తో Chat చేయండి",
+    "language": "భాష:",
+
+    "filing": "దాఖలు అవుతోంది...",
+    "completeFiling": "దాఖలు పూర్తి చేయండి",
+
+    "connecting": "న్యాయ సారథితో కనెక్ట్ అవుతోంది...",
+    "securedAssistant": "సురక్షిత AI సహాయకుడు",
+    "connectingShort": "కనెక్ట్ అవుతోంది...",
+
+    "attachDocument": "పత్రం జోడించండి",
+    "placeholder": "మీ న్యాయ సమస్యను వివరించండి...",
+    "stopRecording": "రికార్డింగ్ ఆపండి",
+    "speak": "మాట్లాడండి (Bhashini AI)",
+    "hideAvatar": "AI Avatar దాచండి",
+    "showAvatar": "AI Avatar చూపించండి",
+    "avatarGreeting": "నమస్కారం. నేను మీ AI న్యాయ సహాయకుడిని. మీరు ఎప్పుడైనా నాతో మాట్లాడవచ్చు.",
+    "history": "చరిత్ర"
+  },
+
+  "common": {
+    "save": "సేవ్ చేయండి",
+    "cancel": "రద్దు చేయండి",
+    "delete": "తొలగించండి",
+    "close": "మూసివేయండి",
+    "loading": "లోడ్ అవుతోంది...",
+    "retry": "మళ్ళీ ప్రయత్నించండి",
+    "refresh": "Refresh చేయండి",
+    "search": "వెతకండి",
+    "filter": "వడపోత",
+    "download": "Download",
+    "upload": "Upload",
+    "edit": "సవరించండి",
+    "view": "చూడండి",
+    "yes": "అవును",
+    "no": "కాదు",
+    "submit": "సమర్పించండి",
+    "back": "వెనుకకు",
+    "next": "తదుపరి",
+    "continue": "కొనసాగించండి",
+    "status": "స్థితి",
+    "success": "విజయం",
+    "error": "లోపం",
+    "notAvailable": "N/A",
+    "zeroBytes": "0 B"
+  },
+
+  "popups": {
+    "caseUpdated": "కేసు విజయవంతంగా అప్‌డేట్ చేయబడింది!",
+    "updateFailed": "కేసు అప్‌డేట్ చేయడం విఫలమైంది.",
+    "proposalSent": "ప్రతిపాదన విజయవంతంగా పంపబడింది!",
+    "proposalFailed": "ప్రతిపాదన పంపడం విఫలమైంది.",
+    "uploadFailed": "Upload విఫలమైంది.",
+    "downloadFailed": "Download విఫలమైంది.",
+    "networkError": "Network లోపం. మీ కనెక్షన్ తనిఖీ చేయండి.",
+    "somethingWentWrong": "ఏదో తప్పు జరిగింది.",
+    "sessionExpired": "సెషన్ గడువు ముగిసింది. మళ్ళీ Login చేయండి.",
+    "confirmDelete": "ఈ అంశాన్ని తొలగించాలనుకుంటున్నారా?",
+    "confirmLogout": "Logout చేయాలనుకుంటున్నారా?",
+    "draftApproved": "ముసాయిదా ఆమోదించబడింది!",
+    "draftRejected": "మార్పులు అభ్యర్థించి తిరిగి పంపబడ్డాయి.",
+    "faceEnrollSuccess": "Face విజయవంతంగా నమోదు చేయబడింది!",
+    "faceEnrollFailed": "Face నమోదు విఫలమైంది.",
+    "faceDeleteSuccess": "Face డేటా విజయవంతంగా తొలగించబడింది.",
+    "faceDeleteFailed": "Face డేటాను తొలగించడం విఫలమైంది.",
+    "passwordChanged": "Password విజయవంతంగా మార్చబడింది.",
+    "passwordFailed": "Password మార్చడం విఫలమైంది.",
+    "aiRefineFailed": "AI మెరుగుదల విఫలమైంది. మళ్ళీ ప్రయత్నించండి.",
+    "loadLawyersFailed": "అందుబాటులో ఉన్న న్యాయవాదులను లోడ్ చేయడం విఫలమైంది.",
+    "analysisUnavailable": "విశ్లేషణ ఇంకా అందుబాటులో లేదు.",
+    "fileTooLarge": "ఫైల్ పరిమాణం అనుమతించిన పరిమితిని మించిపోయింది.",
+    "unsupportedFile": "మద్దతు లేని ఫైల్ ఫార్మాట్.",
+    "uploadSuccess": "ఫైల్ విజయవంతంగా Upload అయింది!",
+    "saveSuccess": "మార్పులు విజయవంతంగా సేవ్ చేయబడ్డాయి!",
+    "saveFailed": "మార్పులు సేవ్ చేయడం విఫలమైంది.",
+    "hearingJoinFailed": "విచారణలో చేరడం సాధ్యం కాలేదు.",
+    "messageSendFailed": "సందేశం పంపడం విఫలమైంది.",
+    "caseFiledSuccess": "కేసు విజయవంతంగా దాఖలు అయింది!",
+    "firFiledSuccess": "FIR విజయవంతంగా దాఖలు అయింది!",
+    "firFiledFailed": "FIR దాఖలు విఫలమైంది.",
+    "documentDeleted": "పత్రం విజయవంతంగా తొలగించబడింది.",
+    "confirmFaceDelete": "Face Login ని నిలిపివేయాలనుకుంటున్నారా?",
+    "approveDraft": "ఈ ముసాయిదాను Digitally Sign చేసి ఆమోదించాలనుకుంటున్నారా?",
+    "rejectDraft": "దయచేసి మీ అభిప్రాయం లేదా అభ్యర్థించిన మార్పులు నమోదు చేయండి."
+  },
+
+  "statuses": {
+    "active": "చురుకుగా",
+    "inactive": "నిష్క్రియంగా",
+    "pending": "పెండింగ్‌లో",
+    "approved": "ఆమోదించబడింది",
+    "rejected": "తిరస్కరించబడింది",
+    "completed": "పూర్తయింది",
+    "closed": "మూసివేయబడింది",
+    "open": "తెరవబడింది",
+    "online": "Online",
+    "offline": "Offline",
+    "live": "Live",
+    "upcoming": "రాబోయేవి",
+    "in_progress": "అభివృద్ధిలో",
+    "under_review": "సమీక్షలో",
+    "awaiting_documents": "పత్రాల కోసం వేచి ఉంది",
+    "verified": "ధృవీకరించబడింది",
+    "failed": "విఫలమైంది",
+    "success": "విజయం",
+    "pending_police_review": "పోలీస్ సమీక్ష పెండింగ్‌లో"
+  },
+
+  "lawyers": {
+    "matchExperts": "న్యాయ నిపుణులతో సరిపోల్చండి",
+    "sourcingExperts": "అందుబాటులో ఉన్న న్యాయ నిపుణులను వెతుకుతోంది...",
+    "noLawyersAvailable": "ప్రస్తుతం న్యాయవాదులెవరూ అందుబాటులో లేరు",
+    "experience": "అనుభవం",
+    "selectBestLawyer": "దీని కోసం అత్యుత్తమ న్యాయవాదిని ఎంచుకోండి:",
+    "noLawyersDescription": "మా భాగస్వామి న్యాయవాదులు ప్రస్తుతం ఇతర కేసులు నిర్వహిస్తున్నారు. దయచేసి కొంచెం సేపటిలో మళ్ళీ ప్రయత్నించండి.",
+    "experienceValue": "8+ సంవత్సరాలు",
+    "cases": "కేసులు",
+    "selectAndSendProposal": "ఎంచుకుని ప్రతిపాదన పంపండి"
+  },
+
+  "aiBrain": {
+    "title": "NyaySetu Brain",
+    "subtitle": "చురుకైన Reasoning Engine",
+    "placeholder": "మీ విచారణను టైప్ చేయండి...",
+    "connectionError": "⚠️ Brain తో కనెక్షన్ తెగిపోయింది. దయచేసి కొంచెం సేపటిలో మళ్ళీ ప్రయత్నించండి.",
+
+    "judgeWelcome": "🙏 NyaySetu Judicial Brain Online లో ఉంది. Dossier విశ్లేషణ, సాక్ష్య చెల్లుబాటు తనిఖీ, లేదా మీ పెండింగ్ కేసులకు విధానపరమైన దశలు సూచించడంలో సహాయపడగలను. గౌరవనీయమైన న్యాయమూర్తి అవర్లు, ఎలా సహాయపడగలను?",
+
+    "lawyerWelcome": "నమస్కారం, న్యాయవాది అవర్లు. కేసు రచన, IPC/BNS పరిశోధన, లేదా క్లయింట్ కమ్యూనికేషన్ వ్యూహాలలో సహాయపడటానికి సిద్ధంగా ఉన్నాను. ఈరోజు అజెండా ఏమిటి?",
+
+    "litigantWelcome": "🙏 నమస్కారం. నేను మీ NyaySetu న్యాయ మార్గదర్శి. మీ హక్కులు అర్థం చేసుకోవడంలో, కొత్త కేసు దాఖలు చేయడంలో, లేదా న్యాయ ప్రతినిధిని కనుగొనడంలో సహాయపడగలను. మీకు ఏమి తెలుసుకోవాలనుంది?",
+
+    "defaultWelcome": "నమస్కారం. నేను NyaySetu AI Brain. ఈరోజు నేను మీకు ఎలా సహాయపడగలను?"
+  }
+}

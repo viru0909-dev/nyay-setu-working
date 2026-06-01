@@ -3,22 +3,9 @@ import { createPortal } from 'react-dom';
 import { X, Sparkles, Mic, StopCircle, Globe } from 'lucide-react';
 import VakilAvatar3D from './VakilAvatar3D';
 import ReasoningPanel from './ReasoningPanel';
+import { useTranslation } from 'react-i18next';
 
-const stateLabels = {
-    idle: 'Online — Ready to assist',
-    thinking: 'Analyzing your query...',
-    talking: 'Responding...',
-    listening: 'Listening to command...',
-    passive: 'Listening quietly...'
-};
 
-const stateColors = {
-    idle: '#10b981',
-    thinking: '#6366f1',
-    talking: '#3b82f6',
-    listening: '#ef4444',
-    passive: '#f59e0b'
-};
 
 export default function AvatarPanel({
     state = 'idle',
@@ -38,6 +25,23 @@ export default function AvatarPanel({
     isDeepResearching = false
 }) {
     const [entering, setEntering] = useState(true);
+    const { t } = useTranslation('avatar');
+
+    const stateLabels = {
+        idle: t('avatar.idle'),
+        thinking: t('avatar.thinking'),
+        talking: t('avatar.talking'),
+        listening: t('avatar.listening'),
+        passive: t('avatar.passive')
+    };
+
+    const stateColors = {
+        idle: '#10b981',
+        thinking: '#6366f1',
+        talking: '#3b82f6',
+        listening: '#ef4444',
+        passive: '#f59e0b'
+    };
 
     // Determine the *display* state based on recording status
     const displayState = isRecording && !inputMessage
@@ -97,7 +101,7 @@ export default function AvatarPanel({
                             color: inline ? '#1e293b' : '#f1f5f9',
                             letterSpacing: '-0.01em'
                         }}>
-                            Nyay Saarthi
+                            {t('avatar.title')}
                         </h2>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
                             <div style={{
@@ -131,7 +135,7 @@ export default function AvatarPanel({
                         alignItems: 'center',
                         transition: 'all 0.2s'
                     }}
-                    title="Close Avatar"
+                    title={t('avatar.close')}
                 >
                     <X size={20} />
                 </button>
@@ -232,10 +236,10 @@ export default function AvatarPanel({
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.1em'
                             }}>
-                                {inputMessage ? 'Transcribing...' : 'Listening...'}
+                                {inputMessage ? t('avatar.transcribing') : t('avatar.listeningText')}
                             </div>
                             <div style={{ minHeight: '1.5em', opacity: inputMessage ? 1 : 0.5, fontStyle: inputMessage ? 'normal' : 'italic' }}>
-                                {inputMessage || "Awaiting your voice..."}
+                                {inputMessage || t('avatar.awaitingVoice')}
                             </div>
                         </div>
                     </div>
@@ -315,7 +319,7 @@ export default function AvatarPanel({
                         textTransform: 'uppercase',
                         marginBottom: '0.25rem'
                     }}>
-                        Nyay Saarthi
+                        {t('avatar.title')}
                     </div>
                     <div style={{
                         fontSize: '0.8rem',
@@ -323,7 +327,7 @@ export default function AvatarPanel({
                         fontWeight: '500',
                         marginBottom: '1rem'
                     }}>
-                        Your AI-Powered Legal Assistant
+                        {t('avatar.subtitle')}
                     </div>
 
                 </div>

@@ -20,7 +20,7 @@ import java.util.UUID;
  */
 @Tag(name = "Case Assignment", description = "Assign judges and lawyers to cases automatically or manually")
 @RestController
-@RequestMapping("/api/cases")
+@RequestMapping("/cases")
 @RequiredArgsConstructor
 @Slf4j
 public class CaseAssignmentController {

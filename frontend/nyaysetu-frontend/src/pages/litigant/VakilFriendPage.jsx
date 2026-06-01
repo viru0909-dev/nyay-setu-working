@@ -7,9 +7,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { API_BASE_URL } from '../../config/apiConfig';
 import AvatarPanel from '../../components/avatar/AvatarPanel';
+import { useTranslation } from 'react-i18next';
 import useChatStore from '../../store/chatStore';
 
 export default function VakilFriendChat() {
+    const { t } = useTranslation('litigant');
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [sessionId, setSessionId] = useState(null);
@@ -121,7 +123,7 @@ export default function VakilFriendChat() {
     // Handle Hologram Avatar Open Event (Auto-Greeting)
     useEffect(() => {
         if (showAvatar) {
-            const greeting = "Namaste. I am your AI Legal Assistant. You can speak to me anytime.";
+            const greeting = t('vakilFriend.avatarGreeting');
             speakText(greeting, -1);
 
             // Auto-start recording after greeting (delayed to avoid recording TTS)
@@ -193,14 +195,14 @@ export default function VakilFriendChat() {
             setSessionId(response.data.sessionId);
             setMessages([{
                 role: 'assistant',
-                content: response.data.message || "🙏 Namaste! I am Nyay Saarthi, your AI legal assistant. How can I help you today?"
+                content: response.data.message || t('vakilFriend.welcome')
             }]);
         } catch (err) {
             console.error('Failed to start session:', err);
             setError('Failed to connect. Please make sure the backend is running.');
             setMessages([{
                 role: 'assistant',
-                content: '🙏 Namaste! I am Nyay Saarthi (offline mode). The backend server is not responding. Please start the backend and refresh.'
+                content: t('vakilFriend.offlineMessage')
             }]);
         } finally {
             setIsStarting(false);
@@ -256,7 +258,7 @@ export default function VakilFriendChat() {
         if (!sessionId) {
             setMessages(prev => [...prev, {
                 role: 'assistant',
-                content: '⚠️ No active session. Please refresh the page.'
+                content: t('vakilFriend.noSession')
             }]);
             setIsLoading(false);
             return;
@@ -306,7 +308,7 @@ export default function VakilFriendChat() {
             console.error('Failed to send message:', err);
             setMessages(prev => [...prev, {
                 role: 'assistant',
-                content: '❌ Sorry, I encountered an error. Please try again.'
+                content: t('vakilFriend.sendError')
             }]);
         } finally {
             setIsLoading(false);
@@ -369,6 +371,7 @@ export default function VakilFriendChat() {
         } catch (err) {
             if (err.name !== 'AbortError') {
                 console.error('Deep research error:', err);
+                setError(t('vakilFriend.deepResearchError'));
             }
         } finally {
             setIsDeepResearching(false);
@@ -392,6 +395,10 @@ export default function VakilFriendChat() {
 
             case 'reasoning':
                 setReasoningText(prev => prev + (prev ? ' ' : '') + payload.text);
+                break;
+
+            case 'synthesis_token':
+                setReasoningText(prev => prev + payload.chunk);
                 break;
 
             case 'avatar_speak':
@@ -429,7 +436,7 @@ export default function VakilFriendChat() {
     // Browser Native Speech Recognition
     const startRecording = () => {
         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            alert("Your browser does not support speech recognition. Please use Chrome or Edge.");
+            alert(t('vakilFriend.speechNotSupported'));
             return;
         }
 
@@ -636,8 +643,8 @@ export default function VakilFriendChat() {
 
             // Build success message with all details
             let successMessage = `✅ **Case Filed Successfully!**\n\n`;
-            successMessage += `📋 **Case ID:** ${data.caseId}\n`;
-            successMessage += `📝 **Title:** ${data.caseTitle}\n`;
+            successMessage += `📋 **Case ID:** ${data.id}\n`;
+             successMessage += `📝 **Title:** ${data.title}\n`;
             successMessage += `🏷️ **Type:** ${data.caseType}\n`;
             successMessage += `⚡ **Urgency:** ${data.urgency}\n`;
             successMessage += `👤 **Petitioner:** ${data.petitioner}\n`;
@@ -672,7 +679,7 @@ export default function VakilFriendChat() {
             console.error('Failed to complete session:', err);
             setMessages(prev => [...prev, {
                 role: 'assistant',
-                content: '❌ Failed to file case. Please try again or contact support.'
+                content: t('vakilFriend.fileCaseError')
             }]);
         } finally {
             setIsCompleting(false);
@@ -696,12 +703,12 @@ export default function VakilFriendChat() {
             const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg',
                 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
             if (!allowedTypes.includes(file.type)) {
-                alert(`File type not supported: ${file.name}`);
+                alert(`${t('vakilFriend.fileTypeNotSupported')} ${file.name}`);
                 continue;
             }
             // Validate file size (max 10MB)
             if (file.size > 10 * 1024 * 1024) {
-                alert(`File too large: ${file.name} (max 10MB)`);
+                alert(`${t('vakilFriend.fileTooLarge')} ${file.name}`);
                 continue;
             }
 
@@ -729,7 +736,7 @@ export default function VakilFriendChat() {
         // Add a temporary "Analyzing..." message
         setMessages(prev => [...prev, {
             role: 'assistant',
-            content: `🔄 Analyzing document: ${file.name}... Please wait.`
+            content: `🔄 ${t('vakilFriend.analyzingDocument')} ${file.name}...`
         }]);
 
         try {
@@ -818,7 +825,7 @@ export default function VakilFriendChat() {
 
                 setMessages(prev => [...prev, {
                     role: 'user',
-                    content: `📎 Attached document: ${file.name}`
+                    content: `📎 ${t('vakilFriend.attachedDocument')} ${file.name}`
                 }]);
             }
 
@@ -829,10 +836,10 @@ export default function VakilFriendChat() {
                     ? { ...f, status: 'failed' }
                     : f
             ));
-            alert(`Failed to analyze ${file.name}. Please try again.`);
+            alert(`${t('vakilFriend.analyzeFailed')} ${file.name}`);
             setMessages(prev => [...prev, {
                 role: 'assistant',
-                content: `❌ Failed to analyze ${file.name}. Please try again.`
+                content: `❌ ${t('vakilFriend.analyzeFailed')} ${file.name}`
             }]);
         } finally {
             setUploadingFile(false);
@@ -952,7 +959,7 @@ export default function VakilFriendChat() {
                         onClick={e => e.stopPropagation()}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>💬 Chat History</h3>
+                            <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>💬 {t('vakilFriend.chatHistory')}</h3>
                             <button
                                 onClick={() => setShowHistory(false)}
                                 style={{
@@ -987,14 +994,14 @@ export default function VakilFriendChat() {
                                 boxShadow: 'var(--shadow-glass)'
                             }}
                         >
-                            <Plus size={18} /> New Chat
+                            <Plus size={18} /> {t('vakilFriend.chatHistory')}
                         </button>
 
                         {sessions.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem 0' }}>No chat history yet</p>
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem 0' }}>{t('vakilFriend.noHistory')}</p>
                         ) : (
                             <div>
-                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Recent Sessions</p>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.75rem', textTransform: 'uppercase' }}>{t('vakilFriend.recentSessions')}</p>
                                 {sessions.map((session, idx) => (
                                     <div
                                         key={session.sessionId}
@@ -1075,11 +1082,11 @@ export default function VakilFriendChat() {
                                         fontWeight: '800',
                                         margin: 0
                                     }}>
-                                        AI Document Analysis
+                                        {t('vakilFriend.aiDocumentAnalysis')}
                                     </h3>
                                 </div>
                                 <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
-                                    {documentAnalysis.documentName || 'Analyzing Document...'}
+                                    {documentAnalysis.documentName || t('vakilFriend.analyzing')}
                                 </p>
                             </div>
                             <button
@@ -1108,7 +1115,7 @@ export default function VakilFriendChat() {
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
                                 <Shield size={16} style={{ color: '#10b981' }} />
-                                <span style={{ color: '#10b981', fontWeight: '700', fontSize: '0.75rem', letterSpacing: '0.05em' }}>SHA-256 PROTECTED</span>
+                                <span style={{ color: '#10b981', fontWeight: '700', fontSize: '0.75rem', letterSpacing: '0.05em' }}>{t('vakilFriend.shaProtected')}</span>
                             </div>
                             <div style={{
                                 color: '#334155',
@@ -1142,7 +1149,7 @@ export default function VakilFriendChat() {
                                 }}>
                                     <CheckCircle size={20} color="#10b981" />
                                 </div>
-                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Validity</div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>{t('vakilFriend.validity')}</div>
                                 <div style={{ color: '#10b981', fontWeight: '800', fontSize: '0.95rem' }}>
                                     {documentAnalysis.validityStatus || 'VALID'}
                                 </div>
@@ -1167,7 +1174,7 @@ export default function VakilFriendChat() {
                                 }}>
                                     <Eye size={20} color="#6366f1" />
                                 </div>
-                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Usefulness</div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>{t('vakilFriend.usefulness')}</div>
                                 <div style={{ color: '#6366f1', fontWeight: '800', fontSize: '0.95rem' }}>
                                     {documentAnalysis.usefulnessLevel || 'HIGH'}
                                 </div>
@@ -1192,7 +1199,7 @@ export default function VakilFriendChat() {
                                 }}>
                                     <Shield size={20} color="#64748b" />
                                 </div>
-                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>Evidence Vault</div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '700' }}>{t('vakilFriend.evidenceVault')}</div>
                                 <div style={{ color: '#475569', fontWeight: '800', fontSize: '0.95rem' }}>
                                     {documentAnalysis.storedInVault ? 'STORED' : 'NOT STORED'}
                                 </div>
@@ -1203,11 +1210,11 @@ export default function VakilFriendChat() {
                         {/* Document Details Grid */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                             <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '1.25rem', border: '1px solid #e2e8f0' }}>
-                                <div style={{ color: '#64748b', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: '700' }}>Document Type</div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: '700' }}>{t('vakilFriend.documentType')}</div>
                                 <div style={{ color: '#1e2a44', fontWeight: '700', fontSize: '1rem' }}>{documentAnalysis.documentType || 'Legal Document'}</div>
                             </div>
                             <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '1.25rem', border: '1px solid #e2e8f0' }}>
-                                <div style={{ color: '#64748b', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: '700' }}>Category</div>
+                                <div style={{ color: '#64748b', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: '700' }}>{t('vakilFriend.category')}</div>
                                 <div style={{ color: '#1e2a44', fontWeight: '700', fontSize: '1rem' }}>{documentAnalysis.suggestedCategory || 'EVIDENCE'}</div>
                             </div>
                         </div>
@@ -1220,9 +1227,9 @@ export default function VakilFriendChat() {
                             border: '1px solid #e2e8f0',
                             marginBottom: '1.5rem'
                         }}>
-                            <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.75rem' }}>AI Summary</div>
+                            <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.75rem' }}>{t('vakilFriend.aiSummary')}</div>
                             <p style={{ color: '#334155', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
-                                {documentAnalysis.summary || 'Analytical summary pending...'}
+                                {documentAnalysis.summary || t('vakilFriend.summaryPending')}
                             </p>
                         </div>
 
@@ -1237,7 +1244,7 @@ export default function VakilFriendChat() {
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', color: '#6366f1' }}>
                                     <Bot size={18} />
-                                    <span style={{ fontWeight: '800', fontSize: '0.9rem', letterSpacing: '0.02em' }}>Key Points</span>
+                                    <span style={{ fontWeight: '800', fontSize: '0.9rem', letterSpacing: '0.02em' }}>{t('vakilFriend.keyPoints')}</span>
                                 </div>
                                 <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                     {documentAnalysis.keyPoints.map((point, idx) => (
@@ -1261,7 +1268,7 @@ export default function VakilFriendChat() {
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', color: '#ef4444' }}>
                                     <AlertTriangle size={18} />
-                                    <span style={{ fontWeight: '800', fontSize: '0.9rem', letterSpacing: '0.02em' }}>Critical Issues</span>
+                                    <span style={{ fontWeight: '800', fontSize: '0.9rem', letterSpacing: '0.02em' }}>{t('vakilFriend.criticalIssues')}</span>
                                 </div>
                                 <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                     {documentAnalysis.validityIssues.map((issue, idx) => (
@@ -1291,7 +1298,7 @@ export default function VakilFriendChat() {
                                 boxShadow: '0 10px 15px -3px rgba(30, 42, 68, 0.2)'
                             }}
                         >
-                            Close Analysis
+                            {t('vakilFriend.closeAnalysis')}
                         </button>
                     </div>
                 </div>
@@ -1334,10 +1341,10 @@ export default function VakilFriendChat() {
                             fontSize: '0.85rem',
                             fontWeight: '500'
                         }}
-                        title="Chat History"
+                        title={t('vakilFriend.chatHistory')}
                     >
                         <History size={18} />
-                        History
+                        {t('vakilFriend.history')}
                     </button>
                     <button
                         onClick={startNewSession}
@@ -1352,23 +1359,23 @@ export default function VakilFriendChat() {
                             alignItems: 'center',
                             gap: '0.5rem'
                         }}
-                        title="New Chat"
+                        title={t('vakilFriend.newChat')}
                     >
                         <Plus size={20} />
                     </button>
                     <div>
                         <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>
-                            Nyay Saarthi
+                            {t('vakilFriend.title')}
                         </h1>
                         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                            Chat with our AI to file your legal case
+                            {t('vakilFriend.subtitle')}
                         </p>
                     </div>
                 </div>
 
                 {/* Language Selector */}
                 <div style={{ marginLeft: 'auto', marginRight: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Language:</span>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{t('vakilFriend.language')}</span>
                     <select
                         value={language}
                         onChange={(e) => setLanguage(e.target.value)}
@@ -1409,7 +1416,7 @@ export default function VakilFriendChat() {
                         }}
                     >
                         {isCompleting ? <Loader2 size={18} /> : <CheckCircle size={18} />}
-                        {isCompleting ? 'Filing...' : 'Complete Filing'}
+                        {isCompleting ? t('vakilFriend.filing') : t('vakilFriend.completeFiling')}
                     </button>
                 )}
             </div>
@@ -1473,12 +1480,12 @@ export default function VakilFriendChat() {
                         </div>
                         <div>
                             <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--color-primary)', margin: 0, letterSpacing: '-0.01em' }}>
-                                Nyay Saarthi
+                                {t('vakilFriend.title')}
                             </h3>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: sessionId ? '#10b981' : '#f59e0b' }} />
                                 <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#64748B' }}>
-                                    {sessionId ? 'Secured AI Assistant' : 'Connecting...'}
+                                    {sessionId ? t('vakilFriend.securedAssistant') : t('vakilFriend.securedAssistant')}
                                 </span>
                             </div>
                         </div>
@@ -1507,7 +1514,7 @@ export default function VakilFriendChat() {
                             color: 'var(--text-secondary)'
                         }}>
                             <Loader2 size={36} style={{ marginBottom: '1rem', animation: 'spin 1s linear infinite', color: 'var(--color-primary)' }} />
-                            <p>Connecting to Nyay Saarthi...</p>
+                            <p>{t('vakilFriend.connecting')}</p>
                         </div>
                     ) : (
                         <>
@@ -1714,7 +1721,7 @@ export default function VakilFriendChat() {
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isLoading || isStarting || uploadingFile}
-                            title="Attach document"
+                            title={t('vakilFriend.attachDocument')}
                             style={{
                                 padding: '0.75rem',
                                 background: 'var(--bg-glass)',
@@ -1765,7 +1772,7 @@ export default function VakilFriendChat() {
                             value={inputMessage}
                             onChange={(e) => setInputMessage(e.target.value)}
                             onKeyPress={handleKeyPress}
-                            placeholder="Describe your legal issue..."
+                            placeholder={t('vakilFriend.placeholder')}
                             disabled={isLoading || isStarting}
                             rows={2}
                             style={{
@@ -1802,7 +1809,7 @@ export default function VakilFriendChat() {
                                 transition: 'all 0.2s',
                                 animation: isRecording ? 'pulse 1.5s infinite' : 'none'
                             }}
-                            title={isRecording ? "Stop Recording" : "Speak (Bhashini AI)"}
+                            title={isRecording? t('vakilFriend.stopRecording'): t('vakilFriend.speak')}
                         >
                             {isRecording ? <StopCircle size={20} /> : <Mic size={20} />}
                         </button>
@@ -1827,7 +1834,7 @@ export default function VakilFriendChat() {
                                 transition: 'all 0.2s',
                                 position: 'relative'
                             }}
-                            title={showAvatar ? 'Hide AI Avatar' : 'Show AI Avatar'}
+                            title={showAvatar? t('vakilFriend.hideAvatar'): t('vakilFriend.showAvatar')}
                         >
                             <UserCircle2 size={20} />
                             {showAvatar && (

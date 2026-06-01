@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Tag(name = "Judge Portal", description = "Judge dashboard — assigned cases, hearings and verdict management")
 @RestController
-@RequestMapping("/api/judge")
+@RequestMapping("/judge")
 @RequiredArgsConstructor
 @Slf4j
 public class JudgeController {

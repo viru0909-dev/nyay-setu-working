@@ -1,0 +1,685 @@
+{
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "myCases": "मेरे मामले",
+    "upcomingHearings": "आगामी सुनवाई",
+    "documents": "दस्तावेज़",
+    "legalChat": "कानूनी चैट",
+    "active": "सक्रिय",
+    "chatWithLawyer": "वकील से चैट करें",
+    "loading": "लोड हो रहा है...",
+    "thisMonth": "इस महीने",
+    "newDocs": "नए दस्तावेज़",
+    "reviewDraft": "ड्राफ्ट की समीक्षा करें",
+    "approve": "स्वीकृत करें",
+    "reject": "अस्वीकृत करें",
+    "recentCases": "हाल के मामले"
+  },
+
+  "caseDiary": {
+    "title": "केस डायरी",
+    "backToDiary": "डायरी पर वापस जाएँ",
+    "downloadReport": "रिपोर्ट डाउनलोड करें",
+    "subtitle": "अपने अदालत के मामलों और FIR का प्रबंधन करें",
+    "fileNewCase": "नया मामला दर्ज करें",
+    "searchPlaceholder": "मामले या FIR खोजें...",
+    "allStatuses": "सभी स्थितियाँ",
+    "cases": "मामले",
+    "firs": "FIR",
+    "download": "डाउनलोड",
+    "noCases": "कोई मामला नहीं मिला",
+    "gridView": "ग्रिड दृश्य",
+    "listView": "सूची दृश्य",
+    "filter": "फ़िल्टर",
+    "status": "स्थिति",
+    "total": "कुल",
+    "action": "कार्यवाही",
+    "court": "अदालत",
+    "police": "पुलिस",
+    "searchCasePlaceholder": "शीर्षक या केस आईडी द्वारा खोजें...",
+    "searchFirPlaceholder": "शीर्षक या FIR आईडी द्वारा खोजें...",
+    "loadingDiary": "आपकी डायरी लोड हो रही है...",
+  "noEntries": "कोई प्रविष्टि नहीं मिली",
+  "fileNew": "नया दर्ज करें",
+  "noType": "कोई प्रकार नहीं",
+  "policeFir": "पुलिस FIR",
+  "noLocation": "कोई स्थान नहीं",
+  "viewDetails": "विवरण देखें",
+  "requestSent": "अनुरोध भेजा गया",
+  "hireLawyer": "वकील नियुक्त करें",
+  "viewLinkedCourtCase": "संबंधित अदालत मामला देखें",
+  "applicationRejected": "आवेदन अस्वीकृत",
+  "processing": "प्रक्रिया जारी है"
+  },
+
+  
+  
+  "caseDetail": {
+    "tabs": {
+      "overview": "अवलोकन",
+      "caseFiles": "केस फ़ाइलें",
+      "timeline": "समयरेखा",
+      "proceduralHealth": "प्रक्रियात्मक स्थिति"
+    },
+    "aiDraftReady": "समीक्षा के लिए AI ड्राफ्ट तैयार है",
+    "reviewApprovePetition": "याचिका की समीक्षा करें और स्वीकृत करें",
+    "aiDraftDescription": "न्याय सारथी ने एक केस विश्लेषण तैयार किया है। औपचारिक केस ड्राफ्ट बनाने के लिए इसे स्वीकृत करें।",
+    "lawyerDraftDescription": "आपके वकील ने एक ड्राफ्ट याचिका जमा की है। कृपया इसकी समीक्षा करें और इसे स्वीकृत करें ताकि आपके वकील के लिए \"अदालत में जमा करें\" कार्रवाई शुरू हो सके।",
+    "confirmApproveDraft": "क्या आप सुनिश्चित हैं कि आप इस ड्राफ्ट को स्वीकृत करना चाहते हैं? इससे आपके वकील को सूचित किया जाएगा।",
+    "draftApproved": "ड्राफ्ट स्वीकृत हो गया! आपका वकील अब इसे अदालत में जमा कर सकता है।",
+    "failedApproveDraft": "ड्राफ्ट स्वीकृत करने में विफल। कृपया पुनः प्रयास करें।",
+    "approveESign": "स्वीकृत करें और ई-हस्ताक्षर करें",
+    "hireLawyer": "वकील नियुक्त करें",
+    "selectVerifiedLawyer": "एक सत्यापित कानूनी विशेषज्ञ चुनें",
+    "noLawyersAvailable": "कोई वकील उपलब्ध नहीं",
+    "noLawyersAvailableDescription": "इस समय कोई सत्यापित वकील केस स्वीकार नहीं कर रहा है।",
+    "sendProposal": "प्रस्ताव भेजें",
+    "failedToLoadLawyers": "उपलब्ध वकील लोड करने में विफल",
+
+    "proposalSentSuccess": "✅ प्रस्ताव सफलतापूर्वक भेज दिया गया! वकील आपके मामले की समीक्षा करेगा और स्वीकार या अस्वीकार करेगा।",
+    "proposalSendFailed": "प्रस्ताव भेजने में विफल। इस मामले के लिए पहले से ही एक लंबित प्रस्ताव हो सकता है।",
+
+    "joinVirtualCourt": "VOIS 5G वर्चुअल कोर्ट में शामिल हों",
+
+    "caseDescription": "मामले का विवरण",
+    "aiAnalysis": "न्याय सारथी विश्लेषण",
+    
+    "approveAndESign": "स्वीकृत करें और ई-साइन करें",
+    "requestChanges": "परिवर्तन का अनुरोध करें",
+
+    
+
+    "aiDraftGenerated": "न्याय सारथी ने केस विश्लेषण तैयार किया है। औपचारिक केस ड्राफ्ट बनाने के लिए इसे स्वीकृत करें।",
+    "reviewLawyerDraft": "आपके वकील ने ड्राफ्ट याचिका जमा की है। कृपया इसकी समीक्षा करें और अदालत में जमा करने की प्रक्रिया शुरू करने के लिए इसे स्वीकृत करें।",
+
+    "keyDetails": "मुख्य विवरण",
+    "caseType": "मामले का प्रकार",
+    "filedDate": "दाखिल तिथि",
+    "nextHearing": "अगली सुनवाई",
+    "assignedJudge": "नियुक्त न्यायाधीश",
+    "pendingAssignment": "नियुक्ति लंबित",
+    "toBeAnnounced": "घोषित किया जाना है",
+
+    "proposalSent": "प्रस्ताव भेज दिया गया",
+    "waitingLawyerResponse": "वकील के उत्तर की प्रतीक्षा है",
+
+    "legalRepresentative": "कानूनी प्रतिनिधि",
+    "privateCounsel": "निजी वकील",
+    "caseAccepted": "✓ मामला स्वीकार किया गया",
+
+    "partiesInvolved": "संबंधित पक्ष",
+    "petitioner": "याचिकाकर्ता",
+    "respondent": "प्रतिवादी",
+
+    "aiSuggestedDocuments": "एआई द्वारा सुझाए गए दस्तावेज़",
+    "analyzingCaseDetails": "मामले का विश्लेषण किया जा रहा है...",
+    "noSuggestionsFound": "कोई विशेष सुझाव नहीं मिला।",
+
+    "uploadedFiles": "अपलोड की गई फ़ाइलें",
+    "uploading": "अपलोड हो रहा है...",
+    "uploadFile": "फ़ाइल अपलोड करें",
+    "noFilesFound": "कोई फ़ाइल नहीं मिली।",
+
+    "uploadedFromCaseFiles": "केस फ़ाइलों से अपलोड किया गया",
+    "uploadFailed": "अपलोड विफल",
+    "analysisNotAvailable": "विश्लेषण अभी उपलब्ध नहीं है",
+    "evidenceDownloadUnavailable": "साक्ष्य डाउनलोड अभी उपलब्ध नहीं है। ब्लॉकचेन पर सत्यापित करें।",
+    "downloadFailed": "डाउनलोड विफल",
+    "certificateLoadFailed": "❌ प्रमाणपत्र लोड करने में विफल। इस दस्तावेज़ में सत्यापन डेटा नहीं हो सकता है।",
+
+    "basedOnCaseType": "आपके केस प्रकार के आधार पर",
+    "aiRecommendsDocuments": "Groq AI इन दस्तावेज़ों को अपलोड करने की सलाह देता है:",
+
+    "uploadThisDocument": "यह दस्तावेज़ अपलोड करें",
+
+    "documentType": "दस्तावेज़ प्रकार",
+    "generalDocument": "सामान्य दस्तावेज़",
+
+    "keyEntitiesExtracted": "निकाली गई मुख्य इकाइयाँ",
+    "noEntitiesDetected": "कोई इकाई नहीं मिली",
+
+    "analysisSummary": "विश्लेषण सारांश",
+    "noSummaryAvailable": "कोई सारांश उपलब्ध नहीं है।",
+
+    "evidenceCertificate": "धारा 63(4) साक्ष्य प्रमाणपत्र",
+    "downloadPdf": "पीडीएफ डाउनलोड करें",
+
+    "aiInsights": "एआई अंतर्दृष्टि",
+    "analyzing": "विश्लेषण हो रहा है...",
+    "certificate": "प्रमाणपत्र",
+
+    "caseId": "मामला आईडी",
+    "verified": "सत्यापित",
+    "hash": "हैश",
+
+    "aiDocumentAnalysis": "एआई दस्तावेज़ विश्लेषण",
+
+    "priority": {
+      "normal": "सामान्य प्राथमिकता",
+      "urgent": "तत्काल प्राथमिकता",
+      "critical": "गंभीर प्राथमिकता"
+    },
+
+    "system": "सिस्टम",
+    "completed": "पूर्ण",
+    "step": "चरण",
+
+    "lawyerInitial": "व",
+
+    "timeline": {
+      "caseFiled": "मामला दर्ज",
+      "initialFilingCompleted": "प्रारंभिक दाखिला पूर्ण",
+      "cognizanceTaken": "संज्ञान लिया गया",
+      "caseAdmitted": "मामला स्वीकार किया गया",
+      "courtAcceptedCase": "अदालत ने मामला स्वीकार कर लिया है",
+      "liveCaseRoadmap": "लाइव केस रोडमैप",
+      "currentStage": "वर्तमान चरण",
+      "viewPreparationKit": "तैयारी किट देखें"
+    },
+
+    "timelineStages": {
+      "firFiled": "एफआईआर / शिकायत दर्ज",
+      "caseInitiation": "मामले की शुरुआत",
+      "cognizance": "संज्ञान",
+      "magistrateReviewsFir": "मजिस्ट्रेट एफआईआर की समीक्षा करता है",
+      "appearance": "उपस्थिति",
+      "accusedAppears": "आरोपी अदालत में उपस्थित होता है",
+      "framingCharges": "आरोप तय करना",
+      "chargesRead": "आरोपी को आरोप पढ़कर सुनाए जाते हैं",
+      "prosecutionEvidence": "अभियोजन साक्ष्य",
+      "witnessProof": "गवाह और प्रमाण",
+      "defenceEvidence": "बचाव साक्ष्य",
+      "accusedDefence": "आरोपी का बचाव",
+      "finalArguments": "अंतिम बहस",
+      "lawyersDebate": "वकील मामले पर बहस करते हैं",
+      "judgment": "निर्णय",
+      "finalVerdict": "अंतिम फैसला",
+
+      "plaintFiled": "वाद पत्र दाखिल",
+      "summonsServed": "समन तामील",
+      "noticeRespondent": "प्रतिवादी को सूचना",
+      "writtenStatement": "लिखित बयान",
+      "replyFiled": "उत्तर दाखिल",
+      "framingIssues": "मुद्दों का निर्धारण",
+      "keyDisputePoints": "विवाद के मुख्य बिंदु",
+      "evidence": "साक्ष्य",
+      "documentsWitnesses": "दस्तावेज़ और गवाह",
+      "arguments": "बहस",
+      "finalHearing": "अंतिम सुनवाई",
+      "decreePassed": "डिक्री पारित"
+    },
+
+    "preparationKit": {
+      "title": "तैयारी किट",
+      "for": "के लिए",
+      "whatToExpect": "क्या अपेक्षा करें",
+      "prepareDocuments": "अपने दस्तावेज़ तैयार रखें और इस चरण से संबंधित प्रश्नों के उत्तर देने के लिए तैयार रहें।",
+      "recommendedActions": "अनुशंसित कार्य",
+      "reviewDocuments": "इस चरण से संबंधित सभी दस्तावेज़ों की समीक्षा करें।",
+      "consultLawyer": "2 दिन पहले अपने वकील से परामर्श करें।",
+      "organizeEvidence": "साक्ष्यों की मूल प्रतियाँ व्यवस्थित रखें।",
+      "gotIt": "समझ गया, धन्यवाद!"
+    },
+
+    "aiPrepKit": {
+      "title": "एआई सुनवाई तैयारी किट",
+      "forStage": "चरण के लिए:",
+      "whatToExpect": "क्या अपेक्षा करें",
+      "physicalPresence": "आपकी शारीरिक उपस्थिति आवश्यक हो सकती है।",
+      "ensureDocuments": "सुनिश्चित करें कि सभी संबंधित दस्तावेज़ अपलोड किए गए हैं।",
+      "recommendedActions": "अनुशंसित कार्य",
+      "reviewEvidence": "वकील के साथ जमा साक्ष्यों की समीक्षा करें",
+      "dontMissCourt": "अदालत की तारीख न चूकें",
+      "gotIt": "समझ गया!",
+      "judgeReview": "न्यायाधीश समीक्षा करेंगे",
+      "thisStage": "इस चरण की"
+    },
+
+    "bsaGenerator": {
+      "title": "बीएसए धारा 63(4) जनरेटर",
+      "subtitle": "डिजिटल साक्ष्य प्रमाणन उपयोगिता",
+      "scanMetadata": "साक्ष्य मेटाडेटा स्कैन किया जा रहा है...",
+      "generateHash": "SHA-256 हैश तैयार किया जा रहा है...",
+      "esignVerification": "आधार ई-साइन सत्यापन",
+      "authenticate": "4 साक्ष्य फ़ाइलों की अखंडता प्रमाणित करने हेतु कृपया आधार ई-साइन द्वारा प्रमाणीकरण करें।",
+      "certificateGenerated": "प्रमाणपत्र सफलतापूर्वक तैयार किया गया! (मॉक)",
+      "esignWithAadhaar": "आधार से ई-साइन करें"
+    },
+
+    "certificatePreview": "प्रमाणपत्र पूर्वावलोकन",
+
+    "proceduralHealth": {
+      "title": "प्रक्रियात्मक स्वास्थ्य और अनुपालन",
+      "subtitle": "सुनिश्चित करें कि आपका केस अगली सुनवाई के लिए तैयार है।",
+      "criticalRequirements": "महत्वपूर्ण आवश्यकताएँ",
+      "bsaCertificate": "धारा 63(4) बीएसए प्रमाणपत्र",
+      "certificateVerified": "प्रमाणपत्र प्रदान किया गया और ब्लॉकचेन पर सत्यापित किया गया।",
+      "certificateMissing": "डिजिटल साक्ष्य की स्वीकार्यता के लिए आवश्यक। प्रमाणपत्र गायब होने से साक्ष्य अस्वीकार हो सकता है।",
+      "generateCertificate": "प्रमाणपत्र उत्पन्न और हस्ताक्षर करें",
+      "summonsStatus": "समन तामील स्थिति",
+      "summonsServed": "सभी प्रतिवादियों को समन सफलतापूर्वक तामील किया गया।",
+      "summonsPending": "तामील लंबित है। समन तामील होने तक अदालत आगे नहीं बढ़ेगी।",
+      "trackStatus": "स्थिति ट्रैक करें",
+      "readinessScore": "तैयारी स्कोर",
+      "ready": "तैयार",
+      "impactAnalysis": "प्रभाव विश्लेषण",
+      "impactDescription": "लंबित प्रक्रियाओं के कारण आपका मामला वर्तमान में प्रवेश चरण में रुका हुआ है। लाल मदों को हल करने से आपके तैयारी स्कोर में सुधार होगा।"
+    }
+  },
+
+
+
+  "fileUnified": {
+  "selectCategory": "श्रेणी चुनें",
+  "provideInformation": "जानकारी प्रदान करें",
+  "uploadFiles": "फ़ाइलें अपलोड करें",
+  "confirmSubmit": "पुष्टि करें और जमा करें",
+  "caseFiledSuccess": "मामला सफलतापूर्वक दर्ज हुआ!",
+  "firSubmittedSuccess": "FIR सफलतापूर्वक दर्ज हुई!",
+  "caseRegistered": "आपका मामला अदालत में पंजीकृत हो गया है",
+  "firSentReview": "आपकी FIR पुलिस समीक्षा हेतु भेज दी गई है",
+  "goToCaseDiary": "केस डायरी पर जाएँ",
+  "fileAnother": "एक और दर्ज करें",
+  "fileCaseFir": "मामला / FIR दर्ज करें",
+  "chooseFilingType": "अदालती मामला या पुलिस FIR दर्ज करने के बीच चुनें",
+  "askNyaySaarthi": "न्याय सारथी से पूछें",
+  "courtCase": "अदालती मामला",
+  "policeFir": "पुलिस FIR",
+  "caseType": "मामले का प्रकार",
+    "caseDetails": "मामले का विवरण",
+    "documents": "दस्तावेज़",
+    "review": "समीक्षा",
+    "selectCaseType": "मामले का प्रकार चुनें",
+    "civilCase": "सिविल मामला",
+  "civilCaseDesc": "संपत्ति, अनुबंध, विवाद",
+
+  "criminalCase": "आपराधिक मामला",
+  "criminalCaseDesc": "आपराधिक अपराध",
+
+  "familyLaw": "पारिवारिक कानून",
+  "familyLawDesc": "तलाक, अभिरक्षा, विरासत",
+
+  "propertyDispute": "संपत्ति विवाद",
+  "propertyDisputeDesc": "भूमि, स्वामित्व विवाद",
+
+  "commercial": "वाणिज्यिक",
+  "commercialDesc": "व्यापार और कारोबारी मामले",
+  "caseTitle": "मामले का शीर्षक",
+"caseTitlePlaceholder": "अपने मामले का संक्षिप्त शीर्षक",
+"caseDescription": "मामले का विवरण",
+"caseDescriptionPlaceholder": "विस्तृत विवरण लिखें...",
+"petitioner": "याचिकाकर्ता",
+"petitionerPlaceholder": "आपका नाम",
+"respondent": "प्रतिवादी",
+"respondentPlaceholder": "दूसरा पक्ष",
+"urgency": "तत्कालता",
+"normal": "सामान्य",
+  "urgent": "अत्यावश्यक",
+  "critical": "गंभीर",
+  "uploadDocuments": "दस्तावेज़ अपलोड करें",
+"clickUploadFiles": "फ़ाइलें अपलोड करने के लिए क्लिक करें",
+"supportedFormats": "PDF, DOC, JPG, PNG (अधिकतम 10MB)",
+"thinking": "सोचा जा रहा है...",
+"analyzeDocument": "✨ दस्तावेज़ विश्लेषण करें",
+"reviewConfirm": "समीक्षा और पुष्टि करें",
+"title": "शीर्षक",
+"petitionerRespondent": "याचिकाकर्ता बनाम प्रतिवादी",
+"files": "फ़ाइलें",
+"previous": "पिछला",
+"next": "अगला",
+"submitting": "जमा किया जा रहा है...",
+"submitCase": "मामला दर्ज करें",
+"filePoliceFir": "पुलिस FIR दर्ज करें",
+  "incidentTitle": "घटना का शीर्षक",
+  "incidentTitlePlaceholder": "उदा., घर में चोरी",
+  "incidentDate": "घटना की तिथि",
+  "location": "स्थान",
+  "locationPlaceholder": "उदा., सिटी मॉल के पास, पुणे",
+  "incidentDescription": "घटना का विवरण",
+  "incidentDescriptionPlaceholder": "विस्तार से बताएं क्या हुआ...",
+  "evidenceOptional": "साक्ष्य (वैकल्पिक)",
+  "clickUploadEvidence": "साक्ष्य अपलोड करने के लिए क्लिक करें",
+  "supportedEvidenceFormats": "समर्थित: PDF, JPG, PNG, MP4",
+  "submitFirPolice": "पुलिस को FIR जमा करें",
+  "nyaySaarthiAssist": "न्याय सारथी सहायता",
+  "aiAssistDescription": "अपनी स्थिति बताएं, मैं फाइलिंग में सहायता करूंगा।",
+  "aiPlaceholder": "उदा., मेरे मकान मालिक ने नोटिस देने के बाद भी मेरी जमा राशि वापस नहीं की...",
+  "analyzingCase": "आपके मामले का विश्लेषण किया जा रहा है...",
+  "analyzeSuggest": "विश्लेषण और सुझाव",
+  "recommendedFiling": "अनुशंसित फाइलिंग",
+  "category": "श्रेणी",
+  "criminal": "आपराधिक",
+  "civil": "सिविल",
+  "suggestedTitle": "सुझाया गया शीर्षक",
+  "convertToFiling": "फाइलिंग में परिवर्तित करें",
+  
+  "backToDashboard": "डैशबोर्ड पर वापस जाएँ"
+
+},
+
+  "forensics": {
+    "title": "दुर्घटना फॉरेंसिक विश्लेषण",
+    "subtitle": "वीडियो अपराध स्थल पुनर्निर्माण",
+    "noVideo": "कोई वीडियो अपलोड नहीं किया गया",
+    "uploadTitle": "दुर्घटना फुटेज अपलोड करें",
+    "uploadDescription": "500MB तक की MP4, MOV या AVI फ़ाइलें",
+    "engineStatus": "फॉरेंसिक इंजन स्थिति",
+    "processing": "प्रोसेसिंग जारी है...",
+    "timeline": "पुनर्निर्मित टाइमलाइन",
+    "waitingAnalysis": "फ्रेम विश्लेषण की प्रतीक्षा हो रही है...",
+    "legalImplications": "कानूनी प्रभाव",
+    "analyzingViolations": "उल्लंघनों का विश्लेषण किया जा रहा है...",
+    "logs": "फॉरेंसिक इंजन लॉग्स",
+    "reportReady": "दायित्व मूल्यांकन तैयार",
+    "primaryLiable": "मुख्य जिम्मेदार पक्ष:",
+    "viewReport": "केस रिपोर्ट देखें",
+
+    "events": {
+      "startExtraction": "एआई: फॉरेंसिक फ्रेम एक्सट्रैक्शन शुरू हो रहा है...",
+      "timelineExtraction": "जेमिनी: वीडियो फ्रेम से टाइमलाइन निकाली जा रही है...",
+      "legalLookup": "ग्रोक: संबंधित कानूनी धाराओं की खोज की जा रही है...",
+      "reportGenerated": "सफलता: दायित्व रिपोर्ट तैयार"
+    },
+
+    "avatar": {
+      "analysisStart": "मैं वीडियो फुटेज का विश्लेषण कर रहा हूँ। मैं देख सकता हूँ कि वाहन B ने रास्ता नहीं दिया जिसके कारण टक्कर हुई।",
+      "legalSections": "मेरे विश्लेषण के आधार पर IPC 279 और MVA 184 लागू होते हैं।",
+      "finalReport": "अंतिम दायित्व रिपोर्ट तैयार है। दुर्घटना के लिए मुख्य रूप से वाहन B जिम्मेदार है।"
+    },
+    "timelineEvents": {
+      "vehicleA": "वाहन A 45 किमी/घंटा की गति से चौराहे में प्रवेश करता है",
+      "vehicleB": "वाहन B लाल बत्ती पर नहीं रुका",
+      "impact": "केंद्र-बाएँ लेन में टक्कर का बिंदु"
+    },
+
+    "legalSections": {
+      "dangerousDriving": "खतरनाक ड्राइविंग",
+      "rashDriving": "सार्वजनिक मार्ग पर लापरवाही से वाहन चलाना",
+      "mvaPenalty": "6 महीने तक की कैद या जुर्माना",
+      "ipcPenalty": "मानक कानूनी दंड लागू"
+    },
+
+    "report": {
+      "vehicleB": "वाहन B (सफेद SUV)",
+      "signalViolation": "सिग्नल उल्लंघन",
+      "overspeeding": "अत्यधिक गति"
+    }
+  },
+
+  "hearings": {
+    "title": "सुनवाई",
+    "subtitle": "आपकी निर्धारित वर्चुअल कोर्ट सुनवाई",
+    "searchPlaceholder": "सुनवाई खोजें...",
+    "loading": "सुनवाई लोड हो रही है...",
+    "noHearings": "कोई सुनवाई नहीं मिली",
+    "noHearingsDescription": "आपकी कोई मेल खाती सुनवाई नहीं है।",
+    "courtHearing": "कोर्ट सुनवाई",
+    "secureLine": "एंड-टू-एंड एन्क्रिप्टेड सुरक्षित न्यायिक लाइन",
+    "sessionLive": "सत्र लाइव",
+    "leaveSession": "सत्र छोड़ें",
+    "today": "आज",
+    "virtualCourt": "वर्चुअल कोर्ट",
+    "joinNow": "अभी जुड़ें",
+    "upcoming": "आगामी",
+    "completed": "पूर्ण",
+    "weeklyOverview": "साप्ताहिक अवलोकन",
+    "yourHearings": "आपकी सुनवाई",
+    "legalAid": "कानूनी सहायता",
+    "legalAidDescription": "कोर्ट की तैयारी में सहायता चाहिए? वादी अधिकारों और प्रक्रियात्मक दिशानिर्देशों की हमारी लाइब्रेरी देखें।",
+    "viewResources": "संसाधन देखें",
+    "fetchError": "सुनवाई लोड करने में विफल।"
+  },
+
+  "lawyerChat": {
+    "myLawyers": "मेरे वकील",
+    "noLawyers": "अभी तक आपके मामलों के लिए कोई वकील नियुक्त नहीं किया गया है।",
+    "selectLawyer": "एक वकील चुनें",
+    "selectConversation": "अपने वकील से चैट शुरू करने के लिए एक वार्तालाप चुनें।",
+    "sharedViaChat": "क्लाइंट द्वारा चैट में साझा किया गया",
+    "sharedFile": "साझा की गई फ़ाइल:",
+    "voiceMessage": "वॉइस संदेश",
+    "defaultAiMessage": "क्या आप मुझे मेरे केस की स्थिति के बारे में अपडेट कर सकते हैं?",
+    "microphoneError": "माइक्रोफोन एक्सेस नहीं हो सका।",
+    "joinVideoCall": "वीडियो कॉल जॉइन करें",
+    "joinAudioCall": "ऑडियो कॉल जॉइन करें",
+    "recordingAudio": "ऑडियो रिकॉर्ड हो रही है...",
+    "typeMessage": "संदेश लिखें...",
+    "aiHelp": "एआई सहायता",
+    "videoCallRequest": "मैं वीडियो कॉल शुरू करना चाहता/चाहती हूँ।",
+    "phoneCallRequest": "मैं फोन कॉल करना चाहता/चाहती हूँ।",
+    "downloadFile": "फ़ाइल डाउनलोड करें",
+    "requestMeeting": "मीटिंग अनुरोध",
+    "defaultLawyer": "वकील",
+    "casePrefix": "मामला:",
+    "regardingCase": "मामले के संबंध में",
+    "fileUploadError": "फ़ाइल अपलोड करने में विफल।",
+    "voiceUploadError": "वॉइस संदेश अपलोड करने में विफल।",
+    "sendMessageError": "संदेश भेजने में विफल।",
+    "fetchCasesError": "मामले लोड करने में विफल।",
+    "fetchMessagesError": "संदेश लोड करने में विफल।",
+    "aiHelpError": "एआई सहायता जनरेट करने में विफल।",
+    "findLawyer": "🔍 वकील खोजें"
+  },
+
+  
+  "profile": {
+    "checking": "जांच हो रही है...",
+
+    "profileSettings": "प्रोफ़ाइल सेटिंग्स",
+    "manageAccount": "अपनी खाता जानकारी और सुरक्षा सेटिंग्स प्रबंधित करें",
+
+    "faceLogin": "फेस लॉगिन",
+    "enabled": "सक्रिय",
+    "notConfigured": "कॉन्फ़िगर नहीं किया गया",
+
+    "enableFaceLogin": "फेस लॉगिन सक्षम करें",
+    "updateFaceLogin": "फेस लॉगिन अपडेट करें",
+
+    "personalInformation": "व्यक्तिगत जानकारी",
+
+    "save": "सहेजें",
+    "edit": "संपादित करें",
+
+    "fullName": "पूरा नाम",
+    "email": "ईमेल",
+    "phone": "फ़ोन",
+    "profession": "पेशा",
+    "address": "पता",
+
+    "securitySettings": "सुरक्षा सेटिंग्स",
+    "changePassword": "पासवर्ड बदलें",
+    "currentPassword": "वर्तमान पासवर्ड",
+    "newPassword": "नया पासवर्ड",
+    "confirmNewPassword": "नए पासवर्ड की पुष्टि करें",
+    "updatePassword": "पासवर्ड अपडेट करें",
+
+    "biometricEnrollment": "बायोमेट्रिक पंजीकरण",
+    "neuralSignature": "न्यूरल सिग्नेचर पंजीकरण प्रणाली",
+
+    "faceEnrolled": "फेस सफलतापूर्वक पंजीकृत किया गया!",
+    "faceEnrollmentFailed": "फेस पंजीकरण विफल",
+    "confirmDeleteFace": "क्या आप फेस लॉगिन अक्षम करना चाहते हैं? इससे आपका बायोमेट्रिक डेटा हट जाएगा।",
+    "faceDeleted": "फेस डेटा हटा दिया गया।",
+    "deleteFaceFailed": "फेस डेटा हटाने में विफल",
+
+    "professions": {
+      "judge": "उच्च न्यायालय न्यायाधीश",
+      "lawyer": "वरिष्ठ अधिवक्ता",
+      "police": "पुलिस अधिकारी",
+      "default": "सॉफ्टवेयर इंजीनियर"
+    },
+
+    "bio": {
+      "judge": "न्याय के प्रति प्रतिबद्धता के साथ दीवानी और आपराधिक मामलों की अध्यक्षता कर रहे हैं।",
+      "lawyer": "संवैधानिक और आपराधिक कानून में विशेषज्ञ कानूनी सलाहकार।",
+      "police": "कानून व्यवस्था बनाए रखने और समुदाय की सेवा के लिए समर्पित।",
+      "default": "संपत्ति मामलों में कानूनी सहायता प्राप्त करने वाले अनुभवी पेशेवर।"
+    }
+  },
+
+
+  "vakilFriend": {
+    "welcome": "🙏 नमस्ते! मैं न्याय सारथी हूँ, आपका एआई कानूनी सहायक। मैं आपकी कैसे सहायता कर सकता हूँ?",
+    "offlineMessage": "🙏 नमस्ते! मैं न्याय सारथी (ऑफलाइन मोड) हूँ। बैकएंड सर्वर प्रतिक्रिया नहीं दे रहा है। कृपया सर्वर चालू करें और पेज रीफ्रेश करें।",
+    "deepResearchError": "डीप रिसर्च विफल हुआ।",
+    "speechNotSupported": "आपका ब्राउज़र स्पीच रिकग्निशन को सपोर्ट नहीं करता। कृपया Chrome या Edge का उपयोग करें।",
+    "noSession": "⚠️ कोई सक्रिय सत्र नहीं है। कृपया पेज रीफ्रेश करें।",
+    "sendError": "❌ क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।",
+    "fileCaseError": "❌ केस फाइल करने में विफल। कृपया पुनः प्रयास करें या सहायता से संपर्क करें।",
+    "fileTypeNotSupported": "फ़ाइल प्रकार समर्थित नहीं है:",
+    "fileTooLarge": "फ़ाइल बहुत बड़ी है:",
+    "analyzingDocument": "दस्तावेज़ का विश्लेषण किया जा रहा है:",
+    "attachedDocument": "संलग्न दस्तावेज़:",
+    "analyzeFailed": "विश्लेषण करने में विफल",
+
+    "chatHistory": "चैट इतिहास",
+    "newChat": "नई चैट",
+    "noHistory": "अभी तक कोई चैट इतिहास नहीं है",
+    "recentSessions": "हाल की सत्र",
+
+    "aiDocumentAnalysis": "एआई दस्तावेज़ विश्लेषण",
+    "analyzing": "दस्तावेज़ का विश्लेषण किया जा रहा है...",
+    "shaProtected": "SHA-256 संरक्षित",
+    "validity": "वैधता",
+    "usefulness": "उपयोगिता",
+    "evidenceVault": "एविडेंस वॉल्ट",
+    "documentType": "दस्तावेज़ प्रकार",
+    "category": "श्रेणी",
+    "aiSummary": "एआई सारांश",
+    "summaryPending": "विश्लेषणात्मक सारांश लंबित है...",
+    "keyPoints": "मुख्य बिंदु",
+    "criticalIssues": "महत्वपूर्ण समस्याएँ",
+    "closeAnalysis": "विश्लेषण बंद करें",
+
+    "title": "न्याय सारथी",
+    "subtitle": "अपना कानूनी मामला दर्ज करने के लिए हमारे एआई से चैट करें",
+    "language": "भाषा:",
+
+    "filing": "फाइल किया जा रहा है...",
+    "completeFiling": "फाइलिंग पूर्ण करें",
+
+    "connecting": "न्याय सारथी से जुड़ा जा रहा है...",
+    "securedAssistant": "सुरक्षित एआई सहायक",
+    "connectingShort": "जुड़ रहा है...",
+
+    "attachDocument": "दस्तावेज़ संलग्न करें",
+    "placeholder": "अपनी कानूनी समस्या लिखें...",
+    "stopRecording": "रिकॉर्डिंग रोकें",
+    "speak": "बोलें (भाषिणी एआई)",
+    "hideAvatar": "एआई अवतार छिपाएँ",
+    "showAvatar": "एआई अवतार दिखाएँ",
+    "avatarGreeting": "नमस्ते। मैं आपका एआई कानूनी सहायक हूँ। आप मुझसे कभी भी बात कर सकते हैं।",
+    "history": "इतिहास"
+  },
+
+  "common": {
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएँ",
+    "close": "बंद करें",
+    "loading": "लोड हो रहा है...",
+    "retry": "पुनः प्रयास करें",
+    "refresh": "रीफ्रेश करें",
+    "search": "खोजें",
+    "filter": "फ़िल्टर",
+    "download": "डाउनलोड",
+    "upload": "अपलोड",
+    "edit": "संपादित करें",
+    "view": "देखें",
+    "yes": "हाँ",
+    "no": "नहीं",
+    "submit": "जमा करें",
+    "back": "वापस",
+    "next": "अगला",
+    "continue": "जारी रखें",
+    "status": "स्थिति",
+    "success": "सफलता",
+    "error": "त्रुटि"
+  },
+
+  "popups": {
+    "caseUpdated": "मामला सफलतापूर्वक अपडेट हो गया!",
+    "updateFailed": "मामला अपडेट करने में विफल।",
+    "proposalSent": "प्रस्ताव सफलतापूर्वक भेजा गया!",
+    "proposalFailed": "प्रस्ताव भेजने में विफल।",
+    "uploadFailed": "अपलोड विफल हुआ।",
+    "downloadFailed": "डाउनलोड विफल हुआ।",
+    "networkError": "नेटवर्क त्रुटि। कृपया अपना कनेक्शन जांचें।",
+    "somethingWentWrong": "कुछ गलत हुआ।",
+    "sessionExpired": "सत्र समाप्त हो गया। कृपया पुनः लॉगिन करें।",
+    "confirmDelete": "क्या आप इस आइटम को हटाना चाहते हैं?",
+    "confirmLogout": "क्या आप लॉगआउट करना चाहते हैं?",
+    "draftApproved": "ड्राफ्ट स्वीकृत हो गया!",
+    "draftRejected": "परिवर्तन अनुरोध वापस भेज दिए गए।",
+    "faceEnrollSuccess": "फेस सफलतापूर्वक पंजीकृत हुआ!",
+    "faceEnrollFailed": "फेस पंजीकरण विफल हुआ।",
+    "faceDeleteSuccess": "फेस डेटा सफलतापूर्वक हटाया गया।",
+    "faceDeleteFailed": "फेस डेटा हटाने में विफल।",
+    "passwordChanged": "पासवर्ड सफलतापूर्वक बदल दिया गया।",
+    "passwordFailed": "पासवर्ड बदलने में विफल।",
+    "aiRefineFailed": "AI सुधार विफल हुआ। कृपया पुनः प्रयास करें।",
+    "loadLawyersFailed": "उपलब्ध वकीलों को लोड करने में विफल।",
+    "analysisUnavailable": "विश्लेषण अभी उपलब्ध नहीं है।",
+    "fileTooLarge": "फ़ाइल आकार अनुमत सीमा से अधिक है।",
+    "unsupportedFile": "असमर्थित फ़ाइल प्रारूप।",
+    "uploadSuccess": "फ़ाइल सफलतापूर्वक अपलोड हुई!",
+    "saveSuccess": "परिवर्तन सफलतापूर्वक सहेजे गए!",
+    "saveFailed": "परिवर्तन सहेजने में विफल।",
+    "hearingJoinFailed": "सुनवाई में शामिल होने में असमर्थ।",
+    "messageSendFailed": "संदेश भेजने में विफल।",
+    "caseFiledSuccess": "मामला सफलतापूर्वक दर्ज हुआ!",
+    "firFiledSuccess": "FIR सफलतापूर्वक दर्ज हुई!",
+    "firFiledFailed": "FIR दर्ज करने में विफल।",
+    "documentDeleted": "दस्तावेज़ सफलतापूर्वक हटाया गया।",
+    "confirmFaceDelete": "क्या आप फेस लॉगिन अक्षम करना चाहते हैं?",
+    "approveDraft": "क्या आप इस ड्राफ्ट को डिजिटल रूप से हस्ताक्षरित और स्वीकृत करना चाहते हैं?",
+    "rejectDraft": "कृपया अपनी प्रतिक्रिया या आवश्यक परिवर्तन दर्ज करें।"
+  },
+  "statuses": {
+  "active": "सक्रिय",
+  "inactive": "निष्क्रिय",
+  "pending": "लंबित",
+  "approved": "स्वीकृत",
+  "rejected": "अस्वीकृत",
+  "completed": "पूर्ण",
+  "closed": "बंद",
+  "open": "खुला",
+  "online": "ऑनलाइन",
+  "offline": "ऑफलाइन",
+  "live": "लाइव",
+  "upcoming": "आगामी",
+  "in_progress": "प्रगति में",
+  "under_review": "समीक्षा के अंतर्गत",
+  "awaiting_documents": "दस्तावेज़ों की प्रतीक्षा",
+  "verified": "सत्यापित",
+  "failed": "विफल",
+  "success": "सफल",
+  "pending_police_review": "पुलिस समीक्षा लंबित"
+  },
+  "lawyers": {
+  "matchExperts": "कानूनी विशेषज्ञों से मिलान करें",
+  "selectBestLawyer": "इसके लिए सर्वोत्तम वकील चुनें:",
+  "sourcingExperts": "उपलब्ध कानूनी विशेषज्ञ खोजे जा रहे हैं...",
+  "noLawyersAvailable": "वर्तमान में कोई वकील उपलब्ध नहीं है",
+  "noLawyersDescription": "हमारे साझेदार वकील वर्तमान में अन्य मामलों को संभाल रहे हैं। कृपया थोड़ी देर बाद पुनः प्रयास करें।",
+  "experience": "अनुभव",
+  "experienceValue": "8+ वर्ष",
+  "cases": "मामले",
+  "selectAndSendProposal": "चुनें और प्रस्ताव भेजें"
+},
+  "aiBrain": {
+    "title": "न्यायसेतु ब्रेन",
+    "subtitle": "सक्रिय तर्क इंजन",
+    "placeholder": "अपना प्रश्न लिखें...",
+
+    "connectionError": "⚠️ ब्रेन से कनेक्शन बाधित हो गया। कृपया थोड़ी देर बाद पुनः प्रयास करें।",
+
+    "judgeWelcome": "🙏 न्यायसेतु ज्यूडिशियल ब्रेन ऑनलाइन है। मैं दस्तावेज़ों का विश्लेषण करने, साक्ष्यों की वैधता जांचने या लंबित मामलों के लिए प्रक्रियात्मक सुझाव देने में सहायता कर सकता हूँ। मैं आपकी कैसे सहायता कर सकता हूँ, माननीय न्यायाधीश महोदय?",
+
+    "lawyerWelcome": "नमस्कार काउंसलर। मैं केस ड्राफ्टिंग, IPC/BNS रिसर्च और क्लाइंट संचार रणनीतियों में सहायता के लिए तैयार हूँ। आज का एजेंडा क्या है?",
+
+    "litigantWelcome": "🙏 नमस्ते। मैं आपका न्यायसेतु कानूनी सहायक हूँ। मैं आपके अधिकार समझने, नया केस दर्ज करने या कानूनी प्रतिनिधि खोजने में सहायता कर सकता हूँ। आप क्या जानना चाहते हैं?",
+
+    "defaultWelcome": "नमस्ते। मैं न्यायसेतु एआई ब्रेन हूँ। मैं आपकी कैसे सहायता कर सकता हूँ?"
+  }
+}

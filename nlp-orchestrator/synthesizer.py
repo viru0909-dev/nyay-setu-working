@@ -4,6 +4,7 @@ Combines all sub-answers into one structured, clean final legal answer.
 Includes relevant IPC / BNS / MVA section references.
 """
 
+import asyncio
 from groq import AsyncGroq
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
 
@@ -77,3 +78,40 @@ async def synthesize_answers(
         # Fallback: concatenate all answers
         parts = [f"**{r['question']}**\n{r['answer']}" for r in research_results if r.get("answer")]
         return "\n\n".join(parts)
+
+
+async def stream_synthesize_answers(query, research_results):
+
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a legal synthesis assistant."
+        },
+        {
+            "role": "user",
+            "content": f"""
+Query: {query}
+
+Research Results:
+{research_results}
+"""
+        }
+    ]
+
+    async with client.chat.with_streaming_response.completions.create(
+        model=GROQ_MODEL_FAST,
+        messages=messages,
+        temperature=0.3,
+        max_tokens=1024,
+    ) as stream:
+
+        async for chunk in stream:
+
+            try:
+                content = chunk.choices[0].delta.content
+
+                if content:
+                    yield content
+
+            except Exception:
+                continue
