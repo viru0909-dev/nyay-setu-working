@@ -46,7 +46,7 @@
 
 <hr/>
 
-## Why Nyay Saarthi?
+## Why Nyay Setu?
 
 The Indian judiciary faces a systemic crisis that affects hundreds of millions of citizens:
 

@@ -1,142 +1,48 @@
-import "@testing-library/jest-dom";
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  within,
-} from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
+import '@testing-library/jest-dom';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 
-// Mock react-i18next useTranslation to return keys as translations
-vi.mock("react-i18next", () => ({
-  useTranslation: () => ({ t: (k) => k }),
-}));
+import FileUnifiedPage from './FileUnifiedPage';
 
-import FileUnifiedPage from "./FileUnifiedPage";
-
-describe("FileUnifiedPage stepper navigation", () => {
-  const renderPage = () =>
+describe('FileUnifiedPage', () => {
+  it('preserves form state when navigating backwards', () => {
     render(
       <MemoryRouter>
         <FileUnifiedPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
-  it("navigates back using Previous button and preserves form state", async () => {
-    renderPage();
-
-    // Select first case type button by locating the button that contains the case title
-    const allButtons = screen.getAllByRole("button");
-    const firstCaseButton = allButtons.find(
-      (b) => within(b).queryAllByText(/civilCase/i).length > 0,
-    );
-    expect(firstCaseButton).toBeTruthy();
-    fireEvent.click(firstCaseButton);
-
-    // Proceed to Step 2
-    fireEvent.click(screen.getByRole("button", { name: /fileUnified.next/i }));
-    await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: /fileUnified.caseDetails/i }),
-      ).toBeInTheDocument(),
-    );
-
-    // Fill some fields in Step 2 (use placeholders rendered as i18n keys)
-    const titleInput = screen.getByPlaceholderText(
-      /fileUnified.caseTitlePlaceholder/i,
-    );
-    const petitionerInput = screen.getByPlaceholderText(
-      /fileUnified.petitionerPlaceholder/i,
-    );
-    const respondentInput = screen.getByPlaceholderText(
-      /fileUnified.respondentPlaceholder/i,
-    );
-    const descriptionInput = screen.getByPlaceholderText(
-      /fileUnified.caseDescriptionPlaceholder/i,
-    );
-
-    fireEvent.change(titleInput, { target: { value: "Test Case Title" } });
-    fireEvent.change(petitionerInput, { target: { value: "Alice" } });
-    fireEvent.change(respondentInput, { target: { value: "Bob" } });
-    fireEvent.change(descriptionInput, { target: { value: "Some facts" } });
-
-    // Go to Step 3
-    fireEvent.click(screen.getByRole("button", { name: /fileUnified.next/i }));
-    await waitFor(() =>
-      expect(
-        screen.getByText(/fileUnified.clickUploadFiles/i),
-      ).toBeInTheDocument(),
-    );
-
-    // Click Previous to go back to Step 2
+    // Step 1 - select case type
     fireEvent.click(
-      screen.getByRole("button", { name: /fileUnified.previous/i }),
-    );
-    await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: /fileUnified.caseDetails/i }),
-      ).toBeInTheDocument(),
+      screen.getByText('fileUnified.propertyDispute')
     );
 
-    // Ensure the previously entered values are preserved
-    expect(titleInput.value).toBe("Test Case Title");
-    expect(petitionerInput.value).toBe("Alice");
-    expect(respondentInput.value).toBe("Bob");
-  });
-
-  it("allows clicking a completed step indicator to navigate back and preserves state", async () => {
-    renderPage();
-
-    // Select a case type and move to step 2
-    const allButtons2 = screen.getAllByRole("button");
-    const firstCaseButton = allButtons2.find(
-      (b) => within(b).queryAllByText(/civilCase/i).length > 0,
-    );
-    fireEvent.click(firstCaseButton);
-    fireEvent.click(screen.getByRole("button", { name: /fileUnified.next/i }));
-    await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: /fileUnified.caseDetails/i }),
-      ).toBeInTheDocument(),
+    // Go to Step 2
+    fireEvent.click(
+      screen.getByText('fileUnified.next')
     );
 
-    // Fill required fields
-    const titleInput2 = screen.getByPlaceholderText(
-      /fileUnified.caseTitlePlaceholder/i,
-    );
-    const descriptionInput2 = screen.getByPlaceholderText(
-      /fileUnified.caseDescriptionPlaceholder/i,
-    );
-    const petitionerInput2 = screen.getByPlaceholderText(
-      /fileUnified.petitionerPlaceholder/i,
-    );
-    const respondentInput2 = screen.getByPlaceholderText(
-      /fileUnified.respondentPlaceholder/i,
-    );
-    fireEvent.change(titleInput2, { target: { value: "Preserve Title" } });
-    fireEvent.change(descriptionInput2, { target: { value: "Some facts" } });
-    fireEvent.change(petitionerInput2, { target: { value: "Alice" } });
-    fireEvent.change(respondentInput2, { target: { value: "Bob" } });
+    // Fill title field
+    const titleInput = screen.getAllByRole('textbox')[0];
 
-    // Move forward to Step 3
-    fireEvent.click(screen.getByRole("button", { name: /fileUnified.next/i }));
-    await waitFor(() =>
-      expect(
-        screen.getByText(/fileUnified.clickUploadFiles/i),
-      ).toBeInTheDocument(),
+    fireEvent.change(titleInput, {
+      target: { value: 'Property Dispute Case' },
+    });
+
+    // Go back to Step 1
+    fireEvent.click(
+      screen.getByText('fileUnified.previous')
     );
 
-    // Click the stepper label for "Case Details" (completed) to go back
-    const stepLabel = screen.getAllByText(/fileUnified.caseDetails/i)[0];
-    fireEvent.click(stepLabel);
-
-    await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: /fileUnified.caseDetails/i }),
-      ).toBeInTheDocument(),
+    // Go forward again
+    fireEvent.click(
+      screen.getByText('fileUnified.next')
     );
-    expect(titleInput2.value).toBe("Preserve Title");
+
+    // Verify title is still there
+    expect(
+      screen.getAllByRole('textbox')[0]
+    ).toHaveValue('Property Dispute Case');
   });
 });

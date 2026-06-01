@@ -27,15 +27,23 @@ import logging
 
 from google import genai
 from groq import AsyncGroq
-
 from config import (
     GEMINI_API_KEY,
     GEMINI_MODEL,
     GROQ_API_KEY,
     GROQ_MODEL_FAST,
     GROUND_RESEARCH,
+    RETRY_ENABLED,
+    RETRY_MAX_ATTEMPTS,
+    RETRY_DELAY_SECONDS,
+    PROVIDER_ORDER,
 )
-from utils import CircuitBreaker, retry_transient
+
+from utils import (
+    CircuitBreaker,
+    retry_transient,
+    is_retryable_exception,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -102,15 +110,102 @@ def _fallback_response(question: str, source: str) -> dict:
     }
 
 
-# ─── Decorated LLM calls (retry layer) ────────────────────────────────────────
+def build_provider_queue(primary_provider: str) -> list[str]:
+    """Return ordered, deduplicated provider list with primary first."""
+    ordered = [p for p in PROVIDER_ORDER if p in {"gemini", "groq"}]
+    if primary_provider in ordered:
+        ordered = [primary_provider] + [p for p in ordered if p != primary_provider]
+
+    # If gemini is not configured, remove it
+    if "gemini" in ordered and not gemini_client:
+        ordered = [p for p in ordered if p != "gemini"]
+
+    # Deduplicate while preserving order
+    seen = set()
+    result = []
+    for p in ordered:
+        if p not in seen:
+            seen.add(p)
+            result.append(p)
+    return result
 
 
-@retry_transient
-async def _call_groq_with_retry(
-    question: str,
-    kanoon_context: str | None = None,
-) -> dict:
-    """Groq LPU call wrapped with tenacity-based retry."""
+async def _attempt_provider(provider: str, question: str, kanoon_context: str | None = None) -> dict:
+    """Invoke a single provider once, honoring circuit-breaker state and returning a structured result or fallback."""
+    if provider == "gemini":
+        if not gemini_client:
+            return _fallback_response(question, "gemini")
+        if not gemini_breaker.is_available():
+            logger.warning("[CircuitBreaker/Gemini] OPEN - skipping")
+            return _fallback_response(question, "gemini")
+        try:
+            # Use single-attempt call here; coordinator owns retries
+            res = await _call_gemini_once(question, kanoon_context)
+            gemini_breaker.call_succeeded()
+            return res
+        except Exception as exc:
+            gemini_breaker.call_failed()
+            logger.error(f"[Research/Gemini] Provider attempt failed: {exc}")
+            raise
+
+    if provider == "groq":
+        if not groq_breaker.is_available():
+            logger.warning("[CircuitBreaker/Groq] OPEN - skipping")
+            return _fallback_response(question, "groq")
+        try:
+            # Use single-attempt call here; coordinator owns retries
+            res = await _call_groq_once(question, kanoon_context)
+            groq_breaker.call_succeeded()
+            return res
+        except Exception as exc:
+            groq_breaker.call_failed()
+            logger.error(f"[Research/Groq] Provider attempt failed: {exc}")
+            raise
+
+    return _fallback_response(question, provider)
+
+
+async def execute_with_fallback(question: str, kanoon_context: str | None = None, primary_provider: str = "gemini") -> dict:
+    """Coordinator: try primary provider with retries, then fallback to secondary providers.
+
+    Returns the first successful provider result or a unified fallback response when all fail.
+    """
+    providers = build_provider_queue(primary_provider)
+    if not providers:
+        return _fallback_response(question, "all_providers_failed")
+
+    last_error = None
+    # Interpret RETRY_MAX_ATTEMPTS as number of retries (not total attempts).
+    # Total attempts per provider = RETRY_MAX_ATTEMPTS + 1 (initial attempt + retries)
+    for provider in providers:
+        for attempt in range(RETRY_MAX_ATTEMPTS + 1):
+            try:
+                result = await _attempt_provider(provider, question, kanoon_context)
+                # If provider returns a fallback-shaped response, treat as failure and try next provider
+                if result.get("is_fallback"):
+                    last_error = result.get("error", "fallback")
+                    break
+                return result
+            except Exception as exc:
+                last_error = exc
+                # Decide whether to retry this exception
+                is_last_attempt = (attempt == RETRY_MAX_ATTEMPTS)
+                if (not RETRY_ENABLED) or (not is_retryable_exception(exc)) or is_last_attempt:
+                    logger.error(f"[Research] Provider {provider} terminal error: {exc}")
+                    break
+                # backoff increases with each retry (attempt starts at 0)
+                wait = RETRY_DELAY_SECONDS * (attempt + 1)
+                logger.warning(f"[Research] Transient error from {provider}, retry {attempt+1} in {wait}s: {exc}")
+                await asyncio.sleep(wait)
+
+        logger.warning(f"[Research] Provider {provider} exhausted, trying next provider if available")
+
+    logger.error(f"[Research] All providers exhausted. Last error: {last_error}")
+    return _fallback_response(question, "all_providers_failed")
+
+
+async def _call_groq_once(question: str, kanoon_context: str | None = None) -> dict:
+    """Single attempt to call Groq LPU (no retry decorator)."""
     user_prompt = _build_user_prompt(question, kanoon_context)
     response = await groq_client.chat.completions.create(
         model=GROQ_MODEL_FAST,
@@ -152,12 +247,11 @@ async def stream_groq_chat(messages, model, max_tokens=1024):
                 continue
 
 
-@retry_transient
-async def _call_gemini_with_retry(
+async def _call_gemini_once(
     question: str,
     kanoon_context: str | None = None,
 ) -> dict:
-    """Gemini call wrapped with tenacity-based retry."""
+    """Single attempt to call Gemini (no retry decorator)."""
     user_prompt = _build_user_prompt(question, kanoon_context)
     full_prompt = (
         f"{LEGAL_SYSTEM_PROMPT}\n\n"
@@ -182,8 +276,12 @@ async def _call_gemini_with_retry(
     }
 
 
-# ─── Public LLM entry points (circuit-breaker layer) ──────────────────────────
+# Keep convenience decorated versions for other call sites that expect retry behavior.
+# These wrap the single-attempt functions with the tenacity retry policy.
+_call_groq_with_retry = retry_transient(_call_groq_once)
+_call_gemini_with_retry = retry_transient(_call_gemini_once)
 
+# ─── Public LLM entry points (circuit-breaker layer) ──────────────────────────
 
 def _enforce_ground_flag(kanoon_context: str | None) -> str | None:
     """Strip context if GROUND_RESEARCH=false, so we can A/B test grounding."""
@@ -198,7 +296,6 @@ async def call_groq_async(
 ) -> dict:
     """Call Groq with circuit breaker + retry + ground-flag enforcement."""
     kanoon_context = _enforce_ground_flag(kanoon_context)
-
     if not groq_breaker.is_available():
         logger.warning("[CircuitBreaker/Groq] OPEN — fast-failing")
         return _fallback_response(question, "groq")
@@ -258,10 +355,8 @@ async def run_parallel_research(
         question = item["question"]
         model = item["model"]
 
-        if model == "gemini":
-            tasks.append(call_gemini_async(question, kanoon_context))
-        else:
-            tasks.append(call_groq_async(question, kanoon_context))
+        # Use unified coordinator to handle retries and fallback ordering
+        tasks.append(execute_with_fallback(question, kanoon_context, primary_provider=model))
 
     results = await asyncio.gather(*tasks, return_exceptions=False)
     return list(results)
