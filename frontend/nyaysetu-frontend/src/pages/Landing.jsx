@@ -2,7 +2,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Download, Bot, BookOpen, Video, ShieldCheck, Cpu, Cuboid } from 'lucide-react';
+import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Download, Video, Cpu, Cuboid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
@@ -16,6 +16,7 @@ import GuestAccessDeniedModal from '../components/guest/GuestAccessDeniedModal';
 import GuestInlineCTA from '../components/guest/GuestInlineCTA';
 import GuestLockedCard from '../components/guest/GuestLockedCard';
 import QuickCard from '../components/landing/QuickCard';
+import FeaturesSection from '../components/landing/FeaturesSection';
 
 export default function Landing() {
     const { t } = useTranslation('landing');
@@ -56,7 +57,7 @@ export default function Landing() {
 
     const TRUST_STATS = [
         { value: '50K+', label: t('trustStats.activeUsers'), icon: Users },
-        { value: '99%',  label: t('trustStats.successRate'), icon: Star },
+        { value: '99%', label: t('trustStats.successRate'), icon: Star },
         { value: '24/7', label: t('trustStats.availability'), icon: CheckCircle },
     ];
 
@@ -64,24 +65,24 @@ export default function Landing() {
         {
             icon: UserPlus,
             title: t('quickCards.createAccount.title'),
-            desc:  t('quickCards.createAccount.desc'),
-            cta:   t('quickCards.createAccount.cta'),
+            desc: t('quickCards.createAccount.desc'),
+            cta: t('quickCards.createAccount.cta'),
             color: '#7C5CFF',
             bg: 'rgba(124,92,255,0.08)',
         },
         {
             icon: FileText,
             title: t('quickCards.submitCase.title'),
-            desc:  t('quickCards.submitCase.desc'),
-            cta:   t('quickCards.submitCase.cta'),
+            desc: t('quickCards.submitCase.desc'),
+            cta: t('quickCards.submitCase.cta'),
             color: '#3F5DCC',
             bg: 'rgba(63,93,204,0.08)',
         },
         {
             icon: Zap,
             title: t('quickCards.powerfulFeatures.title'),
-            desc:  t('quickCards.powerfulFeatures.desc'),
-            cta:   t('quickCards.powerfulFeatures.cta'),
+            desc: t('quickCards.powerfulFeatures.desc'),
+            cta: t('quickCards.powerfulFeatures.cta'),
             color: '#10B981',
             bg: 'rgba(16,185,129,0.08)',
         },
@@ -91,14 +92,6 @@ export default function Landing() {
         tryAccess();
     };
 
-    const FEATURES = [
-        { icon: Bot,         title: t('features.aiLegalAssistant.title'),   desc: t('features.aiLegalAssistant.description'),   color: '#3F5DCC' },
-        { icon: BookOpen,    title: t('features.constitutionReader.title'),  desc: t('features.constitutionReader.description'),  color: '#7C5CFF' },
-        { icon: FileText,    title: t('features.fileCases.title'),           desc: t('features.fileCases.description'),           color: '#10B981' },
-        { icon: Video,       title: t('features.virtualHearings.title'),     desc: t('features.virtualHearings.description'),     color: '#F59E0B' },
-        { icon: ShieldCheck, title: t('features.securePrivate.title'),       desc: t('features.securePrivate.description'),       color: '#EF4444' },
-        { icon: Zap,         title: t('features.realTimeUpdates.title'),     desc: t('features.realTimeUpdates.description'),     color: '#8B5CF6' },
-    ];
 
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
@@ -212,7 +205,7 @@ export default function Landing() {
                                     onClick={handleInstall}
                                     title={t('hero.installApp')}
                                     style={{
-                                        gap:'0.5rem',padding:'0.8rem 1rem',
+                                        gap: '0.5rem', padding: '0.8rem 1rem',
                                         borderRadius: '12px',
                                         border: '1px solid var(--border-medium)',
                                         background: 'var(--bg-surface)',
@@ -220,8 +213,8 @@ export default function Landing() {
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         cursor: 'pointer',
                                         boxShadow: 'var(--shadow-sm)',
-                                        fontWeight:'600',
-                                        whiteSpace:'nowrap',
+                                        fontWeight: '600',
+                                        whiteSpace: 'nowrap',
                                     }}
                                 >
                                     <Download size={18} />
@@ -276,7 +269,7 @@ export default function Landing() {
                                         width="720"
                                         height="720"
                                         loading="eager"
-                                       fetchpriority="high"
+                                        fetchpriority="high"
                                         decoding="async"
                                         animate={{ y: [0, -14, 0] }}
                                         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -332,109 +325,8 @@ export default function Landing() {
                 <HowItWorks />
 
                 {/* ── Features ──────────────────────────────────────── */}
-                <section id="features" style={{
-                    padding: '7rem 2rem',
-                    background: 'var(--bg-surface)',
-                    borderTop: '1px solid var(--border-light)',
-                    borderBottom: '1px solid var(--border-light)',
-                }}>
-                    <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
-                        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                            <div style={{
-                                display: 'inline-block', padding: '0.4rem 1rem', marginBottom: '1rem',
-                                background: 'rgba(63,93,204,0.08)', border: '1px solid rgba(63,93,204,0.15)',
-                                borderRadius: '2rem',
-                            }}>
-                                <span style={{ color: 'var(--color-accent)', fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                                    {t('features.badge')}
-                                </span>
-                            </div>
-                            <h2 style={{ fontSize: 'clamp(1.9rem,3.5vw,2.6rem)', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem', letterSpacing: '-0.025em' }}>
-                                {t('features.title')}{' '}
-                                <span style={{ color: 'var(--color-secondary)' }}>{t('features.titleHighlight')}</span>
-                            </h2>
-                            <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', maxWidth: '560px', margin: '0 auto' }}>
-                                {t('features.subtitle')}
-                            </p>
-                        </div>
+                <FeaturesSection isGuest={isGuest} />
 
-                        <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
-                            {FEATURES.map((f, i) => {
-                                const FeatureIcon = f.icon;
-                                return (
-                                    <motion.div key={i}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: i * 0.07 }}
-                                        whileHover={{ y: -5 }}
-                                        style={{
-                                            padding: '2.25rem',
-                                            background: 'var(--bg-main)',
-                                            border: '1px solid var(--border-light)',
-                                            borderRadius: '16px',
-                                            cursor: 'default',
-                                            transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
-                                        }}
-                                        onMouseEnter={e => { e.currentTarget.style.borderColor = f.color + '50'; e.currentTarget.style.boxShadow = `0 8px 24px ${f.color}15`; }}
-                                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.boxShadow = 'none'; }}
-                                    >
-                                        <div style={{
-                                            width: '52px', height: '52px', borderRadius: '14px',
-                                            background: f.color + '12',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            marginBottom: '1.1rem',
-                                        }}>
-                                            <FeatureIcon size={26} style={{ color: f.color }} />
-                                        </div>
-                                        <div
-    style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '0.75rem',
-        marginBottom: '0.65rem',
-    }}
->
-    <h3
-        style={{
-            fontSize: '1.1rem',
-            fontWeight: '700',
-            color: 'var(--text-main)',
-            margin: 0,
-        }}
-    >
-        {f.title}
-    </h3>
-
-    {isGuest && (
-        f.title === t('features.fileCases.title') ||
-        f.title === t('features.virtualHearings.title')
-    ) && (
-        <span
-            style={{
-                padding: '0.28rem 0.55rem',
-                borderRadius: '999px',
-                fontSize: '0.68rem',
-                fontWeight: '700',
-                background: 'rgba(245,158,11,0.10)',
-                border: '1px solid rgba(245,158,11,0.18)',
-                color: '#f59e0b',
-                letterSpacing: '0.02em',
-                whiteSpace: 'nowrap',
-            }}
-        >
-            Account Required
-        </span>
-    )}
-</div>
-                                        <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
-                                    </motion.div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </section>
 
                 <TrustIndicators />
                 <AchievementsSection />
@@ -454,7 +346,7 @@ export default function Landing() {
                         background: 'radial-gradient(circle, rgba(124,92,255,0.06) 0%, transparent 60%)',
                         pointerEvents: 'none', zIndex: 0
                     }} />
-                    
+
                     <div style={{ maxWidth: '1320px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
                         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                             <div style={{
@@ -524,7 +416,7 @@ export default function Landing() {
                                 );
                             })}
                         </div>
-                        
+
                         <div style={{ textAlign: 'center' }}>
                             <Link to="/upcoming-features" style={{
                                 display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -616,11 +508,9 @@ export default function Landing() {
                     .hero-grid { grid-template-columns: 1fr !important; }
                     .hero-grid > div:last-child { display: none; }
                     .quick-cards-grid { grid-template-columns: 1fr !important; }
-                    .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
                 }
                 @media (max-width: 600px) {
                     .quick-cards-grid { grid-template-columns: 1fr !important; }
-                    .features-grid { grid-template-columns: 1fr !important; }
                 }
             `}</style>
         </div>
