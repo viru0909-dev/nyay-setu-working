@@ -1,7 +1,18 @@
 import "@testing-library/jest-dom";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
+
+// Mock react-i18next useTranslation to return keys as translations
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (k) => k }),
+}));
 
 import FileUnifiedPage from "./FileUnifiedPage";
 
@@ -14,11 +25,12 @@ describe("FileUnifiedPage stepper navigation", () => {
     );
 
   it("navigates back using Previous button and preserves form state", async () => {
-    const { container } = renderPage();
+    renderPage();
 
-    // Select first case type card so we can proceed to step 2
-    const firstCaseButton = container.querySelector(
-      ".horizontal-scroll-cards button",
+    // Select first case type button by locating the button that contains the case title
+    const allButtons = screen.getAllByRole("button");
+    const firstCaseButton = allButtons.find(
+      (b) => within(b).queryAllByText(/civilCase/i).length > 0,
     );
     expect(firstCaseButton).toBeTruthy();
     fireEvent.click(firstCaseButton);
@@ -75,11 +87,12 @@ describe("FileUnifiedPage stepper navigation", () => {
   });
 
   it("allows clicking a completed step indicator to navigate back and preserves state", async () => {
-    const { container } = renderPage();
+    renderPage();
 
     // Select a case type and move to step 2
-    const firstCaseButton = container.querySelector(
-      ".horizontal-scroll-cards button",
+    const allButtons2 = screen.getAllByRole("button");
+    const firstCaseButton = allButtons2.find(
+      (b) => within(b).queryAllByText(/civilCase/i).length > 0,
     );
     fireEvent.click(firstCaseButton);
     fireEvent.click(screen.getByRole("button", { name: /fileUnified.next/i }));
