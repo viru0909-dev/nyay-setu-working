@@ -6,7 +6,7 @@ import {
     Archive, Video, User, Users, Briefcase,
     Gavel, BarChart3, Settings, Menu, X,
     Scale, MessageSquare, Calendar, Bot, TrendingUp, Search,
-    WifiOff, Sun, Moon
+    WifiOff, Sun, Moon, Star
 } from 'lucide-react';
 
 import { useTheme } from '../contexts/ThemeContext';
@@ -21,7 +21,8 @@ const getRoleMenuItems = (t) => ({
         { icon: MessageSquare, label: t('dashboard:sidebar.litigant.lawyerChat'), path: '/litigant/chat' },
         { icon: Search, label: t('dashboard:sidebar.litigant.forensicAnalysis'), path: '/litigant/forensics' },
         { icon: FileText, label: t('dashboard:sidebar.litigant.generateDocument'), path: '/litigant/generate-document' },
-        { icon: User, label: t('dashboard:sidebar.litigant.profile'), path: '/litigant/profile' }
+        { icon: User, label: t('dashboard:sidebar.litigant.profile'), path: '/litigant/profile' },
+        { icon: Star, label: 'Feedback', path: '/litigant/feedback' }
     ],
     LAWYER: [
         { icon: Home, label: t('dashboard:sidebar.lawyer.dashboard'), path: '/lawyer' },
@@ -30,7 +31,8 @@ const getRoleMenuItems = (t) => ({
         { icon: Brain, label: t('dashboard:sidebar.lawyer.aiLegalAssistant'), path: '/lawyer/ai-assistant' },
         { icon: Video, label: t('dashboard:sidebar.lawyer.hearings'), path: '/lawyer/hearings' },
         { icon: BarChart3, label: t('dashboard:sidebar.lawyer.analytics'), path: '/lawyer/analytics' },
-        { icon: User, label: t('dashboard:sidebar.lawyer.profile'), path: '/lawyer/profile' }
+        { icon: User, label: t('dashboard:sidebar.lawyer.profile'), path: '/lawyer/profile' },
+        { icon: Star, label: 'Feedback', path: '/lawyer/feedback' }
     ],
     JUDGE: [
         { icon: Home, label: t('dashboard:sidebar.judge.judicialOverview'), path: '/judge' },
@@ -38,7 +40,8 @@ const getRoleMenuItems = (t) => ({
         { icon: FolderOpen, label: t('dashboard:sidebar.judge.unassignedPool'), path: '/judge/unassigned' },
         { icon: Video, label: t('dashboard:sidebar.judge.liveHearing'), path: '/judge/live-hearing' },
         { icon: BarChart3, label: t('dashboard:sidebar.judge.courtAnalytics'), path: '/judge/analytics' },
-        { icon: User, label: t('dashboard:sidebar.judge.profile'), path: '/judge/profile' }
+        { icon: User, label: t('dashboard:sidebar.judge.profile'), path: '/judge/profile' },
+        { icon: Star, label: 'Feedback', path: '/judge/feedback' }
     ],
     ADMIN: [
         { icon: Home, label: t('dashboard:sidebar.admin.dashboard'), path: '/admin' },
@@ -47,7 +50,8 @@ const getRoleMenuItems = (t) => ({
         { icon: Gavel, label: t('dashboard:sidebar.admin.judgeAssignment'), path: '/admin/judges' },
         { icon: BarChart3, label: t('dashboard:sidebar.admin.reports'), path: '/admin/reports' },
         { icon: Settings, label: t('dashboard:sidebar.admin.settings'), path: '/admin/settings' },
-        { icon: User, label: t('dashboard:sidebar.admin.profile'), path: '/admin/profile' }
+        { icon: User, label: t('dashboard:sidebar.admin.profile'), path: '/admin/profile' },
+        { icon: Star, label: 'Feedback', path: '/admin/feedback' }
     ],
     TECH_ADMIN: [
         { icon: Home, label: t('dashboard:sidebar.techAdmin.dashboard'), path: '/tech-admin' },
@@ -55,14 +59,16 @@ const getRoleMenuItems = (t) => ({
         { icon: Video, label: t('dashboard:sidebar.techAdmin.videoSystem'), path: '/tech-admin/video' },
         { icon: BarChart3, label: t('dashboard:sidebar.techAdmin.logs'), path: '/tech-admin/logs' },
         { icon: Settings, label: t('dashboard:sidebar.techAdmin.configuration'), path: '/tech-admin/config' },
-        { icon: User, label: t('dashboard:sidebar.techAdmin.profile'), path: '/tech-admin/profile' }
+        { icon: User, label: t('dashboard:sidebar.techAdmin.profile'), path: '/tech-admin/profile' },
+        { icon: Star, label: 'Feedback', path: '/tech-admin/feedback' }
     ],
     POLICE: [
         { icon: Home, label: t('dashboard:sidebar.police.dashboard'), path: '/police' },
         { icon: TrendingUp, label: t('dashboard:sidebar.police.investigationUnit'), path: '/police/investigations' },
         { icon: Upload, label: t('dashboard:sidebar.police.uploadFIR'), path: '/police/upload' },
         { icon: FolderOpen, label: t('dashboard:sidebar.police.myFIRs'), path: '/police/firs' },
-        { icon: User, label: t('dashboard:sidebar.police.profile'), path: '/police/profile' }
+        { icon: User, label: t('dashboard:sidebar.police.profile'), path: '/police/profile' },
+        { icon: Star, label: 'Feedback', path: '/police/feedback' }
     ]
 });
 

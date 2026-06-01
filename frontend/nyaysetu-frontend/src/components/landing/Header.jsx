@@ -81,6 +81,7 @@ export default function Header({ hideAuthButtons = false }) {
         { labelKey: 'header.nav.constitution', href: '/constitution', isRoute: true },
         { labelKey: 'header.nav.aiAssistant', action: () => setShowAIModal(true) },
         { labelKey: 'header.nav.about', href: '/about', isRoute: true },
+        { labelKey: 'Feedback', href: '/feedback', isRoute: true },
     ];
 
     const isDark = theme === 'dark';
