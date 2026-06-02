@@ -9,8 +9,15 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.socket.WebSocketHandler;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
 import com.nyaysetu.backend.handler.NotificationWebSocketHandler;
-
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -25,6 +32,28 @@ public class WebSocketConfig implements WebSocketConfigurer, WebSocketMessageBro
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(notificationHandler, "/api/ws/notifications")
+                .addInterceptors(new HandshakeInterceptor() {
+                    @Override
+                    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
+                                                  WebSocketHandler wsHandler, Map<String, Object> attributes) {
+                        if (request instanceof ServletServerHttpRequest) {
+                            HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
+                            Cookie[] cookies = servletRequest.getCookies();
+                            if (cookies != null) {
+                                for (Cookie cookie : cookies) {
+                                    if ("accessToken".equals(cookie.getName())) {
+                                        attributes.put("accessToken", cookie.getValue());
+                                    }
+                                }
+                            }
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
+                                               WebSocketHandler wsHandler, Exception exception) {}
+                })
                 .setAllowedOrigins("*");  // Configure appropriately for production
     }
 

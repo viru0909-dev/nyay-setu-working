@@ -16,8 +16,6 @@ export default function NotificationBell() {
     useEffect(() => {
         if (!user) return;
 
-        const token = localStorage.getItem('token');
-
         // 1. Fetch History
         const loadHistory = async () => {
             setLoading(true);
@@ -35,7 +33,7 @@ export default function NotificationBell() {
         };
 
         // 2. Connect WebSocket
-        NotificationService.connect(token);
+        NotificationService.connect();
         loadHistory();
 
         // 3. Subscribe to new events

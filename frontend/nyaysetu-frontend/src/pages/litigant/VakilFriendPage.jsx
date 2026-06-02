@@ -808,11 +808,8 @@ export default function VakilFriendChat() {
                 formData.append('category', 'EVIDENCE');
                 formData.append('description', `Uploaded during case filing via Nyay Saarthi chat`);
 
-                const token = localStorage.getItem('token');
                 const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    withCredentials: true
                 });
 
                 setAttachedFiles(prev => prev.map(f =>

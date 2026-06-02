@@ -99,7 +99,11 @@ const GuestAuthRedirect = ({ location }) => {
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const location = useLocation();
-    const { isAuthenticated, isGuest, user } = useAuthStore();
+    const { isAuthenticated, isGuest, user, isLoading } = useAuthStore();
+
+    if (isLoading) {
+        return <LoadingSpinner fullScreen message="Verifying session..." />;
+    }
 
     if (isGuest) {
         return <GuestAuthRedirect location={location} />;

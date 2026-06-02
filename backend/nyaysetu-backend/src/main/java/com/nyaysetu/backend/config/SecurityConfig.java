@@ -171,6 +171,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/face/login",
                                 "/api/v1/auth/ping",
                                 "/api/v1/auth/test",
+                                "/api/v1/auth/logout",
                                 "/api/v1/health",
                                 "/api/v1/police/health"
                         ).permitAll()

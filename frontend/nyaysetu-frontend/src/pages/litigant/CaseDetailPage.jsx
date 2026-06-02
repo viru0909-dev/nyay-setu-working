@@ -779,7 +779,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
             const [docsRes, evidenceRes] = await Promise.all([
                 documentAPI.getByCase(caseId),
                 axios.get(`${API_BASE_URL}/api/evidence/case/${caseId}`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                    withCredentials: true
                 })
             ]);
 
@@ -817,9 +817,8 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
 
     const verifyHash = async (doc) => {
         try {
-            const token = localStorage.getItem('token');
             const res = await axios.get(`${API_BASE_URL}/api/documents/${doc.id}/verify-hash`, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
             setVerificationMap(prev => ({ ...prev, [doc.id]: res.data.valid }));
         } catch (e) {
@@ -915,7 +914,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
 
             const response = await axios.get(url, {
                 responseType: 'blob',
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                withCredentials: true
             });
             const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
             setCertUrl(blobUrl);
@@ -1337,15 +1336,13 @@ function TimelineTab({ caseData }) {
 
     const fetchTimeline = async () => {
         try {
-            const token = localStorage.getItem('token');
-
             // Fetch from BOTH legacy timeline AND new CaseEvents API
             const [timelineRes, eventsRes] = await Promise.allSettled([
                 axios.get(`${API_BASE_URL}/api/timeline/${caseData.id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    withCredentials: true
                 }),
                 axios.get(`${API_BASE_URL}/api/cases/${caseData.id}/events`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    withCredentials: true
                 })
             ]);
 

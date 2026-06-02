@@ -47,6 +47,18 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) {
         log.info("Notification WebSocket opened: {}", session.getId());
 
+        // Check if token was provided via HandshakeInterceptor (cookies)
+        String token = (String) session.getAttributes().get("accessToken");
+        if (token != null && !token.isBlank()) {
+            try {
+                authenticateWithToken(session, token);
+                return;
+            } catch (Exception e) {
+                log.warn("Auto-authentication via cookie failed: {}", e.getMessage());
+                // Don't close yet, wait for manual AUTH message as fallback
+            }
+        }
+
         ScheduledFuture<?> timeout = authTimeoutExecutor.schedule(() -> {
             if (session.isOpen() && !userIdBySessionId.containsKey(session.getId())) {
                 try {
@@ -59,6 +71,31 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         }, 5, TimeUnit.SECONDS);
 
         authTimeouts.put(session.getId(), timeout);
+    }
+
+    private void authenticateWithToken(WebSocketSession session, String token) throws IOException {
+        try {
+            String email = jwtService.extractUsername(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+            if (!jwtService.isTokenValid(token, userDetails)) {
+                throw new IllegalArgumentException("Invalid token");
+            }
+
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new IllegalStateException("User not found"));
+
+            cancelAuthTimeout(session);
+
+            sessionsByUserId.put(user.getId(), session);
+            userIdBySessionId.put(session.getId(), user.getId());
+
+            sendJson(session, Map.of("type", "AUTH_SUCCESS"));
+
+            log.info("Notification WebSocket authenticated for user: {}", user.getId());
+        } catch (Exception e) {
+            throw new IOException("Authentication failed: " + e.getMessage());
+        }
     }
 
     @Override
