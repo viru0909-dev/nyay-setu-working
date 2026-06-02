@@ -5,59 +5,94 @@ class NotificationService {
     constructor() {
         this.ws = null;
         this.listeners = [];
+        this.statusListeners = [];
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 3;
+        this.maxBackoffDelay = 30000;
         this.API_BASE_URL = API_BASE_URL;
-        this.isConnecting = false;
-        this.connectionFailed = false;
+        this.pingInterval = null;
+        this.reconnectTimer = null;
+
+        // Connection status: 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'failed'
+        this.status = 'disconnected';
     }
 
-    /**
-     * Connects to the WebSocket for real-time notifications securely
-     */
+    getStatus() {
+        return this.status;
+    }
+
+    subscribeToStatus(callback) {
+        this.statusListeners.push(callback);
+        return () => {
+            this.statusListeners = this.statusListeners.filter(cb => cb !== callback);
+        };
+    }
+
+    _setStatus(newStatus) {
+        if (this.status === newStatus) return;
+        this.status = newStatus;
+        this.statusListeners.forEach(cb => {
+            try { cb(newStatus); } catch (e) { /* silent */ }
+        });
+    }
+
+    _startHeartbeat() {
+        this._stopHeartbeat();
+        this.pingInterval = setInterval(() => {
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                try {
+                    this.ws.send('ping');
+                } catch (e) {
+                    // Connection likely died; onclose will clean up
+                }
+            }
+        }, 30000);
+    }
+
+    _stopHeartbeat() {
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval);
+            this.pingInterval = null;
+        }
+    }
+
+    _clearReconnectTimer() {
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
+    }
+
     connect(token) {
-        // Skip if already connected, connecting, or permanently failed
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            return;
-        }
-        if (this.isConnecting || this.connectionFailed) {
-            return;
-        }
-        if (!token || token === 'null' || token === 'undefined') {
-            return;
-        }
+        // Skip if already connected
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) return;
+        if (this.status === 'connecting') return;
+        if (!token || token === 'null' || token === 'undefined') return;
 
         const isProduction = !window.location.hostname.includes('localhost');
 
         try {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = new URL(this.API_BASE_URL).host;
-            
-            // Secure URL without query parameters
+
             const wsUrl = `${protocol}//${host}/api/ws/notifications`;
 
-            this.isConnecting = true;
+            this._setStatus('connecting');
 
-            // Merged environment log routing rules - CONFLICT 1 RESOLVED
-            if (!isProduction) {
-                if (import.meta.env.DEV) {
-                    console.log('Connecting to WebSocket:', wsUrl);
-                }
+            if (!isProduction && import.meta.env.DEV) {
+                console.log('Connecting to WebSocket:', wsUrl);
             }
 
             this.ws = new WebSocket(wsUrl);
 
-            // In-band Authentication frame payload dispatch - CONFLICT 2 RESOLVED
             this.ws.onopen = () => {
-                if (!isProduction) {
-                    if (import.meta.env.DEV) {
-                        console.log('✅ WebSocket connected');
-                    }
-                }
                 this.reconnectAttempts = 0;
-                this.isConnecting = false;
-                
-                // Securely transmit token in the body frame immediately on open
+                this._setStatus('connected');
+                this._startHeartbeat();
+
+                if (!isProduction && import.meta.env.DEV) {
+                    console.log('WebSocket connected');
+                }
+
                 this.ws.send(JSON.stringify({
                     type: 'AUTH',
                     token: token
@@ -65,24 +100,20 @@ class NotificationService {
             };
 
             this.ws.onmessage = (event) => {
+                if (event.data === 'pong') return;
                 try {
                     const message = JSON.parse(event.data);
 
                     if (message.type === 'AUTH_SUCCESS') {
-                        if (!isProduction) {
-                            if (import.meta.env.DEV) {
-                                console.log('✅ Notification WebSocket authenticated');
-                            }
+                        if (!isProduction && import.meta.env.DEV) {
+                            console.log('Notification WebSocket authenticated');
                         }
                         this.reconnectAttempts = 0;
-                        this.isConnecting = false;
-                        this.connectionFailed = false;
                         return;
                     }
 
                     if (message.type === 'AUTH_ERROR') {
-                        this.isConnecting = false;
-                        this.connectionFailed = true;
+                        this._setStatus('failed');
                         this.disconnect();
                         return;
                     }
@@ -94,52 +125,61 @@ class NotificationService {
 
                     this.notifyListeners(message);
                 } catch (error) {
-                    if (!isProduction) {
-                        if (import.meta.env.DEV) {
-                            console.warn('Invalid notification WebSocket message format received');
-                        }
+                    if (!isProduction && import.meta.env.DEV) {
+                        console.warn('Invalid notification WebSocket message format received');
                     }
                 }
             };
 
             this.ws.onerror = () => {
-                this.isConnecting = false;
+                // Suppress error logs; onclose will fire next
             };
 
             this.ws.onclose = (event) => {
-                this.isConnecting = false;
+                this._stopHeartbeat();
+                this._setStatus('disconnected');
                 this.ws = null;
-                
-                // Code 1008 means server sandbox kicked the connection due to auth timeout/failure
+
                 if (event.code === 1008) {
-                    this.connectionFailed = true;
+                    this._setStatus('failed');
                     return;
                 }
 
-                if (!this.connectionFailed) {
-                    this.attemptReconnect(token);
-                }
+                this._attemptReconnect();
             };
         } catch (error) {
-            this.isConnecting = false;
-            this.connectionFailed = true;
+            this._setStatus('failed');
         }
     }
 
-    /**
-     * Reconnection logic with exponential backoff
-     */
-    attemptReconnect(token) {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.reconnectAttempts++;
-            const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+    _attemptReconnect() {
+        this._clearReconnectTimer();
 
-            setTimeout(() => {
+        const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), this.maxBackoffDelay);
+        this.reconnectAttempts++;
+        this._setStatus('reconnecting');
+
+        this.reconnectTimer = setTimeout(() => {
+            const token = localStorage.getItem('token');
+            if (token) {
                 this.connect(token);
-            }, delay);
-        } else {
-            this.connectionFailed = true;
+            } else {
+                this._setStatus('failed');
+            }
+        }, delay);
+    }
+
+    disconnect() {
+        this._clearReconnectTimer();
+        this._stopHeartbeat();
+        if (this.ws) {
+            this.ws.onclose = null;
+            this.ws.close();
+            this.ws = null;
         }
+        this.reconnectAttempts = 0;
+        this.listeners = [];
+        this._setStatus('disconnected');
     }
 
     subscribe(callback) {
@@ -157,17 +197,6 @@ class NotificationService {
                 // Silent catch to keep listener loops active
             }
         });
-    }
-
-    disconnect() {
-        if (this.ws) {
-            this.ws.close();
-            this.ws = null;
-        }
-        this.listeners = [];
-        this.reconnectAttempts = 0;
-        this.isConnecting = false;
-        this.connectionFailed = false;
     }
 
     // --- REST API Methods ---

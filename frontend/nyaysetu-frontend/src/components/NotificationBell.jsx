@@ -1,8 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
-import { Bell, X, Check, CheckCheck, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Bell, X, CheckCheck, Loader2, WifiOff } from 'lucide-react';
 import NotificationService from '../services/NotificationService';
 import useAuthStore from '../store/authStore';
 import { useTranslation } from 'react-i18next';
+
+const STATUS_DOT = {
+    connected: { color: '#22c55e', label: 'Connected' },
+    connecting: { color: '#eab308', label: 'Connecting' },
+    reconnecting: { color: '#eab308', label: 'Reconnecting' },
+    disconnected: { color: '#ef4444', label: 'Disconnected' },
+    failed: { color: '#ef4444', label: 'Connection Failed' },
+};
 
 export default function NotificationBell() {
     const { user } = useAuthStore();
@@ -11,6 +19,7 @@ export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState(NotificationService.getStatus());
 
     // Connect to WebSocket and fetch initial history
     useEffect(() => {
@@ -50,8 +59,14 @@ export default function NotificationBell() {
             setUnreadCount(prev => prev + 1);
         });
 
+        // 4. Subscribe to connection status changes
+        const unsubStatus = NotificationService.subscribeToStatus((status) => {
+            setConnectionStatus(status);
+        });
+
         return () => {
             unsubscribe();
+            unsubStatus();
             // Optimization: We don't disconnect immediately on unmount to keep connection alive during nav
         };
     }, [user]); // Removed unreadCount to prevent refetch loop
@@ -112,6 +127,7 @@ export default function NotificationBell() {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="Toggle notifications"
+                title={STATUS_DOT[connectionStatus]?.label || 'Disconnected'}
                 style={{
                     position: 'relative',
                     background: isOpen ? 'rgba(139, 92, 246, 0.2)' : 'var(--bg-glass-strong)',
@@ -131,6 +147,23 @@ export default function NotificationBell() {
                 }}
             >
                 <Bell size={20} />
+                {/* Connection status dot - bottom-right corner */}
+                <span style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    right: '-2px',
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    backgroundColor: STATUS_DOT[connectionStatus]?.color || '#ef4444',
+                    border: '2px solid var(--bg-main)',
+                    boxShadow: connectionStatus === 'connected'
+                        ? '0 0 6px rgba(34, 197, 94, 0.6)'
+                        : connectionStatus === 'reconnecting' || connectionStatus === 'connecting'
+                        ? '0 0 6px rgba(234, 179, 8, 0.6)'
+                        : '0 0 6px rgba(239, 68, 68, 0.6)',
+                    transition: 'all 0.3s ease'
+                }} />
                 {unreadCount > 0 && (
                     <span style={{
                         position: 'absolute',
@@ -235,13 +268,59 @@ export default function NotificationBell() {
                         maxHeight: '400px',
                         padding: '0.5rem'
                     }}>
+                        {/* Connection status banner for non-connected states */}
+                        {connectionStatus !== 'connected' && !loading && (
+                            <div style={{
+                                padding: '0.75rem 1rem',
+                                margin: '0.25rem 0.5rem 0.5rem',
+                                borderRadius: '0.75rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontSize: '0.8rem',
+                                fontWeight: '600',
+                                background: connectionStatus === 'failed'
+                                    ? 'rgba(239, 68, 68, 0.1)'
+                                    : 'rgba(234, 179, 8, 0.1)',
+                                color: connectionStatus === 'failed'
+                                    ? '#ef4444'
+                                    : '#eab308',
+                                border: `1px solid ${connectionStatus === 'failed' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(234, 179, 8, 0.2)'}`
+                            }}>
+                                {connectionStatus === 'failed' ? <WifiOff size={14} /> : <Loader2 size={14} className="spin" />}
+                                <span>{STATUS_DOT[connectionStatus]?.label || 'Disconnected'}</span>
+                                {connectionStatus === 'failed' && (
+                                    <span style={{ fontWeight: '400', opacity: 0.8 }}>
+                                        — Real-time updates paused
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                        {/* Connection warning when connected but browser is offline */}
+                        {connectionStatus === 'connected' && !navigator.onLine && (
+                            <div style={{
+                                padding: '0.75rem 1rem',
+                                margin: '0.25rem 0.5rem 0.5rem',
+                                borderRadius: '0.75rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontSize: '0.8rem',
+                                fontWeight: '500',
+                                background: 'rgba(234, 179, 8, 0.1)',
+                                color: '#eab308',
+                                border: '1px solid rgba(234, 179, 8, 0.2)'
+                            }}>
+                                <WifiOff size={14} />
+                                <span>Operating in offline mode</span>
+                            </div>
+                        )}
                         {loading && notifications.length === 0 ? (
                             <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
                                 <Loader2 size={24} className="spin" style={{ margin: '0 auto 0.5rem' }} />
                                 <span style={{ fontSize: '0.85rem' }}>{t('notification.syncing')}</span>
-                                <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .spin { animation: spin 1s linear infinite; }`}</style>
                             </div>
-                        ) : notifications.length === 0 ? (
+                        ) : !loading && notifications.length === 0 && connectionStatus === 'failed' ? null : notifications.length === 0 ? (
                             <div style={{
                                 padding: '3rem 1.5rem',
                                 textAlign: 'center',
@@ -370,6 +449,11 @@ export default function NotificationBell() {
                     from { opacity: 0; transform: translateY(-10px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                .spin { animation: spin 1s linear infinite; }
             `}</style>
         </div>
     );
