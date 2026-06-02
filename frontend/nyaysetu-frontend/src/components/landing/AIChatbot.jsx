@@ -34,13 +34,16 @@ export default function AIChatbot() {
             setMessages(prev => [...prev, aiResponse]);
             if (response.data.sessionId) setSessionId(response.data.sessionId);
         } catch (error) {
-            console.error('Chat error:', error);
-            const errorResponse = {
-                role: 'assistant',
-                content: 'I understand your question. As an AI legal assistant, I can help you with general legal information about Indian law, the Constitution, case filing procedures, and more. For specific legal advice, please consult with a qualified lawyer. What would you like to know?'
-            };
-            setMessages(prev => [...prev, errorResponse]);
-        } finally {
+    console.error('Chat error:', error);
+
+    const errorResponse = {
+        role: 'assistant',
+        content:
+            '⚠️ Unable to connect to the AI legal service at the moment. Please try again later or ensure the backend server is running.'
+    };
+
+    setMessages(prev => [...prev, errorResponse]);
+} finally {
             setIsTyping(false);
         }
     };
