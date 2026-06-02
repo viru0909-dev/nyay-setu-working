@@ -79,6 +79,23 @@ export default function Signup() {
             setError('Password must be at least 8 characters, include an uppercase letter, a number, and a special character (@#$!%*?&).');
             return;
         }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+
+        if (!emailRegex.test(formData.email.trim())) {
+            console.log("Email validation running", formData.email);
+            setError('Please enter a valid email address.');
+            return;
+        }
+        const allowedTlds = ['com', 'org', 'net', 'edu', 'gov','in', 'co.in', 'io', 'ai', 'dev'];
+
+        const domain = formData.email.split('@')[1].toLowerCase();
+
+        const hasValidTld = allowedTlds.some(tld =>domain.endsWith(`.${tld}`));
+        if (!hasValidTld) {
+            setError('Please enter a valid email address.');
+            return;
+        }
 
         setLoading(true);
 
