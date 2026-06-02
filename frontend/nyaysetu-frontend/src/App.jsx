@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, Suspense, lazy } from 'react';
 import useAuthStore from './store/authStore';
-import { LanguageProvider } from './contexts/LanguageContext.jsx';
 // CHANGED: ThemeProvider added — wraps the entire app so all components can access theme
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -128,7 +127,6 @@ function App({ swRegistration }) {
         // is set on <html> before any child renders — prevents flash of wrong theme
         <ThemeProvider>
             <ErrorBoundary>
-                <LanguageProvider>
                     {/* Global PWA Components */}
                     <OfflineIndicator />
                     <UpdateNotification registration={swRegistration} />
@@ -258,7 +256,6 @@ function App({ swRegistration }) {
                             </Routes>
                         </Suspense>
                     </BrowserRouter>
-                </LanguageProvider>
             </ErrorBoundary>
         </ThemeProvider>
     );
