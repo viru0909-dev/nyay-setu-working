@@ -331,6 +331,7 @@ For environment variables, copy `.env.example` to `.env` and fill in your values
 |---|---|
 | [Setup Guide](./docs/setup.md) | Full database setup, environment variables, and Docker configuration |
 | [Architecture Overview](./docs/architecture/overview.md) | System design, component diagrams, and data flow |
+| [Monitoring Guide](./docs/monitoring.md) | Prometheus and Grafana setup for backend observability |
 | [AI Integration Guide](./AI_INTEGRATION_GUIDE.md) | Groq API and NLP orchestrator technical deep-dive |
 | [API Documentation](./SYSTEM_DOCUMENTATION.md) | All REST endpoints with request and response specifications |
 | [Contributing Guidelines](./CONTRIBUTING.md) | Branching strategy, commit conventions, and PR workflow |
