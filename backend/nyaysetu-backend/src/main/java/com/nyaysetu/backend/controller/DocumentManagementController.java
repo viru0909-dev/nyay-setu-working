@@ -102,8 +102,11 @@ public class DocumentManagementController {
      * Trigger AI analysis for a document
      */
     @PostMapping("/{id}/analyze")
-    public ResponseEntity<?> analyzeDocument(@PathVariable UUID id) {
+    public ResponseEntity<?> analyzeDocument(@PathVariable UUID id, Authentication authentication) {
         try {
+            User user = authService.findByEmail(authentication.getName());
+            documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
             // Trigger async analysis
             documentManagementService.triggerAnalysis(id);
             return ResponseEntity.ok(Map.of(
@@ -119,8 +122,11 @@ public class DocumentManagementController {
      * Get AI analysis for a document
      */
     @GetMapping("/{id}/analysis")
-    public ResponseEntity<?> getDocumentAnalysis(@PathVariable UUID id) {
+    public ResponseEntity<?> getDocumentAnalysis(@PathVariable UUID id, Authentication authentication) {
         try {
+            User user = authService.findByEmail(authentication.getName());
+            documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
             if (!documentAnalysisService.hasAnalysis(id)) {
                 return ResponseEntity.status(404).body(Map.of("error", "Analysis not found"));
             }
@@ -138,8 +144,11 @@ public class DocumentManagementController {
      * Check if document has analysis
      */
     @GetMapping("/{id}/has-analysis")
-    public ResponseEntity<?> checkAnalysis(@PathVariable UUID id) {
+    public ResponseEntity<?> checkAnalysis(@PathVariable UUID id, Authentication authentication) {
         try {
+            User user = authService.findByEmail(authentication.getName());
+            documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
             boolean hasAnalysis = documentAnalysisService.hasAnalysis(id);
             return ResponseEntity.ok(Map.of(
                 "documentId", id.toString(),
@@ -192,14 +201,20 @@ public class DocumentManagementController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DocumentDto> getDocument(@PathVariable UUID id) {
+    public ResponseEntity<DocumentDto> getDocument(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
         DocumentDto document = documentManagementService.getDocumentById(id);
         return ResponseEntity.ok(document);
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<?> downloadDocument(@PathVariable UUID id) {
+    public ResponseEntity<?> downloadDocument(@PathVariable UUID id, Authentication authentication) {
         try {
+            User user = authService.findByEmail(authentication.getName());
+            documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
             DocumentDto metadata = documentManagementService.getDocumentById(id);
             Resource resource = documentManagementService.downloadDocument(id);
 
@@ -232,8 +247,11 @@ public class DocumentManagementController {
      * Download Section 63(4) Evidence Certificate for a document
      */
     @GetMapping("/{id}/certificate")
-    public ResponseEntity<?> downloadCertificate(@PathVariable UUID id) {
+    public ResponseEntity<?> downloadCertificate(@PathVariable UUID id, Authentication authentication) {
         try {
+            User user = authService.findByEmail(authentication.getName());
+            documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
             byte[] pdfBytes = certificateService.generateDocumentCertificate(id);
             
             return ResponseEntity.ok()
@@ -250,7 +268,10 @@ public class DocumentManagementController {
      * Verify document hash (SHA-256) againts stored fingerprint
      */
     @GetMapping("/{id}/verify-hash")
-    public ResponseEntity<?> verifyHash(@PathVariable UUID id) {
+    public ResponseEntity<?> verifyHash(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
         boolean isValid = documentManagementService.verifyDocumentHash(id);
         return ResponseEntity.ok(Map.of("id", id, "valid", isValid));
     }

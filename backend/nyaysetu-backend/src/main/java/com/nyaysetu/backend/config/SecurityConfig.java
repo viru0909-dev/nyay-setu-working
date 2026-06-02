@@ -50,17 +50,15 @@ public class SecurityConfig {
 
     @PostConstruct
     public void validateJwtSecretConfiguration() {
-        boolean isProd = java.util.Arrays.stream(environment.getActiveProfiles())
-                .anyMatch("prod"::equalsIgnoreCase);
         boolean isDev = java.util.Arrays.stream(environment.getActiveProfiles())
-                .anyMatch("dev"::equalsIgnoreCase);
+                .anyMatch(profile -> profile.equalsIgnoreCase("dev") || profile.equalsIgnoreCase("test"));
         String jwtSecretEnv = System.getenv("JWT_SECRET");
         boolean isJwtSecretEnvMissing = jwtSecretEnv == null || jwtSecretEnv.trim().isEmpty();
         boolean isUsingDefaultSecret = DEFAULT_JWT_SECRET.equals(jwtSecret);
 
-        if (isProd && (isJwtSecretEnvMissing || isUsingDefaultSecret)) {
+        if (!isDev && (isJwtSecretEnvMissing || isUsingDefaultSecret)) {
             throw new IllegalStateException(
-                    "Security configuration error: JWT_SECRET environment variable is required in production. "
+                    "Security configuration error: JWT_SECRET environment variable is required in non-development deployments. "
                             + "Application startup is blocked to prevent using an insecure default JWT signing key.");
         }
 

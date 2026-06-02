@@ -437,6 +437,7 @@ export default function Login() {
                             {/* Sign In Button */}
                             <button
                                 type="submit"
+                                className="auth-full-width-btn"
                                 disabled={loading}
                                 style={{
                                     width: '100%',
@@ -461,6 +462,7 @@ export default function Login() {
                             {/* Face Login */}
                             <button
                                 type="button"
+                                className="auth-full-width-btn"
                                 onClick={() => setShowFaceLogin(true)}
                                 style={{
                                     width: '100%',

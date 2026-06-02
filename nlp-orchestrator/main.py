@@ -33,6 +33,8 @@ from cache import (
 from config import FRONTEND_ORIGIN, GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KEY, GEMINI_MODEL
 from decomposer import decompose_query
 from router import route_questions
+from research import run_parallel_research, execute_with_fallback
+from synthesizer import synthesize_answers
 from research import run_parallel_research, stream_groq_chat
 from synthesizer import synthesize_answers, stream_synthesize_answers
 from validators.citation_validator import validate_citations_from_text
@@ -529,40 +531,68 @@ async def deep_research_pipeline(query: str, language: str):
             user_query=query
         )
 
-        # Call the AI model and stream reasoning
         ai_answer = None
+        cached = False
 
         if model_choice == "gemini" and gemini_client:
-            try:
-                loop = asyncio.get_running_loop()
-                response = await loop.run_in_executor(
-                    None,
-                    lambda: gemini_client.models.generate_content(
-                        model=GEMINI_MODEL,
-                        contents=grounded_prompt
+            cache_key = generate_cache_key(
+                "gemini",
+                grounded_prompt,
+                GEMINI_MODEL,
+                user_query=query
+            )
+            cached_response = get_cached_response(cache_key)
+            if cached_response:
+                logger.info("[Deep Research] Gemini cache hit")
+                ai_answer = cached_response
+                cached = True
+
+        if not cached and (model_choice == "groq" or (model_choice == "gemini" and not gemini_client)):
+            cache_key = generate_cache_key(
+                "groq",
+                grounded_prompt,
+                GROQ_MODEL_FAST,
+                user_query=query
+            )
+            cached_response = get_cached_response(cache_key)
+            if cached_response:
+                logger.info("[Deep Research] Groq cache hit")
+                ai_answer = cached_response
+                cached = True
+
+        if not cached:
+            # Use the unified fallback coordinator for deep research to avoid
+            # duplicating retry/fallback logic between Gemini and Groq.
+            result = await execute_with_fallback(query, kanoon_context, primary_provider=model_choice)
+            ai_answer = result.get("answer", "")
+            model_choice = result.get("source", model_choice)
+
+            if ai_answer:
+                if model_choice == "gemini":
+                    cache_key = generate_cache_key(
+                        "gemini",
+                        grounded_prompt,
+                        GEMINI_MODEL,
+                        user_query=query
                     )
-                )
+                    set_cached_response(cache_key, ai_answer)
+                elif model_choice == "groq":
+                    cache_key = generate_cache_key(
+                        "groq",
+                        grounded_prompt,
+                        GROQ_MODEL_FAST,
+                        user_query=query
+                    )
+                    set_cached_response(cache_key, ai_answer)
 
-                ai_answer = response.text.strip()
-
-            except Exception as e:
-                logger.error(f"Gemini failed, falling back to Groq: {e}")
-                model_choice = "groq"
-        if model_choice == "groq" or (
-            model_choice == "gemini" and not gemini_client
-        ):
-            # Stream tokens directly from Groq
-            logger.info("[Deep Research] Streaming from Groq...")
-            async for token in stream_groq_chat(
-                messages=[
-                    {"role": "system", "content": grounded_prompt},
-                    {"role": "user", "content": query}
-                ],
-                model=GROQ_MODEL_FAST,
-                max_tokens=2048
-            ):
-                yield sse_event("reasoning", {"text": token})
-                ai_answer = (ai_answer or "") + token
+        # Stream reasoning text in chunks for live display
+        if ai_answer:
+            words = ai_answer.split()
+            chunk_size = 8
+            for i in range(0, len(words), chunk_size):
+                chunk = " ".join(words[i:i + chunk_size])
+                yield sse_event("reasoning", {"text": chunk})
+                await asyncio.sleep(0.1)  # Small delay for streaming effect
 
         yield sse_event("stage", {
             "stage": "reasoning",

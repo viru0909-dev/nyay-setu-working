@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -153,7 +154,7 @@ public class AuthController {
 
     @SecurityRequirements
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest req) {
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
         try {
             emailService.sendPasswordResetEmail(req.getEmail());
             return ResponseEntity.ok(Map.of(
@@ -190,7 +191,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest req) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
         try {
             PasswordResetToken resetToken = tokenRepository.findByToken(req.getToken())
                     .orElseThrow(() -> new RuntimeException("Invalid token"));
@@ -223,9 +224,10 @@ public class AuthController {
     // ==================== FACE LOGIN ENDPOINTS ====================
 
     @PostMapping("/face/enroll")
-    public ResponseEntity<?> enrollFace(@RequestBody FaceEnrollRequest req) {
+    public ResponseEntity<?> enrollFace(@Valid @RequestBody FaceEnrollRequest req, Authentication auth) {
         try {
-            faceRecognitionService.enrollFace(req.getUserId(), req.getFaceDescriptor());
+            User user = authService.findByEmail(auth.getName());
+            faceRecognitionService.enrollFace(user.getId(), req.getFaceDescriptor());
             return ResponseEntity.ok(Map.of("message", "Face enrolled successfully"));
         } catch (Exception e) {
             log.error("Error enrolling face", e);
@@ -234,7 +236,7 @@ public class AuthController {
     }
 
     @PostMapping("/face/login")
-    public ResponseEntity<?> loginWithFace(@RequestBody FaceLoginRequest req) {
+    public ResponseEntity<?> loginWithFace(@Valid @RequestBody FaceLoginRequest req) {
         try {
             User user = faceRecognitionService.verifyFace(req.getEmail(), req.getFaceDescriptor());
 
@@ -260,9 +262,10 @@ public class AuthController {
     }
 
     @DeleteMapping("/face/disable")
-    public ResponseEntity<?> disableFaceLogin(@RequestParam Long userId) {
+    public ResponseEntity<?> disableFaceLogin(Authentication auth) {
         try {
-            faceRecognitionService.disableFaceLogin(userId);
+            User user = authService.findByEmail(auth.getName());
+            faceRecognitionService.disableFaceLogin(user.getId());
             return ResponseEntity.ok(Map.of("message", "Face login disabled"));
         } catch (Exception e) {
             return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
@@ -270,9 +273,10 @@ public class AuthController {
     }
 
     @GetMapping("/face/status")
-    public ResponseEntity<?> getFaceLoginStatus(@RequestParam Long userId) {
+    public ResponseEntity<?> getFaceLoginStatus(Authentication auth) {
         try {
-            boolean enrolled = faceRecognitionService.hasFaceEnrolled(userId);
+            User user = authService.findByEmail(auth.getName());
+            boolean enrolled = faceRecognitionService.hasFaceEnrolled(user.getId());
             return ResponseEntity.ok(Map.of("enrolled", enrolled));
         } catch (Exception e) {
             return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));

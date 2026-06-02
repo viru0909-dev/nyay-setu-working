@@ -35,10 +35,6 @@ class NotificationService {
         });
     }
 
-    /**
-     * Sends a lightweight ping every 30 seconds to prevent Render's
-     * 50-second idle timeout from killing the connection.
-     */
     _startHeartbeat() {
         this._stopHeartbeat();
         this.pingInterval = setInterval(() => {
@@ -67,17 +63,24 @@ class NotificationService {
     }
 
     connect(token) {
+        // Skip if already connected
         if (this.ws && this.ws.readyState === WebSocket.OPEN) return;
         if (this.status === 'connecting') return;
+        if (!token || token === 'null' || token === 'undefined') return;
 
         const isProduction = !window.location.hostname.includes('localhost');
 
         try {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = new URL(this.API_BASE_URL).host;
-            const wsUrl = `${protocol}//${host}/api/ws/notifications?token=${token}`;
+
+            const wsUrl = `${protocol}//${host}/api/ws/notifications`;
 
             this._setStatus('connecting');
+
+            if (!isProduction && import.meta.env.DEV) {
+                console.log('Connecting to WebSocket:', wsUrl);
+            }
 
             this.ws = new WebSocket(wsUrl);
 
@@ -85,15 +88,46 @@ class NotificationService {
                 this.reconnectAttempts = 0;
                 this._setStatus('connected');
                 this._startHeartbeat();
+
+                if (!isProduction && import.meta.env.DEV) {
+                    console.log('WebSocket connected');
+                }
+
+                this.ws.send(JSON.stringify({
+                    type: 'AUTH',
+                    token: token
+                }));
             };
 
             this.ws.onmessage = (event) => {
                 if (event.data === 'pong') return;
                 try {
-                    const notification = JSON.parse(event.data);
-                    this.notifyListeners(notification);
-                } catch (e) {
-                    // Silent fail on parse errors
+                    const message = JSON.parse(event.data);
+
+                    if (message.type === 'AUTH_SUCCESS') {
+                        if (!isProduction && import.meta.env.DEV) {
+                            console.log('Notification WebSocket authenticated');
+                        }
+                        this.reconnectAttempts = 0;
+                        return;
+                    }
+
+                    if (message.type === 'AUTH_ERROR') {
+                        this._setStatus('failed');
+                        this.disconnect();
+                        return;
+                    }
+
+                    if (message.type === 'NOTIFICATION') {
+                        this.notifyListeners(message.payload);
+                        return;
+                    }
+
+                    this.notifyListeners(message);
+                } catch (error) {
+                    if (!isProduction && import.meta.env.DEV) {
+                        console.warn('Invalid notification WebSocket message format received');
+                    }
                 }
             };
 
@@ -101,9 +135,16 @@ class NotificationService {
                 // Suppress error logs; onclose will fire next
             };
 
-            this.ws.onclose = () => {
+            this.ws.onclose = (event) => {
                 this._stopHeartbeat();
                 this._setStatus('disconnected');
+                this.ws = null;
+
+                if (event.code === 1008) {
+                    this._setStatus('failed');
+                    return;
+                }
+
                 this._attemptReconnect();
             };
         } catch (error) {
@@ -111,10 +152,6 @@ class NotificationService {
         }
     }
 
-    /**
-     * Exponential backoff: 1s, 2s, 4s, 8s, 16s, then caps at 30s.
-     * Re-fetches the token on each attempt so new sockets stay authorized.
-     */
     _attemptReconnect() {
         this._clearReconnectTimer();
 
@@ -157,7 +194,7 @@ class NotificationService {
             try {
                 callback(notification);
             } catch (error) {
-                // Silent fail
+                // Silent catch to keep listener loops active
             }
         });
     }
@@ -183,7 +220,7 @@ class NotificationService {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch (error) {
-            // Silent fail
+            // Suppress error responses
         }
     }
 }

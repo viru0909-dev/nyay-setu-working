@@ -85,24 +85,21 @@ export default function Header({ hideAuthButtons = false }) {
 
     const isDark = theme === 'dark';
 
-    const navLinkStyle = (href) => ({
-        color: location.pathname === href ? 'var(--color-primary)' : 'var(--text-secondary)',
+    const navLinkStyle = (isActive) => ({
+        color: isActive ? 'var(--color-primary)' : 'var(--text-secondary)',
         textDecoration: 'none',
         fontSize: '0.925rem',
-        fontWeight: location.pathname === href ? '600' : '500',
+        fontWeight: isActive ? '600' : '500',
         cursor: 'pointer',
         padding: '0.25rem 0',
-        borderBottom: location.pathname === href
-            ? '2px solid var(--color-primary)'
-            : '2px solid transparent',
-        transition: 'color 0.2s ease, border-color 0.2s ease',
         background: 'none',
         border: 'none',
         fontFamily: 'inherit',
     });
 
     const renderNavItem = (item) => {
-        const baseStyle = navLinkStyle(item.href);
+        const isActive = Boolean(item.href && location.pathname === item.href);
+        const baseStyle = navLinkStyle(isActive);
         // Fallback to labelKey directly if translation returns the exact key
         const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
@@ -111,9 +108,9 @@ export default function Header({ hideAuthButtons = false }) {
                 <button
                     key={item.labelKey}
                     onClick={item.action}
+                    className="header-nav-link"
+                    data-active={isActive ? 'true' : undefined}
                     style={baseStyle}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
                 >
                     {displayLabel}
                 </button>
@@ -124,9 +121,9 @@ export default function Header({ hideAuthButtons = false }) {
                 <Link
                     key={item.labelKey}
                     to={item.href}
+                    className="header-nav-link"
+                    data-active={isActive ? 'true' : undefined}
                     style={baseStyle}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                    onMouseLeave={e => e.currentTarget.style.color = location.pathname === item.href ? 'var(--color-primary)' : 'var(--text-secondary)'}
                 >
                     {displayLabel}
                 </Link>
@@ -136,9 +133,9 @@ export default function Header({ hideAuthButtons = false }) {
             <a
                 key={item.labelKey}
                 href={item.href}
+                className="header-nav-link"
+                data-active={isActive ? 'true' : undefined}
                 style={baseStyle}
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
             >
                 {displayLabel}
             </a>
@@ -542,20 +539,20 @@ export default function Header({ hideAuthButtons = false }) {
 
                                     if (item.action) {
                                         return (
-                                            <button key={item.labelKey} onClick={() => { item.action(); setIsMobileMenuOpen(false); }} style={sharedStyle}>
+                                            <button key={item.labelKey} onClick={() => { item.action(); setIsMobileMenuOpen(false); }} style={sharedStyle} className="header-nav-link">
                                                 {displayLabel}
                                             </button>
                                         );
                                     }
                                     if (item.isRoute) {
                                         return (
-                                            <Link key={item.labelKey} to={item.href} onClick={() => setIsMobileMenuOpen(false)} style={sharedStyle}>
+                                            <Link key={item.labelKey} to={item.href} onClick={() => setIsMobileMenuOpen(false)} style={sharedStyle} className="header-nav-link" aria-current={location.pathname === item.href ? 'page' : undefined}>
                                                 {displayLabel}
                                             </Link>
                                         );
                                     }
                                     return (
-                                        <a key={item.labelKey} href={item.href} onClick={() => setIsMobileMenuOpen(false)} style={sharedStyle}>
+                                        <a key={item.labelKey} href={item.href} onClick={() => setIsMobileMenuOpen(false)} style={sharedStyle} className="header-nav-link">
                                             {displayLabel}
                                         </a>
                                     );
@@ -730,6 +727,50 @@ export default function Header({ hideAuthButtons = false }) {
                         }
                         .desktop-nav, .desktop-cta { display: none !important; }
                         .mobile-menu-btn { display: flex !important; }
+                    }
+
+                    .header-nav-link {
+                        position: relative;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        line-height: 1.2;
+                        transition: color 0.2s ease;
+                        -webkit-tap-highlight-color: transparent;
+                    }
+
+                    .header-nav-link::after {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        right: 0;
+                        bottom: -0.3rem;
+                        height: 2px;
+                        border-radius: 999px;
+                        background: currentColor;
+                        transform: scaleX(0);
+                        transform-origin: left center;
+                        transition: transform 0.24s ease;
+                    }
+
+                    .header-nav-link:hover,
+                    .header-nav-link:focus-visible,
+                    .header-nav-link[data-active='true'],
+                    .header-nav-link[aria-current='page'] {
+                        color: var(--color-primary) !important;
+                    }
+
+                    .header-nav-link:hover::after,
+                    .header-nav-link:focus-visible::after,
+                    .header-nav-link[data-active='true']::after,
+                    .header-nav-link[aria-current='page']::after {
+                        transform: scaleX(1);
+                    }
+
+                    @media (hover: none) and (pointer: coarse) {
+                        .header-nav-link:hover::after {
+                            transform: scaleX(0);
+                        }
                     }
                 `}</style>
             </motion.header>

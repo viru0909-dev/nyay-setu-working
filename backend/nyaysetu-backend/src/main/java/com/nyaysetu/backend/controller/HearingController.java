@@ -8,6 +8,7 @@ import com.nyaysetu.backend.notification.service.NotificationService;
 import com.nyaysetu.backend.notification.entity.Notification;
 import com.nyaysetu.backend.entity.CaseEntity;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public class HearingController {
     
     @PostMapping("/schedule")
     public ResponseEntity<Map<String, Object>> scheduleHearing(
-            @RequestBody ScheduleHearingRequest request,
+            @Valid @RequestBody ScheduleHearingRequest request,
             Authentication authentication
     ) {
         log.info("Scheduling hearing for case: {}", request.getCaseId());

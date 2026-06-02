@@ -526,6 +526,7 @@ export default function Signup() {
                                     {/* Create Account Button */}
                                     <button
                                         type="submit"
+                                        className="auth-full-width-btn"
                                         disabled={loading}
                                         style={{
                                             width: '100%',

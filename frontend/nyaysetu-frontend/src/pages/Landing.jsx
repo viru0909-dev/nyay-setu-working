@@ -275,7 +275,7 @@ export default function Landing() {
                                         width="720"
                                         height="720"
                                         loading="eager"
-                                        fetchPriority="high"
+                                       fetchpriority="high"
                                         decoding="async"
                                         animate={{ y: [0, -14, 0] }}
                                         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
