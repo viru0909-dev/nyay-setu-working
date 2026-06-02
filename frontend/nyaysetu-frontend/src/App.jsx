@@ -6,8 +6,8 @@ import { LanguageProvider } from './contexts/LanguageContext.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
+import ScrollProgressBar from './components/common/ScrollProgressBar';
 import ScrollToTop from './ScrollToTop';
-
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
 import UpdateNotification from './components/UpdateNotification';
@@ -140,8 +140,9 @@ function App({ swRegistration }) {
                         }}
                     >
                         <GuestWelcomeToast />
-                        <GuestOnboardingHint />
-                        <ScrollToTop />
+                       <GuestOnboardingHint />
+                       <ScrollProgressBar />
+                       <ScrollToTop />
                         <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
                             <Routes>
                                 <Route path="/" element={<Landing />} />
