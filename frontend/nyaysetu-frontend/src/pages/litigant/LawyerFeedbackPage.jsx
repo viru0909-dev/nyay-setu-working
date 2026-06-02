@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, ThumbsUp, ThumbsDown, Send, CheckCircle } from 'lucide-react';
+import axios from 'axios';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 const mockLawyer = {
   id: 1,
@@ -18,6 +20,7 @@ export default function LawyerFeedbackPage() {
   const [recommend, setRecommend] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const ratingLabels = {
     1: 'Poor',
@@ -32,11 +35,39 @@ export default function LawyerFeedbackPage() {
       alert('Please select a rating!');
       return;
     }
+    
     setSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setSubmitting(false);
-    setSubmitted(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('You must be logged in to submit feedback.');
+        setSubmitting(false);
+        return;
+      }
+
+      const response = await axios.post(`${API_BASE_URL}/api/v1/feedback`, {
+        lawyerId: mockLawyer.id,
+        content: review,
+        rating: rating
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data.success) {
+        setSubmitted(true);
+      } else {
+        setError(response.data.message || 'Failed to submit feedback.');
+      }
+    } catch (err) {
+      console.error('Feedback submission error:', err);
+      setError(err.response?.data?.message || 'An error occurred while submitting feedback. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const glassStyle = {
@@ -333,6 +364,23 @@ export default function LawyerFeedbackPage() {
           </button>
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div style={{
+          padding: '1rem',
+          marginBottom: '1rem',
+          borderRadius: '10px',
+          background: '#fce8e6',
+          color: '#c62828',
+          fontSize: '0.9rem',
+          textAlign: 'center',
+          fontWeight: '600',
+          border: '1px solid #c62828'
+        }}>
+          ⚠️ {error}
+        </div>
+      )}
 
       {/* Submit Button */}
       <button
