@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import lawgpt from '../../services/lawgptService';
-
+import styles from './DocumentGeneratePage.module.css';
 const DOC_TYPES = [
     {
         id: 'affidavit',
@@ -281,58 +281,9 @@ const DocumentGeneratePage = () => {
 
     const selectedDocInfo = DOC_TYPES.find(d => d.id === selectedType);
 
-    // ── Shared styles ────────────────────────────────────────────────────────
+    
 
-    const cardStyle = {
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--color-border)',
-        borderRadius: '1rem',
-        padding: '1.5rem',
-    };
-
-    const inputStyle = {
-        width: '100%',
-        padding: '0.75rem 1rem',
-        border: 'var(--color-border)',
-        borderRadius: '0.5rem',
-        fontSize: '0.9rem',
-        outline: 'none',
-        transition: 'border-color 0.2s',
-        background: 'var(--bg-surface)',
-        fontFamily: 'inherit',
-        color:'var(--text-main)'
-    };
-
-    const labelStyle = {
-        display: 'block',
-        fontSize: '0.85rem',
-        fontWeight: 600,
-        color: 'var(--text-main)',
-        marginBottom: '0.35rem',
-    };
-
-    const btnPrimary = {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        padding: '0.75rem 1.5rem',
-        background: 'var(--color-primary)',
-        color: 'white',
-        border: 'none',
-        borderRadius: '0.5rem',
-        fontSize: '0.9rem',
-        fontWeight: 600,
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-    };
-
-    const btnOutline = {
-        ...btnPrimary,
-        background: 'transparent',
-        color: 'var(--color-primary)',
-        border: '1px solid var(--color-primary)',
-    };
-
+   
     // ── Render ────────────────────────────────────────────────────────────────
 
     return (
@@ -474,7 +425,7 @@ const DocumentGeneratePage = () => {
                                     <div>
                                         <label style={labelStyle}>Petitioner Name *</label>
                                         <input name="petitionerName" value={form.petitionerName} onChange={handleInputChange}
-                                            style={inputStyle} placeholder="Full legal name" />
+                                            className={styles.label} placeholder="Full legal name" />
                                         {validationErrors.petitionerName && (
                                             <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
                                                 {validationErrors.petitionerName}
@@ -484,7 +435,7 @@ const DocumentGeneratePage = () => {
                                     <div>
                                         <label style={labelStyle}>Incident Date *</label>
                                         <input name="incidentDate" type="date" value={form.incidentDate} onChange={handleInputChange}
-                                            style={inputStyle} />
+                                            className={styles.label} />
                                         {validationErrors.incidentDate && (
                                             <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
                                                 {validationErrors.incidentDate}
@@ -496,7 +447,7 @@ const DocumentGeneratePage = () => {
                                 <div>
                                     <label style={labelStyle}>Petitioner Address *</label>
                                     <input name="petitionerAddress" value={form.petitionerAddress} onChange={handleInputChange}
-                                        style={inputStyle} placeholder="Complete residential address" />
+                                        className={styles.label} placeholder="Complete residential address" />
                                     {validationErrors.petitionerAddress && (
                                         <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
                                             {validationErrors.petitionerAddress}
@@ -511,7 +462,7 @@ const DocumentGeneratePage = () => {
                                             <div>
                                                 <label style={labelStyle}>Respondent Name *</label>
                                                 <input name="respondentName" value={form.respondentName} onChange={handleInputChange}
-                                                    style={inputStyle} placeholder="Respondent's full name" />
+                                                    className={styles.label} placeholder="Respondent's full name" />
                                                     {validationErrors.respondentName && (
                                                         <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
                                                             {validationErrors.respondentName}
@@ -521,7 +472,7 @@ const DocumentGeneratePage = () => {
                                             <div>
                                                 <label style={labelStyle}>Respondent Address *</label>
                                                 <input name="respondentAddress" value={form.respondentAddress} onChange={handleInputChange}
-                                                    style={inputStyle} placeholder="Respondent's address" />
+                                                    className={styles.label} placeholder="Respondent's address" />
                                                     {validationErrors.respondentAddress && (
                                                         <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
                                                             {validationErrors.respondentAddress}
@@ -538,7 +489,7 @@ const DocumentGeneratePage = () => {
                                         <div>
                                             <label style={labelStyle}>Department Name *</label>
                                             <input name="departmentName" value={form.departmentName} onChange={handleInputChange}
-                                                style={inputStyle} placeholder="e.g. Ministry of Finance" />
+                                                className={styles.label} placeholder="e.g. Ministry of Finance" />
                                                 {validationErrors.departmentName && (
                                                     <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
                                                         {validationErrors.departmentName}
@@ -548,7 +499,7 @@ const DocumentGeneratePage = () => {
                                         <div>
                                             <label style={labelStyle}>PIO Name (optional)</label>
                                             <input name="pioName" value={form.pioName} onChange={handleInputChange}
-                                                style={inputStyle} placeholder="Public Information Officer" />
+                                                className={styles.label} placeholder="Public Information Officer" />
                                                 {validationErrors.pioName && (
                                                     <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
                                                         {validationErrors.pioName}
@@ -563,7 +514,7 @@ const DocumentGeneratePage = () => {
                                     <div>
                                         <label style={labelStyle}>Court Name (optional)</label>
                                         <input name="courtName" value={form.courtName} onChange={handleInputChange}
-                                            style={inputStyle} placeholder="e.g. District Court, Patiala House" />
+                                            className={styles.label} placeholder="e.g. District Court, Patiala House" />
                                             {validationErrors.courtName && (
                                                 <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
                                                     {validationErrors.courtName}
@@ -634,17 +585,13 @@ const DocumentGeneratePage = () => {
 
                                 {/* Actions */}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem' }}>
-                                    <button onClick={() => setStep(1)} style={btnOutline}>
+                                    <button onClick={() => setStep(1)} className={styles.btnOutline}>
                                         <ArrowLeft size={16} /> Back
                                     </button>
                                     <button
                                         onClick={handleGeneratePreview}
                                         disabled={!isFormValid() || isGenerating}
-                                        style={{
-                                            ...btnPrimary,
-                                            opacity: (!isFormValid() || isGenerating) ? 0.5 : 1,
-                                            cursor: (!isFormValid() || isGenerating) ? 'not-allowed' : 'pointer',
-                                        }}
+                                        className={styles.btnPrimary}
                                     >
                                         {isGenerating ? (
                                             <>
@@ -776,19 +723,19 @@ const DocumentGeneratePage = () => {
 
                             {/* Actions */}
                             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '0.75rem' }}>
-                                <button onClick={() => { setStep(2); setGeneratedDoc(null); }} style={btnOutline}>
+                                <button onClick={() => { setStep(2); setGeneratedDoc(null); }} className={styles.btnOutline}>
                                     <ArrowLeft size={16} /> Edit Fields
                                 </button>
                                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                                     <button
                                         onClick={handleCopyToClipboard}
                                         disabled={isCopying}
-                                        style={{
-                                            ...btnOutline,
-                                            minWidth: '180px',
-                                            opacity: isCopying ? 0.6 : 1,
-                                            cursor: isCopying ? 'not-allowed' : 'pointer',
-                                        }}
+                                        className={styles.btnOutline}
+                                style={{
+                                minWidth: '180px',
+                                opacity: isCopying ? 0.6 : 1,
+                                cursor: isCopying ? 'not-allowed' : 'pointer',
+                                    }}
                                     >
                                         {isCopying ? (
                                             <>
@@ -804,6 +751,7 @@ const DocumentGeneratePage = () => {
                                     <button
                                         onClick={handleDownloadDocx}
                                         disabled={isDownloading}
+                                        className={styles.btnPrimary}   
                                         style={{
                                             ...btnPrimary,
                                             background: '#2563EB',
