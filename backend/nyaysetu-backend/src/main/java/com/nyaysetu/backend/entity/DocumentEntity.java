@@ -2,8 +2,11 @@ package com.nyaysetu.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "document")
@@ -35,7 +38,7 @@ public class DocumentEntity {
     @Enumerated(EnumType.STRING)
     private DocumentStorageType storageType;
 
-    private String category; // LEGAL, EVIDENCE, CORRESPONDENCE, IDENTITY, OTHER
+    private String category;
 
     @Column(length = 500)
     private String description;
@@ -43,13 +46,19 @@ public class DocumentEntity {
     private String fileHash;
 
     private String uploadIp;
-    
-    // Access control: PUBLIC (all parties), RESTRICTED (uploader+lawyer+judge), SEALED (judge only)
+
     @Builder.Default
     private String visibilityLevel = "PUBLIC";
 
     @Builder.Default
     private Boolean isVerified = true;
+
+    @ElementCollection
+    @CollectionTable(
+        name = "document_versions",
+        joinColumns = @JoinColumn(name = "document_id")
+    )
+    private List<DocumentVersion> versions = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
