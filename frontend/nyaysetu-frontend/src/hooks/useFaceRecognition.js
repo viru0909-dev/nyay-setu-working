@@ -94,14 +94,14 @@ export const useFaceRecognition = () => {
         }
     };
 
-    const enrollFace = async (descriptor, token) => {
+    const enrollFace = async (descriptor) => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/face/enroll`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     faceDescriptor: JSON.stringify(descriptor)
                 })
@@ -123,6 +123,7 @@ export const useFaceRecognition = () => {
             const response = await fetch(`${API_BASE_URL}/api/face/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({
                     email,
                     faceDescriptor: JSON.stringify(descriptor)

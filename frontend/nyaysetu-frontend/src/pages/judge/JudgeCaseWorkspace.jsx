@@ -139,7 +139,7 @@ export default function JudgeCaseWorkspace() {
         try {
             // Using a specific endpoint for ordering notice
             await axios.post(`${API_BASE_URL}/api/cases/${caseId}/order-notice`, {}, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                withCredentials: true
             });
             alert('✅ Notice Ordered Successfully! The respondent has been notified.');
             fetchCaseDetails(); // Refresh to show updated status or logs
@@ -747,13 +747,12 @@ function EvidenceTab({ caseId }) {
 
     const fetchEvidence = async () => {
         try {
-            const token = localStorage.getItem('token');
             const [evidenceRes, documentsRes] = await Promise.all([
                 axios.get(`${API_BASE_URL}/api/evidence/case/${caseId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    withCredentials: true
                 }),
                 axios.get(`${API_BASE_URL}/api/documents/case/${caseId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    withCredentials: true
                 })
             ]);
 
@@ -794,9 +793,8 @@ function EvidenceTab({ caseId }) {
 
     const verifyHash = async (doc) => {
         try {
-            const token = localStorage.getItem('token');
             const res = await axios.get(`${API_BASE_URL}/api/documents/${doc.id}/verify-hash`, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
             setVerificationMap(prev => ({ ...prev, [doc.id]: res.data.valid }));
         } catch (e) {
@@ -851,10 +849,9 @@ function EvidenceTab({ caseId }) {
                 ? `${API_BASE_URL}/api/evidence/${item.id}/certificate`
                 : `${API_BASE_URL}/api/documents/${item.id}/certificate`;
 
-            const token = localStorage.getItem('token');
             const response = await axios.get(url, {
                 responseType: 'blob',
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
 
             const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -1218,9 +1215,8 @@ Presiding Officer`
 
     const fetchOrders = async () => {
         try {
-            const token = localStorage.getItem('token');
             const response = await axios.get(`${API_BASE_URL}/api/orders/case/${caseId}`, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
             setOrders(response.data || []);
         } catch (error) {
@@ -1241,14 +1237,13 @@ Presiding Officer`
 
     const saveDraft = async () => {
         try {
-            const token = localStorage.getItem('token');
             await axios.post(`${API_BASE_URL}/api/orders`, {
                 caseId,
                 orderType: draftOrder.orderType,
                 content: draftOrder.content,
                 status: 'DRAFT'
             }, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
 
             alert('✅ Order draft saved successfully!');
@@ -1482,9 +1477,8 @@ function HearingsTab({ caseId, caseData }) {
 
     const fetchHearings = async () => {
         try {
-            const token = localStorage.getItem('token');
             const response = await axios.get(`${API_BASE_URL}/api/hearings/case/${caseId}`, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
             setHearings(response.data || []);
         } catch (error) {
@@ -1496,8 +1490,6 @@ function HearingsTab({ caseId, caseData }) {
 
     const scheduleHearing = async () => {
         try {
-            const token = localStorage.getItem('token');
-
             // Create datetime string in local timezone format (YYYY-MM-DDTHH:mm:ss)
             const localDateTime = `${hearingData.scheduledDate}T${hearingData.scheduledTime}:00`;
 
@@ -1506,7 +1498,7 @@ function HearingsTab({ caseId, caseData }) {
                 scheduledDate: localDateTime, // Send as local datetime string, backend will parse correctly
                 durationMinutes: hearingData.durationMinutes
             }, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
 
             alert('✅ Hearing scheduled successfully!');
@@ -1520,8 +1512,6 @@ function HearingsTab({ caseId, caseData }) {
 
     const recordOutcome = async () => {
         try {
-            const token = localStorage.getItem('token');
-
             const payload = {
                 outcomeType: outcomeData.outcomeType,
                 judgeNotes: outcomeData.judgeNotes,
@@ -1533,7 +1523,7 @@ function HearingsTab({ caseId, caseData }) {
             }
 
             await axios.post(`${API_BASE_URL}/api/hearings/${selectedHearingForOutcome.id}/outcome`, payload, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
 
             alert('✅ Order recorded successfully & Case updated!');
@@ -2041,11 +2031,10 @@ function TimelineDisplay({ caseId }) {
 
     const fetchTimeline = async () => {
         try {
-            const token = localStorage.getItem('token');
             // Fetch both standard timeline and audit logs
             const [timelineRes, auditRes] = await Promise.all([
-                axios.get(`${API_BASE_URL}/api/timeline/${caseId}`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_BASE_URL}/api/audit/case/${caseId}`, { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${API_BASE_URL}/api/timeline/${caseId}`, { withCredentials: true }),
+                axios.get(`${API_BASE_URL}/api/audit/case/${caseId}`, { withCredentials: true })
             ]);
 
             const timelineEvents = (timelineRes.data || []).map(e => ({
@@ -2179,11 +2168,10 @@ function PartiesTab({ caseData, caseId, onUpdate }) {
     const handleSaveRespondentDetails = async () => {
         setIsSaving(true);
         try {
-            const token = localStorage.getItem('token');
             await axios.put(
                 `${API_BASE_URL}/api/cases/${caseId}/respondent-details`,
                 respondentDetails,
-                { headers: { Authorization: `Bearer ${token}` } }
+                { withCredentials: true }
             );
             alert("Respondent details updated successfully!");
             setIsEditing(false);
@@ -2200,9 +2188,8 @@ function PartiesTab({ caseData, caseId, onUpdate }) {
     const issueSummons = async () => {
         if (confirm("Issue digital summons to the Respondent? Task will be assigned to Police.")) {
             try {
-                const token = localStorage.getItem('token');
                 await axios.post(`${API_BASE_URL}/api/judge/cases/${caseId}/issue-summons`, {}, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    withCredentials: true
                 });
                 alert("Summons Issued! Police Dashboard updated.");
                 // Refetch data instead of reloading the page

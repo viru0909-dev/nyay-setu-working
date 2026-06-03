@@ -1,50 +1,15 @@
 import { useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
 
-export const useSessionMonitor = (token) => {
+/**
+ * Hook to monitor session expiry.
+ * With HttpOnly cookies, we rely on the backend to enforce session expiry
+ * and the frontend to handle 401 responses.
+ */
+export const useSessionMonitor = () => {
     const [showWarning, setShowWarning] = useState(false);
 
-
-    useEffect(() => {
-        if (!token) return;
-
-        try {
-            const decoded = jwtDecode(token);
-            const expiryTime = decoded.exp * 1000;
-            const currentTime = Date.now();
-
-            const warningTime = expiryTime - (5 * 60 * 1000);
-
-            const timeUntilWarning = warningTime - currentTime;
-            const timeUntilExpiry = expiryTime - currentTime;
-
-            if (timeUntilExpiry <= 0) {
-                handleLogout();
-                return;
-            }
-
-            const warningTimer = setTimeout(() => {
-                setShowWarning(true);
-            }, timeUntilWarning > 0 ? timeUntilWarning : 0);
-
-            const expiryTimer = setTimeout(() => {
-                handleLogout();
-            }, timeUntilExpiry);
-
-            return () => {
-                clearTimeout(warningTimer);
-                clearTimeout(expiryTimer);
-            };
-        } catch (error) {
-            console.error("Invalid token format", error);
-        }
-    }, [token]);
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        setShowWarning(false);
-        // Redirects to login with a special parameter so we can show a nice message later
-        window.location.href = '/login?reason=session_expired';
-    };
+    // Client-side monitoring disabled for secure HttpOnly cookies
+    // Session expiry is now handled via 401 intercepts in services/api.js
 
     return { showWarning, setShowWarning };
 };

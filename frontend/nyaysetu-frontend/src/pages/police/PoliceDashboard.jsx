@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
     FileText, Upload, Shield, CheckCircle2,
     Clock, TrendingUp, AlertTriangle, Loader2, Lock
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { policeAPI } from '../../services/api';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 export default function PoliceDashboard() {
     const navigate = useNavigate();
@@ -30,8 +32,8 @@ export default function PoliceDashboard() {
                 policeAPI.getStats(),
                 policeAPI.getPendingFirs(),
                 policeAPI.getInvestigations(),
-                axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/police/summons/pending`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                axios.get(`${API_BASE_URL}/api/police/summons/pending`, {
+                    withCredentials: true
                 })
             ]);
             setStats(statsRes.data);
@@ -48,9 +50,8 @@ export default function PoliceDashboard() {
 
     const handleCompleteSummons = async (caseId) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/police/summons/${caseId}/complete`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
+            await axios.post(`${API_BASE_URL}/api/police/summons/${caseId}/complete`, {}, {
+                withCredentials: true
             });
             alert('Success: Summons marked as SERVED');
             fetchDashboardData();

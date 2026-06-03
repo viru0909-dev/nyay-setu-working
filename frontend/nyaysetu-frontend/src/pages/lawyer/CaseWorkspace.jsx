@@ -360,10 +360,9 @@ function TabEvidence({ caseId }) {
         try {
             const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
             const url = `${API_BASE_URL}/api/documents/${doc.id}/certificate`;
-            const token = localStorage.getItem('token');
 
             const response = await fetch(url, {
-                headers: { Authorization: `Bearer ${token}` }
+                credentials: 'include'
             });
 
             if (!response.ok) throw new Error('Certificate not available');

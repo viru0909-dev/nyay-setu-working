@@ -13,13 +13,10 @@ import { registerSW } from 'virtual:pwa-register';
 const Root = () => {
     const [swRegistration, setSwRegistration] = useState(null);
 
-    // 1. Grab the user's token from local storage
-    const token = localStorage.getItem('token');
+    // 1. Start the background monitor engine (now relies on cookie validity)
+    const { showWarning, setShowWarning } = useSessionMonitor();
 
-    // 2. Start the background monitor engine
-    const { showWarning, setShowWarning } = useSessionMonitor(token);
-
-    // 3. The temporary function for the "Stay Logged In" button
+    // 2. The temporary function for the "Stay Logged In" button
     const handleRefresh = () => {
         if (import.meta.env.DEV) {
             console.log("User wants to stay logged in!");
@@ -43,19 +40,17 @@ const Root = () => {
 
     useEffect(() => {
         if (import.meta.env.DEV) {
-            const token = localStorage.getItem('token');
             const user = localStorage.getItem('user');
 
-            if (!token || !user) {
+            if (!user) {
                 const devUser = {
                     id: 1,
                     name: 'Dev User',
                     role: 'LITIGANT',
                 };
 
-                localStorage.setItem('token', 'dev-token');
                 localStorage.setItem('user', JSON.stringify(devUser));
-                console.log('🔧 DEV auth bypass enabled for local QA: litigant user seeded');
+                console.log('🔧 DEV auth bypass enabled for local QA: user profile seeded');
             }
         }
     }, []);

@@ -15,15 +15,12 @@ class NotificationService {
     /**
      * Connects to the WebSocket for real-time notifications securely
      */
-    connect(token) {
+    connect() {
         // Skip if already connected, connecting, or permanently failed
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             return;
         }
         if (this.isConnecting || this.connectionFailed) {
-            return;
-        }
-        if (!token || token === 'null' || token === 'undefined') {
             return;
         }
 
@@ -33,35 +30,25 @@ class NotificationService {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = new URL(this.API_BASE_URL).host;
             
-            // Secure URL without query parameters
+            // Secure URL without query parameters - cookies handled automatically by browser
             const wsUrl = `${protocol}//${host}/api/ws/notifications`;
 
             this.isConnecting = true;
 
-            // Merged environment log routing rules - CONFLICT 1 RESOLVED
-            if (!isProduction) {
-                if (import.meta.env.DEV) {
-                    console.log('Connecting to WebSocket:', wsUrl);
-                }
+            if (import.meta.env.DEV) {
+                console.log('Connecting to WebSocket:', wsUrl);
             }
 
             this.ws = new WebSocket(wsUrl);
 
-            // In-band Authentication frame payload dispatch - CONFLICT 2 RESOLVED
             this.ws.onopen = () => {
-                if (!isProduction) {
-                    if (import.meta.env.DEV) {
-                        console.log('✅ WebSocket connected');
-                    }
+                if (import.meta.env.DEV) {
+                    console.log('✅ WebSocket connected');
                 }
                 this.reconnectAttempts = 0;
                 this.isConnecting = false;
                 
-                // Securely transmit token in the body frame immediately on open
-                this.ws.send(JSON.stringify({
-                    type: 'AUTH',
-                    token: token
-                }));
+                // No manual AUTH frame needed - backend handles cookie-based auth in handshake
             };
 
             this.ws.onmessage = (event) => {
@@ -117,7 +104,7 @@ class NotificationService {
                 }
 
                 if (!this.connectionFailed) {
-                    this.attemptReconnect(token);
+                    this.attemptReconnect();
                 }
             };
         } catch (error) {
@@ -129,13 +116,13 @@ class NotificationService {
     /**
      * Reconnection logic with exponential backoff
      */
-    attemptReconnect(token) {
+    attemptReconnect() {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
             const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
 
             setTimeout(() => {
-                this.connect(token);
+                this.connect();
             }, delay);
         } else {
             this.connectionFailed = true;
@@ -174,9 +161,8 @@ class NotificationService {
 
     async fetchNotifications(userId) {
         try {
-            const token = localStorage.getItem('token');
             const response = await axios.get(`${this.API_BASE_URL}/api/notifications/user/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
             return response.data;
         } catch (error) {
@@ -186,9 +172,8 @@ class NotificationService {
 
     async markRead(id) {
         try {
-            const token = localStorage.getItem('token');
             await axios.post(`${this.API_BASE_URL}/api/notifications/${id}/read`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
         } catch (error) {
             // Suppress error responses

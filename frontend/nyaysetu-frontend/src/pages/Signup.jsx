@@ -26,7 +26,6 @@ export default function Signup() {
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(1); // 1: Form, 2: Face Registration
     const [registeredUser, setRegisteredUser] = useState(null);
-    const [registeredToken, setRegisteredToken] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
     const { setAuth } = useAuthStore();
@@ -90,9 +89,8 @@ export default function Signup() {
                 role: formData.role
             });
 
-            const { token, user } = response.data;
+            const { user } = response.data;
             setRegisteredUser(user);
-            setRegisteredToken(token);
             setStep(2); // Move to face registration
         } catch (err) {
             setError(err.response?.data?.message || t('auth:signup.errors.registrationFailed', 'Registration failed'));
@@ -104,7 +102,7 @@ export default function Signup() {
     const handleFaceCapture = async (descriptor) => {
         setLoading(true);
         try {
-            await enrollFace(descriptor, registeredToken);
+            await enrollFace(descriptor);
             completeSignup();
         } catch (err) {
             setError(t('auth:signup.errors.faceRegistrationFailed', 'Face registration failed. You can skip this for now or try again.'));
@@ -114,7 +112,7 @@ export default function Signup() {
     };
 
     const completeSignup = () => {
-        setAuth(registeredUser, registeredToken);
+        setAuth(registeredUser);
         navigate(resolvePostAuthPath(registeredUser.role, location.state));
     };
 

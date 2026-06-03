@@ -24,6 +24,7 @@ if (import.meta.env.DEV) {
 const api = axios.create({
     baseURL: API_BASE_URL,
     timeout: 10000, // 10s timeout — prevents infinite loading when backend is unreachable
+    withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -31,13 +32,6 @@ const api = axios.create({
 
 // Add token to requests if available
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-
-    // Only add Authorization header if token exists and is not null/undefined
-    if (token && token !== 'null' && token !== 'undefined') {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-
     // If request body is FormData, remove Content-Type to let browser set it with boundary
     if (config.data instanceof FormData) {
         delete config.headers['Content-Type'];
@@ -69,27 +63,9 @@ api.interceptors.response.use(
 
         const status = error.response?.status;
         if (status === 401 || status === 403) {
-            const token = localStorage.getItem('token');
-            const hasValidToken = token && token !== 'null' && token !== 'undefined';
-
-            if (!hasValidToken) {
-                try {
-                    window.dispatchEvent(
-                        new CustomEvent('guest:api-blocked', {
-                            detail: {
-                                message: 'Create an account to use this feature.',
-                                url: error.config?.url,
-                            },
-                        })
-                    );
-                } catch {
-                    // ignore
-                }
-            } else {
-                useAuthStore.getState().logout();
-                if (!window.location.pathname.startsWith('/login')) {
-                    window.location.assign('/login');
-                }
+            useAuthStore.getState().logout();
+            if (!window.location.pathname.startsWith('/login')) {
+                window.location.assign('/login');
             }
         }
         return Promise.reject(error);
@@ -99,8 +75,9 @@ api.interceptors.response.use(
 export const authAPI = {
     login: (credentials) => api.post('/api/v1/auth/login', credentials),
     register: (userData) => api.post('/api/v1/auth/register', userData),
+    me: () => api.get('/api/v1/auth/me'),
     logout: () => {
-        localStorage.removeItem('token');
+        api.post('/api/v1/auth/logout');
         localStorage.removeItem('user');
     },
 };
