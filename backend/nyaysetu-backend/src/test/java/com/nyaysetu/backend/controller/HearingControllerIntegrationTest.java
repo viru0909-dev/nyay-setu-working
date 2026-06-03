@@ -4,7 +4,7 @@ import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.HearingRepository;
 import com.nyaysetu.backend.repository.UserRepository;
-import com.nyaysetu.backend.security.jwt.JwtService;
+import com.nyaysetu.backend.service.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

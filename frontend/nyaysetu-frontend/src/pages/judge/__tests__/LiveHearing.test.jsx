@@ -1,11 +1,13 @@
 import React from "react";
-import { render, screen, act } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, act, fireEvent } from "@testing-library/react";
 import LiveHearing from "../LiveHearing";
-import * as judgeAPI from "../../services/api";
+import * as judgeAPI from "../../services/api.js";
 
 // Mock the judgeAPI
-jest.mock("../../services/api");
+jest.mock("../../services/api.js", () => ({
+  ...jest.requireActual("../../services/api.js"),
+  getTodaysHearings: jest.fn(),
+}));
 
 describe("LiveHearing component", () => {
   const hearingId = "123e4567-e89b-12d3-a456-426614174000";
@@ -48,7 +50,7 @@ describe("LiveHearing component", () => {
     expect(joinButton).toBeEnabled();
 
     // Simulate clicking the join button
-    await userEvent.click(joinButton);
+    fireEvent.click(joinButton);
 
     // Wait for the active hearing to be set
     await act(async () => {
@@ -84,7 +86,7 @@ describe("LiveHearing component", () => {
     });
 
     const joinButton = screen.getByRole("button", { name: /start session/i });
-    await userEvent.click(joinButton);
+    fireEvent.click(joinButton);
 
     await act(async () => {
       return Promise.resolve();
