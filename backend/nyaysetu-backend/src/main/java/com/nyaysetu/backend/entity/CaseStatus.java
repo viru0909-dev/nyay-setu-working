@@ -28,5 +28,9 @@ public enum CaseStatus {
     DRAFT_PENDING_CLIENT,   // Lawyer's draft awaiting litigant approval
     TRIAL_READY,            // Summons served AND BSA 63(4) certified
     JUDGMENT_PENDING,       // Trial complete, judgment awaited
-    READY_FOR_COURT         // All pre-trial requirements met
+    READY_FOR_COURT,        // All pre-trial requirements met
+
+    // Compatibility aliases (used by some tests / older code)
+    NEW                     // Alias for initial case creation status
 }
+
