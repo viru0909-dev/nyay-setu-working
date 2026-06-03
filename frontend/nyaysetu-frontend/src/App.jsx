@@ -6,7 +6,7 @@ import { LanguageProvider } from './contexts/LanguageContext.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
-import ScrollToTop from './ScrollToTop';
+import ScrollToTop from './ScrollToTop'; // Agar error aaye toh isko './components/ScrollToTop' kar lena
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
@@ -31,7 +31,6 @@ const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 
 // Dashboard Pages
 const AdminDashboard = lazy(() => import('./pages/dashboards/AdminDashboard'));
-
 const LawyerDashboard = lazy(() => import('./pages/dashboards/LawyerDashboard'));
 
 // Litigant Pages
@@ -46,9 +45,7 @@ const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
 const ForensicsPage = lazy(() => import('./pages/litigant/ForensicsPage'));
 const DocumentGeneratePage = lazy(() => import('./pages/litigant/DocumentGeneratePage'));
 const FindLawyerPage = lazy(() => import('./pages/litigant/FindLawyerPage'));
-const LawyerFeedbackPage = lazy(() => 
-  import('./pages/litigant/LawyerFeedbackPage'));
-
+const LawyerFeedbackPage = lazy(() => import('./pages/litigant/LawyerFeedbackPage'));
 
 // Judge Pages (keep only those still used)
 const ConductHearingPage = lazy(() => import('./pages/judge/ConductHearingPage'));
@@ -60,7 +57,6 @@ const JudicialOverview = lazy(() => import('./pages/judge/JudicialOverview'));
 const UnassignedPool = lazy(() => import('./pages/judge/UnassignedPool'));
 const LiveHearing = lazy(() => import('./pages/judge/LiveHearing'));
 const JudgeHearingsPage = lazy(() => import('./pages/judge/JudgeHearingsPage'));
-
 
 // Lawyer Pages
 const LawyerCasesPage = lazy(() => import('./pages/lawyer/LawyerCasesPage'));
