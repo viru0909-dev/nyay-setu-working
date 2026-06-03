@@ -927,3 +927,34 @@ This project and everyone participating in it is governed by the [Code of Conduc
 
 **Happy contributing! 🎉**
 
+We actively monitor the repository and are committed to helping you get your PR successfully merged.
+
+## Reporting Bugs
+
+If you encounter a bug, please create a new issue and include the following details:
+
+* **Title:** A clear and descriptive title
+* **Steps to Reproduce:** Step-by-step instructions to reproduce the issue
+* **Expected Behavior:** What you expected to happen
+* **Actual Behavior:** What actually happened
+* **Screenshots/Logs:** Attach screenshots or error logs if available
+* **Environment Details:** OS, browser, and version (if applicable)
+
+Providing detailed information helps maintainers resolve issues faster.
+
+## Pull Request Template
+
+When opening a Pull Request, please include:
+
+* **Description:** Brief summary of the changes
+* **Related Issue:** Link the issue (e.g., `Closes #123`)
+* **Type of Change:** (Bug fix / Feature / Documentation)
+* **Screenshots:** (If UI changes)
+* **Checklist:**
+
+  * [ ] Code follows project guidelines
+  * [ ] Tested locally
+  * [ ] No unnecessary files included
+
+This ensures faster review and approval of your PR.
+
