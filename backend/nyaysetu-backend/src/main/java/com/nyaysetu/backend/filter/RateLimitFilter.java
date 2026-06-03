@@ -190,7 +190,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
      */
     private boolean isRateLimitedEndpoint(String path) {
 
-        return path.matches("^/api/v1/auth/(login|register|forgot-password)$");
+        return path.matches("^/api/v1/auth/(login|register|forgot-password)$") || path.contains("/api/v1/vakil-friend/chat");
     }
 
     /**
