@@ -333,7 +333,20 @@ For environment variables, copy `.env.example` to `.env` and fill in your values
 | [Architecture Overview](./docs/architecture/overview.md) | System design, component diagrams, and data flow |
 | [AI Integration Guide](./AI_INTEGRATION_GUIDE.md) | Groq API and NLP orchestrator technical deep-dive |
 | [API Documentation](./SYSTEM_DOCUMENTATION.md) | All REST endpoints with request and response specifications |
+| [Postman Collection](./postman_collection.json) | Postman collection (v2.1) for testing Spring Boot & Python APIs |
+| [OpenAPI Specification](./docs/openapi.yaml) | OpenAPI 3.0 YAML spec for all endpoints |
 | [Contributing Guidelines](./CONTRIBUTING.md) | Branching strategy, commit conventions, and PR workflow |
+
+### API Testing
+
+To easily test the backend APIs:
+1. **Import the Postman Collection**: Import the `postman_collection.json` file located in the project root into Postman.
+2. **Configure Environment Variables**:
+   - `baseUrl`: Set to `http://localhost:8080` (Spring Boot backend)
+   - `nlpUrl`: Set to `http://localhost:8001` (Python services)
+   - `bearerToken`: Set to the JWT token returned after registering/logging in.
+3. **Authentication**: All authenticated endpoints automatically inherit the Bearer Token from the collection properties. Simply register or login via the `Authentication` folder, copy the `token` (or `accessToken`), and save it in the `bearerToken` variable.
+4. **OpenAPI Spec**: You can also import `docs/openapi.yaml` into Swagger Editor or your preferred OpenAPI client to visualize and interact with the endpoints.
 
 <hr/>
 
