@@ -50,22 +50,32 @@ public class SecurityConfig {
 
     @PostConstruct
     public void validateJwtSecretConfiguration() {
-        boolean isDev = java.util.Arrays.stream(environment.getActiveProfiles())
-                .anyMatch(profile -> profile.equalsIgnoreCase("dev") || profile.equalsIgnoreCase("test"));
+        // Treat tests as "development" to keep ApplicationContext loadable in CI
+        // where JWT_SECRET env var is often not injected.
+        String[] activeProfiles = environment.getActiveProfiles();
+        boolean isDevLike = java.util.Arrays.stream(activeProfiles)
+                .anyMatch(profile -> profile.equalsIgnoreCase("dev")
+                        || profile.equalsIgnoreCase("test")
+                        || profile.equalsIgnoreCase("integration"));
+
         String jwtSecretEnv = System.getenv("JWT_SECRET");
         boolean isJwtSecretEnvMissing = jwtSecretEnv == null || jwtSecretEnv.trim().isEmpty();
         boolean isUsingDefaultSecret = DEFAULT_JWT_SECRET.equals(jwtSecret);
 
-        if (!isDev && (isJwtSecretEnvMissing || isUsingDefaultSecret)) {
+        // If we are not running in dev-like profile, enforce strict security.
+        if (!isDevLike && (isJwtSecretEnvMissing || isUsingDefaultSecret)) {
             throw new IllegalStateException(
                     "Security configuration error: JWT_SECRET environment variable is required in non-development deployments. "
                             + "Application startup is blocked to prevent using an insecure default JWT signing key.");
         }
 
-        if (isDev && isUsingDefaultSecret) {
-            logger.warn("JWT secret is using the default fallback value. Set JWT_SECRET in your environment for safer development setup.");
+        // In dev-like profiles, allow startup even if JWT_SECRET is missing/default.
+        if (isDevLike && isUsingDefaultSecret) {
+            logger.warn(
+                    "JWT secret is using the default fallback value. Set JWT_SECRET in your environment for safer development/test setup.");
         }
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
