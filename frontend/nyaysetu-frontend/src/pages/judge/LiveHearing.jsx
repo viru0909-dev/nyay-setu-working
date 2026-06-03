@@ -118,6 +118,7 @@ export default function LiveHearing() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                             <button
                                 onClick={endCall}
+                                aria-label="Leave hearing"
                                 style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
                             >
                                 <ArrowLeft size={20} />

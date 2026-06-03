@@ -1,0 +1,15 @@
+{
+  "avatar": {
+    "idle": "Online — Ready to assist",
+    "thinking": "Analyzing your query...",
+    "talking": "Responding...",
+    "listening": "Listening to command...",
+    "passive": "Listening quietly...",
+    "title": "Nyay Saarthi",
+    "close": "Close Avatar",
+    "transcribing": "Transcribing...",
+    "listeningText": "Listening...",
+    "awaitingVoice": "Awaiting your voice...",
+    "subtitle": "Your AI-Powered Legal Assistant"
+  }
+}

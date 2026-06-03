@@ -44,7 +44,7 @@ public class VakilFriendDocumentService {
     private String groqModel;
 
     private final ObjectMapper objectMapper;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate; // Injected bean with timeouts — see RestTemplateConfig
     private final CaseEvidenceRepository evidenceRepository;
     private final VakilAiDiaryEntryRepository diaryRepository;
     private final CaseRepository caseRepository;

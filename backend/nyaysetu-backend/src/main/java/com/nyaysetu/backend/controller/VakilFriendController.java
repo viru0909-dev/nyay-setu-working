@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "Vakil Friend (AI Chat)", description = "AI-powered chat-first case filing and legal document analysis")
 @RestController
-@RequestMapping("/api/vakil-friend")
+@RequestMapping("/vakil-friend")
 @RequiredArgsConstructor
 @Slf4j
 public class VakilFriendController {

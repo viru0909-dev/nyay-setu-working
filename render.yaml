@@ -36,10 +36,10 @@ services:
     env: docker
     dockerContext: nlp-orchestrator
     dockerfilePath: nlp-orchestrator/Dockerfile
-    plan: free
+    plan: starter
     envVars:
       - key: FRONTEND_ORIGIN
-        value: https://nyay-setu-frontend.vercel.app # Replace with actual Vercel URL
+        value: https://nyaysetu-lovat.vercel.app
       - key: GROQ_API_KEY
         sync: false
       - key: GOOGLE_GEMINI_API_KEY

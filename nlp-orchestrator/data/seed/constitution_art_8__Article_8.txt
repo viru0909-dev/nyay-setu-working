@@ -1,0 +1,5 @@
+# <b>Article</b> <b>8</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=691208
+# Fetch query: Constitution of India Article 8
+
+Article 8 in Constitution of India 8. Rights of citizenship of certain persons of Indian origin residing outside India Notwithstanding anything in article 5, any person who or either of whose parents or any of whose grand-parents was born in India as defined in the Government of India Act, 1935 (as originally enacted), and who is ordinarily residing in any country outside India as so defined shall be deemed to be a citizen of India if he has been registered as a citizen of India by the diplomatic or consular representative of India in the country where he is for the time being residing on an application made by him therefore to such diplomatic or consular representative, whether before or after the commencement of this Constitution, in the form and manner prescribed by the Government of the Dominion of India or the Government of India.

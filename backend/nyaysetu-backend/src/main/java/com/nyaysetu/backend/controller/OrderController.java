@@ -16,7 +16,7 @@ import java.util.*;
 
 @Tag(name = "Court Orders", description = "Issue and retrieve court orders for cases")
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/orders")
 @RequiredArgsConstructor
 @Slf4j
 public class OrderController {

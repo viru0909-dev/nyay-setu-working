@@ -1,0 +1,682 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "myCases": "My Cases",
+    "upcomingHearings": "Upcoming Hearings",
+    "documents": "Documents",
+    "legalChat": "Legal Chat",
+    "active": "Active",
+    "chatWithLawyer": "Chat with Lawyer",
+    "loading": "Loading...",
+    "thisMonth": "This Month",
+    "newDocs": "New Documents",
+    "reviewDraft": "Review Draft",
+    "approve": "Approve",
+    "reject": "Reject",
+    "recentCases": "Recent Cases"
+  },
+
+  "caseDiary": {
+    "title": "Case Diary",
+    "backToDiary": "Back to Diary",
+    "downloadReport": "Download Report",
+    "subtitle": "Manage your court cases and police FIRs",
+    "fileNewCase": "File New Case",
+    "searchPlaceholder": "Search cases or FIRs...",
+    "allStatuses": "All Statuses",
+    "cases": "Cases",
+    "firs": "FIRs",
+    "download": "Download",
+    "noCases": "No cases found",
+    "gridView": "Grid View",
+    "listView": "List View",
+    "filter": "Filter",
+    "status": "Status",
+    "total": "Total",
+    "action": "Action",
+    "court": "Court",
+    "police": "Police",
+    "searchCasePlaceholder": "Search by title or Case ID...",
+    "searchFirPlaceholder": "Search by title or FIR ID...",
+    "loadingDiary": "Loading your diary...",
+    "noEntries": "No entries found",
+    "fileNew": "File New",
+    "noType": "No Type",
+    "policeFir": "Police FIR",
+    "noLocation": "No Location",
+    "viewDetails": "View Details",
+    "requestSent": "Request Sent",
+    "hireLawyer": "Hire Lawyer",
+    "viewLinkedCourtCase": "View Linked Court Case",
+    "applicationRejected": "Application Rejected",
+    "processing": "Processing"
+  },
+
+
+  "caseDetail": {
+    "tabs": {
+      "overview": "Overview",
+      "caseFiles": "Case Files",
+      "timeline": "Timeline",
+      "proceduralHealth": "Procedural Health"
+    },
+
+    "hireLawyer": "Hire Lawyer",
+    "selectVerifiedLawyer": "Select a verified legal professional",
+    "noLawyersAvailable": "No Lawyers Available",
+    "noLawyersAvailableDescription": "There are no verified lawyers accepting cases at the moment.",
+    "sendProposal": "Send Proposal",
+    "failedToLoadLawyers": "Failed to load available lawyers",
+
+    "proposalSentSuccess": "✅ Proposal sent successfully! The lawyer will review and accept/decline your case.",
+    "proposalSendFailed": "Failed to send proposal. This case might already have a pending proposal.",
+
+    "joinVirtualCourt": "Join VOIS 5G Virtual Court",
+
+    "caseDescription": "Case Description",
+    "aiAnalysis": "Nyay Saarthi Analysis",
+    "aiDraftReady": "AI Draft Ready for Review",
+    "reviewApprovePetition": "Review & Approve Petition",
+    "approveAndESign": "Approve & E-Sign",
+    "requestChanges": "Request Changes",
+    
+
+    "aiDraftDescription": "Nyay Saarthi has generated a case analysis. Approve it to create a formal case draft.",
+    "lawyerDraftDescription": "Your lawyer has submitted a draft petition. Please review and approve it to trigger the \"Submit to Court\" action for your lawyer.",
+    "confirmApproveDraft": "Are you sure you want to approve this draft? This will notify your lawyer.",
+    "draftApproved": "Draft Approved! Your lawyer can now submit to court.",
+    "failedApproveDraft": "Failed to approve draft. Please try again.",
+    "approveESign": "Approve & E-Sign",
+
+    "aiDraftGenerated": "Nyay Saarthi has generated a case analysis. Approve it to create a formal case draft.",
+    "reviewLawyerDraft": "Your lawyer has submitted a draft petition. Please review and approve it to trigger the Submit to Court action.",
+
+    "keyDetails": "Key Details",
+    "caseType": "Case Type",
+    "filedDate": "Filed Date",
+    "nextHearing": "Next Hearing",
+    "assignedJudge": "Assigned Judge",
+    "pendingAssignment": "Pending Assignment",
+    "toBeAnnounced": "TBA",
+
+    "proposalSent": "Proposal Sent",
+    "waitingLawyerResponse": "Waiting for lawyer response",
+
+    "legalRepresentative": "Legal Representative",
+    "privateCounsel": "Private Counsel",
+    "caseAccepted": "✓ Case Accepted",
+
+    "partiesInvolved": "Parties Involved",
+    "petitioner": "PETITIONER",
+    "respondent": "RESPONDENT",
+
+    "aiSuggestedDocuments": "AI Suggested Documents",
+    "analyzingCaseDetails": "Analyzing case details...",
+    "noSuggestionsFound": "No specific suggestions found.",
+
+    "uploadedFiles": "Uploaded Files",
+    "uploading": "Uploading...",
+    "uploadFile": "Upload File",
+    "noFilesFound": "No files found.",
+
+    "uploadedFromCaseFiles": "Uploaded from Case Files",
+    "uploadFailed": "Upload failed",
+    "analysisNotAvailable": "Analysis not available yet",
+    "evidenceDownloadUnavailable": "Evidence download not implemented yet. Verify on blockchain.",
+    "downloadFailed": "Download failed",
+    "certificateLoadFailed": "❌ Failed to load certificate. This document may not have verification data.",
+
+    "basedOnCaseType": "Based on your case type",
+    "aiRecommendsDocuments": "Groq AI recommends uploading these:",
+
+    "uploadThisDocument": "Upload this document",
+
+    "documentType": "Document Type",
+    "generalDocument": "General Document",
+
+    "keyEntitiesExtracted": "Key Entities Extracted",
+    "noEntitiesDetected": "No entities detected",
+
+    "analysisSummary": "Analysis Summary",
+    "noSummaryAvailable": "No summary available.",
+
+    "evidenceCertificate": "Section 63(4) Evidence Certificate",
+    "downloadPdf": "Download PDF",
+
+    "aiInsights": "AI Insights",
+    "analyzing": "Analyzing...",
+    "certificate": "Certificate",
+
+    "caseId": "Case ID",
+    "verified": "VERIFIED",
+    "hash": "Hash",
+
+    "aiDocumentAnalysis": "AI Document Analysis",
+
+    "priority": {
+      "normal": "Normal Priority",
+      "urgent": "Urgent Priority",
+      "critical": "Critical Priority"
+    },
+
+    "system": "System",
+    "completed": "Completed",
+    "step": "Step",
+
+    "lawyerInitial": "L",
+
+    "timeline": {
+      "caseFiled": "Case Filed",
+      "initialFilingCompleted": "Initial filing completed",
+      "cognizanceTaken": "Cognizance Taken",
+      "caseAdmitted": "Case Admitted",
+      "courtAcceptedCase": "Court has accepted the case",
+      "liveCaseRoadmap": "Live Case Roadmap",
+      "currentStage": "CURRENT STAGE",
+      "viewPreparationKit": "View Preparation Kit"
+    },
+
+    "timelineStages": {
+      "firFiled": "FIR / Complaint Filed",
+      "caseInitiation": "Case initiation",
+      "cognizance": "Cognizance",
+      "magistrateReviewsFir": "Magistrate reviews FIR",
+      "appearance": "Appearance",
+      "accusedAppears": "Accused appears in court",
+      "framingCharges": "Framing of Charges",
+      "chargesRead": "Charges read against accused",
+      "prosecutionEvidence": "Prosecution Evidence",
+      "witnessProof": "Witnesses & Proof",
+      "defenceEvidence": "Defence Evidence",
+      "accusedDefence": "Accused defence",
+      "finalArguments": "Final Arguments",
+      "lawyersDebate": "Lawyers debate merits",
+      "judgment": "Judgment",
+      "finalVerdict": "Final Verdict",
+
+      "plaintFiled": "Plaint Filed",
+      "summonsServed": "Summons Served",
+      "noticeRespondent": "Notice to Respondent",
+      "writtenStatement": "Written Statement",
+      "replyFiled": "Reply filed",
+      "framingIssues": "Framing of Issues",
+      "keyDisputePoints": "Key points of dispute",
+      "evidence": "Evidence",
+      "documentsWitnesses": "Documents & Witnesses",
+      "arguments": "Arguments",
+      "finalHearing": "Final hearing",
+      "decreePassed": "Decree passed"
+    },
+
+    "preparationKit": {
+      "title": "Preparation Kit",
+      "for": "For",
+      "whatToExpect": "What to expect",
+      "prepareDocuments": "Prepare your documents and be ready to answer questions regarding this stage.",
+      "recommendedActions": "Recommended Actions",
+      "reviewDocuments": "Review all filed documents related to this stage.",
+      "consultLawyer": "Consult with your lawyer 2 days prior.",
+      "organizeEvidence": "Organize original copies of evidence.",
+      "gotIt": "Got it, thanks!"
+    },
+
+    "aiPrepKit": {
+      "title": "AI Hearing Prep Kit",
+      "forStage": "For Stage:",
+      "whatToExpect": "WHAT TO EXPECT",
+      "physicalPresence": "Your physical presence might be required.",
+      "ensureDocuments": "Ensure all related documents are uploaded.",
+      "recommendedActions": "RECOMMENDED ACTIONS",
+      "reviewEvidence": "Review submitted evidence with lawyer",
+      "dontMissCourt": "Don't miss court date",
+      "gotIt": "Got it!",
+      "judgeReview": "The judge will review",
+      "thisStage": "this stage"
+    },
+
+    "bsaGenerator": {
+      "title": "BSA Section 63(4) Generator",
+      "subtitle": "Digital Evidence Certification Utility",
+      "scanMetadata": "Scanning Evidence Metadata...",
+      "generateHash": "Generating SHA-256 Hash...",
+      "esignVerification": "Aadhaar e-Sign Verification",
+      "authenticate": "Please authenticate using Aadhaar e-Sign to certify the integrity of 4 evidence files.",
+      "certificateGenerated": "Certificate Generated Successfully! (Mock)",
+      "esignWithAadhaar": "e-Sign with Aadhaar"
+    },
+
+    "certificatePreview": "Certificate Preview",
+
+    "proceduralHealth": {
+      "title": "Procedural Health & Compliance",
+      "subtitle": "Ensure your case is ready for the next hearing.",
+      "criticalRequirements": "CRITICAL REQUIREMENTS",
+      "bsaCertificate": "Section 63(4) BSA Certificate",
+      "certificateVerified": "Certificate provided and verified on blockchain.",
+      "certificateMissing": "Required for admissibility of digital evidence. Missing certificate may lead to evidence rejection.",
+      "generateCertificate": "Generate & Sign Certificate",
+      "summonsStatus": "Summons Service Status",
+      "summonsServed": "Summons successfully served to all respondents.",
+      "summonsPending": "Pending service. Court will not proceed until summons are served.",
+      "trackStatus": "Track Status",
+      "readinessScore": "Readiness Score",
+      "ready": "Ready",
+      "impactAnalysis": "IMPACT ANALYSIS",
+      "impactDescription": "Your case is currently halted at the Admission stage due to pending procedures. Resolving the red items will improve your readiness score."
+    }
+  },
+
+  
+
+
+  "fileUnified": {
+  "selectCategory": "Select category",
+  "provideInformation": "Provide information",
+  "uploadFiles": "Upload files",
+  "confirmSubmit": "Confirm & submit",
+  "caseFiledSuccess": "Case Filed Successfully!",
+  "firSubmittedSuccess": "FIR Submitted Successfully!",
+  "caseRegistered": "Your case has been registered with the court",
+  "firSentReview": "Your FIR has been sent for police review",
+  "goToCaseDiary": "Go to Case Diary",
+  "fileAnother": "File Another",
+  "fileCaseFir": "File Case / FIR",
+  "chooseFilingType": "Choose between filing a court case or a police FIR",
+  "askNyaySaarthi": "Ask Nyay Saarthi",
+  "courtCase": "Court Case",
+  "policeFir": "Police FIR",
+  "caseType": "Case Type",
+    "caseDetails": "Case Details",
+    "documents": "Documents",
+    "review": "Review",
+    "selectCaseType": "Select Case Type",
+    "civilCase": "Civil Case",
+  "civilCaseDesc": "Property, contracts, disputes",
+
+  "criminalCase": "Criminal Case",
+  "criminalCaseDesc": "Criminal offenses",
+
+  "familyLaw": "Family Law",
+  "familyLawDesc": "Divorce, custody, inheritance",
+
+  "propertyDispute": "Property Dispute",
+  "propertyDisputeDesc": "Land, ownership disputes",
+
+  "commercial": "Commercial",
+  "commercialDesc": "Business, trade matters",
+  "caseTitle": "Case Title",
+"caseTitlePlaceholder": "Brief title of your case",
+"caseDescription": "Case Description",
+"caseDescriptionPlaceholder": "Detailed description...",
+"petitioner": "Petitioner",
+"petitionerPlaceholder": "Your name",
+"respondent": "Respondent",
+"respondentPlaceholder": "Other party",
+"urgency": "Urgency",
+"normal": "Normal",
+  "urgent": "Urgent",
+  "critical": "Critical",
+  "uploadDocuments": "Upload Documents",
+"clickUploadFiles": "Click to upload files",
+"supportedFormats": "PDF, DOC, JPG, PNG (max 10MB)",
+"thinking": "Thinking...",
+"analyzeDocument": "✨ Analyze Document",
+"reviewConfirm": "Review & Confirm",
+"title": "Title",
+"petitionerRespondent": "Petitioner vs Respondent",
+"files": "files",
+"previous": "Previous",
+"next": "Next",
+"submitting": "Submitting...",
+"submitCase": "Submit Case",
+"filePoliceFir": "File Police FIR",
+  "incidentTitle": "Incident Title",
+  "incidentTitlePlaceholder": "e.g., Theft at residence",
+  "incidentDate": "Incident Date",
+  "location": "Location",
+  "locationPlaceholder": "e.g., Near City Mall, Pune",
+  "incidentDescription": "Incident Description",
+  "incidentDescriptionPlaceholder": "Describe what happened in detail...",
+  "evidenceOptional": "Evidence (Optional)",
+  "clickUploadEvidence": "Click to upload evidence",
+  "supportedEvidenceFormats": "Supported: PDF, JPG, PNG, MP4",
+  "submitFirPolice": "Submit FIR to Police",
+  "nyaySaarthiAssist": "Nyay Saarthi Assist",
+  "aiAssistDescription": "Describe your situation, I'll help you file.",
+  "aiPlaceholder": "e.g., My landlord is refusing to return my deposit even though I gave notice...",
+  "analyzingCase": "Analyzing your case...",
+  "analyzeSuggest": "Analyze & Suggest",
+  "recommendedFiling": "Recommended Filing",
+  "category": "Category",
+  "criminal": "Criminal",
+  "civil": "Civil",
+  "suggestedTitle": "Suggested Title",
+  "convertToFiling": "Convert to Filing",
+  "backToDashboard": "Back to Dashboard"
+},
+
+  "forensics": {
+    "title": "Accident Forensic Analysis",
+    "subtitle": "Video Crime Scene Reconstruction",
+    "noVideo": "No Video Uploaded",
+    "uploadTitle": "Upload Accident Footage",
+    "uploadDescription": "MP4, MOV or AVI files up to 500MB",
+    "engineStatus": "Forensic Engine Status",
+    "processing": "Processing...",
+    "timeline": "RECONSTRUCTED TIMELINE",
+    "waitingAnalysis": "Waiting for frame analysis...",
+    "legalImplications": "LEGAL IMPLICATIONS",
+    "analyzingViolations": "Analyzing violations...",
+    "logs": "FORENSIC_ENGINE_LOGS",
+    "reportReady": "Liability Assessment Ready",
+    "primaryLiable": "Primary Liable Party detected:",
+    "viewReport": "View Case Report",
+
+    "events": {
+      "startExtraction": "AI: Starting Forensic Frame Extraction...",
+      "timelineExtraction": "Gemini: Extracting timeline from video frames...",
+      "legalLookup": "Groq: Looking up relevant legal sections (MVA, IPC)...",
+      "reportGenerated": "Success: Liability Report Generated"
+    },
+
+    "avatar": {
+      "analysisStart": "I am analyzing the video footage. I can see a collision at the intersection where vehicle B failed to yield.",
+      "legalSections": "Based on my analysis, sections IPC 279 and MVA 184 are applicable here due to rash driving and signal violation.",
+      "finalReport": "The final liability report is ready. Vehicle B is primarily liable for the accident."
+    },
+    "timelineEvents": {
+      "vehicleA": "Vehicle A entering intersection at 45km/h",
+      "vehicleB": "Vehicle B fails to stop at red light",
+      "impact": "Point of Impact at Center-Left lane"
+    },
+
+    "legalSections": {
+      "dangerousDriving": "Dangerous Driving",
+      "rashDriving": "Rash Driving on a Public Way",
+      "mvaPenalty": "Imprisonment up to 6 months or fine",
+      "ipcPenalty": "Standard legal penalty applies"
+    },
+
+    "report": {
+      "vehicleB": "Vehicle B (White SUV)",
+      "signalViolation": "Signal violation",
+      "overspeeding": "Overspeeding"
+    }
+  },
+
+  "hearings": {
+    "title": "Hearings",
+    "subtitle": "Your scheduled virtual court sessions",
+    "searchPlaceholder": "Search hearings...",
+    "loading": "Loading hearings...",
+    "noHearings": "No hearings found",
+    "noHearingsDescription": "You don't have any matching hearings.",
+    "courtHearing": "Court Hearing",
+    "secureLine": "End-to-End Encrypted Secure Judicial Line",
+    "sessionLive": "SESSION LIVE",
+    "leaveSession": "LEAVE SESSION",
+    "today": "TODAY",
+    "virtualCourt": "Virtual Court",
+    "joinNow": "Join Now",
+    "upcoming": "Upcoming",
+    "completed": "Completed",
+    "weeklyOverview": "Weekly Overview",
+    "yourHearings": "Your Hearings",
+    "legalAid": "Legal Aid",
+    "legalAidDescription": "Need help preparing for court? Access our library of litigant rights and procedural guidelines.",
+    "viewResources": "View Resources",
+    "fetchError": "Failed to load hearings."
+  },
+
+  "lawyerChat": {
+    "myLawyers": "My Lawyers",
+    "noLawyers": "No lawyers assigned to your cases yet.",
+    "selectLawyer": "Select a Lawyer",
+    "selectConversation": "Select a conversation to start chatting with your lawyer.",
+    "sharedViaChat": "Shared via chat by client",
+    "sharedFile": "Shared file:",
+    "voiceMessage": "Voice Message",
+    "defaultAiMessage": "Can you update me on the status of my case?",
+    "microphoneError": "Could not access microphone.",
+    "joinVideoCall": "Join Video Call",
+    "joinAudioCall": "Join Audio Call",
+    "recordingAudio": "Recording audio...",
+    "typeMessage": "Type a message...",
+    "aiHelp": "AI HELP",
+    "videoCallRequest": "I would like to start a video call.",
+    "phoneCallRequest": "I would like to have a phone call.",
+    "downloadFile": "Download File",
+    "requestMeeting": "Request Meeting",
+    "defaultLawyer": "Lawyer",
+    "casePrefix": "Case:",
+    "regardingCase": "regarding Case",
+    "fileUploadError": "Failed to upload file.",
+    "voiceUploadError": "Failed to upload voice message.",
+    "sendMessageError": "Failed to send message.",
+    "fetchCasesError": "Failed to load cases.",
+    "fetchMessagesError": "Failed to load messages.",
+    "aiHelpError": "Failed to generate AI help.",
+    "findLawyer": "🔍 Find a Lawyer"
+  },
+
+  "profile": {
+    "checking": "Checking...",
+
+    "profileSettings": "Profile Settings",
+    "manageAccount": "Manage your account information and security settings",
+
+    "faceLogin": "Face Login",
+    "enabled": "Enabled",
+    "notConfigured": "Not configured",
+
+    "enableFaceLogin": "Enable Face Login",
+    "updateFaceLogin": "Update Face Login",
+
+    "personalInformation": "Personal Information",
+
+    "save": "Save",
+    "edit": "Edit",
+
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "profession": "Profession",
+    "address": "Address",
+
+    "securitySettings": "Security Settings",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "updatePassword": "Update Password",
+
+    "biometricEnrollment": "Biometric Enrollment",
+    "neuralSignature": "Neural Signature Registration System",
+
+    "faceEnrolled": "Face enrolled successfully!",
+    "faceEnrollmentFailed": "Face enrollment failed",
+    "confirmDeleteFace": "Are you sure you want to disable face login? This will delete your biometric data.",
+    "faceDeleted": "Face data deleted.",
+    "deleteFaceFailed": "Failed to delete face data",
+
+    "professions": {
+      "judge": "High Court Justice",
+      "lawyer": "Senior Advocate",
+      "police": "Police Officer",
+      "default": "Software Engineer"
+    },
+
+    "bio": {
+      "judge": "Presiding over civil and criminal matters with a commitment to justice.",
+      "lawyer": "Legal counsel specializing in constitutional and criminal law.",
+      "police": "Dedicated to maintaining law and order and serving the community.",
+      "default": "Experienced professional seeking legal assistance for property matters."
+    }
+  },
+
+  "vakilFriend": {
+    "welcome": "🙏 Namaste! I am Nyay Saarthi, your AI legal assistant. How can I help you today?",
+    "offlineMessage": "🙏 Namaste! I am Nyay Saarthi (offline mode). The backend server is not responding. Please start the backend and refresh.",
+    "deepResearchError": "Deep research failed.",
+    "speechNotSupported": "Your browser does not support speech recognition. Please use Chrome or Edge.",
+    "noSession": "⚠️ No active session. Please refresh the page.",
+    "sendError": "❌ Sorry, I encountered an error. Please try again.",
+    "fileCaseError": "❌ Failed to file case. Please try again or contact support.",
+    "fileTypeNotSupported": "File type not supported:",
+    "fileTooLarge": "File too large:",
+    "analyzingDocument": "Analyzing document:",
+    "attachedDocument": "Attached document:",
+    "analyzeFailed": "Failed to analyze",
+
+    "chatHistory": "Chat History",
+    "newChat": "New Chat",
+    "noHistory": "No chat history yet",
+    "recentSessions": "Recent Sessions",
+
+    "aiDocumentAnalysis": "AI Document Analysis",
+    "analyzing": "Analyzing Document...",
+    "shaProtected": "SHA-256 PROTECTED",
+    "validity": "Validity",
+    "usefulness": "Usefulness",
+    "evidenceVault": "Evidence Vault",
+    "documentType": "Document Type",
+    "category": "Category",
+    "aiSummary": "AI Summary",
+    "summaryPending": "Analytical summary pending...",
+    "keyPoints": "Key Points",
+    "criticalIssues": "Critical Issues",
+    "closeAnalysis": "Close Analysis",
+
+    "title": "Nyay Saarthi",
+    "subtitle": "Chat with our AI to file your legal case",
+    "language": "Language:",
+
+    "filing": "Filing...",
+    "completeFiling": "Complete Filing",
+
+    "connecting": "Connecting to Nyay Saarthi...",
+    "securedAssistant": "Secured AI Assistant",
+    "connectingShort": "Connecting...",
+
+    "attachDocument": "Attach document",
+    "placeholder": "Describe your legal issue...",
+    "stopRecording": "Stop Recording",
+    "speak": "Speak (Bhashini AI)",
+    "hideAvatar": "Hide AI Avatar",
+    "showAvatar": "Show AI Avatar",
+    "avatarGreeting": "Namaste. I am your AI Legal Assistant. You can speak to me anytime.",
+    "history": "History"
+  },
+
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "close": "Close",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "search": "Search",
+    "filter": "Filter",
+    "download": "Download",
+    "upload": "Upload",
+    "edit": "Edit",
+    "view": "View",
+    "yes": "Yes",
+    "no": "No",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "status": "Status",
+    "success": "Success",
+    "error": "Error",
+    "notAvailable": "N/A",
+    "zeroBytes": "0 B"
+  },
+
+  "popups": {
+    "caseUpdated": "Case updated successfully!",
+    "updateFailed": "Failed to update case.",
+    "proposalSent": "Proposal sent successfully!",
+    "proposalFailed": "Failed to send proposal.",
+    "uploadFailed": "Upload failed.",
+    "downloadFailed": "Download failed.",
+    "networkError": "Network error. Please check your connection.",
+    "somethingWentWrong": "Something went wrong.",
+    "sessionExpired": "Session expired. Please login again.",
+    "confirmDelete": "Are you sure you want to delete this item?",
+    "confirmLogout": "Are you sure you want to logout?",
+    "draftApproved": "Draft Approved!",
+    "draftRejected": "Changes requested and sent back.",
+    "faceEnrollSuccess": "Face enrolled successfully!",
+    "faceEnrollFailed": "Face enrollment failed.",
+    "faceDeleteSuccess": "Face data deleted successfully.",
+    "faceDeleteFailed": "Failed to delete face data.",
+    "passwordChanged": "Password changed successfully.",
+    "passwordFailed": "Failed to change password.",
+    "aiRefineFailed": "AI Refinement failed. Please try again.",
+    "loadLawyersFailed": "Failed to load available lawyers.",
+    "analysisUnavailable": "Analysis not available yet.",
+    "fileTooLarge": "File size exceeds allowed limit.",
+    "unsupportedFile": "Unsupported file format.",
+    "uploadSuccess": "File uploaded successfully!",
+    "saveSuccess": "Changes saved successfully!",
+    "saveFailed": "Failed to save changes.",
+    "hearingJoinFailed": "Unable to join hearing.",
+    "messageSendFailed": "Failed to send message.",
+    "caseFiledSuccess": "Case filed successfully!",
+    "firFiledSuccess": "FIR filed successfully!",
+    "firFiledFailed": "Failed to file FIR.",
+    "documentDeleted": "Document deleted successfully.",
+    "confirmFaceDelete": "Are you sure you want to disable face login?",
+    "approveDraft": "Do you want to digitally sign and approve this draft?",
+    "rejectDraft": "Please enter your feedback or requested changes."
+  },
+  "statuses": {
+  "active": "Active",
+  "inactive": "Inactive",
+  "pending": "Pending",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "completed": "Completed",
+  "closed": "Closed",
+  "open": "Open",
+  "online": "Online",
+  "offline": "Offline",
+  "live": "Live",
+  "upcoming": "Upcoming",
+  "in_progress": "In Progress",
+  "under_review": "Under Review",
+  "awaiting_documents": "Awaiting Documents",
+  "verified": "Verified",
+  "failed": "Failed",
+  "success": "Success",
+  "pending_police_review": "Pending Police Review"
+},
+"lawyers": {
+  "matchExperts": "Match with Legal Experts",
+  "sourcingExperts": "Sourcing available legal experts...",
+  "noLawyersAvailable": "No lawyers available currently",
+  "experience": "Experience",
+  "selectBestLawyer": "Select the best lawyer for:",
+  "noLawyersDescription": "Our partner lawyers are currently handling other cases. Please try again shortly.",
+  "experienceValue": "8+ Years",
+  "cases": "Cases",
+  "selectAndSendProposal": "Select & Send Proposal"
+},
+  "aiBrain": {
+    "title": "NyaySetu Brain",
+    "subtitle": "Active Reasoning Engine",
+    "placeholder": "Type your inquiry...",
+    "connectionError": "⚠️ Connection to Brain interrupted. Please try again shortly.",
+
+    "judgeWelcome": "🙏 NyaySetu Judicial Brain online. I can help analyze dossiers, check evidence validity, or suggest procedural steps for your pending cases. How may I assist you, Your Honor?",
+
+    "lawyerWelcome": "Greetings, Counselor. I'm ready to assist with case drafting, IPC/BNS research, or client communication strategies. What's on the agenda today?",
+
+    "litigantWelcome": "🙏 Namaste. I am your NyaySetu legal guide. I can help you understand your rights, file a new case, or find a legal representative. What would you like to know?",
+
+    "defaultWelcome": "Hello. I am the NyaySetu AI Brain. How can I help you today?"
+  }
+}

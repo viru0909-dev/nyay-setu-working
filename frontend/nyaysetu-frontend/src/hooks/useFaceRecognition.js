@@ -33,7 +33,7 @@ export const useFaceRecognition = () => {
             ]);
 
             setModelsLoaded(true);
-            console.log('Face recognition models loaded successfully');
+         //   console.log('Face recognition models loaded successfully');
         } catch (err) {
             console.error('Error loading face recognition models:', err);
             setError('Failed to load face recognition models');

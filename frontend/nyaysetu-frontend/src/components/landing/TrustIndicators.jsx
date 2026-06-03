@@ -114,10 +114,10 @@ export default function TrustIndicators() {
                                 whileHover={{ y: -10, transition: { duration: 0.3 } }}
                                 style={{
                                     padding: '4rem 3rem',
-                                    background: 'rgba(255, 255, 255, 0.4)',
-                                    backdropFilter: 'blur(10px)',
+                                    background: 'var(--bg-glass)',
+                                    backdropFilter: 'var(--glass-blur)',
                                     borderRadius: '24px',
-                                    border: 'var(--border-glass)',
+                                    border: '1px solid var(--border-light)',
                                     textAlign: 'center',
                                     cursor: 'pointer',
                                     boxShadow: 'var(--shadow-glass)',
@@ -126,17 +126,18 @@ export default function TrustIndicators() {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.borderColor = item.color;
                                     e.currentTarget.style.boxShadow = `0 15px 40px ${item.color}20`;
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)';
+                                    e.currentTarget.style.background = 'var(--bg-glass-strong)';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                                    e.currentTarget.style.borderColor = 'var(--border-light)';
                                     e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)';
+                                    e.currentTarget.style.background = 'var(--bg-glass)';
                                 }}
                             >
                                 {/* Icon */}

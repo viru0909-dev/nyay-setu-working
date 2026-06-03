@@ -13,8 +13,7 @@ class NotificationService {
     }
 
     /**
-     * Connects to the WebSocket for real-time notifications
-     * Silently fails if WebSocket is not available
+     * Connects to the WebSocket for real-time notifications securely
      */
     connect(token) {
         // Skip if already connected, connecting, or permanently failed
@@ -24,54 +23,104 @@ class NotificationService {
         if (this.isConnecting || this.connectionFailed) {
             return;
         }
+        if (!token || token === 'null' || token === 'undefined') {
+            return;
+        }
 
-        // Detect production environment
         const isProduction = !window.location.hostname.includes('localhost');
 
         try {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = new URL(this.API_BASE_URL).host;
-            const wsUrl = `${protocol}//${host}/api/ws/notifications?token=${token}`;
+            
+            // Secure URL without query parameters
+            const wsUrl = `${protocol}//${host}/api/ws/notifications`;
 
             this.isConnecting = true;
 
-            // Only log in development
+            // Merged environment log routing rules - CONFLICT 1 RESOLVED
             if (!isProduction) {
-                console.log('Connecting to WebSocket:', wsUrl);
+                if (import.meta.env.DEV) {
+                    console.log('Connecting to WebSocket:', wsUrl);
+                }
             }
 
             this.ws = new WebSocket(wsUrl);
 
+            // In-band Authentication frame payload dispatch - CONFLICT 2 RESOLVED
             this.ws.onopen = () => {
                 if (!isProduction) {
-                    console.log('✅ WebSocket connected');
+                    if (import.meta.env.DEV) {
+                        console.log('✅ WebSocket connected');
+                    }
                 }
                 this.reconnectAttempts = 0;
                 this.isConnecting = false;
+                
+                // Securely transmit token in the body frame immediately on open
+                this.ws.send(JSON.stringify({
+                    type: 'AUTH',
+                    token: token
+                }));
             };
 
             this.ws.onmessage = (event) => {
                 try {
-                    const notification = JSON.parse(event.data);
-                    this.notifyListeners(notification);
+                    const message = JSON.parse(event.data);
+
+                    if (message.type === 'AUTH_SUCCESS') {
+                        if (!isProduction) {
+                            if (import.meta.env.DEV) {
+                                console.log('✅ Notification WebSocket authenticated');
+                            }
+                        }
+                        this.reconnectAttempts = 0;
+                        this.isConnecting = false;
+                        this.connectionFailed = false;
+                        return;
+                    }
+
+                    if (message.type === 'AUTH_ERROR') {
+                        this.isConnecting = false;
+                        this.connectionFailed = true;
+                        this.disconnect();
+                        return;
+                    }
+
+                    if (message.type === 'NOTIFICATION') {
+                        this.notifyListeners(message.payload);
+                        return;
+                    }
+
+                    this.notifyListeners(message);
                 } catch (error) {
-                    // Silent fail on parse errors
+                    if (!isProduction) {
+                        if (import.meta.env.DEV) {
+                            console.warn('Invalid notification WebSocket message format received');
+                        }
+                    }
                 }
             };
 
             this.ws.onerror = () => {
-                // Suppress error logs
                 this.isConnecting = false;
             };
 
-            this.ws.onclose = () => {
+            this.ws.onclose = (event) => {
                 this.isConnecting = false;
+                this.ws = null;
+                
+                // Code 1008 means server sandbox kicked the connection due to auth timeout/failure
+                if (event.code === 1008) {
+                    this.connectionFailed = true;
+                    return;
+                }
+
                 if (!this.connectionFailed) {
                     this.attemptReconnect(token);
                 }
             };
         } catch (error) {
-            // Silent fail
             this.isConnecting = false;
             this.connectionFailed = true;
         }
@@ -89,7 +138,6 @@ class NotificationService {
                 this.connect(token);
             }, delay);
         } else {
-            // Stop trying after max attempts
             this.connectionFailed = true;
         }
     }
@@ -106,7 +154,7 @@ class NotificationService {
             try {
                 callback(notification);
             } catch (error) {
-                // Silent fail
+                // Silent catch to keep listener loops active
             }
         });
     }
@@ -143,7 +191,7 @@ class NotificationService {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch (error) {
-            // Silent fail
+            // Suppress error responses
         }
     }
 }

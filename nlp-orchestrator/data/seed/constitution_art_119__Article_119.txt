@@ -1,0 +1,5 @@
+# <b>Article</b> <b>119</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=710990
+# Fetch query: Constitution of India Article 119
+
+Article 119 in Constitution of India 119. Regulation by law of procedure in Parliament in relation to financial business Parliament may, for the purpose of the timely completion of financial business, regulate by law the procedure of, and the conduct of business in, each House of Parliament in relation to any financial matter or to any Bill for the appropriation of moneys out of the Consolidated Fund of India, and, if and so far as any provision of any law so made is inconsistent with any rule made by a House of Parliament under clause (1) of article 118 or with any rule or standing order having effect in relation to Parliament under clause (2) of that article, such provision shall prevail.
