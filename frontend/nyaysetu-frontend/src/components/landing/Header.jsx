@@ -163,6 +163,8 @@ export default function Header({ hideAuthButtons = false }) {
                 <div className="header-container" style={{
                     maxWidth: '1400px',
                     margin: '0 auto',
+                    width: '100%',
+                    boxSizing: 'border-box',
                 }}>
                     {/* Logo */}
                     <Link to="/" style={{
@@ -718,6 +720,8 @@ export default function Header({ hideAuthButtons = false }) {
                         flex-wrap: wrap !important;
                         gap: 1rem !important;
                         padding: 0.7rem 2rem;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
                     }
 
                     @media (max-width: 900px) {
