@@ -4,6 +4,8 @@ import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.CaseStage;
 import com.nyaysetu.backend.entity.CaseStatus;
 import com.nyaysetu.backend.repository.CaseRepository;
+import com.nyaysetu.backend.notification.entity.Notification;
+import com.nyaysetu.backend.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -31,6 +33,7 @@ public class CaseStateTransitionService {
     private final CaseRepository caseRepository;
     private final CaseEventService eventService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
     // Stage names for the 7-step judicial process
     private static final String[] STAGE_NAMES = {
@@ -75,6 +78,8 @@ public class CaseStateTransitionService {
 
         // Broadcast to judge's unassigned pool
         broadcastToJudgePool(caseEntity);
+
+        sendCaseStatusNotification(caseEntity, "Case Status Update", "Your case was submitted to court and is now awaiting cognizance.", null);
 
         log.info("Police {} submitted case {} to court", officerName, caseId);
         return caseEntity;
@@ -228,6 +233,8 @@ public class CaseStateTransitionService {
         // Broadcast to all parties
         broadcastCaseUpdate(caseEntity, "Judge took cognizance - case admitted");
 
+        sendCaseStatusNotification(caseEntity, "Case Status Update", "The Judge has taken cognizance of your case. It is now Under Review (Admitted).", judgeId);
+
         log.info("Judge {} took cognizance of case {}", judgeName, caseId);
         return caseEntity;
     }
@@ -280,6 +287,8 @@ public class CaseStateTransitionService {
                 )
         );
 
+        sendCaseStatusNotification(caseEntity, "Case Stage Advanced", "Case advanced to Stage " + newStage + ": " + stageName + ".", judgeId);
+
         log.info("Judge {} advanced case {} to stage {}: {}", judgeName, caseId, newStage, stageName);
         return caseEntity;
     }
@@ -303,6 +312,8 @@ public class CaseStateTransitionService {
                 "System",
                 "Summons successfully served to all parties"
         );
+
+        sendCaseStatusNotification(caseEntity, "Summons Served", "Digital Summons has been successfully served.", null);
 
         // Check if case is now trial ready
         checkAndUpdateTrialReady(caseEntity);
@@ -364,6 +375,8 @@ public class CaseStateTransitionService {
             );
 
             broadcastCaseUpdate(caseEntity, "Case is now Trial Ready");
+
+            sendCaseStatusNotification(caseEntity, "Case Status Update", "Case status changed to Trial Ready. All trial requirements (summons served + BSA certified) have been met.", null);
         }
     }
 
@@ -397,6 +410,8 @@ public class CaseStateTransitionService {
         );
 
         broadcastCaseUpdate(caseEntity, "Petition filed in court - awaiting cognizance");
+
+        sendCaseStatusNotification(caseEntity, "Case Filed", "Approved petition filed in court. Awaiting judge's cognizance.", Long.parseLong(lawyerId));
 
         log.info("Lawyer {} filed case {} in court", lawyerName, caseId);
         return caseEntity;
@@ -472,5 +487,36 @@ public class CaseStateTransitionService {
     private CaseEntity getCaseOrThrow(UUID caseId) {
         return caseRepository.findById(caseId)
                 .orElseThrow(() -> new IllegalArgumentException("Case not found: " + caseId));
+    }
+
+    private void sendCaseStatusNotification(CaseEntity caseEntity, String title, String message, Long excludeUserId) {
+        try {
+            // Notify Client (Litigant)
+            if (caseEntity.getClient() != null && !caseEntity.getClient().getId().equals(excludeUserId)) {
+                notificationService.save(Notification.builder()
+                        .userId(caseEntity.getClient().getId())
+                        .title(title)
+                        .message(message)
+                        .build());
+            }
+            // Notify Lawyer
+            if (caseEntity.getLawyer() != null && !caseEntity.getLawyer().getId().equals(excludeUserId)) {
+                notificationService.save(Notification.builder()
+                        .userId(caseEntity.getLawyer().getId())
+                        .title(title)
+                        .message(message)
+                        .build());
+            }
+            // Notify Judge
+            if (caseEntity.getJudgeId() != null && !caseEntity.getJudgeId().equals(excludeUserId)) {
+                notificationService.save(Notification.builder()
+                        .userId(caseEntity.getJudgeId())
+                        .title(title)
+                        .message(message)
+                        .build());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to send status notification: {}", e.getMessage());
+        }
     }
 }

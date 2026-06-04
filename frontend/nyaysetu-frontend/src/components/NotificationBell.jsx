@@ -156,23 +156,23 @@ export default function NotificationBell() {
 
             {/* Dropdown */}
             {isOpen && (
-                <div style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 0.75rem)',
-                    right: -50, // Slightly offset to align under user area
-                    width: '380px',
-                    maxHeight: '520px',
-                    background: 'var(--bg-glass-strong)',
-                    backdropFilter: 'var(--glass-blur)',
-                    border: '1px solid var(--border-glass-strong)',
-                    borderRadius: '1.25rem',
-                    boxShadow: 'var(--shadow-glass-strong)',
-                    zIndex: 1000,
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    animation: 'slideDown 0.2s ease-out'
-                }}>
+                <div 
+                    className="notification-dropdown"
+                    style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 0.75rem)',
+                        maxHeight: '520px',
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: '1px solid var(--border-glass-strong)',
+                        borderRadius: '1.25rem',
+                        boxShadow: 'var(--shadow-glass-strong)',
+                        zIndex: 1000,
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
+                    }}
+                >
                     {/* Header */}
                     <div style={{
                         padding: '1.25rem',
@@ -366,6 +366,18 @@ export default function NotificationBell() {
                 />
             )}
             <style>{`
+                .notification-dropdown {
+                    right: -50px;
+                    width: 380px;
+                    animation: slideDown 0.2s ease-out;
+                }
+                @media (max-width: 480px) {
+                    .notification-dropdown {
+                        right: -80px !important;
+                        width: calc(100vw - 2rem) !important;
+                        max-width: 340px !important;
+                    }
+                }
                 @keyframes slideDown {
                     from { opacity: 0; transform: translateY(-10px); }
                     to { opacity: 1; transform: translateY(0); }

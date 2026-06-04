@@ -181,7 +181,16 @@ class NotificationService {
             const response = await axios.get(`${this.API_BASE_URL}/api/notifications/user/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            return response.data;
+            if (Array.isArray(response.data)) {
+                return response.data.map(n => ({
+                    id: n.id,
+                    title: n.title,
+                    message: n.message,
+                    read: n.read !== undefined ? n.read : n.readFlag,
+                    timestamp: n.timestamp || n.createdAt
+                }));
+            }
+            return [];
         } catch (error) {
             return [];
         }
