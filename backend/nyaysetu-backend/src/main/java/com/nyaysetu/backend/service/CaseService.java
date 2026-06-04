@@ -1,25 +1,21 @@
 package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.CreateCaseRequest;
-import com.nyaysetu.backend.dto.PartyDto;
 import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.LegalCaseRepository;
-import com.nyaysetu.backend.repository.PartyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CaseService {
 
     private final LegalCaseRepository legalCaseRepository;
-    private final PartyRepository partyRepository;
     private final CaseTimelineService timelineService;
 
     @Transactional

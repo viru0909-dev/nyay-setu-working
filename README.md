@@ -171,6 +171,53 @@ Nyay Setu's architecture is a microservices ecosystem structured into three tier
 2. **Core Backend Tier (Spring Boot)**: Manages case creation, secure session handling, user credentials, document verification vaults (SHA-256 hashed), Bhashini Indic language services integration, and routes conversational requests.
 3. **NLP & AI Tier (FastAPI)**: Coordinates advanced legal reasoning pipelines, decompiles multi-part queries, executes parallel web research on Indian Kanoon databases, synthesizes citations, and converts final summaries to Hinglish dialogue.
 
+### High-Level Service Communication
+
+The following diagram shows the primary communication flow between the Frontend, Spring Boot Backend, and Python NLP services.
+
+```mermaid
+flowchart LR
+
+    User[User]
+
+    Frontend[React + Vite Frontend]
+
+    Backend[Spring Boot Backend]
+
+    NLP[NLP Orchestrator<br/>FastAPI]
+
+    LawGPT[LawGPT Service<br/>RAG Engine]
+
+    DB[(PostgreSQL)]
+
+    Groq[Groq API]
+    Gemini[Gemini API]
+
+    User --> Frontend
+
+    Frontend --> Backend
+
+    Backend --> DB
+
+    Backend --> NLP
+
+    Backend --> LawGPT
+
+    NLP --> Groq
+    NLP --> Gemini
+
+    LawGPT --> Groq
+```
+
+**Flow Overview**
+
+1. Users interact with the React frontend.
+2. Requests are routed to the Spring Boot backend.
+3. The backend manages authentication, case records, and database operations.
+4. AI-related requests are forwarded to the Python NLP Orchestrator.
+5. Legal knowledge retrieval is handled through the LawGPT RAG service.
+6. The NLP services communicate with external AI providers such as Groq and Gemini to generate responses.
+
 ### Component Architecture & Interactions
 
 ```mermaid
