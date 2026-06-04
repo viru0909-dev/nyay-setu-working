@@ -138,7 +138,7 @@ export default function JudgeCaseWorkspace() {
 
         try {
             // Using a specific endpoint for ordering notice
-            await axios.post(`${API_BASE_URL}/api/cases/${caseId}/order-notice`, {}, {
+            await axios.post(`${API_BASE_URL}/api/v1/cases/${caseId}/order-notice`, {}, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             alert('✅ Notice Ordered Successfully! The respondent has been notified.');
