@@ -40,4 +40,10 @@ class HealthControllerTest {
                 .andExpect(jsonPath("$.service").value("nyaysetu-backend"))
                 .andExpect(jsonPath("$.uptime").exists());
     }
+    @Test
+    void healthEndpoint_shouldReturnTimestampField() throws Exception {
+        mockMvc.perform(get("/api/v1/health"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.timestamp").exists());
+    }
 }
