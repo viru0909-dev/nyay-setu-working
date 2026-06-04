@@ -8,11 +8,14 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.nyaysetu.backend.handler.NotificationWebSocketHandler;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @EnableWebSocket
 @EnableWebSocketMessageBroker
@@ -21,30 +24,47 @@ public class WebSocketConfig implements WebSocketConfigurer, WebSocketMessageBro
 
     private final NotificationWebSocketHandler notificationHandler;
 
-    // Raw WebSocket handler for notifications
+    @Value("${app.websocket.allowed-origins}")
+    private String[] allowedOrigins;
+
+    private String[] getValidatedOrigins() {
+        if (allowedOrigins == null || allowedOrigins.length == 0) {
+            throw new IllegalStateException(
+                "app.websocket.allowed-origins must be explicitly configured. " +
+                "Wildcard '*' is not permitted (CWE-942)."
+            );
+        }
+        for (String origin : allowedOrigins) {
+            if ("*".equals(origin.trim())) {
+                throw new IllegalStateException(
+                    "Wildcard '*' is not allowed in app.websocket.allowed-origins. " +
+                    "Specify explicit origins to prevent Cross-Site WebSocket Hijacking (CWE-942)."
+                );
+            }
+        }
+        log.info("WebSocket allowed origins: {}", String.join(", ", allowedOrigins));
+        return allowedOrigins;
+    }
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(notificationHandler, "/api/ws/notifications")
-                .setAllowedOrigins("*");  // Configure appropriately for production
+                .setAllowedOrigins(getValidatedOrigins());
     }
 
-    // STOMP message broker for SimpMessagingTemplate
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Enable simple in-memory broker for topics
         config.enableSimpleBroker("/topic", "/queue");
-        // Prefix for messages FROM client TO server
         config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // STOMP endpoint for SockJS fallback
         registry.addEndpoint("/api/ws/stomp")
-                .setAllowedOrigins("*")
+                .setAllowedOrigins(getValidatedOrigins())
                 .withSockJS();
-        // Plain WebSocket STOMP endpoint
+
         registry.addEndpoint("/api/ws/stomp")
-                .setAllowedOrigins("*");
+                .setAllowedOrigins(getValidatedOrigins());
     }
 }
