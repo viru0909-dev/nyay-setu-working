@@ -54,7 +54,7 @@ export default function Footer() {
     ];
 
     return (
-        <footer style={{
+        <footer className="landing-footer" style={{
             background: '#111827',
             borderTop: '1px solid rgba(255, 255, 255, 0.08)',
             padding: '4rem 0 2rem',
@@ -80,6 +80,7 @@ export default function Footer() {
             }}>
 
                 <motion.div
+                    className="footer-grid"
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -91,7 +92,7 @@ export default function Footer() {
                     }}>
                     {/* Brand Section */}
                     <div>
-                        <div style={{
+                        <div className="footer-brand-row" style={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.75rem',
@@ -121,7 +122,7 @@ export default function Footer() {
                         }}>
                             {t('landing:footer.tagline')}
                         </p>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
+                        <div className="footer-social-links" style={{ display: 'flex', gap: '1rem' }}>
                             {socialLinks.map((link) => (
                                 <motion.a
                                     key={link.label}
@@ -187,6 +188,7 @@ export default function Footer() {
                                     {link.action ? (
                                         <button
                                             type="button"
+                                            className="footer-nav-button"
                                             onClick={link.action}
                                             style={{
                                                 color: 'rgba(255, 255, 255, 0.7)',
@@ -247,6 +249,7 @@ export default function Footer() {
                                     ) : link.isRoute ? (
                                         <Link
                                             to={link.href}
+                                            className="footer-nav-link"
                                             style={{
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 textDecoration: 'none',
@@ -300,6 +303,7 @@ export default function Footer() {
                                     ) : (
                                         <a
                                             href={link.href}
+                                            className="footer-nav-link"
                                             style={{
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 textDecoration: 'none',
@@ -369,6 +373,7 @@ export default function Footer() {
                                 <li key={link.label} style={{ marginBottom: '0.75rem' }}>
                                     <Link
                                         to={link.href}
+                                        className="footer-nav-link"
                                         style={{
                                             color: 'rgba(255, 255, 255, 0.7)',
                                             textDecoration: 'none',
@@ -433,6 +438,7 @@ export default function Footer() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <a
                                 href="mailto:gadekarvidera4@gmail.com"
+                                className="footer-contact-link"
                                 style={{
                                     color: 'rgba(255, 255, 255, 0.7)',
                                     textDecoration: 'none',
@@ -477,6 +483,7 @@ export default function Footer() {
                                 href="https://github.com/viru0909-dev/nyay-setu-working"
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                className="footer-contact-link"
                                 style={{
                                     color: 'rgba(255, 255, 255, 0.7)',
                                     textDecoration: 'none',
@@ -523,7 +530,7 @@ export default function Footer() {
                 </motion.div>
 
                 {/* Bottom Bar */}
-                <div style={{
+                <div className="footer-bottom-bar" style={{
                     borderTop: '1px solid rgba(255, 255, 255, 0.1)',
                     paddingTop: '2rem',
                     display: 'flex',

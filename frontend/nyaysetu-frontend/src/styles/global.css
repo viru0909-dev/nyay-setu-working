@@ -350,6 +350,16 @@ a:hover { color: var(--color-primary); }
   .grid-cols-3,
   .grid-cols-4 { grid-template-columns: 1fr; }
   .container   { padding: 0 var(--spacing-lg); }
+
+  .fab {
+    right: 1rem;
+    width: 52px;
+    height: 52px;
+  }
+
+  .scroll-top-button {
+    --scroll-top-bottom: 6.5rem;
+  }
 }
 
 /* Floating action base (shared by assistant + scroll button) */

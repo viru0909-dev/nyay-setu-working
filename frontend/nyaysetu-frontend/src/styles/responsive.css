@@ -266,7 +266,7 @@
     }
 
     /* Make buttons visible and touch-friendly */
-    button:not(.guest-continue-btn):not(.guest-btn-primary):not(.guest-btn-secondary):not(.guest-btn-ghost):not(.auth-full-width-btn),
+    button:not(.guest-continue-btn):not(.guest-btn-primary):not(.guest-btn-secondary):not(.guest-btn-ghost):not(.auth-full-width-btn):not(.footer-nav-button),
     .next-btn,
     .prev-btn,
     button[type="submit"]:not(.auth-full-width-btn),
@@ -369,6 +369,66 @@
         padding-top: 0.5rem !important;
         border-top: 1px solid var(--border-glass) !important;
 
+    }
+
+    /* Landing footer — counteract broad mobile flex/button rules */
+    .landing-footer {
+        padding-bottom: 11rem !important;
+    }
+
+    .landing-footer > .container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .landing-footer .footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+    }
+
+    .landing-footer .footer-brand-row {
+        flex-direction: row !important;
+        align-items: center !important;
+    }
+
+    .landing-footer .footer-social-links {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 1rem !important;
+    }
+
+    .landing-footer .footer-social-links a {
+        min-height: 40px !important;
+        min-width: 40px !important;
+        width: 40px !important;
+        height: 40px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .landing-footer .footer-contact-link {
+        flex-direction: row !important;
+        align-items: center !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .landing-footer .footer-bottom-bar {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+    }
+
+    .landing-footer .footer-nav-link,
+    .landing-footer .footer-nav-button {
+        padding: 0 !important;
+        margin: 0 !important;
+        min-height: auto !important;
+        font-size: 0.95rem !important;
+        text-align: left !important;
+        width: auto !important;
+        display: inline-block !important;
     }
 }
 
