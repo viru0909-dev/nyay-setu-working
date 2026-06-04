@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -18,7 +19,13 @@ public class DocumentEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "case_id")
     private UUID caseId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "case_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "documents"})
+    private CaseEntity caseEntity;
 
     private String fileName;
 
