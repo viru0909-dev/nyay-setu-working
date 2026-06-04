@@ -19,6 +19,9 @@ import GuestLockedCard from '../components/guest/GuestLockedCard';
 export default function Landing() {
     const { t } = useTranslation('landing');
     const { theme } = useTheme();
+
+    const [activeCardIndex, setActiveCardIndex] = useState(null);
+
     const [deferredPrompt, setDeferredPrompt] = useState(null);
     const heroImage = theme === 'dark'
         ? {
@@ -90,13 +93,13 @@ export default function Landing() {
         tryAccess();
     };
 
-    const FEATURES = [
-        { icon: Bot,         title: t('features.aiLegalAssistant.title'),   desc: t('features.aiLegalAssistant.description'),   color: '#3F5DCC' },
-        { icon: BookOpen,    title: t('features.constitutionReader.title'),  desc: t('features.constitutionReader.description'),  color: '#7C5CFF' },
-        { icon: FileText,    title: t('features.fileCases.title'),           desc: t('features.fileCases.description'),           color: '#10B981' },
-        { icon: Video,       title: t('features.virtualHearings.title'),     desc: t('features.virtualHearings.description'),     color: '#F59E0B' },
-        { icon: ShieldCheck, title: t('features.securePrivate.title'),       desc: t('features.securePrivate.description'),       color: '#EF4444' },
-        { icon: Zap,         title: t('features.realTimeUpdates.title'),     desc: t('features.realTimeUpdates.description'),     color: '#8B5CF6' },
+const FEATURES = [
+        { icon: Bot,         title: t('features.aiLegalAssistant.title'),   desc: t('features.aiLegalAssistant.description'),   color: '#3F5DCC', path: '/litigant/vakil-friend' },
+        { icon: BookOpen,    title: t('features.constitutionReader.title'),  desc: t('features.constitutionReader.description'),  color: '#7C5CFF', path: '/constitution' },
+        { icon: FileText,    title: t('features.fileCases.title'),           desc: t('features.fileCases.description'),           color: '#10B981', path: '/litigant/file' },
+        { icon: Video,       title: t('features.virtualHearings.title'),     desc: t('features.virtualHearings.description'),     color: '#F59E0B', path: '/litigant/hearings' },
+        { icon: ShieldCheck, title: t('features.securePrivate.title'),       desc: t('features.securePrivate.description'),       color: '#EF4444', path: '/' },
+        { icon: Zap,         title: t('features.realTimeUpdates.title'),     desc: t('features.realTimeUpdates.description'),     color: '#8B5CF6', path: '/' },
     ];
 
     return (
@@ -430,75 +433,106 @@ export default function Landing() {
                         <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
                             {FEATURES.map((f, i) => {
                                 const FeatureIcon = f.icon;
+                                const isHighlighted = activeCardIndex === i;
+                                
                                 return (
-                                    <motion.div key={i}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: i * 0.07 }}
-                                        whileHover={{ y: -5 }}
-                                        style={{
-                                            padding: '2.25rem',
-                                            background: 'var(--bg-main)',
-                                            border: '1px solid var(--border-light)',
-                                            borderRadius: '16px',
-                                            cursor: 'default',
-                                            transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
+                                    <Link 
+                                        key={i} 
+                                        to={f.path} 
+                                        onClick={() => setActiveCardIndex(i)} // 🛠️ Updates highlight index state on click
+                                        style={{ 
+                                            textDecoration: 'none', 
+                                            display: 'block',
+                                            color: 'inherit' // 🛠️ Safeguards lucide icon fills and text colors from hyperlink overrides
                                         }}
-                                        onMouseEnter={e => { e.currentTarget.style.borderColor = f.color + '50'; e.currentTarget.style.boxShadow = `0 8px 24px ${f.color}15`; }}
-                                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.boxShadow = 'none'; }}
                                     >
-                                        <div style={{
-                                            width: '52px', height: '52px', borderRadius: '14px',
-                                            background: f.color + '12',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            marginBottom: '1.1rem',
-                                        }}>
-                                            <FeatureIcon size={26} style={{ color: f.color }} />
-                                        </div>
-                                        <div
-    style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '0.75rem',
-        marginBottom: '0.65rem',
-    }}
->
-    <h3
-        style={{
-            fontSize: '1.1rem',
-            fontWeight: '700',
-            color: 'var(--text-main)',
-            margin: 0,
-        }}
-    >
-        {f.title}
-    </h3>
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: i * 0.07 }}
+                                            whileHover={{ y: -5 }}
+                                            style={{
+                                                padding: '2.25rem',
+                                                background: 'var(--bg-main)',
+                                                // 🛠️ Dynamically thickens and tints the border ring if clicked/highlighted
+                                                border: isHighlighted 
+                                                    ? `2px solid ${f.color}` 
+                                                    : '1px solid var(--border-light)',
+                                                borderRadius: '16px',
+                                                cursor: 'pointer',
+                                                // 🛠️ Keeps an active shadow glow persistent if selected
+                                                boxShadow: isHighlighted 
+                                                    ? `0 12px 32px ${f.color}25` 
+                                                    : 'none',
+                                                transition: 'all 0.25s ease',
+                                            }}
+                                            onMouseEnter={e => { 
+                                                if (!isHighlighted) {
+                                                    e.currentTarget.style.borderColor = f.color + '50'; 
+                                                    e.currentTarget.style.boxShadow = `0 8px 24px ${f.color}15`; 
+                                                }
+                                            }}
+                                            onMouseLeave={e => { 
+                                                if (!isHighlighted) {
+                                                    e.currentTarget.style.borderColor = 'var(--border-light)'; 
+                                                    e.currentTarget.style.boxShadow = 'none'; 
+                                                }
+                                            }}
+                                        >
+                                            <div style={{
+                                                width: '52px', height: '52px', borderRadius: '14px',
+                                                background: f.color + '12',
+                                                display: 'flex', alignItems: 'center', justifycontent: 'center',
+                                                marginBottom: '1.1rem',
+                                            }}>
+                                                {/* Icon now pulls correctly inheriting color arrays */}
+                                                <FeatureIcon size={26} style={{ color: f.color }} />
+                                            </div>
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    gap: '0.75rem',
+                                                    marginBottom: '0.65rem',
+                                                }}
+                                            >
+                                                <h3
+                                                    style={{
+                                                        fontSize: '1.1rem',
+                                                        fontWeight: '700',
+                                                        color: 'var(--text-main)',
+                                                        margin: 0,
+                                                    }}
+                                                >
+                                                    {f.title}
+                                                </h3>
 
-    {isGuest && (
-        f.title === t('features.fileCases.title') ||
-        f.title === t('features.virtualHearings.title')
-    ) && (
-        <span
-            style={{
-                padding: '0.28rem 0.55rem',
-                borderRadius: '999px',
-                fontSize: '0.68rem',
-                fontWeight: '700',
-                background: 'rgba(245,158,11,0.10)',
-                border: '1px solid rgba(245,158,11,0.18)',
-                color: '#f59e0b',
-                letterSpacing: '0.02em',
-                whiteSpace: 'nowrap',
-            }}
-        >
-            Account Required
-        </span>
-    )}
-</div>
-                                        <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
-                                    </motion.div>
+                                                {isGuest && (
+                                                    f.title === t('features.fileCases.title') ||
+                                                    f.title === t('features.virtualHearings.title')
+                                                ) && (
+                                                    <span
+                                                        style={{
+                                                            padding: '0.28rem 0.55rem',
+                                                            borderRadius: '999px',
+                                                            fontSize: '0.68rem',
+                                                            fontWeight: '700',
+                                                            background: 'rgba(245,158,11,0.10)',
+                                                            border: '1px solid rgba(245,158,11,0.18)',
+                                                            color: '#f59e0b',
+                                                            letterSpacing: '0.02em',
+                                                            whiteSpace: 'nowrap',
+                                                        }}
+                                                    >
+                                                        Account Required
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
+                                        </motion.div>
+                                    </Link>
                                 );
                             })}
                         </div>
