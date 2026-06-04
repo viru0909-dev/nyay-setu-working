@@ -2,10 +2,45 @@ import cv2
 import os
 import aiohttp
 import asyncio
+import socket
+import ipaddress
+from urllib.parse import urlparse
 from typing import List
 
 UPLOAD_DIR = "/tmp/nyaysetu_forensics"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+def is_safe_url(url: str) -> bool:
+    """
+    Validates if a URL is safe to download from (SSRF mitigation).
+    Ensures scheme is http/https and resolved IP is not loopback, private, link-local, or unspecified.
+    """
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            return False
+
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+
+        # Resolve hostname to all associated IP addresses
+        addr_info = socket.getaddrinfo(hostname, None)
+        for family, _, _, _, sockaddr in addr_info:
+            ip_str = sockaddr[0]
+            ip = ipaddress.ip_address(ip_str)
+            
+            # Check for loopback, private networks, link-local, unspecified, or multicast addresses
+            if (ip.is_loopback or 
+                ip.is_private or 
+                ip.is_link_local or 
+                ip.is_unspecified or 
+                ip.is_multicast):
+                return False
+                
+        return True
+    except Exception:
+        return False
 
 async def download_video(url: str, job_id: str) -> str:
     """Download video from URL (which will be a MinIO/Spring Boot endpoint) to a local temp file."""
@@ -13,6 +48,10 @@ async def download_video(url: str, job_id: str) -> str:
     if url.startswith("/") and os.path.exists(url):
         return url
         
+    # Apply SSRF validation check
+    if not is_safe_url(url):
+        raise ValueError(f"SSRF validation failed: URL '{url}' resolves to a restricted or unsafe IP address.")
+
     local_path = os.path.join(UPLOAD_DIR, f"{job_id}_video.mp4")
     
     # Simple check if already downloaded
