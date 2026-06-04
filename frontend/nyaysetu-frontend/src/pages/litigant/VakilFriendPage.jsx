@@ -199,7 +199,7 @@ export default function VakilFriendChat() {
             }]);
         } catch (err) {
             console.error('Failed to start session:', err);
-            setError('Failed to connect. Please make sure the backend is running.');
+            setError(t('vakilFriend.connectError'));
             setMessages([{
                 role: 'assistant',
                 content: t('vakilFriend.offlineMessage')

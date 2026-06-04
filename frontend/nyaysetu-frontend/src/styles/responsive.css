@@ -68,7 +68,13 @@
 
     /* Padding adjustments */
     section {
-        padding: 3rem 1rem !important;
+        /*
+         * NOTE: Don't use !important here.
+         * Many pages (especially Landing) set section padding inline to
+         * compensate for the fixed header. Using !important overrides those
+         * values on mobile and causes headings to slide under the navbar.
+         */
+        padding: 3rem 1rem;
     }
 
     /* Constitution page */

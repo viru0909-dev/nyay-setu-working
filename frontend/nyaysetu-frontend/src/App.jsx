@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useEffect, Suspense, lazy } from 'react';
+import { useEffect, Suspense, lazy, useState } from 'react';
 import useAuthStore from './store/authStore';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
 // CHANGED: ThemeProvider added — wraps the entire app so all components can access theme
@@ -13,6 +13,9 @@ import OfflineIndicator from './components/OfflineIndicator';
 import UpdateNotification from './components/UpdateNotification';
 import GuestWelcomeToast from './components/guest/GuestWelcomeToast';
 import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
+
+import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
+import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
 
 // Lazy load pages for better performance
 const Landing = lazy(() => import('./pages/Landing'));
@@ -43,7 +46,6 @@ const CaseDetailPage = lazy(() => import('./pages/litigant/CaseDetailPage'));
 const HearingsPage = lazy(() => import('./pages/litigant/HearingsPage'));
 const LawyerChatPage = lazy(() => import('./pages/litigant/LawyerChatPage'));
 const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
-const ForensicsPage = lazy(() => import('./pages/litigant/ForensicsPage'));
 const DocumentGeneratePage = lazy(() => import('./pages/litigant/DocumentGeneratePage'));
 const FindLawyerPage = lazy(() => import('./pages/litigant/FindLawyerPage'));
 const LawyerFeedbackPage = lazy(() => 
@@ -116,8 +118,25 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return children;
 };
 
+function KeyboardAccessibilityProvider({ user }) {
+    const [showShortcuts, setShowShortcuts] = useState(false);
+
+    useKeyboardShortcuts({
+        user,
+        onOpenHelp: () => setShowShortcuts(true),
+        onCloseHelp: () => setShowShortcuts(false),
+    });
+
+    return (
+        <KeyboardShortcutsModal
+            isOpen={showShortcuts}
+            onClose={() => setShowShortcuts(false)}
+        />
+    );
+}
+
 function App({ swRegistration }) {
-    const { initAuth } = useAuthStore();
+    const { initAuth, user } = useAuthStore();
 
     useEffect(() => {
         initAuth();
@@ -139,6 +158,7 @@ function App({ swRegistration }) {
                             v7_relativeSplatPath: true
                         }}
                     >
+                        <KeyboardAccessibilityProvider user={user} />
                         <GuestWelcomeToast />
                         <GuestOnboardingHint />
                         <ScrollToTop />
@@ -174,7 +194,6 @@ function App({ swRegistration }) {
                                     <Route path="find-lawyer" element={<FindLawyerPage />} />
                                     <Route path="feedback" element={<LawyerFeedbackPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
-                                    <Route path="forensics" element={<ForensicsPage />} />
                                     <Route path="generate-document" element={<DocumentGeneratePage />} />
                                 </Route>
 

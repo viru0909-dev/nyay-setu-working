@@ -332,6 +332,9 @@ a:hover { color: var(--color-primary); }
   border-color: var(--color-primary);
   transform: rotate(15deg);
 }
+.theme-toggle svg {
+  transform: translateY(1px);
+}
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-main); }

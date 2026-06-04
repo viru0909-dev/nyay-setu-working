@@ -10,9 +10,9 @@ import AIAssistantModal from './AIAssistantModal';
 
 // role links for the portal dropdown
 const ROLES = [
-    { id: 'litigant', label: 'Litigant', href: '/litigant' },
-    { id: 'lawyer', label: 'Lawyer', href: '/lawyer' },
-    { id: 'judge', label: 'Judge', href: '/judge' },
+    { id: 'litigant', label:'header.nav.roles.litigant', href: '/litigant' },
+    { id: 'lawyer', label: 'header.nav.roles.lawyer', href: '/lawyer' },
+    { id: 'judge', label: 'header.nav.roles.judge', href: '/judge' },
 ];
 
 const LANGUAGES = [
@@ -77,7 +77,7 @@ export default function Header({ hideAuthButtons = false }) {
     const navItems = [
         { labelKey: 'header.nav.home', href: '/', isRoute: true },
         { labelKey: 'header.nav.features', href: '/#features' },
-        { labelKey: 'Upcoming Features', href: '/upcoming-features', isRoute: true },
+        { labelKey: 'header.nav.upcomingFeatures', href: '/upcoming-features', isRoute: true },
         { labelKey: 'header.nav.constitution', href: '/constitution', isRoute: true },
         { labelKey: 'header.nav.aiAssistant', action: () => setShowAIModal(true) },
         { labelKey: 'header.nav.about', href: '/about', isRoute: true },
@@ -229,10 +229,9 @@ export default function Header({ hideAuthButtons = false }) {
                                 onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border-medium)'; }}
                             >
-                                Portal
+                                {t('header.nav.portal')}
                                 <ChevronDown size={14} style={{ transform: roleOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
                             </button>
-
                             <AnimatePresence>
                                 {roleOpen && (
                                     <motion.div
@@ -270,7 +269,7 @@ export default function Header({ hideAuthButtons = false }) {
                                                 onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                             >
-                                                {role.label}
+                                                {t(role.label)}
                                             </Link>
                                         ))}
                                     </motion.div>

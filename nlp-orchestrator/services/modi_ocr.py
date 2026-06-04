@@ -8,6 +8,7 @@ from typing import Any
 import cv2
 import numpy as np
 from PIL import Image, UnidentifiedImageError
+from services.deskew_service import deskew_image
 
 from config import HF_TOKEN, TROCR_DEVICE, TROCR_MODEL_NAME
 
@@ -105,7 +106,7 @@ def preprocess_image(image_bytes: bytes) -> Image.Image:
         pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     except (UnidentifiedImageError, OSError) as exc:
         raise InvalidImageError("Uploaded file is not a valid image.") from exc
-
+    pil_image = deskew_image(pil_image)
     rgb = np.array(pil_image)
     bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)

@@ -20,87 +20,84 @@ import Footer from '../components/landing/Footer';
 import { Link } from 'react-router-dom';
 
 export default function UpcomingFeatures() {
-    const { t } = useTranslation('common');
+    const { t } = useTranslation('upcomingFeatures');
 
     const FEATURES = [
         {
-            id: 'workspace',
+            id:'workspace',
             icon: Cpu,
-            title: 'Nyay-GPT Conversational Workspace',
-            subtitle: 'Dynamic Split-Screen Intelligence',
-            description: 'A highly sophisticated user interface akin to advanced generative AI platforms. Features a fluid, three-pane structural hierarchy with a resizable artifact canvas for simultaneous interaction with the conversational agent and generated artifacts.',
+            title: t('upcomingFeatures.targets.0.title'),
+            subtitle: t('upcomingFeatures.targets.0.subtitle'),
+            description: t('upcomingFeatures.targets.0.description'),
             color: '#7C5CFF',
-            phase: 'Phase 2',
+            phase: t('upcomingFeatures.targets.0.badge'),
             bgImage: 'linear-gradient(135deg, rgba(124,92,255,0.1) 0%, rgba(124,92,255,0.02) 100%)'
         },
         {
             id: 'forensics',
             icon: Cuboid,
-            title: '3D Spatial Forensics',
-            subtitle: 'Gaussian Splatting Integration',
-            description: 'Navigate photorealistic, three-dimensional reconstructions of accident scenes directly in the browser. Features interactive evidentiary annotations, progressive loading, and demand-based rendering optimized via React Three Fiber.',
+            title: t('upcomingFeatures.targets.1.title'),
+            subtitle: t('upcomingFeatures.targets.1.subtitle'),
+            description: t('upcomingFeatures.targets.1.description'),
             color: '#F59E0B',
-            phase: 'Phase 3',
+            phase: t('upcomingFeatures.targets.1.badge'),
             bgImage: 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.02) 100%)'
         },
         {
             id: 'webrtc',
             icon: Video,
-            title: 'Live Multimodal Streaming',
-            subtitle: 'Secure WebRTC Architecture',
-            description: 'Stream continuous video and audio data for real-time guidance. Features dynamic frame chunking, concurrent AI processing, real-time bounding boxes, and advanced voice activity detection replicating natural human conversation.',
+            title: t('upcomingFeatures.targets.2.title'),
+            subtitle: t('upcomingFeatures.targets.2.subtitle'),
+            description: t('upcomingFeatures.targets.2.description'),
             color: '#EF4444',
-            phase: 'Phase 3',
+            phase: t('upcomingFeatures.targets.2.badge'),
             bgImage: 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(239,68,68,0.02) 100%)'
         },
         {
             id: 'multi-model',
             icon: Network,
-            title: 'Multi-Model Inference',
-            subtitle: 'Dynamic Orchestration Engine',
-            description: 'Granular control over AI inference. Automatically routes simple queries to ultra-fast Groq inference units, while directing complex liability analyses to frontier models like Gemini 1.5 Pro or Claude 3.5 Sonnet.',
+            title: t('upcomingFeatures.targets.3.title'),
+            subtitle: t('upcomingFeatures.targets.3.subtitle'),
+            description: t('upcomingFeatures.targets.3.description'),
             color: '#3F5DCC',
-            phase: 'Phase 2',
+            phase: t('upcomingFeatures.targets.3.badge'),
             bgImage: 'linear-gradient(135deg, rgba(63,93,204,0.1) 0%, rgba(63,93,204,0.02) 100%)'
         },
         {
             id: 'reasoning',
             icon: GitBranch,
-            title: 'Agentic Reasoning Traces',
-            subtitle: 'Transparent AI Logic',
-            description: 'Demystifying the AI black box by visualizing chain-of-thought, tool invocations, and database queries. Ensures outputs are rigorously grounded with interactive inline footnote citations linked to the Bharatiya Nyaya Sanhita.',
+            title: t('upcomingFeatures.targets.4.title'),
+            subtitle: t('upcomingFeatures.targets.4.subtitle'),
+            description: t('upcomingFeatures.targets.4.description'),
             color: '#10B981',
-            phase: 'Phase 2',
+            phase: t('upcomingFeatures.targets.4.badge'),
             bgImage: 'linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(16,185,129,0.02) 100%)'
         },
         {
             id: 'transliteration',
             icon: Languages,
-            title: 'Historical Transliteration OCR',
-            subtitle: 'Vision-Language Pipeline',
-            description: 'Decipher archaic scripts in historical land deeds using knowledge-distilled CNNs. Extracts spatial data and boundary markers to map historical claims onto modern GIS overlays.',
+            title: t('upcomingFeatures.targets.5.title'),
+            subtitle: t('upcomingFeatures.targets.5.subtitle'),
+            description: t('upcomingFeatures.targets.5.description'),
             color: '#8B5CF6',
-            phase: 'Phase 4',
+            phase: t('upcomingFeatures.targets.5.badge'),
             bgImage: 'linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(139,92,246,0.02) 100%)'
         },
         {
             id: 'rag',
             icon: Database,
-            title: 'RAG-Powered Intelligence',
-            subtitle: 'Context-Aware Legal Routing',
-            description: 'Intelligent semantic chunking of vast legal texts and court judgments. Utilizes highly optimized multilingual embedding models backed by scalable vector databases to eliminate legal hallucination.',
+            title: t('upcomingFeatures.targets.6.title'),
+            subtitle: t('upcomingFeatures.targets.6.subtitle'),
+            description: t('upcomingFeatures.targets.6.description'),
             color: '#EC4899',
-            phase: 'Phase 4',
+            phase: t('upcomingFeatures.targets.6.badge'),
             bgImage: 'linear-gradient(135deg, rgba(236,72,153,0.1) 0%, rgba(236,72,153,0.02) 100%)'
         }
     ];
 
-    const PHASES = [
-        { num: 1, title: 'Foundation', desc: 'Architecture Refactoring', weeks: 'Weeks 1-2' },
-        { num: 2, title: 'Interface', desc: 'Multimodal Workspace UI', weeks: 'Weeks 3-5' },
-        { num: 3, title: 'Spatial & Live', desc: '3D WebGL & WebRTC', weeks: 'Weeks 6-9' },
-        { num: 4, title: 'Intelligence', desc: 'RAG & OCR Pipelines', weeks: 'Weeks 10-12' },
-    ];
+    const PHASES = t('upcomingFeatures.phases',{
+        returnObjects: true,
+    });
 
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
@@ -135,7 +132,7 @@ export default function UpcomingFeatures() {
                             }}>
                                 <Star size={14} color="#7C5CFF" />
                                 <span style={{ color: '#7C5CFF', fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                                    Nyay-GPT Vision Roadmap
+                                    {t('upcomingFeatures.hero.badge')}
                                 </span>
                             </div>
                             <h1 style={{
@@ -147,12 +144,12 @@ export default function UpcomingFeatures() {
                                 marginBottom: '1.5rem',
                                 fontFamily: 'var(--font-heading)'
                             }}>
-                                Building the Multimodal <br />
+                                {t('upcomingFeatures.hero.title1')}<br />
                                 <span style={{ 
                                     background: 'linear-gradient(135deg, #7C5CFF 0%, #3F5DCC 100%)',
                                     WebkitBackgroundClip: 'text',
                                     WebkitTextFillColor: 'transparent',
-                                }}>Legal Workspace</span>
+                                }}>{t('upcomingFeatures.hero.title2')}</span>
                             </h1>
                             <p style={{
                                 fontSize: '1.15rem',
@@ -161,7 +158,7 @@ export default function UpcomingFeatures() {
                                 maxWidth: '700px',
                                 margin: '0 auto 3rem'
                             }}>
-                                Transitioning from a static interface to a highly sophisticated, real-time multimodal environment capable of processing complex physical evidence and providing authoritative legal intelligence.
+                               {t('upcomingFeatures.hero.description')}                            
                             </p>
                         </motion.div>
                     </div>
@@ -318,10 +315,10 @@ export default function UpcomingFeatures() {
                         }}>
                             <Zap size={32} color="#7C5CFF" style={{ margin: '0 auto 1.5rem' }} />
                             <h2 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem' }}>
-                                Join the Revolution
+                                {t('upcomingFeatures.cta.title')}
                             </h2>
                             <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', marginBottom: '2.5rem', maxWidth: '500px', margin: '0 auto 2.5rem' }}>
-                                Nyay-Setu is an open-source initiative. Create an account today to explore current features and prepare for the next generation of legal intelligence.
+                               {t('upcomingFeatures.cta.description')}
                             </p>
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                                 <Link to="/signup" style={{
@@ -330,7 +327,7 @@ export default function UpcomingFeatures() {
                                     borderRadius: '12px', fontWeight: '700', textDecoration: 'none',
                                     boxShadow: 'var(--shadow-md)', transition: 'transform 0.2s'
                                 }}>
-                                    Get Started <ArrowRight size={18} />
+                                    {t('upcomingFeatures.cta.getStarted')} <ArrowRight size={18} />
                                 </Link>
                                 <a href="https://github.com/viru0909-dev/nyay-setu-working" target="_blank" rel="noopener noreferrer" style={{
                                     display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -338,7 +335,7 @@ export default function UpcomingFeatures() {
                                     border: '1px solid var(--border-medium)', borderRadius: '12px', 
                                     fontWeight: '700', textDecoration: 'none', transition: 'background 0.2s'
                                 }}>
-                                    View Repository
+                                    {t('upcomingFeatures.cta.viewRepository')}
                                 </a>
                             </div>
                         </div>
