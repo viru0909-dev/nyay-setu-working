@@ -32,4 +32,11 @@ public class RbacSecurityTest {
         mockMvc.perform(get("/api/v1/cases/pending-assignment"))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @WithMockUser(username = "litigant@example.com", roles = {"LITIGANT"})
+    void shouldAllowLitigantAccessOwnCasesEndpoint() throws Exception {
+        mockMvc.perform(get("/api/v1/litigant/cases"))
+                .andExpect(status().isOk());
+    }
 }
