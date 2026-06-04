@@ -2,6 +2,7 @@ package com.nyaysetu.backend.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import java.util.List;
 
@@ -18,5 +19,7 @@ public class CreateVerificationRequest {
     @NotBlank(message = "Requested role is required")
     private String requestedRole;
 
-    private List<String> documentUrls; // optional
+    @NotEmpty(message = "Document URLs must not be empty")
+    private List<String> documentUrls;
 }
+

@@ -21,9 +21,10 @@ public class VerificationController {
     private final VerificationService service;
 
     @PostMapping("/request")
-    public ResponseEntity<VerificationRequest> createRequest(@Valid @RequestBody CreateVerificationRequest dto) {
-        return ResponseEntity.ok(service.createRequest(dto));
+    public ResponseEntity<?> createRequest(@Valid @RequestBody CreateVerificationRequest request) {
+        return ResponseEntity.ok(service.createRequest(request));
     }
+
 
     @GetMapping("/admin/pending")
     public ResponseEntity<List<VerificationRequest>> getPending() {

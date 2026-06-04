@@ -138,4 +138,7 @@ bhashini.url=https://dhruva-api.bhashini.gov.in/services/inference/pipeline
 # ============================================
 # Python FastAPI service for legal document retrieval (FAISS + bge-m3)
 lawgpt.service.url=${LAWGPT_SERVICE_URL:http://localhost:8001}
-lawgpt.service.url=http://localhost:8001
+
+# Auth Service URL (for verification service update-role loopback call)
+auth.service.url=${AUTH_SERVICE_URL:http://localhost:8080}
+
