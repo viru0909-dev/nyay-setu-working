@@ -294,7 +294,7 @@ export default function Signup() {
                                                     const rawValue = e.target.value;
 
                                                     if (/[^A-Za-z ]/.test(rawValue)) {
-                                                        alert("Enter a valid full name");
+                                                        setError("Enter a valid full name");
                                                     }
 
                                                     const value = rawValue.replace(/[^A-Za-z ]/g, "");
@@ -346,7 +346,7 @@ export default function Signup() {
                                                         rawValue.length > 0 &&
                                                         !/^[a-zA-Z0-9._%+-]*@?[a-zA-Z0-9.-]*\.?[a-zA-Z]*$/.test(rawValue)
                                                     ) {
-                                                        alert("Enter a valid email address");
+                                                        setError("Enter a valid email address");
                                                     }
 
                                                     setFormData({ ...formData, email: rawValue });
