@@ -866,7 +866,7 @@ const startDeepResearch = async (query) => {
                 formData.append('description', `Uploaded during case filing via Nyay Saarthi chat`);
 
                 const token = localStorage.getItem('token');
-                const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
+                const response = await axios.post(`${API_BASE_URL}/api/v1/documents/upload`, formData, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
