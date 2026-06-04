@@ -22,7 +22,7 @@ export default function JudgeHearingsPage() {
     const fetchAllHearings = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_BASE_URL}/api/hearings/my`, {
+            const response = await axios.get(`${API_BASE_URL}/api/v1/hearings/my`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setHearings(response.data || []);
