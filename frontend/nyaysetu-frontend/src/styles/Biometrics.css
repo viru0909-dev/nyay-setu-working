@@ -100,7 +100,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 260px;
+    width: min(260px, 70vw);
+    aspect-ratio: 260/ 320;
     height: 320px;
     border: 1px dashed var(--text-secondary);
     border-radius: 130px 130px 110px 110px;
