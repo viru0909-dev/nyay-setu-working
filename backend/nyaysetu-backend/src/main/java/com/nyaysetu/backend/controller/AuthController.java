@@ -38,6 +38,7 @@ public class AuthController {
     private final UserDetailsService userDetailsService;
     private final EmailService emailService;
     private final FaceRecognitionService faceRecognitionService;
+    private final GoogleAuthService googleAuthService;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -116,6 +117,23 @@ public class AuthController {
         }
         catch (BadCredentialsException ex) {
             return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
+        }
+    }
+
+    @SecurityRequirements
+    @PostMapping("/google")
+    public ResponseEntity<?> loginWithGoogle(@Valid @RequestBody GoogleAuthRequest req) {
+        try {
+            return ResponseEntity.ok(googleAuthService.authenticate(req.getCredential()));
+        } catch (IllegalStateException ex) {
+            log.error("Google OAuth is not configured", ex);
+            return ResponseEntity.status(500).body(Map.of("message", "Google sign-in is not configured"));
+        } catch (org.springframework.security.oauth2.jwt.JwtException ex) {
+            log.warn("Google login failed: {}", ex.getMessage());
+            return ResponseEntity.status(401).body(Map.of("message", ex.getMessage()));
+        } catch (Exception ex) {
+            log.error("Google login failed", ex);
+            return ResponseEntity.status(400).body(Map.of("message", "Google sign-in failed"));
         }
     }
 

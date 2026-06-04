@@ -1,5 +1,6 @@
 import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import './styles/global.css'
 import './styles/responsive.css'
 import './styles/guest.css'
@@ -9,6 +10,8 @@ import { useSessionMonitor } from './hooks/useSessionMonitor';
 import SessionWarningBanner from './components/SessionWarningBanner';
 import { Toaster } from "react-hot-toast";
 import { registerSW } from 'virtual:pwa-register';
+
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const Root = () => {
     const [swRegistration, setSwRegistration] = useState(null);
@@ -60,7 +63,7 @@ const Root = () => {
         }
     }, []);
 
-    return (
+    const appShell = (
         <StrictMode>
             {showWarning && (
                 <SessionWarningBanner
@@ -74,6 +77,16 @@ const Root = () => {
                 <App swRegistration={swRegistration} />
             </>
         </StrictMode>
+    );
+
+    if (!googleClientId) {
+        return appShell;
+    }
+
+    return (
+        <GoogleOAuthProvider clientId={googleClientId}>
+            {appShell}
+        </GoogleOAuthProvider>
     );
 };
 
