@@ -54,10 +54,11 @@ public class CaseManagementController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CaseDTO> getCaseById(@PathVariable UUID id) {
-        CaseDTO caseDTO = caseManagementService.getCaseById(id);
-        return ResponseEntity.ok(caseDTO);
-    }
+        public ResponseEntity<?> getCaseById(@PathVariable UUID id, Authentication authentication) {
+            User user = authService.findByEmail(authentication.getName());
+            CaseDTO caseDTO = caseManagementService.getCaseById(id, user);
+            return ResponseEntity.ok(caseDTO);
+        }
 
     @PutMapping("/{id}")
     public ResponseEntity<CaseDTO> updateCase(
@@ -69,10 +70,11 @@ public class CaseManagementController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteCase(@PathVariable UUID id) {
-        caseManagementService.deleteCase(id);
-        return ResponseEntity.ok(Map.of("message", "Case deleted successfully"));
-    }
+        public ResponseEntity<?> deleteCase(@PathVariable UUID id, Authentication authentication) {
+            User user = authService.findByEmail(authentication.getName());
+            caseManagementService.deleteCase(id, user);
+            return ResponseEntity.ok(Map.of("message", "Case deleted successfully"));
+        }
 
     /**
      * Handover C: Lawyer submits draft
