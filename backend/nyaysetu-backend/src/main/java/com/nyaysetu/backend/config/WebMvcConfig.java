@@ -1,15 +1,18 @@
 package com.nyaysetu.backend.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Intentionally empty.
+ *
+ * Earlier versions attempted to dynamically prefix controller mappings with
+ * "/api/v1" via PathMatchConfigurer. That approach is fragile with Spring MVC
+ * controller metadata and can prevent the application context from loading
+ * correctly in integration tests.
+ *
+ * Prefixing is now handled via server.servlet.context-path.
+ */
 @Configuration
-public class WebMvcConfig implements WebMvcConfigurer {
-
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.addPathPrefix("/api/v1", c -> c.isAnnotationPresent(RestController.class));
-    }
+public class WebMvcConfig {
 }
+
