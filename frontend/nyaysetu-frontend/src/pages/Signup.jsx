@@ -87,15 +87,7 @@ export default function Signup() {
             setError('Please enter a valid email address.');
             return;
         }
-        const allowedTlds = ['com', 'org', 'net', 'edu', 'gov','in', 'co.in', 'io', 'ai', 'dev'];
-
-        const domain = formData.email.split('@')[1].toLowerCase();
-
-        const hasValidTld = allowedTlds.some(tld =>domain.endsWith(`.${tld}`));
-        if (!hasValidTld) {
-            setError('Please enter a valid email address.');
-            return;
-        }
+        
 
         setLoading(true);
 
