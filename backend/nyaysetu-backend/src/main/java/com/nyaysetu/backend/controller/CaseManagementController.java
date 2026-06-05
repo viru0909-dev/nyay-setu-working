@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +32,7 @@ public class CaseManagementController {
 
     @PostMapping
     public ResponseEntity<CaseDTO> createCase(
-            @RequestBody CreateCaseRequest request,
+            @Valid @RequestBody CreateCaseRequest request,
             Authentication authentication
     ) {
         User user = authService.findByEmail(authentication.getName());
@@ -62,7 +63,7 @@ public class CaseManagementController {
     @PutMapping("/{id}")
     public ResponseEntity<CaseDTO> updateCase(
             @PathVariable UUID id,
-            @RequestBody CaseDTO caseDTO
+            @Valid @RequestBody CaseDTO caseDTO
     ) {
         CaseDTO updated = caseManagementService.updateCase(id, caseDTO);
         return ResponseEntity.ok(updated);
@@ -221,7 +222,7 @@ public class CaseManagementController {
     @PutMapping("/{id}/respondent-details")
     public ResponseEntity<Map<String, Object>> updateRespondentDetails(
             @PathVariable UUID id,
-            @RequestBody com.nyaysetu.backend.dto.RespondentDetailsDTO details
+            @Valid @RequestBody com.nyaysetu.backend.dto.RespondentDetailsDTO details
     ) {
         caseManagementService.updateRespondentDetails(id, details);
         

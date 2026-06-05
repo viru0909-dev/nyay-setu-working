@@ -1,21 +1,24 @@
 package com.nyaysetu.backend.controller;
 
-import com.nyaysetu.backend.entity.User;
-import com.nyaysetu.backend.repository.UserRepository;
-import com.nyaysetu.backend.service.NyaySetuBrainService;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-import java.util.Map;
-import java.util.UUID;
-import java.util.List;
-import java.util.ArrayList;
+import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.service.AuthService;
+import com.nyaysetu.backend.service.NyaySetuBrainService;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * REST Controller for the Central AI Brain
@@ -28,7 +31,7 @@ import java.util.ArrayList;
 public class BrainController {
 
     private final NyaySetuBrainService brainService;
-    private final UserRepository userRepository;
+    private final AuthService authService;
 
     /**
      * unified brain chat endpoint
@@ -44,8 +47,11 @@ public class BrainController {
 
         User user = null;
         if (userDetails != null) {
-            user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElse(null);
+            try {
+                user = authService.findByEmail(userDetails.getUsername());
+            } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+                log.warn("Authenticated principal not found in database: {}", userDetails.getUsername());
+            }
         }
 
         log.info("🧠 Brain request from role: {}, msg: {}", (user != null ? user.getRole() : "GUEST"), message);

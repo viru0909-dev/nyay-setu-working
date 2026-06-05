@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useResilientStream } from '../../hooks/useResilientStream';
+import StreamFallbackBanner from '../../components/stream/StreamFallbackBanner';
+import { downloadPartialStreamContent } from '../../utils/streamResilience';
 import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, Scan, FileText, X, Mic, StopCircle, Volume2, Shield, AlertTriangle, CheckCircle2, Eye, UserCircle2 } from 'lucide-react';
 import { vakilFriendAPI } from '../../services/api';
 import axios from 'axios';
@@ -41,7 +44,16 @@ export default function VakilFriendChat() {
     const [reasoningStages, setReasoningStages] = useState({});
     const [reasoningText, setReasoningText] = useState('');
     const [kanoonResults, setKanoonResults] = useState([]);
-    const deepResearchAbortRef = useRef(null);
+    const lastDeepResearchQueryRef = useRef(null);
+
+const {
+    streamState: deepResearchStreamState,
+    start: startResilientDeepResearch,
+    cancel: cancelDeepResearchStream,
+} = useResilientStream({
+    breakerKey: 'vakil-friend-deep-research',
+    maxRetries: 3,
+});
 
     // Wake Word Buffers
     const commandBufferRef = useRef('');
@@ -319,62 +331,81 @@ export default function VakilFriendChat() {
     };
 
     // Deep Research SSE Connection
-    const startDeepResearch = async (query) => {
-        // Abort any previous deep research
-        if (deepResearchAbortRef.current) {
-            deepResearchAbortRef.current.abort();
-        }
+    const savePartialResearchSnapshot = () => {
+    const stageSummary = Object.entries(reasoningStages)
+        .map(([stage, details]) => `- ${stage}: ${details.status} — ${details.message || ''}`)
+        .join('\n');
 
-        const abortController = new AbortController();
-        deepResearchAbortRef.current = abortController;
+    const kanoonSummary = kanoonResults
+        .map((result) => `- ${result.title || 'Untitled'} ${result.doc_id ? `(Doc: ${result.doc_id})` : ''}`)
+        .join('\n');
 
-        // Reset state
-        setIsDeepResearching(true);
-        setReasoningStages({});
-        setReasoningText('');
-        setKanoonResults([]);
+    const content = [
+        '# Partial Deep Legal Research',
+        '',
+        `Query: ${lastDeepResearchQueryRef.current || 'Unknown'}`,
+        '',
+        '## Reasoning Stages',
+        stageSummary || 'No stages captured yet.',
+        '',
+        '## Reasoning Text',
+        reasoningText || 'No reasoning text captured yet.',
+        '',
+        '## Kanoon Results',
+        kanoonSummary || 'No Kanoon results captured yet.',
+    ].join('\n');
 
-        try {
-            const nlpBaseUrl = import.meta.env.VITE_NLP_BASE_URL || 'http://localhost:8001';
-            const response = await fetch(`${nlpBaseUrl}/research/deep`, {
+    downloadPartialStreamContent('partial-deep-legal-research.md', content);
+};
+
+// Deep Research SSE Connection
+const startDeepResearch = async (query) => {
+    lastDeepResearchQueryRef.current = query;
+
+    setIsDeepResearching(true);
+    setReasoningStages({});
+    setReasoningText('');
+    setKanoonResults([]);
+    setError(null);
+
+    const nlpBaseUrl = import.meta.env.VITE_NLP_BASE_URL || 'http://localhost:8001';
+
+    await startResilientDeepResearch({
+        request: ({ signal }) =>
+            fetch(`${nlpBaseUrl}/research/deep`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query, language }),
-                signal: abortController.signal
-            });
+                signal,
+            }),
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
+        onEvent: handleDeepResearchEvent,
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
+        onRetry: () => {
+            setError('AI research stream degraded. Reconnecting without clearing your current result...');
+        },
 
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop(); // Keep incomplete line in buffer
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        try {
-                            const data = JSON.parse(line.slice(6));
-                            handleDeepResearchEvent(data);
-                        } catch (e) {
-                            // Ignore JSON parse errors for partial data
-                        }
-                    }
-                }
-            }
-        } catch (err) {
-            if (err.name !== 'AbortError') {
-                console.error('Deep research error:', err);
-                setError(t('vakilFriend.deepResearchError'));
-            }
-        } finally {
+        onComplete: () => {
             setIsDeepResearching(false);
-        }
-    };
+            setError(null);
+        },
+
+        onFailure: (err) => {
+            console.error('Deep research error:', err);
+            setIsDeepResearching(false);
+            setError(t('vakilFriend.deepResearchError'));
+
+            setMessages(prev => [
+                ...prev,
+                {
+                    role: 'assistant',
+                    content:
+                        '⚠️ Deep research stream was interrupted. Your partial reasoning is preserved. Please use Retry to reconnect or Save partial to download the current result.',
+                },
+            ]);
+        },
+    });
+};
 
     const handleDeepResearchEvent = (data) => {
         const { type, ...payload } = data;
@@ -1889,10 +1920,25 @@ export default function VakilFriendChat() {
                     flexDirection: 'column',
                     minHeight: '600px', // matches chat height roughly
                 }}>
+           <StreamFallbackBanner
+    state={deepResearchStreamState}
+    onRetry={() => {
+        if (lastDeepResearchQueryRef.current) {
+            startDeepResearch(lastDeepResearchQueryRef.current);
+        }
+    }}
+    onSavePartial={savePartialResearchSnapshot}
+    hasPartialContent={
+        Boolean(reasoningText) ||
+        kanoonResults.length > 0 ||
+        Object.keys(reasoningStages).length > 0
+    }
+/>
                     {/* Render Avatar Panel inline, removing its portal wrapper later or handling it specially */}
                     <AvatarPanel
                         state={avatarState}
                         onClose={() => {
+                            cancelDeepResearchStream();
                             setShowAvatar(false);
                             window.speechSynthesis.cancel();
 

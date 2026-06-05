@@ -3,6 +3,9 @@ package com.nyaysetu.backend.service;
 import com.nyaysetu.backend.dto.DocumentDto;
 import com.nyaysetu.backend.dto.UploadDocumentRequest;
 import com.nyaysetu.backend.entity.*;
+import com.nyaysetu.backend.entity.DocumentEntity;
+import com.nyaysetu.backend.entity.DocumentStorageType;
+import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.repository.UserRepository;
@@ -128,6 +131,13 @@ public class DocumentManagementService {
             default:
                 return false;
         }
+        
+        return switch (visibility) {
+            case "PUBLIC" -> true; // Everyone can see public documents
+            case "RESTRICTED" -> "JUDGE".equals(userRole) || (userId != null && userId.equals(doc.getUploadedBy()));
+            case "SEALED" -> "JUDGE".equals(userRole); // Only judge
+            default -> false; // Unknown visibility level - deny by default
+        };
     }
 
     public DocumentDto getDocumentById(UUID id) {

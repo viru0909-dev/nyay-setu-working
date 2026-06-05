@@ -2,22 +2,22 @@ import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-vi.mock('../../services/lawgptService', () => ({
-  default: {
-    generate: vi.fn(),
-    generatePdf: vi.fn(),
-    generateDocx: vi.fn(),
+vi.mock('../../services/api', () => ({
+  documentGenerateAPI: {
+    preview: vi.fn(),
+    download: vi.fn(),
+    downloadDocx: vi.fn(),
   },
 }));
 
-import lawgpt from '../../services/lawgptService';
+import { documentGenerateAPI as lawgpt } from '../../services/api';
 import DocumentGeneratePage from './DocumentGeneratePage';
 
 describe('DocumentGeneratePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    lawgpt.generate.mockResolvedValue({ data: { title: 'AFFIDAVIT', content: 'dummy text', generatedAt: new Date().toISOString(), sources: [] } });
-    lawgpt.generateDocx.mockResolvedValue({ data: new Blob(['docx']) });
+    lawgpt.preview.mockResolvedValue({ data: { title: 'AFFIDAVIT', content: 'dummy text', generatedAt: new Date().toISOString(), sources: [] } });
+    lawgpt.downloadDocx.mockResolvedValue({ data: new Blob(['docx']) });
   });
 
   const renderPage = () => render(
@@ -27,7 +27,7 @@ describe('DocumentGeneratePage', () => {
   );
 
   it('renders backend validation errors for missing fields', async () => {
-    lawgpt.generate.mockRejectedValueOnce({ response: { data: { detail: { missing_fields: ['petitioner_address'] } } } });
+    lawgpt.preview.mockRejectedValueOnce({ response: { data: { detail: { missing_fields: ['petitioner_address'] } } } });
 
     renderPage();
 
@@ -50,7 +50,7 @@ describe('DocumentGeneratePage', () => {
   });
 
   it('shows prompt-injection warnings from backend error responses', async () => {
-    lawgpt.generate.mockRejectedValueOnce({ response: { data: { detail: { prompt_injection_detected: ['ignore all previous'] } } } });
+    lawgpt.preview.mockRejectedValueOnce({ response: { data: { detail: { prompt_injection_detected: ['ignore all previous'] } } } });
 
     renderPage();
 
@@ -75,7 +75,7 @@ describe('DocumentGeneratePage', () => {
   it('copies generated content and calls DOCX export actions', async () => {
     const writeText = vi.fn(() => Promise.resolve());
     Object.assign(navigator, { clipboard: { writeText } });
-    lawgpt.generate.mockResolvedValueOnce({ data: { title: 'AFFIDAVIT', content: 'My generated document', generatedAt: new Date().toISOString(), sources: [] } });
+    lawgpt.preview.mockResolvedValueOnce({ data: { title: 'AFFIDAVIT', content: 'My generated document', generatedAt: new Date().toISOString(), sources: [] } });
 
     renderPage();
 
@@ -98,12 +98,12 @@ describe('DocumentGeneratePage', () => {
     await waitFor(() => expect(writeText).toHaveBeenCalledWith('My generated document'));
     expect(screen.getByText(/Copied to clipboard/i)).toBeInTheDocument();
 
-    lawgpt.generateDocx.mockResolvedValueOnce({ data: new Blob(['docx']) });
+    lawgpt.downloadDocx.mockResolvedValueOnce({ data: new Blob(['docx']) });
     const createObjectURL = vi.spyOn(window.URL, 'createObjectURL').mockReturnValue('blob:dummy');
     const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
     fireEvent.click(screen.getByRole('button', { name: /Download DOCX/i }));
-    await waitFor(() => expect(lawgpt.generateDocx).toHaveBeenCalled());
+    await waitFor(() => expect(lawgpt.downloadDocx).toHaveBeenCalled());
 
     createObjectURL.mockRestore();
     anchorClick.mockRestore();
@@ -111,8 +111,8 @@ describe('DocumentGeneratePage', () => {
 
   it('downloads PDF and handles filename and blob flow', async () => {
     // Prepare mocks
-    lawgpt.generate.mockResolvedValueOnce({ data: { title: 'AFFIDAVIT', content: 'PDF content', generatedAt: new Date().toISOString(), sources: [] } });
-    lawgpt.generatePdf.mockResolvedValueOnce({ data: new Blob(['%PDF-1.4']) });
+    lawgpt.preview.mockResolvedValueOnce({ data: { title: 'AFFIDAVIT', content: 'PDF content', generatedAt: new Date().toISOString(), sources: [] } });
+    lawgpt.download.mockResolvedValueOnce({ data: new Blob(['%PDF-1.4']) });
 
     const createObjectURL = vi.spyOn(window.URL, 'createObjectURL').mockReturnValue('blob:pdfdummy');
     let appendedEl = null;
@@ -141,7 +141,7 @@ describe('DocumentGeneratePage', () => {
     // Click Download PDF and assert flows
     const appendSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((el) => { appendedEl = el; return el; });
     fireEvent.click(screen.getByRole('button', { name: /Download PDF/i }));
-    await waitFor(() => expect(lawgpt.generatePdf).toHaveBeenCalled());
+    await waitFor(() => expect(lawgpt.download).toHaveBeenCalled());
     expect(createObjectURL).toHaveBeenCalled();
     expect(appendedEl).not.toBeNull();
     // download name should match pattern: <type>_<Petitioner_Name_with_underscores>.pdf

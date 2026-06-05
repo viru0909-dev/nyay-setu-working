@@ -4,12 +4,17 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { brainAPI } from '../../services/api';
+import StreamFallbackBanner from '../stream/StreamFallbackBanner';
+import {
+    downloadPartialStreamContent,
+    executeWithResilience,
+} from '../../utils/streamResilience';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useTranslation } from 'react-i18next';
 
 export default function AIAssistantModal({ isOpen, onClose }) {
-    
+
     const { t, i18n } = useTranslation('aiAssistant');
     const language = i18n.language;
     const [chatStarted, setChatStarted] = useState(false);
@@ -17,6 +22,13 @@ export default function AIAssistantModal({ isOpen, onClose }) {
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [sessionId, setSessionId] = useState(null);
+    const [assistantNetworkState, setAssistantNetworkState] = useState({
+    status: 'idle',
+    attempt: 0,
+    error: null,
+    lastRetryDelay: 0,
+    });
+    const lastPromptRef = useRef('');
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -30,31 +42,93 @@ export default function AIAssistantModal({ isOpen, onClose }) {
             setMessages([]);
             setInputMessage('');
             setSessionId(null);
-        }
+            setAssistantNetworkState({
+                status: 'idle',
+                attempt: 0,
+                error: null,
+                lastRetryDelay: 0,
+            });
+            lastPromptRef.current = '';
+       }
     }, [isOpen]);
 
-    const sendMessage = async (text) => {
-        if (!text.trim()) return;
+    const savePartialAssistantChat = () => {
+    const content = messages
+        .map((msg) => `## ${msg.role === 'user' ? 'User' : 'AI Assistant'}\n\n${msg.content}`)
+        .join('\n\n---\n\n');
+
+    downloadPartialStreamContent('ai-assistant-partial-chat.md', content);
+};
+
+const sendMessage = async (text, { appendUserMessage = true } = {}) => {
+    if (!text.trim() || isLoading) return;
+
+    lastPromptRef.current = text;
+
+    if (appendUserMessage) {
         const userMessage = { role: 'user', content: text };
         setMessages(prev => [...prev, userMessage]);
         setInputMessage('');
-        setIsLoading(true);
-        try {
-            const response = await brainAPI.chat(text, sessionId);
-            const aiMessage = { role: 'ai', content: response.data.message };
-            setMessages(prev => [...prev, aiMessage]);
-            if (response.data.sessionId) setSessionId(response.data.sessionId);
-        } catch (error) {
-            console.error('AI Chat Error:', error);
-            const errorMessage = {
-                role: 'ai',
-                content: t('error')
-            };
-            setMessages(prev => [...prev, errorMessage]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    }
+
+    setIsLoading(true);
+    setAssistantNetworkState({
+        status: 'connecting',
+        attempt: 0,
+        error: null,
+        lastRetryDelay: 0,
+    });
+
+    try {
+        const response = await executeWithResilience(
+            () => brainAPI.chat(text, sessionId),
+            {
+                breakerKey: 'landing-ai-assistant-chat',
+                maxRetries: 2,
+                baseDelayMs: 700,
+                maxDelayMs: 4000,
+                onRetry: ({ attempt, delay, error }) => {
+                    setAssistantNetworkState({
+                        status: 'reconnecting',
+                        attempt,
+                        error,
+                        lastRetryDelay: delay,
+                    });
+                },
+            }
+        );
+
+        const aiMessage = { role: 'ai', content: response.data.message };
+        setMessages(prev => [...prev, aiMessage]);
+
+        if (response.data.sessionId) setSessionId(response.data.sessionId);
+
+        setAssistantNetworkState({
+            status: 'completed',
+            attempt: 0,
+            error: null,
+            lastRetryDelay: 0,
+        });
+    } catch (error) {
+        console.error('AI Chat Error:', error);
+
+        setAssistantNetworkState({
+            status: 'failed',
+            attempt: 2,
+            error,
+            lastRetryDelay: 0,
+        });
+
+        const errorMessage = {
+            role: 'ai',
+            content: '⚠️ AI connection is currently unstable. Your chat is preserved. Please use Retry or Save partial.',
+        };
+
+        setMessages(prev => [...prev, errorMessage]);
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     if (!isOpen) return null;
 
@@ -193,6 +267,18 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                             flexDirection: 'column',
                             gap: '0'
                         }}>
+
+                        <StreamFallbackBanner
+    state={assistantNetworkState}
+    onRetry={() => {
+        if (lastPromptRef.current) {
+            sendMessage(lastPromptRef.current, { appendUserMessage: false });
+        }
+    }}
+    onSavePartial={savePartialAssistantChat}
+    hasPartialContent={messages.length > 0}
+/>
+
                             {/* Suggestions */}
                             {messages.length === 0 && (
                                 <div>
