@@ -395,8 +395,21 @@ For environment variables, copy `.env.example` to `.env` and fill in your values
 | Document | Description |
 |---|---|
 | [AI Integration Guide](./AI_INTEGRATION_GUIDE.md) | Groq API and NLP orchestrator technical deep-dive |
-| [System Documentation](./SYSTEM_DOCUMENTATION.md) | Existing REST endpoints and specifications |
+| [API Documentation](./SYSTEM_DOCUMENTATION.md) | All REST endpoints with request and response specifications |
+| [Postman Collection](./postman_collection.json) | Postman collection (v2.1) for testing Spring Boot & Python APIs |
+| [OpenAPI Specification](./docs/openapi.yaml) | OpenAPI 3.0 YAML spec for all endpoints |
 | [Contributing Guidelines](./CONTRIBUTING.md) | Branching strategy, commit conventions, and PR workflow |
+
+### API Testing
+
+To easily test the backend APIs:
+1. **Import the Postman Collection**: Import the `postman_collection.json` file located in the project root into Postman.
+2. **Configure Environment Variables**:
+   - `baseUrl`: Set to `http://localhost:8080` (Spring Boot backend)
+   - `nlpUrl`: Set to `http://localhost:8001` (Python services)
+   - `bearerToken`: Set to the JWT token returned after registering/logging in.
+3. **Authentication**: All authenticated endpoints automatically inherit the Bearer Token from the collection properties. Simply register or login via the `Authentication` folder, copy the `token` (or `accessToken`), and save it in the `bearerToken` variable.
+4. **OpenAPI Spec**: You can also import `docs/openapi.yaml` into Swagger Editor or your preferred OpenAPI client to visualize and interact with the endpoints.
 
 <hr/>
 
@@ -502,3 +515,83 @@ This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE)
   Built with purpose for a more accessible Indian Judiciary.<br/>
   <em>Nyay Setu — न्याय हर किसी का अधिकार है।</em>
 </p>
+## Local Development Setup
+
+### Prerequisites
+
+- Node.js
+- Java 17
+- Maven
+- Python 3.10+
+- Git
+
+---
+
+### Clone Repository
+
+```bash
+git clone https://github.com/viru0909-dev/nyay-setu-working.git
+cd nyay-setu-working
+```
+
+---
+
+### Frontend Setup
+
+```bash
+cd frontend/nyaysetu-frontend
+npm install
+npm run dev
+```
+
+Frontend runs on:
+
+```bash
+http://localhost:5173
+```
+
+---
+
+### Backend Setup
+
+```bash
+cd backend/nyaysetu-backend
+mvn spring-boot:run
+```
+
+Backend runs on:
+
+```bash
+http://localhost:8080
+```
+
+---
+
+### NLP Service Setup
+
+```bash
+cd nlp-orchestrator
+pip install -r requirements.txt
+python main.py
+```
+
+---
+
+### Common Issues
+
+#### Login / Network Error
+
+Ensure backend is running before starting frontend login flow.
+
+#### Maven Errors
+
+Always run Maven commands inside:
+
+```bash
+backend/nyaysetu-backend
+```
+
+#### Deployment Build Errors
+
+Linux deployment environments are case-sensitive.
+Ensure import paths exactly match filenames.
