@@ -493,17 +493,13 @@ npx kill-port 3000
 
 ## Contributors
 
-<br/>
+<!-- CONTRIBUTORS_START -->
 
-<a href="https://github.com/viru0909-dev/nyay-setu-working/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=viru0909-dev/nyay-setu-working&max=500&columns=15" alt="Contributors" />
-</a>
+<!-- CONTRIBUTORS_END -->
 
-<br/><br/>
+Updates automatically as new contributors merge pull requests. 
+Want to see your avatar here? [Pick up an issue](https://github.com/viru0909-dev/nyay-setu-working/issues) and start contributing.
 
-This chart updates automatically as new contributors merge pull requests. Want to see your avatar here? [Pick up an issue](https://github.com/viru0909-dev/nyay-setu-working/issues) and start contributing.
-
-<hr/>
 
 ## License
 
