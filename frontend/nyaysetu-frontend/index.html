@@ -45,13 +45,18 @@
   -->
   <meta
     http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://nyay-setu-frontend.vercel.app wss:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+    content="default-src 'self'; script-src 'self';     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://nyay-setu-frontend.vercel.app wss:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
   />
-  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <!--
+    X-Content-Type-Options: nosniff is intentionally set only as an HTTP response
+    header (nginx.conf / SecurityConfig.java). The meta-tag equivalent is
+    non-standard and ignored by most browsers, so it is omitted here.
+  -->
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
 
   <!-- Apple-specific PWA Meta Tags -->
   <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="NyaySetu" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
