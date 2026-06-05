@@ -2,7 +2,6 @@ package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.DocumentDto;
 import com.nyaysetu.backend.dto.UploadDocumentRequest;
-import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.DocumentEntity;
 import com.nyaysetu.backend.entity.DocumentStorageType;
 import com.nyaysetu.backend.entity.User;
@@ -112,23 +111,12 @@ public class DocumentManagementService {
     private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole) {
         String visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : "PUBLIC";
         
-        switch (visibility) {
-            case "PUBLIC":
-                return true; // Everyone can see public documents
-                
-            case "RESTRICTED":
-                // Judge, uploader, or their lawyer can see
-                if ("JUDGE".equals(userRole)) return true;
-                if (userId.equals(doc.getUploadedBy())) return true;
-                // TODO: Add lawyer check
-                return false;
-                
-            case "SEALED":
-                return "JUDGE".equals(userRole); // Only judge
-                
-            default:
-                return false; // Unknown visibility level - deny by default
-        }
+        return switch (visibility) {
+            case "PUBLIC" -> true; // Everyone can see public documents
+            case "RESTRICTED" -> "JUDGE".equals(userRole) || (userId != null && userId.equals(doc.getUploadedBy()));
+            case "SEALED" -> "JUDGE".equals(userRole); // Only judge
+            default -> false; // Unknown visibility level - deny by default
+        };
     }
 
     public DocumentDto getDocumentById(UUID id) {

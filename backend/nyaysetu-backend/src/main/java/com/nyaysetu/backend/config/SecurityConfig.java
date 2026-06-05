@@ -157,7 +157,29 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.deny())
                         .contentSecurityPolicy(csp -> csp
-                                .policyDirectives("frame-ancestors 'none';"))
+                                // Strict CSP for API responses. Mirrors the
+                                // frontend nginx.conf policy so that any
+                                // HTML/error page Spring serves (e.g. the
+                                // default whitelabel error pages) is also
+                                // protected. Adjust directives here when you
+                                // adjust them in nginx.conf.
+                                .policyDirectives(
+                                    "default-src 'self'; " +
+                                    "script-src 'self'; " +
+                                    "style-src 'self' 'unsafe-inline'; " +
+                                    "img-src 'self' data: https:; " +
+                                    "font-src 'self' https://fonts.gstatic.com; " +
+                                    "connect-src 'self' wss:; " +
+                                    "frame-ancestors 'none'; " +
+                                    "object-src 'none'; " +
+                                    "base-uri 'self'; " +
+                                    "form-action 'self'; " +
+                                    "upgrade-insecure-requests"
+                                ))
+                        .referrerPolicy(rp -> rp.policy(
+                            org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .permissionsPolicy(pp -> pp.policy(
+                            "geolocation=(), microphone=(), camera=(), payment=()"))
                 )
                 .authorizeHttpRequests(auth -> auth
 

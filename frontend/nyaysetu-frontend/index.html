@@ -33,6 +33,23 @@
   <meta name="theme-color" content="#1e3a8a" />
   <meta name="description" content="Offline-first Legal Justice Platform for Indian Judiciary" />
 
+  <!--
+    Content Security Policy — defense-in-depth meta tag.
+    The primary CSP is set as an HTTP response header in nginx.conf (production)
+    and SecurityConfig.java (API responses). This meta tag covers any host that
+    serves the static bundle but doesn't set the header (Vercel preview, local
+    file://, ad-hoc static servers).
+
+    Directives that meta CSP cannot enforce (frame-ancestors, report-uri,
+    sandbox) are intentionally omitted here — they only work as headers.
+  -->
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://nyay-setu-frontend.vercel.app wss:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+  />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+
   <!-- Apple-specific PWA Meta Tags -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

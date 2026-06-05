@@ -56,7 +56,7 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
                     log.warn("Failed to close unauthenticated WebSocket session: {}", session.getId());
                 }
             }
-        }, 5, TimeUnit.SECONDS);
+        }, 15, TimeUnit.SECONDS);
 
         authTimeouts.put(session.getId(), timeout);
     }

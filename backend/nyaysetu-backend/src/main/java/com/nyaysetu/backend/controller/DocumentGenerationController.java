@@ -1,17 +1,22 @@
 package com.nyaysetu.backend.controller;
 
-import com.nyaysetu.backend.entity.User;
-import com.nyaysetu.backend.service.AuthService;
-import com.nyaysetu.backend.service.DocumentGenerationService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.service.AuthService;
+import com.nyaysetu.backend.service.DocumentGenerationService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Controller for AI-powered legal document generation.
@@ -20,7 +25,7 @@ import java.util.Map;
  * Proxies to the Python LawGPT microservice for RAG-grounded document drafting.
  */
 @RestController
-@RequestMapping("/api/documents/generate")
+@RequestMapping("/documents/generate")
 @RequiredArgsConstructor
 @Slf4j
 public class DocumentGenerationController {
@@ -132,6 +137,52 @@ public class DocumentGenerationController {
             return ResponseEntity.status(502).body(Map.of("error", msg != null ? msg : "PDF generation failed"));
         } catch (Exception e) {
             log.error("Unexpected error in PDF download: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error"));
+        }
+    }
+
+    /**
+     * Generate a document and download as DOCX.
+     * 
+     * POST /api/documents/generate/download/docx
+     */
+    @PostMapping("/download/docx")
+    public ResponseEntity<?> generateDownloadDocx(
+            @RequestBody Map<String, Object> request,
+            Authentication authentication
+    ) {
+        try {
+            User user = authService.findByEmail(authentication.getName());
+
+            if (!isAllowedRole(user)) {
+                return ResponseEntity.status(403).body(Map.of(
+                        "error", "Only litigants and lawyers can generate documents"
+                ));
+            }
+
+            log.info("📄 DOCX download requested by {} ({})", user.getName(), user.getRole());
+
+            byte[] docxBytes = documentGenerationService.generateDocx(request);
+            String docType = request.get("docType") != null ? request.get("docType").toString() : "document";
+            String petitioner = request.get("petitionerName") != null
+                    ? request.get("petitionerName").toString().replace(" ", "_")
+                    : "user";
+            String filename = docType + "_" + petitioner + ".docx";
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .body(docxBytes);
+
+        } catch (RuntimeException e) {
+            String msg = e.getMessage();
+            if (msg != null && msg.contains("unavailable")) {
+                return ResponseEntity.status(503).body(Map.of("error", msg));
+            }
+            log.error("DOCX download error: {}", msg);
+            return ResponseEntity.status(502).body(Map.of("error", msg != null ? msg : "DOCX generation failed"));
+        } catch (Exception e) {
+            log.error("Unexpected error in DOCX download: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body(Map.of("error", "Internal server error"));
         }
     }

@@ -1,0 +1,41 @@
+name: Environment Configuration Validator
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Validate Backend Env Examples
+        run: |
+          if [ -f "backend/nyaysetu-backend/.env.example" ]; then
+            echo "✅ Backend env template exists"
+          else
+            echo "⚠️ Backend env template (.env.example) is missing!"
+            exit 1
+          fi
+
+      - name: Validate Frontend Env Examples
+        run: |
+          if [ -f "frontend/nyaysetu-frontend/.env.production" ]; then
+            echo "✅ Frontend env production template exists"
+          else
+            echo "⚠️ Frontend env production template is missing!"
+            exit 1
+          fi
+
+      - name: Validate NLP Orchestrator Env Examples
+        run: |
+          if [ -f "nlp-orchestrator/.env.example" ]; then
+            echo "✅ NLP Orchestrator env template exists"
+          else
+            echo "⚠️ NLP Orchestrator env template (.env.example) is missing!"
+            exit 1
+          fi

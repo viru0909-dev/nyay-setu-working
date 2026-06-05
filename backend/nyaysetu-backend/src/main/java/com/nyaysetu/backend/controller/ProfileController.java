@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.Authentication;
+
 @Tag(name = "User Profile", description = "Create and update user profile information and photo")
 @RestController
 @RequestMapping("/profile")
@@ -34,5 +36,11 @@ public class ProfileController {
     public ResponseEntity<?> uploadPicture(@PathVariable Long userId, @RequestParam("file") MultipartFile file) throws Exception {
         profileService.saveProfilePicture(userId, file.getBytes());
         return ResponseEntity.ok("OK");
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteAccount(Authentication auth) {
+        profileService.deleteUserAccount(auth.getName());
+        return ResponseEntity.ok(java.util.Map.of("message", "User account deleted successfully"));
     }
 }

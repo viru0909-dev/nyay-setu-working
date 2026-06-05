@@ -8,6 +8,9 @@ updates:
     labels:
       - "dependencies"
       - "security"
+    commit-message:
+      prefix: "fix"
+      include: "scope"
 
   - package-ecosystem: "npm"
     directory: "/frontend/nyaysetu-frontend"
@@ -16,6 +19,20 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
+      - "security"
+    commit-message:
+      prefix: "fix"
+      prefix-development: "chore"
+      include: "scope"
+
+  - package-ecosystem: "pip"
+    directory: "/nlp-orchestrator"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
 
   - package-ecosystem: "github-actions"
     directory: "/"

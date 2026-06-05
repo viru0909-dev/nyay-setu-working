@@ -107,6 +107,7 @@ export default function TrustIndicators() {
                         {[...indicators, ...indicators].map((item, idx) => (
                             <motion.div
                                 key={`${idx}-${item.title}`}
+                                className="trust-card"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
@@ -187,6 +188,31 @@ export default function TrustIndicators() {
                     }
                     .trust-track:hover {
                         animation-play-state: paused;
+                    }
+
+                    /* Mobile: keep the marquee horizontal + prevent clipping.
+                       responsive.css has broad rules that can force flex wrap/column on mobile. */
+                    @media (max-width: 768px) {
+                        .trust-scroll-mask {
+                            overflow-x: auto !important;
+                            overflow-y: hidden !important;
+                            -webkit-overflow-scrolling: touch;
+                            mask-image: none !important;
+                            -webkit-mask-image: none !important;
+                            padding: 0.75rem 0 !important;
+                        }
+                        .trust-scroll-mask .trust-track {
+                            flex-direction: row !important;
+                            flex-wrap: nowrap !important;
+                            width: max-content !important;
+                            animation: none !important; /* better UX than auto-scroll on small screens */
+                            padding: 0.75rem 0 !important;
+                            gap: 1rem !important;
+                        }
+                        .trust-scroll-mask .trust-card {
+                            min-width: min(85vw, 360px) !important;
+                            padding: 2.25rem 1.5rem !important;
+                        }
                     }
                 `}</style>
             </div>

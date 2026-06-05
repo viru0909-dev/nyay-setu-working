@@ -7,8 +7,8 @@
       "fileCaseFIR": "வழக்கு / FIR பதிவு செய்",
       "caseDiary": "வழக்கு குறிப்பேடு",
       "hearings": "விசாரணைகள்",
-      "lawyerChat": "வழக்கறிஞர் உரையாடல்",
-      "forensicAnalysis": "நுண்ணறிவு பகுப்பாய்வு",
+      "lawyerChat": "வழக்கறிஞர் அரட்டை",
+      "generateDocument": "ஆவணத்தை உருவாக்கவும்",
       "profile": "சுயவிவரம்"
     },
     "lawyer": {

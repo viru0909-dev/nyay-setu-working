@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useEffect, Suspense, lazy } from 'react';
+import { useEffect, Suspense, lazy, useState } from 'react';
 import useAuthStore from './store/authStore';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
 // CHANGED: ThemeProvider added — wraps the entire app so all components can access theme
@@ -7,12 +7,16 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import ScrollToTop from './ScrollToTop';
+import ScrollProgressBar from './components/ScrollProgressBar';
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
 import UpdateNotification from './components/UpdateNotification';
 import GuestWelcomeToast from './components/guest/GuestWelcomeToast';
 import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
+
+import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
+import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
 
 // Lazy load pages for better performance
 const Landing = lazy(() => import('./pages/Landing'));
@@ -43,7 +47,6 @@ const CaseDetailPage = lazy(() => import('./pages/litigant/CaseDetailPage'));
 const HearingsPage = lazy(() => import('./pages/litigant/HearingsPage'));
 const LawyerChatPage = lazy(() => import('./pages/litigant/LawyerChatPage'));
 const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
-const ForensicsPage = lazy(() => import('./pages/litigant/ForensicsPage'));
 const DocumentGeneratePage = lazy(() => import('./pages/litigant/DocumentGeneratePage'));
 const FindLawyerPage = lazy(() => import('./pages/litigant/FindLawyerPage'));
 const LawyerFeedbackPage = lazy(() => 
@@ -116,8 +119,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return children;
 };
 
+import { useOfflineSync } from './hooks/useOfflineSync';
+
 function App({ swRegistration }) {
     const { initAuth } = useAuthStore();
+    useOfflineSync();
 
     useEffect(() => {
         initAuth();
@@ -126,6 +132,7 @@ function App({ swRegistration }) {
     return (
         // CHANGED: ThemeProvider is the outermost wrapper so the theme CSS attribute
         // is set on <html> before any child renders — prevents flash of wrong theme
+        
         <ThemeProvider>
             <ErrorBoundary>
                 <LanguageProvider>
@@ -139,9 +146,11 @@ function App({ swRegistration }) {
                             v7_relativeSplatPath: true
                         }}
                     >
+                        <KeyboardAccessibilityProvider user={user} />
                         <GuestWelcomeToast />
                         <GuestOnboardingHint />
                         <ScrollToTop />
+                        <ScrollProgressBar />
                         <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
                             <Routes>
                                 <Route path="/" element={<Landing />} />
@@ -174,7 +183,6 @@ function App({ swRegistration }) {
                                     <Route path="find-lawyer" element={<FindLawyerPage />} />
                                     <Route path="feedback" element={<LawyerFeedbackPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
-                                    <Route path="forensics" element={<ForensicsPage />} />
                                     <Route path="generate-document" element={<DocumentGeneratePage />} />
                                 </Route>
 

@@ -6,7 +6,7 @@ class NotificationService {
         this.ws = null;
         this.listeners = [];
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 3;
+        this.maxReconnectAttempts = 10;
         this.API_BASE_URL = API_BASE_URL;
         this.isConnecting = false;
         this.connectionFailed = false;
@@ -16,11 +16,10 @@ class NotificationService {
      * Connects to the WebSocket for real-time notifications securely
      */
     connect(token) {
-        // Skip if already connected, connecting, or permanently failed
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             return;
         }
-        if (this.isConnecting || this.connectionFailed) {
+        if (this.isConnecting) {
             return;
         }
         if (!token || token === 'null' || token === 'undefined') {
@@ -30,15 +29,13 @@ class NotificationService {
         const isProduction = !window.location.hostname.includes('localhost');
 
         try {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const host = new URL(this.API_BASE_URL).host;
-            
-            // Secure URL without query parameters
-            const wsUrl = `${protocol}//${host}/api/ws/notifications`;
+            const parsedUrl = new URL(this.API_BASE_URL);
+            const protocol = parsedUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${parsedUrl.host}/api/ws/notifications`;
 
             this.isConnecting = true;
+            this.connectionFailed = false;
 
-            // Merged environment log routing rules - CONFLICT 1 RESOLVED
             if (!isProduction) {
                 if (import.meta.env.DEV) {
                     console.log('Connecting to WebSocket:', wsUrl);
@@ -47,7 +44,6 @@ class NotificationService {
 
             this.ws = new WebSocket(wsUrl);
 
-            // In-band Authentication frame payload dispatch - CONFLICT 2 RESOLVED
             this.ws.onopen = () => {
                 if (!isProduction) {
                     if (import.meta.env.DEV) {
@@ -56,8 +52,7 @@ class NotificationService {
                 }
                 this.reconnectAttempts = 0;
                 this.isConnecting = false;
-                
-                // Securely transmit token in the body frame immediately on open
+
                 this.ws.send(JSON.stringify({
                     type: 'AUTH',
                     token: token
@@ -109,20 +104,21 @@ class NotificationService {
             this.ws.onclose = (event) => {
                 this.isConnecting = false;
                 this.ws = null;
-                
-                // Code 1008 means server sandbox kicked the connection due to auth timeout/failure
+
                 if (event.code === 1008) {
                     this.connectionFailed = true;
                     return;
                 }
 
-                if (!this.connectionFailed) {
-                    this.attemptReconnect(token);
+                if (this.connectionFailed) {
+                    return;
                 }
+
+                this.attemptReconnect(token);
             };
         } catch (error) {
             this.isConnecting = false;
-            this.connectionFailed = true;
+            this.connectionFailed = false;
         }
     }
 
@@ -138,7 +134,10 @@ class NotificationService {
                 this.connect(token);
             }, delay);
         } else {
-            this.connectionFailed = true;
+            this.reconnectAttempts = 0;
+            setTimeout(() => {
+                this.connect(token);
+            }, 60000);
         }
     }
 
@@ -168,6 +167,10 @@ class NotificationService {
         this.reconnectAttempts = 0;
         this.isConnecting = false;
         this.connectionFailed = false;
+    }
+
+    resetConnection() {
+        this.disconnect();
     }
 
     // --- REST API Methods ---
