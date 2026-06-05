@@ -146,7 +146,7 @@ function App({ swRegistration }) {
                             v7_relativeSplatPath: true
                         }}
                     >
-                        <KeyboardAccessibilityProvider user={user} />
+                   
                         <GuestWelcomeToast />
                         <GuestOnboardingHint />
                         <ScrollToTop />
