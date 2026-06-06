@@ -7,6 +7,7 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import ScrollToTop from './ScrollToTop';
+import ContactUs from './pages/ContactUs';
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
@@ -167,6 +168,7 @@ function App({ swRegistration }) {
                                 <Route path="/" element={<Landing />} />
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/signup" element={<Signup />} />
+                                <Route path="/contact" element={<ContactUs />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                                 <Route path="/constitution" element={<Constitution />} />
                                 <Route path="/about" element={<About />} />
