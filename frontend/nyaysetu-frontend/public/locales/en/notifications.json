@@ -1,3 +1,38 @@
 {
-    "placeholder": "Notification translations will be added during component migration"
+  "notification": {
+    "notifications": "Notifications",
+    "markAllRead": "Mark all read",
+
+    "syncing": "Syncing...",
+
+    "allCaughtUp": "All caught up!",
+    "noNotifications": "No new notifications for now.",
+
+    "justNow": "Just now",
+
+    "newLabel": "NEW",
+
+    "failedLoad": "Failed to load notifications",
+
+    "time": {
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago"
+    },
+
+    "titles": {
+      "caseUpdate": "Case Update",
+      "newMessage": "New Message",
+      "hearingReminder": "Hearing Reminder",
+      "documentUploaded": "Document Uploaded",
+      "lawyerAssigned": "Lawyer Assigned"
+    },
+
+    "messages": {
+      "caseAccepted": "Your case has been accepted.",
+      "newDocument": "A new document was uploaded.",
+      "hearingTomorrow": "Your hearing is scheduled for tomorrow.",
+      "proposalReceived": "You received a new proposal.",
+      "messageReceived": "You received a new message."
+    }
+  }
 }

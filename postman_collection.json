@@ -1,0 +1,5600 @@
+{
+  "info": {
+    "_postman_id": "nyaysetu-collection-v1",
+    "name": "NyaySetu Unified API Collection",
+    "description": "Unified Postman collection for all NyaySetu API services (Spring Boot and Python Microservices).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Spring Boot Backend API",
+      "description": "Endpoints served by Spring Boot application (Default port 8080)",
+      "item": [
+        {
+          "name": "AI Services",
+          "item": [
+            {
+              "name": "[POST] summarize",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/api/ai/summarize",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "api",
+                    "ai",
+                    "summarize"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] chat",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/api/ai/chat",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "api",
+                    "ai",
+                    "chat"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] chatWithOllama",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/api/ai/chat/ollama",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "api",
+                    "ai",
+                    "chat",
+                    "ollama"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] constitutionQA",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/api/ai/constitution/qa",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "api",
+                    "ai",
+                    "constitution",
+                    "qa"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] checkOllamaStatus",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/api/ai/ollama/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "api",
+                    "ai",
+                    "ollama",
+                    "status"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getAvailableModels",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/api/ai/ollama/models",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "api",
+                    "ai",
+                    "ollama",
+                    "models"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Audit Logs",
+          "item": [
+            {
+              "name": "[POST] createLog",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/audit/log",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "audit",
+                    "log"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Authentication",
+          "item": [
+            {
+              "name": "[POST] register",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "register"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"litigant@example.com\",\n  \"name\": \"Jane Doe\",\n  \"password\": \"Password@123\",\n  \"role\": \"LITIGANT\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] ping",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/ping",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "ping"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] login",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "login"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"litigant@example.com\",\n  \"password\": \"Password@123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] refreshToken",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/refresh",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "refresh"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"eyJhbGci...\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] forgotPassword",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "forgot-password"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"litigant@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] verifyResetToken",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/verify-reset-token",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "verify-reset-token"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] resetPassword",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/reset-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "reset-password"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"reset-token-here\",\n  \"newPassword\": \"NewPassword@123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] enrollFace",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/face/enroll",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "face",
+                    "enroll"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"faceDescriptor\": [\n    0.1,\n    -0.2,\n    0.3\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] loginWithFace",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/face/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "face",
+                    "login"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"litigant@example.com\",\n  \"faceDescriptor\": [\n    0.1,\n    -0.2,\n    0.3\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[DELETE] disableFaceLogin",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/face/disable",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "face",
+                    "disable"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getFaceLoginStatus",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/face/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "face",
+                    "status"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] test",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/test",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "test"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Blockchain Evidence Vault",
+          "item": [
+            {
+              "name": "[POST] uploadEvidence - Upload evidence with blockchain hash",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/evidence/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "evidence",
+                    "upload"
+                  ]
+                },
+                "description": "Upload evidence with blockchain hash",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getEvidenceByCase - Get all evidence for a case",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/evidence/case/:caseId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "evidence",
+                    "case",
+                    ":caseId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Get all evidence for a case"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] verifyEvidence - Verify single evidence integrity",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/evidence/:evidenceId/verify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "evidence",
+                    ":evidenceId",
+                    "verify"
+                  ],
+                  "variable": [
+                    {
+                      "key": "evidenceId",
+                      "value": "example-value",
+                      "description": "The evidenceId parameter"
+                    }
+                  ]
+                },
+                "description": "Verify single evidence integrity"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] verifyChain - Verify entire evidence chain for a case",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/evidence/case/:caseId/verify-chain",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "evidence",
+                    "case",
+                    ":caseId",
+                    "verify-chain"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Verify entire evidence chain for a case"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getEvidence - Get evidence details by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/evidence/:evidenceId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "evidence",
+                    ":evidenceId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "evidenceId",
+                      "value": "example-value",
+                      "description": "The evidenceId parameter"
+                    }
+                  ]
+                },
+                "description": "Get evidence details by ID"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] downloadCertificate - Download Section 63(4) Certificate",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/evidence/:evidenceId/certificate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "evidence",
+                    ":evidenceId",
+                    "certificate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "evidenceId",
+                      "value": "example-value",
+                      "description": "The evidenceId parameter"
+                    }
+                  ]
+                },
+                "description": "Download Section 63(4) Certificate"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Brain AI",
+          "item": [
+            {
+              "name": "[POST] chat - unified brain chat endpoint",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/brain/chat",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "brain",
+                    "chat"
+                  ]
+                },
+                "description": "unified brain chat endpoint",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] analyzeCase - Analyze case intent (FIR vs Court Case)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/brain/analyze-case",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "brain",
+                    "analyze-case"
+                  ]
+                },
+                "description": "Analyze case intent (FIR vs Court Case)",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] suggestDocuments - Suggest documents based on case details",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/brain/suggest-documents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "brain",
+                    "suggest-documents"
+                  ]
+                },
+                "description": "Suggest documents based on case details",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Case Assignment",
+          "item": [
+            {
+              "name": "[POST] autoAssignJudge - Auto-assign a judge to a case",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/assign-judge",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "assign-judge"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Auto-assign a judge to a case",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getAvailableLawyers - Get list of available lawyers for client selection",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/lawyers/available",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "lawyers",
+                    "available"
+                  ]
+                },
+                "description": "Get list of available lawyers for client selection"
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] proposeLawyer - Propose a lawyer for a case",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/propose-lawyer",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "propose-lawyer"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Propose a lawyer for a case",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] respondProposal - Respond to a lawyer proposal",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/respond-proposal",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "respond-proposal"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Respond to a lawyer proposal",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getPendingCases - Get cases pending judge assignment (for admin)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/pending-assignment",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "pending-assignment"
+                  ]
+                },
+                "description": "Get cases pending judge assignment (for admin)"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getJudgeWorkload - Get judge workload (for admin dashboard)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/judge-workload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "judge-workload"
+                  ]
+                },
+                "description": "Get judge workload (for admin dashboard)"
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] takeCognizance",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/take-cognizance",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "take-cognizance"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] updateSummons",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/update-summons",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "update-summons"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] updateDocumentStatus",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/document-status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "document-status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Case Events",
+          "item": [
+            {
+              "name": "[GET] getCaseTimeline - Get timeline events for a case (ordered chronologically for ...",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/events",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "events"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Get timeline events for a case (ordered chronologically for display). This powers the frontend Timeline component."
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getRecentEvents - Get recent events for a case (newest first).",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/events/recent",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "events",
+                    "recent"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Get recent events for a case (newest first)."
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getJudgeEvents - Get events for a judge's assigned cases.",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/judge/:judgeId/events",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "judge",
+                    ":judgeId",
+                    "events"
+                  ],
+                  "variable": [
+                    {
+                      "key": "judgeId",
+                      "value": "example-value",
+                      "description": "The judgeId parameter"
+                    }
+                  ]
+                },
+                "description": "Get events for a judge's assigned cases."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Case Management",
+          "item": [
+            {
+              "name": "[POST] createCase",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Case of Breach of Contract\",\n  \"description\": \"The respondent failed to deliver the goods as agreed.\",\n  \"caseType\": \"CIVIL\",\n  \"jurisdiction\": \"Delhi High Court\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getMyCases",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Case of Breach of Contract\",\n  \"description\": \"The respondent failed to deliver the goods as agreed.\",\n  \"caseType\": \"CIVIL\",\n  \"jurisdiction\": \"Delhi High Court\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getCaseById",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[PUT] updateCase",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[DELETE] deleteCase",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] submitDraft - Handover C: Lawyer submits draft",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/submit-draft",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "submit-draft"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Handover C: Lawyer submits draft",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] reviewDraft - Handover C: Client reviews draft",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/review-draft",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "review-draft"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Handover C: Client reviews draft",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[PUT] approveDraft",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/approve-draft",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "approve-draft"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] fileInCourt - Handover D: Lawyer files the approved petition in court Rout...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/file-in-court",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "file-in-court"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Handover D: Lawyer files the approved petition in court Routes through CaseStateTransitionService for audit trail and validation.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] orderNotice",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/order-notice",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "order-notice"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] startHearings",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/start-hearings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "start-hearings"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] startEvidence",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/start-evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "start-evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] startArguments",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/start-arguments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "start-arguments"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] startJudgment",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/start-judgment",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "start-judgment"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] deliverVerdict",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/deliver-verdict",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "deliver-verdict"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] addParty",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/parties",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "parties"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John Respondent\",\n  \"role\": \"RESPONDENT\",\n  \"address\": \"456 Street, Delhi\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[PUT] updateRespondentDetails",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:id/respondent-details",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":id",
+                    "respondent-details"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"respondentName\": \"John Respondent\",\n  \"respondentAddress\": \"456 Street, Delhi\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Case Messaging",
+          "item": [
+            {
+              "name": "[POST] sendMessage",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/messages",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "messages"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getMessages",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/messages",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "messages"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Case Notes",
+          "item": [
+            {
+              "name": "[POST] addNote",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/notes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "notes"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Note regarding latest documents uploaded.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Case Transitions",
+          "item": [
+            {
+              "name": "[POST] policeSubmitToCourt - POLICE \u2192 COURT: Submit case to court for cognizance. Body: {...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/transition/:caseId/submit-to-court",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "transition",
+                    ":caseId",
+                    "submit-to-court"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "POLICE \u2192 COURT: Submit case to court for cognizance. Body: { \"officerId\": \"...\", \"officerName\": \"...\" }",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"officerId\": \"P123\",\n  \"officerName\": \"Officer Kumar\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] lawyerSaveDraft - LAWYER: Save draft petition (triggers client approval workfl...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/transition/:caseId/save-draft",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "transition",
+                    ":caseId",
+                    "save-draft"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "LAWYER: Save draft petition (triggers client approval workflow). Body: { \"lawyerId\": \"...\", \"lawyerName\": \"...\", \"draftContent\": \"...\" }",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"lawyerId\": \"L456\",\n  \"lawyerName\": \"Advocate Sharma\",\n  \"draftContent\": \"Detailed petition draft text...\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] litigantApproveDraft - LITIGANT: Approve draft petition (enables court submission)....",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/transition/:caseId/approve-draft",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "transition",
+                    ":caseId",
+                    "approve-draft"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "LITIGANT: Approve draft petition (enables court submission). Body: { \"litigantId\": \"...\", \"litigantName\": \"...\" }",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"litigantId\": \"U789\",\n  \"litigantName\": \"Jane Doe\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] litigantRejectDraft - LITIGANT: Reject draft petition. Body: { \"litigantId\": \"...\"...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/transition/:caseId/reject-draft",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "transition",
+                    ":caseId",
+                    "reject-draft"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "LITIGANT: Reject draft petition. Body: { \"litigantId\": \"...\", \"litigantName\": \"...\", \"reason\": \"...\" }",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"litigantId\": \"U789\",\n  \"litigantName\": \"Jane Doe\",\n  \"reason\": \"Draft needs updates on incident date.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] judgeTakeCognizance - JUDGE: Take cognizance of case. Body: { \"judgeId\": 123, \"jud...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/transition/:caseId/take-cognizance",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "transition",
+                    ":caseId",
+                    "take-cognizance"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "JUDGE: Take cognizance of case. Body: { \"judgeId\": 123, \"judgeName\": \"...\" }",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"judgeId\": 101,\n  \"judgeName\": \"Justice Dixit\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] judgeAdvanceStage - JUDGE: Advance case to next stage in the 7-step process. Bod...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/transition/:caseId/advance-stage",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "transition",
+                    ":caseId",
+                    "advance-stage"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "JUDGE: Advance case to next stage in the 7-step process. Body: { \"judgeId\": 123, \"judgeName\": \"...\" }",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"judgeId\": 101,\n  \"judgeName\": \"Justice Dixit\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] markSummonsServed - SYSTEM: Mark summons as served.",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/transition/:caseId/summons-served",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "transition",
+                    ":caseId",
+                    "summons-served"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "SYSTEM: Mark summons as served.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getCaseHealth - Get case health status (trial readiness check).",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/transition/:caseId/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    "transition",
+                    ":caseId",
+                    "health"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Get case health status (trial readiness check)."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Client FIRs",
+          "item": [
+            {
+              "name": "[POST] fileFir - Client files an FIR (Manual or AI-assisted)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/client/fir",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "client",
+                    "fir"
+                  ]
+                },
+                "description": "Client files an FIR (Manual or AI-assisted)",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"complainantName\": \"Jane Doe\",\n  \"complainantAddress\": \"123 Lane, Mumbai\",\n  \"accusedName\": \"Unknown\",\n  \"description\": \"Bicycle theft from residential premises.\",\n  \"incidentDate\": \"2026-06-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getMyFirs - Get all FIRs filed by the current client",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/client/fir/list",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "client",
+                    "fir",
+                    "list"
+                  ]
+                },
+                "description": "Get all FIRs filed by the current client"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getFirById - Get FIR details by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/client/fir/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "client",
+                    "fir",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Get FIR details by ID"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getStats - Get client FIR stats for dashboard",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/client/fir/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "client",
+                    "fir",
+                    "stats"
+                  ]
+                },
+                "description": "Get client FIR stats for dashboard"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Court Orders",
+          "item": [
+            {
+              "name": "[GET] getOrdersByCase - Get all orders for a specific case",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders/case/:caseId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders",
+                    "case",
+                    ":caseId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Get all orders for a specific case"
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] createOrder - Create a new court order",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders"
+                  ]
+                },
+                "description": "Create a new court order",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"caseId\": \"case-uuid-here\",\n  \"title\": \"Adjournment Order\",\n  \"content\": \"Hearing adjourned till next scheduled date.\",\n  \"status\": \"DRAFT\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[PUT] updateOrder - Update an existing order",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders/:orderId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders",
+                    ":orderId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "orderId",
+                      "value": "example-value",
+                      "description": "The orderId parameter"
+                    }
+                  ]
+                },
+                "description": "Update an existing order",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Final Order\",\n  \"content\": \"Case dismissed due to lack of evidence.\",\n  \"status\": \"PUBLISHED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[DELETE] deleteOrder - Delete an order (only drafts can be deleted)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders/:orderId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders",
+                    ":orderId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "orderId",
+                      "value": "example-value",
+                      "description": "The orderId parameter"
+                    }
+                  ]
+                },
+                "description": "Delete an order (only drafts can be deleted)",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Final Order\",\n  \"content\": \"Case dismissed due to lack of evidence.\",\n  \"status\": \"PUBLISHED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getMyOrders - Get all orders issued by the current judge",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/orders/my-orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders",
+                    "my-orders"
+                  ]
+                },
+                "description": "Get all orders issued by the current judge"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Document Generation",
+          "item": [
+            {
+              "name": "[POST] generatePreview - Request body: { \"docType\": \"affidavit|rti|complaint|notice\",...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/api/documents/generate/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "api",
+                    "documents",
+                    "generate",
+                    "preview"
+                  ]
+                },
+                "description": "Request body: { \"docType\": \"affidavit|rti|complaint|notice\", \"petitionerName\": \"string\", \"petitionerAddress\": \"string\", \"respondentName\": \"string\", \"respondentAddress\": \"string\", \"caseDescription\": \"string\", \"incidentDate\": \"string\", \"reliefSought\": \"string\", \"courtName\": \"string (optional)\", \"departmentName\": \"string (RTI only)\", \"pioName\": \"string (RTI only)\" }",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"docType\": \"complaint\",\n  \"petitionerName\": \"Jane Doe\",\n  \"petitionerAddress\": \"123 Lane, Mumbai\",\n  \"respondentName\": \"John Respondent\",\n  \"respondentAddress\": \"456 Street, Delhi\",\n  \"caseDescription\": \"Bicycle theft from residential premises.\",\n  \"incidentDate\": \"2026-06-01\",\n  \"reliefSought\": \"Recovery of the stolen bicycle or equivalent compensation.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] generateDownload - Generate a document and download as PDF.  POST /api/document...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/api/documents/generate/download",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "api",
+                    "documents",
+                    "generate",
+                    "download"
+                  ]
+                },
+                "description": "Generate a document and download as PDF.  POST /api/documents/generate/download  Same request body as /preview. Returns: PDF file as application/pdf with Content-Disposition: attachment",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"docType\": \"complaint\",\n  \"petitionerName\": \"Jane Doe\",\n  \"petitionerAddress\": \"123 Lane, Mumbai\",\n  \"respondentName\": \"John Respondent\",\n  \"respondentAddress\": \"456 Street, Delhi\",\n  \"caseDescription\": \"Bicycle theft from residential premises.\",\n  \"incidentDate\": \"2026-06-01\",\n  \"reliefSought\": \"Recovery of the stolen bicycle or equivalent compensation.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Document Management",
+          "item": [
+            {
+              "name": "[POST] uploadDocument",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    "upload"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] analyzeDocument - Trigger AI analysis for a document",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/:id/analyze",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    ":id",
+                    "analyze"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Trigger AI analysis for a document",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getDocumentAnalysis - Get AI analysis for a document",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/:id/analysis",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    ":id",
+                    "analysis"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Get AI analysis for a document"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] checkAnalysis - Check if document has analysis",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/:id/has-analysis",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    ":id",
+                    "has-analysis"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Check if document has analysis"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getUserDocuments",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getUserCases",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/user/cases",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    "user",
+                    "cases"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getCaseDocuments",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/case/:caseId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    "case",
+                    ":caseId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getDocument",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] downloadDocument",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/:id/download",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    ":id",
+                    "download"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[DELETE] deleteDocument",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] downloadCertificate - Download Section 63(4) Evidence Certificate for a document",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/:id/certificate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    ":id",
+                    "certificate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Download Section 63(4) Evidence Certificate for a document"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] verifyHash - Verify document hash (SHA-256) againts stored fingerprint",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/documents/:id/verify-hash",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "documents",
+                    ":id",
+                    "verify-hash"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Verify document hash (SHA-256) againts stored fingerprint"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Evidence Management",
+          "item": [
+            {
+              "name": "[POST] uploadEvidence",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/cases/:caseId/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "cases",
+                    ":caseId",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Face Recognition",
+          "item": [
+            {
+              "name": "[POST] enrollFace",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/face/enroll",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "face",
+                    "enroll"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] verifyFace",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/face/verify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "face",
+                    "verify"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getFaceStatus",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/face/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "face",
+                    "status"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[DELETE] removeFace",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/face/remove",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "face",
+                    "remove"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Forensics Analysis",
+          "item": [
+            {
+              "name": "[POST] uploadVideo",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/forensics/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "forensics",
+                    "upload"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] streamAnalysis",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/forensics/stream/:jobId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "forensics",
+                    "stream",
+                    ":jobId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "jobId",
+                      "value": "example-value",
+                      "description": "The jobId parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getReport",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/forensics/report/:jobId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "forensics",
+                    "report",
+                    ":jobId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "jobId",
+                      "value": "example-value",
+                      "description": "The jobId parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Health & Monitoring",
+          "item": [
+            {
+              "name": "[GET] healthCheck",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "health"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Hearings",
+          "item": [
+            {
+              "name": "[POST] scheduleHearing",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/hearings/schedule",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "hearings",
+                    "schedule"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"caseId\": \"case-uuid-here\",\n  \"hearingDate\": \"2026-07-15T10:00:00\",\n  \"hearingType\": \"PRELIMINARY\",\n  \"description\": \"Initial hearing for plea\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] addParticipant",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/hearings/:hearingId/participants",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "hearings",
+                    ":hearingId",
+                    "participants"
+                  ],
+                  "variable": [
+                    {
+                      "key": "hearingId",
+                      "value": "example-value",
+                      "description": "The hearingId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Advocate Sharma\",\n  \"role\": \"LAWYER\",\n  \"email\": \"lawyer@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] joinHearing",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/hearings/:hearingId/join",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "hearings",
+                    ":hearingId",
+                    "join"
+                  ],
+                  "variable": [
+                    {
+                      "key": "hearingId",
+                      "value": "example-value",
+                      "description": "The hearingId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] leaveHearing",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/hearings/:hearingId/leave",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "hearings",
+                    ":hearingId",
+                    "leave"
+                  ],
+                  "variable": [
+                    {
+                      "key": "hearingId",
+                      "value": "example-value",
+                      "description": "The hearingId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[PUT] completeHearing",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/hearings/:hearingId/complete",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "hearings",
+                    ":hearingId",
+                    "complete"
+                  ],
+                  "variable": [
+                    {
+                      "key": "hearingId",
+                      "value": "example-value",
+                      "description": "The hearingId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] recordOutcome",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/hearings/:hearingId/outcome",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "hearings",
+                    ":hearingId",
+                    "outcome"
+                  ],
+                  "variable": [
+                    {
+                      "key": "hearingId",
+                      "value": "example-value",
+                      "description": "The hearingId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"outcome\": \"Hearing adjourned. Next hearing on 2026-08-01.\",\n  \"nextHearingDate\": \"2026-08-01T10:00:00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getHearing",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/hearings/:hearingId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "hearings",
+                    ":hearingId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "hearingId",
+                      "value": "example-value",
+                      "description": "The hearingId parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getParticipants",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/hearings/:hearingId/participants",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "hearings",
+                    ":hearingId",
+                    "participants"
+                  ],
+                  "variable": [
+                    {
+                      "key": "hearingId",
+                      "value": "example-value",
+                      "description": "The hearingId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Advocate Sharma\",\n  \"role\": \"LAWYER\",\n  \"email\": \"lawyer@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getCaseHearings",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/hearings/case/:caseId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "hearings",
+                    "case",
+                    ":caseId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getMyHearings",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/hearings/my",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "hearings",
+                    "my"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Judge Dashboard",
+          "item": [
+            {
+              "name": "[GET] getJudgeCases - Get all cases assigned to the logged-in judge",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/judge/cases",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "judge",
+                    "cases"
+                  ]
+                },
+                "description": "Get all cases assigned to the logged-in judge"
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] claimCase",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/judge/cases/:id/claim",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "judge",
+                    "cases",
+                    ":id",
+                    "claim"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] issueSummons - Issue Summons (Step 4)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/judge/cases/:id/issue-summons",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "judge",
+                    "cases",
+                    ":id",
+                    "issue-summons"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Issue Summons (Step 4)",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getUnassignedCases",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/judge/unassigned",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "judge",
+                    "unassigned"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getJudgeAnalytics",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/judge/analytics",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "judge",
+                    "analytics"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getTodaysHearings - Get hearings scheduled for today",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/judge/hearings/today",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "judge",
+                    "hearings",
+                    "today"
+                  ]
+                },
+                "description": "Get hearings scheduled for today"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getAICaseSummary - AI Case Summary for Judge (Digital Court Master)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/judge/case/:id/ai-summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "judge",
+                    "case",
+                    ":id",
+                    "ai-summary"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "AI Case Summary for Judge (Digital Court Master)"
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] scheduleHearingAI - AI-Assisted Hearing Scheduling Parses natural language reque...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/judge/hearings/schedule-ai",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "judge",
+                    "hearings",
+                    "schedule-ai"
+                  ]
+                },
+                "description": "AI-Assisted Hearing Scheduling Parses natural language request to schedule a hearing",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Lawyer Dashboard",
+          "item": [
+            {
+              "name": "[POST] generateDraft",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/lawyer/draft",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "lawyer",
+                    "draft"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] saveDraft",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/lawyer/draft/save",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "lawyer",
+                    "draft",
+                    "save"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getMyCases",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/lawyer/cases",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "lawyer",
+                    "cases"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getMyClients",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/lawyer/clients",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "lawyer",
+                    "clients"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getStats",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/lawyer/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "lawyer",
+                    "stats"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Meetings",
+          "item": [
+            {
+              "name": "[POST] create",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/meetings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "meetings"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] join",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/meetings/join",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "meetings",
+                    "join"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] end",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/meetings/end/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "meetings",
+                    "end",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] byCase",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/meetings/case/:caseId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "meetings",
+                    "case",
+                    ":caseId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Notifications",
+          "item": [
+            {
+              "name": "[POST] send",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/notifications/send",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    "send"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": 1,\n  \"title\": \"New Hearing Scheduled\",\n  \"message\": \"A hearing has been scheduled for Case #102 on 2026-07-15.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] forUser",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/notifications/user/:userId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    "user",
+                    ":userId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "example-value",
+                      "description": "The userId parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] markRead",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/notifications/:id/read",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    ":id",
+                    "read"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Police FIRs & Investigations",
+          "item": [
+            {
+              "name": "[GET] getSummonsTasks - Get pending summons delivery tasks for police",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/summons/pending",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "summons",
+                    "pending"
+                  ]
+                },
+                "description": "Get pending summons delivery tasks for police"
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] completeSummonsTask - Mark summons as served",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/summons/:caseId/complete",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "summons",
+                    ":caseId",
+                    "complete"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Mark summons as served",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] uploadFir - Upload FIR document with SHA-256 digital stamping",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/fir/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "fir",
+                    "upload"
+                  ]
+                },
+                "description": "Upload FIR document with SHA-256 digital stamping",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getMyFirs - Get all FIRs uploaded by the current officer",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/fir/list",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "fir",
+                    "list"
+                  ]
+                },
+                "description": "Get all FIRs uploaded by the current officer"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getFirById - Get FIR details by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/fir/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "fir",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Get FIR details by ID"
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] verifyFir - Verify FIR integrity by re-hashing uploaded file",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/fir/:id/verify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "fir",
+                    ":id",
+                    "verify"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Verify FIR integrity by re-hashing uploaded file",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getStats - Get police dashboard statistics",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "stats"
+                  ]
+                },
+                "description": "Get police dashboard statistics"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] health - Health check endpoint",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "health"
+                  ]
+                },
+                "description": "Health check endpoint",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getPendingFirs - Get all FIRs pending police review (client-filed FIRs)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/fir/pending",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "fir",
+                    "pending"
+                  ]
+                },
+                "description": "Get all FIRs pending police review (client-filed FIRs)"
+              },
+              "response": []
+            },
+            {
+              "name": "[PUT] updateFirStatus - Update FIR status (REGISTERED or REJECTED)",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/fir/:id/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "fir",
+                    ":id",
+                    "status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Update FIR status (REGISTERED or REJECTED)",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] startInvestigation - Start investigation on an FIR",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/investigation/:id/start",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "investigation",
+                    ":id",
+                    "start"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Start investigation on an FIR",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] submitInvestigation - Submit investigation findings to court",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/investigation/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "investigation",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Submit investigation findings to court",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getFirsUnderInvestigation - Get FIRs currently under investigation",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/investigation/list",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "investigation",
+                    "list"
+                  ]
+                },
+                "description": "Get FIRs currently under investigation"
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] uploadeEvidence - Upload additional evidence to FIR",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/investigation/:id/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "investigation",
+                    ":id",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Upload additional evidence to FIR",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] generateSummary - Generate AI Summary using Groq",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/investigation/:id/summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "investigation",
+                    ":id",
+                    "summary"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Generate AI Summary using Groq"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] draftSubmission - Draft Court Submission using Groq (Charge Sheet)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/police/investigation/:id/draft-submission",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "police",
+                    "investigation",
+                    ":id",
+                    "draft-submission"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "description": "Draft Court Submission using Groq (Charge Sheet)"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Timeline",
+          "item": [
+            {
+              "name": "[GET] getTimeline",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/timeline/:caseId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "timeline",
+                    ":caseId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "User Profiles",
+          "item": [
+            {
+              "name": "[POST] createOrUpdate",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/profile/create-or-update",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "profile",
+                    "create-or-update"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phone\": \"+919876543210\",\n  \"address\": \"123 Lane, Mumbai\",\n  \"bio\": \"Legal professional specializing in corporate law.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getByUserId",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/profile/:userId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "profile",
+                    ":userId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "example-value",
+                      "description": "The userId parameter"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] uploadPicture",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/profile/:userId/upload-picture",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "profile",
+                    ":userId",
+                    "upload-picture"
+                  ],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "example-value",
+                      "description": "The userId parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Vakil Friend AI",
+          "item": [
+            {
+              "name": "[POST] startCaseSession - Start a new chat session for case assistance (linked to a sp...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/case/:caseId/start",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "case",
+                    ":caseId",
+                    "start"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Start a new chat session for case assistance (linked to a specific case)",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] startSession - Start a new chat session for case filing",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/start",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "start"
+                  ]
+                },
+                "description": "Start a new chat session for case filing",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] uploadDocument - Upload and analyze a document",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/chat/:sessionId/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "chat",
+                    ":sessionId",
+                    "upload"
+                  ],
+                  "variable": [
+                    {
+                      "key": "sessionId",
+                      "value": "example-value",
+                      "description": "The sessionId parameter"
+                    }
+                  ]
+                },
+                "description": "Upload and analyze a document",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] chat - Send a message in the chat session",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/chat/:sessionId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "chat",
+                    ":sessionId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "sessionId",
+                      "value": "example-value",
+                      "description": "The sessionId parameter"
+                    }
+                  ]
+                },
+                "description": "Send a message in the chat session",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"message\": \"What are my rights if my landlord refuses to return my security deposit?\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] completeSession - Complete the session and create a case",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/complete/:sessionId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "complete",
+                    ":sessionId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "sessionId",
+                      "value": "example-value",
+                      "description": "The sessionId parameter"
+                    }
+                  ]
+                },
+                "description": "Complete the session and create a case",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getSession - Get session details",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/session/:sessionId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "session",
+                    ":sessionId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "sessionId",
+                      "value": "example-value",
+                      "description": "The sessionId parameter"
+                    }
+                  ]
+                },
+                "description": "Get session details"
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getUserSessions - Get user's chat sessions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/sessions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "sessions"
+                  ]
+                },
+                "description": "Get user's chat sessions"
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] analyzeDocument - Upload and analyze a document with Vakil Friend AI. Features...",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/case/:caseId/analyze-document",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "case",
+                    ":caseId",
+                    "analyze-document"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Upload and analyze a document with Vakil Friend AI. Features: - SHA-256 hash computation for integrity - AI analysis (validity, usefulness, type detection) - Automatic storage to Evidence Vault if important - Case Diary logging with cryptographic protection",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] analyzeDocumentForSession - Upload document for general analysis (not linked to a case)....",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/session/:sessionId/analyze-document",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "session",
+                    ":sessionId",
+                    "analyze-document"
+                  ],
+                  "variable": [
+                    {
+                      "key": "sessionId",
+                      "value": "example-value",
+                      "description": "The sessionId parameter"
+                    }
+                  ]
+                },
+                "description": "Upload document for general analysis (not linked to a case). Used during initial case filing via Vakil Friend.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getCaseDiaryEntries - Get all Vakil AI diary entries for a case. Each entry is pro...",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/case/:caseId/diary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "case",
+                    ":caseId",
+                    "diary"
+                  ],
+                  "variable": [
+                    {
+                      "key": "caseId",
+                      "value": "example-value",
+                      "description": "The caseId parameter"
+                    }
+                  ]
+                },
+                "description": "Get all Vakil AI diary entries for a case. Each entry is protected with SHA-256 hash for integrity."
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] verifyDiaryEntry - Verify integrity of a diary entry using SHA-256 hash.",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/vakil-friend/diary/:entryId/verify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "vakil-friend",
+                    "diary",
+                    ":entryId",
+                    "verify"
+                  ],
+                  "variable": [
+                    {
+                      "key": "entryId",
+                      "value": "example-value",
+                      "description": "The entryId parameter"
+                    }
+                  ]
+                },
+                "description": "Verify integrity of a diary entry using SHA-256 hash."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Verification",
+          "item": [
+            {
+              "name": "[POST] createRequest",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/verify/request",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "verify",
+                    "request"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Jane Doe\",\n  \"documentType\": \"Aadhar\",\n  \"documentNumber\": \"123456789012\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[GET] getPending",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/verify/admin/pending",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "verify",
+                    "admin",
+                    "pending"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] approve",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/verify/admin/approve/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "verify",
+                    "admin",
+                    "approve",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "[POST] reject",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/verify/admin/reject/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "verify",
+                    "admin",
+                    "reject",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "example-value",
+                      "description": "The id parameter"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NLP Orchestrator (Python)",
+      "description": "Endpoints served by legal reasoning NLP orchestrator (Default port 8001)",
+      "item": [
+        {
+          "name": "[GET] health - NLP Orchestrator Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/health",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "NLP Orchestrator Health Check",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[GET] get_models - Get available AI models and status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/models",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "models"
+              ]
+            },
+            "description": "Get available AI models and status",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] analyze_sync - Synchronous legal query analysis and research (testing only)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/api/legal/analyze",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "api",
+                "legal",
+                "analyze"
+              ]
+            },
+            "description": "Synchronous legal query analysis and research (testing only)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"What is the penalty for driving without a license in India?\",\n  \"language\": \"en\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] analyze_stream - Primary SSE streaming legal reasoning pipeline",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/api/legal/analyze-stream",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "api",
+                "legal",
+                "analyze-stream"
+              ]
+            },
+            "description": "Primary SSE streaming legal reasoning pipeline",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"What is the penalty for driving without a license in India?\",\n  \"language\": \"en\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] deep_research - Streams 5-stage legal reasoning with Indian Kanoon context v...",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/research/deep",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "research",
+                "deep"
+              ]
+            },
+            "description": "Streams 5-stage legal reasoning with Indian Kanoon context via SSE",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Can a tenant be evicted during the lease period under Indian Rent Control laws?\",\n  \"language\": \"en\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] analyze_forensics_stream - SSE streaming for 5-stage accident forensics video analysis",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/forensics/analyze-stream",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "forensics",
+                "analyze-stream"
+              ]
+            },
+            "description": "SSE streaming for 5-stage accident forensics video analysis",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobId\": \"job-123\",\n  \"videoUrls\": [\n    \"https://example.com/accident.mp4\"\n  ],\n  \"citizenDescription\": \"Red car hit the pedestrian at the crossing.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] ocr_modi_document - Run OCR and Devanagari cleanup on uploaded Modi script docum...",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/ocr/modi",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "ocr",
+                "modi"
+              ]
+            },
+            "description": "Run OCR and Devanagari cleanup on uploaded Modi script document image",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "LawGPT Service (Python)",
+      "description": "Endpoints served by FAISS RAG and document generation service (Default port 8001)",
+      "item": [
+        {
+          "name": "[GET] health - RAG database status, load index, and model details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/health",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "RAG database status, load index, and model details",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] get_context - Primary RAG retrieval. Returns raw retrieved context chunks ...",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/context",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "context"
+              ]
+            },
+            "description": "Primary RAG retrieval. Returns raw retrieved context chunks from vector DB",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What does Section 302 of the Indian Penal Code deal with?\",\n  \"max_results\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] chat - Retrieve context from vector DB and generate grounded LLM an...",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/chat",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "chat"
+              ]
+            },
+            "description": "Retrieve context from vector DB and generate grounded LLM answer",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What is Section 302 of IPC?\",\n  \"session_id\": \"session-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] generate_document - Generate drafted legal document text (affidavit, RTI, compla...",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/generate",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "generate"
+              ]
+            },
+            "description": "Generate drafted legal document text (affidavit, RTI, complaint, notice)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doc_type\": \"complaint\",\n  \"fields\": {\n    \"petitioner_name\": \"Jane Doe\",\n    \"petitioner_address\": \"123 Lane, Mumbai\",\n    \"respondent_name\": \"John Respondent\",\n    \"respondent_address\": \"456 Street, Delhi\",\n    \"case_description\": \"Breach of tenancy agreement and non-payment of rent.\",\n    \"incident_date\": \"2026-06-01\",\n    \"relief_sought\": \"Eviction of tenant and recovery of rent arrears.\"\n  },\n  \"language\": \"en\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] generate_document_pdf - Generate drafted legal document as a downloadable PDF stream",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/generate/pdf",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "generate",
+                "pdf"
+              ]
+            },
+            "description": "Generate drafted legal document as a downloadable PDF stream",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doc_type\": \"complaint\",\n  \"fields\": {\n    \"petitioner_name\": \"Jane Doe\",\n    \"petitioner_address\": \"123 Lane, Mumbai\",\n    \"respondent_name\": \"John Respondent\",\n    \"respondent_address\": \"456 Street, Delhi\",\n    \"case_description\": \"Breach of tenancy agreement and non-payment of rent.\",\n    \"incident_date\": \"2026-06-01\",\n    \"relief_sought\": \"Eviction of tenant and recovery of rent arrears.\"\n  },\n  \"language\": \"en\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[POST] generate_document_docx - Generate drafted legal document as a downloadable DOCX strea...",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{nlpUrl}}/generate/docx",
+              "host": [
+                "{{nlpUrl}}"
+              ],
+              "path": [
+                "generate",
+                "docx"
+              ]
+            },
+            "description": "Generate drafted legal document as a downloadable DOCX stream",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doc_type\": \"complaint\",\n  \"fields\": {\n    \"petitioner_name\": \"Jane Doe\",\n    \"petitioner_address\": \"123 Lane, Mumbai\",\n    \"respondent_name\": \"John Respondent\",\n    \"respondent_address\": \"456 Street, Delhi\",\n    \"case_description\": \"Breach of tenancy agreement and non-payment of rent.\",\n    \"incident_date\": \"2026-06-01\",\n    \"relief_sought\": \"Eviction of tenant and recovery of rent arrears.\"\n  },\n  \"language\": \"en\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string",
+      "description": "Spring Boot backend base URL"
+    },
+    {
+      "key": "nlpUrl",
+      "value": "http://localhost:8001",
+      "type": "string",
+      "description": "Python NLP Orchestrator & LawGPT microservices base URL"
+    },
+    {
+      "key": "bearerToken",
+      "value": "your-jwt-token-here",
+      "type": "string",
+      "description": "JWT Auth Token obtained from login"
+    }
+  ]
+}

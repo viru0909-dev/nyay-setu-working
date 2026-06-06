@@ -3,9 +3,9 @@ package com.nyaysetu.backend.service;
 import com.nyaysetu.backend.dto.ClientFirRequest;
 import com.nyaysetu.backend.dto.FirUploadRequest;
 import com.nyaysetu.backend.dto.FirUploadResponse;
+import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.FirRecord;
 import com.nyaysetu.backend.entity.User;
-import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.CaseStatus;
 import com.nyaysetu.backend.repository.FirRecordRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,10 +36,10 @@ public class FirService {
     private final GroqDocumentVerificationService groqService;
     private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
 
-    @Value("${app.upload.fir-path:uploads/fir}")
+    @Value("${app.upload.fir-path:backend/uploads/fir}")
     private String firUploadPath;
 
-    @Value("${app.upload.evidence-path:uploads/evidence}")
+    @Value("${app.upload.evidence-path:backend/uploads/evidence}")
     private String evidenceUploadPath;
 
     /**
@@ -225,7 +224,7 @@ public class FirService {
                     .description(request.getDescription())
                     .incidentDate(request.getIncidentDate())
                     .incidentLocation(request.getIncidentLocation())
-                    .aiGenerated(request.getAiGenerated() != null ? request.getAiGenerated() : false)
+                    .aiGenerated(Boolean.TRUE.equals(request.getAiGenerated()))
                     .aiSessionId(request.getAiSessionId())
                     .fileHash(fileHash)
                     .filePath(filePath)
@@ -557,4 +556,3 @@ public class FirService {
         private long rejectedFirs;
     }
 }
-

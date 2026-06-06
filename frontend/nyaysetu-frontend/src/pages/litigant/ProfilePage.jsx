@@ -8,13 +8,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
 import FaceCapture from '../../components/auth/FaceCapture';
 import { useFaceRecognition } from '../../hooks/useFaceRecognition';
+import { useTranslation } from 'react-i18next';
 
 export default function ProfilePage() {
+    const { t } = useTranslation('litigant');
     const { user, token } = useAuthStore();
     const [editing, setEditing] = useState(false);
     const [showFaceEnrollment, setShowFaceEnrollment] = useState(false);
     const { enrollFace, deleteFace } = useFaceRecognition();
-    const [faceStatus, setFaceStatus] = useState('Checking...');
+    const [faceStatus, setFaceStatus] = useState(t('profile.checking'));
     const [faceLoaded, setFaceLoaded] = useState(false);
     const [showPasswordChange, setShowPasswordChange] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -27,19 +29,19 @@ export default function ProfilePage() {
 
     const getDefaultProfession = (role) => {
         switch (role) {
-            case 'JUDGE': return 'High Court Justice';
-            case 'LAWYER': return 'Senior Advocate';
-            case 'POLICE': return 'Police Officer';
-            default: return 'Software Engineer';
+            case 'JUDGE': return t('profile.professions.judge');
+            case 'LAWYER': return t('profile.professions.lawyer');
+            case 'POLICE': return t('profile.professions.police');
+            default: return t('profile.professions.default');
         }
     };
 
     const getDefaultBio = (role) => {
         switch (role) {
-            case 'JUDGE': return 'Presiding over civil and criminal matters with a commitment to justice.';
-            case 'LAWYER': return 'Legal counsel specializing in constitutional and criminal law.';
-            case 'POLICE': return 'Dedicated to maintaining law and order and serving the community.';
-            default: return 'Experienced professional seeking legal assistance for property matters.';
+            case 'JUDGE': return t('profile.bio.judge');
+            case 'LAWYER': return t('profile.bio.lawyer');
+            case 'POLICE': return t('profile.bio.police');
+            default: return t('profile.bio.default');
         }
     };
 
@@ -64,20 +66,20 @@ export default function ProfilePage() {
             await enrollFace(descriptor, token);
             setProfileData({ ...profileData, faceEnabled: true });
             setShowFaceEnrollment(false);
-            alert('Face enrolled successfully!');
+            alert(t('profile.faceEnrolled'));
         } catch (err) {
-            alert('Face enrollment failed: ' + err.message);
+            alert(`${t('profile.faceEnrollmentFailed')}: ${err.message}`);
         }
     };
 
     const handleDeleteFace = async () => {
-        if (window.confirm('Are you sure you want to disable face login? This will delete your biometric data.')) {
+        if (window.confirm(t('profile.confirmDeleteFace'))) {
             try {
                 await deleteFace(token);
                 setProfileData({ ...profileData, faceEnabled: false });
-                alert('Face data deleted.');
+                alert(t('profile.faceDeleted'));
             } catch (err) {
-                alert('Failed to delete face data: ' + err.message);
+                alert(`${t('profile.deleteFaceFailed')}: ${err.message}`);
             }
         }
     };
@@ -98,10 +100,10 @@ export default function ProfilePage() {
             {/* Header */}
             <div style={{ marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                    Profile Settings
+                    {t('profile.profileSettings')}
                 </h1>
                 <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
-                    Manage your account information and security settings
+                    {t('profile.manageAccount')}
                 </p>
             </div>
 
@@ -185,11 +187,11 @@ export default function ProfilePage() {
                                     fontWeight: '600',
                                     color: profileData.faceEnabled ? '#10b981' : 'var(--text-secondary)'
                                 }}>
-                                    Face Login
+                                    {t('profile.faceLogin')}
                                 </span>
                             </div>
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                {profileData.faceEnabled ? 'Enabled' : 'Not configured'}
+                                {profileData.faceEnabled ? t('profile.enabled') : t('profile.notConfigured')}
                             </p>
                         </div>
 
@@ -214,7 +216,7 @@ export default function ProfilePage() {
                                 }}
                             >
                                 <Camera size={16} />
-                                {profileData.faceEnabled ? 'Update' : 'Enable'} Face Login
+                                {profileData.faceEnabled ? t('profile.updateFaceLogin') : t('profile.enableFaceLogin')} Face Login
                             </button>
                             {profileData.faceEnabled && (
                                 <button
@@ -252,7 +254,7 @@ export default function ProfilePage() {
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>
-                                Personal Information
+                                {t('profile.personalInformation')}
                             </h3>
                             <button
                                 onClick={() => editing ? handleSave() : setEditing(true)}
@@ -272,14 +274,14 @@ export default function ProfilePage() {
                                     cursor: 'pointer'
                                 }}
                             >
-                                {editing ? <><Save size={16} /> Save</> : <><Edit2 size={16} /> Edit</>}
+                                {editing ? <><Save size={16} /> {t('profile.save')}</> : <><Edit2 size={16} /> {t('profile.edit')}</>}
                             </button>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                    Full Name
+                                    {t('profile.fullName')}
                                 </label>
                                 <div style={{
                                     display: 'flex',
@@ -313,7 +315,7 @@ export default function ProfilePage() {
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                    Email
+                                    {t('profile.email')}
                                 </label>
                                 <div style={{
                                     display: 'flex',
@@ -331,7 +333,7 @@ export default function ProfilePage() {
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                    Phone
+                                    {t('profile.phone')}
                                 </label>
                                 <div style={{
                                     display: 'flex',
@@ -365,7 +367,7 @@ export default function ProfilePage() {
 
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                    Profession
+                                    {t('profile.profession')}
                                 </label>
                                 <div style={{
                                     display: 'flex',
@@ -400,7 +402,7 @@ export default function ProfilePage() {
 
                         <div style={{ marginTop: '1.5rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                Address
+                                {t('profile.address')}
                             </label>
                             <div style={{
                                 display: 'flex',
@@ -443,7 +445,7 @@ export default function ProfilePage() {
                         boxShadow: 'var(--shadow-glass)'
                     }}>
                         <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
-                            Security Settings
+                            {t('profile.securitySettings')}
                         </h3>
 
                         <button
@@ -465,14 +467,14 @@ export default function ProfilePage() {
                             }}
                         >
                             <Lock size={18} />
-                            Change Password
+                            {t('profile.changePassword')}
                         </button>
 
                         {showPasswordChange && (
                             <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                        Current Password
+                                        {t('profile.currentPassword')}
                                     </label>
                                     <input
                                         type={showPassword ? 'text' : 'password'}
@@ -492,7 +494,7 @@ export default function ProfilePage() {
 
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                        New Password
+                                        {t('profile.newPassword')}
                                     </label>
                                     <input
                                         type={showPassword ? 'text' : 'password'}
@@ -512,7 +514,7 @@ export default function ProfilePage() {
 
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                        Confirm New Password
+                                        {t('profile.confirmNewPassword')}
                                     </label>
                                     <input
                                         type={showPassword ? 'text' : 'password'}
@@ -544,7 +546,7 @@ export default function ProfilePage() {
                                         boxShadow: 'var(--shadow-glass-strong)'
                                     }}
                                 >
-                                    Update Password
+                                    {t('profile.updatePassword')}
                                 </button>
                             </div>
                         )}
@@ -583,10 +585,10 @@ export default function ProfilePage() {
                                         <ShieldCheck size={32} />
                                     </div>
                                     <h2 className="biometric-title">
-                                        Biometric Enrollment
+                                        {t('profile.biometricEnrollment')}
                                     </h2>
                                     <p className="biometric-subtitle">
-                                        Neural Signature Registration System
+                                        {t('profile.neuralSignature')}
                                     </p>
                                 </div>
 

@@ -5,10 +5,12 @@ import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.service.CaseManagementService;
+import com.nyaysetu.backend.service.CaseStateTransitionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,17 +21,18 @@ import java.util.UUID;
 
 @Tag(name = "Case Management", description = "Create, update, retrieve and manage legal cases")
 @RestController
-@RequestMapping("/api/cases")
+@RequestMapping("/cases")
 @RequiredArgsConstructor
 @Slf4j
 public class CaseManagementController {
 
     private final CaseManagementService caseManagementService;
+    private final CaseStateTransitionService caseStateTransitionService;
     private final com.nyaysetu.backend.service.AuthService authService;
 
     @PostMapping
     public ResponseEntity<CaseDTO> createCase(
-            @RequestBody CreateCaseRequest request,
+            @Valid @RequestBody CreateCaseRequest request,
             Authentication authentication
     ) {
         User user = authService.findByEmail(authentication.getName());
@@ -60,7 +63,7 @@ public class CaseManagementController {
     @PutMapping("/{id}")
     public ResponseEntity<CaseDTO> updateCase(
             @PathVariable UUID id,
-            @RequestBody CaseDTO caseDTO
+            @Valid @RequestBody CaseDTO caseDTO
     ) {
         CaseDTO updated = caseManagementService.updateCase(id, caseDTO);
         return ResponseEntity.ok(updated);
@@ -122,19 +125,21 @@ public class CaseManagementController {
 
     /**
      * Handover D: Lawyer files the approved petition in court
-     * Transitions case to COGNIZANCE_PERIOD (stepper Stage 2 - Notice Issued)
+     * Routes through CaseStateTransitionService for audit trail and validation.
      */
     @PostMapping("/{id}/file-in-court")
-    public ResponseEntity<Map<String, Object>> fileInCourt(@PathVariable UUID id) {
-        CaseEntity caseEntity = caseManagementService.getCaseEntity(id);
-        caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.COGNIZANCE_PERIOD);
-        caseEntity.setStage(com.nyaysetu.backend.entity.CaseStage.COGNIZANCE);
-        caseEntity.setCurrentJudicialStage(1);
-        caseManagementService.saveCaseEntity(caseEntity);
+    public ResponseEntity<Map<String, Object>> fileInCourt(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        User user = authService.findByEmail(authentication.getName());
+        CaseEntity result = caseStateTransitionService.lawyerFileInCourt(
+            id, user.getId().toString(), user.getName()
+        );
         return ResponseEntity.ok(Map.of(
             "success", true,
             "message", "Case filed in court successfully",
-            "newStatus", "COGNIZANCE_PERIOD"
+            "newStatus", result.getStatus().name()
         ));
     }
 
@@ -217,7 +222,7 @@ public class CaseManagementController {
     @PutMapping("/{id}/respondent-details")
     public ResponseEntity<Map<String, Object>> updateRespondentDetails(
             @PathVariable UUID id,
-            @RequestBody com.nyaysetu.backend.dto.RespondentDetailsDTO details
+            @Valid @RequestBody com.nyaysetu.backend.dto.RespondentDetailsDTO details
     ) {
         caseManagementService.updateRespondentDetails(id, details);
         
