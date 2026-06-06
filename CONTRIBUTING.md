@@ -115,3 +115,15 @@ If you encounter technical issues or have questions regarding the implementation
 - Tag the maintainers for guidance.
 
 We actively monitor the repository and are committed to helping you get your PR successfully merged.
+
+
+
+
+### Running Lint and Format Checks
+
+After making changes to the frontend, you should run lint and format checks to ensure consistency:
+
+#### Check for lint errors
+```bash
+cd frontend/nyaysetu-frontend
+npm run lint
