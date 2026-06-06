@@ -1,8 +1,9 @@
 import logging
 import time
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
+from auth import require_auth
 from models.schemas import ModiOCRResponse
 from services.modi_ocr import InvalidImageError, ModiOCRServiceError, recognize_modi_image
 
@@ -20,7 +21,7 @@ ALLOWED_IMAGE_CONTENT_TYPES = {
 
 
 @router.post("/modi", response_model=ModiOCRResponse)
-async def ocr_modi_document(file: UploadFile = File(...)):
+async def ocr_modi_document(file: UploadFile = File(...), _: str = Depends(require_auth)):
     """Run OCR and Devanagari cleanup on an uploaded Modi script document image."""
     if file.content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
         raise HTTPException(status_code=400, detail="Upload a valid image file.")

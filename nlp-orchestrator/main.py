@@ -15,12 +15,13 @@ import json
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import Depends, FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
+from auth import require_auth
 from cache import (
     generate_cache_key,
     get_cached_response,
@@ -239,7 +240,7 @@ async def get_models():
     }
 
 @app.post("/api/legal/analyze-stream")
-async def analyze_stream(body: LegalQuery, request: Request):
+async def analyze_stream(body: LegalQuery, request: Request, _: str = Depends(require_auth)):
     """
     Primary SSE endpoint — streams the full legal reasoning pipeline.
     Frontend connects using fetch + ReadableStream for real-time updates.
@@ -264,7 +265,7 @@ async def analyze_stream(body: LegalQuery, request: Request):
 
 
 @app.post("/api/legal/analyze")
-async def analyze_sync(body: LegalQuery):
+async def analyze_sync(body: LegalQuery, _: str = Depends(require_auth)):
     """
     Synchronous endpoint — runs the full pipeline and returns all results at once.
     Use only for testing. In production, use /analyze-stream for real-time UX.
@@ -570,7 +571,7 @@ async def deep_research_pipeline(query: str, language: str):
 
 
 @app.post("/research/deep")
-async def deep_research(body: LegalQuery, request: Request):
+async def deep_research(body: LegalQuery, request: Request, _: str = Depends(require_auth)):
     """
     Deep Research SSE endpoint — streams 5-stage legal reasoning with
     Indian Kanoon context. Frontend connects directly to this for

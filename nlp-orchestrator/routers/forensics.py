@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Depends, Request, HTTPException
 from sse_starlette.sse import EventSourceResponse
 import asyncio
 import json
 import logging
 
+from auth import require_auth
 from models.schemas import ForensicsRequest
 from services.video_processor import download_video, extract_frames, cleanup_job
 from services.gemini_analyzer import analyze_frames
@@ -88,7 +89,7 @@ async def forensic_analysis_pipeline(request_data: ForensicsRequest):
             logger.error(f"[{job_id}] Cleanup failed: {cleanup_err}")
 
 @router.post("/analyze-stream")
-async def analyze_forensics_stream(request_data: ForensicsRequest, request: Request):
+async def analyze_forensics_stream(request_data: ForensicsRequest, request: Request, _: str = Depends(require_auth)):
     """SSE endpoint for streaming the 5-stage accident forensic analysis."""
     
     async def event_generator():

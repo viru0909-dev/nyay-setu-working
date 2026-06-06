@@ -34,6 +34,10 @@ INDIAN_KANOON_API_URL: str = os.getenv(
     "INDIAN_KANOON_API_URL", "https://api.indiankanoon.org"
 )
 
+# ─── JWT Authentication ────────────────────────────────────────────────────────
+JWT_SECRET: str = os.getenv("JWT_SECRET", "")
+JWT_ALGORITHM: str = "HS256"
+
 # ─── CORS ─────────────────────────────────────────────────────────────────────
 FRONTEND_ORIGIN: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 

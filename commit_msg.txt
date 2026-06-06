@@ -1,0 +1,17 @@
+fix: add JWT authentication to all microservices (nlp-orchestrator, lawgpt, signaling-server, frontend)
+
+Closes #1218 - Cross-Service Authentication Bypass
+
+- nlp-orchestrator/auth.py: JWT verification middleware using PyJWT
+- nlp-orchestrator/config.py: JWT_SECRET and JWT_ALGORITHM config
+- nlp-orchestrator/main.py: require_auth on all POST endpoints
+- nlp-orchestrator/routers/forensics.py: auth on /forensics/analyze-stream
+- nlp-orchestrator/routers/modi_ocr.py: auth on /ocr/modi
+- nlp-orchestrator/requirements.txt: added pyjwt dependency
+- lawgpt-service/main.py: require_auth dependency + app-level health endpoint
+- lawgpt-service/routers/context.py: removed duplicate health endpoint
+- signaling-server/server.js: JWT validation middleware on Socket.IO connection
+- signaling-server/package.json: added jsonwebtoken dependency
+- .env.example: documented shared JWT_SECRET across all services
+- frontend VakilFriendPage.jsx: pass JWT Bearer token to /research/deep
+- frontend useWebRTC.js: pass JWT token in Socket.IO handshake auth

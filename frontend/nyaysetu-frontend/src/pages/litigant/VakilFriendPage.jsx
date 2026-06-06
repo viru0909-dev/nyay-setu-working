@@ -336,9 +336,13 @@ export default function VakilFriendChat() {
 
         try {
             const nlpBaseUrl = import.meta.env.VITE_NLP_BASE_URL || 'http://localhost:8001';
+            const token = localStorage.getItem('token');
             const response = await fetch(`${nlpBaseUrl}/research/deep`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && token !== 'null' && token !== 'undefined' ? { 'Authorization': `Bearer ${token}` } : {})
+                },
                 body: JSON.stringify({ query, language }),
                 signal: abortController.signal
             });
