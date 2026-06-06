@@ -37,9 +37,9 @@ from config import (
 from decomposer import decompose_query
 from router import route_questions
 from research import run_parallel_research, execute_with_fallback
-from synthesizer import (
-    synthesize_answers,  # noqa: F401 - re-export for test mocking
-    stream_synthesize_answers,  # noqa: F401 - re-export for test mocking
+from synthesizer import (  # noqa: F401 - re-exports for test mocking
+    synthesize_answers,
+    stream_synthesize_answers,
     synthesize_answers_structured,
     stream_synthesize_answers_structured,
 )
