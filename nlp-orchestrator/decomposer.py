@@ -10,7 +10,7 @@ from config import GROQ_API_KEY, GROQ_MODEL_FAST
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
 DECOMPOSE_PROMPT = """You are a senior Indian legal expert. A citizen asked a question.
-Your task is to break this down into 3 to 5 specific focused sub-questions that together 
+Your task is to break this down into 3 to 5 specific focused sub-questions that together
 fully cover the original question. Each sub-question should be answerable independently.
 
 Focus ONLY on Indian law: IPC, BNS, CPC, MVA, Constitution, etc.

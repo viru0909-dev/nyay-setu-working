@@ -202,7 +202,8 @@ async def execute_with_fallback(
         for attempt in range(RETRY_MAX_ATTEMPTS + 1):
             try:
                 result = await _attempt_provider(provider, question, kanoon_context)
-                # If provider returns a fallback-shaped response, treat as failure and try next provider
+                # If provider returns a fallback-shaped response, treat as failure and
+                # try next provider
                 if result.get("is_fallback"):
                     last_error = result.get("error", "fallback")
                     break
@@ -222,9 +223,8 @@ async def execute_with_fallback(
                     break
                 # backoff increases with each retry (attempt starts at 0)
                 wait = RETRY_DELAY_SECONDS * (attempt + 1)
-                logger.warning(
-                    f"[Research] Transient error from {provider}, retry {attempt+1} in {wait}s: {exc}"
-                )
+                logger.warning(f"[Research] Transient error from {provider}, retry {
+                        attempt + 1} in {wait}s: {exc}")
                 await asyncio.sleep(wait)
 
         logger.warning(

@@ -8,22 +8,20 @@ ordering, batch completeness, concurrency bounding, real parallelism, and
 per-page error isolation.
 """
 
+from services.modi_ocr import recognize_modi_pages, ModiOCRServiceError
+import services.modi_ocr as modi_ocr
+from unittest.mock import patch
+import time
+import asyncio
+import pytest
 import os
 
 os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
 
 # The OCR service imports cv2/Pillow at module load. Skip cleanly if absent.
-import pytest
 
 pytest.importorskip("cv2")
 pytest.importorskip("PIL")
-
-import asyncio
-import time
-from unittest.mock import patch
-
-import services.modi_ocr as modi_ocr
-from services.modi_ocr import recognize_modi_pages, ModiOCRServiceError
 
 
 @pytest.mark.asyncio

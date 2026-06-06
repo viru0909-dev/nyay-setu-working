@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, Request
 from sse_starlette.sse import EventSourceResponse
 import asyncio
 import json

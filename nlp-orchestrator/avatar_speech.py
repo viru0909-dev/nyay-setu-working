@@ -4,7 +4,6 @@ Layer 5: Avatar Speech Layer
 2. Converts the final answer to Hinglish spoken dialogue for the 3D avatar
 """
 
-import asyncio
 import random
 from groq import AsyncGroq
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
@@ -170,7 +169,7 @@ def get_interim_messages(query: str, count: int = 3) -> list[str]:
     return result
 
 
-HINGLISH_CONVERSION_PROMPT = """You are converting a formal English legal answer into a friendly, 
+HINGLISH_CONVERSION_PROMPT = """You are converting a formal English legal answer into a friendly,
 conversational Hinglish dialogue spoken by an AI legal assistant avatar named "Nyay Saarthi".
 
 Rules:

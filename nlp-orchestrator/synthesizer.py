@@ -4,7 +4,6 @@ Combines all sub-answers into one structured, clean final legal answer.
 Includes relevant IPC / BNS / MVA section references.
 """
 
-import asyncio
 import json
 import re
 from groq import AsyncGroq
@@ -52,7 +51,7 @@ _ACT_DISPLAY = {
 
 SYNTHESIS_PROMPT = """You are a senior Indian legal expert writing a final comprehensive legal opinion.
 
-You have received research results from multiple focused legal sub-queries. 
+You have received research results from multiple focused legal sub-queries.
 Synthesize these into a single, clear, well-structured answer for an Indian citizen.
 
 Research Results:

@@ -8,7 +8,6 @@ any endpoint to enforce authentication.
 
 import logging
 import os
-from datetime import datetime, timezone
 from typing import Optional
 
 import jwt

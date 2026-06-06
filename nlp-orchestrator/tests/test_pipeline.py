@@ -1,11 +1,10 @@
+from main import deep_research_pipeline
 import pytest
 import sys
 import os
 from unittest.mock import AsyncMock, patch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from main import deep_research_pipeline
 
 
 @pytest.mark.asyncio

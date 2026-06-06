@@ -16,7 +16,7 @@ import json
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Request, HTTPException
+from fastapi import Depends, FastAPI, Request
 import time
 import uuid
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -38,8 +38,6 @@ from decomposer import decompose_query
 from router import route_questions
 from research import run_parallel_research, execute_with_fallback
 from synthesizer import (
-    synthesize_answers,
-    stream_synthesize_answers,
     synthesize_answers_structured,
     stream_synthesize_answers_structured,
 )
@@ -425,7 +423,7 @@ async def analyze_sync(body: LegalQuery, _: str = Depends(require_auth)):
 
 # ─── Deep Research Pipeline ──────────────────────────────────────────────────
 
-DEEP_RESEARCH_SYSTEM_PROMPT = """You are Nyay Saarthi, a specialized Indian Legal AI Assistant. 
+DEEP_RESEARCH_SYSTEM_PROMPT = """You are Nyay Saarthi, a specialized Indian Legal AI Assistant.
 Your SOLE purpose is to provide legal information, analysis, and guidance based on Indian Law (IPC, BNS, MVA, Constitution, etc.).
 
 STRICT MANDATE:
@@ -545,11 +543,10 @@ async def deep_research_pipeline(query: str, language: str):
         logger.info("[Deep Research] Stage 3: Routing...")
 
         # Compute complexity score for display
-        from router import classify_question, COMPLEX_KEYWORDS, SIMPLE_KEYWORDS
+        from router import COMPLEX_KEYWORDS
 
         lower_q = query.lower()
         complex_score = sum(1 for kw in COMPLEX_KEYWORDS if kw in lower_q)
-        simple_score = sum(1 for kw in SIMPLE_KEYWORDS if kw in lower_q)
         word_count = len(query.split())
 
         # Normalized complexity 0-1

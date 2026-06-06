@@ -5,6 +5,7 @@ Run with: python -m pytest tests/test_chunker.py -v
 Or directly: python tests/test_chunker.py
 """
 
+from services.retrieval import chunker
 import sys
 from pathlib import Path
 
@@ -13,7 +14,6 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from services.retrieval import chunker
 
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 

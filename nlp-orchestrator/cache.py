@@ -2,6 +2,7 @@
 Simple In-Memory TTL Cache for NLP Responses
 """
 
+from functools import wraps
 import time
 import hashlib
 import logging
@@ -87,9 +88,6 @@ def get_cache_stats() -> dict:
         "valid_entries": valid_entries,
         "expired_entries": total_entries - valid_entries,
     }
-
-
-from functools import wraps
 
 
 def cache_decorator(ttl: int = CACHE_TTL):
