@@ -5,12 +5,12 @@ export default function ScrollToTop() {
     const { pathname, hash } = useLocation();
 
     useEffect(() => {
-        // If there is a hash, attempt to scroll to the element smoothly
         if (hash) {
-            // Valid HTML5 ids cannot start with a number or contain certain characters without escaping, 
-            // CSS.escape ensures querySelector doesn't crash on invalid selectors.
             try {
-                const element = document.querySelector(hash);
+                // Safely escape the hash selector if CSS.escape exists, otherwise fallback to standard hash
+                const safeHash = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(hash) : hash;
+                const element = document.querySelector(safeHash);
+                
                 if (element) {
                     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     return;
@@ -19,11 +19,12 @@ export default function ScrollToTop() {
                 console.warn(`ScrollToTop: Invalid selector found for hash "${hash}"`, error);
             }
 
-            // Fallback: If element isn't immediately found (e.g., due to mounting delays),
-            // use MutationObserver to watch for it, avoiding fixed/arbitrary setTimeout delays.
+            // Fallback: If element isn't immediately found due to component loading delays,
+            // watch the DOM using a MutationObserver instead of a brittle setTimeout.
             const observer = new MutationObserver((_, obs) => {
                 try {
-                    const element = document.querySelector(hash);
+                    const safeHash = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(hash) : hash;
+                    const element = document.querySelector(safeHash);
                     if (element) {
                         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         obs.disconnect();
@@ -35,10 +36,9 @@ export default function ScrollToTop() {
 
             observer.observe(document.body, { childList: true, subtree: true });
 
-            // Cleanup observer on unmount or dependency change to prevent memory leaks
             return () => observer.disconnect();
         } else {
-            // Fallback for standard route changes without a hash: scroll smoothly to the top
+            // Smooth scroll to top on normal route transitions
             window.scrollTo({
                 top: 0,
                 left: 0,
