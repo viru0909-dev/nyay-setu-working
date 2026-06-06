@@ -20,10 +20,10 @@ public class LawyerService {
     private final CaseRepository caseRepository;
     private final CaseManagementService caseManagementService;
 
-    public String generateDraft(UUID caseId, String templateType) {
+    public String generateDraft(UUID caseId, String templateType, User requestingUser) {
         log.info("Generating AI draft for case {} with template {}", caseId, templateType);
         
-        CaseDTO caseDetails = caseManagementService.getCaseById(caseId);
+        CaseDTO caseDetails = caseManagementService.getCaseById(caseId, requestingUser);
         
         String prompt = String.format(
             "You are an expert Indian legal drafter. Generate a formal legal document for the following case:\n\n" +
