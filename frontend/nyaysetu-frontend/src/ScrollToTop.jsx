@@ -10,7 +10,7 @@ export default function ScrollToTop() {
             // Valid HTML5 ids cannot start with a number or contain certain characters without escaping, 
             // CSS.escape ensures querySelector doesn't crash on invalid selectors.
             try {
-                const element = document.querySelector(CSS.escape(hash));
+                const element = document.querySelector(hash);
                 if (element) {
                     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     return;
@@ -23,7 +23,7 @@ export default function ScrollToTop() {
             // use MutationObserver to watch for it, avoiding fixed/arbitrary setTimeout delays.
             const observer = new MutationObserver((_, obs) => {
                 try {
-                    const element = document.querySelector(CSS.escape(hash));
+                    const element = document.querySelector(hash);
                     if (element) {
                         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         obs.disconnect();
