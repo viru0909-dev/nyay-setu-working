@@ -31,6 +31,7 @@ public class DocumentManagementController {
     private final DocumentManagementService documentManagementService;
     private final CaseManagementService caseManagementService;
     private final AuthService authService;
+    private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
     private final com.nyaysetu.backend.service.DocumentAnalysisService documentAnalysisService;
     private final com.nyaysetu.backend.service.CertificateService certificateService;
 
@@ -192,15 +193,21 @@ public class DocumentManagementController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DocumentDto> getDocument(@PathVariable UUID id) {
-        DocumentDto document = documentManagementService.getDocumentById(id);
+    public ResponseEntity<DocumentDto> getDocument(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        DocumentDto document = documentManagementService.getDocumentById(id, user);
         return ResponseEntity.ok(document);
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<?> downloadDocument(@PathVariable UUID id) {
+    public ResponseEntity<?> downloadDocument(
+            @PathVariable UUID id,
+            Authentication authentication) {
         try {
-            DocumentDto metadata = documentManagementService.getDocumentById(id);
+            User user = authService.findByEmail(authentication.getName());
+            DocumentDto metadata = documentManagementService.getDocumentById(id, user);
             Resource resource = documentManagementService.downloadDocument(id);
 
             return ResponseEntity.ok()

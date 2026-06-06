@@ -111,7 +111,13 @@ public class DocumentManagementService {
                 // Judge, uploader, or their lawyer can see
                 if ("JUDGE".equals(userRole)) return true;
                 if (userId.equals(doc.getUploadedBy())) return true;
-                // TODO: Add lawyer check
+                if ("LAWYER".equals(userRole) && doc.getCaseId() != null) {
+                    CaseEntity caseEntity = caseRepository.findById(doc.getCaseId()).orElse(null);
+                    if (caseEntity != null && caseEntity.getLawyer() != null
+                            && caseEntity.getLawyer().getId().equals(userId)) {
+                        return true;
+                    }
+                }
                 return false;
                 
             case "SEALED":
@@ -125,6 +131,15 @@ public class DocumentManagementService {
     public DocumentDto getDocumentById(UUID id) {
         DocumentEntity document = documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
+        return convertToDto(document);
+    }
+
+    public DocumentDto getDocumentById(UUID id, User user) {
+        DocumentEntity document = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+        if (!canAccessDocument(document, user)) {
+            throw new com.nyaysetu.backend.exception.AccessDeniedException("You do not have access to this document");
+        }
         return convertToDto(document);
     }
 
@@ -163,6 +178,29 @@ public class DocumentManagementService {
         
         // Trigger async analysis
         documentAnalysisService.analyzeDocumentAsync(document, file);
+    }
+
+    /**
+     * Check if a user can access a document based on their relationship to the case
+     */
+    public boolean canAccessDocument(DocumentEntity doc, User user) {
+        if (doc.getCaseId() == null) {
+            return user.getId().equals(doc.getUploadedBy());
+        }
+        CaseEntity caseEntity = caseRepository.findById(doc.getCaseId()).orElse(null);
+        if (caseEntity == null) {
+            return user.getId().equals(doc.getUploadedBy());
+        }
+        if (user.getRole() == com.nyaysetu.backend.entity.Role.ADMIN
+                || user.getRole() == com.nyaysetu.backend.entity.Role.SUPER_JUDGE) {
+            return true;
+        }
+        if (caseEntity.getClient() != null && caseEntity.getClient().getId().equals(user.getId())) return true;
+        if (caseEntity.getLawyer() != null && caseEntity.getLawyer().getId().equals(user.getId())) return true;
+        if (caseEntity.getJudgeId() != null && caseEntity.getJudgeId().equals(user.getId())) return true;
+        if (user.getRole() == com.nyaysetu.backend.entity.Role.JUDGE) return true;
+        if (user.getEmail() != null && user.getEmail().equals(caseEntity.getRespondentEmail())) return true;
+        return user.getId().equals(doc.getUploadedBy());
     }
 
     /**

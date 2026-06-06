@@ -26,6 +26,7 @@ public class CaseManagementController {
 
     private final CaseManagementService caseManagementService;
     private final com.nyaysetu.backend.service.AuthService authService;
+    private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
 
     @PostMapping
     public ResponseEntity<CaseDTO> createCase(
@@ -52,7 +53,9 @@ public class CaseManagementController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CaseDTO> getCaseById(@PathVariable UUID id) {
+    public ResponseEntity<CaseDTO> getCaseById(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         CaseDTO caseDTO = caseManagementService.getCaseById(id);
         return ResponseEntity.ok(caseDTO);
     }
@@ -60,14 +63,19 @@ public class CaseManagementController {
     @PutMapping("/{id}")
     public ResponseEntity<CaseDTO> updateCase(
             @PathVariable UUID id,
-            @RequestBody CaseDTO caseDTO
+            @RequestBody CaseDTO caseDTO,
+            Authentication authentication
     ) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         CaseDTO updated = caseManagementService.updateCase(id, caseDTO);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteCase(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, String>> deleteCase(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         caseManagementService.deleteCase(id);
         return ResponseEntity.ok(Map.of("message", "Case deleted successfully"));
     }
@@ -78,8 +86,11 @@ public class CaseManagementController {
     @PostMapping("/{id}/submit-draft")
     public ResponseEntity<Map<String, Object>> submitDraft(
             @PathVariable UUID id,
-            @RequestBody Map<String, String> request
+            @RequestBody Map<String, String> request,
+            Authentication authentication
     ) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         String draftContent = request.get("draftContent");
         caseManagementService.sendDraftForApproval(id, draftContent);
         return ResponseEntity.ok(Map.of("success", true, "message", "Draft submitted for approval"));
@@ -91,8 +102,11 @@ public class CaseManagementController {
     @PostMapping("/{id}/review-draft")
     public ResponseEntity<Map<String, Object>> reviewDraft(
             @PathVariable UUID id,
-            @RequestBody Map<String, Object> request
+            @RequestBody Map<String, Object> request,
+            Authentication authentication
     ) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         boolean approved = Boolean.parseBoolean(request.get("approved").toString());
         String comments = request.get("comments") != null ? request.get("comments").toString() : "";
         
@@ -107,8 +121,11 @@ public class CaseManagementController {
     @PutMapping("/{id}/approve-draft")
     public ResponseEntity<Map<String, Object>> approveDraft(
             @PathVariable UUID id,
-            @RequestBody Map<String, Object> request
+            @RequestBody Map<String, Object> request,
+            Authentication authentication
     ) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         boolean approved = Boolean.parseBoolean(request.get("approved").toString());
         String comments = request.get("comments") != null ? request.get("comments").toString() : "";
         
@@ -125,7 +142,9 @@ public class CaseManagementController {
      * Transitions case to COGNIZANCE_PERIOD (stepper Stage 2 - Notice Issued)
      */
     @PostMapping("/{id}/file-in-court")
-    public ResponseEntity<Map<String, Object>> fileInCourt(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, Object>> fileInCourt(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         CaseEntity caseEntity = caseManagementService.getCaseEntity(id);
         caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.COGNIZANCE_PERIOD);
         caseEntity.setStage(com.nyaysetu.backend.entity.CaseStage.COGNIZANCE);
@@ -139,7 +158,9 @@ public class CaseManagementController {
     }
 
     @PostMapping("/{id}/order-notice")
-    public ResponseEntity<Map<String, Object>> orderNotice(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, Object>> orderNotice(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         caseManagementService.orderRespondentNotice(id);
         return ResponseEntity.ok(Map.of(
             "success", true,
@@ -148,7 +169,9 @@ public class CaseManagementController {
     }
 
     @PostMapping("/{id}/start-hearings")
-    public ResponseEntity<Map<String, Object>> startHearings(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, Object>> startHearings(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         caseManagementService.startHearings(id);
         return ResponseEntity.ok(Map.of(
             "success", true,
@@ -158,7 +181,9 @@ public class CaseManagementController {
     }
 
     @PostMapping("/{id}/start-evidence")
-    public ResponseEntity<Map<String, Object>> startEvidence(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, Object>> startEvidence(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         caseManagementService.startEvidence(id);
         return ResponseEntity.ok(Map.of(
             "success", true,
@@ -167,7 +192,9 @@ public class CaseManagementController {
     }
 
     @PostMapping("/{id}/start-arguments")
-    public ResponseEntity<Map<String, Object>> startArguments(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, Object>> startArguments(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         caseManagementService.startArguments(id);
         return ResponseEntity.ok(Map.of(
             "success", true,
@@ -176,7 +203,9 @@ public class CaseManagementController {
     }
 
     @PostMapping("/{id}/start-judgment")
-    public ResponseEntity<Map<String, Object>> startJudgment(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, Object>> startJudgment(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         caseManagementService.startJudgment(id);
         return ResponseEntity.ok(Map.of(
             "success", true,
@@ -187,7 +216,10 @@ public class CaseManagementController {
     @PostMapping("/{id}/deliver-verdict")
     public ResponseEntity<Map<String, Object>> deliverVerdict(
             @PathVariable UUID id,
-            @RequestBody Map<String, String> payload) {
+            @RequestBody Map<String, String> payload,
+            Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         String verdictDetails = payload.getOrDefault("verdictDetails", "Final judgment passed.");
         caseManagementService.deliverVerdict(id, verdictDetails);
         return ResponseEntity.ok(Map.of(
@@ -200,10 +232,13 @@ public class CaseManagementController {
     @PostMapping("/{id}/parties")
     public ResponseEntity<Map<String, Object>> addParty(
             @PathVariable UUID id,
-            @RequestBody Map<String, String> request
+            @RequestBody Map<String, String> request,
+            Authentication authentication
     ) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         String partyName = request.get("partyName");
-        String partyType = request.get("partyType"); // PETITIONER, RESPONDENT, WITNESS, etc.
+        String partyType = request.get("partyType");
         String partyEmail = request.get("partyEmail");
         
         caseManagementService.addPartyToCase(id, partyName, partyType, partyEmail);
@@ -217,8 +252,11 @@ public class CaseManagementController {
     @PutMapping("/{id}/respondent-details")
     public ResponseEntity<Map<String, Object>> updateRespondentDetails(
             @PathVariable UUID id,
-            @RequestBody com.nyaysetu.backend.dto.RespondentDetailsDTO details
+            @RequestBody com.nyaysetu.backend.dto.RespondentDetailsDTO details,
+            Authentication authentication
     ) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(id, user);
         caseManagementService.updateRespondentDetails(id, details);
         
         return ResponseEntity.ok(Map.of(
