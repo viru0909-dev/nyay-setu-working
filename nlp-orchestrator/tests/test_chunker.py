@@ -15,7 +15,6 @@ if str(_ROOT) not in sys.path:
 
 from services.retrieval import chunker
 
-
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 LEGAL_SAMPLE = """Section 103 — Punishment for murder.

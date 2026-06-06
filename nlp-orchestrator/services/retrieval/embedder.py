@@ -51,9 +51,8 @@ def _load_model(model_name: str):
             _model_name = model_name
             # Forward-compatible: get_sentence_embedding_dimension() is being
             # renamed to get_embedding_dimension() in a future release.
-            dim_fn = (
-                getattr(_model, "get_embedding_dimension", None)
-                or getattr(_model, "get_sentence_embedding_dimension", None)
+            dim_fn = getattr(_model, "get_embedding_dimension", None) or getattr(
+                _model, "get_sentence_embedding_dimension", None
             )
             dim = dim_fn() if dim_fn else "?"
             logger.info(f"Embedding model ready ({dim}-dim)")

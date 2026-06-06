@@ -3,6 +3,7 @@ import os
 
 print("Program started")
 
+
 def extract_frames(video_path, output_folder):
 
     os.makedirs(output_folder, exist_ok=True)
@@ -26,10 +27,7 @@ def extract_frames(video_path, output_folder):
         if not success:
             break
 
-        frame_path = os.path.join(
-            output_folder,
-            f"frame_{count}.jpg"
-        )
+        frame_path = os.path.join(output_folder, f"frame_{count}.jpg")
 
         cv2.imwrite(frame_path, frame)
 
@@ -40,7 +38,4 @@ def extract_frames(video_path, output_folder):
     print(f"Extracted {count} frames successfully")
 
 
-extract_frames(
-    "sample.mp4",
-    "output_frames"
-)
+extract_frames("sample.mp4", "output_frames")

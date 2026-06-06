@@ -29,7 +29,9 @@ security = HTTPBearer(auto_error=False)
 class TokenPayload:
     """Minimal parsed token payload with user identity."""
 
-    def __init__(self, sub: str, role: Optional[str] = None, email: Optional[str] = None):
+    def __init__(
+        self, sub: str, role: Optional[str] = None, email: Optional[str] = None
+    ):
         self.sub = sub
         self.role = role
         self.email = email

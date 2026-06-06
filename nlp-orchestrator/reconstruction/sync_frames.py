@@ -1,5 +1,6 @@
 import json
 
+
 def synchronize_frames(metadata_file):
 
     with open(metadata_file, "r") as f:
@@ -9,11 +10,13 @@ def synchronize_frames(metadata_file):
 
     for item in metadata:
 
-        synced_frames.append({
-            "frame": item["frame"],
-            "timestamp": item["timestamp"],
-            "camera_id": item["camera_id"]
-        })
+        synced_frames.append(
+            {
+                "frame": item["frame"],
+                "timestamp": item["timestamp"],
+                "camera_id": item["camera_id"],
+            }
+        )
 
     print(f"Synchronized {len(synced_frames)} frames")
 
