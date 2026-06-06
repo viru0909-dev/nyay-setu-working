@@ -19,7 +19,7 @@ i18n
         supportedLngs: ['en', 'hi', 'mr', 'ta', 'te', 'gu', 'kn', 'bn', 'ml', 'pa'],
 
         // Namespaces for organizing translations
-        ns: ['common', 'landing', 'auth', 'dashboard', 'forms', 'notifications'],
+        ns: ['common', 'landing', 'auth', 'dashboard', 'forms', 'notifications','constitution', 'aiAssistant'],
         defaultNS: 'common',
 
         // Backend configuration for loading translation files

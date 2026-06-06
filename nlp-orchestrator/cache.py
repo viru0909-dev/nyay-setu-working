@@ -102,3 +102,27 @@ def get_cache_stats() -> dict:
         "valid_entries": valid_entries,
         "expired_entries": total_entries - valid_entries
     }
+
+
+from functools import wraps
+
+def cache_decorator(ttl: int = CACHE_TTL):
+    """Decorator to cache asynchronous function results based on arguments."""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            # Create a cache key from function name and arguments
+            arg_str = "-".join([str(arg) for arg in args])
+            kwarg_str = "-".join([f"{k}:{v}" for k, v in sorted(kwargs.items())])
+            raw_key = f"{func.__name__}-{arg_str}-{kwarg_str}"
+            cache_key = hashlib.md5(raw_key.encode()).hexdigest()
+
+            cached = get_cached_response(cache_key)
+            if cached is not None:
+                return cached
+
+            result = await func(*args, **kwargs)
+            set_cached_response(cache_key, result, ttl)
+            return result
+        return wrapper
+    return decorator

@@ -2,6 +2,7 @@ package com.nyaysetu.backend.config;
 
 import com.nyaysetu.backend.filter.JwtAuthFilter;
 import com.nyaysetu.backend.filter.RateLimitFilter;
+import com.nyaysetu.backend.filter.XssSanitizationFilter;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,8 +23,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -41,17 +50,15 @@ public class SecurityConfig {
 
     @PostConstruct
     public void validateJwtSecretConfiguration() {
-        boolean isProd = java.util.Arrays.stream(environment.getActiveProfiles())
-                .anyMatch("prod"::equalsIgnoreCase);
         boolean isDev = java.util.Arrays.stream(environment.getActiveProfiles())
-                .anyMatch("dev"::equalsIgnoreCase);
+                .anyMatch(profile -> profile.equalsIgnoreCase("dev") || profile.equalsIgnoreCase("test"));
         String jwtSecretEnv = System.getenv("JWT_SECRET");
         boolean isJwtSecretEnvMissing = jwtSecretEnv == null || jwtSecretEnv.trim().isEmpty();
         boolean isUsingDefaultSecret = DEFAULT_JWT_SECRET.equals(jwtSecret);
 
-        if (isProd && (isJwtSecretEnvMissing || isUsingDefaultSecret)) {
+        if (!isDev && (isJwtSecretEnvMissing || isUsingDefaultSecret)) {
             throw new IllegalStateException(
-                    "Security configuration error: JWT_SECRET environment variable is required in production. "
+                    "Security configuration error: JWT_SECRET environment variable is required in non-development deployments. "
                             + "Application startup is blocked to prevent using an insecure default JWT signing key.");
         }
 
@@ -141,15 +148,145 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            JwtAuthFilter jwtAuthFilter) throws Exception {
+            JwtAuthFilter jwtAuthFilter,
+            XssSanitizationFilter xssSanitizationFilter) throws Exception {
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .contentSecurityPolicy(csp -> csp
+                                // Strict CSP for API responses. Mirrors the
+                                // frontend nginx.conf policy so that any
+                                // HTML/error page Spring serves (e.g. the
+                                // default whitelabel error pages) is also
+                                // protected. Adjust directives here when you
+                                // adjust them in nginx.conf.
+                                .policyDirectives(
+                                    "default-src 'self'; " +
+                                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
+                                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+                                    "img-src 'self' data: https:; " +
+                                    "font-src 'self' https://fonts.gstatic.com; " +
+                                    "connect-src 'self' wss: https://cdn.jsdelivr.net https://nyaysetubackend.onrender.com; " +
+                                    "frame-ancestors 'none'; " +
+                                    "object-src 'none'; " +
+                                    "base-uri 'self'; " +
+                                    "form-action 'self'; " +
+                                    "upgrade-insecure-requests"
+                                ))
+                                .referrerPolicy(rp -> rp.policy(
+                                    org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
+                                ))
+                                .permissionsPolicy(pp -> pp.policy(
+                                    "geolocation=(), microphone=(), camera=(), payment=()"
+                                ))
+                )
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll())
+
+                        // ── Public endpoints ──────────────────────────────────────────────
+                        .requestMatchers(
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/forgot-password",
+                                "/api/v1/auth/verify-reset-token",
+                                "/api/v1/auth/reset-password",
+                                "/api/v1/auth/face/login",
+                                "/api/v1/auth/ping",
+                                "/api/v1/auth/test",
+                                "/api/v1/health",
+                                "/api/v1/police/health"
+                        ).permitAll()
+
+                        // ── WebSocket endpoints ───────────────────────────────────────────
+                        .requestMatchers("/api/ws/**").permitAll()
+
+                        // ── AI endpoints (open for now; restrict if misuse detected) ──────
+                        .requestMatchers(
+                                "/ai/summarize",
+                                "/ai/chat",
+                                "/ai/chat/ollama",
+                                "/ai/constitution/qa",
+                                "/ai/ollama/status",
+                                "/ai/ollama/models",
+                                "/api/v1/brain/analyze-case",
+                                "/api/v1/brain/suggest-documents"
+                        ).permitAll()
+
+                        // ── Auth-only: any authenticated user ─────────────────────────────
+                        .requestMatchers(
+                                "/api/v1/auth/face/enroll",
+                                "/api/v1/auth/face/disable",
+                                "/api/v1/auth/face/status",
+                                "/api/v1/face/enroll",
+                                "/api/v1/face/verify",
+                                "/api/v1/face/status",
+                                "/api/v1/face/remove",
+                                "/profile/**"
+                        ).authenticated()
+
+                        // ── Brain / AI (authenticated) ────────────────────────────────────
+                        .requestMatchers("/api/v1/brain/**").authenticated()
+
+                        // ── Judge-only endpoints ──────────────────────────────────────────
+                        .requestMatchers(
+                                "/api/v1/judge/**",
+                                "/api/v1/hearings/schedule",
+                                "/api/v1/hearings/*/complete",
+                                "/api/v1/hearings/*/outcome",
+                                "/api/v1/hearings/*/participants",
+                                "/api/v1/orders",
+                                "/api/v1/orders/*",
+                                "/api/v1/orders/my-orders",
+                                "/api/v1/cases/*/assign-judge",
+                                "/api/v1/cases/*/take-cognizance",
+                                "/api/v1/cases/*/order-notice",
+                                "/api/v1/cases/transition/*/take-cognizance",
+                                "/api/v1/cases/transition/*/advance-stage"
+                        ).hasAnyRole("JUDGE", "SUPER_JUDGE", "ADMIN")
+
+                        // ── Police-only endpoints ─────────────────────────────────────────
+                        .requestMatchers(
+                                "/api/v1/police/summons/**",
+                                "/api/v1/police/fir/**",
+                                "/api/v1/police/investigation/**",
+                                "/api/v1/police/stats"
+                        ).hasAnyRole("POLICE", "ADMIN")
+
+                        // ── Lawyer-only endpoints ─────────────────────────────────────────
+                        .requestMatchers(
+                                "/api/v1/lawyer/**",
+                                "/api/v1/cases/transition/*/save-draft"
+                        ).hasAnyRole("LAWYER", "ADMIN")
+
+                        // ── Litigant endpoints ────────────────────────────────────────────
+                        .requestMatchers(
+                                "/api/v1/client/fir/**",
+                                "/api/v1/cases/transition/*/approve-draft",
+                                "/api/v1/cases/transition/*/reject-draft"
+                        ).hasAnyRole("LITIGANT", "ADMIN")
+
+                        // ── Admin/oversight-only endpoints ────────────────────────────────
+                        .requestMatchers(
+                                "/api/v1/cases/pending-assignment",
+                                "/api/v1/cases/judge-workload",
+                                "/verify/admin/**",
+                                "/api/v1/audit/log"
+                        ).hasAnyRole("ADMIN", "SUPER_JUDGE", "TECH_ADMIN")
+
+                        // ── Summons & transition (police + judge + admin) ──────────────────
+                        .requestMatchers(
+                                "/api/v1/cases/*/update-summons",
+                                "/api/v1/cases/transition/*/summons-served"
+                        ).hasAnyRole("POLICE", "JUDGE", "SUPER_JUDGE", "ADMIN")
+
+                        // ── Everything else requires authentication ────────────────────────
+                        .anyRequest().authenticated()
+                )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(xssSanitizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

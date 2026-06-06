@@ -50,7 +50,7 @@ public class VakilFriendService {
     private String groqModel;
 
     private final ObjectMapper objectMapper;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate; // Injected bean with timeouts — see RestTemplateConfig
     private final ChatSessionRepository chatSessionRepository;
     private final CaseRepository caseRepository;
     private final HearingRepository hearingRepository;
@@ -59,7 +59,10 @@ public class VakilFriendService {
     private final OllamaService ollamaService;
     private final BhashiniService bhashiniService;
     private final VakilFriendDocumentService vakilFriendDocumentService;
-    private final RagService ragService;
+
+    // Optional — only present when rag.enabled=true. Null-safe usage below.
+    @Autowired(required = false)
+    private RagService ragService;
     
 
     
@@ -294,12 +297,15 @@ public class VakilFriendService {
         conversation.add(userMsg);
 
         // Retrieve relevant legal context from Vector Database using English query
+        // RagService is optional (disabled by default via rag.enabled property).
         String ragContext = "";
-        try {
-            ragContext = ragService.findRelevantContext(englishMessage, 3);
-            log.info("RAG Context retrieved for query: {}", englishMessage);
-        } catch (Exception e) {
-            log.warn("Failed to retrieve RAG context", e);
+        if (ragService != null) {
+            try {
+                ragContext = ragService.findRelevantContext(englishMessage, 3);
+                log.info("RAG Context retrieved for query: {}", englishMessage);
+            } catch (Exception e) {
+                log.warn("RAG context retrieval skipped: {}", e.getMessage());
+            }
         }
 
         // Get AI response (English)

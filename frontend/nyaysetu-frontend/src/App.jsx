@@ -1,92 +1,143 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, Suspense, lazy } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect, Suspense, lazy, useState } from 'react';
 import useAuthStore from './store/authStore';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
-// CHANGED: ThemeProvider added — wraps the entire app so all components can access theme
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import ScrollToTop from './ScrollToTop';
+import './styles/accessibility.css';
+import ScrollProgressBar from './components/ScrollProgressBar';
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
 import UpdateNotification from './components/UpdateNotification';
+import GuestWelcomeToast from './components/guest/GuestWelcomeToast';
+import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
 
-// Lazy load pages for better performance
-const Landing = lazy(() => import('./pages/Landing'));
-const Constitution = lazy(() => import('./pages/Constitution'));
-const Login = lazy(() => import('./pages/Login'));
-const Signup = lazy(() => import('./pages/Signup'));
-const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const About = lazy(() => import('./pages/About'));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
-const Terms = lazy(() => import('./pages/Terms'));
-const Disclaimer = lazy(() => import('./pages/Disclaimer'));
-const UpcomingFeatures = lazy(() => import('./pages/UpcomingFeatures'));
+import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
+import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
+
+// Imported Feature Component
+import ScrollProgressBar from './ScrollProgressBar';
+// ==========================================
+// VITE CHUNK BREAKAGE MITIGATION WRAPPER
+// ==========================================
+const retryLazy = (componentImport) => lazy(async () => {
+    const pageHasAlreadyBeenForceRefreshed = JSON.parse(
+        window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
+    );
+    try {
+        const component = await componentImport();
+        window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
+        return component;
+    } catch (error) {
+        if (!pageHasAlreadyBeenForceRefreshed) {
+            window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+            window.location.reload();
+            return { default: () => <LoadingSpinner fullScreen message="Syncing workspace patches..." /> };
+        }
+        throw error;
+    }
+});
+
+// ==========================================
+// OPTIMIZED LAZY-LOAD ENTRIES
+// ==========================================
+const Landing = retryLazy(() => import('./pages/Landing'));
+const Constitution = retryLazy(() => import('./pages/Constitution'));
+const Login = retryLazy(() => import('./pages/Login'));
+const Signup = retryLazy(() => import('./pages/Signup'));
+const ResetPassword = retryLazy(() => import('./pages/ResetPassword'));
+const About = retryLazy(() => import('./pages/About'));
+const PrivacyPolicy = retryLazy(() => import('./pages/PrivacyPolicy'));
+const Terms = retryLazy(() => import('./pages/Terms'));
+const Disclaimer = retryLazy(() => import('./pages/Disclaimer'));
+const UpcomingFeatures = retryLazy(() => import('./pages/UpcomingFeatures'));
 
 // Dashboard Layout
-const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
+const DashboardLayout = retryLazy(() => import('./layouts/DashboardLayout'));
 
 // Dashboard Pages
-const AdminDashboard = lazy(() => import('./pages/dashboards/AdminDashboard'));
-
-const LawyerDashboard = lazy(() => import('./pages/dashboards/LawyerDashboard'));
+const AdminDashboard = retryLazy(() => import('./pages/dashboards/AdminDashboard'));
+const LawyerDashboard = retryLazy(() => import('./pages/dashboards/LawyerDashboard'));
 
 // Litigant Pages
-const LitigantDashboard = lazy(() => import('./pages/litigant/LitigantDashboard'));
-const FileUnifiedPage = lazy(() => import('./pages/litigant/FileUnifiedPage'));
-const VakilFriendPage = lazy(() => import('./pages/litigant/VakilFriendPage'));
-const CaseDiaryPage = lazy(() => import('./pages/litigant/CaseDiaryPage'));
-const CaseDetailPage = lazy(() => import('./pages/litigant/CaseDetailPage'));
-const HearingsPage = lazy(() => import('./pages/litigant/HearingsPage'));
-const LawyerChatPage = lazy(() => import('./pages/litigant/LawyerChatPage'));
-const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
-const ForensicsPage = lazy(() => import('./pages/litigant/ForensicsPage'));
-const DocumentGeneratePage = lazy(() => import('./pages/litigant/DocumentGeneratePage'));
-const FindLawyerPage = lazy(() => import('./pages/litigant/FindLawyerPage'));
-const LawyerFeedbackPage = lazy(() => 
-  import('./pages/litigant/LawyerFeedbackPage'));
+const LitigantDashboard = retryLazy(() => import('./pages/litigant/LitigantDashboard'));
+const FileUnifiedPage = retryLazy(() => import('./pages/litigant/FileUnifiedPage'));
+const VakilFriendPage = retryLazy(() => import('./pages/litigant/VakilFriendPage'));
+const CaseDiaryPage = retryLazy(() => import('./pages/litigant/CaseDiaryPage'));
+const CaseDetailPage = retryLazy(() => import('./pages/litigant/CaseDetailPage'));
+const HearingsPage = retryLazy(() => import('./pages/litigant/HearingsPage'));
+const LawyerChatPage = retryLazy(() => import('./pages/litigant/LawyerChatPage'));
+const ProfilePage = retryLazy(() => import('./pages/litigant/ProfilePage'));
+const DocumentGeneratePage = retryLazy(() => import('./pages/litigant/DocumentGeneratePage'));
+const FindLawyerPage = retryLazy(() => import('./pages/litigant/FindLawyerPage'));
+const LawyerFeedbackPage = retryLazy(() => import('./pages/litigant/LawyerFeedbackPage'));
 
-
-// Judge Pages (keep only those still used)
-const ConductHearingPage = lazy(() => import('./pages/judge/ConductHearingPage'));
-const CourtAnalyticsPage = lazy(() => import('./pages/judge/CourtAnalyticsPage'));
-// New Unified Workspace Pages
-const MyDocket = lazy(() => import('./pages/judge/MyDocket'));
-const JudgeCaseWorkspace = lazy(() => import('./pages/judge/JudgeCaseWorkspace'));
-const JudicialOverview = lazy(() => import('./pages/judge/JudicialOverview'));
-const UnassignedPool = lazy(() => import('./pages/judge/UnassignedPool'));
-const LiveHearing = lazy(() => import('./pages/judge/LiveHearing'));
-const JudgeHearingsPage = lazy(() => import('./pages/judge/JudgeHearingsPage'));
-
+// Judge Pages
+const ConductHearingPage = retryLazy(() => import('./pages/judge/ConductHearingPage'));
+const CourtAnalyticsPage = retryLazy(() => import('./pages/judge/CourtAnalyticsPage'));
+const MyDocket = retryLazy(() => import('./pages/judge/MyDocket'));
+const JudgeCaseWorkspace = retryLazy(() => import('./pages/judge/JudgeCaseWorkspace'));
+const JudicialOverview = retryLazy(() => import('./pages/judge/JudicialOverview'));
+const UnassignedPool = retryLazy(() => import('./pages/judge/UnassignedPool'));
+const LiveHearing = retryLazy(() => import('./pages/judge/LiveHearing'));
+const JudgeHearingsPage = retryLazy(() => import('./pages/judge/JudgeHearingsPage'));
 
 // Lawyer Pages
-const LawyerCasesPage = lazy(() => import('./pages/lawyer/LawyerCasesPage'));
-const MyClientsPage = lazy(() => import('./pages/lawyer/MyClientsPage'));
-const CasePreparationPage = lazy(() => import('./pages/lawyer/CasePreparationPage'));
-const EvidenceVaultPage = lazy(() => import('./pages/lawyer/EvidenceVaultPage'));
-const AILegalAssistantPage = lazy(() => import('./pages/lawyer/AILegalAssistantPage'));
-const LawyerHearingsPage = lazy(() => import('./pages/lawyer/LawyerHearingsPage'));
-const LawyerAnalyticsPage = lazy(() => import('./pages/lawyer/AnalyticsPage'));
-const LawyerCaseDetailsPage = lazy(() => import('./pages/lawyer/LawyerCaseDetailsPage'));
-const ClientChatPage = lazy(() => import('./pages/lawyer/ClientChatPage'));
-const LawyerProfilePage = lazy(() => import('./pages/lawyer/LawyerProfilePage'));
-const CaseWorkspace = lazy(() => import('./pages/lawyer/CaseWorkspace'));
-const OfflineDraftsPage = lazy(() => import('./pages/lawyer/OfflineDraftsPage'));
+const LawyerCasesPage = retryLazy(() => import('./pages/lawyer/LawyerCasesPage'));
+const MyClientsPage = retryLazy(() => import('./pages/lawyer/MyClientsPage'));
+const CasePreparationPage = retryLazy(() => import('./pages/lawyer/CasePreparationPage'));
+const EvidenceVaultPage = retryLazy(() => import('./pages/lawyer/EvidenceVaultPage'));
+const AILegalAssistantPage = retryLazy(() => import('./pages/lawyer/AILegalAssistantPage'));
+const LawyerHearingsPage = retryLazy(() => import('./pages/lawyer/LawyerHearingsPage'));
+const LawyerAnalyticsPage = retryLazy(() => import('./pages/lawyer/AnalyticsPage'));
+const LawyerCaseDetailsPage = retryLazy(() => import('./pages/lawyer/LawyerCaseDetailsPage'));
+const ClientChatPage = retryLazy(() => import('./pages/lawyer/ClientChatPage'));
+const LawyerProfilePage = retryLazy(() => import('./pages/lawyer/LawyerProfilePage'));
+const CaseWorkspace = retryLazy(() => import('./pages/lawyer/CaseWorkspace'));
+const OfflineDraftsPage = retryLazy(() => import('./pages/lawyer/OfflineDraftsPage'));
 
 // Police Pages
-const PoliceDashboard = lazy(() => import('./pages/police/PoliceDashboard'));
-const UploadFirPage = lazy(() => import('./pages/police/UploadFirPage'));
-const MyFirsPage = lazy(() => import('./pages/police/MyFirsPage'));
-const PoliceInvestigationsPage = lazy(() => import('./pages/police/PoliceInvestigationsPage'));
-const InvestigationDetailsPage = lazy(() => import('./pages/police/InvestigationDetailsPage'));
+const PoliceDashboard = retryLazy(() => import('./pages/police/PoliceDashboard'));
+const UploadFirPage = retryLazy(() => import('./pages/police/UploadFirPage'));
+const MyFirsPage = retryLazy(() => import('./pages/police/MyFirsPage'));
+const PoliceInvestigationsPage = retryLazy(() => import('./pages/police/PoliceInvestigationsPage'));
+const InvestigationDetailsPage = retryLazy(() => import('./pages/police/InvestigationDetailsPage'));
 
-// Protected Route Component
+// ==========================================
+// CORE AUTH ROUTE LOGIC
+// ==========================================
+const GuestAuthRedirect = ({ location }) => {
+    const setGuestIntent = useAuthStore((s) => s.setGuestIntent);
+
+    useEffect(() => {
+        if (!location.pathname.includes('/signup') && !location.pathname.includes('/login')) {
+            setGuestIntent({
+                path: `${location.pathname}${location.search}`,
+                feature: 'access your dashboard',
+            });
+        }
+    }, [location.pathname, location.search, setGuestIntent]);
+
+    return <Navigate to="/signup" replace state={{ from: location }} />;
+};
+
 const ProtectedRoute = ({ children, allowedRoles }) => {
-    const { isAuthenticated, user } = useAuthStore();
+    const location = useLocation();
+    
+    // Atomic Zustand Selectors prevent localized updates from re-rendering the outer core app
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+    const isGuest = useAuthStore((s) => s.isGuest);
+    const user = useAuthStore((s) => s.user);
+
+    if (isGuest) {
+        return <GuestAuthRedirect location={location} />;
+    }
 
     if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
     if (allowedRoles && !allowedRoles.includes(user?.role)) {
@@ -96,20 +147,62 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return children;
 };
 
+// Structural Workspace wrapper isolating Suspense performance bounds
+const ProtectedWorkspace = ({ allowedRoles, message, children }) => (
+    <ProtectedRoute allowedRoles={allowedRoles}>
+        <Suspense fallback={<LoadingSpinner fullScreen message={message} />}>
+            {children}
+        </Suspense>
+    </ProtectedRoute>
+);
+
+function KeyboardAccessibilityProvider({ user }) {
+    const [showShortcuts, setShowShortcuts] = useState(false);
+
+    useKeyboardShortcuts({
+        user,
+        onOpenHelp: () => setShowShortcuts(true),
+        onCloseHelp: () => setShowShortcuts(false),
+    });
+
+    return (
+        <KeyboardShortcutsModal
+            isOpen={showShortcuts}
+            onClose={() => setShowShortcuts(false)}
+        />
+    );
+}
+
+// Fixed-Reference Fallback Views
+const UnauthorizedView = () => (
+    <div style={{ textAlign: 'center', padding: '3rem' }}>
+        <h1>Unauthorized</h1>
+        <p>You don't have permission to access this page.</p>
+    </div>
+);
+
+const NotFoundView = () => (
+    <div style={{ textAlign: 'center', padding: '3rem' }}>
+        <h1>404 - Page Not Found</h1>
+        <p>The page you are looking for does not exist.</p>
+    </div>
+);
+
+// ==========================================
+// ENHANCED SYSTEM CORE ROOT ENTRY
+// ==========================================
 function App({ swRegistration }) {
-    const { initAuth } = useAuthStore();
+    const initAuth = useAuthStore((s) => s.initAuth);
+    const user = useAuthStore((s) => s.user);
 
     useEffect(() => {
         initAuth();
     }, [initAuth]);
 
     return (
-        // CHANGED: ThemeProvider is the outermost wrapper so the theme CSS attribute
-        // is set on <html> before any child renders — prevents flash of wrong theme
         <ThemeProvider>
             <ErrorBoundary>
                 <LanguageProvider>
-                    {/* Global PWA Components */}
                     <OfflineIndicator />
                     <UpdateNotification registration={swRegistration} />
 
@@ -119,9 +212,19 @@ function App({ swRegistration }) {
                             v7_relativeSplatPath: true
                         }}
                     >
+                        {/* ============================================================= */}
+                        {/* 🌟 SCROLL PROGRESS INDICATOR GLOBAL INTEGRATION LOCATION 🌟 */}
+                        {/* ============================================================= */}
+                        <ScrollProgressBar />
+
+                        <KeyboardAccessibilityProvider user={user} />
+                        <GuestWelcomeToast />
+                        <GuestOnboardingHint />
                         <ScrollToTop />
+                        
                         <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
                             <Routes>
+                                {/* Base Application Portals */}
                                 <Route path="/" element={<Landing />} />
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/signup" element={<Signup />} />
@@ -133,15 +236,12 @@ function App({ swRegistration }) {
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
 
-                                {/* Protected Dashboards */}
-                                <Route
-                                    path="/litigant/*"
-                                    element={
-                                        <ProtectedRoute allowedRoles={['LITIGANT']}>
-                                            <DashboardLayout />
-                                        </ProtectedRoute>
-                                    }
-                                >
+                                {/* Litigant Functional Core */}
+                                <Route path="/litigant/*" element={
+                                    <ProtectedWorkspace allowedRoles={['LITIGANT']} message="Loading Litigant Workspace...">
+                                        <DashboardLayout />
+                                    </ProtectedWorkspace>
+                                }>
                                     <Route index element={<LitigantDashboard />} />
                                     <Route path="vakil-friend" element={<VakilFriendPage />} />
                                     <Route path="file" element={<FileUnifiedPage />} />
@@ -152,18 +252,16 @@ function App({ swRegistration }) {
                                     <Route path="find-lawyer" element={<FindLawyerPage />} />
                                     <Route path="feedback" element={<LawyerFeedbackPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
-                                    <Route path="forensics" element={<ForensicsPage />} />
                                     <Route path="generate-document" element={<DocumentGeneratePage />} />
+                                    <Route path="*" element={<Navigate to="/litigant" replace />} />
                                 </Route>
 
-                                <Route
-                                    path="/lawyer/*"
-                                    element={
-                                        <ProtectedRoute allowedRoles={['LAWYER']}>
-                                            <DashboardLayout />
-                                        </ProtectedRoute>
-                                    }
-                                >
+                                {/* Lawyer Functional Core */}
+                                <Route path="/lawyer/*" element={
+                                    <ProtectedWorkspace allowedRoles={['LAWYER']} message="Loading Lawyer Workspace...">
+                                        <DashboardLayout />
+                                    </ProtectedWorkspace>
+                                }>
                                     <Route index element={<LawyerDashboard />} />
                                     <Route path="cases" element={<LawyerCasesPage />} />
                                     <Route path="case/:caseId" element={<LawyerCaseDetailsPage />} />
@@ -177,62 +275,55 @@ function App({ swRegistration }) {
                                     <Route path="chat" element={<ClientChatPage />} />
                                     <Route path="profile" element={<LawyerProfilePage />} />
                                     <Route path="offline-drafts" element={<OfflineDraftsPage />} />
+                                    <Route path="*" element={<Navigate to="/lawyer" replace />} />
                                 </Route>
 
-                                <Route
-                                    path="/judge/*"
-                                    element={
-                                        <ProtectedRoute allowedRoles={['JUDGE']}>
-                                            <DashboardLayout />
-                                        </ProtectedRoute>
-                                    }
-                                >
+                                {/* Judicial Functional Core */}
+                                <Route path="/judge/*" element={
+                                    <ProtectedWorkspace allowedRoles={['JUDGE']} message="Loading Judicial Workspace...">
+                                        <DashboardLayout />
+                                    </ProtectedWorkspace>
+                                }>
                                     <Route index element={<JudicialOverview />} />
-                                    {/* New Unified Workspace Routes */}
                                     <Route path="docket" element={<MyDocket />} />
                                     <Route path="unassigned" element={<UnassignedPool />} />
                                     <Route path="hearings" element={<JudgeHearingsPage />} />
                                     <Route path="live-hearing" element={<LiveHearing />} />
                                     <Route path="case/:caseId" element={<JudgeCaseWorkspace />} />
-                                    {/* Keep only essential old routes */}
                                     <Route path="conduct" element={<ConductHearingPage />} />
                                     <Route path="analytics" element={<CourtAnalyticsPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
+                                    <Route path="*" element={<Navigate to="/judge" replace />} />
                                 </Route>
 
-                                <Route
-                                    path="/admin/*"
-                                    element={
-                                        <ProtectedRoute allowedRoles={['ADMIN']}>
-                                            <DashboardLayout />
-                                        </ProtectedRoute>
-                                    }
-                                >
+                                {/* Administrative Core */}
+                                <Route path="/admin/*" element={
+                                    <ProtectedWorkspace allowedRoles={['ADMIN']} message="Loading Admin Panel...">
+                                        <DashboardLayout />
+                                    </ProtectedWorkspace>
+                                }>
                                     <Route index element={<AdminDashboard />} />
+                                    <Route path="*" element={<Navigate to="/admin" replace />} />
                                 </Route>
 
-                                <Route
-                                    path="/police/*"
-                                    element={
-                                        <ProtectedRoute allowedRoles={['POLICE']}>
-                                            <DashboardLayout />
-                                        </ProtectedRoute>
-                                    }
-                                >
+                                {/* Law Enforcement Core */}
+                                <Route path="/police/*" element={
+                                    <ProtectedWorkspace allowedRoles={['POLICE']} message="Loading Police Dashboard...">
+                                        <DashboardLayout />
+                                    </ProtectedWorkspace>
+                                }>
                                     <Route index element={<PoliceDashboard />} />
                                     <Route path="upload" element={<UploadFirPage />} />
                                     <Route path="firs" element={<MyFirsPage />} />
                                     <Route path="investigations" element={<PoliceInvestigationsPage />} />
                                     <Route path="investigation/:id" element={<InvestigationDetailsPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
+                                    <Route path="*" element={<Navigate to="/police" replace />} />
                                 </Route>
                                 
-                                <Route path="/unauthorized" element={
-                                    <div style={{ textAlign: 'center', padding: '3rem' }}>
-                                        <h1>Unauthorized</h1>
-                                        <p>You don't have permission to access this page.</p>
-                                    </div>
-                                } />
+                                {/* Core Catch-All Directives */}
+                                <Route path="/unauthorized" element={<UnauthorizedView />} />
+                                <Route path="*" element={<NotFoundView />} />
                             </Routes>
                         </Suspense>
                     </BrowserRouter>

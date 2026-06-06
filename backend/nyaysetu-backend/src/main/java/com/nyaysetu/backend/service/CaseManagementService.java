@@ -139,6 +139,7 @@ public class CaseManagementService {
 
         caseEntity.setDraftPetition(draftContent);
         caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.DRAFT_PENDING_CLIENT);
+        caseEntity.setDraftApprovalStatus("AWAITING_CLIENT");
         // Ensure Document Status is set for frontend logic
         caseEntity.setDocumentStatus(com.nyaysetu.backend.entity.DocumentStatus.PENDING_REVIEW);
         

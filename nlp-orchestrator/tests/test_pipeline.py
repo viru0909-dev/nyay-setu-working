@@ -53,6 +53,33 @@ async def test_deep_research_pipeline_flow(
 
 @pytest.mark.asyncio
 @patch("main.build_kanoon_context", new_callable=AsyncMock)
+@patch("main.execute_with_fallback", new_callable=AsyncMock)
+@patch("main.get_cached_response", return_value="Cached analysis")
+@patch("main.detect_domain", return_value="general")
+async def test_deep_research_pipeline_gemini_cache_hit(
+    mock_detect_domain,
+    mock_get_cached_response,
+    mock_execute_fallback,
+    mock_kanoon,
+):
+    mock_kanoon.return_value = (
+        "Mock kanoon context",
+        [{"title": "Mock Case", "doc_id": "123"}]
+    )
+    mock_get_cached_response.return_value = "Cached analysis"
+
+    query = "This is a long enough complex query designed to trigger the Gemini model choice and hit cache"
+    events = []
+
+    with patch("main.gemini_client", True):
+        async for event in deep_research_pipeline(query, "english"):
+            events.append(event)
+
+    assert any("Cached analysis" in event for event in events)
+    mock_execute_fallback.assert_not_awaited()
+
+@pytest.mark.asyncio
+@patch("main.build_kanoon_context", new_callable=AsyncMock)
 async def test_pipeline_error_handling(mock_kanoon):
 
     mock_kanoon.side_effect = Exception("Mock API failure")

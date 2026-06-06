@@ -14,7 +14,9 @@ import { caseAPI, documentAPI, brainAPI, caseAssignmentAPI } from '../../service
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../config/apiConfig';
 import CaseChatWidget from '../../components/CaseChatWidget';
+import { useTranslation } from 'react-i18next';
 import CaseStepper from '../../components/common/CaseStepper';
+import { t } from 'i18next';
 
 // -----------------------------------------------------------------------------
 // HELPER CONSTANTS & FUNCTIONS
@@ -35,10 +37,31 @@ const urgencyColors = {
     'CRITICAL': { bg: '#ef444420', text: '#ef4444' }
 };
 
-const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-IN', {
-        day: 'numeric', month: 'short', year: 'numeric'
+// const formatDate = (dateString) => {
+//     if (!dateString) return 'N/A';
+//     return new Date(dateString).toLocaleDateString('en-IN', {
+//         day: 'numeric', month: 'short', year: 'numeric'
+//     });
+// };
+
+const formatDate = (dateString, language = 'en') => {
+    if (!dateString) return '-';
+
+    const localeMap = {
+        en: 'en-US',
+        hi: 'hi-IN',
+        mr: 'mr-IN',
+        ta: 'ta-IN',
+        te: 'te-IN'
+    };
+
+    const locale =
+        localeMap[language] || 'en-US';
+
+    return new Date(dateString).toLocaleDateString(locale, {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
     });
 };
 
@@ -57,7 +80,7 @@ const formatFileSize = (bytes) => {
 export default function CaseDetailPage() {
     const { caseId } = useParams();
     const navigate = useNavigate();
-
+    const { t } = useTranslation('litigant');
     const [activeTab, setActiveTab] = useState('overview');
     const [caseData, setCaseData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -77,6 +100,7 @@ export default function CaseDetailPage() {
         fetchCaseDetails();
     }, [caseId]);
 
+    
     const handleEditClick = () => {
         setEditData({
             title: caseData.title,
@@ -92,10 +116,10 @@ export default function CaseDetailPage() {
             await caseAPI.update(caseId, editData);
             setCaseData({ ...caseData, ...editData });
             setIsEditing(false);
-            alert('Case updated successfully!');
+            alert(t('caseDetail.caseUpdatedSuccessfully'));
         } catch (e) {
             console.error('Update failed:', e);
-            alert('Failed to update case.');
+            alert(t('caseDetail.failedToUpdateCase'));
         } finally {
             setSaving(false);
         }
@@ -111,7 +135,7 @@ export default function CaseDetailPage() {
             }
         } catch (e) {
             console.error(e);
-            alert('AI Refinement failed. Please try again.');
+            alert(t('caseDetail.aiRefinementFailed'));
         } finally {
             setRefining(false);
         }
@@ -125,7 +149,7 @@ export default function CaseDetailPage() {
             setError(null);
         } catch (err) {
             console.error('Error fetching case:', err);
-            setError('Failed to load case details');
+            setError(t('caseDetail.failedToLoadCaseDetails'));
         } finally {
             setLoading(false);
         }
@@ -139,7 +163,7 @@ export default function CaseDetailPage() {
             setAvailableLawyers(response.data || []);
         } catch (error) {
             console.error('Error fetching lawyers:', error);
-            alert('Failed to load available lawyers');
+            alert(t('caseDetail.failedToLoadLawyers'));
         } finally {
             setLawyerLoading(false);
         }
@@ -148,12 +172,12 @@ export default function CaseDetailPage() {
     const submitProposal = async (lawyerId) => {
         try {
             await caseAssignmentAPI.proposeLawyer(caseId, lawyerId);
-            alert('✅ Proposal sent successfully! The lawyer will review and accept/decline your case.');
+            alert(t('caseDetail.proposalSentSuccess'));
             setShowHireModal(false);
             fetchCaseDetails(); // Refresh to see if status updated
         } catch (error) {
             console.error('Error sending proposal:', error);
-            alert('Failed to send proposal. This case might already have a pending proposal.');
+            alert(t('caseDetail.proposalSendFailed'));
         }
     };
 
@@ -183,12 +207,12 @@ export default function CaseDetailPage() {
         return (
             <div style={{ textAlign: 'center', padding: '4rem' }}>
                 <AlertCircle size={64} style={{ color: '#ef4444', marginBottom: '1rem' }} />
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{error || 'Case Not Found'}</h2>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{error || t('caseDiary.caseNotFound')}</h2>
                 <button
                     onClick={() => navigate('/litigant/case-diary')}
                     style={{ marginTop: '1rem', padding: '0.75rem 1.5rem', background: 'var(--color-primary)', border: 'none', borderRadius: '0.5rem', color: 'white', cursor: 'pointer' }}
                 >
-                    Back to Case Diary
+                    {t('caseDiary.backToCaseDiary')}
                 </button>
             </div>
         );
@@ -206,14 +230,14 @@ export default function CaseDetailPage() {
                         onClick={() => navigate('/litigant/case-diary')}
                         style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
                     >
-                        <ArrowLeft size={20} /> Back to Diary
+                        <ArrowLeft size={20} /> {t('caseDiary.backToDiary')}
                     </button>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button
                             onClick={downloadCaseReport}
                             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', borderRadius: '0.5rem', color: '#10b981', fontWeight: '600', cursor: 'pointer' }}
                         >
-                            <Download size={16} /> Download Report
+                            <Download size={16} /> {t('caseDiary.downloadReport')}
                         </button>
                     </div>
                 </div>
@@ -226,16 +250,16 @@ export default function CaseDetailPage() {
                                 {caseData.status.replace(/_/g, ' ')}
                             </span>
                         </div>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Case ID: {caseData.id}</p>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('caseDetail.caseId')}: {caseData.id}</p>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
                         <span style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', background: urgencyStyle.bg, color: urgencyStyle.text, fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            ⚡ {caseData.urgency} Priority
+                            ⚡ {t(`caseDetail.priority.${caseData.urgency.toLowerCase()}`)}
                         </span>
                         {/* Computed Status Heartbeat */}
                         {caseData.summonsStatus === 'PENDING' && (
                             <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', padding: '0.25rem 0.5rem', borderRadius: '0.35rem', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-                                ⚠️ Status Override: IN ADMISSION (Summons Pending)
+                                {t('caseDiary.statusOverrideAdmission')}
                             </span>
                         )}
                     </div>
@@ -245,10 +269,10 @@ export default function CaseDetailPage() {
             {/* 2. Tabs Navigation */}
             <div style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', marginBottom: '2rem', gap: '2rem' }}>
                 {[
-                    { id: 'overview', label: 'Overview', icon: FileText },
-                    { id: 'files', label: 'Case Files', icon: FileCheck },
-                    { id: 'timeline', label: 'Timeline', icon: Clock },
-                    { id: 'health', label: 'Procedural Health', icon: Shield }
+                    { id: 'overview', label: t('caseDetail.tabs.overview'), icon: FileText },
+                    { id: 'files', label: t('caseDetail.tabs.caseFiles'), icon: FileCheck },
+                    { id: 'timeline', label: t('caseDetail.tabs.timeline'), icon: Clock },
+                    { id: 'health', label: t('caseDetail.tabs.proceduralHealth'), icon: Shield }
                 ].map(tab => (
                     <button
                         key={tab.id}
@@ -302,10 +326,10 @@ export default function CaseDetailPage() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <div>
                                 <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
-                                    ⚖️ Hire a Lawyer
+                                    ⚖️ {t('caseDetail.hireLawyer')}
                                 </h2>
                                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
-                                    Select a verified legal professional
+                                    {t('caseDetail.selectVerifiedLawyer')}
                                 </p>
                             </div>
                             <button
@@ -324,9 +348,9 @@ export default function CaseDetailPage() {
                             ) : availableLawyers.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '3rem' }}>
                                     <User size={48} color="var(--text-secondary)" style={{ marginBottom: '1rem' }} />
-                                    <h4 style={{ color: 'var(--text-main)', margin: '0 0 0.5rem 0' }}>No Lawyers Available</h4>
+                                    <h4 style={{ color: 'var(--text-main)', margin: '0 0 0.5rem 0' }}>{t('caseDetail.noLawyersAvailable')}</h4>
                                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                                        There are no verified lawyers accepting cases at the moment.
+                                        {t('caseDetail.noLawyersAvailableDescription')}
                                     </p>
                                 </div>
                             ) : (
@@ -382,7 +406,7 @@ export default function CaseDetailPage() {
                                                     boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
                                                 }}
                                             >
-                                                <Gavel size={16} /> Send Proposal
+                                                <Gavel size={16} /> {t('caseDetail.sendProposal')}
                                             </button>
                                         </div>
                                     ))}
@@ -401,6 +425,7 @@ export default function CaseDetailPage() {
 // -----------------------------------------------------------------------------
 
 function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
+    const { t, i18n } = useTranslation('litigant');
     return (
         <div>
             {/* 7-Stage Judicial Workflow Stepper */}
@@ -410,7 +435,7 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     {/* Description */}
                     <div style={{ background: 'var(--bg-glass-strong)', padding: '2rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>Case Description</h3>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1rem' }}>{t('caseDetail.caseDescription')} </h3>
                         <p style={{ lineHeight: '1.7', color: 'var(--text-secondary)' }}>{caseData.description}</p>
                     </div>
 
@@ -436,7 +461,7 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                                 }}>
                                     <Sparkles size={20} style={{ color: 'var(--color-primary)' }} />
                                 </div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Nyay Saarthi Analysis</h3>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>{t('caseDetail.aiAnalysis')}</h3>
                             </div>
                             <div style={{ lineHeight: '1.8', color: 'var(--text-main)', fontSize: '1rem' }}>
                                 <ReactMarkdown>{caseData.aiGeneratedSummary}</ReactMarkdown>
@@ -456,26 +481,26 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                                 <FileText size={24} color="var(--color-primary)" />
                                 <h4 style={{ margin: 0, color: 'var(--text-main)' }}>
-                                    {caseData.aiGeneratedSummary && caseData.status === 'PENDING' ? 'AI Draft Ready for Review' : 'Review & Approve Petition'}
+                                    {caseData.aiGeneratedSummary && caseData.status === 'PENDING' ? t('caseDetail.aiDraftReady') : t('caseDetail.reviewApprovePetition')}
                                 </h4>
                             </div>
                             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
                                 {caseData.aiGeneratedSummary && caseData.status === 'PENDING'
-                                    ? 'Nyay Saarthi has generated a case analysis. Approve it to create a formal case draft.'
-                                    : 'Your lawyer has submitted a draft petition. Please review and approve it to trigger the "Submit to Court" action for your lawyer.'}
+                                    ? t('caseDetail.aiDraftDescription')
+                                    : t('caseDetail.lawyerDraftDescription')}
                             </p>
                             <div style={{ display: 'flex', gap: '1rem' }}>
                                 <button
                                     onClick={() => {
-                                        if (confirm('Are you sure you want to approve this draft? This will notify your lawyer.')) {
+                                        if (confirm(t('caseDetail.confirmApproveDraft'))) {
                                             caseAPI.reviewDraft(caseData.id, true, "Approved by client")
                                                 .then(() => {
-                                                    alert('Draft Approved! Your lawyer can now submit to court.');
+                                                    alert(t('caseDetail.draftApproved'));
                                                     if (onRefresh) onRefresh();
                                                 })
                                                 .catch(err => {
                                                     console.error('Failed to approve:', err);
-                                                    alert('Failed to approve draft. Please try again.');
+                                                    alert(t('caseDetail.failedApproveDraft'));
                                                 });
                                         }
                                     }}
@@ -488,7 +513,7 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                                         fontWeight: '600',
                                         cursor: 'pointer'
                                     }}>
-                                    Approve & E-Sign
+                                    {t('caseDetail.approveESign')}
                                 </button>
                                 <button style={{
                                     padding: '0.5rem 1rem',
@@ -499,7 +524,7 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                                     fontWeight: '600',
                                     cursor: 'pointer'
                                 }}>
-                                    Request Changes
+                                    {t('caseDetail.requestChanges')}
                                 </button>
                             </div>
                         </div>
@@ -510,27 +535,27 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     {/* Key Details Card */}
                     <div style={{ background: 'var(--bg-glass-strong)', padding: '1.5rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Key Details</h3>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>{t('caseDetail.keyDetails')}</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                             <div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Case Type</p>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>{t('caseDetail.caseType')}</p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <Scale size={16} color="var(--color-primary)" />
                                     <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{caseData.caseType}</span>
                                 </div>
                             </div>
                             <div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Filed Date</p>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>{t('caseDetail.filedDate')}</p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <Calendar size={16} color="#10b981" />
                                     <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formatDate(caseData.filedDate)}</span>
                                 </div>
                             </div>
                             <div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Next Hearing</p>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>{t('caseDetail.nextHearing')}</p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <Clock size={16} color="#ef4444" />
-                                    <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formatDate(caseData.nextHearing) || 'TBA'}</span>
+                                    <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formatDate(caseData.nextHearing) || t('caseDetail.toBeAnnounced')}</span>
                                 </div>
                                 {/* Virtual Court Join Button - appears 15 min before hearing */}
                                 {caseData.nextHearing && (() => {
@@ -558,16 +583,16 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                                                 animation: 'pulse 2s infinite'
                                             }}
                                         >
-                                            📹 Join VOIS 5G Virtual Court
+                                            📹 {t('caseDetail.joinVirtualCourt')}
                                         </button>
                                     ) : null;
                                 })()}
                             </div>
                             <div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Assigned Judge</p>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>{t('caseDetail.assignedJudge')}</p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <Gavel size={16} color="#f59e0b" />
-                                    <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{caseData.assignedJudge || 'Pending Assignment'}</span>
+                                    <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>{caseData.assignedJudge || t('caseDetail.pendingAssignment')}</span>
                                 </div>
                             </div>
 
@@ -593,7 +618,7 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                                         }}
                                     >
                                         <Gavel size={18} />
-                                        Hire Lawyer
+                                        {t('caseDetail.hireLawyer')}
                                     </button>
                                 </div>
                             )}
@@ -615,16 +640,16 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                                         gap: '0.5rem'
                                     }}>
                                         <Clock size={18} />
-                                        Proposal Sent
+                                        {t('caseDetail.proposalSent')}
                                     </div>
-                                    <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Waiting for lawyer response</p>
+                                    <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>{t('caseDetail.waitingLawyerResponse')} </p>
                                 </div>
                             )}
 
                             {/* Assigned Lawyer Display */}
                             {caseData.assignedLawyer && (
                                 <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: 'var(--border-glass)' }}>
-                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Legal Representative</p>
+                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{t('caseDetail.legalRepresentative')} </p>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                         <div style={{
                                             width: '40px', height: '40px', borderRadius: '50%',
@@ -636,10 +661,10 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                                         </div>
                                         <div>
                                             <p style={{ fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
-                                                {caseData.lawyerName || 'Private Counsel'}
+                                                {caseData.lawyerName || t('caseDetail.privateCounsel')}
                                             </p>
                                             <p style={{ fontSize: '0.8rem', color: '#10b981', margin: 0 }}>
-                                                ✓ Case Accepted
+                                                {t('caseDetail.caseAccepted')}
                                             </p>
                                         </div>
                                     </div>
@@ -650,10 +675,10 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
 
                     {/* Parties Card */}
                     <div style={{ background: 'var(--bg-glass-strong)', padding: '1.5rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Parties Involved</h3>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>{t('caseDetail.partiesInvolved')}</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                             <div>
-                                <p style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '700', marginBottom: '0.25rem' }}>PETITIONER</p>
+                                <p style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '700', marginBottom: '0.25rem' }}>{t('caseDetail.petitioner')}</p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <User size={18} color="var(--text-secondary)" />
                                     <span style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.petitioner}</span>
@@ -661,7 +686,7 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                             </div>
                             <div style={{ height: '1px', background: 'var(--border-glass)' }}></div>
                             <div>
-                                <p style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: '700', marginBottom: '0.25rem' }}>RESPONDENT</p>
+                                <p style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: '700', marginBottom: '0.25rem' }}>{t('caseDetail.respondent')}</p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <User size={18} color="var(--text-secondary)" />
                                     <span style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)' }}>{caseData.respondent}</span>
@@ -676,6 +701,7 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
 }
 
 function CaseFilesTab({ caseId, caseType, caseDescription }) {
+    const { t,i18n } = useTranslation('litigant');
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
@@ -816,7 +842,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
 
         setUploading(true);
         try {
-            const res = await documentAPI.upload(file, { caseId, category: 'CASE_DOCUMENT', description: 'Uploaded from Case Files' });
+            const res = await documentAPI.upload(file, { caseId, category: 'CASE_DOCUMENT', description: t('caseDetail.uploadedFromCaseFiles') });
             if (res.data) {
                 setFiles(prev => [{ ...res.data, type: 'DOCUMENT', source: 'docs' }, ...prev]);
                 pollForAnalysis(res.data.id);
@@ -825,7 +851,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
             }
         } catch (error) {
             console.error(error);
-            alert('Upload failed');
+            alert(t('caseDetail.uploadFailed'));
         } finally {
             setUploading(false);
         }
@@ -858,14 +884,14 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
             setSelectedAnalysis({ ...res.data, docName: doc.fileName });
             setShowAnalysisModal(true);
         } catch (e) {
-            alert('Analysis not available yet');
+            alert(t('caseDetail.analysisNotAvailable'))
         }
     };
 
     const downloadDoc = async (doc) => {
         try {
             if (doc.source === 'evidence') {
-                alert('Evidence download not implemented yet. Verify on blockchain.');
+                alert(t('caseDetail.evidenceDownloadUnavailable'));
                 return;
             }
             const res = await documentAPI.download(doc.id);
@@ -876,7 +902,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
             document.body.appendChild(link);
             link.click();
             link.remove();
-        } catch (e) { console.error(e); alert('Download failed'); }
+        } catch (e) { console.error(e); alert(t('caseDetail.downloadFailed'));; }
     };
 
     const viewCertificate = async (doc) => {
@@ -884,8 +910,8 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
         try {
             // Use different endpoint based on doc type
             const url = doc.source === 'evidence'
-                ? `${API_BASE_URL}/api/evidence/${doc.id}/certificate`
-                : `${API_BASE_URL}/api/documents/${doc.id}/certificate`;
+                ? `${API_BASE_URL}/api/v1/evidence/${doc.id}/certificate`
+                : `${API_BASE_URL}/api/v1/documents/${doc.id}/certificate`;
 
             const response = await axios.get(url, {
                 responseType: 'blob',
@@ -896,7 +922,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
             setShowCertModal(true);
         } catch (e) {
             console.error('Certificate fetch failed:', e);
-            alert('❌ Failed to load certificate. This document may not have verification data.');
+            alert(t('caseDetail.certificateLoadFailed'));
         } finally {
             setCertLoading(false);
         }
@@ -926,10 +952,10 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                     </div>
                     <div>
                         <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#1e2a44', margin: 0 }}>
-                            AI Suggested Documents
+                            {t('caseDetail.aiSuggestedDocuments')}
                         </h3>
                         <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>
-                            Based on your case type <strong>{caseType}</strong>, Groq AI recommends uploading these:
+                            {t('caseDetail.basedOnCaseType')} <strong>{caseType}</strong>, {t('caseDetail.aiRecommendsDocuments')}
                         </p>
                     </div>
                 </div>
@@ -937,7 +963,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                 {loadingSuggestions ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#64748b', fontSize: '0.9rem', padding: '1rem 0' }}>
                         <Loader2 size={18} className="animate-spin" />
-                        Analyzing case details...
+                        {t('caseDetail.analyzingCaseDetails')}
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
@@ -986,7 +1012,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                                             </span>
                                         </div>
                                         {!isUploaded && (
-                                            <label style={{ cursor: 'pointer', display: 'flex', padding: '0.4rem', borderRadius: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', transition: 'background 0.2s' }} title="Upload this document">
+                                            <label style={{ cursor: 'pointer', display: 'flex', padding: '0.4rem', borderRadius: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', transition: 'background 0.2s' }} title={t('caseDetail.uploadThisDocument')}>
                                                 <Upload size={16} color="#6366f1" />
                                                 <input
                                                     type="file"
@@ -1011,7 +1037,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                                     </motion.div>
                                 );
                             }) : (
-                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>No specific suggestions found.</p>
+                                <p style={{ color: '#64748b', fontSize: '0.9rem' }}>{t('caseDetail.noSuggestionsFound')}</p>
                             )}
                         </AnimatePresence>
                     </div>
@@ -1022,20 +1048,20 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
             <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', padding: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
-                        Uploaded Files ({files.length})
+                        {t('caseDetail.uploadedFiles')} ({files.length})
                     </h3>
                     <label style={{
                         padding: '0.75rem 1.5rem', background: 'var(--color-primary)', borderRadius: '0.5rem',
                         color: 'white', fontWeight: '600', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem'
                     }}>
                         {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
-                        {uploading ? 'Uploading...' : 'Upload File'}
+                        {uploading ? t('caseDetail.uploading') : t('caseDetail.uploadFile')}
                         <input type="file" style={{ display: 'none' }} onChange={handleUpload} disabled={uploading} />
                     </label>
                 </div>
 
                 {loading ? <Loader2 size={32} style={{ margin: '2rem auto', display: 'block' }} className="animate-spin" /> :
-                    files.length === 0 ? <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No files found.</p> :
+                    files.length === 0 ? <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>{t('caseDetail.noFilesFound')}</p> :
                         <div style={{ display: 'grid', gap: '1rem' }}>
                             {files.map(doc => {
                                 // Check if document has hash verification
@@ -1052,7 +1078,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                     <p style={{ fontWeight: '600', color: 'var(--text-main)', margin: 0 }}>{doc.fileName}</p>
                                                     {isVerified && (
-                                                        <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', background: '#10b981', color: 'white', borderRadius: '99px', fontWeight: 'bold' }}>VERIFIED</span>
+                                                        <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', background: '#10b981', color: 'white', borderRadius: '99px', fontWeight: 'bold' }}>{t('caseDetail.verified')}</span>
                                                     )}
                                                 </div>
                                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
@@ -1060,7 +1086,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                                                         ? `Hash: ${doc.blockHash?.substring(0, 16)}...`
                                                         : doc.fileHash
                                                             ? `Hash: ${doc.fileHash.substring(0, 16)}... • ${formatFileSize(doc.size)}`
-                                                            : `${formatFileSize(doc.size)} • ${formatDate(doc.uploadedAt)}`
+                                                            : `${formatFileSize(doc.size)} • ${formatDate(doc.uploadedAt,i18n.language)}`
                                                     }
                                                 </p>
                                             </div>
@@ -1070,18 +1096,18 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                                             {doc.source === 'docs' && (
                                                 analysisMap[doc.id] ? (
                                                     <button onClick={() => viewAnalysis(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '0.5rem', color: '#8b5cf6', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
-                                                        <Sparkles size={14} /> AI Insights
+                                                        <Sparkles size={14} /> {t('caseDetail.aiInsights')}
                                                     </button>
                                                 ) : analyzingIds.includes(doc.id) ? (
                                                     <div style={{ padding: '0.5rem 0.75rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
-                                                        <Loader2 size={14} className="animate-spin" /> Analyzing...
+                                                        <Loader2 size={14} className="animate-spin" /> {t('caseDetail.certificate')}
                                                     </div>
                                                 ) : null
                                             )}
 
                                             {showCertificate && (
                                                 <button onClick={() => viewCertificate(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '0.5rem', color: '#10b981', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
-                                                    <FileCheck size={14} /> Certificate
+                                                    <FileCheck size={14} /> {t('caseDetail.certificate')}
                                                 </button>
                                             )}
 
@@ -1101,7 +1127,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                     <div style={{ padding: '0.5rem', background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)', borderRadius: '0.5rem', color: 'white' }}><Sparkles size={20} /></div>
                                     <div>
-                                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)' }}>AI Document Analysis</h3>
+                                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)' }}>{t('caseDetail.aiDocumentAnalysis')}</h3>
                                         <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{selectedAnalysis.docName}</p>
                                     </div>
                                 </div>
@@ -1109,14 +1135,14 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                             </div>
                             <div style={{ padding: '1.5rem', overflowY: 'auto' }}>
                                 <div style={{ marginBottom: '1.5rem' }}>
-                                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Document Type</h4>
+                                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{t('caseDetail.documentType')}</h4>
                                     <div style={{ padding: '0.75rem', background: 'var(--bg-glass)', borderRadius: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>
-                                        {selectedAnalysis.documentType || 'General Document'}
+                                        {selectedAnalysis.documentType || t('caseDetail.generalDocument')}
                                     </div>
                                 </div>
 
                                 <div style={{ marginBottom: '1.5rem' }}>
-                                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Key Entities Extracted</h4>
+                                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{t('caseDetail.keyEntitiesExtracted')}</h4>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                                         {selectedAnalysis.extractedEntities ? (
                                             (typeof selectedAnalysis.extractedEntities === 'string'
@@ -1127,14 +1153,14 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                                                     {entity.replace(/[{}"]/g, '')}
                                                 </span>
                                             ))
-                                        ) : <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No entities detected</span>}
+                                        ) : <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>{t('caseDetail.noEntitiesDetected')}</span>}
                                     </div>
                                 </div>
 
                                 <div>
-                                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Analysis Summary</h4>
+                                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{t('caseDetail.analysisSummary')}</h4>
                                     <div style={{ padding: '1rem', background: 'var(--bg-glass)', borderRadius: '0.5rem', color: 'var(--text-main)', lineHeight: '1.6', fontSize: '0.95rem' }}>
-                                        {selectedAnalysis.summary || 'No summary available.'}
+                                        {selectedAnalysis.summary || t('caseDetail.noSummaryAvailable')}
                                     </div>
                                 </div>
                             </div>
@@ -1158,14 +1184,14 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                             }}>
                                 <h3 style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <Shield size={20} color="#10b981" /> Section 63(4) Evidence Certificate
+                                    <Shield size={20} color="#10b981" /> {t('caseDetail.evidenceCertificate')}
                                 </h3>
                                 <div style={{ display: 'flex', gap: '1rem' }}>
                                     <a href={certUrl} download="Admissibility_Certificate.pdf" style={{
                                         padding: '0.5rem 1rem', background: '#10b981', color: 'white', borderRadius: '0.5rem',
                                         textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
                                     }}>
-                                        <Download size={16} /> Download PDF
+                                        <Download size={16} /> {t('caseDetail.downloadPdf')}
                                     </a>
                                     <button onClick={() => setShowCertModal(false)} style={{
                                         background: 'none', border: 'none', color: '#a0a0a0', cursor: 'pointer', fontSize: '1.5rem'
@@ -1177,7 +1203,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                             <div style={{ flex: 1, background: '#525659' }}>
                                 <iframe
                                     src={certUrl}
-                                    title="Certificate Preview"
+                                    title={t('caseDetail.certificatePreview')}
                                     width="100%"
                                     height="100%"
                                     style={{ border: 'none' }}
@@ -1193,6 +1219,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
 
 // Helper: Map event types to icons for Timeline
 const getEventIcon = (eventType) => {
+    
     const iconMap = {
         'POLICE_SUBMIT': FileText,
         'LAWYER_DRAFT_SAVE': Edit,
@@ -1214,6 +1241,7 @@ const getEventIcon = (eventType) => {
 };
 
 function TimelineTab({ caseData }) {
+    const { t,i18n } = useTranslation('litigant');
     const [timeline, setTimeline] = useState([]);
     const [loading, setLoading] = useState(true);
     const [prepKitOpen, setPrepKitOpen] = useState(false);
@@ -1221,24 +1249,85 @@ function TimelineTab({ caseData }) {
 
     // Standard lifecycles
     const standardStages = {
-        'CRIMINAL': [
-            { id: 'FIR_FILED', label: 'FIR / Complaint Filed', desc: 'Case initiation' },
-            { id: 'PENDING_COGNIZANCE', label: 'Cognizance', desc: 'Magistrate reviews FIR' },
-            { id: 'APPEARANCE', label: 'Appearance', desc: 'Accused appears in court' },
-            { id: 'CHARGES', label: 'Framing of Charges', desc: 'Charges read against accused' },
-            { id: 'EVIDENCE', label: 'Prosecution Evidence', desc: 'Witnesses & Proof' },
-            { id: 'DEFENCE', label: 'Defence Evidence', desc: 'Accused defence' },
-            { id: 'ARGUMENTS', label: 'Final Arguments', desc: 'Lawyers debate merits' },
-            { id: 'JUDGMENT', label: 'Judgment', desc: 'Final Verdict' }
+        CRIMINAL: [
+            {
+                id: 'FIR_FILED',
+                label: t('caseDetail.timelineStages.firFiled'),
+                desc: t('caseDetail.timelineStages.caseInitiation')
+            },
+            {
+                id: 'PENDING_COGNIZANCE',
+                label: t('caseDetail.timelineStages.cognizance'),
+                desc: t('caseDetail.timelineStages.magistrateReviewsFir')
+            },
+            {
+                id: 'APPEARANCE',
+                label: t('caseDetail.timelineStages.appearance'),
+                desc: t('caseDetail.timelineStages.accusedAppears')
+            },
+            {
+                id: 'CHARGES',
+                label: t('caseDetail.timelineStages.framingCharges'),
+                desc: t('caseDetail.timelineStages.chargesRead')
+            },
+            {
+                id: 'EVIDENCE',
+                label: t('caseDetail.timelineStages.prosecutionEvidence'),
+                desc: t('caseDetail.timelineStages.witnessProof')
+            },
+            {
+                id: 'DEFENCE',
+                label: t('caseDetail.timelineStages.defenceEvidence'),
+                desc: t('caseDetail.timelineStages.accusedDefence')
+            },
+            {
+                id: 'ARGUMENTS',
+                label: t('caseDetail.timelineStages.finalArguments'),
+                desc: t('caseDetail.timelineStages.lawyersDebate')
+            },
+            {
+                id: 'JUDGMENT',
+                label: t('caseDetail.timelineStages.judgment'),
+                desc: t('caseDetail.timelineStages.finalVerdict')
+            }
         ],
-        'CIVIL': [
-            { id: 'FILING', label: 'Plaint Filed', desc: 'Case initiation' },
-            { id: 'SUMMONS', label: 'Summons Served', desc: 'Notice to Respondent' },
-            { id: 'WRITTEN_STATEMENT', label: 'Written Statement', desc: 'Reply filed' },
-            { id: 'ISSUES', label: 'Framing of Issues', desc: 'Key points of dispute' },
-            { id: 'EVIDENCE', label: 'Evidence', desc: 'Documents & Witnesses' },
-            { id: 'ARGUMENTS', label: 'Arguments', desc: 'Final hearing' },
-            { id: 'JUDGMENT', label: 'Judgment', desc: 'Decree passed' }
+
+        CIVIL: [
+            {
+                id: 'FILING',
+                label: t('caseDetail.timelineStages.plaintFiled'),
+                desc: t('caseDetail.timelineStages.caseInitiation')
+            },
+            {
+                id: 'SUMMONS',
+                label: t('caseDetail.timelineStages.summonsServed'),
+                desc: t('caseDetail.timelineStages.noticeRespondent')
+            },
+            {
+                id: 'WRITTEN_STATEMENT',
+                label: t('caseDetail.timelineStages.writtenStatement'),
+                desc: t('caseDetail.timelineStages.replyFiled')
+            },
+            {
+                id: 'ISSUES',
+                label: t('caseDetail.timelineStages.framingIssues'),
+                desc: t('caseDetail.timelineStages.keyDisputePoints')
+            },
+            {
+                id: 'EVIDENCE',
+                label: t('caseDetail.timelineStages.evidence'),
+                desc: t('caseDetail.timelineStages.documentsWitnesses')
+            },
+            {
+                id: 'ARGUMENTS',
+                label: t('caseDetail.timelineStages.arguments'),
+                desc: t('caseDetail.timelineStages.finalHearing')
+            },
+            {
+                id: 'JUDGMENT',
+                label: t('caseDetail.timelineStages.judgment'),
+                desc: t('caseDetail.timelineStages.decreePassed')
+            }
         ]
     };
 
@@ -1268,7 +1357,7 @@ function TimelineTab({ caseData }) {
             const mappedCaseEvents = caseEvents.map(e => ({
                 date: e.timestamp,
                 title: e.summary || e.eventType.replace(/_/g, ' '),
-                subtitle: `${e.actorRole}: ${e.actorName || 'System'}`,
+                subtitle: `${e.actorRole}: ${e.actorName || t('caseDetail.system')}`,
                 type: 'completed',
                 icon: getEventIcon(e.eventType),
                 eventType: e.eventType,
@@ -1279,7 +1368,7 @@ function TimelineTab({ caseData }) {
             const actualEvents = [...legacyEvents.map(e => ({
                 date: e.timestamp,
                 title: e.event,
-                subtitle: e.description || 'Completed',
+                subtitle: e.description || t('caseDetail.completed'),
                 type: 'completed',
                 icon: CheckCircle2
             })), ...mappedCaseEvents];
@@ -1304,7 +1393,7 @@ function TimelineTab({ caseData }) {
                 finalTimeline.push({
                     date: e.timestamp,
                     title: e.event,
-                    subtitle: e.description || 'Completed',
+                    subtitle: e.description || t('caseDetail.completed'),
                     type: 'completed',
                     icon: CheckCircle2
                 });
@@ -1345,7 +1434,7 @@ function TimelineTab({ caseData }) {
                         type: index === passedStageIndex + 1 ? 'active' : 'future', // Highlight next immediate step
                         icon: Clock,
                         stageId: stage.id,
-                        description: `Step ${index + 1}: ${stage.desc}`
+                        description: `${t('caseDetail.step')} ${index + 1}: ${stage.desc}`
                     });
                 }
             });
@@ -1362,8 +1451,8 @@ function TimelineTab({ caseData }) {
             // 1. Generate Past Events
             mockEvents.push({
                 date: caseData.filedDate || new Date(Date.now() - 86400000 * 10).toISOString(),
-                title: 'Case Filed',
-                subtitle: 'Initial filing completed',
+                title: t('caseDetail.timeline.caseFiled'),
+                subtitle: t('caseDetail.timeline.initialFilingCompleted'),
                 type: 'completed',
                 icon: FileText
             });
@@ -1372,8 +1461,8 @@ function TimelineTab({ caseData }) {
             if (['IN_PROGRESS', 'SUMMONS_SERVED', 'PENDING_COGNIZANCE'].includes(caseData.status)) {
                 mockEvents.push({
                     date: new Date(Date.now() - 86400000 * 5).toISOString(),
-                    title: caseData.caseType === 'CRIMINAL' ? 'Cognizance Taken' : 'Case Admitted',
-                    subtitle: 'Court has accepted the case',
+                    title: caseData.caseType === 'CRIMINAL' ? t('caseDetail.timeline.cognizanceTaken'): t('caseDetail.timeline.caseAdmitted'),
+                    subtitle: t('caseDetail.timeline.courtAcceptedCase'),
                     type: 'completed',
                     icon: Gavel
                 });
@@ -1417,7 +1506,7 @@ function TimelineTab({ caseData }) {
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '2rem' }}>Live Case Roadmap</h3>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '2rem' }}>{t('caseDetail.timeline.liveCaseRoadmap')}</h3>
 
             <div style={{ position: 'relative', borderLeft: '2px solid var(--border-glass)', paddingLeft: '2rem', marginLeft: '1rem' }}>
                 {timeline.map((event, i) => (
@@ -1446,14 +1535,14 @@ function TimelineTab({ caseData }) {
                         }}>
                             <h4 style={{ fontSize: '1.1rem', fontWeight: '700', color: event.type === 'future' ? 'var(--text-secondary)' : 'var(--text-main)', margin: 0 }}>
                                 {event.title}
-                                {event.type === 'active' && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', background: '#f59e0b', color: 'white', padding: '0.1rem 0.5rem', borderRadius: '4px' }}>CURRENT STAGE</span>}
+                                {event.type === 'active' && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', background: '#f59e0b', color: 'white', padding: '0.1rem 0.5rem', borderRadius: '4px' }}>{t('caseDetail.timeline.currentStage')}</span>}
                             </h4>
                             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>
                                 {event.subtitle}
                             </p>
                             {event.date && (
                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>
-                                    {formatDate(event.date)}
+                                    {formatDate(event.date,i18n.language)}
                                 </p>
                             )}
 
@@ -1468,7 +1557,7 @@ function TimelineTab({ caseData }) {
                                         display: 'flex', alignItems: 'center', gap: '0.25rem'
                                     }}
                                 >
-                                    <Sparkles size={12} /> View Preparation Kit
+                                    <Sparkles size={12} /> {t('caseDetail.timeline.viewPreparationKit')}
                                 </button>
                             )}
                         </div>
@@ -1491,24 +1580,24 @@ function TimelineTab({ caseData }) {
                                 <Sparkles size={24} />
                             </div>
                             <div>
-                                <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.1rem' }}>Preparation Kit</h3>
-                                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>For {selectedStage.title}</p>
+                                <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.1rem' }}>{t('caseDetail.preparationKit.title')}</h3>
+                                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('caseDetail.preparationKit.for')} {selectedStage.title}</p>
                             </div>
                         </div>
 
                         <div style={{ background: 'var(--bg-glass)', padding: '1rem', borderRadius: '1rem', marginBottom: '1rem' }}>
-                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>What to expect</h4>
+                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{t('caseDetail.preparationKit.whatToExpect')}</h4>
                             <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-main)' }}>
-                                {selectedStage.desc || selectedStage.description || "Prepare your documents and be ready to answer questions regarding this stage."}
+                                {selectedStage.desc || selectedStage.description || t('caseDetail.preparationKit.prepareDocuments')}
                             </p>
                         </div>
 
                         <div style={{ marginBottom: '1.5rem' }}>
-                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Recommended Actions</h4>
+                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{t('caseDetail.preparationKit.recommendedActions')}</h4>
                             <ul style={{ paddingLeft: '1.2rem', color: 'var(--text-main)', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                <li>Review all filed documents related to this stage.</li>
-                                <li>Consult with your lawyer 2 days prior.</li>
-                                <li>Organize original copies of evidence.</li>
+                                <li>{t('caseDetail.preparationKit.reviewDocuments')}</li>
+                                <li>{t('caseDetail.preparationKit.consultLawyer')}</li>
+                                <li>{t('caseDetail.preparationKit.consultLawyer')}</li>
                             </ul>
                         </div>
 
@@ -1516,7 +1605,7 @@ function TimelineTab({ caseData }) {
                             width: '100%', padding: '0.75rem', background: 'var(--color-accent)',
                             color: 'white', border: 'none', borderRadius: '0.75rem', fontWeight: 'bold', cursor: 'pointer'
                         }}>
-                            Got it, thanks!
+                            {t('caseDetail.preparationKit.gotIt')}
                         </button>
                     </div>
                 </div>
@@ -1527,6 +1616,7 @@ function TimelineTab({ caseData }) {
 
 {/* Preparation Kit Modal - RE-ADDED CORRECTLY */ }
 function PrepKitModal({ isOpen, onClose, stage }) {
+    const { t } = useTranslation('litigant');
     if (!isOpen || !stage) return null;
     return (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }} onClick={onClose}>
@@ -1535,27 +1625,27 @@ function PrepKitModal({ isOpen, onClose, stage }) {
                     <div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto', color: 'white' }}>
                         <Sparkles size={30} />
                     </div>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>AI Hearing Prep Kit</h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>For Stage: {stage.title}</p>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{t('caseDetail.aiPrepKit.title')}</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>{t('caseDetail.aiPrepKit.forStage')}{stage.title}</p>
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>
-                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>WHAT TO EXPECT</h4>
+                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{t('caseDetail.aiPrepKit.whatToExpect')}</h4>
                     <ul style={{ paddingLeft: '1.25rem', color: 'var(--text-main)', lineHeight: '1.6' }}>
-                        <li>The judge will review {stage.subtitle?.toLowerCase() || 'this stage'}.</li>
-                        <li>Your physical presence might be required.</li>
-                        <li>Ensure all related documents are uploaded.</li>
+                        <li>{t('caseDetail.aiPrepKit.judgeReview')}{' '}{stage.subtitle?.toLowerCase() || t('caseDetail.aiPrepKit.thisStage')}.</li>
+                        <li>{t('caseDetail.aiPrepKit.physicalPresence')}</li>
+                        <li>{t('caseDetail.aiPrepKit.ensureDocuments')}</li>
                     </ul>
                 </div>
 
                 <div style={{ marginBottom: '2rem' }}>
-                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>RECOMMENDED ACTIONS</h4>
+                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{t('caseDetail.aiPrepKit.recommendedActions')}</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         <div style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '0.5rem', fontSize: '0.9rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <CheckCircle size={16} /> Review submitted evidence with lawyer
+                            <CheckCircle size={16} /> {t('caseDetail.aiPrepKit.reviewEvidence')}
                         </div>
                         <div style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '0.5rem', fontSize: '0.9rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <AlertCircle size={16} /> Don't miss court date
+                            <AlertCircle size={16} /> {t('caseDetail.aiPrepKit.dontMissCourt')}
                         </div>
                     </div>
                 </div>
@@ -1563,7 +1653,7 @@ function PrepKitModal({ isOpen, onClose, stage }) {
                 <button
                     onClick={onClose}
                     style={{ width: '100%', padding: '1rem', background: 'var(--color-accent)', color: 'white', border: 'none', borderRadius: '0.75rem', fontWeight: '700', fontSize: '1rem', cursor: 'pointer' }}>
-                    Got it!
+                    {t('caseDetail.aiPrepKit.gotIt')}
                 </button>
             </div>
         </div>
@@ -1573,6 +1663,7 @@ function PrepKitModal({ isOpen, onClose, stage }) {
 
 {/* BSA 63(4) Generator Component - Mock Implementation of Section 63(4) Evidence Certification */ }
 function BSA634GeneratorModal({ isOpen, onClose }) {
+    const { t } = useTranslation('litigant');
     const [step, setStep] = useState('SCAN'); // SCAN, HASH, SIGN, DONE
 
     useEffect(() => {
@@ -1593,38 +1684,38 @@ function BSA634GeneratorModal({ isOpen, onClose }) {
 
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <Shield size={48} color={step === 'DONE' ? '#10b981' : '#3b82f6'} style={{ marginBottom: '1rem' }} />
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'white', margin: 0 }}>BSA Section 63(4) Generator</h2>
-                    <p style={{ color: '#94a3b8', marginTop: '0.5rem' }}>Digital Evidence Certification Utility</p>
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'white', margin: 0 }}>{t('caseDetail.bsaGenerator.title')}</h2>
+                    <p style={{ color: '#94a3b8', marginTop: '0.5rem' }}>{t('caseDetail.bsaGenerator.subtitle')}</p>
                 </div>
 
                 <div style={{ marginBottom: '2rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', update: '1rem', marginBottom: '1rem', opacity: step === 'SCAN' ? 1 : 0.5 }}>
                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: step === 'SCAN' ? '#3b82f6' : '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>1</div>
-                        <div style={{ color: 'white' }}>Scanning Evidence Metadata...</div>
+                        <div style={{ color: 'white' }}>{t('caseDetail.bsaGenerator.scanMetadata')}</div>
                         {step === 'SCAN' && <Loader2 size={16} className="spin" color="#3b82f6" />}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', opacity: step === 'HASH' ? 1 : 0.5 }}>
                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: step === 'HASH' ? '#3b82f6' : '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>2</div>
-                        <div style={{ color: 'white' }}>Generating SHA-256 Hash...</div>
+                        <div style={{ color: 'white' }}>{t('caseDetail.bsaGenerator.generateHash')}</div>
                         {step === 'HASH' && <Loader2 size={16} className="spin" color="#3b82f6" />}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', opacity: (step === 'SIGN' || step === 'DONE') ? 1 : 0.5 }}>
                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: (step === 'SIGN' || step === 'DONE') ? '#3b82f6' : '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>3</div>
-                        <div style={{ color: 'white' }}>Aadhaar e-Sign Verification</div>
+                        <div style={{ color: 'white' }}>{t('caseDetail.bsaGenerator.esignVerification')}</div>
                     </div>
                 </div>
 
                 {step === 'SIGN' && (
                     <div style={{ padding: '1.5rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '1rem', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
                         <p style={{ color: '#cbd5e1', fontSize: '0.9rem', marginBottom: '1.5rem', textAlign: 'center' }}>
-                            Please authenticate using Aadhaar e-Sign to certify the integrity of 4 evidence files.
+                            {t('caseDetail.bsaGenerator.authenticate')}
                         </p>
                         <button
                             onClick={() => {
                                 setStep('DONE');
                                 // Mock API call update
                                 setTimeout(() => {
-                                    alert("Certificate Generated Successfully! (Mock)");
+                                    alert(t('caseDetail.bsaGenerator.certificateGenerated'));
                                     onClose();
                                     window.location.reload();
                                 }, 1000);
@@ -1635,7 +1726,7 @@ function BSA634GeneratorModal({ isOpen, onClose }) {
                                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem'
                             }}>
                             <img src="https://upload.wikimedia.org/wikipedia/en/c/cf/Aadhaar_Logo.svg" alt="Aadhaar" style={{ width: '24px', height: '24px' }} />
-                            e-Sign with Aadhaar
+                            {t('caseDetail.bsaGenerator.esignWithAadhaar')}
                         </button>
                     </div>
                 )}
@@ -1647,11 +1738,12 @@ function BSA634GeneratorModal({ isOpen, onClose }) {
 
 /* PROCEDURAL HEALTH DOCUMENTATION TAB - VAKIL FRIEND COMPLIANT */
 function ProceduralHealthTab({ caseData }) {
+    const { t } = useTranslation('litigant');
     const [lang, setLang] = useState('en');
     const [showBsaModal, setShowBsaModal] = useState(false); // NEW STATE
 
     useEffect(() => { if (localStorage.getItem('lang') === 'hi') setLang('hi'); }, []);
-    const t = (text, hindi) => lang === 'hi' ? hindi : text;
+    
 
     return (
         <div style={{ padding: '1rem' }}>
@@ -1662,10 +1754,10 @@ function ProceduralHealthTab({ caseData }) {
                 <div>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <Shield size={28} color="#10b981" />
-                        {t('Procedural Health & Compliance', 'प्रक्रियात्मक स्वास्थ्य और अनुपालन')}
+                        {t('caseDetail.proceduralHealth.title')}
                     </h2>
                     <p style={{ color: 'var(--text-secondary)' }}>
-                        {t('Ensure your case is ready for the next hearing.', 'सुनिश्चित करें कि आपका केस अगली सुनवाई के लिए तैयार है।')}
+                        {t('caseDetail.proceduralHealth.subtitle')}
                     </p>
                 </div>
                 <div style={{ background: 'var(--bg-glass)', padding: '0.25rem', borderRadius: '0.5rem', border: 'var(--border-glass)', display: 'flex' }}>
@@ -1677,7 +1769,7 @@ function ProceduralHealthTab({ caseData }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '2rem' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-secondary)' }}>{t('CRITICAL REQUIREMENTS', 'महत्वपूर्ण आवश्यकताएँ')}</h3>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-secondary)' }}>{t('caseDetail.proceduralHealth.criticalRequirements')}</h3>
 
                     <div style={{ background: caseData.hasBsaCert ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)', border: caseData.hasBsaCert ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '1rem', padding: '1.5rem' }}>
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
@@ -1685,13 +1777,13 @@ function ProceduralHealthTab({ caseData }) {
                                 {caseData.hasBsaCert ? <CheckCircle2 size={24} color="#10b981" /> : <AlertTriangle size={24} color="#ef4444" />}
                             </div>
                             <div style={{ flex: 1 }}>
-                                <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)', fontSize: '1.1rem' }}>{t('Section 63(4) BSA Certificate', 'धारा 63(4) BSA प्रमाणपत्र')}</h4>
+                                <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)', fontSize: '1.1rem' }}>{t('caseDetail.proceduralHealth.bsaCertificate')}</h4>
                                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '1rem' }}>
-                                    {caseData.hasBsaCert ? t('Certificate provided and verified on blockchain.', 'प्रमाणपत्र प्रदान किया गया और ब्लॉकचेन पर सत्यापित किया गया।') : t('Required for admissibility of digital evidence. Missing certificate may lead to evidence rejection.', 'डिजिटल साक्ष्य की स्वीकार्यता के लिए आवश्यक। प्रमाणपत्र गायब होने से साक्ष्य अस्वीकार हो सकता है।')}
+                                    {caseData.hasBsaCert ? t('caseDetail.proceduralHealth.certificateVerified') : t('caseDetail.proceduralHealth.certificateMissing')}
                                 </p>
                                 {!caseData.hasBsaCert && (
                                     <button onClick={() => setShowBsaModal(true)} style={{ padding: '0.75rem 1.5rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <FileText size={16} /> {t('Generate & Sign Certificate', 'प्रमाणपत्र उत्पन्न और हस्ताक्षर करें')}
+                                        <FileText size={16} /> {t('caseDetail.proceduralHealth.generateCertificate')}
                                     </button>
                                 )}
                             </div>
@@ -1704,12 +1796,12 @@ function ProceduralHealthTab({ caseData }) {
                                 {caseData.summonsStatus === 'SERVED' ? <CheckCircle2 size={24} color="#10b981" /> : <Clock size={24} color="#f59e0b" />}
                             </div>
                             <div style={{ flex: 1 }}>
-                                <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)', fontSize: '1.1rem' }}>{t('Summons Service Status', 'समन तामील स्थिति')}</h4>
+                                <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)', fontSize: '1.1rem' }}>{t('caseDetail.proceduralHealth.summonsStatus')}</h4>
                                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '1rem' }}>
-                                    {caseData.summonsStatus === 'SERVED' ? t('Summons successfully served to all respondents.', 'सभी प्रतिवादियों को समन सफलतापूर्वक तामील किया गया।') : t('Pending service. Court will not proceed until summons are served.', 'तामील लंबित है। समन तामील होने तक अदालत आगे नहीं बढ़ेगी।')}
+                                    {caseData.summonsStatus === 'SERVED' ? t('caseDetail.proceduralHealth.summonsServed') : t('caseDetail.proceduralHealth.summonsPending') }
                                 </p>
                                 {caseData.summonsStatus !== 'SERVED' && (
-                                    <button style={{ padding: '0.5rem 1rem', background: 'transparent', color: '#f59e0b', border: '1px solid #f59e0b', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>{t('Track Status', 'स्थिति ट्रैक करें')}</button>
+                                    <button style={{ padding: '0.5rem 1rem', background: 'transparent', color: '#f59e0b', border: '1px solid #f59e0b', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>{t('caseDetail.proceduralHealth.trackStatus')}</button>
                                 )}
                             </div>
                         </div>
@@ -1717,7 +1809,7 @@ function ProceduralHealthTab({ caseData }) {
                 </div>
 
                 <div style={{ background: 'var(--bg-glass-strong)', borderRadius: '1.5rem', padding: '2rem', border: 'var(--border-glass-strong)' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '1.5rem' }}>{t('Readiness Score', 'तैयारी स्कोर')}</h3>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '1.5rem' }}>{t('caseDetail.proceduralHealth.readinessScore')}</h3>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2rem' }}>
                         <div style={{ position: 'relative', width: '150px', height: '150px' }}>
                             <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
@@ -1726,13 +1818,13 @@ function ProceduralHealthTab({ caseData }) {
                             </svg>
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                                 <span style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)' }}>{(caseData.hasBsaCert ? 50 : 0) + (caseData.summonsStatus === 'SERVED' ? 50 : 0)}%</span>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Ready</span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t('caseDetail.proceduralHealth.ready')}</span>
                             </div>
                         </div>
                     </div>
                     <div style={{ padding: '1rem', background: 'var(--bg-glass)', borderRadius: '1rem' }}>
-                        <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>IMPACT ANALYSIS</h4>
-                        <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', fontStyle: 'italic' }}>{t('"Your case is currently halted at the Admission stage due to pending procedures. Resolving the red items will improve your readiness score."', '"लंबित प्रक्रियाओं के कारण आपका मामला वर्तमान में प्रवेश चरण में रुका हुआ है। लाल मदों को हल करने से आपके तैयारी स्कोर में सुधार होगा।"')}</p>
+                        <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{t('caseDetail.proceduralHealth.impactAnalysis')}</h4>
+                        <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', fontStyle: 'italic' }}>{t('caseDetail.proceduralHealth.impactDescription')}</p>
                     </div>
                 </div>
             </div>

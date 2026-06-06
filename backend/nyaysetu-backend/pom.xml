@@ -30,7 +30,7 @@
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-bom</artifactId>
-                <version>0.26.1</version>
+                <version>1.15.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -157,7 +157,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>10.10.0</version>        
+            <version>12.7.0</version>        
         </dependency>
 
         <!-- Bucket4j for Rate Limiting -->
@@ -171,7 +171,7 @@
         <dependency>
             <groupId>me.paulschwarz</groupId>
             <artifactId>spring-dotenv</artifactId>
-            <version>4.0.0</version>
+            <version>5.1.0</version>
         </dependency>
 
         <!-- Testing -->
@@ -204,7 +204,7 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
-            <version>0.26.1</version>
+            <version>0.36.2</version>
         </dependency>
 
     </dependencies>
@@ -219,7 +219,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.30</version>
+                            <version>1.18.46</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

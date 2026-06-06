@@ -2,7 +2,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Smartphone, Bot, BookOpen, Video, ShieldCheck, Cpu, Cuboid } from 'lucide-react';
+import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Download, Bot, BookOpen, Video, ShieldCheck, Cpu, Cuboid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
@@ -10,6 +10,11 @@ import AIChatbot from '../components/landing/AIChatbot';
 import AchievementsSection from '../components/landing/AchievementsSection';
 import HowItWorks from '../components/landing/HowItWorks';
 import TrustIndicators from '../components/landing/TrustIndicators';
+import useProtectedFeature from '../hooks/useProtectedFeature';
+import useGuest from '../hooks/useGuest';
+import GuestAccessDeniedModal from '../components/guest/GuestAccessDeniedModal';
+import GuestInlineCTA from '../components/guest/GuestInlineCTA';
+import GuestLockedCard from '../components/guest/GuestLockedCard';
 
 export default function Landing() {
     const { t } = useTranslation('landing');
@@ -26,6 +31,14 @@ export default function Landing() {
             fallbackSrcSet: '/scales-light-480.jpg 480w, /scales-light-720.jpg 720w',
             webpSrcSet: '/scales-light-480.webp 480w, /scales-light-720.webp 720w',
         };
+    const { isGuest } = useGuest();
+    const {
+        showDeniedModal,
+        setShowDeniedModal,
+        inlineMessage,
+        tryAccess,
+        goToSignup,
+    } = useProtectedFeature('file a case', { intentPath: '/litigant/file' });
 
     useEffect(() => {
         const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); window.deferredPrompt = e; };
@@ -73,6 +86,10 @@ export default function Landing() {
         },
     ];
 
+    const handleSubmitCaseClick = () => {
+        tryAccess();
+    };
+
     const FEATURES = [
         { icon: Bot,         title: t('features.aiLegalAssistant.title'),   desc: t('features.aiLegalAssistant.description'),   color: '#3F5DCC' },
         { icon: BookOpen,    title: t('features.constitutionReader.title'),  desc: t('features.constitutionReader.description'),  color: '#7C5CFF' },
@@ -87,14 +104,16 @@ export default function Landing() {
             <Header />
             <AIChatbot />
 
-            <main>
+            {/* Offset content for the fixed header (mobile-safe). */}
+            <main style={{ paddingTop: '75px' }}>
                 {/* ── Hero ──────────────────────────────────────────── */}
                 <section style={{
                     minHeight: '100vh',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    padding: '9rem 2rem 4rem',
+                    // Keep existing spacing while accounting for <Header /> fixed height.
+                    padding: 'calc(9rem - 75px) 2rem 4rem',
                     position: 'relative',
                     overflow: 'hidden',
                 }}>
@@ -189,12 +208,12 @@ export default function Landing() {
                                 </Link>
 
                                 <motion.button
-                                    whileHover={{ scale: 1.08 }}
+                                    whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleInstall}
                                     title={t('hero.installApp')}
                                     style={{
-                                        width: '48px', height: '48px',
+                                        gap:'0.5rem',padding:'0.8rem 1rem',
                                         borderRadius: '12px',
                                         border: '1px solid var(--border-medium)',
                                         background: 'var(--bg-surface)',
@@ -202,9 +221,12 @@ export default function Landing() {
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         cursor: 'pointer',
                                         boxShadow: 'var(--shadow-sm)',
+                                        fontWeight:'600',
+                                        whiteSpace:'nowrap',
                                     }}
                                 >
-                                    <Smartphone size={20} />
+                                    <Download size={18} />
+                                    {t('hero.installApp')}
                                 </motion.button>
                             </div>
 
@@ -255,7 +277,7 @@ export default function Landing() {
                                         width="720"
                                         height="720"
                                         loading="eager"
-                                        fetchPriority="high"
+                                       fetchpriority="high"
                                         decoding="async"
                                         animate={{ y: [0, -14, 0] }}
                                         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -322,22 +344,58 @@ export default function Landing() {
                                 <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '1.25rem' }}>
                                     {card.desc}
                                 </p>
-                                <Link to="/signup" style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                                    color: card.color,
-                                    fontSize: '0.875rem', fontWeight: '700',
-                                    textDecoration: 'none',
-                                    transition: 'gap 0.2s ease',
-                                }}
-                                    onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
-                                    onMouseLeave={e => e.currentTarget.style.gap = '0.35rem'}
-                                >
-                                    {card.cta} <ArrowRight size={14} />
-                                </Link>
+                                {i === 1 ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmitCaseClick}
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '0.35rem',
+                                            color: card.color,
+                                            fontSize: '0.875rem',
+                                            fontWeight: '700',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            padding: 0,
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        {card.cta} <ArrowRight size={14} />
+                                    </button>
+                                ) : (
+                                    <Link to="/signup" style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                                        color: card.color,
+                                        fontSize: '0.875rem', fontWeight: '700',
+                                        textDecoration: 'none',
+                                        transition: 'gap 0.2s ease',
+                                    }}
+                                        onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
+                                        onMouseLeave={e => e.currentTarget.style.gap = '0.35rem'}
+                                    >
+                                        {card.cta} <ArrowRight size={14} />
+                                    </Link>
+                                )}
+
+                                {inlineMessage && i === 1 && (
+                                    <GuestInlineCTA message={inlineMessage} onSignUp={goToSignup} compact />
+                                )}
                             </motion.div>
                         ))}
                     </div>
                 </section>
+
+                <GuestAccessDeniedModal
+                    isOpen={showDeniedModal}
+                    feature="file a case"
+                    onClose={() => setShowDeniedModal(false)}
+                    onUpgrade={() => {
+                        setShowDeniedModal(false);
+                        goToSignup();
+                    }}
+                    onContinue={() => setShowDeniedModal(false)}
+                />
 
                 {/* ── How It Works ──────────────────────────────────── */}
                 <HowItWorks />
@@ -398,7 +456,47 @@ export default function Landing() {
                                         }}>
                                             <FeatureIcon size={26} style={{ color: f.color }} />
                                         </div>
-                                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.65rem' }}>{f.title}</h3>
+                                        <div
+    style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '0.75rem',
+        marginBottom: '0.65rem',
+    }}
+>
+    <h3
+        style={{
+            fontSize: '1.1rem',
+            fontWeight: '700',
+            color: 'var(--text-main)',
+            margin: 0,
+        }}
+    >
+        {f.title}
+    </h3>
+
+    {isGuest && (
+        f.title === t('features.fileCases.title') ||
+        f.title === t('features.virtualHearings.title')
+    ) && (
+        <span
+            style={{
+                padding: '0.28rem 0.55rem',
+                borderRadius: '999px',
+                fontSize: '0.68rem',
+                fontWeight: '700',
+                background: 'rgba(245,158,11,0.10)',
+                border: '1px solid rgba(245,158,11,0.18)',
+                color: '#f59e0b',
+                letterSpacing: '0.02em',
+                whiteSpace: 'nowrap',
+            }}
+        >
+            Account Required
+        </span>
+    )}
+</div>
                                         <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
                                     </motion.div>
                                 );

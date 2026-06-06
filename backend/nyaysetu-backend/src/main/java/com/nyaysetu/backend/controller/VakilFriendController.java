@@ -14,6 +14,7 @@ import com.nyaysetu.backend.service.VakilFriendDocumentService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
  */
 @Tag(name = "Vakil Friend (AI Chat)", description = "AI-powered chat-first case filing and legal document analysis")
 @RestController
-@RequestMapping("/api/vakil-friend")
+@RequestMapping("/vakil-friend")
 @RequiredArgsConstructor
 @Slf4j
 public class VakilFriendController {
@@ -152,7 +153,7 @@ public class VakilFriendController {
     @PostMapping("/chat/{sessionId}")
     public ResponseEntity<Map<String, Object>> chat(
             @PathVariable UUID sessionId,
-            @RequestBody ChatMessageRequest request,
+            @Valid @RequestBody ChatMessageRequest request,
             Authentication auth
     ) {
         User user = getCurrentUser(auth);
