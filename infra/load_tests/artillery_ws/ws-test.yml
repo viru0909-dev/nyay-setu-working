@@ -1,0 +1,24 @@
+config:
+  target: "ws://localhost:8080/ws"
+  engines:
+    ws: {}
+  phases:
+    - duration: 300
+      arrivalRate: 100
+  defaults:
+    headers:
+      Origin: "http://localhost"
+scenarios:
+  - engine: ws
+    flow:
+      - connect: {}
+      - think: 1
+      - send:
+          text: '{"type":"ping","ts":{{ $timestamp }}}'
+      - loop:
+          - think: 5
+          - send:
+              text: '{"type":"ping","ts":{{ $timestamp }}}'
+            count: 100
+      - think: 1
+      - close: {}
