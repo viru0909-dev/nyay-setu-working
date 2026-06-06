@@ -224,7 +224,7 @@ async def execute_with_fallback(
                 # backoff increases with each retry (attempt starts at 0)
                 wait = RETRY_DELAY_SECONDS * (attempt + 1)
                 logger.warning(
-                    f"[Research] Transient error from {provider}, retry {attempt+1} in {wait}s: {exc}"
+                    f"[Research] Transient error from {provider}, retry {attempt+1} in {wait}s: {exc}"  # noqa: E501
                 )
                 await asyncio.sleep(wait)
 
