@@ -1,6 +1,6 @@
+import styles from './ContactUs.module.css';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import styles from './ContactUs.module.css';
 
 export default function ContactUs() {
   return (
