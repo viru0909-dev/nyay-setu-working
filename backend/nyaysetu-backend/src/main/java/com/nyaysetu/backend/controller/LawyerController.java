@@ -45,7 +45,8 @@ public class LawyerController {
     ) {
         UUID caseId = UUID.fromString(request.get("caseId"));
         String template = request.get("template");
-        String draft = lawyerService.generateDraft(caseId, template);
+        User user = authService.findByEmail(authentication.getName());
+        String draft = lawyerService.generateDraft(caseId, template, user);
         return ResponseEntity.ok(Map.of("draft", draft));
     }
 

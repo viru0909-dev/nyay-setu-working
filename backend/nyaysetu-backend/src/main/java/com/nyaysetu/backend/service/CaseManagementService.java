@@ -88,9 +88,21 @@ public class CaseManagementService {
                 .collect(Collectors.toList());
     }
 
-    public CaseDTO getCaseById(UUID id) {
+    public CaseDTO getCaseById(UUID id, User requestingUser) {
         CaseEntity caseEntity = caseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        boolean isAdmin = requestingUser.getRole().name().equals("ADMIN");
+        boolean isOwner = caseEntity.getUserId().equals(requestingUser.getId());
+        boolean isJudge = requestingUser.getRole().name().equals("JUDGE") ||
+                        requestingUser.getRole().name().equals("SUPER_JUDGE");
+        boolean isLawyer = requestingUser.getRole().name().equals("LAWYER");
+
+        if (!isAdmin && !isOwner && !isJudge && !isLawyer) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                "You do not have permission to view this case"
+            );
+        }
         return convertToDTO(caseEntity);
     }
 
@@ -122,9 +134,17 @@ public class CaseManagementService {
     }
 
     @Transactional
-    public void deleteCase(UUID id) {
-        if (!caseRepository.existsById(id)) {
-            throw new RuntimeException("Case not found");
+    public void deleteCase(UUID id, User requestingUser) {
+        CaseEntity caseEntity = caseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        boolean isAdmin = requestingUser.getRole().name().equals("ADMIN");
+        boolean isOwner = caseEntity.getUserId().equals(requestingUser.getId());
+
+        if (!isAdmin && !isOwner) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                "You do not have permission to delete this case"
+            );
         }
         caseRepository.deleteById(id);
     }
