@@ -435,17 +435,16 @@ export default function Footer() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <a
                                 href="mailto:gadekarvidera4@gmail.com"
-                                style={{
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    textDecoration: 'none',
-                                    fontSize: '0.95rem',
-                                    transition: 'all 0.3s ease',
-                                    display: 'inline-block',
-                                    position: 'relative',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem'
-                                }}
+                               style={{
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                textDecoration: 'none',
+                                fontSize: '0.95rem',
+                                transition: 'all 0.3s ease',
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                }}
 
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.color = 'white';

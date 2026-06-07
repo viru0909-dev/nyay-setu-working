@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function ContactUs() {
   return (
-    <div className={styles.container}>
+   <div className={styles.page}>
       <div className={styles.card}>
 
         <Link to="/" className={styles.backButton}>
@@ -48,7 +48,11 @@ export default function ContactUs() {
           </button>
         </form>
 
+<div className={styles.wrapper}>
+  <div className={styles.card}></div>
+
       </div>
+    </div>
     </div>
   );
 }
