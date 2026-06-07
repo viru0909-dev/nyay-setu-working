@@ -1,3 +1,4 @@
+import ScrollProgress from "../components/ScrollProgress";
 import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -100,6 +101,8 @@ export default function Landing() {
     ];
 
     return (
+        <>
+        <ScrollProgress />
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
             <Header />
             <AIChatbot />
@@ -726,5 +729,6 @@ export default function Landing() {
     }
 `}</style>
         </div>
+        </>
     );
 }
