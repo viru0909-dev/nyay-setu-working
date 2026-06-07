@@ -13,6 +13,7 @@
     "@anthropic-ai/sdk": "^0.100.1",
     "@react-three/drei": "^9.117.3",
     "@react-three/fiber": "^8.17.10",
+    "@stomp/stompjs": "^7.3.0",
     "aos": "^2.3.4",
     "axios": "^1.6.2",
     "dexie": "^4.2.1",
@@ -36,6 +37,7 @@
     "remark-gfm": "^4.0.1",
     "simple-peer": "^9.11.1",
     "socket.io-client": "^4.8.1",
+    "sockjs-client": "^1.6.1",
     "three": "^0.184.0",
     "vite-plugin-pwa": "^1.2.0",
     "zustand": "^5.0.14"
