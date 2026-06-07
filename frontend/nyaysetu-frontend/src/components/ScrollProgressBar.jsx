@@ -1,35 +1,66 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const ScrollProgressBar = () => {
-  const [progress, setProgress] = useState(0);
+    const [scrollProgress, setScrollProgress] = useState(0);
+    const location = useLocation();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const percentage = totalHeight > 0 ? (scrollY / totalHeight) * 100 : 0;
-      setProgress(percentage);
-    };
+    useEffect(() => {
+        let ticking = false;
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+        const updateScrollProgress = () => {
+            const totalScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            
+            // Handle edge-case where page content fits entirely within view heights
+            if (totalScroll <= 0) {
+                setScrollProgress(0);
+                ticking = false;
+                return;
+            }
 
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        height: '3px',
-        width: `${progress}%`,
-        background: 'linear-gradient(to right, #8b5cf6, #6366f1)',
-        zIndex: 9999,
-        transition: 'width 0.1s ease',
-        borderRadius: '0 2px 2px 0',
-      }}
-    />
-  );
+            const currentScroll = window.scrollY;
+            const percentage = (currentScroll / totalScroll) * 100;
+            
+            // Keep value safely clamped between 0 and 100
+            setScrollProgress(Math.min(Math.max(percentage, 0), 100));
+            ticking = false;
+        };
+
+        const handleScroll = () => {
+            if (!ticking) {
+                window.requestAnimationFrame(updateScrollProgress);
+                ticking = true;
+            }
+        };
+
+        // Passive configuration prevents scroll-blocking lag on mobile browsers
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        
+        // Execute initial computation on page mount / route transformation
+        updateScrollProgress();
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [location]); 
+
+    return (
+        <div
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                height: '4px',
+                width: `${scrollProgress}%`,
+                background: 'linear-gradient(to right, #8b5cf6, #6366f1)', // Sleek purple-to-indigo gradient
+                zIndex: 99999,              // Mounts directly above absolute headers, modals, and toasts
+                transition: 'width 0.1s ease-out',
+                borderRadius: '0 2px 2px 0',
+                pointerEvents: 'none'       // Guarantees zero element click obstructions
+            }}
+            aria-hidden="true"
+        />
+    );
 };
 
 export default ScrollProgressBar;
