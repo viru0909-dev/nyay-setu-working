@@ -19,22 +19,15 @@ load_dotenv()
 GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
 GEMINI_API_KEY: str = os.getenv("GOOGLE_GEMINI_API_KEY", "")
 
-# Model names
+# ─── Model names ──────────────────────────────────────────────────────────────
 GROQ_MODEL_FAST: str = "llama-3.3-70b-versatile"   # Current recommended model
 GEMINI_MODEL: str = "gemini-1.5-flash"             # Fast + deep reasoning
-# Retry / fallback configuration
+
+# ─── Retry / fallback configuration ──────────────────────────────────────────
 RETRY_ENABLED: bool = True
 RETRY_MAX_ATTEMPTS: int = 2
 RETRY_DELAY_SECONDS: float = 1.0
-PROVIDER_ORDER: list[str] = ["gemini", "groq", "ollama"]
-
-# ─── Ollama Configuration ─────────────────────────────────────────────────────
-OLLAMA_API_URL: str = os.getenv("OLLAMA_API_URL", "http://localhost:11434")
-OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama-3-8b")
-
-# ─── Model names ──────────────────────────────────────────────────────────────
-GROQ_MODEL_FAST: str = "llama-3.3-70b-versatile"
-GEMINI_MODEL: str = "gemini-1.5-flash"
+PROVIDER_ORDER: list[str] = ["gemini", "groq"]
 
 # ─── OCR (viru's additions) ───────────────────────────────────────────────────
 TROCR_MODEL_NAME: str = os.getenv("TROCR_MODEL_NAME", "Piyush3142/trocr-sanskrit-ocr")
@@ -61,6 +54,11 @@ CHROMA_PATH: str = os.getenv(
 RETRIEVAL_FETCH_K: int = int(os.getenv("RETRIEVAL_FETCH_K", "20"))
 RETRIEVAL_TOP_K: int = int(os.getenv("RETRIEVAL_TOP_K", "5"))
 
+# ─── Redis Cache ──────────────────────────────────────────────────────────────
+REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+CACHE_TTL_SECONDS: int = int(os.getenv("CACHE_TTL_SECONDS", "86400"))          # 24h — LLM responses
+EMBEDDING_CACHE_TTL_SECONDS: int = int(os.getenv("EMBEDDING_CACHE_TTL_SECONDS", "604800"))  # 7 days — embeddings
+
 
 def _bool(name: str, default: bool) -> bool:
     raw = os.getenv(name)
@@ -72,6 +70,7 @@ def _bool(name: str, default: bool) -> bool:
 RETRIEVAL_ENABLED: bool = _bool("RETRIEVAL_ENABLED", True)
 RERANKER_ENABLED: bool = _bool("RERANKER_ENABLED", True)
 GROUND_RESEARCH: bool = _bool("GROUND_RESEARCH", True)
+CACHE_ENABLED: bool = _bool("CACHE_ENABLED", True)
 
 # ─── Validate required keys ───────────────────────────────────────────────────
 if not GROQ_API_KEY:

@@ -26,16 +26,31 @@ End with LIABILITY VERDICT:
 """
 
 async def analyze_frames(frame_paths: list[str], job_id: str) -> str:
-    """Upload frames to Gemini and request forensic timeline analysis."""
+    """
+    Upload frames to Gemini and request forensic timeline analysis.
+    Responses are cached in Redis by a key derived from the frame file paths,
+    so re-analysis of the same video job is served instantly from cache.
+    """
     if not client:
         logger.error("Gemini API key not found. Returning fallback analysis.")
         return "FALLBACK: Gemini API key not configured. Video frame analysis skipped."
 
+    # ── Cache check (keyed by sorted frame paths as a proxy for video identity) ──
+    cache_key = None
     try:
-        # Note: For production with many frames, it's better to use Gemini File API to upload a video
-        # But for this implementation we will upload the extracted frames directly
-        
-        # Load the images
+        from cache import generate_cache_key, get_cached_response, set_cached_response
+        frames_fingerprint = "|".join(sorted(frame_paths))
+        cache_key = generate_cache_key("gemini_frames", frames_fingerprint, GEMINI_MODEL)
+        cached = get_cached_response(cache_key)
+        if cached is not None:
+            logger.info(f"[{job_id}] Frame analysis cache HIT — skipping Gemini API call")
+            return cached
+    except Exception as e:
+        logger.warning(f"[{job_id}] Cache read failed (non-blocking): {e}")
+        cache_key = None
+
+    # ── Gemini API call ───────────────────────────────────────────────────────
+    try:
         from PIL import Image
         images = []
         for path in frame_paths:
@@ -43,16 +58,14 @@ async def analyze_frames(frame_paths: list[str], job_id: str) -> str:
                 images.append(Image.open(path))
             except Exception as e:
                 logger.error(f"Error loading frame {path}: {e}")
-        
+
         if not images:
             return "No valid frames extracted from the video."
 
-        # Prepare request content
         contents = [TIMELINE_RECONSTRUCTION_PROMPT] + images
-        
+
         logger.info(f"[{job_id}] Sending {len(images)} frames to Gemini for analysis...")
-        
-        # Run in executor to not block async loop
+
         loop = asyncio.get_running_loop()
         response = await loop.run_in_executor(
             None,
@@ -61,9 +74,17 @@ async def analyze_frames(frame_paths: list[str], job_id: str) -> str:
                 contents=contents
             )
         )
-        
+
         analysis = response.text.strip()
         logger.info(f"[{job_id}] Received analysis from Gemini.")
+
+        # ── Cache store ───────────────────────────────────────────────────────
+        try:
+            if cache_key and analysis:
+                set_cached_response(cache_key, analysis)
+        except Exception as e:
+            logger.warning(f"[{job_id}] Cache write failed (non-blocking): {e}")
+
         return analysis
 
     except Exception as e:

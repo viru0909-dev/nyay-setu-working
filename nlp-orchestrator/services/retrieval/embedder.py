@@ -1,15 +1,26 @@
 """
-Lazy-loaded sentence-transformer embedder.
+Lazy-loaded sentence-transformer embedder with Redis-backed embedding cache.
 
 Default model: `law-ai/InLegalBERT` — 768-dim, Indian-legal domain pretrained.
 Replaces `sentence-transformers/all-MiniLM-L6-v2` (384-dim) for higher legal
 domain fidelity. Mean pooling is applied automatically for InLegalBERT since it
 is not a native SBERT model.
 
+<<<<<<< HEAD
 The model is loaded on first use, behind a lock, so multiple concurrent requests
 hitting cold start do not try to instantiate it in parallel. All public calls are
 async-friendly: blocking encode work runs in the default executor so the FastAPI
 event loop is never stalled.
+=======
+The model is loaded on first use, behind a lock, so multiple concurrent
+requests hitting cold start don't try to instantiate it in parallel.
+All public calls are async-friendly: blocking encode work runs in the default
+executor so the FastAPI event loop is never stalled.
+
+Caching: single-query embed_async() calls are cached in Redis (or in-memory
+fallback) keyed by SHA-256 of the query text. Batch calls (>1 text) are
+never cached as they're used for document ingestion, not live queries.
+>>>>>>> 10d8f5c5 (feat: add Redis cache for embeddings and LLM responses)
 """
 
 import asyncio
@@ -99,8 +110,9 @@ def _load_model(model_name: str):
                 _model = SentenceTransformer(model_name)
 
             _model_name = model_name
-            dim_fn = getattr(_model, "get_embedding_dimension", None) or getattr(
-                _model, "get_sentence_embedding_dimension", None
+            dim_fn = (
+                getattr(_model, "get_embedding_dimension", None)
+                or getattr(_model, "get_sentence_embedding_dimension", None)
             )
             dim = dim_fn() if dim_fn else "?"
             logger.info(f"Embedding model ready ({dim}-dim)")
@@ -136,8 +148,38 @@ async def embed_async(
     texts: list[str],
     model_name: str,
 ) -> Optional[list[list[float]]]:
-    """Async wrapper: runs encode in the default executor."""
+    """
+    Async wrapper: runs encode in the default executor.
+
+    Single-text calls (live RAG search path) are cached in Redis so repeated
+    queries like 'What is Section 420 IPC?' skip the CPU encode entirely.
+    Batch calls (document ingestion) bypass cache to avoid storing huge arrays.
+    """
     if not texts:
         return []
+
+    # Only cache single-query lookups — batch ingestion calls are not cached
+    is_single_query = len(texts) == 1
+    query_text = texts[0] if is_single_query else None
+
+    if is_single_query and query_text:
+        try:
+            from cache import get_cached_embedding, set_cached_embedding
+            cached = get_cached_embedding(query_text)
+            if cached is not None:
+                logger.info(f"[Embedder] Cache HIT for: {query_text[:50]!r}")
+                return cached
+        except Exception as e:
+            logger.warning(f"[Embedder] Cache read failed (non-blocking): {e}")
+
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, embed_sync, texts, model_name)
+    result = await loop.run_in_executor(None, embed_sync, texts, model_name)
+
+    if is_single_query and query_text and result is not None:
+        try:
+            from cache import set_cached_embedding
+            set_cached_embedding(query_text, result)
+        except Exception as e:
+            logger.warning(f"[Embedder] Cache write failed (non-blocking): {e}")
+
+    return result
