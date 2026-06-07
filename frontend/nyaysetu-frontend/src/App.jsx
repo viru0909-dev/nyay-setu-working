@@ -212,12 +212,12 @@ function App({ swRegistration }) {
                             v7_relativeSplatPath: true
                         }}
                     >
-                        {/* ============================================================= */}
+             {/* ============================================================= */}
                         {/* 🌟 SCROLL PROGRESS INDICATOR GLOBAL INTEGRATION LOCATION 🌟 */}
                         {/* ============================================================= */}
                         <ScrollProgressBar />
 
-                       {/*<KeyboardAccessibilityProvider user={user} />*/}
+
                         <GuestWelcomeToast />
                         <GuestOnboardingHint />
                         <ScrollToTop />
