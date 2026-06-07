@@ -58,6 +58,11 @@ def sanitize_prompt_input(text: str) -> str:
         r'(?i)disregard\s+(all\s+)?(previous|above|prior)',
         r'(?i)new\s+instruction\s*:',
         r'(?i)override\s+(previous|system)',
+        r'(?i)dan\s+mode',
+        r'(?i)jailbreak',
+        r'(?i)do\s+anything\s+now',
+        r'(?i)print\s+the\s+system\s+prompt',
+        r'(?i)act\s+as\s+a\s+developer',
     ]
     for pattern in injection_patterns:
         text = re.sub(pattern, '[FILTERED]', text)

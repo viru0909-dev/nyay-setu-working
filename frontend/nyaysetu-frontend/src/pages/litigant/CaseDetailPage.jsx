@@ -910,8 +910,8 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
         try {
             // Use different endpoint based on doc type
             const url = doc.source === 'evidence'
-                ? `${API_BASE_URL}/api/evidence/${doc.id}/certificate`
-                : `${API_BASE_URL}/api/documents/${doc.id}/certificate`;
+                ? `${API_BASE_URL}/api/v1/evidence/${doc.id}/certificate`
+                : `${API_BASE_URL}/api/v1/documents/${doc.id}/certificate`;
 
             const response = await axios.get(url, {
                 responseType: 'blob',
