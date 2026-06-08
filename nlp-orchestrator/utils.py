@@ -7,7 +7,7 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
     retry_if_exception_type,
-    before_sleep_log
+    before_sleep_log,
 )
 
 # for async retry
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 def async_retry(max_attempts: int = 3, delay: float = 1.0):
     """Async retry decorator with exponential backoff."""
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -35,7 +36,9 @@ def async_retry(max_attempts: int = 3, delay: float = 1.0):
                     )
                     await asyncio.sleep(delay * attempt)
                     attempt += 1
+
         return wrapper
+
     return decorator
 
 
@@ -46,13 +49,16 @@ def is_retryable_exception(exc: Exception) -> bool:
     Do not retry for client errors like 400/401/403/404.
     """
     # Network/timeouts
-    if isinstance(exc, (
-        httpx.TimeoutException,
-        httpx.ConnectError,
-        aiohttp.ClientTimeout,
-        aiohttp.ClientConnectorError,
-        aiohttp.ServerDisconnectedError,
-    )):
+    if isinstance(
+        exc,
+        (
+            httpx.TimeoutException,
+            httpx.ConnectError,
+            aiohttp.ClientTimeout,
+            aiohttp.ClientConnectorError,
+            aiohttp.ServerDisconnectedError,
+        ),
+    ):
         return True
 
     # Inspect HTTP status codes when available
@@ -70,22 +76,26 @@ def is_retryable_exception(exc: Exception) -> bool:
 
     return False
 
-# Retry Decorator 
+
+# Retry Decorator
 retry_transient = retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=1, max=4),
-    retry=retry_if_exception_type((
-        httpx.TimeoutException,
-        httpx.ConnectError,
-        aiohttp.ClientTimeout,
-        aiohttp.ClientConnectorError,
-        aiohttp.ServerDisconnectedError,
-    )),
+    retry=retry_if_exception_type(
+        (
+            httpx.TimeoutException,
+            httpx.ConnectError,
+            aiohttp.ClientTimeout,
+            aiohttp.ClientConnectorError,
+            aiohttp.ServerDisconnectedError,
+        )
+    ),
     before_sleep=before_sleep_log(logger, logging.WARNING),
-    reraise=True
+    reraise=True,
 )
 
-# Circuit Breaker 
+
+# Circuit Breaker
 class CircuitBreaker:
     def __init__(self, failure_threshold=5, recovery_timeout=60):
         self.failure_threshold = failure_threshold

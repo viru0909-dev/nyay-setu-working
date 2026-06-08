@@ -44,7 +44,7 @@ def normalize_citation(raw: str, act: str, section: str) -> dict:
     return {
         "raw": raw.strip(),
         "act": normalize_act_name(act),
-        "section": section.strip()
+        "section": section.strip(),
     }
 
 
