@@ -449,20 +449,26 @@ export default function Landing() {
                                             border: '1px solid var(--border-light)',
                                             borderRadius: '16px',
                                             cursor: 'default',
-                                            transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
+                                            transition: 'border-color 0.25s ease, box-shadow 0.25s ease, transform 0.3s ease',
                                         }}
                                         onMouseEnter={e => { e.currentTarget.style.borderColor = f.color + '50'; e.currentTarget.style.boxShadow = `0 8px 24px ${f.color}15`; }}
                                         onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.boxShadow = 'none'; }}
                                     >
-                                        <div style={{
-                                            width: '52px', height: '52px', borderRadius: '14px',
-                                            background: f.color + '12',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            marginBottom: '1.1rem',
-                                        }}>
-                                            <FeatureIcon size={26} style={{ color: f.color }} />
-                                        </div>
-                                        <div
+                                        <motion.div
+                                             whileHover={{ scale: 1.15, rotate: 6 }}
+                                             transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                                             style={{
+                                                  width: '52px', height: '52px', borderRadius: '14px',
+                                                  background: f.color + '12',
+                                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                  marginBottom: '1.1rem',
+                                                  border: `1px solid ${f.color}25`,
+                                                  transition: 'background 0.3s ease',
+                                               }}
+                                         >
+                                             <FeatureIcon size={26} style={{ color: f.color }} />
+                                        </motion.div>
+    <div
     style={{
         display: 'flex',
         alignItems: 'center',
