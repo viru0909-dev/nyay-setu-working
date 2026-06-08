@@ -43,8 +43,8 @@ public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
     // Find cases by respondent email
     List<CaseEntity> findByRespondentEmail(String respondentEmail);
 
-    // 🔥 PERF FIX: Resolves N+1 query problem by fetching CaseEntity and associated documents in 1 single query
-    @Query(value = "SELECT c FROM CaseEntity c LEFT JOIN FETCH c.documents",
+    // 🔥 PERF FIX: Resolves N+1 query problem by eagerly fetching lazy client and lawyer user relationships
+    @Query(value = "SELECT c FROM CaseEntity c LEFT JOIN FETCH c.client LEFT JOIN FETCH c.lawyer",
            countQuery = "SELECT COUNT(c) FROM CaseEntity c")
     Page<CaseEntity> findAllWithDocuments(Pageable pageable);
 }
