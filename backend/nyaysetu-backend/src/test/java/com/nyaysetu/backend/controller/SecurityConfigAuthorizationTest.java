@@ -34,7 +34,6 @@ mockMvc.perform(get("/api/v1/health"))
     }
 
     @Test
-    @Test
     @WithMockUser(username = "litigant@example.com", roles = {"LITIGANT"})
     void litigant_isForbiddenFromJudgeEndpoint() throws Exception {
         mockMvc.perform(get("/api/v1/judge/cases"))
