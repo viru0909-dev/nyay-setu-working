@@ -13,7 +13,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
 # ─── API keys — loaded from environment variables only ────────────────────────
 GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
@@ -80,10 +80,10 @@ GROUND_RESEARCH: bool = _bool("GROUND_RESEARCH", True)
 # ─── Validate required keys ───────────────────────────────────────────────────
 if not GROQ_API_KEY:
     print(
-        "[Config] ERROR: GROQ_API_KEY is not set. Please add it to .env (see .env.example)",  # noqa: E501
+        "[Config] WARNING: GROQ_API_KEY is not set. Please add it to .env (see .env.example). "  # noqa: E501
+        "Groq calls will fail at runtime.",
         file=sys.stderr,
     )
-    sys.exit(1)
 if not GEMINI_API_KEY:
     print(
         "[Config] WARNING: GOOGLE_GEMINI_API_KEY not set. Gemini calls will fall back to Groq."  # noqa: E501
