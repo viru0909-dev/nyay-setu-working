@@ -26,7 +26,12 @@ GEMINI_MODEL: str = "gemini-1.5-flash"             # Fast + deep reasoning
 RETRY_ENABLED: bool = True
 RETRY_MAX_ATTEMPTS: int = 2
 RETRY_DELAY_SECONDS: float = 1.0
-PROVIDER_ORDER: list[str] = ["gemini", "groq"]
+PROVIDER_ORDER: list[str] = ["gemini", "groq", "ollama"]
+
+# ─── Ollama Configuration ─────────────────────────────────────────────────────
+OLLAMA_API_URL: str = os.getenv("OLLAMA_API_URL", "http://localhost:11434")
+OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama-3-8b")
+
 # ─── Model names ──────────────────────────────────────────────────────────────
 GROQ_MODEL_FAST: str = "llama-3.3-70b-versatile"
 GEMINI_MODEL: str = "gemini-1.5-flash"

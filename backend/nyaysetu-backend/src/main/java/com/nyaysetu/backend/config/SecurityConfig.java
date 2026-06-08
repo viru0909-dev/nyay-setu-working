@@ -165,21 +165,23 @@ public class SecurityConfig {
                                 // adjust them in nginx.conf.
                                 .policyDirectives(
                                     "default-src 'self'; " +
-                                    "script-src 'self'; " +
-                                    "style-src 'self' 'unsafe-inline'; " +
+                                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
+                                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
                                     "img-src 'self' data: https:; " +
                                     "font-src 'self' https://fonts.gstatic.com; " +
-                                    "connect-src 'self' wss:; " +
+                                    "connect-src 'self' wss: https://cdn.jsdelivr.net https://nyaysetubackend.onrender.com; " +
                                     "frame-ancestors 'none'; " +
                                     "object-src 'none'; " +
                                     "base-uri 'self'; " +
                                     "form-action 'self'; " +
                                     "upgrade-insecure-requests"
                                 ))
-                        .referrerPolicy(rp -> rp.policy(
-                            org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
-                        .permissionsPolicy(pp -> pp.policy(
-                            "geolocation=(), microphone=(), camera=(), payment=()"))
+                                .referrerPolicy(rp -> rp.policy(
+                                    org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
+                                ))
+                                .permissionsPolicy(pp -> pp.policy(
+                                    "geolocation=(), microphone=(), camera=(), payment=()"
+                                ))
                 )
                 .authorizeHttpRequests(auth -> auth
 
