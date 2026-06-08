@@ -153,7 +153,14 @@ public class SecurityConfig {
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
+                // CSRF should not be globally disabled. Only disable where the endpoint is stateless
+                // and not vulnerable to cross-site request-forgery (e.g., pure token-in-header APIs).
+                // Keeping it enabled provides strong protection for browser-based flows.
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(
+                                org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse()
+                        )
+                )
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.deny())
                         .contentSecurityPolicy(csp -> csp
@@ -195,7 +202,8 @@ public class SecurityConfig {
                         // ── WebSocket endpoints ───────────────────────────────────────────
                         .requestMatchers("/api/ws/**").permitAll()
 
-                        // ── AI endpoints (open for now; restrict if misuse detected) ──────
+                        // ── AI endpoints (now authenticated) ─────────────────────────────
+                        // These endpoints can leak sensitive case content. Require auth.
                         .requestMatchers(
                                 "/ai/summarize",
                                 "/ai/chat",
@@ -205,7 +213,7 @@ public class SecurityConfig {
                                 "/ai/ollama/models",
                                 "/api/v1/brain/analyze-case",
                                 "/api/v1/brain/suggest-documents"
-                        ).permitAll()
+                        ).authenticated()
 
                         // ── Auth-only: any authenticated user ─────────────────────────────
                         .requestMatchers(
