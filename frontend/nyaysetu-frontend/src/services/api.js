@@ -98,6 +98,7 @@ api.interceptors.response.use(
 // Auth API
 export const authAPI = {
     login: (credentials) => api.post('/api/v1/auth/login', credentials),
+    googleLogin: (credential) => api.post('/api/v1/auth/google', { credential }),
     register: (userData) => api.post('/api/v1/auth/register', userData),
     logout: () => {
         localStorage.removeItem('token');

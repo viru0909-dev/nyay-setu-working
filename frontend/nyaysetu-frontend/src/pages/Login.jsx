@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { GoogleLogin } from '@react-oauth/google';
+import toast from 'react-hot-toast';
 import { authAPI } from '../services/api';
 import useAuthStore from '../store/authStore';
 import { Mail, Lock, Eye, EyeOff, Camera, CheckCircle2, Scale, Shield, User, Briefcase, Gavel } from 'lucide-react';
@@ -20,11 +22,13 @@ export default function Login() {
     const [selectedRole, setSelectedRole] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const [showFaceLogin, setShowFaceLogin] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const { setAuth } = useAuthStore();
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
     // Mobile detection
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -73,6 +77,39 @@ export default function Login() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        setError('');
+
+        if (!credentialResponse?.credential) {
+            const message = 'Google sign-in did not return a valid credential. Please try again.';
+            setError(message);
+            toast.error(message);
+            return;
+        }
+
+        setGoogleLoading(true);
+
+        try {
+            const response = await authAPI.googleLogin(credentialResponse.credential);
+            const { token, user } = response.data;
+
+            setAuth(user, token);
+            navigate(resolvePostAuthPath(user.role, location.state));
+        } catch (err) {
+            const message = err.response?.data?.message || 'Google sign-in failed. Please try again.';
+            setError(message);
+            toast.error(message);
+        } finally {
+            setGoogleLoading(false);
+        }
+    };
+
+    const handleGoogleError = () => {
+        const message = 'Google sign-in was cancelled or could not be completed.';
+        setError(message);
+        toast.error(message);
     };
 
     return (
@@ -463,6 +500,45 @@ export default function Login() {
                             >
                                 {loading ? t('auth:login.signingIn') : t('auth:login.signIn')}
                             </button>
+
+                            <div style={{ marginBottom: '0.75rem' }}>
+                                {googleClientId ? (
+                                    <div style={{
+                                        opacity: googleLoading ? 0.65 : 1,
+                                        pointerEvents: googleLoading ? 'none' : 'auto'
+                                    }}>
+                                        <GoogleLogin
+                                            onSuccess={handleGoogleSuccess}
+                                            onError={handleGoogleError}
+                                            text="signin_with"
+                                            shape="rectangular"
+                                            size="large"
+                                            width="100%"
+                                            theme="outline"
+                                            logo_alignment="left"
+                                        />
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="auth-full-width-btn"
+                                        onClick={() => toast.error('Google sign-in is not configured yet.')}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: '#fff',
+                                            border: '1px solid #dadce0',
+                                            borderRadius: '0.75rem',
+                                            color: '#3c4043',
+                                            fontSize: '0.95rem',
+                                            fontWeight: '600',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Sign in with Google
+                                    </button>
+                                )}
+                            </div>
 
                             {/* Face Login */}
                             <button

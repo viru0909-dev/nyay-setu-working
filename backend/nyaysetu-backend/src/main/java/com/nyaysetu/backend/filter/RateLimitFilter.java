@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
  *
  * Protected endpoints:
  * - /api/v1/auth/login
+ * - /api/v1/auth/google
  * - /api/v1/auth/register
  * - /api/v1/auth/forgot-password
  */
@@ -191,7 +192,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
      */
     private boolean isRateLimitedEndpoint(String path) {
 
-        return path.matches("^/api/v1/auth/(login|register|forgot-password)$");
+        return path.matches("^/api/v1/auth/(login|google|register|forgot-password)$");
     }
 
     /**

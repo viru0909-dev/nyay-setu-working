@@ -30,6 +30,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "is_oauth", nullable = false)
+    @Builder.Default
+    private Boolean isOAuth = false;
+
+    @Column(name = "oauth_provider")
+    private String oauthProvider;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 }
