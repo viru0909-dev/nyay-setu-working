@@ -151,7 +151,7 @@ public class HearingController {
     @PostMapping("/{hearingId}/outcome")
     public ResponseEntity<?> recordOutcome(
             @PathVariable UUID hearingId,
-            @RequestBody com.nyaysetu.backend.dto.HearingOutcomeRequest request
+            @Valid @RequestBody com.nyaysetu.backend.dto.HearingOutcomeRequest request
     ) {
         try {
             Hearing hearing = hearingService.recordOutcome(hearingId, request);

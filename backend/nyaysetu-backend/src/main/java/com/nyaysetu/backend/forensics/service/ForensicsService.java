@@ -8,8 +8,6 @@ import com.nyaysetu.backend.forensics.repository.AccidentCaseRepository;
 import com.nyaysetu.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
@@ -139,7 +137,7 @@ public class ForensicsService {
                             if (sink != null) sink.tryEmitError(new RuntimeException((String) eventMap.get("message")));
                             activeStreams.remove(jobId);
                         }
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         log.error("Error parsing Python SSE event", e);
                     }
                 })

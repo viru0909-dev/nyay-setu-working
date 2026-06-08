@@ -41,13 +41,15 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^14.0.0",
+    "@testing-library/react": "^14.3.1",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
+    "esbuild": "^0.28.0",
     "jsdom": "^29.1.1",
     "vite": "^5.0.8",
-    "vitest": "^4.1.6"
+    "vitest": "^3.2.4"
   }
 }

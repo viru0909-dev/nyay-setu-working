@@ -1,6 +1,5 @@
 package com.nyaysetu.backend.controller;
 
-import com.nyaysetu.backend.dto.CaseDTO;
 import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.repository.*;
 import com.nyaysetu.backend.service.AuthService;
@@ -12,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,8 +28,6 @@ public class JudgeController {
     private final HearingRepository hearingRepository;
     private final com.nyaysetu.backend.service.HearingService hearingService;
     private final AuthService authService;
-    private final UserRepository userRepository;
-    private final DocumentRepository documentRepository;
     private final GroqDocumentVerificationService groqService;
     private final com.nyaysetu.backend.service.AuditService auditService;
     private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
@@ -75,7 +73,7 @@ public class JudgeController {
             }
             
             return ResponseEntity.ok(Map.of("message", "Case claimed successfully", "caseId", id));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Error claiming case", e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -117,7 +115,7 @@ public class JudgeController {
             }
 
             return ResponseEntity.ok(Map.of("message", "Summons issued successfully. Police notified."));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
              log.error("Error issuing summons", e);
              return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -161,6 +159,7 @@ public class JudgeController {
         stats.put("pendingCases", pending); 
         stats.put("activeCases", active); 
         stats.put("closedCases", closed);
+        stats.put("unassignedCases", unassignedCount);
         stats.put("byStatus", byStatus);
         stats.put("byType", byType);
         stats.put("monthlyTrend", monthlyTrend);
@@ -220,7 +219,7 @@ public class JudgeController {
             }
             
             return ResponseEntity.ok(Map.of("summary", summary));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Error generating AI summary", e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -270,27 +269,26 @@ public class JudgeController {
             context.append("}");
 
             String aiResponse = groqService.chatWithAI(context.toString());
-            
+
             // Clean response
             String jsonStr = aiResponse.replaceAll("```json", "").replaceAll("```", "").trim();
-            
+
             // Parse JSON
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(jsonStr);
-            
+
             UUID caseId = UUID.fromString(root.get("caseId").asText());
             LocalDateTime date = LocalDateTime.parse(root.get("scheduledDate").asText());
             int duration = root.get("durationMinutes").asInt(60);
-            
+
             // Schedule the hearing
             Hearing hearing = hearingService.scheduleHearing(caseId, date, duration);
-            
+
             return ResponseEntity.ok(Map.of(
                 "message", "Hearing scheduled successfully via AI",
                 "hearing", hearing
             ));
-
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             log.error("Error in AI scheduling", e);
             return ResponseEntity.badRequest().body(Map.of("error", "Failed to schedule: " + e.getMessage()));
         }

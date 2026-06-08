@@ -11,7 +11,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.util.HtmlUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -111,14 +110,9 @@ public class XssSanitizationFilter extends OncePerRequestFilter {
                 if (inString) {
                     // Escape HTML special characters within string values
                     switch (c) {
-                        case '<':
-                            result.append("&lt;");
-                            break;
-                        case '>':
-                            result.append("&gt;");
-                            break;
-                        default:
-                            result.append(c);
+                        case '<' -> result.append("&lt;");
+                        case '>' -> result.append("&gt;");
+                        default -> result.append(c);
                     }
                 } else {
                     result.append(c);

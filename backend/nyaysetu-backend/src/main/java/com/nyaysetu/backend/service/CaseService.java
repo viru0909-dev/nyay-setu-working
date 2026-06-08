@@ -1,25 +1,24 @@
 package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.CreateCaseRequest;
-import com.nyaysetu.backend.dto.PartyDto;
 import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.LegalCaseRepository;
-import com.nyaysetu.backend.repository.PartyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+// import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CaseService {
 
     private final LegalCaseRepository legalCaseRepository;
-    private final PartyRepository partyRepository;
     private final CaseTimelineService timelineService;
 
     @Transactional
@@ -57,8 +56,10 @@ public class CaseService {
                 .orElseThrow(() -> new NotFoundException("Case not found " + id));
     }
 
-    public List<LegalCase> getAllCases() {
-        return legalCaseRepository.findAll();
+    // Refactored method to accept page and size and return Page<LegalCase>
+    public Page<LegalCase> getAllCases(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return legalCaseRepository.findAll(pageable);
     }
 
     public LegalCase updateStatus(UUID caseId, CaseStatus status) {
