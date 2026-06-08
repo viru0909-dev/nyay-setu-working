@@ -76,6 +76,7 @@ public class ProfileService {
     public void deleteUserAccount(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        profileRepository.deleteByUserId(user.getId());
         userRepository.delete(user);
     }
 }
