@@ -55,9 +55,7 @@ JWT_ALGORITHM: str = "HS256"
 FRONTEND_ORIGIN: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 
 # ─── Retrieval / RAG settings ─────────────────────────────────────────────────
-EMBEDDING_MODEL: str = os.getenv(
-    "EMBEDDING_MODEL", "law-ai/InLegalBERT"
-)
+EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "law-ai/InLegalBERT")
 RERANKER_MODEL: str = os.getenv("RERANKER_MODEL", "BAAI/bge-reranker-base")
 CHROMA_PATH: str = os.getenv(
     "CHROMA_PATH", str(Path(__file__).parent / "data" / "chroma")

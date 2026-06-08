@@ -111,7 +111,9 @@ def chunk_text(
                         chunks.append(" ".join(sent_buf))
                         sent_buf, sent_tokens = _tail_overlap(sent_buf, overlap_tokens)
 
-                    chunks.extend(_split_long_sentence(sentence, max_tokens, overlap_tokens))
+                    chunks.extend(
+                        _split_long_sentence(sentence, max_tokens, overlap_tokens)
+                    )
                     sent_buf = []
                     sent_tokens = 0
                     continue
