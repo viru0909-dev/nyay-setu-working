@@ -49,12 +49,9 @@ async def extract_frames(video_path: str, job_id: str, frame_interval: int = 30)
     # Run OpenCV extraction in a thread to not block asyncio pool
     def _extract():
         cap = cv2.VideoCapture(video_path)
-        fps = int(cap.get(cv2.CAP_PROP_FPS))
-        if fps == 0:
-            fps = 30 # default assumed
-            
-        # extract 1 frame per second
-        interval = fps 
+
+        # extract every frame_interval frames
+        interval = max(1, frame_interval)
         
         count = 0
         success, image = cap.read()
