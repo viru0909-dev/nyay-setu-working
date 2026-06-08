@@ -1,71 +1,61 @@
 package com.nyaysetu.backend.service;
 
-import com.nyaysetu.backend.dto.CreateCaseRequest;
-import com.nyaysetu.backend.entity.*;
-import com.nyaysetu.backend.exception.NotFoundException;
-import com.nyaysetu.backend.repository.LegalCaseRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Pageable; // FIXED: Imported CaseRepository
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// import java.util.List;
-import java.util.UUID;
+import com.nyaysetu.backend.dto.CreateCaseRequest;
+import com.nyaysetu.backend.entity.CaseEntity;
+import com.nyaysetu.backend.entity.CaseStatus;
+import com.nyaysetu.backend.exception.NotFoundException;
+import com.nyaysetu.backend.repository.CaseRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class CaseService {
 
-    private final LegalCaseRepository legalCaseRepository;
+    // FIXED: Changed fields to point to your precise repository class
+    private final CaseRepository caseRepository;
     private final CaseTimelineService timelineService;
 
     @Transactional
-    public LegalCase createCase(CreateCaseRequest dto) {
+    public CaseEntity createCase(CreateCaseRequest dto) {
 
-        LegalCase legalCase = LegalCase.builder()
+        // FIXED: Using CaseEntity to create a new case mapping
+        CaseEntity caseEntity = CaseEntity.builder()
                 .title(dto.getTitle())
                 .description(dto.getDescription())
-                // judgeId and parties removed from CreateCaseRequest
                 .status(CaseStatus.OPEN)
                 .build();
 
-        LegalCase saved = legalCaseRepository.save(legalCase);
-
-        // Parties functionality removed from CreateCaseRequest
-        // if (dto.getParties() != null && !dto.getParties().isEmpty()) {
-        //     List<Party> parties = dto.getParties().stream()
-        //             .map(p -> Party.builder()
-        //                     .legalCaseId(saved.getId())
-        //                     .name(p.getName())
-        //                     .role(p.getRole())
-        //                     .build())
-        //             .collect(Collectors.toList());
-        //
-        //     partyRepository.saveAll(parties);
-        // }
+        CaseEntity saved = caseRepository.save(caseEntity);
 
         timelineService.addEvent(saved.getId(), "Case created");
 
         return saved;
     }
 
-    public LegalCase getCase(UUID id) {
-        return legalCaseRepository.findById(id)
+    public CaseEntity getCase(UUID id) {
+        return caseRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Case not found " + id));
     }
 
-    // Refactored method to accept page and size and return Page<LegalCase>
-    public Page<LegalCase> getAllCases(int page, int size) {
+    // FIXED: Refactored method consuming your optimized N+1 JOIN FETCH query method
+    public Page<CaseEntity> getAllCases(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return legalCaseRepository.findAll(pageable);
+        return caseRepository.findAllWithDocuments(pageable);
     }
 
-    public LegalCase updateStatus(UUID caseId, CaseStatus status) {
-        LegalCase lc = getCase(caseId);
+    public CaseEntity updateStatus(UUID caseId, CaseStatus status) {
+        CaseEntity lc = getCase(caseId);
         lc.setStatus(status);
-        legalCaseRepository.save(lc);
+        caseRepository.save(lc);
 
         timelineService.addEvent(caseId, "Case status updated to " + status);
         return lc;
