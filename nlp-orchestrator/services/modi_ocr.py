@@ -1,6 +1,7 @@
 import asyncio
 import io
 import logging
+import os
 import re
 import threading
 from typing import Any
@@ -8,6 +9,7 @@ from typing import Any
 import cv2
 import numpy as np
 from PIL import Image, UnidentifiedImageError
+from services.deskew_service import deskew_image
 
 from config import HF_TOKEN, TROCR_DEVICE, TROCR_MODEL_NAME
 
@@ -20,6 +22,22 @@ _model_lock = threading.Lock()
 
 MAX_IMAGE_DIMENSION = 1280
 MIN_IMAGE_DIMENSION = 384
+
+# Bound on how many pages are OCR'd concurrently. OCR is heavy (model
+# inference + OpenCV preprocessing), so unbounded concurrency on a large PDF
+# would exhaust memory/VRAM. Override with OCR_MAX_CONCURRENCY in the env.
+# Defaults to a small multiple of CPU count, capped at 8.
+def _default_ocr_concurrency() -> int:
+    try:
+        raw = os.getenv("OCR_MAX_CONCURRENCY")
+        if raw:
+            return max(1, int(raw))
+    except ValueError:
+        logger.warning("Invalid OCR_MAX_CONCURRENCY=%r; using default.", os.getenv("OCR_MAX_CONCURRENCY"))
+    return max(1, min(8, (os.cpu_count() or 2)))
+
+
+OCR_MAX_CONCURRENCY = _default_ocr_concurrency()
 
 
 class InvalidImageError(ValueError):
@@ -58,15 +76,19 @@ def _load_model() -> tuple[Any, Any, Any]:
 
             token = HF_TOKEN or None
             logger.info("Loading TrOCR model '%s' for Modi OCR.", TROCR_MODEL_NAME)
-
-            processor = TrOCRProcessor.from_pretrained(TROCR_MODEL_NAME, token=token, use_fast=False)
+            
+            try:
+                _processor = TrOCRProcessor.from_pretrained(TROCR_MODEL_NAME, token=token, use_fast=True)
+            except Exception as proc_exc:
+                logger.warning("Fast tokenizer load failed for '%s' (%s); retrying with use_fast=False.", TROCR_MODEL_NAME, proc_exc)
+                _processor = TrOCRProcessor.from_pretrained(TROCR_MODEL_NAME, token=token, use_fast=False)
+            
             model = VisionEncoderDecoderModel.from_pretrained(TROCR_MODEL_NAME, token=token)
             device = _resolve_device(torch)
 
             model.to(device)
             model.eval()
 
-            _processor = processor
             _model = model
             _device = device
 
@@ -105,7 +127,7 @@ def preprocess_image(image_bytes: bytes) -> Image.Image:
         pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     except (UnidentifiedImageError, OSError) as exc:
         raise InvalidImageError("Uploaded file is not a valid image.") from exc
-
+    pil_image = deskew_image(pil_image)
     rgb = np.array(pil_image)
     bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
@@ -238,3 +260,66 @@ def _run_ocr(image_bytes: bytes) -> str:
 
 async def recognize_modi_image(image_bytes: bytes) -> str:
     return await asyncio.to_thread(_run_ocr, image_bytes)
+
+
+async def recognize_modi_pages(
+    pages: list[bytes],
+    max_concurrency: int | None = None,
+) -> list[dict]:
+    """
+    OCR many page images concurrently and return per-page results in input order.
+
+    Previously a multi-page document (e.g. a 50-page PDF rendered to images) was
+    processed one page at a time. Here each page is dispatched through
+    `recognize_modi_image` (which offloads the blocking model inference to a
+    worker thread) and run concurrently via `asyncio.gather`, bounded by a
+    semaphore so a large document cannot exhaust memory/VRAM.
+
+    A failure on one page is captured for that page only and does NOT abort the
+    rest of the batch.
+
+    Returns a list of dicts, one per input page, each shaped:
+        {
+            "page": <1-based index>,
+            "status": "success" | "error",
+            "predicted_text": <str>,   # "" on error
+            "error": <str|None>,
+        }
+    """
+    if not pages:
+        return []
+
+    limit = max_concurrency if max_concurrency and max_concurrency > 0 else OCR_MAX_CONCURRENCY
+    semaphore = asyncio.Semaphore(limit)
+
+    async def _process(index: int, image_bytes: bytes) -> dict:
+        async with semaphore:
+            try:
+                text = await recognize_modi_image(image_bytes)
+                return {
+                    "page": index + 1,
+                    "status": "success",
+                    "predicted_text": text,
+                    "error": None,
+                }
+            except (InvalidImageError, ModiOCRServiceError) as exc:
+                logger.error("OCR failed on page %d: %s", index + 1, exc)
+                return {
+                    "page": index + 1,
+                    "status": "error",
+                    "predicted_text": "",
+                    "error": str(exc),
+                }
+            except Exception as exc:  # defensive: never let one page sink the batch
+                logger.error("Unexpected OCR error on page %d: %s", index + 1, exc)
+                return {
+                    "page": index + 1,
+                    "status": "error",
+                    "predicted_text": "",
+                    "error": f"Unexpected error: {exc}",
+                }
+
+    tasks = [_process(i, page) for i, page in enumerate(pages)]
+    results = await asyncio.gather(*tasks)
+    # gather preserves task order, which matches input page order.
+    return list(results)

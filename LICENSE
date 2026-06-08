@@ -1,0 +1,138 @@
+MIT License
+
+Copyright (c) 2026 Nyay Setu Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## License Header Manifest Insertion Guide
+
+To maintain repository consistency, all major source code files (`.java`, `.py`, `.js`, `.jsx`, `.sh`) must begin with a standardized copyright header block. 
+
+Below is an automated, idempotent bash script to bulk-add license headers to all source files in the repository.
+
+### Bulk Ingestion Script
+
+Create a script named `add-license-headers.sh` at the root of the project, or run the following commands in your bash terminal:
+
+```bash
+#!/bin/bash
+# add-license-headers.sh
+# Prepend MIT License headers to all source code files in the repository.
+
+LICENSE_HOLDER="Nyay Setu Contributors"
+YEAR="2026"
+
+# Define the license headers
+JAVA_JS_HEADER="/*
+ * Copyright (c) $YEAR $LICENSE_HOLDER
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the \"Software\"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+"
+
+PYTHON_SH_HEADER="# Copyright (c) $YEAR $LICENSE_HOLDER
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the \"Software\"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+"
+
+echo "Adding license headers to source files..."
+
+# Exclude vendor, build, and hidden directories
+EXCLUDE_DIRS="-not -path '*/.*' -not -path '*/target/*' -not -path '*/node_modules/*' -not -path '*/venv/*' -not -path '*/build/*'"
+
+# Find and process Java, JS, and JSX files
+eval "find . -type f \( -name '*.java' -o -name '*.js' -o -name '*.jsx' \) $EXCLUDE_DIRS" | while read -r file; do
+    if ! grep -q "Copyright (c)" "$file"; then
+        echo "Processing: $file"
+        echo "$JAVA_JS_HEADER" | cat - "$file" > temp && mv temp "$file"
+    fi
+done
+
+# Find and process Python and Shell files (preserving shebangs)
+eval "find . -type f \( -name '*.py' -o -name '*.sh' \) $EXCLUDE_DIRS" | while read -r file; do
+    if ! grep -q "Copyright (c)" "$file"; then
+        echo "Processing: $file"
+        # Keep shebang at the top if present
+        if head -n 1 "$file" | grep -q "^#!/"; then
+            SHEBANG=$(head -n 1 "$file")
+            tail -n +2 "$file" > temp_body
+            echo "$SHEBANG" > temp
+            echo "$PYTHON_SH_HEADER" >> temp
+            cat temp_body >> temp
+            mv temp "$file"
+            rm temp_body
+        else
+            echo "$PYTHON_SH_HEADER" | cat - "$file" > temp && mv temp "$file"
+        fi
+    fi
+done
+
+echo "License header injection complete!"
+```
+
+### Usage Instructions
+
+1. Make the script executable:
+   ```bash
+   chmod +x add-license-headers.sh
+   ```
+2. Execute the script from the repository root:
+   ```bash
+   ./add-license-headers.sh
+   ```
+3. (Optional) Run a dry-run check or verify via Git diff:
+   ```bash
+   git diff
+   ```

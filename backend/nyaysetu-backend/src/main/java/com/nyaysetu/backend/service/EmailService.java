@@ -30,7 +30,7 @@ public class EmailService {
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
-    @Value("${app.password-reset.token-validity:1800000}") // 30 min default
+    @Value("${app.password-reset.token-validity:1800000}")
     private Long tokenValidityMs;
 
     @Async
@@ -38,12 +38,11 @@ public class EmailService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Delete any existing tokens for this user
         tokenRepository.deleteByUser(user);
 
-        // Generate new token
         String token = UUID.randomUUID().toString();
-        LocalDateTime expiryDate = LocalDateTime.now().plusSeconds(tokenValidityMs / 1000);
+        LocalDateTime expiryDate = LocalDateTime.now()
+                .plusSeconds(tokenValidityMs / 1000);
 
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .token(token)
@@ -55,10 +54,8 @@ public class EmailService {
 
         tokenRepository.save(resetToken);
 
-        // Create reset link
         String resetLink = frontendUrl + "/reset-password/" + token;
 
-        // Send email
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -68,16 +65,17 @@ public class EmailService {
             helper.setText(buildEmailContent(user.getName(), resetLink), true);
 
             mailSender.send(message);
+
             log.info("Password reset email sent successfully to: {}", email);
+
         } catch (Exception e) {
+
             log.error("CRITICAL: Failed to send email via SMTP. SMTP_USERNAME or SMTP_PASSWORD might be missing.");
+
             log.info("====================================================================");
             log.info("DEVELOPMENT FALLBACK - PASSWORD RESET LINK FOR {}:", email);
             log.info(resetLink);
             log.info("====================================================================");
-            
-            // Re-throw if it's not a dev environment or if you want the frontend to see the error
-            // For now, let's keep it handled so the user can at least see the link in logs
         }
     }
 
@@ -109,13 +107,17 @@ public class EmailService {
                             <h2 style="color: #1e293b; margin-top: 0;">Password Reset Request</h2>
                             <p>Hello %s,</p>
                             <p>We received a request to reset your password for your NyaySetu account. Click the button below to create a new password:</p>
+
                             <center>
                                 <a href="%s" class="button">Reset My Password</a>
                             </center>
+
                             <div class="warning">
                                 <p><strong>⏰ Important:</strong> This link will expire in 30 minutes for security reasons.</p>
                             </div>
+
                             <p>If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
+
                             <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
                                 If the button doesn't work, copy and paste this link into your browser:<br>
                                 <a href="%s" style="color: #8b5cf6; word-break: break-all;">%s</a>
@@ -148,10 +150,12 @@ public class EmailService {
             helper.setText(buildSummonsContent(respondentName, caseNumber, hearingDate), true);
 
             mailSender.send(message);
+
             log.info("Summons email sent successfully to: {}", recipientEmail);
+
         } catch (Exception e) {
             log.error("Failed to send summons email: {}", e.getMessage());
-            // Fallback for dev
+
             log.info("====================================================================");
             log.info("DEVELOPMENT SUMMONS FOR {}: Case {}, Hearing {}", recipientEmail, caseNumber, hearingDate);
             log.info("====================================================================");
@@ -174,8 +178,6 @@ public class EmailService {
                         .detail-row { display: flex; margin-bottom: 10px; }
                         .detail-label { font-weight: bold; width: 150px; }
                         .footer { margin-top: 40px; border-top: 1px solid #cbd5e1; padding-top: 20px; text-align: center; font-size: 14px; color: #64748b; }
-                        .stamp { text-align: right; margin-top: 40px; }
-                        .stamp img { width: 120px; opacity: 0.8; }
                     </style>
                 </head>
                 <body>
@@ -187,8 +189,9 @@ public class EmailService {
                         <div class="content">
                             <p>To,</p>
                             <p><strong>%s</strong></p>
-                            <p><strong>NOTICE IS HEREBY GIVEN</strong> that legal proceedings have been instituted against you. You are required to appear before the designated court in relation to the case described below.</p>
-                            
+
+                            <p><strong>NOTICE IS HEREBY GIVEN</strong> that legal proceedings have been instituted against you.</p>
+
                             <div class="details">
                                 <div class="detail-row">
                                     <span class="detail-label">Case Number:</span>
@@ -198,22 +201,39 @@ public class EmailService {
                                     <span class="detail-label">Hearing Date:</span>
                                     <span>%s</span>
                                 </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Requirement:</span>
-                                    <span>Personal Appearance / Legal Representation</span>
-                                </div>
                             </div>
 
-                            <p>Failure to attend may result in an ex-parte decision against you or issuance of a warrant.</p>
-                            <p>Please log in to the <strong>NyaySetu</strong> portal to view full case details and submit your response.</p>
+                            <p>Failure to attend may result in legal consequences.</p>
                         </div>
                         <div class="footer">
-                            <p>This is a computer-generated notice and requires no physical signature.</p>
                             <p>NyaySetu Virtual Judiciary System</p>
                         </div>
                     </div>
                 </body>
                 </html>
                 """, respondentName, caseNumber, hearingDate);
+    }
+
+    @Async
+    public void sendWelcomeEmail(String email, String name) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("Welcome to NyaySetu");
+
+            helper.setText("""
+                <h2>Welcome %s 👋</h2>
+                <p>Your account has been created successfully.</p>
+                """.formatted(name), true);
+
+            mailSender.send(message);
+
+            log.info("Welcome email sent to {}", email);
+
+        } catch (Exception e) {
+            log.error("Failed to send welcome email", e);
+        }
     }
 }

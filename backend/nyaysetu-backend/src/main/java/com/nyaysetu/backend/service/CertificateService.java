@@ -8,7 +8,6 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
@@ -117,7 +116,6 @@ public class CertificateService {
                 yPosition -= 50;
                 float tableWidth = page.getMediaBox().getWidth() - 120;
                 float rowHeight = 30;
-                float col1Width = 150;
                 
                 drawTable(contentStream, 60, yPosition, tableWidth, rowHeight, "Attribute", "Details");
                 drawTable(contentStream, 60, yPosition - rowHeight, tableWidth, rowHeight, "File Name", fileName);
@@ -219,7 +217,7 @@ public class CertificateService {
         else contentStream.setFont(PDType1Font.HELVETICA, 10);
         
         contentStream.newLineAtOffset(x + col1Width + 10, y - (height/2) - 4);
-        contentStream.showText(value != null ? value : "-");
+        contentStream.showText(value);
         contentStream.endText();
     }
 }

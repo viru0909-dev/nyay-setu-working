@@ -1,0 +1,5 @@
+# <b>Article</b> <b>10</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=492977
+# Fetch query: Constitution of India Article 10
+
+Article 10 in Constitution of India 10. Continuance of the rights of citizenship Every person who is or is deemed to be a citizen of India under any of the foregoing provisions of this Part shall, subject to the provisions of any law that may be made by Parliament, continue to be such citizen.

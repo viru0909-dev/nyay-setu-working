@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Tag(name = "Case Transitions", description = "Role-to-role handoff operations")
 @RestController
-@RequestMapping("/api/cases/transition")
+@RequestMapping("/cases/transition")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class CaseTransitionController {

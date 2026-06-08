@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import { documentGenerateAPI } from '../../services/api';
 
 const DOC_TYPES = [
     {
@@ -35,10 +35,10 @@ const DOC_TYPES = [
         bgColor: 'rgba(245, 158, 11, 0.08)',
     },
     {
-        id: 'notice',
+        id: 'demand_letter',
         icon: Mail,
-        title: 'Legal Notice',
-        description: 'Send a formal legal notice to a party',
+        title: 'Demand Letter',
+        description: 'Create a pre-litigation demand notice for your dispute',
         color: '#EF4444',
         bgColor: 'rgba(239, 68, 68, 0.08)',
     },
@@ -50,8 +50,12 @@ const DocumentGeneratePage = () => {
     const [selectedType, setSelectedType] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
+    const [isCopying, setIsCopying] = useState(false);
     const [generatedDoc, setGeneratedDoc] = useState(null);
     const [error, setError] = useState(null);
+    const [clipboardStatus, setClipboardStatus] = useState('');
+    const [validationErrors, setValidationErrors] = useState({});
+    const [injectionWarnings, setInjectionWarnings] = useState([]);
 
     // Form fields
     const [form, setForm] = useState({
@@ -62,6 +66,8 @@ const DocumentGeneratePage = () => {
         caseDescription: '',
         incidentDate: '',
         reliefSought: '',
+        noticePeriod: '15',
+        language: 'en',
         courtName: '',
         departmentName: '',
         pioName: '',
@@ -70,6 +76,17 @@ const DocumentGeneratePage = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const computeResponseDeadline = () => {
+        if (!selectedType || selectedType !== 'demand_letter' || !form.noticePeriod) {
+            return null;
+        }
+        const days = parseInt(form.noticePeriod, 10);
+        if (Number.isNaN(days) || days <= 0) return null;
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + days);
+        return deadline.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
     };
 
     const selectDocType = (typeId) => {
@@ -86,6 +103,9 @@ const DocumentGeneratePage = () => {
         if (selectedType === 'rti') {
             return !!form.departmentName;
         }
+        if (selectedType === 'demand_letter') {
+            return !!form.respondentName && !!form.respondentAddress && !!form.reliefSought && !!form.noticePeriod;
+        }
         if (selectedType !== 'rti') {
             return !!form.respondentName && !!form.respondentAddress && !!form.reliefSought;
         }
@@ -95,16 +115,30 @@ const DocumentGeneratePage = () => {
     const handleGeneratePreview = async () => {
         setIsGenerating(true);
         setError(null);
+        setValidationErrors({});
+        setInjectionWarnings([]);
         try {
-            const response = await api.post('/api/documents/generate/preview', {
+            const payload = {
                 docType: selectedType,
-                ...form,
-            });
+                petitionerName: form.petitionerName,
+                petitionerAddress: form.petitionerAddress,
+                respondentName: form.respondentName,
+                respondentAddress: form.respondentAddress,
+                caseDescription: form.caseDescription,
+                incidentDate: form.incidentDate,
+                reliefSought: form.reliefSought,
+                noticePeriod: form.noticePeriod,
+                language: form.language,
+                courtName: form.courtName,
+                departmentName: form.departmentName,
+                pioName: form.pioName,
+            };
+
+            const response = await documentGenerateAPI.preview(payload);
             setGeneratedDoc(response.data);
             setStep(3);
         } catch (err) {
-            const msg = err.response?.data?.error || err.message || 'Failed to generate document';
-            setError(msg);
+            handleApiError(err);
         } finally {
             setIsGenerating(false);
         }
@@ -113,15 +147,28 @@ const DocumentGeneratePage = () => {
     const handleDownloadPdf = async () => {
         setIsDownloading(true);
         setError(null);
+        setClipboardStatus('');
+        setValidationErrors({});
+        setInjectionWarnings([]);
         try {
-            const response = await api.post('/api/documents/generate/download', {
+            const payload = {
                 docType: selectedType,
-                ...form,
-            }, {
-                responseType: 'blob',
-            });
+                petitionerName: form.petitionerName,
+                petitionerAddress: form.petitionerAddress,
+                respondentName: form.respondentName,
+                respondentAddress: form.respondentAddress,
+                caseDescription: form.caseDescription,
+                incidentDate: form.incidentDate,
+                reliefSought: form.reliefSought,
+                noticePeriod: form.noticePeriod,
+                language: form.language,
+                courtName: form.courtName,
+                departmentName: form.departmentName,
+                pioName: form.pioName,
+            };
 
-            // Create download link
+            const response = await documentGenerateAPI.download(payload);
+
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -132,11 +179,115 @@ const DocumentGeneratePage = () => {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
         } catch (err) {
-            const msg = err.response?.data?.error || err.message || 'Failed to download PDF';
-            setError(msg);
+            handleApiError(err);
         } finally {
             setIsDownloading(false);
         }
+    };
+
+    const handleDownloadDocx = async () => {
+        setIsDownloading(true);
+        setError(null);
+        setClipboardStatus('');
+        setValidationErrors({});
+        setInjectionWarnings([]);
+        try {
+            const payload = {
+                docType: selectedType,
+                petitionerName: form.petitionerName,
+                petitionerAddress: form.petitionerAddress,
+                respondentName: form.respondentName,
+                respondentAddress: form.respondentAddress,
+                caseDescription: form.caseDescription,
+                incidentDate: form.incidentDate,
+                reliefSought: form.reliefSought,
+                noticePeriod: form.noticePeriod,
+                language: form.language,
+                courtName: form.courtName,
+                departmentName: form.departmentName,
+                pioName: form.pioName,
+            };
+
+            const response = await documentGenerateAPI.downloadDocx(payload);
+            const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${selectedType}_${form.petitionerName.replace(/\s+/g, '_')}.docx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            handleApiError(err);
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+    const handleCopyToClipboard = async () => {
+        setIsCopying(true);
+        setClipboardStatus('');
+        try {
+            await navigator.clipboard.writeText(generatedDoc.content || '');
+            setClipboardStatus('Copied to clipboard');
+        } catch (copyError) {
+            setClipboardStatus('Failed to copy to clipboard');
+        } finally {
+            setIsCopying(false);
+            window.setTimeout(() => setClipboardStatus(''), 3000);
+        }
+    };
+
+    const mapBackendToFrontend = (name) => name.replace(/_([a-z])/g, (m, p) => p.toUpperCase());
+
+    const handleApiError = (err) => {
+        const resp = err.response;
+        setGeneratedDoc(null);
+        setValidationErrors({});
+        setInjectionWarnings([]);
+
+        // Pydantic validation errors (list)
+        if (resp && Array.isArray(resp.data?.detail)) {
+            const fieldErrors = {};
+            resp.data.detail.forEach((d) => {
+                const loc = d.loc || [];
+                const idx = loc.indexOf('fields');
+                if (idx !== -1 && loc.length > idx + 1) {
+                    const backendField = loc[idx + 1];
+                    const front = mapBackendToFrontend(backendField);
+                    fieldErrors[front] = d.msg;
+                }
+            });
+            setValidationErrors(fieldErrors);
+            setError('Please fix the highlighted fields.');
+            setStep(2);
+            return;
+        }
+
+        const detail = resp?.data?.detail || resp?.data || null;
+        if (detail && typeof detail === 'object') {
+            if (detail.missing_fields) {
+                const errs = {};
+                detail.missing_fields.forEach((bf) => {
+                    errs[mapBackendToFrontend(bf)] = 'This field is required.';
+                });
+                setValidationErrors(errs);
+                setError('Required fields are missing — please complete them.');
+                setStep(2);
+                return;
+            }
+            if (detail.prompt_injection_detected) {
+                setInjectionWarnings(detail.prompt_injection_detected || []);
+                setError('Potential prompt-injection detected in your inputs — please remove suspicious content.');
+                setStep(2);
+                return;
+            }
+            setError(JSON.stringify(detail));
+            return;
+        }
+
+        setError(err.message || 'An unexpected error occurred');
     };
 
     const selectedDocInfo = DOC_TYPES.find(d => d.id === selectedType);
@@ -144,7 +295,7 @@ const DocumentGeneratePage = () => {
     // ── Shared styles ────────────────────────────────────────────────────────
 
     const cardStyle = {
-        background: 'white',
+        background: 'var(--bg-surface)',
         border: '1px solid var(--color-border)',
         borderRadius: '1rem',
         padding: '1.5rem',
@@ -153,20 +304,21 @@ const DocumentGeneratePage = () => {
     const inputStyle = {
         width: '100%',
         padding: '0.75rem 1rem',
-        border: '1px solid #E5E7EB',
+        border: 'var(--color-border)',
         borderRadius: '0.5rem',
         fontSize: '0.9rem',
         outline: 'none',
         transition: 'border-color 0.2s',
-        background: '#FAFBFC',
+        background: 'var(--bg-surface)',
         fontFamily: 'inherit',
+        color:'var(--text-main)'
     };
 
     const labelStyle = {
         display: 'block',
         fontSize: '0.85rem',
         fontWeight: 600,
-        color: '#374151',
+        color: 'var(--text-main)',
         marginBottom: '0.35rem',
     };
 
@@ -205,7 +357,7 @@ const DocumentGeneratePage = () => {
             {/* Header */}
             <header style={{
                 padding: '1rem 1.5rem',
-                background: 'white',
+                background: 'var(--bg-surface)',
                 borderBottom: '1px solid var(--color-border)',
                 display: 'flex',
                 alignItems: 'center',
@@ -230,7 +382,7 @@ const DocumentGeneratePage = () => {
                             width: s === step ? '2rem' : '0.5rem',
                             height: '0.5rem',
                             borderRadius: '0.25rem',
-                            background: s <= step ? 'var(--color-primary)' : '#E5E7EB',
+                            background: s <= step ? 'var(--color-primary)' : 'var(--color-border)',
                             transition: 'all 0.3s',
                         }} />
                     ))}
@@ -250,7 +402,7 @@ const DocumentGeneratePage = () => {
                             exit={{ opacity: 0, x: 20 }}
                             transition={{ duration: 0.25 }}
                         >
-                            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', color: '#1F2937' }}>
+                            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-main)' }}>
                                 Select Document Type
                             </h2>
                             <div style={{
@@ -286,10 +438,10 @@ const DocumentGeneratePage = () => {
                                             }}>
                                                 <Icon size={24} color={docType.color} />
                                             </div>
-                                            <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: '0 0 0.25rem', color: '#1F2937' }}>
+                                            <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: '0 0 0.25rem', color: 'var(--text-main)' }}>
                                                 {docType.title}
                                             </h3>
-                                            <p style={{ fontSize: '0.8rem', color: '#6B7280', margin: 0, lineHeight: 1.4 }}>
+                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
                                                 {docType.description}
                                             </p>
                                         </motion.div>
@@ -334,18 +486,64 @@ const DocumentGeneratePage = () => {
                                         <label style={labelStyle}>Petitioner Name *</label>
                                         <input name="petitionerName" value={form.petitionerName} onChange={handleInputChange}
                                             style={inputStyle} placeholder="Full legal name" />
+                                        {validationErrors.petitionerName && (
+                                            <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                {validationErrors.petitionerName}
+                                            </div>
+                                        )}
                                     </div>
                                     <div>
                                         <label style={labelStyle}>Incident Date *</label>
                                         <input name="incidentDate" type="date" value={form.incidentDate} onChange={handleInputChange}
                                             style={inputStyle} />
+                                        {validationErrors.incidentDate && (
+                                            <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                {validationErrors.incidentDate}
+                                            </div>
+                                        )}
                                     </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={labelStyle}>Language</label>
+                                        <select name="language" value={form.language} onChange={handleInputChange}
+                                            style={inputStyle}>
+                                            <option value="en">English</option>
+                                            <option value="hi">Hindi</option>
+                                            <option value="ta">Tamil</option>
+                                            <option value="mr">Marathi</option>
+                                            <option value="kn">Kannada</option>
+                                        </select>
+                                    </div>
+                                    {selectedType === 'demand_letter' && (
+                                        <div>
+                                            <label style={labelStyle}>Response Period (days) *</label>
+                                            <input name="noticePeriod" type="number" min="1" value={form.noticePeriod} onChange={handleInputChange}
+                                                style={inputStyle} placeholder="e.g. 30" />
+                                            {validationErrors.noticePeriod && (
+                                                <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                    {validationErrors.noticePeriod}
+                                                </div>
+                                            )}
+                                            {computeResponseDeadline() && (
+                                                <div style={{ color: '#4B5563', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                    Suggested response deadline: {computeResponseDeadline()}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div>
                                     <label style={labelStyle}>Petitioner Address *</label>
-                                    <input name="petitionerAddress" value={form.petitionerAddress} onChange={handleInputChange}
-                                        style={inputStyle} placeholder="Complete residential address" />
+                                    <textarea name="petitionerAddress" value={form.petitionerAddress} onChange={handleInputChange}
+                                        style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} placeholder="Complete residential address" />
+                                    {validationErrors.petitionerAddress && (
+                                        <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                            {validationErrors.petitionerAddress}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Respondent fields (not for RTI) */}
@@ -356,11 +554,21 @@ const DocumentGeneratePage = () => {
                                                 <label style={labelStyle}>Respondent Name *</label>
                                                 <input name="respondentName" value={form.respondentName} onChange={handleInputChange}
                                                     style={inputStyle} placeholder="Respondent's full name" />
+                                                    {validationErrors.respondentName && (
+                                                        <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                            {validationErrors.respondentName}
+                                                        </div>
+                                                    )}
                                             </div>
                                             <div>
                                                 <label style={labelStyle}>Respondent Address *</label>
-                                                <input name="respondentAddress" value={form.respondentAddress} onChange={handleInputChange}
-                                                    style={inputStyle} placeholder="Respondent's address" />
+                                                <textarea name="respondentAddress" value={form.respondentAddress} onChange={handleInputChange}
+                                                    style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} placeholder="Respondent's address" />
+                                                    {validationErrors.respondentAddress && (
+                                                        <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                            {validationErrors.respondentAddress}
+                                                        </div>
+                                                    )}
                                             </div>
                                         </div>
                                     </>
@@ -373,11 +581,21 @@ const DocumentGeneratePage = () => {
                                             <label style={labelStyle}>Department Name *</label>
                                             <input name="departmentName" value={form.departmentName} onChange={handleInputChange}
                                                 style={inputStyle} placeholder="e.g. Ministry of Finance" />
+                                                {validationErrors.departmentName && (
+                                                    <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                        {validationErrors.departmentName}
+                                                    </div>
+                                                )}
                                         </div>
                                         <div>
                                             <label style={labelStyle}>PIO Name (optional)</label>
                                             <input name="pioName" value={form.pioName} onChange={handleInputChange}
                                                 style={inputStyle} placeholder="Public Information Officer" />
+                                                {validationErrors.pioName && (
+                                                    <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                        {validationErrors.pioName}
+                                                    </div>
+                                                )}
                                         </div>
                                     </div>
                                 )}
@@ -388,6 +606,11 @@ const DocumentGeneratePage = () => {
                                         <label style={labelStyle}>Court Name (optional)</label>
                                         <input name="courtName" value={form.courtName} onChange={handleInputChange}
                                             style={inputStyle} placeholder="e.g. District Court, Patiala House" />
+                                            {validationErrors.courtName && (
+                                                <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                    {validationErrors.courtName}
+                                                </div>
+                                            )}
                                     </div>
                                 )}
 
@@ -402,6 +625,11 @@ const DocumentGeneratePage = () => {
                                             : 'Describe the facts of the case in detail...'
                                         }
                                     />
+                                    {validationErrors.caseDescription && (
+                                        <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                            {validationErrors.caseDescription}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Relief sought (not for RTI) */}
@@ -412,6 +640,11 @@ const DocumentGeneratePage = () => {
                                             style={{ ...inputStyle, minHeight: '70px', resize: 'vertical' }}
                                             placeholder="What outcome or remedy are you seeking?"
                                         />
+                                        {validationErrors.reliefSought && (
+                                            <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                {validationErrors.reliefSought}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -424,6 +657,20 @@ const DocumentGeneratePage = () => {
                                     }}>
                                         <AlertTriangle size={16} />
                                         {error}
+                                    </div>
+                                )}
+                                {injectionWarnings && injectionWarnings.length > 0 && (
+                                    <div style={{
+                                        display: 'flex', flexDirection: 'column', gap: '0.5rem',
+                                        padding: '0.75rem', background: '#FFF7ED', border: '1px solid #FDE68A',
+                                        borderRadius: '0.5rem', color: '#92400E', fontSize: '0.85rem',
+                                    }}>
+                                        <strong>Suspicious input detected:</strong>
+                                        <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
+                                            {injectionWarnings.map((w, i) => (
+                                                <li key={i}>{w}</li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 )}
 
@@ -498,7 +745,7 @@ const DocumentGeneratePage = () => {
                                 <div style={{
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                     marginBottom: '1rem', paddingBottom: '0.75rem',
-                                    borderBottom: '1px solid #F3F4F6',
+                                    borderBottom: '1px solid var(--color-border)',
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <FileText size={18} color="var(--color-primary)" />
@@ -518,14 +765,14 @@ const DocumentGeneratePage = () => {
                                         width: '100%',
                                         minHeight: '400px',
                                         padding: '1rem',
-                                        border: '1px solid #E5E7EB',
+                                        border: '1px solid var(--color-border)',
                                         borderRadius: '0.5rem',
                                         fontFamily: '"Courier New", Courier, monospace',
                                         fontSize: '0.88rem',
                                         lineHeight: 1.6,
-                                        background: '#FAFBFC',
+                                        background: 'var(--bg-surface)',
                                         resize: 'vertical',
-                                        color: '#1F2937',
+                                        color: 'var(--text-main)',
                                     }}
                                 />
                             </div>
@@ -557,33 +804,90 @@ const DocumentGeneratePage = () => {
                                     {error}
                                 </div>
                             )}
+                            {clipboardStatus && (
+                                <div style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                    padding: '0.75rem', background: '#ECFDF5', border: '1px solid #D1FAE5',
+                                    borderRadius: '0.5rem', color: '#065F46', fontSize: '0.85rem',
+                                    marginBottom: '1rem',
+                                }}>
+                                    <CheckCircle size={16} />
+                                    {clipboardStatus}
+                                </div>
+                            )}
 
                             {/* Actions */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '0.75rem' }}>
                                 <button onClick={() => { setStep(2); setGeneratedDoc(null); }} style={btnOutline}>
                                     <ArrowLeft size={16} /> Edit Fields
                                 </button>
-                                <button
-                                    onClick={handleDownloadPdf}
-                                    disabled={isDownloading}
-                                    style={{
-                                        ...btnPrimary,
-                                        background: '#059669',
-                                        opacity: isDownloading ? 0.6 : 1,
-                                        cursor: isDownloading ? 'not-allowed' : 'pointer',
-                                    }}
-                                >
-                                    {isDownloading ? (
-                                        <>
-                                            <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                                            Preparing PDF...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Download size={16} /> Download PDF
-                                        </>
-                                    )}
-                                </button>
+                                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                    <button
+                                        onClick={handleCopyToClipboard}
+                                        disabled={isCopying}
+                                        style={{
+                                            ...btnOutline,
+                                            minWidth: '180px',
+                                            opacity: isCopying ? 0.6 : 1,
+                                            cursor: isCopying ? 'not-allowed' : 'pointer',
+                                        }}
+                                    >
+                                        {isCopying ? (
+                                            <>
+                                                <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                                                Copying...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ClipboardList size={16} /> Copy to clipboard
+                                            </>
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={handleDownloadDocx}
+                                        disabled={isDownloading}
+                                        style={{
+                                            ...btnPrimary,
+                                            background: '#2563EB',
+                                            opacity: isDownloading ? 0.6 : 1,
+                                            cursor: isDownloading ? 'not-allowed' : 'pointer',
+                                            minWidth: '180px',
+                                        }}
+                                    >
+                                        {isDownloading ? (
+                                            <>
+                                                <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                                                Preparing DOCX...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FileText size={16} /> Download DOCX
+                                            </>
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={handleDownloadPdf}
+                                        disabled={isDownloading}
+                                        style={{
+                                            ...btnPrimary,
+                                            background: '#059669',
+                                            opacity: isDownloading ? 0.6 : 1,
+                                            cursor: isDownloading ? 'not-allowed' : 'pointer',
+                                            minWidth: '180px',
+                                        }}
+                                    >
+                                        {isDownloading ? (
+                                            <>
+                                                <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                                                Preparing PDF...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Download size={16} /> Download PDF
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     )}

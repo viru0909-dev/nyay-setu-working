@@ -18,8 +18,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import java.util.concurrent.TimeUnit;
 
 /**
  * RateLimitFilter
@@ -34,8 +35,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * - 5 requests per minute per IP
  *
  * Protected endpoints:
- * - /api/auth/login
- * - /api/auth/register
+ * - /api/v1/auth/login
+ * - /api/v1/auth/register
+ * - /api/v1/auth/forgot-password
  */
 @Component
 @Slf4j
@@ -45,7 +47,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
      * Stores token buckets for each client IP.
      * ConcurrentHashMap ensures thread safety.
      */
-    private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
+      private final Cache<String, Bucket> cache = Caffeine.newBuilder()
+        .maximumSize(100_000)
+        .expireAfterAccess(2, TimeUnit.MINUTES)
+        .build();
 
     /**
      * Maximum allowed requests per minute.
@@ -72,10 +77,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             String clientIp = getClientIp(request);
 
             // Create bucket for new IP or reuse existing one
-            Bucket bucket = cache.computeIfAbsent(
-                    clientIp,
-                    ip -> createNewBucket()
-            );
+            Bucket bucket = cache.get(clientIp, ip -> createNewBucket());
 
             // Try consuming one token
             ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
@@ -189,7 +191,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
      */
     private boolean isRateLimitedEndpoint(String path) {
 
-        return path.matches("^/api/auth/(login|register)$");
+        return path.matches("^/api/v1/auth/(login|register|forgot-password)$");
     }
 
     /**

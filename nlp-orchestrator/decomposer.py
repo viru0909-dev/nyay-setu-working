@@ -9,11 +9,15 @@ from config import GROQ_API_KEY, GROQ_MODEL_FAST
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
-DECOMPOSE_PROMPT = """You are a senior Indian legal expert. A citizen asked a legal question.
+DECOMPOSE_PROMPT = """You are a senior Indian legal expert. A citizen asked a question.
 Your task is to break this down into 3 to 5 specific focused sub-questions that together 
 fully cover the original question. Each sub-question should be answerable independently.
 
-Focus on Indian law: IPC, BNS, CPC, MVA, Constitution, etc.
+Focus ONLY on Indian law: IPC, BNS, CPC, MVA, Constitution, etc.
+
+STRICT DOMAIN GUARDRAIL:
+- If the user's question is NOT related to Indian Law, legal procedures, or the Indian justice system, return an empty JSON array [].
+- DO NOT attempt to decompose non-legal queries (e.g., science, tech, general chitchat).
 
 Return ONLY a valid JSON array of strings. No explanation. No markdown.
 Example: ["What does Section 304A IPC say?", "What is the penalty for negligence?"]

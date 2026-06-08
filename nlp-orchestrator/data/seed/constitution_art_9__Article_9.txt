@@ -1,0 +1,5 @@
+# <b>Article</b> <b>9</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=260256
+# Fetch query: Constitution of India Article 9
+
+Article 9 in Constitution of India 9. Persons voluntarily acquiring citizenship of a foreign State not to be citizens No person shall be a citizen of India by virtue of article 5, or be deemed to be a citizen of India by virtue of article 6 or article 8, if he has voluntarily acquired the citizenship of any foreign State.

@@ -1,0 +1,827 @@
+openapi: 3.0.0
+info:
+  title: Nyay Setu - Legal Platform API
+  description: |
+    Comprehensive API documentation for Nyay Setu - An AI-powered legal assistance platform.
+    
+    ## Authentication
+    - Use JWT tokens obtained from `/auth/login` endpoint
+    - Include token in `Authorization: Bearer <token>` header
+    - Tokens expire in 24 hours; use refresh tokens for renewal
+    
+    ## Environments
+    - **Development**: http://localhost:8080
+    - **Staging**: https://staging.nyaysetu.in
+    - **Production**: https://nyaysetu.in
+    
+    ## Architecture
+    The platform consists of multiple interconnected services:
+    - **Backend (Spring Boot)**: Core business logic on port 8080
+    - **LawGPT Service**: Legal document generation on port 8000
+    - **NLP Orchestrator**: Advanced legal reasoning on port 8001
+    - **Signaling Server**: WebRTC communication on port 3001
+  version: 1.0.0
+  contact:
+    name: Nyay Setu Team
+    email: support@nyaysetu.in
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://localhost:8080
+    description: Development Server
+  - url: https://staging.nyaysetu.in
+    description: Staging Server
+  - url: https://nyaysetu.in
+    description: Production Server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Cases
+    description: Case management operations
+  - name: Documents
+    description: Document upload, analysis, and management
+  - name: Evidence
+    description: Evidence management with blockchain verification
+  - name: Hearings
+    description: Hearing scheduling and management
+  - name: Court Orders
+    description: Court order management
+  - name: Judge Portal
+    description: Judge-specific operations
+  - name: Lawyer Portal
+    description: Lawyer-specific operations
+  - name: Police FIR
+    description: FIR upload and management
+  - name: Legal Documents (LawGPT)
+    description: AI-powered legal document generation
+  - name: Legal Reasoning (NLP)
+    description: Advanced legal reasoning and analysis
+  - name: WebRTC (Signaling)
+    description: Real-time communication for virtual hearings
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Create a new user account with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - role
+                - firstName
+                - lastName
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: securePassword123
+                role:
+                  type: string
+                  enum: [USER, LAWYER, JUDGE, POLICE, ADMIN]
+                  example: LAWYER
+                firstName:
+                  type: string
+                  example: John
+                lastName:
+                  type: string
+                  example: Doe
+                phone:
+                  type: string
+                  pattern: '^\+?[1-9]\d{1,14}$'
+                  example: '+919876543210'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  email:
+                    type: string
+                  role:
+                    type: string
+                  message:
+                    type: string
+        '400':
+          description: Invalid input or user already exists
+        '500':
+          description: Internal server error
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and receive JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT access token
+                  refreshToken:
+                    type: string
+                    description: Token for refreshing access
+                  expiresIn:
+                    type: integer
+                    description: Token expiration time in seconds
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+        '401':
+          description: Invalid credentials
+        '404':
+          description: User not found
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Get new access token using refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: New token generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  expiresIn:
+                    type: integer
+        '401':
+          description: Invalid or expired refresh token
+
+  /cases:
+    get:
+      tags:
+        - Cases
+      summary: List all cases
+      description: Retrieve cases with pagination and filtering
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, FILED, ACTIVE, CLOSED, APPEALED]
+        - name: sort
+          in: query
+          schema:
+            type: string
+            example: createdAt,desc
+      responses:
+        '200':
+          description: List of cases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Case'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+    post:
+      tags:
+        - Cases
+      summary: Create a new case
+      description: Create a new legal case (requires LAWYER or JUDGE role)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseInput'
+      responses:
+        '201':
+          description: Case created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Only lawyers and judges can create cases
+
+  /cases/{caseId}:
+    get:
+      tags:
+        - Cases
+      summary: Get case details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Case details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '404':
+          description: Case not found
+
+    put:
+      tags:
+        - Cases
+      summary: Update case details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseInput'
+      responses:
+        '200':
+          description: Case updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '404':
+          description: Case not found
+
+  /documents/upload:
+    post:
+      tags:
+        - Documents
+      summary: Upload a document
+      description: Upload a legal document (PDF, DOC, DOCX, TXT)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - caseId
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Document file (max 10MB)
+                caseId:
+                  type: string
+                  format: uuid
+                documentType:
+                  type: string
+                  enum: [COMPLAINT, AFFIDAVIT, PETITION, ORDER, FIR, OTHER]
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Document uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          description: Invalid file format or size exceeds limit
+        '401':
+          description: Unauthorized
+
+  /documents/{documentId}/analyze:
+    post:
+      tags:
+        - Documents
+      summary: Analyze document with AI
+      description: Use AI to extract information and generate analysis
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                analysisType:
+                  type: string
+                  enum: [LEGAL_REVIEW, EVIDENCE_EXTRACTION, TIMELINE, SUMMARY]
+                includeAI:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Analysis completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  documentId:
+                    type: string
+                  analysis:
+                    type: object
+                  confidence:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+        '404':
+          description: Document not found
+
+  /evidence:
+    post:
+      tags:
+        - Evidence
+      summary: Add evidence to case
+      description: Add evidence with blockchain verification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - caseId
+                - title
+                - description
+                - evidenceType
+              properties:
+                caseId:
+                  type: string
+                  format: uuid
+                title:
+                  type: string
+                description:
+                  type: string
+                evidenceType:
+                  type: string
+                  enum: [DOCUMENT, PHOTO, VIDEO, AUDIO, DIGITAL, PHYSICAL]
+                chainOfCustody:
+                  type: object
+                  properties:
+                    collectedBy:
+                      type: string
+                    collectionDate:
+                      type: string
+                      format: date-time
+                    location:
+                      type: string
+      responses:
+        '201':
+          description: Evidence recorded with blockchain hash
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  evidenceId:
+                    type: string
+                  blockchainHash:
+                    type: string
+                    description: SHA-256 hash for verification
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /hearings:
+    post:
+      tags:
+        - Hearings
+      summary: Schedule a hearing
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - caseId
+                - scheduledDate
+                - courtroom
+              properties:
+                caseId:
+                  type: string
+                  format: uuid
+                scheduledDate:
+                  type: string
+                  format: date-time
+                courtroom:
+                  type: string
+                participants:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                hearingType:
+                  type: string
+                  enum: [PHYSICAL, VIRTUAL, HYBRID]
+      responses:
+        '201':
+          description: Hearing scheduled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hearingId:
+                    type: string
+                  caseId:
+                    type: string
+                  status:
+                    type: string
+                  videoConferenceLink:
+                    type: string
+                    description: Generated if hearing is VIRTUAL or HYBRID
+
+  /lawgpt/generate:
+    post:
+      tags:
+        - Legal Documents (LawGPT)
+      summary: Generate legal document
+      description: Generate AI-powered legal documents using LawGPT service
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - documentType
+                - caseId
+              properties:
+                documentType:
+                  type: string
+                  enum: [AFFIDAVIT, RTI, COMPLAINT, NOTICE, PETITION, RESPONSE]
+                caseId:
+                  type: string
+                  format: uuid
+                context:
+                  type: object
+                  description: Case-specific context for generation
+                language:
+                  type: string
+                  enum: [EN, HI, HINGLISH]
+                  default: EN
+      responses:
+        '200':
+          description: Document generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  documentId:
+                    type: string
+                  documentType:
+                    type: string
+                  content:
+                    type: string
+                  language:
+                    type: string
+                  generatedAt:
+                    type: string
+                    format: date-time
+
+  /nlp/analyze:
+    post:
+      tags:
+        - Legal Reasoning (NLP)
+      summary: Analyze case with legal reasoning
+      description: |
+        Run advanced legal reasoning pipeline (5-layer analysis):
+        1. Input Sanitization
+        2. Case Decomposition
+        3. Legal Retrieval (RAG)
+        4. Reasoning
+        5. Response Synthesis
+        
+        Supports streaming responses using Server-Sent Events (SSE)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - caseId
+                - query
+              properties:
+                caseId:
+                  type: string
+                  format: uuid
+                query:
+                  type: string
+                  description: Legal question or analysis request
+                analysisDepth:
+                  type: string
+                  enum: [QUICK, STANDARD, DEEP]
+                  default: STANDARD
+                includeForensics:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Analysis started (SSE stream)
+          content:
+            text/event-stream:
+              schema:
+                type: object
+                properties:
+                  event:
+                    type: string
+                    enum: [analysis, progress, result, error]
+                  data:
+                    type: string
+
+  /forensics/analyze:
+    post:
+      tags:
+        - Legal Reasoning (NLP)
+      summary: Perform forensic analysis
+      description: Analyze evidence with digital forensics
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - evidenceId
+              properties:
+                evidenceId:
+                  type: string
+                  format: uuid
+                analysisType:
+                  type: string
+                  enum: [DIGITAL, METADATA, TIMELINE, PATTERN]
+      responses:
+        '200':
+          description: Forensic analysis completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  evidenceId:
+                    type: string
+                  findings:
+                    type: array
+                    items:
+                      type: object
+                  confidence:
+                    type: number
+
+  /modi/ocr:
+    post:
+      tags:
+        - Legal Reasoning (NLP)
+      summary: Perform OCR on Modi script
+      description: Extract text from Modi script handwritten documents
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OCR completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: string
+                  confidence:
+                    type: number
+                  language:
+                    type: string
+
+components:
+  schemas:
+    Case:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, FILED, ACTIVE, CLOSED, APPEALED]
+        caseNumber:
+          type: string
+        court:
+          type: string
+        judge:
+          type: string
+        parties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              role:
+                type: string
+                enum: [PLAINTIFF, DEFENDANT, APPELLANT, RESPONDENT]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CaseInput:
+      type: object
+      required:
+        - title
+        - court
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        court:
+          type: string
+        caseType:
+          type: string
+          enum: [CIVIL, CRIMINAL, FAMILY, COMMERCIAL, CONSTITUTIONAL]
+        parties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              role:
+                type: string
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        caseId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        documentType:
+          type: string
+        fileName:
+          type: string
+        fileSize:
+          type: integer
+        uploadedBy:
+          type: string
+        uploadedAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token obtained from /auth/login
+        Format: Authorization: Bearer <token>
+        Token expires in 24 hours
+
+security:
+  - bearerAuth: []
+
+x-internal-id: nyay-setu-api-v1

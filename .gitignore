@@ -1,3 +1,7 @@
+# Logs
+**/logs/
+**/*.log
+**/backend.log
 # Build directories
 target/
 **/target/
@@ -5,6 +9,7 @@ build/
 **/build/
 dist/
 **/dist/
+backend/nyaysetu-backend/src/main/resources/application.properties
 
 venv/
 __pycache__/
@@ -53,6 +58,8 @@ __pycache__/
 *.pyd
 *.key
 *.pem
+nlp-orchestrator/.env
+nlp-orchestrator/.env.example
 
 # API Keys and Secrets - IMPORTANT
 **/apiKey.js
@@ -76,8 +83,6 @@ __pycache__/
 **/uploads/
 **/evidence/
 **/EVIDENCE/
-uploads/
-evidence/
 
 
 # Temporary files
@@ -100,3 +105,5 @@ __pycache__/
 *.pyc
 .pytest_cache/
 backend/nyaysetu-backend/src/main/resources/application.properties
+
+*.zip
