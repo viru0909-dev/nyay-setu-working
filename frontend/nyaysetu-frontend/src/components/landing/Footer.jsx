@@ -41,7 +41,9 @@ export default function Footer() {
     ];
 
     const quickLinks = [
+        { label: t('common:header.nav.home'), href: '/', isRoute: true },
         { label: t('common:header.nav.features'), href: '/#features' },
+        { label: t('common:header.nav.upcomingFeatures'), href: '/upcoming-features', isRoute: true },
         { label: t('common:header.nav.constitution'), href: '/constitution', isRoute: true },
         { label: t('common:header.nav.aiAssistant'), action: () => setShowAIModal(true) },
         { label: t('common:header.nav.about'), href: '/about', isRoute: true }

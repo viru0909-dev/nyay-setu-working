@@ -9,6 +9,7 @@ from services.video_processor import download_video, extract_frames, cleanup_job
 from services.gemini_analyzer import analyze_frames
 from services.groq_router import legal_section_lookup
 from services.report_generator import generate_report, generate_avatar_script
+from sanitizer import sanitize_prompt_input
 
 logger = logging.getLogger("forensics-router")
 router = APIRouter(prefix="/forensics", tags=["Forensics"])
@@ -23,7 +24,7 @@ async def forensic_analysis_pipeline(request_data: ForensicsRequest):
     """
     job_id = request_data.jobId
     video_urls = request_data.videoUrls
-    citizen_desc = request_data.citizenDescription
+    citizen_desc = sanitize_prompt_input(request_data.citizenDescription or "")
     
     if not video_urls:
         yield sse_event("error", {"jobId": job_id, "message": "No video URLs provided."})

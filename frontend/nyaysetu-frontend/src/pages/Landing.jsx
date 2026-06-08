@@ -1,3 +1,4 @@
+import ScrollProgress from "../components/ScrollProgress";
 import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -100,6 +101,8 @@ export default function Landing() {
     ];
 
     return (
+        <>
+        <ScrollProgress />
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
             <Header />
             <AIChatbot />
@@ -406,8 +409,11 @@ export default function Landing() {
                     background: 'var(--bg-surface)',
                     borderTop: '1px solid var(--border-light)',
                     borderBottom: '1px solid var(--border-light)',
+                    boxSizing: 'border-box',
+                    width: '100%',
+                    overflowX: 'hidden',
                 }}>
-                    <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
+                    <div style={{ maxWidth: '1320px', margin: '0 auto', width: '100%', boxSizing: 'border-box'}}>
                         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                             <div style={{
                                 display: 'inline-block', padding: '0.4rem 1rem', marginBottom: '1rem',
@@ -674,24 +680,55 @@ export default function Landing() {
             <Footer />
 
             <style>{`
-                .hero-img-wrap {
-                    position: relative;
-                    z-index: 1;
-                    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 45%, transparent 100%);
-                    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 45%, transparent 100%);
-                }
-                .hero-img { border-radius: 0; }
-                @media (max-width: 900px) {
-                    .hero-grid { grid-template-columns: 1fr !important; }
-                    .hero-grid > div:last-child { display: none; }
-                    .quick-cards-grid { grid-template-columns: 1fr !important; }
-                    .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
-                }
-                @media (max-width: 600px) {
-                    .quick-cards-grid { grid-template-columns: 1fr !important; }
-                    .features-grid { grid-template-columns: 1fr !important; }
-                }
-            `}</style>
+            .hero-img-wrap {
+                position: relative;
+                z-index: 1;
+                -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 45%, transparent 100%);
+                mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 45%, transparent 100%);
+            }
+                
+            .hero-img { border-radius: 0; }
+            
+            @media (max-width: 900px) {
+                .hero-grid { grid-template-columns: 1fr !important; }
+                .hero-grid > div:last-child { display: none; }
+                .quick-cards-grid { grid-template-columns: 1fr !important; }
+                .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            }
+
+            @media (max-width: 600px) {
+                .quick-cards-grid { grid-template-columns: 1fr !important; }
+                .features-grid { grid-template-columns: 1fr !important; }
+            }
+
+    /* ── Fix for very small screens (332px and below) ── */
+            @media (max-width: 400px) {
+                .features-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            .quick-cards-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+        }
+
+    /* ── Prevent any grid/section from overflowing viewport ── */
+    .features-grid,
+    .quick-cards-grid,
+    .hero-grid {
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
+    }
+
+    /* ── Global overflow guard ── */
+    html, body {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+`}</style>
         </div>
+        </>
     );
 }
