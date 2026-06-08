@@ -29,14 +29,15 @@ mockMvc.perform(get("/api/v1/health"))
 
     @Test
     void unauthenticated_user_isDeniedForAiEndpoint() throws Exception {
-mockMvc.perform(get("/ai/chat"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/ai/chat"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @WithMockUser(username = "judge@example.com", roles = {"JUDGE"})
-    void judgeRole_canAccessJudgeEndpoint() throws Exception {
-mockMvc.perform(get("/api/v1/judge/cases"))
+    @Test
+    @WithMockUser(username = "litigant@example.com", roles = {"LITIGANT"})
+    void litigant_isForbiddenFromJudgeEndpoint() throws Exception {
+        mockMvc.perform(get("/api/v1/judge/cases"))
                 .andExpect(status().isForbidden());
     }
 
