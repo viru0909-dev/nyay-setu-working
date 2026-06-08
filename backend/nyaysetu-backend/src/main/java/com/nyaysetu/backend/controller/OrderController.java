@@ -1,10 +1,13 @@
 package com.nyaysetu.backend.controller;
 
+import com.nyaysetu.backend.dto.CreateCourtOrderRequest;
+import com.nyaysetu.backend.dto.UpdateCourtOrderRequest;
 import com.nyaysetu.backend.entity.CourtOrder;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CourtOrderRepository;
 import com.nyaysetu.backend.service.AuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +27,11 @@ public class OrderController {
     private final CourtOrderRepository orderRepository;
     private final AuthService authService;
 
-    /**
-     * Get all orders for a specific case
-     */
     @GetMapping("/case/{caseId}")
     public ResponseEntity<?> getOrdersByCase(@PathVariable UUID caseId) {
         try {
             List<CourtOrder> orders = orderRepository.findByCaseId(caseId);
-            
+
             List<Map<String, Object>> response = orders.stream().map(order -> {
                 Map<String, Object> orderData = new HashMap<>();
                 orderData.put("id", order.getId());
@@ -45,7 +45,7 @@ public class OrderController {
                 orderData.put("issuedAt", order.getIssuedAt());
                 return orderData;
             }).toList();
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error fetching orders for case {}", caseId, e);
@@ -53,26 +53,24 @@ public class OrderController {
         }
     }
 
-    /**
-     * Create a new court order
-     */
     @PostMapping
     public ResponseEntity<?> createOrder(
-            @RequestBody Map<String, Object> request,
-            Authentication authentication) {
+            @Valid @RequestBody CreateCourtOrderRequest request,
+            Authentication authentication
+    ) {
         try {
             User judge = authService.findByEmail(authentication.getName());
-            
+
             CourtOrder order = CourtOrder.builder()
-                    .caseId(UUID.fromString((String) request.get("caseId")))
-                    .orderType((String) request.get("orderType"))
-                    .content((String) request.get("content"))
+                    .caseId(request.getCaseId())
+                    .orderType(request.getOrderType())
+                    .content(request.getContent())
                     .status("DRAFT")
                     .issuedBy(judge.getName())
                     .build();
-            
+
             CourtOrder saved = orderRepository.save(order);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("id", saved.getId());
             response.put("caseId", saved.getCaseId());
@@ -82,7 +80,7 @@ public class OrderController {
             response.put("issuedBy", saved.getIssuedBy());
             response.put("createdAt", saved.getCreatedAt());
             response.put("message", "Order created successfully");
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error creating order", e);
@@ -90,44 +88,43 @@ public class OrderController {
         }
     }
 
-    /**
-     * Update an existing order
-     */
     @PutMapping("/{orderId}")
     public ResponseEntity<?> updateOrder(
             @PathVariable UUID orderId,
-            @RequestBody Map<String, Object> request,
-            Authentication authentication) {
+            @Valid @RequestBody UpdateCourtOrderRequest request,
+            Authentication authentication
+    ) {
         try {
             Optional<CourtOrder> optOrder = orderRepository.findById(orderId);
             if (optOrder.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             CourtOrder order = optOrder.get();
-            
-            if (request.containsKey("content")) {
-                order.setContent((String) request.get("content"));
+
+            if (request.getContent() != null) {
+                order.setContent(request.getContent());
             }
-            if (request.containsKey("orderType")) {
-                order.setOrderType((String) request.get("orderType"));
+            if (request.getOrderType() != null) {
+                order.setOrderType(request.getOrderType());
             }
-            if (request.containsKey("status")) {
-                String newStatus = (String) request.get("status");
+            if (request.getStatus() != null) {
+                String newStatus = request.getStatus().name();
                 order.setStatus(newStatus);
+
                 if ("ISSUED".equals(newStatus) || "FINAL".equals(newStatus)) {
                     order.setIssuedAt(LocalDateTime.now());
                 }
             }
-            
+
             CourtOrder saved = orderRepository.save(order);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("id", saved.getId());
             response.put("status", saved.getStatus());
             response.put("updatedAt", saved.getUpdatedAt());
             response.put("message", "Order updated successfully");
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error updating order {}", orderId, e);
@@ -135,9 +132,6 @@ public class OrderController {
         }
     }
 
-    /**
-     * Delete an order (only drafts can be deleted)
-     */
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteOrder(@PathVariable UUID orderId) {
         try {
@@ -145,12 +139,12 @@ public class OrderController {
             if (optOrder.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             CourtOrder order = optOrder.get();
             if (!"DRAFT".equals(order.getStatus())) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Only draft orders can be deleted"));
             }
-            
+
             orderRepository.delete(order);
             return ResponseEntity.ok(Map.of("message", "Order deleted successfully"));
         } catch (Exception e) {
@@ -159,15 +153,12 @@ public class OrderController {
         }
     }
 
-    /**
-     * Get all orders issued by the current judge
-     */
     @GetMapping("/my-orders")
     public ResponseEntity<?> getMyOrders(Authentication authentication) {
         try {
             User judge = authService.findByEmail(authentication.getName());
             List<CourtOrder> orders = orderRepository.findByIssuedBy(judge.getName());
-            
+
             List<Map<String, Object>> response = orders.stream().map(order -> {
                 Map<String, Object> orderData = new HashMap<>();
                 orderData.put("id", order.getId());
@@ -179,7 +170,7 @@ public class OrderController {
                 orderData.put("issuedAt", order.getIssuedAt());
                 return orderData;
             }).toList();
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error fetching judge orders", e);

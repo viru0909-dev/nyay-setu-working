@@ -1,11 +1,18 @@
 package com.nyaysetu.backend.controller;
 
+import com.nyaysetu.backend.dto.AddPartyRequest;
 import com.nyaysetu.backend.dto.CaseDTO;
 import com.nyaysetu.backend.dto.CreateCaseRequest;
+import com.nyaysetu.backend.dto.DeliverVerdictRequest;
+import com.nyaysetu.backend.dto.RespondentDetailsDTO;
+import com.nyaysetu.backend.dto.ReviewDraftRequest;
+import com.nyaysetu.backend.dto.SubmitDraftRequest;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.service.AuthService;
 import com.nyaysetu.backend.service.CaseManagementService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +32,11 @@ import java.util.UUID;
 public class CaseManagementController {
 
     private final CaseManagementService caseManagementService;
-    private final com.nyaysetu.backend.service.AuthService authService;
+    private final AuthService authService;
 
     @PostMapping
     public ResponseEntity<CaseDTO> createCase(
-            @RequestBody CreateCaseRequest request,
+            @Valid @RequestBody CreateCaseRequest request,
             Authentication authentication
     ) {
         User user = authService.findByEmail(authentication.getName());
@@ -47,7 +54,7 @@ public class CaseManagementController {
             return ResponseEntity.ok(cases);
         } catch (Exception e) {
             log.error("Error fetching cases for user {}: {}", authentication.getName(), e.getMessage());
-            return ResponseEntity.ok(Collections.emptyList()); // Return empty list instead of error
+            return ResponseEntity.ok(Collections.emptyList());
         }
     }
 
@@ -72,58 +79,50 @@ public class CaseManagementController {
         return ResponseEntity.ok(Map.of("message", "Case deleted successfully"));
     }
 
-    /**
-     * Handover C: Lawyer submits draft
-     */
     @PostMapping("/{id}/submit-draft")
     public ResponseEntity<Map<String, Object>> submitDraft(
             @PathVariable UUID id,
-            @RequestBody Map<String, String> request
+            @Valid @RequestBody SubmitDraftRequest request
     ) {
-        String draftContent = request.get("draftContent");
-        caseManagementService.sendDraftForApproval(id, draftContent);
-        return ResponseEntity.ok(Map.of("success", true, "message", "Draft submitted for approval"));
+        caseManagementService.sendDraftForApproval(id, request.getDraftContent());
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Draft submitted for approval"
+        ));
     }
 
-    /**
-     * Handover C: Client reviews draft
-     */
     @PostMapping("/{id}/review-draft")
     public ResponseEntity<Map<String, Object>> reviewDraft(
             @PathVariable UUID id,
-            @RequestBody Map<String, Object> request
+            @Valid @RequestBody ReviewDraftRequest request
     ) {
-        boolean approved = Boolean.parseBoolean(request.get("approved").toString());
-        String comments = request.get("comments") != null ? request.get("comments").toString() : "";
-        
+        boolean approved = request.getApproved();
+        String comments = request.getComments() != null ? request.getComments() : "";
+
         caseManagementService.approveDraft(id, approved, comments);
-        
+
         return ResponseEntity.ok(Map.of(
-            "success", true, 
-            "message", approved ? "Draft Approved" : "Changes Requested"
+                "success", true,
+                "message", approved ? "Draft Approved" : "Changes Requested"
         ));
     }
 
     @PutMapping("/{id}/approve-draft")
     public ResponseEntity<Map<String, Object>> approveDraft(
             @PathVariable UUID id,
-            @RequestBody Map<String, Object> request
+            @Valid @RequestBody ReviewDraftRequest request
     ) {
-        boolean approved = Boolean.parseBoolean(request.get("approved").toString());
-        String comments = request.get("comments") != null ? request.get("comments").toString() : "";
-        
+        boolean approved = request.getApproved();
+        String comments = request.getComments() != null ? request.getComments() : "";
+
         caseManagementService.approveDraft(id, approved, comments);
-        
+
         return ResponseEntity.ok(Map.of(
-            "success", true, 
-            "message", approved ? "Draft Approved" : "Changes Requested"
+                "success", true,
+                "message", approved ? "Draft Approved" : "Changes Requested"
         ));
     }
 
-    /**
-     * Handover D: Lawyer files the approved petition in court
-     * Transitions case to COGNIZANCE_PERIOD (stepper Stage 2 - Notice Issued)
-     */
     @PostMapping("/{id}/file-in-court")
     public ResponseEntity<Map<String, Object>> fileInCourt(@PathVariable UUID id) {
         CaseEntity caseEntity = caseManagementService.getCaseEntity(id);
@@ -131,10 +130,11 @@ public class CaseManagementController {
         caseEntity.setStage(com.nyaysetu.backend.entity.CaseStage.COGNIZANCE);
         caseEntity.setCurrentJudicialStage(1);
         caseManagementService.saveCaseEntity(caseEntity);
+
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Case filed in court successfully",
-            "newStatus", "COGNIZANCE_PERIOD"
+                "success", true,
+                "message", "Case filed in court successfully",
+                "newStatus", "COGNIZANCE_PERIOD"
         ));
     }
 
@@ -142,8 +142,8 @@ public class CaseManagementController {
     public ResponseEntity<Map<String, Object>> orderNotice(@PathVariable UUID id) {
         caseManagementService.orderRespondentNotice(id);
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Notice ordered successfully"
+                "success", true,
+                "message", "Notice ordered successfully"
         ));
     }
 
@@ -151,9 +151,9 @@ public class CaseManagementController {
     public ResponseEntity<Map<String, Object>> startHearings(@PathVariable UUID id) {
         caseManagementService.startHearings(id);
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Hearings started successfully",
-            "newStatus", "IN_PROGRESS"
+                "success", true,
+                "message", "Hearings started successfully",
+                "newStatus", "IN_PROGRESS"
         ));
     }
 
@@ -161,8 +161,8 @@ public class CaseManagementController {
     public ResponseEntity<Map<String, Object>> startEvidence(@PathVariable UUID id) {
         caseManagementService.startEvidence(id);
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Evidence phase started successfully"
+                "success", true,
+                "message", "Evidence phase started successfully"
         ));
     }
 
@@ -170,8 +170,8 @@ public class CaseManagementController {
     public ResponseEntity<Map<String, Object>> startArguments(@PathVariable UUID id) {
         caseManagementService.startArguments(id);
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Arguments phase started successfully"
+                "success", true,
+                "message", "Arguments phase started successfully"
         ));
     }
 
@@ -179,51 +179,57 @@ public class CaseManagementController {
     public ResponseEntity<Map<String, Object>> startJudgment(@PathVariable UUID id) {
         caseManagementService.startJudgment(id);
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Judgment phase started successfully"
+                "success", true,
+                "message", "Judgment phase started successfully"
         ));
     }
 
     @PostMapping("/{id}/deliver-verdict")
     public ResponseEntity<Map<String, Object>> deliverVerdict(
             @PathVariable UUID id,
-            @RequestBody Map<String, String> payload) {
-        String verdictDetails = payload.getOrDefault("verdictDetails", "Final judgment passed.");
+            @Valid @RequestBody DeliverVerdictRequest request
+    ) {
+        String verdictDetails = request.getVerdictDetails() != null
+                ? request.getVerdictDetails()
+                : "Final judgment passed.";
+
         caseManagementService.deliverVerdict(id, verdictDetails);
+
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Verdict delivered successfully",
-            "newStatus", "COMPLETED"
+                "success", true,
+                "message", "Verdict delivered successfully",
+                "newStatus", "COMPLETED"
         ));
     }
 
     @PostMapping("/{id}/parties")
     public ResponseEntity<Map<String, Object>> addParty(
             @PathVariable UUID id,
-            @RequestBody Map<String, String> request
+            @Valid @RequestBody AddPartyRequest request
     ) {
-        String partyName = request.get("partyName");
-        String partyType = request.get("partyType"); // PETITIONER, RESPONDENT, WITNESS, etc.
-        String partyEmail = request.get("partyEmail");
-        
-        caseManagementService.addPartyToCase(id, partyName, partyType, partyEmail);
-        
+        caseManagementService.addPartyToCase(
+                id,
+                request.getPartyName(),
+                request.getPartyType(),
+                request.getPartyEmail()
+        );
+
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Party added successfully"
+                "success", true,
+                "message", "Party added successfully"
         ));
     }
 
     @PutMapping("/{id}/respondent-details")
     public ResponseEntity<Map<String, Object>> updateRespondentDetails(
             @PathVariable UUID id,
-            @RequestBody com.nyaysetu.backend.dto.RespondentDetailsDTO details
+            @RequestBody RespondentDetailsDTO details
     ) {
         caseManagementService.updateRespondentDetails(id, details);
-        
+
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Respondent details updated successfully"
+                "success", true,
+                "message", "Respondent details updated successfully"
         ));
     }
 }
