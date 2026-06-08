@@ -16,6 +16,7 @@ import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
 
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
+// force rebuild
 
 // Lazy load pages for better performance
 const Landing = lazy(() => import('./pages/Landing'));
