@@ -192,11 +192,15 @@ public class DocumentManagementController {
             userRole = "PETITIONER";
         } else if (user.getEmail().equals(caseData.getRespondentEmail())) {
             userRole = "RESPONDENT";
+        } else if (caseData.getLawyerId() != null && caseData.getLawyerId().equals(user.getId())) {
+            userRole = "LAWYER";
         }
+
+        boolean isCaseLawyer = caseData.getLawyerId() != null && caseData.getLawyerId().equals(user.getId());
         
         // Get filtered documents based on role
         List<DocumentDto> documents = documentManagementService.getCaseDocumentsWithAccessControl(
-            caseId, user.getId(), userRole
+            caseId, user.getId(), userRole, isCaseLawyer
         );
         return ResponseEntity.ok(documents);
     }

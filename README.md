@@ -511,6 +511,7 @@ This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE)
   Built with purpose for a more accessible Indian Judiciary.<br/>
   <em>Nyay Setu — न्याय हर किसी का अधिकार है।</em>
 </p>
+
 ## Local Development Setup
 
 ### Prerequisites
