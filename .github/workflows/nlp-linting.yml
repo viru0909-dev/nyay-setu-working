@@ -9,26 +9,46 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./nlp-orchestrator
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Changed Python Files
+        id: changed-files
+        run: |
+          # Find python files modified in the nlp-orchestrator directory relative to base branch
+          FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD | grep '^nlp-orchestrator/.*\.py$' || true)
+          # Replace newlines with spaces for command arguments
+          FILES_SPACE=$(echo "$FILES" | tr '\n' ' ')
+          echo "files=$FILES_SPACE" >> $GITHUB_ENV
+          if [ -z "$FILES" ]; then
+            echo "has_changes=false" >> $GITHUB_ENV
+            echo "No Python files modified under nlp-orchestrator."
+          else
+            echo "has_changes=true" >> $GITHUB_ENV
+            echo "Modified Python files:"
+            echo "$FILES"
+          fi
 
       - name: Set up Python
+        if: env.has_changes == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Install Linting Tools
+        if: env.has_changes == 'true'
         run: |
           python -m pip install --upgrade pip
           pip install black flake8
 
       - name: Run Black (Formatting Check)
-        run: black --check --diff .
+        if: env.has_changes == 'true'
+        run: black --check --diff ${{ env.files }}
 
       - name: Run Flake8 (Linting Check)
-        run: flake8 . --max-line-length=88 --extend-ignore=E203
+        if: env.has_changes == 'true'
+        run: flake8 ${{ env.files }} --max-line-length=88 --extend-ignore=E203

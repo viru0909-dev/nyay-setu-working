@@ -13,6 +13,7 @@ jobs:
     steps:
       - name: Size Labeler
         uses: pascalgn/size-label-action@v0.5.5
+        continue-on-error: true
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           IGNORED_FILES: "package-lock.json,pom.xml,*.png,*.jpg"

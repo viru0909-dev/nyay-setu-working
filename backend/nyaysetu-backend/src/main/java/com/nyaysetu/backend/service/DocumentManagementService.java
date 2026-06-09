@@ -240,7 +240,9 @@ public class DocumentManagementService {
                 .build();
 
         // Get case title if available
-        if (entity.getCaseId() != null) {
+        if (entity.getCaseEntity() != null) {
+            dto.setCaseTitle(entity.getCaseEntity().getTitle());
+        } else if (entity.getCaseId() != null) {
             caseRepository.findById(entity.getCaseId())
                     .ifPresent(caseEntity -> dto.setCaseTitle(caseEntity.getTitle()));
         }

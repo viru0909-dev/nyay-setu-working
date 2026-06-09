@@ -1,8 +1,11 @@
 package com.nyaysetu.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -61,6 +64,11 @@ public class CaseEntity {
     private String filingMethod; // VAKIL_FRIEND, MANUAL
 
     private Long sourceFirId;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "caseEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("caseEntity")
+    private List<DocumentEntity> documents = new ArrayList<>();
 
     private Boolean hasBsaCert;
     
