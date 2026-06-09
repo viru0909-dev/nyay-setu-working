@@ -7,14 +7,17 @@ import time
 import hashlib
 import logging
 import asyncio
-from cachetools import TTLCache
 
 logger = logging.getLogger("nlp-cache")
 
 CACHE_TTL = 300  # 5 minutes
 MAX_CACHE_SIZE = 10000
 
-cache_store: TTLCache = TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL)
+try:
+    from cachetools import TTLCache
+    cache_store: TTLCache = TTLCache(maxsize=MAX_CACHE_SIZE, ttl=CACHE_TTL)
+except ImportError:
+    cache_store = {}
 
 _in_flight: dict[str, asyncio.Future] = {}
 
@@ -38,6 +41,14 @@ def get_cached_response(cache_key: str) -> str | None:
 
     data = cache_store.get(cache_key)
     if data is None:
+        return None
+
+    if time.time() > data["expires_at"]:
+        logger.info(f"Cache EXPIRED for key: {cache_key}")
+        try:
+            del cache_store[cache_key]
+        except KeyError:
+            pass
         return None
 
     logger.info(f"Cache HIT for key: {cache_key}")
