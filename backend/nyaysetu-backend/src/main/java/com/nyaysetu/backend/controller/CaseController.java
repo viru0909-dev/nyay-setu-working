@@ -29,7 +29,6 @@ public class CaseController {
         return ResponseEntity.ok(caseService.getCase(id));
     }
 
-    // 🛠️ PAGINATED ENDPOINT FOR ISSUE #828
     @GetMapping
     public ResponseEntity<Page<CaseEntity>> getAllCases(
             @RequestParam(defaultValue = "0") int page,
@@ -39,7 +38,7 @@ public class CaseController {
         return ResponseEntity.ok(casesPage);
     }
 
-    @PutMapping("/{id}/status")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<CaseEntity> updateStatus(
             @PathVariable UUID id,
             @RequestParam CaseStatus status
