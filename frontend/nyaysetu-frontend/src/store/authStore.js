@@ -57,12 +57,20 @@ const useAuthStore = create((set, get) => ({
     isGuest: false,
 
     setAuth: (user, token) => {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-        clearGuestStorage();
-        localStorage.removeItem(GUEST_INTENT_KEY);
-        set({ user, token, isAuthenticated: true, isGuest: false });
-    },
+    // Store token in memory only (not localStorage) to prevent XSS token theft
+    // Only non-sensitive user metadata is persisted to localStorage
+    localStorage.setItem('user', JSON.stringify(user));
+    try {
+    const expiry = JSON.parse(atob(token.split('.')[1])).exp;
+    localStorage.setItem('token_expiry', expiry);
+} catch {
+    // Token may be a test/dev token without valid JWT structure
+    localStorage.removeItem('token_expiry');
+}
+    clearGuestStorage();
+    localStorage.removeItem(GUEST_INTENT_KEY);
+    set({ user, token, isAuthenticated: true, isGuest: false });
+},
 
     setGuest: () => {
         const sessionId = createGuestSessionId();
@@ -95,8 +103,8 @@ const useAuthStore = create((set, get) => ({
     },
 
     logout: () => {
-        localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('token_expiry');
         clearGuestStorage();
         localStorage.removeItem(GUEST_INTENT_KEY);
         set({ user: null, token: null, isAuthenticated: false, isGuest: false });
@@ -143,14 +151,15 @@ const useAuthStore = create((set, get) => ({
     },
 
     initAuth: () => {
-        const token = localStorage.getItem('token');
-        const userStr = localStorage.getItem('user');
+        const tokenExpiry = localStorage.getItem('token_expiry');
+const userStr = localStorage.getItem('user');
+const token = get().token; // Read from memory only
 
-        if (token && userStr && token !== 'null' && userStr !== 'null' && token !== 'undefined' && userStr !== 'undefined') {
-            try {
-                if (isTokenExpired(token)) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
+if (token && userStr && userStr !== 'null' && userStr !== 'undefined') {
+    try {
+        if (isTokenExpired(token)) {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token_expiry');
 
                     set({
                         token: null,
