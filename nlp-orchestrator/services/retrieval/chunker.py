@@ -47,6 +47,29 @@ def split_sentences(text: str) -> list[str]:
     return [s.strip() for s in _SENTENCE_RE.split(text) if s.strip()]
 
 
+def _split_long_sentence(
+    sentence: str,
+    max_tokens: int,
+    overlap_tokens: int,
+) -> list[str]:
+    words = sentence.split()
+    chunks: list[str] = []
+    word_buf: list[str] = []
+
+    for word in words:
+        candidate_buf = word_buf + [word]
+        if word_buf and count_tokens(" ".join(candidate_buf)) > max_tokens:
+            chunks.append(" ".join(word_buf))
+            word_buf, _ = _tail_overlap(word_buf, overlap_tokens)
+
+        word_buf.append(word)
+
+    if word_buf:
+        chunks.append(" ".join(word_buf))
+
+    return chunks
+
+
 def chunk_text(
     text: str,
     max_tokens: int = 512,
@@ -81,6 +104,16 @@ def chunk_text(
             sent_tokens = 0
             for sentence in split_sentences(para):
                 s_tokens = count_tokens(sentence)
+                if s_tokens > max_tokens:
+                    if sent_buf:
+                        chunks.append(" ".join(sent_buf))
+                        sent_buf, sent_tokens = _tail_overlap(sent_buf, overlap_tokens)
+
+                    chunks.extend(_split_long_sentence(sentence, max_tokens, overlap_tokens))
+                    sent_buf = []
+                    sent_tokens = 0
+                    continue
+
                 if sent_tokens + s_tokens > max_tokens and sent_buf:
                     chunks.append(" ".join(sent_buf))
                     sent_buf, sent_tokens = _tail_overlap(sent_buf, overlap_tokens)

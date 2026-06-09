@@ -7,6 +7,7 @@ import com.nyaysetu.backend.service.HearingService;
 import com.nyaysetu.backend.notification.service.NotificationService;
 import com.nyaysetu.backend.notification.entity.Notification;
 import com.nyaysetu.backend.entity.CaseEntity;
+import com.nyaysetu.backend.entity.User;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,8 @@ public class HearingController {
     
     private final HearingService hearingService;
     private final NotificationService notificationService;
+    private final com.nyaysetu.backend.service.AuthService authService;
+    private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
     
     @PostMapping("/schedule")
     public ResponseEntity<Map<String, Object>> scheduleHearing(
@@ -179,7 +182,11 @@ public class HearingController {
     }
     
     @GetMapping("/case/{caseId}")
-    public ResponseEntity<List<Map<String, Object>>> getCaseHearings(@PathVariable UUID caseId) {
+    public ResponseEntity<List<Map<String, Object>>> getCaseHearings(
+            @PathVariable UUID caseId,
+            Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(caseId, user);
         List<Hearing> hearings = hearingService.getCaseHearings(caseId);
         List<Map<String, Object>> response = hearings.stream().map(h -> {
             Map<String, Object> dto = new HashMap<>();

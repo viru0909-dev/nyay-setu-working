@@ -90,6 +90,7 @@ export default function KeyboardShortcutsModal({
 
           <button
             onClick={onClose}
+            aria-label="Close"
             style={{
               background: "transparent",
               border: "none",

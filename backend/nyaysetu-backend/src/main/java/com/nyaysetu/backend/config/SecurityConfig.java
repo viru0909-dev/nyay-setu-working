@@ -4,19 +4,23 @@ import com.nyaysetu.backend.filter.JwtAuthFilter;
 import com.nyaysetu.backend.filter.RateLimitFilter;
 import com.nyaysetu.backend.filter.XssSanitizationFilter;
 import jakarta.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,9 +30,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -50,7 +51,7 @@ public class SecurityConfig {
 
     @PostConstruct
     public void validateJwtSecretConfiguration() {
-        boolean isDev = java.util.Arrays.stream(environment.getActiveProfiles())
+        boolean isDev = Arrays.stream(environment.getActiveProfiles())
                 .anyMatch(profile -> profile.equalsIgnoreCase("dev") || profile.equalsIgnoreCase("test"));
         String jwtSecretEnv = System.getenv("JWT_SECRET");
         boolean isJwtSecretEnvMissing = jwtSecretEnv == null || jwtSecretEnv.trim().isEmpty();
@@ -86,19 +87,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
-        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
         
         // Use origins from application.properties / Env Var
         if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
-            java.util.List<String> origins = java.util.Arrays.stream(allowedOrigins.split(","))
+            List<String> origins = Arrays.stream(allowedOrigins.split(","))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
 
             if (origins.isEmpty()) {
                 // SAFE DEFAULT: Allow local development origins only
-                configuration.setAllowedOrigins(java.util.Arrays.asList(
+                configuration.setAllowedOrigins(Arrays.asList(
                     "http://localhost:5173",
                     "http://localhost:3000",
                     "http://localhost"
@@ -108,10 +109,9 @@ public class SecurityConfig {
                 // Security: reject bare "*" — it allows any origin to make credentialed requests
                 boolean hasBareWildcard = origins.stream().anyMatch(o -> o.trim().equals("*"));
                 if (hasBareWildcard) {
-                    java.util.logging.Logger.getLogger("SecurityConfig")
-                        .warning("CORS_ALLOWED_ORIGINS contains bare '*'. "
+                    logger.warn("CORS_ALLOWED_ORIGINS contains bare '*'. "
                             + "This is unsafe with credentials. Falling back to localhost defaults.");
-                    configuration.setAllowedOrigins(java.util.Arrays.asList(
+                    configuration.setAllowedOrigins(Arrays.asList(
                         "http://localhost:5173",
                         "http://localhost:3000",
                         "http://localhost"
@@ -129,7 +129,7 @@ public class SecurityConfig {
             }
         } else {
             // SAFE DEFAULT: Allow local development origins only
-            configuration.setAllowedOrigins(java.util.Arrays.asList(
+            configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173", 
                 "http://localhost:3000", 
                 "http://localhost"
@@ -137,10 +137,10 @@ public class SecurityConfig {
             configuration.setAllowCredentials(true);
         }
         
-        configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         
-        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
@@ -153,16 +153,10 @@ public class SecurityConfig {
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.deny())
                         .contentSecurityPolicy(csp -> csp
-                                // Strict CSP for API responses. Mirrors the
-                                // frontend nginx.conf policy so that any
-                                // HTML/error page Spring serves (e.g. the
-                                // default whitelabel error pages) is also
-                                // protected. Adjust directives here when you
-                                // adjust them in nginx.conf.
                                 .policyDirectives(
                                     "default-src 'self'; " +
                                     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
@@ -184,7 +178,6 @@ public class SecurityConfig {
                                 ))
                 )
                 .authorizeHttpRequests(auth -> auth
-
                         // ── Public endpoints ──────────────────────────────────────────────
                         .requestMatchers(
                                 "/api/v1/auth/register",

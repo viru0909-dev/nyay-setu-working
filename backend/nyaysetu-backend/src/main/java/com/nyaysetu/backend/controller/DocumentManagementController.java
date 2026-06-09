@@ -31,6 +31,7 @@ public class DocumentManagementController {
     private final DocumentManagementService documentManagementService;
     private final CaseManagementService caseManagementService;
     private final AuthService authService;
+    private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
     private final com.nyaysetu.backend.service.DocumentAnalysisService documentAnalysisService;
     private final com.nyaysetu.backend.service.CertificateService certificateService;
 
@@ -191,31 +192,35 @@ public class DocumentManagementController {
             userRole = "PETITIONER";
         } else if (user.getEmail().equals(caseData.getRespondentEmail())) {
             userRole = "RESPONDENT";
+        } else if (caseData.getLawyerId() != null && caseData.getLawyerId().equals(user.getId())) {
+            userRole = "LAWYER";
         }
+
+        boolean isCaseLawyer = caseData.getLawyerId() != null && caseData.getLawyerId().equals(user.getId());
         
         // Get filtered documents based on role
         List<DocumentDto> documents = documentManagementService.getCaseDocumentsWithAccessControl(
-            caseId, user.getId(), userRole
+            caseId, user.getId(), userRole, isCaseLawyer
         );
         return ResponseEntity.ok(documents);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DocumentDto> getDocument(@PathVariable UUID id, Authentication authentication) {
+    public ResponseEntity<DocumentDto> getDocument(
+            @PathVariable UUID id,
+            Authentication authentication) {
         User user = authService.findByEmail(authentication.getName());
-        documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
-
-        DocumentDto document = documentManagementService.getDocumentById(id);
+        DocumentDto document = documentManagementService.getDocumentById(id, user);
         return ResponseEntity.ok(document);
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<?> downloadDocument(@PathVariable UUID id, Authentication authentication) {
+    public ResponseEntity<?> downloadDocument(
+            @PathVariable UUID id,
+            Authentication authentication) {
         try {
             User user = authService.findByEmail(authentication.getName());
-            documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
-
-            DocumentDto metadata = documentManagementService.getDocumentById(id);
+            DocumentDto metadata = documentManagementService.getDocumentById(id, user);
             Resource resource = documentManagementService.downloadDocument(id);
 
             return ResponseEntity.ok()

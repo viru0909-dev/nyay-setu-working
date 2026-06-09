@@ -63,7 +63,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
                 >
                     <div className="biometric-header-decor"></div>
 
-                    <button onClick={onClose} className="biometric-close-btn">
+                    <button onClick={onClose} aria-label="Close" className="biometric-close-btn">
                         <X size={20} />
                     </button>
 
@@ -135,6 +135,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
                                 </p>
                                 <button
                                     onClick={onClose}
+                                    aria-label="Close"
                                     className="biometric-btn btn-secondary-bio"
                                     style={{ margin: '0 auto' }}
                                 >
