@@ -14,6 +14,7 @@ const createMemoryStorage = () => {
 };
 
 describe('authStore', () => {
+
     let storage;
     let ls;
 
