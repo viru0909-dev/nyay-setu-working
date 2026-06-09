@@ -1,6 +1,6 @@
-fix(backend): resolve N+1 query issues using EntityGraph for Case and Document
+fix(backend): resolve N+1 query performance issues using EntityGraph
 
-Fixes #928
+Fixes #1158
 
 - Added EntityGraph annotation on CaseRepository query methods to fetch documents in a single query instead of executing N+1 queries.
 - Updated CaseDocumentEntityGraphTest to flush and clear the entity manager before fetching, ensuring that entities are loaded from the database via the EntityGraph rather than returning empty cached collections from the persistence context.

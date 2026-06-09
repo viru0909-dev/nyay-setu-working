@@ -5,10 +5,13 @@ import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.LegalCaseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+// import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -53,8 +56,10 @@ public class CaseService {
                 .orElseThrow(() -> new NotFoundException("Case not found " + id));
     }
 
-    public List<LegalCase> getAllCases() {
-        return legalCaseRepository.findAll();
+    // Refactored method to accept page and size and return Page<LegalCase>
+    public Page<LegalCase> getAllCases(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return legalCaseRepository.findAll(pageable);
     }
 
     public LegalCase updateStatus(UUID caseId, CaseStatus status) {

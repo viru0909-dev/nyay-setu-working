@@ -98,9 +98,20 @@ export default function Header({ hideAuthButtons = false }) {
     });
 
     const renderNavItem = (item) => {
-        const isActive = Boolean(item.href && location.pathname === item.href);
+        const currentPathWithHash = location.pathname + location.hash;
+        let isActive = false;
+        if (item.href === '/') {
+            // Home is only active if we are on '/' AND there is no hash
+            isActive = location.pathname === '/' && !location.hash;
+        } else if (item.href) {
+            // Other tabs are active if they match the exact path+hash OR just the path
+            isActive = currentPathWithHash === item.href || location.pathname === item.href;
+        }
+        // -------------------------------------------------------------
+
         const baseStyle = navLinkStyle(isActive);
         // Fallback to labelKey directly if translation returns the exact key
+
         const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
         if (item.action) {
@@ -464,7 +475,7 @@ export default function Header({ hideAuthButtons = false }) {
                                     onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary-hover)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                                     onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                                 >
-                                    {t('header.cta.getStarted')}
+                                    {t('header.cta.signup')}
                                 </Link>
                             </>
                         )}
@@ -699,7 +710,7 @@ export default function Header({ hideAuthButtons = false }) {
                                             {t('header.cta.login')}
                                         </Link>
                                         <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '0.75rem', textAlign: 'center', background: 'var(--color-primary)', color: 'white', textDecoration: 'none', borderRadius: '10px', fontWeight: '600' }}>
-                                            {t('header.cta.getStarted')}
+                                            {t('header.cta.signup')}
                                         </Link>
                                     </>
                                 )}
