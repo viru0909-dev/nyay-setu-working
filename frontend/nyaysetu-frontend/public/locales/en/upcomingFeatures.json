@@ -1,0 +1,102 @@
+{
+  "upcomingFeatures": {
+    "hero":{
+      "badge": "NYAY-GPT VISION ROADMAP",
+
+      "title1": "Building the Multimodal",
+
+      "title2": "Legal Workspace",
+
+      "description": "Transitioning from a static interface to a highly sophisticated, real-time multimodal environment capable of processing complex physical evidence and providing authoritative legal intelligence."
+    },
+    "phases": [
+      {
+        "num": 1,
+        "phase": "PHASE 1",
+        "weeks": "Weeks 1-2",
+        "title": "Foundation",
+        "desc": "Architecture Refactoring"
+      },
+      {
+        "num": 2,
+        "phase": "PHASE 2",
+        "weeks": "Weeks 3-5",
+        "title": "Interface",
+        "desc": "Multimodal Workspace UI"
+      },
+      {
+        "num": 3,
+        "phase": "PHASE 3",
+        "weeks": "Weeks 6-9",
+        "title": "Spatial & Live",
+        "desc": "3D WebGL & WebRTC"
+      },
+      {
+        "num": 4,
+        "phase": "PHASE 4",
+        "weeks": "Weeks 10-12",
+        "title": "Intelligence",
+        "desc": "RAG & OCR Pipelines"
+      }
+    ],
+
+    "targets": [
+      {
+        "id": "workspace",
+        "badge": "PHASE 2",
+        "title": "Nyay-GPT Conversational Workspace",
+        "subtitle": "Dynamic Split-Screen Intelligence",
+        "description": "A highly sophisticated user interface akin to advanced generative AI platforms. Features a fluid, three-pane structural hierarchy with a resizable artifact canvas for simultaneous interaction with the conversational agent and generated artifacts."
+      },
+      {
+        "id": "forensics",
+        "badge": "PHASE 3",
+        "title": "3D Spatial Forensics",
+        "subtitle": "Gaussian Splatting Integration",
+        "description": "Navigate photorealistic, three-dimensional reconstructions of accident scenes directly in the browser. Features interactive evidentiary annotations, progressive loading, and demand-based rendering optimized via React Three Fiber."
+      },
+      {
+        "id": "webrtc",
+        "badge": "PHASE 3",
+        "title": "Live Multimodal Streaming",
+        "subtitle": "Secure WebRTC Architecture",
+        "description": "Stream continuous video and audio data for real-time guidance. Features dynamic frame chunking, concurrent AI processing, real-time bounding boxes, and advanced voice activity detection replicating natural human conversation."
+      },
+      {
+        "id": "multi-model",
+        "badge": "PHASE 2",
+        "title": "Multi-Model Inference",
+        "subtitle": "Dynamic Orchestration Engine",
+        "description": "Granular control over AI inference. Automatically routes simple queries to ultra-fast Groq inference units, while directing complex liability analyses to frontier models like Gemini 1.5 Pro or Claude 3.5 Sonnet."
+      },
+      {
+        "id": "reasoning",
+        "badge": "PHASE 2",
+        "title": "Agentic Reasoning Traces",
+        "subtitle": "Transparent AI Logic",
+        "description": "Demystifying the AI black box by visualizing chain-of-thought, tool invocations, and database queries. Ensures outputs are rigorously grounded with interactive inline footnote citations linked to the Bharatiya Nyaya Sanhita."
+      },
+      {
+        "id": "transliteration",
+        "badge": "PHASE 4",
+        "title": "Historical Transliteration OCR",
+        "subtitle": "Vision-Language Pipeline",
+        "description": "Decipher archaic scripts in historical land deeds using knowledge-distilled CNNs. Extracts spatial data and boundary markers to map historical claims onto modern GIS overlays."
+      },
+      {
+        "id": "rag",
+        "badge":"PHASE 4",
+        "title": "RAG-Powered Intelligence",
+        "subtitle": "Context-Aware Legal Routing",
+        "description": "Intelligent semantic chunking of vast legal texts and court judgments. Utilizes highly optimized multilingual embedding models backed by scalable vector databases to eliminate legal hallucination."
+      }
+    ],
+
+    "cta": {
+      "title": "Join the Revolution",
+      "description": "Nyay-Setu is an open-source initiative. Create an account today to explore current features and prepare for the next generation of legal intelligence.",
+      "getStarted": "Get Started",
+      "viewRepository": "View Repository"
+    }
+  }
+}

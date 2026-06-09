@@ -3,9 +3,16 @@
         "nav": {
             "home": "होम",
             "features": "विशेषताएँ",
+            "upcomingFeatures":"आगामी सुविधाएँ",
             "constitution": "संविधान",
             "aiAssistant": "AI सहायक",
-            "about": "हमारे बारे में"
+            "about": "हमारे बारे में",
+            "portal": "पोर्टल",
+            "roles": {
+                "litigant": "वादी",
+                "lawyer": "वकील",
+                "judge": "न्यायाधीश"
+            }
         },
         "cta": {
             "login": "लॉगिन",

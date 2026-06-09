@@ -6,15 +6,15 @@
     gap: 0.35rem;
     padding: 0.32rem 0.65rem;
     border-radius: 999px;
-    background: linear-gradient(135deg, rgba(124, 92, 255, 0.1) 0%, rgba(63, 93, 204, 0.08) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 10%, transparent) 0%, color-mix(in srgb, var(--color-secondary) 8%, transparent) 100%);
     color: var(--color-primary);
-    border: 1px solid rgba(124, 92, 255, 0.22);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 22%, transparent);
     font-size: 0.72rem;
     font-weight: 600;
     line-height: 1;
     white-space: nowrap;
     flex-shrink: 0;
-    box-shadow: 0 1px 2px rgba(124, 92, 255, 0.08);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--color-accent) 8%, transparent);
 }
 
 .guest-badge--compact {
@@ -27,8 +27,8 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--color-accent, #7c5cff);
-    box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.25);
+    background: var(--color-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 25%, transparent);
     animation: guest-pulse 2s ease-in-out infinite;
 }
 
@@ -50,7 +50,7 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-light);
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(124, 92, 255, 0.06);
+    box-shadow: var(--shadow-hover), 0 0 0 1px color-mix(in srgb, var(--color-accent) 6%, transparent);
     overflow: hidden;
 }
 
@@ -61,7 +61,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #7c5cff, #3f5dcc);
+    background: linear-gradient(90deg, var(--color-accent), var(--color-secondary));
 }
 
 .guest-toast__inner {
@@ -74,7 +74,7 @@
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: linear-gradient(135deg, rgba(124, 92, 255, 0.15), rgba(63, 93, 204, 0.12));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 15%, transparent), color-mix(in srgb, var(--color-secondary) 12%, transparent));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -112,19 +112,19 @@
     padding: 0.5rem 0.85rem;
     border-radius: 0.6rem;
     border: none;
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary, #3f5dcc) 100%);
-    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: var(--text-on-accent);
     font-weight: 700;
     font-size: 0.8rem;
     text-decoration: none;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(63, 93, 204, 0.28);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-secondary) 28%, transparent);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .guest-btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(63, 93, 204, 0.35);
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--color-secondary) 35%, transparent);
 }
 
 .guest-btn-ghost {
@@ -155,7 +155,7 @@
     background: var(--bg-glass-strong);
     backdrop-filter: blur(14px);
     border: 1px solid var(--border-light);
-    box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
+    box-shadow: var(--shadow-hover);
 }
 
 .guest-onboarding__header {
@@ -185,7 +185,7 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: rgba(124, 92, 255, 0.1);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -210,12 +210,12 @@
     flex: 1;
     height: 4px;
     border-radius: 999px;
-    background: rgba(148, 163, 184, 0.25);
+    background: color-mix(in srgb, var(--text-muted) 25%, transparent);
     transition: background 0.25s ease;
 }
 
 .guest-onboarding__progress-seg--active {
-    background: linear-gradient(90deg, #7c5cff, #3f5dcc);
+    background: linear-gradient(90deg, var(--color-accent), var(--color-secondary));
 }
 
 /* Modal */
@@ -227,7 +227,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    background: rgba(15, 23, 42, 0.45);
+    background: color-mix(in srgb, var(--bg-main) 80%, transparent);
     backdrop-filter: blur(6px);
 }
 
@@ -238,14 +238,14 @@
     border-radius: 1.25rem;
     background: var(--bg-glass-strong);
     border: 1px solid var(--border-light);
-    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
+    box-shadow: var(--shadow-hover);
 }
 
 .guest-modal__icon {
     width: 52px;
     height: 52px;
     border-radius: 14px;
-    background: linear-gradient(135deg, rgba(124, 92, 255, 0.14), rgba(63, 93, 204, 0.1));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 14%, transparent), color-mix(in srgb, var(--color-secondary) 10%, transparent));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -305,8 +305,8 @@
     margin-top: 0.75rem;
     padding: 0.85rem 1rem;
     border-radius: 0.85rem;
-    background: linear-gradient(135deg, rgba(124, 92, 255, 0.06) 0%, rgba(63, 93, 204, 0.04) 100%);
-    border: 1px solid rgba(124, 92, 255, 0.14);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, transparent) 0%, color-mix(in srgb, var(--color-secondary) 4%, transparent) 100%);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 14%, transparent);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -354,7 +354,7 @@
     width: 200px;
     height: 200px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(124, 92, 255, 0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 12%, transparent) 0%, transparent 70%);
     pointer-events: none;
 }
 
@@ -365,8 +365,8 @@
     padding: 0.35rem 0.75rem;
     margin-bottom: 1rem;
     border-radius: 999px;
-    background: rgba(124, 92, 255, 0.08);
-    border: 1px solid rgba(124, 92, 255, 0.15);
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 15%, transparent);
     font-size: 0.72rem;
     font-weight: 700;
     color: var(--color-accent);
@@ -385,7 +385,7 @@
     width: 48px;
     height: 48px;
     border-radius: 14px;
-    background: linear-gradient(135deg, rgba(63, 93, 204, 0.12), rgba(124, 92, 255, 0.1));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color-secondary) 12%, transparent), color-mix(in srgb, var(--color-accent) 10%, transparent));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -432,7 +432,7 @@
 
 .guest-locked-card__feature svg {
     flex-shrink: 0;
-    color: #10b981;
+    color: var(--color-success);
     margin-top: 1px;
 }
 
@@ -453,8 +453,8 @@
     user-select: none;
     max-height: 200px;
     overflow: hidden;
-    mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
+    mask-image: linear-gradient(180deg, var(--text-main) 30%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, var(--text-main) 30%, transparent 100%);
 }
 
 .guest-blur-overlay {
@@ -523,8 +523,8 @@
 
 .guest-continue-btn:hover:not(:disabled) {
     border-color: var(--color-primary);
-    background: rgba(124, 92, 255, 0.04);
-    box-shadow: 0 4px 16px rgba(124, 92, 255, 0.1);
+    background: color-mix(in srgb, var(--color-accent) 4%, transparent);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--color-accent) 10%, transparent);
 }
 
 .guest-continue-btn:disabled {
@@ -561,8 +561,8 @@
 }
 
 .guest-search-card:hover {
-    border-color: rgba(124, 92, 255, 0.35);
-    box-shadow: 0 8px 24px rgba(124, 92, 255, 0.08);
+    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-accent) 8%, transparent);
 }
 
 .guest-search-card--locked {
@@ -586,8 +586,8 @@
     margin: 0 0 1.25rem;
     padding: 0.65rem 0.9rem;
     border-radius: 0.75rem;
-    background: rgba(124, 92, 255, 0.06);
-    border: 1px solid rgba(124, 92, 255, 0.12);
+    background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 12%, transparent);
     font-size: 0.9rem;
     color: var(--text-secondary);
 }

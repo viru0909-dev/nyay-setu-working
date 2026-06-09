@@ -38,6 +38,38 @@ def async_retry(max_attempts: int = 3, delay: float = 1.0):
         return wrapper
     return decorator
 
+
+def is_retryable_exception(exc: Exception) -> bool:
+    """Return True for exceptions that are transient and worth retrying.
+
+    Retry for network/connectivity/timeouts and server 5xx/429 errors.
+    Do not retry for client errors like 400/401/403/404.
+    """
+    # Network/timeouts
+    if isinstance(exc, (
+        httpx.TimeoutException,
+        httpx.ConnectError,
+        aiohttp.ClientTimeout,
+        aiohttp.ClientConnectorError,
+        aiohttp.ServerDisconnectedError,
+    )):
+        return True
+
+    # Inspect HTTP status codes when available
+    status_code = None
+    if isinstance(exc, httpx.HTTPStatusError):
+        response = exc.response
+        status_code = getattr(response, "status_code", None)
+    else:
+        response = getattr(exc, "response", None)
+        if response is not None:
+            status_code = getattr(response, "status_code", None)
+
+    if status_code is not None:
+        return status_code in {429, 500, 502, 503, 504}
+
+    return False
+
 # Retry Decorator 
 retry_transient = retry(
     stop=stop_after_attempt(3),

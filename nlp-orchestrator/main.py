@@ -12,13 +12,13 @@ import os
 from utils import async_retry
 import asyncio
 import json
+
 import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, HTTPException
 import time
 import uuid
-import os
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -33,8 +33,8 @@ from cache import (
 from config import FRONTEND_ORIGIN, GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KEY, GEMINI_MODEL
 from decomposer import decompose_query
 from router import route_questions
-from research import run_parallel_research, stream_groq_chat
-from synthesizer import synthesize_answers, stream_synthesize_answers
+from research import run_parallel_research, execute_with_fallback
+from synthesizer import synthesize_answers, stream_synthesize_answers, synthesize_answers_structured, stream_synthesize_answers_structured
 from validators.citation_validator import validate_citations_from_text
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
@@ -171,9 +171,6 @@ def sse_event(event_type: str, data: dict) -> str:
 async def legal_reasoning_pipeline(query: str, language: str):
     """
     Async generator that yields SSE events through the full 5-layer pipeline.
-
-    Fix: Removed inner async generator — research now runs as a background
-    asyncio.Task while interim messages are yielded from the outer generator.
     """
     kanoon_task = None
     research_task = None
@@ -233,13 +230,18 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("synthesis_start", {})
         yield sse_event("avatar_update", {"message": "Sab information mila di, ab aapke liye summary bana raha hoon..."})
 
-        logger.info("[Layer 4] Synthesizing with streaming...")
+        logger.info("[Layer 4] Synthesizing with structured streaming...")
         
         synthesized_md = ""
-        # Stream synthesis tokens directly
-        async for token in stream_synthesize_answers(safe_query, results):
-            synthesized_md += token
-            yield sse_event("synthesis_token", {"chunk": token})
+        cited_laws_from_stream = []
+        
+        # Stream synthesis tokens using the structured generator
+        async for chunk in stream_synthesize_answers_structured(safe_query, results):
+            if chunk.get("text"):
+                synthesized_md += chunk["text"]
+                yield sse_event("synthesis_token", {"chunk": chunk["text"]})
+            if chunk.get("citations"):
+                cited_laws_from_stream = chunk["citations"]
         
         logger.info("[Layer 4] Synthesis complete")
 
@@ -258,6 +260,7 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("final_answer", {
             "markdown": synthesized_md,
             "hinglish": hinglish_dialogue,
+            "cited_laws": cited_laws_from_stream,
             "citation_validation": validation_results
         })
 
@@ -351,7 +354,8 @@ async def analyze_sync(body: LegalQuery):
         logger.error("[Sync] Indian Kanoon fetch failed: %s", e)
         kanoon_context = ""
     results = await run_parallel_research(routed, kanoon_context=kanoon_context)
-    synthesized = await synthesize_answers(body.query, results)
+    synthesis = await synthesize_answers_structured(body.query, results)
+    synthesized = synthesis.answer_markdown
 
     try:
         validation_results = validate_citations_from_text(synthesized)
@@ -370,6 +374,7 @@ async def analyze_sync(body: LegalQuery):
         "final_answer": {
             "markdown": synthesized,
             "hinglish": hinglish,
+            "cited_laws": synthesis.cited_laws,
             "citation_validation": validation_results
         }
     })
@@ -529,40 +534,68 @@ async def deep_research_pipeline(query: str, language: str):
             user_query=query
         )
 
-        # Call the AI model and stream reasoning
         ai_answer = None
+        cached = False
 
         if model_choice == "gemini" and gemini_client:
-            try:
-                loop = asyncio.get_running_loop()
-                response = await loop.run_in_executor(
-                    None,
-                    lambda: gemini_client.models.generate_content(
-                        model=GEMINI_MODEL,
-                        contents=grounded_prompt
+            cache_key = generate_cache_key(
+                "gemini",
+                grounded_prompt,
+                GEMINI_MODEL,
+                user_query=query
+            )
+            cached_response = get_cached_response(cache_key)
+            if cached_response:
+                logger.info("[Deep Research] Gemini cache hit")
+                ai_answer = cached_response
+                cached = True
+
+        if not cached and (model_choice == "groq" or (model_choice == "gemini" and not gemini_client)):
+            cache_key = generate_cache_key(
+                "groq",
+                grounded_prompt,
+                GROQ_MODEL_FAST,
+                user_query=query
+            )
+            cached_response = get_cached_response(cache_key)
+            if cached_response:
+                logger.info("[Deep Research] Groq cache hit")
+                ai_answer = cached_response
+                cached = True
+
+        if not cached:
+            # Use the unified fallback coordinator for deep research to avoid
+            # duplicating retry/fallback logic between Gemini and Groq.
+            result = await execute_with_fallback(query, kanoon_context, primary_provider=model_choice)
+            ai_answer = result.get("answer", "")
+            model_choice = result.get("source", model_choice)
+
+            if ai_answer:
+                if model_choice == "gemini":
+                    cache_key = generate_cache_key(
+                        "gemini",
+                        grounded_prompt,
+                        GEMINI_MODEL,
+                        user_query=query
                     )
-                )
+                    set_cached_response(cache_key, ai_answer)
+                elif model_choice == "groq":
+                    cache_key = generate_cache_key(
+                        "groq",
+                        grounded_prompt,
+                        GROQ_MODEL_FAST,
+                        user_query=query
+                    )
+                    set_cached_response(cache_key, ai_answer)
 
-                ai_answer = response.text.strip()
-
-            except Exception as e:
-                logger.error(f"Gemini failed, falling back to Groq: {e}")
-                model_choice = "groq"
-        if model_choice == "groq" or (
-            model_choice == "gemini" and not gemini_client
-        ):
-            # Stream tokens directly from Groq
-            logger.info("[Deep Research] Streaming from Groq...")
-            async for token in stream_groq_chat(
-                messages=[
-                    {"role": "system", "content": grounded_prompt},
-                    {"role": "user", "content": query}
-                ],
-                model=GROQ_MODEL_FAST,
-                max_tokens=2048
-            ):
-                yield sse_event("reasoning", {"text": token})
-                ai_answer = (ai_answer or "") + token
+        # Stream reasoning text in chunks for live display
+        if ai_answer:
+            words = ai_answer.split()
+            chunk_size = 8
+            for i in range(0, len(words), chunk_size):
+                chunk = " ".join(words[i:i + chunk_size])
+                yield sse_event("reasoning", {"text": chunk})
+                await asyncio.sleep(0.1)  # Small delay for streaming effect
 
         yield sse_event("stage", {
             "stage": "reasoning",
@@ -658,4 +691,3 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8001))
     uvicorn.run("main:app", host="0.0.0.0", port=port)
-

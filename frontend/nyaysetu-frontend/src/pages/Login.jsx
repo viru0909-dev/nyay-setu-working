@@ -128,7 +128,12 @@ export default function Login() {
                 }}>
                     {/* Left Side - Welcome (hidden on mobile) */}
                     {!isMobile && (
-                        <div style={{ color: 'var(--text-main)' }}>
+    <div
+        style={{
+            color: 'var(--text-main)',
+            transform: 'translateY(-40px)'
+        }}
+    >
                             <div style={{ marginBottom: '2rem' }}>
                                 <h1 style={{
                                     fontSize: '2.8rem',
@@ -437,6 +442,7 @@ export default function Login() {
                             {/* Sign In Button */}
                             <button
                                 type="submit"
+                                className="auth-full-width-btn"
                                 disabled={loading}
                                 style={{
                                     width: '100%',
@@ -461,6 +467,7 @@ export default function Login() {
                             {/* Face Login */}
                             <button
                                 type="button"
+                                className="auth-full-width-btn"
                                 onClick={() => setShowFaceLogin(true)}
                                 style={{
                                     width: '100%',

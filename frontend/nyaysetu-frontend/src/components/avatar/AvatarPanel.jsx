@@ -48,6 +48,9 @@ export default function AvatarPanel({
         ? 'passive'
         : state;
 
+    // FIX: true when the status dot is actively animating
+    const isDotAnimating = displayState !== 'idle' && displayState !== 'passive';
+
     useEffect(() => {
         // Trigger entrance animation
         requestAnimationFrame(() => setEntering(false));
@@ -104,12 +107,15 @@ export default function AvatarPanel({
                             {t('avatar.title')}
                         </h2>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
+                            {/* FIX: will-change pre-promotes this element to its own GPU layer
+                                so Safari doesn't stutter when avatarPulse starts mid-frame */}
                             <div style={{
                                 width: '7px', height: '7px',
                                 borderRadius: '50%',
                                 background: stateColors[displayState],
                                 boxShadow: `0 0 8px ${stateColors[displayState]}`,
-                                animation: displayState !== 'idle' && displayState !== 'passive' ? 'avatarPulse 1.5s infinite' : 'none'
+                                animation: isDotAnimating ? 'avatarPulse 1.5s infinite' : 'none',
+                                willChange: isDotAnimating ? 'transform, opacity' : 'auto',
                             }} />
                             <span style={{
                                 fontSize: '0.75rem',
@@ -124,6 +130,7 @@ export default function AvatarPanel({
 
                 <button
                     onClick={onClose}
+                    aria-label="Close"
                     style={{
                         background: 'rgba(255,255,255,0.06)',
                         border: '1px solid rgba(255,255,255,0.1)',
@@ -334,9 +341,11 @@ export default function AvatarPanel({
             </div>
 
             <style>{`
+                /* FIX: scale3d() forces WebKit onto the 3D compositing path,
+                   ensuring this runs on the GPU thread instead of main thread */
                 @keyframes avatarPulse {
-                    0%, 100% { opacity: 1; transform: scale(1); }
-                    50% { opacity: 0.5; transform: scale(1.5); }
+                    0%, 100% { opacity: 1; transform: scale3d(1, 1, 1); }
+                    50% { opacity: 0.5; transform: scale3d(1.5, 1.5, 1); }
                 }
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(10px); }

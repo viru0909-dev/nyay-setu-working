@@ -1,310 +1,393 @@
-import { useState, useRef } from 'react';
-import { MessageCircle, X, Send, Mic, StopCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { brainAPI } from '../../services/api';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import ScrollTopButton from './ScrollTopButton';
+import { useState, useRef } from "react";
+import { MessageCircle, X, Send, Mic, StopCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { brainAPI } from "../../services/api";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import ScrollTopButton from "./ScrollTopButton";
 
+const copyToClipboard = async (text) => {
+  if (!text || !text.trim()) {
+    alert("Nothing to copy");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("Response copied!");
+  } catch (err) {
+    console.error("Copy failed:", err);
+    alert("Failed to copy response");
+  }
+};
 export default function AIChatbot() {
-    const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        { role: 'assistant', content: 'Hello! I\'m your AI legal assistant powered by NyaySetu Brain (Groq). How can I help you with legal questions today?' }
-    ]);
-    const [input, setInput] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
-    const [sessionId, setSessionId] = useState(null);
-    const [isRecording, setIsRecording] = useState(false);
-    const recognitionRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content:
+        "Hello! I'm your AI legal assistant powered by NyaySetu Brain (Groq). How can I help you with legal questions today?",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef(null);
 
-    const handleSend = async () => {
-        if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim()) return;
 
-        const userMessage = { role: 'user', content: input };
-        setMessages(prev => [...prev, userMessage]);
-        setInput('');
-        setIsTyping(true);
+    const userMessage = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsTyping(true);
 
-        try {
-            const response = await brainAPI.chat(input, sessionId);
-            const aiResponse = {
-                role: 'assistant',
-                content: response.data.message || 'I apologize, but I encountered an error. Please try again.'
-            };
-            setMessages(prev => [...prev, aiResponse]);
-            if (response.data.sessionId) setSessionId(response.data.sessionId);
-        } catch (error) {
-            console.error('Chat error:', error);
-            const errorResponse = {
-                role: 'assistant',
-                content: 'I understand your question. As an AI legal assistant, I can help you with general legal information about Indian law, the Constitution, case filing procedures, and more. For specific legal advice, please consult with a qualified lawyer. What would you like to know?'
-            };
-            setMessages(prev => [...prev, errorResponse]);
-        } finally {
-            setIsTyping(false);
-        }
-    };
+    try {
+      const response = await brainAPI.chat(input, sessionId);
+      const aiResponse = {
+        role: "assistant",
+        content:
+          response.data.message ||
+          "I apologize, but I encountered an error. Please try again.",
+      };
+      setMessages((prev) => [...prev, aiResponse]);
+      if (response.data.sessionId) setSessionId(response.data.sessionId);
+    } catch (error) {
+      console.error("Chat error:", error);
+      const errorResponse = {
+        role: "assistant",
+        content:
+          "I understand your question. As an AI legal assistant, I can help you with general legal information about Indian law, the Constitution, case filing procedures, and more. For specific legal advice, please consult with a qualified lawyer. What would you like to know?",
+      };
+      setMessages((prev) => [...prev, errorResponse]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
-    const startRecording = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert('Speech recognition is not supported in this browser.');
-        return;
+  const startRecording = () => {
+    if (
+      !("webkitSpeechRecognition" in window) &&
+      !("SpeechRecognition" in window)
+    ) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
     }
 
     const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
     const recognition = new SpeechRecognition();
 
-    recognition.lang = 'en-IN';
+    recognition.lang = "en-IN";
     recognition.interimResults = false;
 
     recognition.onstart = () => {
-        setIsRecording(true);
+      setIsRecording(true);
     };
 
     recognition.onend = () => {
-        setIsRecording(false);
+      setIsRecording(false);
     };
 
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setInput((prev) => prev + ' ' + transcript);
+      const transcript = event.results[0][0].transcript;
+      setInput((prev) => prev + " " + transcript);
     };
 
     recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setIsRecording(false);
+      console.error("Speech recognition error:", event.error);
+      setIsRecording(false);
     };
 
     recognitionRef.current = recognition;
     recognition.start();
-};
+  };
 
-const stopRecording = () => {
+  const stopRecording = () => {
     if (recognitionRef.current) {
-        recognitionRef.current.stop();
+      recognitionRef.current.stop();
     }
-};
+  };
 
-    return (
-        <>
-            {/* Floating Button */}
-            <ScrollTopButton />
+  return (
+    <>
+      {/* Floating Button */}
+      <ScrollTopButton />
 
-            <motion.button
-                onClick={() => setIsOpen(!isOpen)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                style={{
-                    position: 'fixed',
-                    bottom: '2rem',
-                    right: '2rem',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                    border: 'none',
-                    boxShadow: '0 8px 24px rgba(139, 92, 246, 0.4)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    zIndex: 1001
-                }}
+      <motion.button
+        onClick={() => setIsOpen(!isOpen)}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        style={{
+          position: "fixed",
+          bottom: "2rem",
+          right: "2rem",
+          width: "60px",
+          height: "60px",
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+          border: "none",
+          boxShadow: "0 8px 24px rgba(139, 92, 246, 0.4)",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          zIndex: 1001,
+        }}
+      >
+        <MessageCircle size={28} />
+      </motion.button>
+
+      {/* Chat Window */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: "fixed",
+              bottom: "100px",
+              right: "2rem",
+              width: "400px",
+              maxWidth: "calc(100vw - 4rem)",
+              height: "600px",
+              maxHeight: "calc(100vh - 140px)",
+              background: "var(--bg-glass-strong)",
+              backdropFilter: "blur(20px)",
+              borderRadius: "1rem",
+              border: "var(--border-glass-strong)",
+              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.15)", // Lighter shadow
+              zIndex: 1001,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                padding: "1.25rem",
+                background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-                <MessageCircle size={28} />
-            </motion.button>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                }}
+              >
+                <MessageCircle size={24} color="white" />
+                <div>
+                  <h3
+                    style={{
+                      color: "white",
+                      fontSize: "1.125rem",
+                      fontWeight: "700",
+                      margin: 0,
+                    }}
+                  >
+                    AI Legal Assistant
+                  </h3>
+                  <p
+                    style={{
+                      color: "rgba(255,255,255,0.9)",
+                      fontSize: "0.75rem",
+                      margin: 0,
+                    }}
+                  >
+                    Powered by NyaySetu Brain (Groq)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                style={{
+                  background: "rgba(255,255,255,0.2)",
+                  border: "none",
+                  borderRadius: "0.5rem",
+                  padding: "0.5rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  color: "white",
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
 
-            {/* Chat Window */}
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
+            {/* Messages */}
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "1rem",
+              }}
+            >
+              {messages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    justifyContent:
+                      msg.role === "user" ? "flex-end" : "flex-start",
+                  }}
+                >
+                  <div
+                    style={{
+                      maxWidth: "80%",
+                      padding: "0.875rem 1.125rem",
+                      borderRadius: "1rem",
+                      background:
+                        msg.role === "user"
+                          ? "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)"
+                          : "white", // Light background for bot
+                      color: msg.role === "user" ? "white" : "#4B5563",
+                      fontSize: "0.9rem",
+                      lineHeight: "1.5",
+                      boxShadow:
+                        msg.role === "assistant"
+                          ? "0 2px 10px rgba(0,0,0,0.05)"
+                          : "none",
+                      border:
+                        msg.role === "assistant"
+                          ? "1px solid rgba(0,0,0,0.05)"
+                          : "none",
+                    }}
+                    className="markdown-content"
+                  >
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {msg.content}
+                    </ReactMarkdown>
+
+                    {msg.role === "assistant" && (
+                      <button
+                        onClick={() => copyToClipboard(msg.content)}
                         style={{
-                            position: 'fixed',
-                            bottom: '100px',
-                            right: '2rem',
-                            width: '400px',
-                            maxWidth: 'calc(100vw - 4rem)',
-                            height: '600px',
-                            maxHeight: 'calc(100vh - 140px)',
-                            background: 'var(--bg-glass-strong)',
-                            backdropFilter: 'blur(20px)',
-                            borderRadius: '1rem',
-                            border: 'var(--border-glass-strong)',
-                            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)', // Lighter shadow
-                            zIndex: 1001,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            overflow: 'hidden'
+                          marginTop: "8px",
+                          padding: "6px 12px",
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          fontSize: "0.8rem",
                         }}
-                    >
-                        {/* Header */}
-                        <div style={{
-                            padding: '1.25rem',
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <MessageCircle size={24} color="white" />
-                                <div>
-                                    <h3 style={{ color: 'white', fontSize: '1.125rem', fontWeight: '700', margin: 0 }}>
-                                        AI Legal Assistant
-                                    </h3>
-                                    <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.75rem', margin: 0 }}>
-                                        Powered by NyaySetu Brain (Groq)
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                style={{
-                                    background: 'rgba(255,255,255,0.2)',
-                                    border: 'none',
-                                    borderRadius: '0.5rem',
-                                    padding: '0.5rem',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    color: 'white'
-                                }}
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
+                      >
+                        Copy Response
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {isTyping && (
+                <div style={{ display: "flex" }}>
+                  <div
+                    style={{
+                      padding: "0.875rem 1.125rem",
+                      borderRadius: "1rem",
+                      background: "white",
+                      color: "var(--text-main)",
+                      fontSize: "0.9rem",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+                      border: "1px solid rgba(0,0,0,0.05)",
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "0.25rem" }}>
+                      <span style={{ animation: "bounce 1.4s infinite" }}>
+                        ●
+                      </span>
+                      <span style={{ animation: "bounce 1.4s infinite 0.2s" }}>
+                        ●
+                      </span>
+                      <span style={{ animation: "bounce 1.4s infinite 0.4s" }}>
+                        ●
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
+            {/* Input */}
+            <div
+              style={{
+                padding: "1.25rem",
+                borderTop: "var(--border-glass)",
+                background: "var(--bg-glass-strong)",
+              }}
+            >
+              <div style={{ display: "flex", gap: "0.75rem" }}>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSend()}
+                  placeholder="Ask me about law, cases, or the Constitution..."
+                  style={{
+                    flex: 1,
+                    padding: "0.75rem 1rem",
+                    background: "white",
+                    border: "1px solid rgba(0, 0, 0, 0.1)",
+                    borderRadius: "0.75rem",
+                    color: "#4B5563",
+                    fontSize: "0.95rem",
+                    outline: "none",
+                  }}
+                />
 
-                        {/* Messages */}
-                        <div style={{
-                            flex: 1,
-                            overflowY: 'auto',
-                            padding: '1.25rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '1rem'
-                        }}>
-                            {messages.map((msg, idx) => (
-                                <div
-                                    key={idx}
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start'
-                                    }}
-                                >
-                                    <div style={{
-                                        maxWidth: '80%',
-                                        padding: '0.875rem 1.125rem',
-                                        borderRadius: '1rem',
-                                        background: msg.role === 'user'
-                                            ? 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)'
-                                            : 'white', // Light background for bot
-                                        color: msg.role === 'user' ? 'white' : '#4B5563',
-                                        fontSize: '0.9rem',
-                                        lineHeight: '1.5',
-                                        boxShadow: msg.role === 'assistant' ? '0 2px 10px rgba(0,0,0,0.05)' : 'none',
-                                        border: msg.role === 'assistant' ? '1px solid rgba(0,0,0,0.05)' : 'none'
-                                    }} className="markdown-content">
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                            {msg.content}
-                                        </ReactMarkdown>
-                                    </div>
-                                </div>
-                            ))}
-                            {isTyping && (
-                                <div style={{ display: 'flex' }}>
-                                    <div style={{
-                                        padding: '0.875rem 1.125rem',
-                                        borderRadius: '1rem',
-                                        background: 'white',
-                                        color: 'var(--text-main)',
-                                        fontSize: '0.9rem',
-                                        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                                        border: '1px solid rgba(0,0,0,0.05)'
-                                    }}>
-                                        <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                            <span style={{ animation: 'bounce 1.4s infinite' }}>●</span>
-                                            <span style={{ animation: 'bounce 1.4s infinite 0.2s' }}>●</span>
-                                            <span style={{ animation: 'bounce 1.4s infinite 0.4s' }}>●</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                <button
+                  onClick={isRecording ? stopRecording : startRecording}
+                  style={{
+                    padding: "0.75rem",
+                    background: isRecording
+                      ? "#ef4444"
+                      : "rgba(139, 92, 246, 0.15)",
+                    border: "none",
+                    borderRadius: "0.75rem",
+                    color: isRecording ? "white" : "#8b5cf6",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {isRecording ? <StopCircle size={18} /> : <Mic size={18} />}
+                </button>
 
-                        {/* Input */}
-                        <div style={{
-                            padding: '1.25rem',
-                            borderTop: 'var(--border-glass)',
-                            background: 'var(--bg-glass-strong)'
-                        }}>
-                            <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                <input
-                                    type="text"
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                                    placeholder="Ask me about law, cases, or the Constitution..."
-                                    style={{
-                                        flex: 1,
-                                        padding: '0.75rem 1rem',
-                                        background: 'white',
-                                        border: '1px solid rgba(0, 0, 0, 0.1)',
-                                        borderRadius: '0.75rem',
-                                        color: '#4B5563',
-                                        fontSize: '0.95rem',
-                                        outline: 'none'
-                                    }}
-                                />
-                                
-                                <button
-    onClick={isRecording ? stopRecording : startRecording}
-    style={{
-        padding: '0.75rem',
-        background: isRecording
-            ? '#ef4444'
-            : 'rgba(139, 92, 246, 0.15)',
-        border: 'none',
-        borderRadius: '0.75rem',
-        color: isRecording ? 'white' : '#8b5cf6',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-    }}
->
-    {isRecording ? <StopCircle size={18} /> : <Mic size={18} />}
-</button>
+                <button
+                  onClick={handleSend}
+                  disabled={!input.trim()}
+                  style={{
+                    padding: "0.75rem 1.25rem",
+                    background: input.trim()
+                      ? "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)"
+                      : "rgba(139, 92, 246, 0.3)",
+                    border: "none",
+                    borderRadius: "0.75rem",
+                    color: "white",
+                    cursor: input.trim() ? "pointer" : "not-allowed",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            </div>
 
-                                <button
-                                    onClick={handleSend}
-                                    disabled={!input.trim()}
-                                    style={{
-                                        padding: '0.75rem 1.25rem',
-                                        background: input.trim()
-                                            ? 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)'
-                                            : 'rgba(139, 92, 246, 0.3)',
-                                        border: 'none',
-                                        borderRadius: '0.75rem',
-                                        color: 'white',
-                                        cursor: input.trim() ? 'pointer' : 'not-allowed',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        fontWeight: '600'
-                                    }}
-                                >
-                                    <Send size={18} />
-                                </button>
-                            </div>
-                        </div>
-
-                        <style>{`
+            <style>{`
                             @keyframes bounce {
                                 0%, 60%, 100% { transform: translateY(0); }
                                 30% { transform: translateY(-4px); }
@@ -339,10 +422,9 @@ const stopRecording = () => {
                                 font-weight: 700 !important;
                             }
                         `}</style>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </>
-    );
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
 }
-
