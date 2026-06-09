@@ -1,16 +1,25 @@
 package com.nyaysetu.backend.service;
 
-import com.nyaysetu.backend.dto.LawyerDTO;
-import com.nyaysetu.backend.entity.*;
-import com.nyaysetu.backend.repository.CaseRepository;
-import com.nyaysetu.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.nyaysetu.backend.dto.LawyerDTO;
+import com.nyaysetu.backend.entity.CaseEntity;
+import com.nyaysetu.backend.entity.CaseStatus;
+import com.nyaysetu.backend.entity.DocumentStatus;
+import com.nyaysetu.backend.entity.Role;
+import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.repository.CaseRepository;
+import com.nyaysetu.backend.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service for auto-assigning cases to judges and managing lawyer invitations
@@ -47,10 +56,14 @@ public class CaseAssignmentService {
         }
 
         // For MVP, just pick first judge (round-robin can be enhanced later)
-        // This avoids the UUID/Long type mismatch issue
-        User selectedJudge = judges.get(0);
+      User selectedJudge = judges.stream()
+        .min((a, b) -> Long.compare(
+            caseRepository.countByJudgeId(a.getId()),
+            caseRepository.countByJudgeId(b.getId())))
+        .orElse(judges.get(0));
 
         // Assign judge to case using the assignedJudge field (which is a String for judge name)
+        caseEntity.setJudgeId(selectedJudge.getId());
         caseEntity.setAssignedJudge(selectedJudge.getName());
         // Also set judgeId for reference (convert Long userId to UUID for storage)
         // Note: For proper implementation, judgeId column should be changed to Long
