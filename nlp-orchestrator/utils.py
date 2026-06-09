@@ -85,37 +85,41 @@ retry_transient = retry(
     reraise=True
 )
 
-# Circuit Breaker 
+# Circuit Breaker
 class CircuitBreaker:
     def __init__(self, failure_threshold=5, recovery_timeout=60):
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.failure_count = 0
-        self.last_failure_time = None
+        self.last_failure_time = 0.0
         self.state = "CLOSED"
+        self._lock = asyncio.Lock()
 
-    def call_succeeded(self):
-        self.failure_count = 0
-        self.state = "CLOSED"
-        logger.info("[CircuitBreaker] State → CLOSED")
+    async def call_succeeded(self):
+        async with self._lock:
+            self.failure_count = 0
+            self.state = "CLOSED"
+            logger.info("[CircuitBreaker] State → CLOSED")
 
-    def call_failed(self):
-        self.failure_count += 1
-        self.last_failure_time = time.time()
-        if self.failure_count >= self.failure_threshold:
-            self.state = "OPEN"
-            logger.warning(
-                f"[CircuitBreaker] State → OPEN after {self.failure_count} failures"
-            )
+    async def call_failed(self):
+        async with self._lock:
+            self.failure_count += 1
+            self.last_failure_time = time.time()
+            if self.failure_count >= self.failure_threshold:
+                self.state = "OPEN"
+                logger.warning(
+                    f"[CircuitBreaker] State → OPEN after {self.failure_count} failures"
+                )
 
-    def is_available(self):
-        if self.state == "CLOSED":
-            return True
-        if self.state == "OPEN":
-            if time.time() - self.last_failure_time >= self.recovery_timeout:
-                self.state = "HALF_OPEN"
-                logger.info("[CircuitBreaker] State → HALF_OPEN, sending probe")
+    async def is_available(self):
+        async with self._lock:
+            if self.state == "CLOSED":
                 return True
-            return False
-        if self.state == "HALF_OPEN":
-            return True
+            if self.state == "OPEN":
+                if time.time() - self.last_failure_time >= self.recovery_timeout:
+                    self.state = "HALF_OPEN"
+                    logger.info("[CircuitBreaker] State → HALF_OPEN, sending probe")
+                    return True
+                return False
+            if self.state == "HALF_OPEN":
+                return True

@@ -96,8 +96,30 @@ async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
         logger.warning("Indian Kanoon API token not set; skipping search.")
         return []
 
-    if not kanoon_breaker.is_available():
+    if not await kanoon_breaker.is_available():
         logger.warning("[CircuitBreaker/Kanoon] OPEN — skipping search")
+        return []
+
+    url = f"{INDIAN_KANOON_API_URL}/search/"
+    params = {"formInput": query, "pagenum": 0}
+    headers = {
+        "Authorization": f"Token {INDIAN_KANOON_TOKEN}",
+        "Accept": "application/json",
+    }
+
+    try:
+        result = await _search_kanoon_with_retry(
+            query,
+            url,
+            params,
+            headers,
+            max_results,
+        )
+        await kanoon_breaker.call_succeeded()
+        return result
+    except Exception as e:
+        await kanoon_breaker.call_failed()
+        logger.error(f"Indian Kanoon search error: {type(e).__name__}: {e}")
         return []
 
     url = f"{INDIAN_KANOON_API_URL}/search/"
@@ -164,7 +186,7 @@ async def get_kanoon_doc(
     if not INDIAN_KANOON_TOKEN or not doc_id:
         return ""
 
-    if not kanoon_breaker.is_available():
+    if not await kanoon_breaker.is_available():
         logger.warning("[CircuitBreaker/Kanoon] OPEN — skipping doc fetch")
         return ""
 
@@ -180,10 +202,10 @@ async def get_kanoon_doc(
         else:
             async with aiohttp.ClientSession(timeout=DOC_TIMEOUT) as new_session:
                 result = await _fetch_doc(new_session, url, headers, max_chars)
-        kanoon_breaker.call_succeeded()
+        await kanoon_breaker.call_succeeded()
         return result
     except Exception as e:
-        kanoon_breaker.call_failed()
+        await kanoon_breaker.call_failed()
         logger.error(
             f"Kanoon doc fetch error (doc_id={doc_id}): {type(e).__name__}: {e}"
         )
