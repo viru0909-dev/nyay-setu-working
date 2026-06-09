@@ -77,6 +77,9 @@ Structured digital evidence uploads with SHA-256 hash verification, creating a t
 **Digital FIR Handling**
 Police can upload FIRs digitally. The AI instantly generates a structured summary and draft charge sheet, significantly reducing manual paperwork and processing time.
 
+**Case Progress Timeline**
+An interactive visual timeline displaying the full progress of a legal case from filing to resolution. Features timeline cards for each judicial stage, status indicators (Completed, Active, Upcoming), estimated next hearing dates, and a one-click download of the complete timeline as a text report.
+
 **Virtual Courtrooms**
 Native WebRTC-based video conferencing integrated directly into the case timeline for secure, seamless remote hearings — no third-party applications required.
 
