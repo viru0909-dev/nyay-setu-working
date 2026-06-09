@@ -2,9 +2,21 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import useAuthStore from './authStore';
 
 describe('authStore', () => {
+beforeEach(() => {
+    const localStorageMock = (() => {
+        let store = {};
+        return {
+            getItem: vi.fn((key) => store[key] ?? null),
+            setItem: vi.fn((key, value) => { store[key] = value; }),
+            removeItem: vi.fn((key) => { delete store[key]; }),
+            clear: vi.fn(() => { store = {}; }),
+        };
+    })();
 
-  beforeEach(() => {
-    localStorage.clear();
+    Object.defineProperty(window, 'localStorage', {
+        value: localStorageMock,
+        writable: true,
+    });
 
     useAuthStore.setState({
       user: null,

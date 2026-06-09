@@ -1506,7 +1506,39 @@ function TimelineTab({ caseData }) {
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '2rem' }}>{t('caseDetail.timeline.liveCaseRoadmap')}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>
+        {t('caseDetail.timeline.liveCaseRoadmap')}
+    </h3>
+    <button
+        onClick={() => {
+            const content = timeline.map((e, i) =>
+                `${i + 1}. [${e.type.toUpperCase()}] ${e.title}\n   ${e.subtitle}\n   ${e.date ? formatDate(e.date) : 'Upcoming'}\n`
+            ).join('\n');
+            const blob = new Blob([`CASE TIMELINE\nCase ID: ${caseData.id}\n\n${content}`], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Timeline_${caseData.id}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }}
+        style={{
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            padding: '0.5rem 1rem',
+            background: 'rgba(16, 185, 129, 0.1)',
+            border: '1px solid #10b981',
+            borderRadius: '0.5rem',
+            color: '#10b981',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontSize: '0.875rem'
+        }}
+    >
+        <Download size={16} /> Download Timeline
+    </button>
+</div>
 
             <div style={{ position: 'relative', borderLeft: '2px solid var(--border-glass)', paddingLeft: '2rem', marginLeft: '1rem' }}>
                 {timeline.map((event, i) => (
