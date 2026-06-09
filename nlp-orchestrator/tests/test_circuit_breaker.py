@@ -1,6 +1,7 @@
 """
 Unit tests for CircuitBreaker in utils.py
 """
+
 import time
 import pytest
 from utils import CircuitBreaker

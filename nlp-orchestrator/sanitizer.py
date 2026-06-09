@@ -17,7 +17,7 @@ import html
 
 def strip_html_tags(text: str) -> str:
     """Remove all HTML/XML tags from input text."""
-    return re.sub(r'<[^>]+>', '', text)
+    return re.sub(r"<[^>]+>", "", text)
 
 
 def sanitize_user_input(text: str) -> str:
@@ -33,9 +33,9 @@ def sanitize_user_input(text: str) -> str:
     text = strip_html_tags(text)
     text = html.escape(text)
     # Remove control characters (keep \n and \t for readability)
-    text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', text)
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
     # Collapse excessive whitespace (3+ newlines → 2)
-    text = re.sub(r'\n{3,}', '\n\n', text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
 
 
@@ -50,22 +50,22 @@ def sanitize_prompt_input(text: str) -> str:
 
     # Common prompt injection patterns to neutralize
     injection_patterns = [
-        r'(?i)ignore\s+(all\s+)?(previous|above|prior)\s+(instructions?|prompts?|rules?)',
-        r'(?i)you\s+are\s+now\s+',
-        r'(?i)system\s*:\s*',
-        r'(?i)\\n\s*system\s*:',
-        r'(?i)forget\s+(everything|all|your\s+instructions)',
-        r'(?i)disregard\s+(all\s+)?(previous|above|prior)',
-        r'(?i)new\s+instruction\s*:',
-        r'(?i)override\s+(previous|system)',
-        r'(?i)dan\s+mode',
-        r'(?i)jailbreak',
-        r'(?i)do\s+anything\s+now',
-        r'(?i)print\s+the\s+system\s+prompt',
-        r'(?i)act\s+as\s+a\s+developer',
+        r"(?i)ignore\s+(all\s+)?(previous|above|prior)\s+(instructions?|prompts?|rules?)",
+        r"(?i)you\s+are\s+now\s+",
+        r"(?i)system\s*:\s*",
+        r"(?i)\\n\s*system\s*:",
+        r"(?i)forget\s+(everything|all|your\s+instructions)",
+        r"(?i)disregard\s+(all\s+)?(previous|above|prior)",
+        r"(?i)new\s+instruction\s*:",
+        r"(?i)override\s+(previous|system)",
+        r"(?i)dan\s+mode",
+        r"(?i)jailbreak",
+        r"(?i)do\s+anything\s+now",
+        r"(?i)print\s+the\s+system\s+prompt",
+        r"(?i)act\s+as\s+a\s+developer",
     ]
     for pattern in injection_patterns:
-        text = re.sub(pattern, '[FILTERED]', text)
+        text = re.sub(pattern, "[FILTERED]", text)
 
     return text
 
@@ -78,6 +78,6 @@ def sanitize_url(url: str) -> str:
     that could be used for XSS attacks.
     """
     url = url.strip()
-    if re.match(r'(?i)^(javascript|data|vbscript):', url):
+    if re.match(r"(?i)^(javascript|data|vbscript):", url):
         raise ValueError(f"Blocked dangerous URL scheme: {url[:30]}")
     return url

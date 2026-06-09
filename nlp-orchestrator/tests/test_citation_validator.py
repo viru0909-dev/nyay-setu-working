@@ -5,9 +5,7 @@ from validators.citation_validator import validate_citation
 
 
 def test_bns_bnss_section_ranges():
-    data_path = (
-    Path(__file__).resolve().parent.parent / "data" / "legal_sections.json"
-)
+    data_path = Path(__file__).resolve().parent.parent / "data" / "legal_sections.json"
 
     with open(data_path, "r", encoding="utf-8") as f:
         data = json.load(f)
