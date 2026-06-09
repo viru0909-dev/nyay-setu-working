@@ -40,13 +40,7 @@ const getRoleMenuItems = (t) => ({
         { icon: User, label: t('dashboard:sidebar.judge.profile'), path: '/judge/profile' }
     ],
     ADMIN: [
-        { icon: Home, label: t('dashboard:sidebar.admin.dashboard'), path: '/admin' },
-        { icon: Users, label: t('dashboard:sidebar.admin.userManagement'), path: '/admin/users' },
-        { icon: Scale, label: t('dashboard:sidebar.admin.caseManagement'), path: '/admin/cases' },
-        { icon: Gavel, label: t('dashboard:sidebar.admin.judgeAssignment'), path: '/admin/judges' },
-        { icon: BarChart3, label: t('dashboard:sidebar.admin.reports'), path: '/admin/reports' },
-        { icon: Settings, label: t('dashboard:sidebar.admin.settings'), path: '/admin/settings' },
-        { icon: User, label: t('dashboard:sidebar.admin.profile'), path: '/admin/profile' }
+        { icon: Home, label: t('dashboard:sidebar.admin.dashboard'), path: '/admin' }
     ],
     TECH_ADMIN: [
         { icon: Home, label: t('dashboard:sidebar.techAdmin.dashboard'), path: '/tech-admin' },

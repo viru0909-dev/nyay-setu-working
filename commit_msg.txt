@@ -1,0 +1,14 @@
+fix: add resource-level authorization for case data access
+
+Closes #1219 - Horizontal Privilege Escalation
+
+- Added AccessDeniedException with GlobalExceptionHandler 403 handling
+- Created CaseAccessService: checks user ownership (client/lawyer/judge/respondent)
+- CaseManagementController: all case-id endpoints now call requireCaseAccess()
+- EvidenceController: removed untrusted uploaderId param, uses auth user
+- BlockchainEvidenceController: checks case access on upload/listEvidence
+- HearingController: checks case access on getCaseHearings
+- DocumentManagementController: checks document-level access on get/download
+- DocumentManagementService.hasDocumentAccess: added lawyer check (was TODO)
+- DocumentManagementService: added canAccessDocument with case ownership
+- getCaseById/getAllCases scoped to user relationship

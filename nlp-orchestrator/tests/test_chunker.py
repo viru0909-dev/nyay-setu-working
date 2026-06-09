@@ -72,6 +72,14 @@ def test_chunks_respect_size_with_some_slack():
         assert toks <= 160, f"chunk {i} has {toks} tokens (> 2x budget)"
 
 
+def test_long_paragraph_without_sentence_boundary_chunks_correctly():
+    text = "word " * 600
+    chunks = chunker.chunk_text(text, max_tokens=100, overlap_tokens=20)
+    assert len(chunks) > 1
+    for c in chunks:
+        assert chunker.count_tokens(c) <= 100
+
+
 def test_realistic_chunk_sizes():
     """With realistic max_tokens=512, all chunks for the sample should fit."""
     big = LEGAL_SAMPLE * 4
