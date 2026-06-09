@@ -26,7 +26,7 @@ public class MeetingService {
         String meetingCode = generateCode();
 
         // If participants list is null
-        List<UUID> participants = dto.getParticipants() != null
+        List<Long> participants = dto.getParticipants() != null
                 ? new ArrayList<>(dto.getParticipants())
                 : new ArrayList<>();
 
@@ -48,7 +48,7 @@ public class MeetingService {
         Meeting meeting = repository.findByMeetingCode(meetingCode)
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
 
-        UUID callerId = user.getId();
+        Long callerId = user.getId();
 
         // Validate user has access to the case this meeting belongs to
         caseAccessService.requireCaseAccess(meeting.getCaseId(), user);
