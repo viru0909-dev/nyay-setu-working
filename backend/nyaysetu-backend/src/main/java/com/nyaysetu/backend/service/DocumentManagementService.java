@@ -166,10 +166,10 @@ public class DocumentManagementService {
 
     public DocumentDto getDocumentById(UUID id) {
         return convertToDto(
-                documentRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Document not found"))
-        );
-    }
+            documentRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Document not found"))
+    );
+}
 
     public DocumentDto getDocumentById(UUID id, User user) {
         DocumentEntity document = documentRepository.findById(id)
