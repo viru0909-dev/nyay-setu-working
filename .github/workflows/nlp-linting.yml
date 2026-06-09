@@ -3,7 +3,7 @@ name: NLP Orchestrator Linting
 on:
   pull_request:
     paths:
-      - 'nlp-orchestrator/**'
+      - 'nlp-orchestrator/**/*.py'
       - '.github/workflows/nlp-linting.yml'
 
 jobs:
