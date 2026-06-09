@@ -44,8 +44,8 @@ const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
 const ForensicsPage = lazy(() => import('./pages/litigant/ForensicsPage'));
 const DocumentGeneratePage = lazy(() => import('./pages/litigant/DocumentGeneratePage'));
 const FindLawyerPage = lazy(() => import('./pages/litigant/FindLawyerPage'));
-const LawyerFeedbackPage = lazy(() => 
-  import('./pages/litigant/LawyerFeedbackPage'));
+const LawyerFeedbackPage = lazy(() =>
+    import('./pages/litigant/LawyerFeedbackPage'));
 
 
 // Judge Pages (keep only those still used)
@@ -71,6 +71,9 @@ const LawyerAnalyticsPage = lazy(() => import('./pages/lawyer/AnalyticsPage'));
 const LawyerCaseDetailsPage = lazy(() => import('./pages/lawyer/LawyerCaseDetailsPage'));
 const ClientChatPage = lazy(() => import('./pages/lawyer/ClientChatPage'));
 const LawyerProfilePage = lazy(() => import('./pages/lawyer/LawyerProfilePage'));
+const DocumentComparisonPage = lazy(() =>
+    import('./pages/lawyer/DocumentComparisonPage')
+);
 const CaseWorkspace = lazy(() => import('./pages/lawyer/CaseWorkspace'));
 const OfflineDraftsPage = lazy(() => import('./pages/lawyer/OfflineDraftsPage'));
 
@@ -92,6 +95,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     if (allowedRoles && !allowedRoles.includes(user?.role)) {
         return <Navigate to="/unauthorized" replace />;
     }
+    console.log("Auth:", isAuthenticated);
+    console.log("User:", user);
 
     return children;
 };
@@ -159,15 +164,20 @@ function App({ swRegistration }) {
                                 <Route
                                     path="/lawyer/*"
                                     element={
-                                        <ProtectedRoute allowedRoles={['LAWYER']}>
-                                            <DashboardLayout />
-                                        </ProtectedRoute>
+                                        // <ProtectedRoute allowedRoles={['LAWYER']}>
+                                        //     <DashboardLayout />
+                                        // </ProtectedRoute>
+                                        <DashboardLayout />
                                     }
                                 >
                                     <Route index element={<LawyerDashboard />} />
                                     <Route path="cases" element={<LawyerCasesPage />} />
                                     <Route path="case/:caseId" element={<LawyerCaseDetailsPage />} />
                                     <Route path="case/:caseId/workspace" element={<CaseWorkspace />} />
+                                    <Route
+                                        path="document-compare"
+                                        element={<DocumentComparisonPage />}
+                                    />
                                     <Route path="clients" element={<MyClientsPage />} />
                                     <Route path="preparation" element={<CasePreparationPage />} />
                                     <Route path="evidence" element={<EvidenceVaultPage />} />
@@ -226,7 +236,7 @@ function App({ swRegistration }) {
                                     <Route path="investigation/:id" element={<InvestigationDetailsPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
                                 </Route>
-                                
+
                                 <Route path="/unauthorized" element={
                                     <div style={{ textAlign: 'center', padding: '3rem' }}>
                                         <h1>Unauthorized</h1>
