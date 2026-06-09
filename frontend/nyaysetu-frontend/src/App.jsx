@@ -18,8 +18,6 @@ import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
 
-// Imported Feature Component
-import ScrollProgressBar from './ScrollProgressBar';
 // ==========================================
 // VITE CHUNK BREAKAGE MITIGATION WRAPPER
 // ==========================================
