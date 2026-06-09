@@ -19,6 +19,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
 import time
 import uuid
+import os
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -34,7 +35,9 @@ from config import FRONTEND_ORIGIN, GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KE
 from decomposer import decompose_query
 from router import route_questions
 from research import run_parallel_research, execute_with_fallback
-from synthesizer import synthesize_answers, stream_synthesize_answers, synthesize_answers_structured, stream_synthesize_answers_structured
+from synthesizer import synthesize_answers
+from research import run_parallel_research, stream_groq_chat
+from synthesizer import synthesize_answers, stream_synthesize_answers
 from validators.citation_validator import validate_citations_from_text
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
@@ -171,6 +174,9 @@ def sse_event(event_type: str, data: dict) -> str:
 async def legal_reasoning_pipeline(query: str, language: str):
     """
     Async generator that yields SSE events through the full 5-layer pipeline.
+
+    Fix: Removed inner async generator — research now runs as a background
+    asyncio.Task while interim messages are yielded from the outer generator.
     """
     kanoon_task = None
     research_task = None
@@ -230,18 +236,13 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("synthesis_start", {})
         yield sse_event("avatar_update", {"message": "Sab information mila di, ab aapke liye summary bana raha hoon..."})
 
-        logger.info("[Layer 4] Synthesizing with structured streaming...")
+        logger.info("[Layer 4] Synthesizing with streaming...")
         
         synthesized_md = ""
-        cited_laws_from_stream = []
-        
-        # Stream synthesis tokens using the structured generator
-        async for chunk in stream_synthesize_answers_structured(safe_query, results):
-            if chunk.get("text"):
-                synthesized_md += chunk["text"]
-                yield sse_event("synthesis_token", {"chunk": chunk["text"]})
-            if chunk.get("citations"):
-                cited_laws_from_stream = chunk["citations"]
+        # Stream synthesis tokens directly
+        async for token in stream_synthesize_answers(safe_query, results):
+            synthesized_md += token
+            yield sse_event("synthesis_token", {"chunk": token})
         
         logger.info("[Layer 4] Synthesis complete")
 
@@ -260,7 +261,6 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("final_answer", {
             "markdown": synthesized_md,
             "hinglish": hinglish_dialogue,
-            "cited_laws": cited_laws_from_stream,
             "citation_validation": validation_results
         })
 
@@ -297,6 +297,15 @@ async def legal_reasoning_pipeline(query: str, language: str):
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "nlp-orchestrator", "port": 8001}
+
+@app.get("/cache/stats")
+async def cache_stats():
+    """Returns current Redis cache stats. Useful for monitoring hit rates and memory."""
+    from cache import get_cache_stats, clear_expired_cache
+    cleared = clear_expired_cache()
+    stats = get_cache_stats()
+    return {**stats, "expired_cleared_this_call": cleared}
+
 
 @app.get("/models")
 async def get_models():
@@ -354,8 +363,7 @@ async def analyze_sync(body: LegalQuery):
         logger.error("[Sync] Indian Kanoon fetch failed: %s", e)
         kanoon_context = ""
     results = await run_parallel_research(routed, kanoon_context=kanoon_context)
-    synthesis = await synthesize_answers_structured(body.query, results)
-    synthesized = synthesis.answer_markdown
+    synthesized = await synthesize_answers(body.query, results)
 
     try:
         validation_results = validate_citations_from_text(synthesized)
@@ -374,7 +382,6 @@ async def analyze_sync(body: LegalQuery):
         "final_answer": {
             "markdown": synthesized,
             "hinglish": hinglish,
-            "cited_laws": synthesis.cited_laws,
             "citation_validation": validation_results
         }
     })
@@ -691,3 +698,4 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8001))
     uvicorn.run("main:app", host="0.0.0.0", port=port)
+
