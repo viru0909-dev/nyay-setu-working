@@ -38,26 +38,20 @@ cp .env.example .env
 
 ### Required Configuration (`.env`)
 
+The root `.env.example` file is the source of truth for local configuration. It includes safe sample values for the backend, frontend, NLP orchestrator, LawGPT service, Docker Compose, and optional integrations such as Gemini, Indian Kanoon, Azure, Bhashini, and Hugging Face.
+
+At minimum, set these values before starting the full stack:
+
 ```env
-# ── Database ─────────────────────────────────
-DB_NAME=nyaysetu
 DB_USERNAME=postgres
 DB_PASSWORD=your_secure_password
-
-# ── Backend Security ─────────────────────────
-# Generate a random 256-bit string for this
-JWT_SECRET=your_jwt_secret_key_change_in_production
-SPRING_PROFILES_ACTIVE=dev
-
-# ── AI Configuration ─────────────────────────
-GROQ_API_KEY=gsk_your_actual_key_here
-# Optional: Fallback Gemini Key
-GOOGLE_GEMINI_API_KEY=your_gemini_key
-
-# ── Networking & CORS ────────────────────────
+JWT_SECRET=replace_with_a_long_random_256_bit_secret
+GROQ_API_KEY=your_groq_api_key_here
 FRONTEND_URL=http://localhost:5173
-CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4174,http://localhost:3000
 ```
+
+Optional providers can be left blank unless you are using those features. Do not commit a filled `.env` file.
 
 > **Production requirement:** When running with `SPRING_PROFILES_ACTIVE=prod`, you **must** set `JWT_SECRET` as an environment variable. The backend now fails fast at startup in production if `JWT_SECRET` is missing or falls back to the default development secret.
 

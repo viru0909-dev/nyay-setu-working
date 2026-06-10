@@ -5,13 +5,14 @@ import { Scale, Menu, X, Globe, Sun, Moon, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
+import useAuthStore from '../../store/authStore';
 import AIAssistantModal from './AIAssistantModal';
 
 // role links for the portal dropdown
 const ROLES = [
-    { id: 'litigant', label: 'Litigant', href: '/litigant' },
-    { id: 'lawyer', label: 'Lawyer', href: '/lawyer' },
-    { id: 'judge', label: 'Judge', href: '/judge' },
+    { id: 'litigant', label:'header.nav.roles.litigant', href: '/litigant' },
+    { id: 'lawyer', label: 'header.nav.roles.lawyer', href: '/lawyer' },
+    { id: 'judge', label: 'header.nav.roles.judge', href: '/judge' },
 ];
 
 const LANGUAGES = [
@@ -32,6 +33,7 @@ export default function Header({ hideAuthButtons = false }) {
     const [langOpen, setLangOpen] = useState(false);
     const { theme, toggleTheme } = useTheme();
     const location = useLocation();
+    const { isGuest } = useAuthStore();
 
     useEffect(() => {
         if (isMobileMenuOpen) {
@@ -75,7 +77,7 @@ export default function Header({ hideAuthButtons = false }) {
     const navItems = [
         { labelKey: 'header.nav.home', href: '/', isRoute: true },
         { labelKey: 'header.nav.features', href: '/#features' },
-        { labelKey: 'Upcoming Features', href: '/upcoming-features', isRoute: true },
+        { labelKey: 'header.nav.upcomingFeatures', href: '/upcoming-features', isRoute: true },
         { labelKey: 'header.nav.constitution', href: '/constitution', isRoute: true },
         { labelKey: 'header.nav.aiAssistant', action: () => setShowAIModal(true) },
         { labelKey: 'header.nav.about', href: '/about', isRoute: true },
@@ -83,25 +85,33 @@ export default function Header({ hideAuthButtons = false }) {
 
     const isDark = theme === 'dark';
 
-    const navLinkStyle = (href) => ({
-        color: location.pathname === href ? 'var(--color-primary)' : 'var(--text-secondary)',
+    const navLinkStyle = (isActive) => ({
+        color: isActive ? 'var(--color-primary)' : 'var(--text-secondary)',
         textDecoration: 'none',
         fontSize: '0.925rem',
-        fontWeight: location.pathname === href ? '600' : '500',
+        fontWeight: isActive ? '600' : '500',
         cursor: 'pointer',
         padding: '0.25rem 0',
-        borderBottom: location.pathname === href
-            ? '2px solid var(--color-primary)'
-            : '2px solid transparent',
-        transition: 'color 0.2s ease, border-color 0.2s ease',
         background: 'none',
         border: 'none',
         fontFamily: 'inherit',
     });
 
     const renderNavItem = (item) => {
-        const baseStyle = navLinkStyle(item.href);
+        const currentPathWithHash = location.pathname + location.hash;
+        let isActive = false;
+        if (item.href === '/') {
+            // Home is only active if we are on '/' AND there is no hash
+            isActive = location.pathname === '/' && !location.hash;
+        } else if (item.href) {
+            // Other tabs are active if they match the exact path+hash OR just the path
+            isActive = currentPathWithHash === item.href || location.pathname === item.href;
+        }
+        // -------------------------------------------------------------
+
+        const baseStyle = navLinkStyle(isActive);
         // Fallback to labelKey directly if translation returns the exact key
+
         const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
         if (item.action) {
@@ -109,9 +119,9 @@ export default function Header({ hideAuthButtons = false }) {
                 <button
                     key={item.labelKey}
                     onClick={item.action}
+                    className="header-nav-link"
+                    data-active={isActive ? 'true' : undefined}
                     style={baseStyle}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
                 >
                     {displayLabel}
                 </button>
@@ -122,9 +132,9 @@ export default function Header({ hideAuthButtons = false }) {
                 <Link
                     key={item.labelKey}
                     to={item.href}
+                    className="header-nav-link"
+                    data-active={isActive ? 'true' : undefined}
                     style={baseStyle}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                    onMouseLeave={e => e.currentTarget.style.color = location.pathname === item.href ? 'var(--color-primary)' : 'var(--text-secondary)'}
                 >
                     {displayLabel}
                 </Link>
@@ -134,9 +144,9 @@ export default function Header({ hideAuthButtons = false }) {
             <a
                 key={item.labelKey}
                 href={item.href}
+                className="header-nav-link"
+                data-active={isActive ? 'true' : undefined}
                 style={baseStyle}
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--color-primary)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
             >
                 {displayLabel}
             </a>
@@ -207,7 +217,7 @@ export default function Header({ hideAuthButtons = false }) {
                     </nav>
 
                     {/* Right Controls */}
-                    <div className="desktop-cta" style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexShrink: 0 }}>
+                    <div className="desktop-cta" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
                         {/* Role Selector */}
                         <div id="role-selector" style={{ position: 'relative' }}>
                             <button
@@ -230,10 +240,9 @@ export default function Header({ hideAuthButtons = false }) {
                                 onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border-medium)'; }}
                             >
-                                Portal
+                                {t('header.nav.portal')}
                                 <ChevronDown size={14} style={{ transform: roleOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
                             </button>
-
                             <AnimatePresence>
                                 {roleOpen && (
                                     <motion.div
@@ -271,13 +280,52 @@ export default function Header({ hideAuthButtons = false }) {
                                                 onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                             >
-                                                {role.label}
+                                                {t(role.label)}
                                             </Link>
                                         ))}
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>
+
+                        {isGuest && (
+    <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.45rem',
+            padding: '0.42rem 0.75rem',
+            borderRadius: '999px',
+            background: isDark
+                ? 'rgba(245, 158, 11, 0.08)'
+                : 'rgba(245, 158, 11, 0.12)',
+            border: '1px solid rgba(245, 158, 11, 0.18)',
+            color: 'var(--text-main)',
+            fontSize: '0.78rem',
+            fontWeight: '600',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+        }}
+    >
+        <span
+            style={{
+                width: '7px',
+                height: '7px',
+                borderRadius: '50%',
+                background: '#f59e0b',
+                boxShadow: '0 0 10px rgba(245, 158, 11, 0.45)',
+                flexShrink: 0,
+            }}
+        />
+
+        <span style={{ letterSpacing: '0.01em' }}>
+            Guest Session
+        </span>
+    </motion.div>
+)}
 
                         {/* Language Toggle */}
                         <div style={{ position: 'relative' }} id="lang-selector">
@@ -427,7 +475,7 @@ export default function Header({ hideAuthButtons = false }) {
                                     onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary-hover)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                                     onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                                 >
-                                    {t('header.cta.getStarted')}
+                                    {t('header.cta.signup')}
                                 </Link>
                             </>
                         )}
@@ -501,25 +549,76 @@ export default function Header({ hideAuthButtons = false }) {
 
                                     if (item.action) {
                                         return (
-                                            <button key={item.labelKey} onClick={() => { item.action(); setIsMobileMenuOpen(false); }} style={sharedStyle}>
+                                            <button key={item.labelKey} onClick={() => { item.action(); setIsMobileMenuOpen(false); }} style={sharedStyle} className="header-nav-link">
                                                 {displayLabel}
                                             </button>
                                         );
                                     }
                                     if (item.isRoute) {
                                         return (
-                                            <Link key={item.labelKey} to={item.href} onClick={() => setIsMobileMenuOpen(false)} style={sharedStyle}>
+                                            <Link key={item.labelKey} to={item.href} onClick={() => setIsMobileMenuOpen(false)} style={sharedStyle} className="header-nav-link" aria-current={location.pathname === item.href ? 'page' : undefined}>
                                                 {displayLabel}
                                             </Link>
                                         );
                                     }
                                     return (
-                                        <a key={item.labelKey} href={item.href} onClick={() => setIsMobileMenuOpen(false)} style={sharedStyle}>
+                                        <a key={item.labelKey} href={item.href} onClick={() => setIsMobileMenuOpen(false)} style={sharedStyle} className="header-nav-link">
                                             {displayLabel}
                                         </a>
                                     );
                                 })}
                             </nav>
+
+                            {isGuest && (
+    <div
+        style={{
+            marginBottom: '1rem',
+            padding: '0.8rem 1rem',
+            borderRadius: '12px',
+            background: isDark
+                ? 'rgba(245, 158, 11, 0.08)'
+                : 'rgba(245, 158, 11, 0.12)',
+            border: '1px solid rgba(245, 158, 11, 0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+        }}
+    >
+        <div
+            style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: '#f59e0b',
+                boxShadow: '0 0 8px rgba(245, 158, 11, 0.45)',
+                flexShrink: 0,
+            }}
+        />
+
+        <div>
+            <p
+                style={{
+                    margin: 0,
+                    fontSize: '0.86rem',
+                    fontWeight: '700',
+                    color: 'var(--text-main)',
+                }}
+            >
+                Guest Mode
+            </p>
+
+            <p
+                style={{
+                    margin: 0,
+                    fontSize: '0.72rem',
+                    color: 'var(--text-muted)',
+                }}
+            >
+                Some features require an account
+            </p>
+        </div>
+    </div>
+)}
 
                             {/* Role links mobile */}
                             <div style={{ marginBottom: '1rem' }}>
@@ -611,7 +710,7 @@ export default function Header({ hideAuthButtons = false }) {
                                             {t('header.cta.login')}
                                         </Link>
                                         <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '0.75rem', textAlign: 'center', background: 'var(--color-primary)', color: 'white', textDecoration: 'none', borderRadius: '10px', fontWeight: '600' }}>
-                                            {t('header.cta.getStarted')}
+                                            {t('header.cta.signup')}
                                         </Link>
                                     </>
                                 )}
@@ -638,6 +737,50 @@ export default function Header({ hideAuthButtons = false }) {
                         }
                         .desktop-nav, .desktop-cta { display: none !important; }
                         .mobile-menu-btn { display: flex !important; }
+                    }
+
+                    .header-nav-link {
+                        position: relative;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        line-height: 1.2;
+                        transition: color 0.2s ease;
+                        -webkit-tap-highlight-color: transparent;
+                    }
+
+                    .header-nav-link::after {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        right: 0;
+                        bottom: -0.3rem;
+                        height: 2px;
+                        border-radius: 999px;
+                        background: currentColor;
+                        transform: scaleX(0);
+                        transform-origin: left center;
+                        transition: transform 0.24s ease;
+                    }
+
+                    .header-nav-link:hover,
+                    .header-nav-link:focus-visible,
+                    .header-nav-link[data-active='true'],
+                    .header-nav-link[aria-current='page'] {
+                        color: var(--color-primary) !important;
+                    }
+
+                    .header-nav-link:hover::after,
+                    .header-nav-link:focus-visible::after,
+                    .header-nav-link[data-active='true']::after,
+                    .header-nav-link[aria-current='page']::after {
+                        transform: scaleX(1);
+                    }
+
+                    @media (hover: none) and (pointer: coarse) {
+                        .header-nav-link:hover::after {
+                            transform: scaleX(0);
+                        }
                     }
                 `}</style>
             </motion.header>

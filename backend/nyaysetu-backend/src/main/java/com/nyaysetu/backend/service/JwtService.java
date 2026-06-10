@@ -19,8 +19,11 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.expiration}")
-    private long expirationMs;
+    // Access token: 15 minutes
+    private static final long ACCESS_TOKEN_EXPIRY = 1000 * 60 * 15;
+
+    // Refresh token: 7 days
+    private static final long REFRESH_TOKEN_EXPIRY = 1000 * 60 * 60 * 24 * 7;
 
     private Key getSignKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
@@ -43,12 +46,23 @@ public class JwtService {
                 .getBody();
     }
 
+    // Generate short-lived ACCESS token (15 min)
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // Generate long-lived REFRESH token (7 days)
+    public String generateRefreshToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

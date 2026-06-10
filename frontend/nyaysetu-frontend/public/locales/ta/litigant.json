@@ -347,56 +347,6 @@
     "backToDashboard": "Dashboard-க்கு திரும்பவும்"
   },
 
-  "forensics": {
-    "title": "விபத்து Forensic பகுப்பாய்வு",
-    "subtitle": "Video Crime Scene Reconstruction",
-    "noVideo": "Video எதுவும் Upload ஆகவில்லை",
-    "uploadTitle": "விபத்து காட்சிப்படத்தை Upload செய்க",
-    "uploadDescription": "MP4, MOV அல்லது AVI கோப்புகள் 500MB வரை",
-    "engineStatus": "Forensic Engine நிலை",
-    "processing": "செயலாக்கம் நடக்கிறது...",
-    "timeline": "மறுகட்டமைக்கப்பட்ட Timeline",
-    "waitingAnalysis": "Frame பகுப்பாய்வுக்காக காத்திருக்கிறது...",
-    "legalImplications": "சட்ட தாக்கங்கள்",
-    "analyzingViolations": "மீறல்களை பகுப்பாய்வு செய்கிறது...",
-    "logs": "FORENSIC_ENGINE_LOGS",
-    "reportReady": "பொறுப்பு மதிப்பீடு தயார்",
-    "primaryLiable": "முதன்மை பொறுப்பு தரப்பு கண்டறியப்பட்டது:",
-    "viewReport": "வழக்கு அறிக்கையை காண்க",
-
-    "events": {
-      "startExtraction": "AI: Forensic Frame Extraction தொடங்குகிறது...",
-      "timelineExtraction": "Gemini: Video frames-லிருந்து Timeline பிரித்தெடுக்கிறது...",
-      "legalLookup": "Groq: தொடர்பான சட்ட பிரிவுகளை (MVA, IPC) தேடுகிறது...",
-      "reportGenerated": "வெற்றி: பொறுப்பு அறிக்கை உருவாக்கப்பட்டது"
-    },
-
-    "avatar": {
-      "analysisStart": "நான் Video footage-ஐ பகுப்பாய்வு செய்கிறேன். சந்திப்பில் வாகனம் B வழி விடாமல் மோதியது தெரிகிறது.",
-      "legalSections": "என் பகுப்பாய்வின் அடிப்படையில், பொறுப்பற்ற வாகன ஓட்டல் மற்றும் சிக்னல் மீறல் காரணமாக IPC 279 மற்றும் MVA 184 பிரிவுகள் இங்கு பொருந்தும்.",
-      "finalReport": "இறுதி பொறுப்பு அறிக்கை தயார். வாகனம் B விபத்திற்கு முதன்மையாக பொறுப்பாகும்."
-    },
-
-    "timelineEvents": {
-      "vehicleA": "வாகனம் A 45 km/h வேகத்தில் சந்திப்பில் நுழைகிறது",
-      "vehicleB": "வாகனம் B சிவப்பு சிக்னலில் நிறுத்தவில்லை",
-      "impact": "மத்திய-இடது பாதையில் மோதல் புள்ளி"
-    },
-
-    "legalSections": {
-      "dangerousDriving": "ஆபத்தான வாகன ஓட்டல்",
-      "rashDriving": "பொது சாலையில் பொறுப்பற்ற வாகன ஓட்டல்",
-      "mvaPenalty": "6 மாதம் வரை சிறைவாசம் அல்லது அபராதம்",
-      "ipcPenalty": "நிலையான சட்ட தண்டனை பொருந்தும்"
-    },
-
-    "report": {
-      "vehicleB": "வாகனம் B (வெள்ளை SUV)",
-      "signalViolation": "சிக்னல் மீறல்",
-      "overspeeding": "அதிக வேகம்"
-    }
-  },
-
   "hearings": {
     "title": "விசாரணைகள்",
     "subtitle": "உங்கள் திட்டமிட்ட virtual நீதிமன்ற அமர்வுகள்",

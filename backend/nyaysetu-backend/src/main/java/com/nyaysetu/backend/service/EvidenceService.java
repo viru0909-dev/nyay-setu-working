@@ -39,8 +39,11 @@ public class EvidenceService {
         File folder = new File(uploadDir);
         if (!folder.exists()) folder.mkdirs();
 
-        String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        File savedFile = new File(folder, filename);
+        
+String rawName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "file";
+String safeName = new File(rawName).getName(); // strips all path separators, no new import needed
+String filename = System.currentTimeMillis() + "_" + safeName;
+File savedFile = new File(folder, filename);
 
         try (FileOutputStream fos = new FileOutputStream(savedFile)) {
             fos.write(file.getBytes());
