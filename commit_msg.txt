@@ -1,4 +1,4 @@
-fix(backend): resolve N+1 query performance issues using EntityGraph
+fix: resolve N+1 query performance issues using EntityGraph
 
 Fixes #1158
 
