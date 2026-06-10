@@ -2,30 +2,29 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   backend-tests:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
 
-    - name: Run Backend Tests
-      run: |
-        cd backend/nyaysetu-backend
-        mvn test
-          
+      - name: Run Backend Tests
+        run: |
+          cd backend/nyaysetu-backend
+          mvn test
 
   frontend-tests:
     runs-on: ubuntu-latest
@@ -49,7 +48,6 @@ jobs:
           cd frontend/nyaysetu-frontend
           npm run test -- --run
 
-
   nlp-tests:
     runs-on: ubuntu-latest
 
@@ -60,7 +58,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install NLP Dependencies
         run: |
@@ -74,7 +72,6 @@ jobs:
         run: |
           cd nlp-orchestrator
           python -m pytest
-
 
   build-and-push:
     needs:
@@ -92,32 +89,42 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
+
+      - name: Resolve Backend Maven Dependencies
+        run: mvn -B -f backend/nyaysetu-backend/pom.xml dependency:go-offline
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Run Trivy Scan - Backend
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: './backend/nyaysetu-backend'
-          severity: 'CRITICAL'
-          exit-code: '0'
+          scan-type: "fs"
+          scan-ref: "./backend/nyaysetu-backend"
+          severity: "CRITICAL"
+          exit-code: "0"
 
       - name: Run Trivy Scan - Frontend
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: './frontend/nyaysetu-frontend'
-          severity: 'CRITICAL'
-          exit-code: '0'
+          scan-type: "fs"
+          scan-ref: "./frontend/nyaysetu-frontend"
+          severity: "CRITICAL"
+          exit-code: "0"
 
       - name: Run Trivy Scan - NLP
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: './nlp-orchestrator'
-          severity: 'CRITICAL'
-          exit-code: '0'  
+          scan-type: "fs"
+          scan-ref: "./nlp-orchestrator"
+          severity: "CRITICAL"
+          exit-code: "0"
 
       - name: Login to GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

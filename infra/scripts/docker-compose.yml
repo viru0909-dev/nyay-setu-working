@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: court-rabbitmq
+    ports:
+      - "5672:5672"   # AMQP protocol port (used by your worker code)
+      - "15672:15672" # Management UI dashboard (viewable in your browser)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  minio:
+    image: minio/minio
+    container_name: court-minio
+    ports:
+      - "9000:9000"   # Object storage API Port
+      - "9001:9001"   # Admin Web Console UI Port
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"

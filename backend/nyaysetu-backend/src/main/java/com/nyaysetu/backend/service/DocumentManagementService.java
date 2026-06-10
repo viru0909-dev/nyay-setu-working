@@ -2,6 +2,7 @@ package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.DocumentDto;
 import com.nyaysetu.backend.dto.UploadDocumentRequest;
+import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.DocumentEntity;
 import com.nyaysetu.backend.entity.DocumentStorageType;
 import com.nyaysetu.backend.entity.User;
@@ -87,11 +88,11 @@ public class DocumentManagementService {
     /**
      * Get case documents with access control based on user's role
      */
-    public List<DocumentDto> getCaseDocumentsWithAccessControl(UUID caseId, Long userId, String userRole) {
+    public List<DocumentDto> getCaseDocumentsWithAccessControl(UUID caseId, Long userId, String userRole, boolean isCaseLawyer) {
         List<DocumentEntity> allDocuments = documentRepository.findByCaseId(caseId);
         
         return allDocuments.stream()
-                .filter(doc -> hasDocumentAccess(doc, userId, userRole))
+                .filter(doc -> hasDocumentAccess(doc, userId, userRole, isCaseLawyer))
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -100,7 +101,14 @@ public class DocumentManagementService {
         DocumentEntity document = documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
 
-        if (!hasDocumentAccess(document, userId, userRole)) {
+        boolean isCaseLawyer = false;
+        if ("LAWYER".equals(userRole) && userId != null && document.getCaseId() != null) {
+            isCaseLawyer = caseRepository.findById(document.getCaseId())
+                    .map(caseEntity -> caseEntity.getLawyer() != null && userId.equals(caseEntity.getLawyer().getId()))
+                    .orElse(false);
+        }
+
+        if (!hasDocumentAccess(document, userId, userRole, isCaseLawyer)) {
             throw new RuntimeException("Unauthorized to access this document");
         }
     }
@@ -108,12 +116,14 @@ public class DocumentManagementService {
     /**
      * Check if user has access to a document
      */
-    private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole) {
+    private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole, boolean isCaseLawyer) {
         String visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : "PUBLIC";
         
         return switch (visibility) {
             case "PUBLIC" -> true; // Everyone can see public documents
-            case "RESTRICTED" -> "JUDGE".equals(userRole) || (userId != null && userId.equals(doc.getUploadedBy()));
+            case "RESTRICTED" -> "JUDGE".equals(userRole)
+                    || (userId != null && userId.equals(doc.getUploadedBy()))
+                    || isCaseLawyer; // Assigned lawyers can access restricted case documents
             case "SEALED" -> "JUDGE".equals(userRole); // Only judge
             default -> false; // Unknown visibility level - deny by default
         };
@@ -122,6 +132,15 @@ public class DocumentManagementService {
     public DocumentDto getDocumentById(UUID id) {
         DocumentEntity document = documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
+        return convertToDto(document);
+    }
+
+    public DocumentDto getDocumentById(UUID id, User user) {
+        DocumentEntity document = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+        if (!canAccessDocument(document, user)) {
+            throw new com.nyaysetu.backend.exception.AccessDeniedException("You do not have access to this document");
+        }
         return convertToDto(document);
     }
 
@@ -160,6 +179,29 @@ public class DocumentManagementService {
         
         // Trigger async analysis
         documentAnalysisService.analyzeDocumentAsync(document, file);
+    }
+
+    /**
+     * Check if a user can access a document based on their relationship to the case
+     */
+    public boolean canAccessDocument(DocumentEntity doc, User user) {
+        if (doc.getCaseId() == null) {
+            return user.getId().equals(doc.getUploadedBy());
+        }
+        CaseEntity caseEntity = caseRepository.findById(doc.getCaseId()).orElse(null);
+        if (caseEntity == null) {
+            return user.getId().equals(doc.getUploadedBy());
+        }
+        if (user.getRole() == com.nyaysetu.backend.entity.Role.ADMIN
+                || user.getRole() == com.nyaysetu.backend.entity.Role.SUPER_JUDGE) {
+            return true;
+        }
+        if (caseEntity.getClient() != null && caseEntity.getClient().getId().equals(user.getId())) return true;
+        if (caseEntity.getLawyer() != null && caseEntity.getLawyer().getId().equals(user.getId())) return true;
+        if (caseEntity.getJudgeId() != null && caseEntity.getJudgeId().equals(user.getId())) return true;
+        if (user.getRole() == com.nyaysetu.backend.entity.Role.JUDGE) return true;
+        if (user.getEmail() != null && user.getEmail().equals(caseEntity.getRespondentEmail())) return true;
+        return user.getId().equals(doc.getUploadedBy());
     }
 
     /**

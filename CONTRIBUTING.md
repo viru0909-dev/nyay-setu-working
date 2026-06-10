@@ -52,6 +52,22 @@ We expect all contributors to maintain a professional, respectful, and collabora
    - Leave a comment on the issue you wish to work on asking to be assigned.
    - **Do not** start working or open a Pull Request for an issue assigned to someone else.
    - If an assignee shows no activity for **7 days**, the issue may be reassigned.
+     - **Activity** means: a comment on the issue, a linked PR, or a commit referencing the issue number.
+     - If you need more than 7 days, **comment on the issue** explaining your timeline — maintainers will accommodate reasonable requests.
+     - To request reassignment of a stale issue, comment: *"Hi, this issue seems stale. I'd like to work on it — can I be assigned?"*
+
+### GSSoC'26 Points Guide
+
+Each issue is tagged with a difficulty level that maps to GSSoC points:
+
+| Label | Points | What it means |
+|-------|--------|---------------|
+| `level-1` | 10 pts | Documentation, typo fixes, minor UI tweaks |
+| `level-2` | 25 pts | Bug fixes, small features, test coverage |
+| `level-3` | 45 pts | New features, major UI work, backend logic |
+
+> **Tip:** Start with `level-1` or `good first issue` to get familiar with
+> the codebase before attempting higher-level tasks.
 
 <hr/>
 
@@ -190,6 +206,19 @@ KANOON_API_URL=https://api.kanoon.org
 # Application
 APP_ENV=development
 ```
+
+> ⚠️ **CRITICAL — Never Commit Credentials**
+>
+> The repository contains a `.env` file in the root directory. **Never push
+> real API keys, database passwords, or JWT secrets** to GitHub.
+>
+> - Always use `.env.example` as your reference template
+> - Your actual `.env` should be in `.gitignore` and never staged
+> - Before committing, run `git status` and confirm `.env` is not listed
+> - If you accidentally commit a secret, rotate it immediately and contact
+>   the maintainer at **gadekarvirendra4@gmail.com**
+>
+> Violating this rule can compromise real user data on the production platform.
 
 Refer to [Setup Guide](./docs/setup.md) for detailed configuration.
 
@@ -559,6 +588,10 @@ Your PR must pass all of these checks before merging:
 3. Make requested changes in new commits
 4. Request re-review after making changes
 
+> 💡 **GSSoC'26 Note:** Your PR will only be counted for points once it is
+> **merged** — not when it is opened. Make sure it meets all the checklist
+> items above to speed up the review process.
+
 <hr/>
 
 ## Best Practices for Contributors
@@ -604,7 +637,14 @@ Your PR must pass all of these checks before merging:
 - **No blame:** Focus on solutions, not who caused issues
 - **Share knowledge:** Help team members learn
 
-### 7. Before Requesting Review
+### 7. Security
+- **Never commit secrets:** No API keys, passwords, or tokens in code
+- **Validate inputs:** Always validate and sanitize user input on both frontend and backend
+- **Use HTTPS:** Never hardcode `http://` URLs for external services
+- **Least privilege:** Request only the permissions your feature needs
+- **Report vulnerabilities:** If you find a security issue, email **gadekarvirendra4@gmail.com** directly instead of opening a public issue
+
+### 8. Before Requesting Review
 - [ ] All tests pass locally
 - [ ] Code formatted and linted
 - [ ] No console errors or warnings
@@ -612,6 +652,7 @@ Your PR must pass all of these checks before merging:
 - [ ] PR description is complete
 - [ ] Related issues are linked
 - [ ] Screenshots included (if applicable)
+- [ ] No `.env` or credentials accidentally staged
 
 <hr/>
 
@@ -734,6 +775,21 @@ git rebase upstream/main
 # If there are conflicts, resolve them
 # Then force push to your fork
 git push origin your-branch-name -f
+```
+
+#### Accidentally Staged `.env` or Credentials
+```bash
+# Unstage the file immediately
+git reset HEAD .env
+
+# Add to .gitignore if not already there
+echo ".env" >> .gitignore
+
+# If already committed, remove from history
+git rm --cached .env
+git commit -m "chore: remove accidentally committed .env file"
+
+# Rotate any exposed credentials immediately
 ```
 
 ### Getting Additional Help
@@ -955,6 +1011,6 @@ When opening a Pull Request, please include:
   * [ ] Code follows project guidelines
   * [ ] Tested locally
   * [ ] No unnecessary files included
+  * [ ] No `.env` or credentials accidentally included
 
 This ensures faster review and approval of your PR.
-

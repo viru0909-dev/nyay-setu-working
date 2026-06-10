@@ -1,3 +1,4 @@
+import ScrollProgress from "../components/ScrollProgress";
 import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -58,7 +59,7 @@ export default function Landing() {
 
     const TRUST_STATS = [
         { value: '50K+', label: t('trustStats.activeUsers'), icon: Users },
-        { value: '99%',  label: t('trustStats.successRate'), icon: Star },
+        { value: '99%', label: t('trustStats.successRate'), icon: Star },
         { value: '24/7', label: t('trustStats.availability'), icon: CheckCircle },
     ];
 
@@ -66,24 +67,24 @@ export default function Landing() {
         {
             icon: UserPlus,
             title: t('quickCards.createAccount.title'),
-            desc:  t('quickCards.createAccount.desc'),
-            cta:   t('quickCards.createAccount.cta'),
+            desc: t('quickCards.createAccount.desc'),
+            cta: t('quickCards.createAccount.cta'),
             color: '#7C5CFF',
             bg: 'rgba(124,92,255,0.08)',
         },
         {
             icon: FileText,
             title: t('quickCards.submitCase.title'),
-            desc:  t('quickCards.submitCase.desc'),
-            cta:   t('quickCards.submitCase.cta'),
+            desc: t('quickCards.submitCase.desc'),
+            cta: t('quickCards.submitCase.cta'),
             color: '#3F5DCC',
             bg: 'rgba(63,93,204,0.08)',
         },
         {
             icon: Zap,
             title: t('quickCards.powerfulFeatures.title'),
-            desc:  t('quickCards.powerfulFeatures.desc'),
-            cta:   t('quickCards.powerfulFeatures.cta'),
+            desc: t('quickCards.powerfulFeatures.desc'),
+            cta: t('quickCards.powerfulFeatures.cta'),
             color: '#10B981',
             bg: 'rgba(16,185,129,0.08)',
         },
@@ -92,6 +93,7 @@ export default function Landing() {
     const handleSubmitCaseClick = () => {
         tryAccess();
     };
+
 
 const FEATURES = [
         { icon: Bot,         title: t('features.aiLegalAssistant.title'),   desc: t('features.aiLegalAssistant.description'),   color: '#3F5DCC', path: '/litigant/vakil-friend' },
@@ -103,6 +105,8 @@ const FEATURES = [
     ];
 
     return (
+        <>
+        <ScrollProgress />
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
             <Header />
             <AIChatbot />
@@ -216,7 +220,7 @@ const FEATURES = [
                                     onClick={handleInstall}
                                     title={t('hero.installApp')}
                                     style={{
-                                        gap:'0.5rem',padding:'0.8rem 1rem',
+                                        gap: '0.5rem', padding: '0.8rem 1rem',
                                         borderRadius: '12px',
                                         border: '1px solid var(--border-medium)',
                                         background: 'var(--bg-surface)',
@@ -224,8 +228,8 @@ const FEATURES = [
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         cursor: 'pointer',
                                         boxShadow: 'var(--shadow-sm)',
-                                        fontWeight:'600',
-                                        whiteSpace:'nowrap',
+                                        fontWeight: '600',
+                                        whiteSpace: 'nowrap',
                                     }}
                                 >
                                     <Download size={18} />
@@ -280,7 +284,7 @@ const FEATURES = [
                                         width="720"
                                         height="720"
                                         loading="eager"
-                                       fetchpriority="high"
+                                        fetchpriority="high"
                                         decoding="async"
                                         animate={{ y: [0, -14, 0] }}
                                         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -409,8 +413,11 @@ const FEATURES = [
                     background: 'var(--bg-surface)',
                     borderTop: '1px solid var(--border-light)',
                     borderBottom: '1px solid var(--border-light)',
+                    boxSizing: 'border-box',
+                    width: '100%',
+                    overflowX: 'hidden',
                 }}>
-                    <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
+                    <div style={{ maxWidth: '1320px', margin: '0 auto', width: '100%', boxSizing: 'border-box'}}>
                         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                             <div style={{
                                 display: 'inline-block', padding: '0.4rem 1rem', marginBottom: '1rem',
@@ -436,6 +443,7 @@ const FEATURES = [
                                 const isHighlighted = activeCardIndex === i;
                                 
                                 return (
+
                                     <Link 
                                         key={i} 
                                         to={f.path} 
@@ -513,6 +521,8 @@ const FEATURES = [
                                                     f.title === t('features.fileCases.title') ||
                                                     f.title === t('features.virtualHearings.title')
                                                 ) && (
+
+                                         
                                                     <span
                                                         style={{
                                                             padding: '0.28rem 0.55rem',
@@ -529,10 +539,11 @@ const FEATURES = [
                                                         Account Required
                                                     </span>
                                                 )}
-                                            </div>
-                                            <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
-                                        </motion.div>
-                                    </Link>
+
+                                        </div>
+                                        <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
+                                    </motion.div>
+
                                 );
                             })}
                         </div>
@@ -542,7 +553,7 @@ const FEATURES = [
                 <TrustIndicators />
                 <AchievementsSection />
 
-                {/* ── Vision Preview ───────────────────────────────────── */}
+
                 <section style={{
                     padding: '6rem 2rem',
                     background: 'var(--bg-surface)',
@@ -557,7 +568,7 @@ const FEATURES = [
                         background: 'radial-gradient(circle, rgba(124,92,255,0.06) 0%, transparent 60%)',
                         pointerEvents: 'none', zIndex: 0
                     }} />
-                    
+
                     <div style={{ maxWidth: '1320px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
                         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                             <div style={{
@@ -627,7 +638,7 @@ const FEATURES = [
                                 );
                             })}
                         </div>
-                        
+
                         <div style={{ textAlign: 'center' }}>
                             <Link to="/upcoming-features" style={{
                                 display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -715,17 +726,66 @@ const FEATURES = [
                     mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 45%, transparent 100%);
                 }
                 .hero-img { border-radius: 0; }
+                
+                .feature-card {
+                    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+                }
+                
+                .feature-card:hover {
+                    transform: translateY(-6px) !important;
+                    border-color: color-mix(in srgb, var(--card-glow-color) 50%, transparent) !important;
+                    box-shadow: 0 12px 30px color-mix(in srgb, var(--card-glow-color) 15%, transparent),
+                                0 0 15px color-mix(in srgb, var(--card-glow-color) 10%, transparent) !important;
+                }
+                
+                .feature-icon-wrapper {
+                    transition: transform 0.3s ease !important;
+                }
+                
+                .feature-card:hover .feature-icon-wrapper {
+                    transform: scale(1.12) rotate(5deg) !important;
+                }
+
                 @media (max-width: 900px) {
                     .hero-grid { grid-template-columns: 1fr !important; }
                     .hero-grid > div:last-child { display: none; }
                     .quick-cards-grid { grid-template-columns: 1fr !important; }
                     .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
                 }
+
                 @media (max-width: 600px) {
                     .quick-cards-grid { grid-template-columns: 1fr !important; }
                     .features-grid { grid-template-columns: 1fr !important; }
                 }
+
+                /* ── Fix for very small screens (332px and below) ── */
+                @media (max-width: 400px) {
+                    .features-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 1rem !important;
+                    }
+                    .quick-cards-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 1rem !important;
+                    }
+                }
+
+                /* ── Prevent any grid/section from overflowing viewport ── */
+                .features-grid,
+                .quick-cards-grid,
+                .hero-grid {
+                    width: 100%;
+                    box-sizing: border-box;
+                    min-width: 0;
+                }
+
+                /* ── Global overflow guard ── */
+                html, body {
+                    overflow-x: hidden;
+                    max-width: 100%;
+                }
             `}</style>
         </div>
+        </>
     );
 }

@@ -24,6 +24,7 @@ public class BlockchainEvidenceService {
     private final CaseRepository caseRepository;
     private final BlockchainService blockchainService;
     private final FileStorageService fileStorageService;
+    private final EvidenceAnchoringService anchoringService;
 
     /**
      * Upload new evidence with blockchain security
@@ -79,9 +80,38 @@ public class BlockchainEvidenceService {
                 .uploadIp(uploadIp != null ? uploadIp : "UNKNOWN")
                 .build();
 
+        // Compute Merkle root from all block hashes (existing + new)
+        List<EvidenceRecord> existingEvidence = evidenceRepository
+                .findByCaseEntityIdOrderByBlockIndexAsc(caseId);
+        List<String> allBlockHashes = new java.util.ArrayList<>(
+                existingEvidence.stream().map(EvidenceRecord::getBlockHash).toList());
+        allBlockHashes.add(blockHash);
+        String merkleRoot = anchoringService.calculateMerkleRoot(allBlockHashes);
+
+        // Anchor the Merkle root to an external timestamp service
+        String anchorProof = anchoringService.anchorMerkleRoot(merkleRoot);
+
+        // Apply anchoring data to the new record
+        record.setMerkleRoot(merkleRoot);
+        record.setExternalAnchorProof(anchorProof);
+        record.setAnchoredAt(java.time.LocalDateTime.now());
+        record.setAnchorService(EvidenceAnchoringService.class.getSimpleName());
+
         EvidenceRecord saved = evidenceRepository.save(record);
-        log.info("Evidence uploaded with block hash: {}..., index: {}", 
-                 blockHash.substring(0, 16), blockIndex);
+
+        // Update all existing records with the new Merkle root
+        for (EvidenceRecord ev : existingEvidence) {
+            ev.setMerkleRoot(merkleRoot);
+            ev.setExternalAnchorProof(anchorProof);
+            ev.setAnchoredAt(java.time.LocalDateTime.now());
+            ev.setAnchorService(EvidenceAnchoringService.class.getSimpleName());
+        }
+        if (!existingEvidence.isEmpty()) {
+            evidenceRepository.saveAll(existingEvidence);
+        }
+
+        log.info("Evidence uploaded with block hash: {}..., index: {}, Merkle root: {}...",
+                 blockHash.substring(0, 16), blockIndex, merkleRoot.substring(0, 16));
 
         return saved;
     }
@@ -116,8 +146,20 @@ public class BlockchainEvidenceService {
         result.put("isValid", blockValid);
         result.put("status", blockValid ? "VERIFIED" : "TAMPERED");
 
+        // Verify external anchor
+        boolean anchorValid = false;
+        if (record.getMerkleRoot() != null && record.getExternalAnchorProof() != null) {
+            anchorValid = anchoringService.verifyAnchor(
+                    record.getMerkleRoot(), record.getExternalAnchorProof());
+        }
+        result.put("anchorValid", anchorValid);
+
+        boolean overallValid = blockValid && anchorValid;
+        result.put("isValid", overallValid);
+        result.put("status", overallValid ? "VERIFIED" : "TAMPERED");
+
         // Update record if status changed
-        if (!blockValid && "VERIFIED".equals(record.getVerificationStatus())) {
+        if (!overallValid && "VERIFIED".equals(record.getVerificationStatus())) {
             record.setVerificationStatus("TAMPERED");
             record.setIsVerified(false);
             evidenceRepository.save(record);
@@ -174,9 +216,25 @@ public class BlockchainEvidenceService {
             expectedPreviousHash = record.getBlockHash();
         }
 
-        result.put("isValid", chainValid);
-        result.put("blocks", blockResults);
-        result.put("message", chainValid ? "Chain integrity verified ✓" : "Chain integrity compromised!");
+        // Verify against external anchor (check most recent record's proof)
+        String merkleRoot = anchoringService.calculateMerkleRoot(
+                chain.stream().map(EvidenceRecord::getBlockHash).toList());
+        EvidenceRecord lastRecord = chain.get(chain.size() - 1);
+        boolean anchorValid = false;
+        if (lastRecord.getExternalAnchorProof() != null) {
+            anchorValid = anchoringService.verifyAnchor(merkleRoot, lastRecord.getExternalAnchorProof());
+        }
+        result.put("anchorValid", anchorValid);
+        result.put("merkleRoot", merkleRoot);
+
+        boolean overallValid = chainValid && anchorValid;
+        result.put("isValid", overallValid);
+        result.put("message", overallValid ? "Chain integrity verified with external anchor ✓"
+                : "Chain integrity compromised!");
+        if (!anchorValid) {
+            result.put("anchorWarning", "External anchor proof is missing or invalid — "
+                    + "evidence may not meet BSA 63(4) requirements");
+        }
 
         return result;
     }

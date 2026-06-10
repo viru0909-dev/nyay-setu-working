@@ -2,11 +2,9 @@ import { useState, useRef, useEffect } from "react";
 import {
   Brain,
   Sparkles,
-  Search,
   FileText,
   MessageSquare,
   History,
-  ChevronRight,
   Loader2,
   Send,
   Scaling,
@@ -17,6 +15,11 @@ import {
   Volume2,
 } from "lucide-react";
 import { brainAPI } from "../../services/api";
+import StreamFallbackBanner from "../../components/stream/StreamFallbackBanner";
+import {
+  downloadPartialStreamContent,
+  executeWithResilience,
+} from "../../utils/streamResilience";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -28,17 +31,26 @@ export default function AILegalAssistantPage() {
         '🙏 Greetings, Counselor. I am your Smart Legal Strategist.\n\nI have access to your **Active Case Portfolio** and **Hearing Schedule**. I can assist with:\n\n1. **Schedule Planning**: "What hearings do I have this week?"\n2. **Case Strategy**: "Draft a strategy for the Theft case."\n3. **Legal Research**: "Summarize BNS Section 302."\n\nHow can I help you today?',
     },
   ]);
+
   const [input, setInput] = useState("");
   const MAX_CHARACTERS = 1000;
   const characterCount = input.length;
   const isLimitExceeded = characterCount > MAX_CHARACTERS;
+
   const [loading, setLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [speakingIndex, setSpeakingIndex] = useState(null);
+  const [assistantNetworkState, setAssistantNetworkState] = useState({
+    status: "idle",
+    attempt: 0,
+    error: null,
+    lastRetryDelay: 0,
+  });
+
+  const lastAssistantPromptRef = useRef("");
   const scrollRef = useRef(null);
   const mediaRecorderRef = useRef(null);
 
-  // Browser Native Speech Recognition
   const startRecording = () => {
     if (
       !("webkitSpeechRecognition" in window) &&
@@ -52,7 +64,7 @@ export default function AILegalAssistantPage() {
       window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
-    recognition.lang = "en-IN"; // Default to Indian English for Lawyers
+    recognition.lang = "en-IN";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -79,7 +91,6 @@ export default function AILegalAssistantPage() {
     }
   };
 
-  // Text to Speech
   const speakText = (text, index) => {
     if (!("speechSynthesis" in window)) return;
 
@@ -106,27 +117,83 @@ export default function AILegalAssistantPage() {
     }
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || loading || isLimitExceeded) return;
+  const saveAssistantChatSnapshot = () => {
+    const content = messages
+      .map(
+        (msg) =>
+          `## ${msg.role === "user" ? "User" : "AI Legal Assistant"}\n\n${msg.content}`,
+      )
+      .join("\n\n---\n\n");
 
-    const userMsg = input;
-    setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    downloadPartialStreamContent("ai-legal-assistant-partial-chat.md", content);
+  };
+
+  const handleSend = async (
+    retryMessage = null,
+    { appendUserMessage = true } = {},
+  ) => {
+    const userMsg = typeof retryMessage === "string" ? retryMessage : input;
+
+    if (!userMsg.trim() || loading || isLimitExceeded) return;
+
+    lastAssistantPromptRef.current = userMsg;
+
+    if (appendUserMessage) {
+      setInput("");
+      setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    }
+
     setLoading(true);
+    setAssistantNetworkState({
+      status: "connecting",
+      attempt: 0,
+      error: null,
+      lastRetryDelay: 0,
+    });
 
     try {
-      const response = await brainAPI.chat(userMsg);
+      const response = await executeWithResilience(() => brainAPI.chat(userMsg), {
+        breakerKey: "lawyer-ai-legal-assistant-chat",
+        maxRetries: 2,
+        baseDelayMs: 700,
+        maxDelayMs: 4000,
+        onRetry: ({ attempt, delay, error }) => {
+          setAssistantNetworkState({
+            status: "reconnecting",
+            attempt,
+            error,
+            lastRetryDelay: delay,
+          });
+        },
+      });
+
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: response.data.message },
       ]);
+
+      setAssistantNetworkState({
+        status: "completed",
+        attempt: 0,
+        error: null,
+        lastRetryDelay: 0,
+      });
     } catch (error) {
+      console.error("AI Legal Assistant error:", error);
+
+      setAssistantNetworkState({
+        status: "failed",
+        attempt: 2,
+        error,
+        lastRetryDelay: 0,
+      });
+
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
           content:
-            "⚠️ Connection to AI Brain was interrupted. Please check your network.",
+            "⚠️ AI connection is currently unstable. Your chat is preserved. Please use Retry or Save partial.",
         },
       ]);
     } finally {
@@ -168,7 +235,6 @@ export default function AILegalAssistantPage() {
         flexDirection: "column",
       }}
     >
-      {/* Header */}
       <div style={{ marginBottom: "2rem", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <div
@@ -219,7 +285,6 @@ export default function AILegalAssistantPage() {
           minHeight: 0,
         }}
       >
-        {/* Chat Column */}
         <div
           style={{
             ...glassStyle,
@@ -229,7 +294,6 @@ export default function AILegalAssistantPage() {
             overflow: "hidden",
           }}
         >
-          {/* Chat Messages */}
           <div
             ref={scrollRef}
             style={{
@@ -241,6 +305,19 @@ export default function AILegalAssistantPage() {
               gap: "1.25rem",
             }}
           >
+            <StreamFallbackBanner
+              state={assistantNetworkState}
+              onRetry={() => {
+                if (lastAssistantPromptRef.current) {
+                  handleSend(lastAssistantPromptRef.current, {
+                    appendUserMessage: false,
+                  });
+                }
+              }}
+              onSavePartial={saveAssistantChatSnapshot}
+              hasPartialContent={messages.length > 1}
+            />
+
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -268,6 +345,7 @@ export default function AILegalAssistantPage() {
                     <Sparkles size={20} color="var(--color-accent)" />
                   </div>
                 )}
+
                 <div
                   style={{
                     maxWidth: "80%",
@@ -296,6 +374,7 @@ export default function AILegalAssistantPage() {
                       {msg.content}
                     </ReactMarkdown>
                   </div>
+
                   {msg.role === "assistant" && (
                     <button
                       onClick={() => speakText(msg.content, i)}
@@ -327,6 +406,7 @@ export default function AILegalAssistantPage() {
                 </div>
               </div>
             ))}
+
             {loading && (
               <div style={{ display: "flex", gap: "1rem" }}>
                 <div
@@ -362,7 +442,6 @@ export default function AILegalAssistantPage() {
             )}
           </div>
 
-          {/* Chat Input */}
           <div
             style={{
               padding: "1.5rem",
@@ -398,7 +477,7 @@ export default function AILegalAssistantPage() {
                   justifyContent: "center",
                   transition: "all 0.2s",
                   flexShrink: 0,
-                  marginBottom: "2px", // Align with input
+                  marginBottom: "2px",
                   animation: isRecording ? "pulse 1.5s infinite" : "none",
                 }}
               >
@@ -409,7 +488,7 @@ export default function AILegalAssistantPage() {
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={(e) =>
+                  onKeyDown={(e) =>
                     e.key === "Enter" &&
                     !e.shiftKey &&
                     (e.preventDefault(), handleSend())
@@ -418,23 +497,26 @@ export default function AILegalAssistantPage() {
                   style={{
                     width: "100%",
                     background: "var(--bg-glass)",
-                    border: "var(--border-glass)",
+                    border: isLimitExceeded
+                      ? "1px solid #ef4444"
+                      : "var(--border-glass)",
                     borderRadius: "1rem",
                     padding: "1rem 3.5rem 1rem 1.25rem",
                     color: "var(--text-main)",
                     outline: "none",
                     fontSize: "1rem",
                     resize: "none",
-                    height: "80px", // Fixed height match
+                    height: "80px",
                   }}
                 />
+
                 <button
-                  onClick={handleSend}
+                  onClick={() => handleSend()}
                   disabled={!input.trim() || loading || isLimitExceeded}
                   style={{
                     position: "absolute",
                     right: "1rem",
-                    bottom: "1rem",
+                    bottom: "2.25rem",
                     width: "36px",
                     height: "36px",
                     borderRadius: "8px",
@@ -445,51 +527,54 @@ export default function AILegalAssistantPage() {
                         : "var(--bg-glass-subtle)",
                     border: "none",
                     color: "white",
-                    cursor: input.trim() ? "pointer" : "not-allowed",
+                    cursor:
+                      input.trim() && !loading && !isLimitExceeded
+                        ? "pointer"
+                        : "not-allowed",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     transition: "all 0.2s",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: "0.5rem",
-                      fontSize: "0.85rem",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: isLimitExceeded
-                          ? "#ef4444"
-                          : "var(--text-secondary)",
-                        fontWeight: isLimitExceeded ? "600" : "400",
-                      }}
-                    >
-                      {isLimitExceeded ? "Character limit exceeded!" : ""}
-                    </span>
-
-                    <span
-                      style={{
-                        color: isLimitExceeded
-                          ? "#ef4444"
-                          : "var(--text-secondary)",
-                      }}
-                    >
-                      {characterCount}/{MAX_CHARACTERS}
-                    </span>
-                  </div>
                   <Send size={18} />
                 </button>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: "0.5rem",
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: isLimitExceeded
+                        ? "#ef4444"
+                        : "var(--text-secondary)",
+                      fontWeight: isLimitExceeded ? "600" : "400",
+                    }}
+                  >
+                    {isLimitExceeded ? "Character limit exceeded!" : ""}
+                  </span>
+
+                  <span
+                    style={{
+                      color: isLimitExceeded
+                        ? "#ef4444"
+                        : "var(--text-secondary)",
+                    }}
+                  >
+                    {characterCount}/{MAX_CHARACTERS}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Sidebar Column */}
         <div
           style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
@@ -617,18 +702,30 @@ export default function AILegalAssistantPage() {
           </div>
         </div>
       </div>
+
       <style>{`
-                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-                .spin { animation: spin 1s linear infinite; }
-                
-                /* Markdown Styling */
-                .markdown-content p { margin-bottom: 0.5rem; }
-                .markdown-content ul, .markdown-content ol { padding-left: 1.2rem; margin-bottom: 0.5rem; }
-                .markdown-content li { margin-bottom: 0.2rem; }
-                .markdown-content strong { color: var(--color-accent); font-weight: 700; }
-                .markdown-content code { background: rgba(0,0,0,0.2); padding: 0.1rem 0.3rem; borderRadius: 4px; fontFamily: monospace; }
-            `}</style>
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        .spin { animation: spin 1s linear infinite; }
+
+        .markdown-content p { margin-bottom: 0.5rem; }
+        .markdown-content ul,
+        .markdown-content ol {
+          padding-left: 1.2rem;
+          margin-bottom: 0.5rem;
+        }
+        .markdown-content li { margin-bottom: 0.2rem; }
+        .markdown-content strong {
+          color: var(--color-accent);
+          font-weight: 700;
+        }
+        .markdown-content code {
+          background: rgba(0,0,0,0.2);
+          padding: 0.1rem 0.3rem;
+          border-radius: 4px;
+          font-family: monospace;
+        }
+      `}</style>
     </div>
   );
 }
