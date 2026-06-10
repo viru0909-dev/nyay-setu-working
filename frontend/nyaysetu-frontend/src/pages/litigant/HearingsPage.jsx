@@ -12,19 +12,44 @@ import {
     Activity,
     ArrowUpRight,
     Search,
-    BookOpen
+    BookOpen,
+    Bell,
+    Trash2
 } from 'lucide-react';
-import { hearingAPI } from '../../services/api';
+import { hearingAPI, hearingReminderAPI } from '../../services/api';
 
 export default function HearingsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [hearings, setHearings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeCall, setActiveCall] = useState(null);
+    const [reminders, setReminders] = useState({});
+    const [selectedHearing, setSelectedHearing] = useState(null);
+    const [reminderTimeOption, setReminderTimeOption] = useState('15');
+    const [customTime, setCustomTime] = useState('');
+    const [reminderMessage, setReminderMessage] = useState('');
+    const [savingReminder, setSavingReminder] = useState(false);
 
     useEffect(() => {
         fetchHearings();
+        fetchReminders();
     }, []);
+
+    const fetchReminders = async () => {
+        try {
+            const response = await hearingReminderAPI.list();
+            const reminderList = response.data || [];
+            const reminderMap = {};
+            reminderList.forEach(r => {
+                if (r.hearingId) {
+                    reminderMap[r.hearingId] = r;
+                }
+            });
+            setReminders(reminderMap);
+        } catch (error) {
+            console.error('Failed to fetch reminders:', error);
+        }
+    };
 
     const fetchHearings = async () => {
         try {
@@ -73,6 +98,88 @@ export default function HearingsPage() {
 
     const endCall = () => {
         setActiveCall(null);
+    };
+
+    const openReminderModal = (hearing) => {
+        setSelectedHearing(hearing);
+        const existingReminder = reminders[hearing.id];
+        if (existingReminder) {
+            setReminderMessage(existingReminder.reminderMessage || '');
+            const schedTime = new Date(hearing.scheduledDate).getTime();
+            const remTime = new Date(existingReminder.reminderTime).getTime();
+            const diffMins = Math.round((schedTime - remTime) / (60 * 1000));
+            
+            if ([15, 30, 60, 120, 1440].includes(diffMins)) {
+                setReminderTimeOption(diffMins.toString());
+                setCustomTime('');
+            } else {
+                setReminderTimeOption('custom');
+                const date = new Date(existingReminder.reminderTime);
+                const formatted = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                setCustomTime(formatted);
+            }
+        } else {
+            setReminderMessage('');
+            setReminderTimeOption('15');
+            setCustomTime('');
+        }
+    };
+
+    const saveReminder = async () => {
+        if (!selectedHearing) return;
+        setSavingReminder(true);
+        try {
+            let reminderTimeStr = '';
+            if (reminderTimeOption === 'custom') {
+                if (!customTime) {
+                    alert('Please select a custom date and time');
+                    setSavingReminder(false);
+                    return;
+                }
+                reminderTimeStr = customTime;
+            } else {
+                const offsetMins = parseInt(reminderTimeOption);
+                const scheduled = new Date(selectedHearing.scheduledDate);
+                const reminderDate = new Date(scheduled.getTime() - offsetMins * 60 * 1000);
+                reminderTimeStr = new Date(reminderDate.getTime() - reminderDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            }
+
+            await hearingReminderAPI.create({
+                hearingId: selectedHearing.id,
+                reminderTime: reminderTimeStr,
+                reminderMessage: reminderMessage
+            });
+
+            alert('Reminder saved successfully!');
+            setSelectedHearing(null);
+            fetchReminders();
+        } catch (error) {
+            console.error('Failed to save reminder:', error);
+            alert('Failed to save reminder');
+        } finally {
+            setSavingReminder(false);
+        }
+    };
+
+    const deleteReminder = async () => {
+        if (!selectedHearing) return;
+        const existingReminder = reminders[selectedHearing.id];
+        if (!existingReminder) return;
+
+        if (confirm('Are you sure you want to delete this reminder?')) {
+            setSavingReminder(true);
+            try {
+                await hearingReminderAPI.delete(existingReminder.id);
+                alert('Reminder deleted successfully!');
+                setSelectedHearing(null);
+                fetchReminders();
+            } catch (error) {
+                console.error('Failed to delete reminder:', error);
+                alert('Failed to delete reminder');
+            } finally {
+                setSavingReminder(false);
+            }
+        }
     };
 
     // Calendar & filtering logic
@@ -244,22 +351,46 @@ export default function HearingsPage() {
                                         </div>
                                     </div>
 
-                                    {hearing.canJoin ? (
-                                        <button onClick={() => joinHearing(hearing)} style={{
-                                            background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '0.75rem',
-                                            padding: '0.75rem 1.5rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                            boxShadow: '0 4px 12px rgba(30, 42, 68, 0.3)'
-                                        }}>
-                                            <Video size={18} /> Join Now
-                                        </button>
-                                    ) : (
-                                        <div style={{
-                                            padding: '0.75rem 1.5rem', borderRadius: '0.75rem', background: 'rgba(100, 116, 139, 0.1)',
-                                            color: 'var(--text-secondary)', fontWeight: '600', fontSize: '0.9rem'
-                                        }}>
-                                            {hearing.isUpcoming ? 'upcoming' : 'Completed'}
-                                        </div>
-                                    )}
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        {hearing.isUpcoming && (
+                                            <button 
+                                                onClick={() => openReminderModal(hearing)} 
+                                                style={{
+                                                    background: reminders[hearing.id] ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                                                    border: reminders[hearing.id] ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid var(--border-light)',
+                                                    borderRadius: '0.75rem',
+                                                    padding: '0.65rem',
+                                                    color: reminders[hearing.id] ? '#22c55e' : 'var(--text-secondary)',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    transition: 'all 0.2s',
+                                                    marginRight: '0.75rem'
+                                                }}
+                                                title={reminders[hearing.id] ? "Reminder Set" : "Set Reminder"}
+                                            >
+                                                <Bell size={18} fill={reminders[hearing.id] ? "#22c55e" : "none"} />
+                                            </button>
+                                        )}
+
+                                        {hearing.canJoin ? (
+                                            <button onClick={() => joinHearing(hearing)} style={{
+                                                background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '0.75rem',
+                                                padding: '0.75rem 1.5rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                                boxShadow: '0 4px 12px rgba(30, 42, 68, 0.3)'
+                                            }}>
+                                                <Video size={18} /> Join Now
+                                            </button>
+                                        ) : (
+                                            <div style={{
+                                                padding: '0.75rem 1.5rem', borderRadius: '0.75rem', background: 'rgba(100, 116, 139, 0.1)',
+                                                color: 'var(--text-secondary)', fontWeight: '600', fontSize: '0.9rem'
+                                            }}>
+                                                {hearing.isUpcoming ? 'upcoming' : 'Completed'}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })
@@ -311,6 +442,180 @@ export default function HearingsPage() {
                     </div>
                 </div>
             </div>
+            {selectedHearing && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.6)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999,
+                    padding: '1rem'
+                }}>
+                    <div style={{
+                        background: 'var(--bg-glass-strong)',
+                        border: 'var(--border-glass-strong)',
+                        boxShadow: 'var(--shadow-glass-strong)',
+                        borderRadius: '1.5rem',
+                        padding: '2rem',
+                        width: '100%',
+                        maxWidth: '500px',
+                        position: 'relative'
+                    }}>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Bell size={24} color="var(--color-primary)" /> Hearing Reminder
+                        </h3>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                            Set an alert for the hearing: <strong>{selectedHearing.caseTitle}</strong>
+                        </p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '1.75rem' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                                    When to remind:
+                                </label>
+                                <select
+                                    value={reminderTimeOption}
+                                    onChange={(e) => setReminderTimeOption(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem',
+                                        background: 'var(--bg-input)',
+                                        border: 'var(--border-light)',
+                                        borderRadius: '0.75rem',
+                                        color: 'var(--text-main)',
+                                        fontSize: '0.9rem',
+                                        outline: 'none'
+                                    }}
+                                >
+                                    <option value="15">15 minutes before</option>
+                                    <option value="30">30 minutes before</option>
+                                    <option value="60">1 hour before</option>
+                                    <option value="120">2 hours before</option>
+                                    <option value="1440">1 day before</option>
+                                    <option value="custom">Custom Date & Time</option>
+                                </select>
+                            </div>
+
+                            {reminderTimeOption === 'custom' && (
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                                        Choose date and time:
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        value={customTime}
+                                        onChange={(e) => setCustomTime(e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'var(--bg-input)',
+                                            border: 'var(--border-light)',
+                                            borderRadius: '0.75rem',
+                                            color: 'var(--text-main)',
+                                            fontSize: '0.9rem',
+                                            outline: 'none'
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                                    Reminder Message:
+                                </label>
+                                <textarea
+                                    value={reminderMessage}
+                                    onChange={(e) => setReminderMessage(e.target.value)}
+                                    placeholder="e.g. Bring case files and identity proof."
+                                    rows={3}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem',
+                                        background: 'var(--bg-input)',
+                                        border: 'var(--border-light)',
+                                        borderRadius: '0.75rem',
+                                        color: 'var(--text-main)',
+                                        fontSize: '0.9rem',
+                                        outline: 'none',
+                                        resize: 'none'
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                            <div>
+                                {reminders[selectedHearing.id] && (
+                                    <button
+                                        onClick={deleteReminder}
+                                        disabled={savingReminder}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            padding: '0.75rem 1.25rem',
+                                            background: 'rgba(239, 68, 68, 0.1)',
+                                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                                            borderRadius: '0.75rem',
+                                            color: '#ef4444',
+                                            fontWeight: '700',
+                                            fontSize: '0.9rem',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        <Trash2 size={16} /> Delete
+                                    </button>
+                                )}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                <button
+                                    onClick={() => setSelectedHearing(null)}
+                                    disabled={savingReminder}
+                                    style={{
+                                        padding: '0.75rem 1.5rem',
+                                        background: 'transparent',
+                                        border: '1px solid var(--border-medium)',
+                                        borderRadius: '0.75rem',
+                                        color: 'var(--text-main)',
+                                        fontWeight: '600',
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={saveReminder}
+                                    disabled={savingReminder}
+                                    style={{
+                                        padding: '0.75rem 1.5rem',
+                                        background: 'var(--color-primary)',
+                                        border: 'none',
+                                        borderRadius: '0.75rem',
+                                        color: 'white',
+                                        fontWeight: '700',
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer',
+                                        boxShadow: 'var(--shadow-sm)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem'
+                                    }}
+                                >
+                                    {savingReminder ? 'Saving...' : 'Save'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
