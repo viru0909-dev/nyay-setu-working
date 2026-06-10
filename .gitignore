@@ -1,3 +1,7 @@
+# Logs
+**/logs/
+**/*.log
+**/backend.log
 # Build directories
 target/
 **/target/
@@ -79,8 +83,6 @@ __pycache__/
 **/uploads/
 **/evidence/
 **/EVIDENCE/
-uploads/
-evidence/
 
 
 # Temporary files
@@ -105,4 +107,3 @@ __pycache__/
 backend/nyaysetu-backend/src/main/resources/application.properties
 
 *.zip
-

@@ -1,6 +1,7 @@
 package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.entity.CaseEntity;
+import com.nyaysetu.backend.entity.CaseStage;
 import com.nyaysetu.backend.entity.CaseStatus;
 import com.nyaysetu.backend.repository.CaseRepository;
 import lombok.RequiredArgsConstructor;
@@ -205,6 +206,7 @@ public class CaseStateTransitionService {
 
         // Update status and stage
         caseEntity.setStatus(CaseStatus.IN_ADMISSION);
+        caseEntity.setStage(CaseStage.COGNIZANCE);
         caseEntity.setJudgeId(judgeId);
         caseEntity.setCurrentJudicialStage(1); // Cognizance stage
         caseEntity = caseRepository.save(caseEntity);
@@ -250,6 +252,9 @@ public class CaseStateTransitionService {
 
         int newStage = currentStage + 1;
         caseEntity.setCurrentJudicialStage(newStage);
+
+        // Update stage enum to stay in sync with currentJudicialStage
+        caseEntity.setStage(mapStageNumberToEnum(newStage));
 
         // Update status based on stage
         if (newStage == 6) {
@@ -359,6 +364,58 @@ public class CaseStateTransitionService {
             );
 
             broadcastCaseUpdate(caseEntity, "Case is now Trial Ready");
+        }
+    }
+
+    /**
+     * LAWYER: File approved petition in court.
+     * Transitions: draftApprovalStatus=APPROVED → COGNIZANCE_PERIOD
+     * Routes through this service to ensure audit trail and validation.
+     */
+    @Transactional
+    public CaseEntity lawyerFileInCourt(UUID caseId, String lawyerId, String lawyerName) {
+        CaseEntity caseEntity = getCaseOrThrow(caseId);
+        CaseStatus previousStatus = caseEntity.getStatus();
+
+        if (!"APPROVED".equals(caseEntity.getDraftApprovalStatus())) {
+            throw new IllegalStateException("Draft must be approved by client before filing in court");
+        }
+
+        caseEntity.setStatus(CaseStatus.COGNIZANCE_PERIOD);
+        caseEntity.setCurrentJudicialStage(1);
+        caseEntity.setStage(CaseStage.COGNIZANCE);
+        caseEntity = caseRepository.save(caseEntity);
+
+        eventService.logStatusChange(
+                caseId,
+                lawyerId,
+                CaseEventService.ROLE_LAWYER,
+                lawyerName,
+                previousStatus,
+                CaseStatus.COGNIZANCE_PERIOD,
+                "Lawyer filed approved petition in court for cognizance"
+        );
+
+        broadcastCaseUpdate(caseEntity, "Petition filed in court - awaiting cognizance");
+
+        log.info("Lawyer {} filed case {} in court", lawyerName, caseId);
+        return caseEntity;
+    }
+
+    /**
+     * Maps judicial stage number (1-7) to the corresponding CaseStage enum value,
+     * keeping the stage enum in sync with currentJudicialStage.
+     */
+    private CaseStage mapStageNumberToEnum(int stageNumber) {
+        switch (stageNumber) {
+            case 1: return CaseStage.COGNIZANCE;
+            case 2: return CaseStage.APPEARANCE;
+            case 3: return CaseStage.FRAMING_OF_CHARGES;
+            case 4: return CaseStage.EVIDENCE;
+            case 5: return CaseStage.ARGUMENTS;
+            case 6: return CaseStage.JUDGMENT;
+            case 7: return CaseStage.VERDICT;
+            default: return null;
         }
     }
 

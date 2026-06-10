@@ -1,8 +1,9 @@
+import ScrollProgress from "../components/ScrollProgress";
 import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Smartphone, Bot, BookOpen, Video, ShieldCheck, Cpu, Cuboid } from 'lucide-react';
+import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Download, Bot, BookOpen, Video, ShieldCheck, Cpu, Cuboid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
@@ -10,6 +11,11 @@ import AIChatbot from '../components/landing/AIChatbot';
 import AchievementsSection from '../components/landing/AchievementsSection';
 import HowItWorks from '../components/landing/HowItWorks';
 import TrustIndicators from '../components/landing/TrustIndicators';
+import useProtectedFeature from '../hooks/useProtectedFeature';
+import useGuest from '../hooks/useGuest';
+import GuestAccessDeniedModal from '../components/guest/GuestAccessDeniedModal';
+import GuestInlineCTA from '../components/guest/GuestInlineCTA';
+import GuestLockedCard from '../components/guest/GuestLockedCard';
 
 export default function Landing() {
     const { t } = useTranslation('landing');
@@ -26,6 +32,14 @@ export default function Landing() {
             fallbackSrcSet: '/scales-light-480.jpg 480w, /scales-light-720.jpg 720w',
             webpSrcSet: '/scales-light-480.webp 480w, /scales-light-720.webp 720w',
         };
+    const { isGuest } = useGuest();
+    const {
+        showDeniedModal,
+        setShowDeniedModal,
+        inlineMessage,
+        tryAccess,
+        goToSignup,
+    } = useProtectedFeature('file a case', { intentPath: '/litigant/file' });
 
     useEffect(() => {
         const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); window.deferredPrompt = e; };
@@ -42,7 +56,7 @@ export default function Landing() {
 
     const TRUST_STATS = [
         { value: '50K+', label: t('trustStats.activeUsers'), icon: Users },
-        { value: '99%',  label: t('trustStats.successRate'), icon: Star },
+        { value: '99%', label: t('trustStats.successRate'), icon: Star },
         { value: '24/7', label: t('trustStats.availability'), icon: CheckCircle },
     ];
 
@@ -79,28 +93,36 @@ export default function Landing() {
         },
     ];
 
+    const handleSubmitCaseClick = () => {
+        tryAccess();
+    };
+
     const FEATURES = [
-        { icon: Bot,         title: t('features.aiLegalAssistant.title'),   desc: t('features.aiLegalAssistant.description'),   color: '#3F5DCC' },
-        { icon: BookOpen,    title: t('features.constitutionReader.title'),  desc: t('features.constitutionReader.description'),  color: '#7C5CFF' },
-        { icon: FileText,    title: t('features.fileCases.title'),           desc: t('features.fileCases.description'),           color: '#10B981' },
-        { icon: Video,       title: t('features.virtualHearings.title'),     desc: t('features.virtualHearings.description'),     color: '#F59E0B' },
-        { icon: ShieldCheck, title: t('features.securePrivate.title'),       desc: t('features.securePrivate.description'),       color: '#EF4444' },
-        { icon: Zap,         title: t('features.realTimeUpdates.title'),     desc: t('features.realTimeUpdates.description'),     color: '#8B5CF6' },
+        { icon: Bot, title: t('features.aiLegalAssistant.title'), desc: t('features.aiLegalAssistant.description'), color: '#3F5DCC' },
+        { icon: BookOpen, title: t('features.constitutionReader.title'), desc: t('features.constitutionReader.description'), color: '#7C5CFF' },
+        { icon: FileText, title: t('features.fileCases.title'), desc: t('features.fileCases.description'), color: '#10B981' },
+        { icon: Video, title: t('features.virtualHearings.title'), desc: t('features.virtualHearings.description'), color: '#F59E0B' },
+        { icon: ShieldCheck, title: t('features.securePrivate.title'), desc: t('features.securePrivate.description'), color: '#EF4444' },
+        { icon: Zap, title: t('features.realTimeUpdates.title'), desc: t('features.realTimeUpdates.description'), color: '#8B5CF6' },
     ];
 
     return (
+        <>
+        <ScrollProgress />
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
             <Header />
             <AIChatbot />
 
-            <main>
+            {/* Offset content for the fixed header (mobile-safe). */}
+            <main style={{ paddingTop: '75px' }}>
                 {/* ── Hero ──────────────────────────────────────────── */}
                 <section style={{
                     minHeight: '100vh',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    padding: '9rem 2rem 4rem',
+                    // Keep existing spacing while accounting for <Header /> fixed height.
+                    padding: 'calc(9rem - 75px) 2rem 4rem',
                     position: 'relative',
                     overflow: 'hidden',
                 }}>
@@ -195,12 +217,12 @@ export default function Landing() {
                                 </Link>
 
                                 <motion.button
-                                    whileHover={{ scale: 1.08 }}
+                                    whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleInstall}
                                     title={t('hero.installApp')}
                                     style={{
-                                        width: '48px', height: '48px',
+                                        gap: '0.5rem', padding: '0.8rem 1rem',
                                         borderRadius: '12px',
                                         border: '1px solid var(--border-medium)',
                                         background: 'var(--bg-surface)',
@@ -208,9 +230,12 @@ export default function Landing() {
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         cursor: 'pointer',
                                         boxShadow: 'var(--shadow-sm)',
+                                        fontWeight: '600',
+                                        whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    <Smartphone size={20} />
+                                    <Download size={18} />
+                                    {t('hero.installApp')}
                                 </motion.button>
                             </div>
 
@@ -261,7 +286,7 @@ export default function Landing() {
                                         width="720"
                                         height="720"
                                         loading="eager"
-                                        fetchPriority="high"
+                                        fetchpriority="high"
                                         decoding="async"
                                         animate={{ y: [0, -14, 0] }}
                                         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -445,6 +470,17 @@ export default function Landing() {
                     </div>
                 </section>
 
+                <GuestAccessDeniedModal
+                    isOpen={showDeniedModal}
+                    feature="file a case"
+                    onClose={() => setShowDeniedModal(false)}
+                    onUpgrade={() => {
+                        setShowDeniedModal(false);
+                        goToSignup();
+                    }}
+                    onContinue={() => setShowDeniedModal(false)}
+                />
+
                 {/* ── How It Works ──────────────────────────────────── */}
                 <HowItWorks />
 
@@ -454,8 +490,11 @@ export default function Landing() {
                     background: 'var(--bg-surface)',
                     borderTop: '1px solid var(--border-light)',
                     borderBottom: '1px solid var(--border-light)',
+                    boxSizing: 'border-box',
+                    width: '100%',
+                    overflowX: 'hidden',
                 }}>
-                    <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
+                    <div style={{ maxWidth: '1320px', margin: '0 auto', width: '100%', boxSizing: 'border-box'}}>
                         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                             <div style={{
                                 display: 'inline-block', padding: '0.4rem 1rem', marginBottom: '1rem',
@@ -672,7 +711,7 @@ export default function Landing() {
                 <TrustIndicators />
                 <AchievementsSection />
 
-                {/* ── Vision Preview ───────────────────────────────────── */}
+
                 <section style={{
                     padding: '6rem 2rem',
                     background: 'var(--bg-surface)',
@@ -687,7 +726,7 @@ export default function Landing() {
                         background: 'radial-gradient(circle, rgba(124,92,255,0.06) 0%, transparent 60%)',
                         pointerEvents: 'none', zIndex: 0
                     }} />
-                    
+
                     <div style={{ maxWidth: '1320px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
                         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                             <div style={{
@@ -757,7 +796,7 @@ export default function Landing() {
                                 );
                             })}
                         </div>
-                        
+
                         <div style={{ textAlign: 'center' }}>
                             <Link to="/upcoming-features" style={{
                                 display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -845,6 +884,26 @@ export default function Landing() {
                     mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 45%, transparent 100%);
                 }
                 .hero-img { border-radius: 0; }
+                
+                .feature-card {
+                    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+                }
+                
+                .feature-card:hover {
+                    transform: translateY(-6px) !important;
+                    border-color: color-mix(in srgb, var(--card-glow-color) 50%, transparent) !important;
+                    box-shadow: 0 12px 30px color-mix(in srgb, var(--card-glow-color) 15%, transparent),
+                                0 0 15px color-mix(in srgb, var(--card-glow-color) 10%, transparent) !important;
+                }
+                
+                .feature-icon-wrapper {
+                    transition: transform 0.3s ease !important;
+                }
+                
+                .feature-card:hover .feature-icon-wrapper {
+                    transform: scale(1.12) rotate(5deg) !important;
+                }
+
                 @media (max-width: 900px) {
                     .hero-grid { grid-template-columns: 1fr !important; }
                     .hero-grid > div:last-child { display: none; }
@@ -854,6 +913,7 @@ export default function Landing() {
                     .features-system-grid { grid-template-columns: 1fr !important; }
                     .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
                 }
+
                 @media (max-width: 600px) {
                     .quick-cards-grid { grid-template-columns: 1fr !important; }
                     .features-grid { grid-template-columns: 1fr !important; }
@@ -862,7 +922,35 @@ export default function Landing() {
                     .features-grid > div { grid-template-columns: 56px minmax(0, 1fr) !important; gap: 0.85rem !important; }
                     .workflow-step { padding: 1.1rem 0.5rem 1.25rem !important; min-height: unset !important; }
                 }
+
+                /* ── Fix for very small screens (332px and below) ── */
+                @media (max-width: 400px) {
+                    .features-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 1rem !important;
+                    }
+                    .quick-cards-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 1rem !important;
+                    }
+                }
+
+                /* ── Prevent any grid/section from overflowing viewport ── */
+                .features-grid,
+                .quick-cards-grid,
+                .hero-grid {
+                    width: 100%;
+                    box-sizing: border-box;
+                    min-width: 0;
+                }
+
+                /* ── Global overflow guard ── */
+                html, body {
+                    overflow-x: hidden;
+                    max-width: 100%;
+                }
             `}</style>
         </div>
+        </>
     );
 }

@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/forensics")
+@RequestMapping("/forensics")
 @RequiredArgsConstructor
 public class ForensicsController {
 

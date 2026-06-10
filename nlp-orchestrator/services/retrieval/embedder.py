@@ -1,14 +1,15 @@
 """
 Lazy-loaded sentence-transformer embedder.
 
-Default model: `sentence-transformers/all-MiniLM-L6-v2` — 384-dim, ~80 MB,
-runs cheaply on CPU. Swap to `law-ai/InLegalBERT` (Indian-legal pretrained)
-via the EMBEDDING_MODEL env var for higher domain fidelity.
+Default model: `law-ai/InLegalBERT` — 768-dim, Indian-legal domain pretrained.
+Replaces `sentence-transformers/all-MiniLM-L6-v2` (384-dim) for higher legal
+domain fidelity. Mean pooling is applied automatically for InLegalBERT since it
+is not a native SBERT model.
 
-The model is loaded on first use, behind a lock, so multiple concurrent
-requests hitting cold start don't try to instantiate it in parallel.
-All public calls are async-friendly: blocking encode work runs in the default
-executor so the FastAPI event loop is never stalled.
+The model is loaded on first use, behind a lock, so multiple concurrent requests
+hitting cold start do not try to instantiate it in parallel. All public calls are
+async-friendly: blocking encode work runs in the default executor so the FastAPI
+event loop is never stalled.
 """
 
 import asyncio
@@ -31,29 +32,75 @@ def _load_model(model_name: str):
         return _model
 
     with _lock:
-        # Re-check inside lock (double-checked locking).
         if _model is not None and _model_name == model_name:
             return _model
 
-        try:
-            from sentence_transformers import SentenceTransformer
-        except ImportError:
-            logger.warning(
-                "sentence-transformers is not installed; embedder disabled. "
-                "Install with: pip install sentence-transformers"
-            )
-            _model = None
-            return None
-
         logger.info(f"Loading embedding model: {model_name}")
         try:
-            _model = SentenceTransformer(model_name)
+            if "InLegalBERT" in model_name or "inlegal" in model_name.lower():
+                import torch
+                import torch.nn.functional as F
+                from transformers import AutoModel, AutoTokenizer
+
+                logger.info("Using HuggingFace AutoModel with mean pooling for InLegalBERT")
+                tokenizer = AutoTokenizer.from_pretrained(model_name)
+                hf_model = AutoModel.from_pretrained(model_name)
+                hf_model.eval()
+
+                class _InLegalBERTWrapper:
+                    def __init__(self, tok, mod):
+                        self._tok = tok
+                        self._mod = mod
+
+                    def encode(
+                        self,
+                        texts,
+                        convert_to_numpy=True,
+                        normalize_embeddings=True,
+                        show_progress_bar=False,
+                    ):
+                        encoded = self._tok(
+                            texts,
+                            padding=True,
+                            truncation=True,
+                            max_length=512,
+                            return_tensors="pt",
+                        )
+                        with torch.no_grad():
+                            output = self._mod(**encoded)
+                        token_emb = output.last_hidden_state
+                        mask = (
+                            encoded["attention_mask"]
+                            .unsqueeze(-1)
+                            .expand(token_emb.size())
+                            .float()
+                        )
+                        pooled = torch.sum(token_emb * mask, 1) / torch.clamp(
+                            mask.sum(1), min=1e-9
+                        )
+                        if normalize_embeddings:
+                            pooled = F.normalize(pooled, p=2, dim=1)
+                        return pooled.numpy() if convert_to_numpy else pooled
+
+                    def get_embedding_dimension(self):
+                        return 768
+
+                _model = _InLegalBERTWrapper(tokenizer, hf_model)
+            else:
+                try:
+                    from sentence_transformers import SentenceTransformer
+                except ImportError:
+                    logger.warning(
+                        "sentence-transformers is not installed; embedder disabled. "
+                        "Install with: pip install sentence-transformers"
+                    )
+                    _model = None
+                    return None
+                _model = SentenceTransformer(model_name)
+
             _model_name = model_name
-            # Forward-compatible: get_sentence_embedding_dimension() is being
-            # renamed to get_embedding_dimension() in a future release.
-            dim_fn = (
-                getattr(_model, "get_embedding_dimension", None)
-                or getattr(_model, "get_sentence_embedding_dimension", None)
+            dim_fn = getattr(_model, "get_embedding_dimension", None) or getattr(
+                _model, "get_sentence_embedding_dimension", None
             )
             dim = dim_fn() if dim_fn else "?"
             logger.info(f"Embedding model ready ({dim}-dim)")
@@ -73,8 +120,6 @@ def embed_sync(texts: list[str], model_name: str) -> Optional[list[list[float]]]
         return None
 
     try:
-        # normalize_embeddings=True ensures cosine similarity == dot product,
-        # which matches the Chroma collection's 'cosine' space setting.
         embeddings = model.encode(
             texts,
             convert_to_numpy=True,

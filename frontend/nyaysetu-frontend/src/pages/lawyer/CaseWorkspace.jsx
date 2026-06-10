@@ -359,7 +359,7 @@ function TabEvidence({ caseId }) {
         setCertLoading(true);
         try {
             const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-            const url = `${API_BASE_URL}/api/documents/${doc.id}/certificate`;
+            const url = `${API_BASE_URL}/api/v1/documents/${doc.id}/certificate`;
             const token = localStorage.getItem('token');
 
             const response = await fetch(url, {
@@ -977,7 +977,7 @@ function TabChat({ caseData }) {
             });
 
             const docId = res.data.id;
-            const downloadUrl = `/api/documents/${docId}/download`;
+            const downloadUrl = `/api/v1/documents/${docId}/download`;
 
             await handleSend("🎤 Voice Message", 'AUDIO', downloadUrl);
         } catch (error) {
@@ -999,7 +999,7 @@ function TabChat({ caseData }) {
                 description: `Shared via chat by Lawyer`
             });
             const docId = res.data.id;
-            const downloadUrl = `/api/documents/${docId}/download`;
+            const downloadUrl = `/api/v1/documents/${docId}/download`;
             await handleSend(`Shared file: ${file.name}`, 'FILE', downloadUrl);
         } catch (error) {
             console.error('Error uploading file:', error);

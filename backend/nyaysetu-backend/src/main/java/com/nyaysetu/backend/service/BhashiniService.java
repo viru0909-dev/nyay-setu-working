@@ -44,7 +44,7 @@ public class BhashiniService {
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
     private final ObjectMapper objectMapper;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate; // Injected bean with timeouts — see RestTemplateConfig
 
     /**
      * Translate text from source language to target language

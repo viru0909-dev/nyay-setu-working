@@ -13,7 +13,7 @@ import java.util.Map;
 @Tag(name = "Health", description = "Server health check — uptime, version and status")
 public class HealthController {
 
-    @GetMapping("/api/health")
+    @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> healthCheck() {
         long uptimeMs = ManagementFactory.getRuntimeMXBean().getUptime();
         Duration uptime = Duration.ofMillis(uptimeMs);

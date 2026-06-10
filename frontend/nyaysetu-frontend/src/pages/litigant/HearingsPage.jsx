@@ -1,3 +1,4 @@
+import { scheduleHearingReminder } from '../../utils/HearingReminder';
 import { useState, useEffect } from 'react';
 import {
     Video,
@@ -15,12 +16,17 @@ import {
     BookOpen
 } from 'lucide-react';
 import { hearingAPI } from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function HearingsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [hearings, setHearings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeCall, setActiveCall] = useState(null);
+    const [reminders, setReminders] = useState(() => {
+    return JSON.parse(localStorage.getItem('hearingReminders') || '{}');
+});
+    const { t } = useTranslation('litigant');
 
     useEffect(() => {
         fetchHearings();
@@ -50,6 +56,7 @@ export default function HearingsPage() {
             setHearings(formatted);
         } catch (error) {
             console.error('Failed to fetch hearings:', error);
+            alert(t('hearings.fetchError'));
         } finally {
             setLoading(false);
         }
@@ -74,6 +81,22 @@ export default function HearingsPage() {
     const endCall = () => {
         setActiveCall(null);
     };
+
+const handleReminder = async (hearing) => {
+    await scheduleHearingReminder(hearing);
+
+    const updated = {
+        ...reminders,
+        [hearing.id]: true
+    };
+
+    setReminders(updated);
+
+    localStorage.setItem(
+        'hearingReminders',
+        JSON.stringify(updated)
+    );
+};
 
     // Calendar & filtering logic
     const today = new Date();
@@ -116,15 +139,15 @@ export default function HearingsPage() {
                             <ArrowLeft size={20} />
                         </button>
                         <div>
-                            <h2 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.125rem', fontWeight: '700' }}>{activeCall.caseTitle || 'Court Hearing'}</h2>
+                            <h2 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.125rem', fontWeight: '700' }}>{activeCall.caseTitle || t('hearings.courtHearing')}</h2>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                                <Shield size={12} color="#4ade80" /> <span>End-to-End Encrypted Secure Judicial Line</span>
+                                <Shield size={12} color="#4ade80" /> <span>{t('hearings.secureLine')}</span>
                             </div>
                         </div>
                     </div>
                     <div className="active-call-status" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontWeight: '800', fontSize: '0.875rem' }}>
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', animation: 'blink 1.5s infinite' }} /> SESSION LIVE
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', animation: 'blink 1.5s infinite' }} /> {t('hearings.sessionLive')}
                         </div>
                         <div style={{ height: '24px', width: '1px', background: 'var(--border-glass)' }} />
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: '600' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -144,7 +167,7 @@ export default function HearingsPage() {
                         color: 'white', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem',
                         boxShadow: '0 10px 25px rgba(239, 68, 68, 0.4)', transition: 'all 0.2s', letterSpacing: '0.5px'
                     }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
-                        <Phone size={20} /> LEAVE SESSION
+                        <Phone size={20} /> {t('hearings.leaveSession')}
                     </button>
                     <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }`}</style>
                 </div>
@@ -166,10 +189,10 @@ export default function HearingsPage() {
                     </div>
                     <div>
                         <h1 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
-                            Hearings
+                            {t('hearings.title')}
                         </h1>
                         <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
-                            Your scheduled virtual court sessions
+                            {t('hearings.subtitle')}
                         </p>
                     </div>
                 </div>
@@ -182,7 +205,7 @@ export default function HearingsPage() {
                         <div style={{ position: 'relative', flex: 1 }}>
                             <input
                                 type="text"
-                                placeholder="Search hearings..."
+                                placeholder={t('hearings.searchPlaceholder')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="search-input"
@@ -198,14 +221,14 @@ export default function HearingsPage() {
                     {loading ? (
                         <div style={{ ...glassStyle, padding: '3rem', textAlign: 'center' }}>
                             <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 1rem', color: 'var(--color-primary)' }} />
-                            <p style={{ color: 'var(--text-secondary)' }}>Loading hearings...</p>
+                            <p style={{ color: 'var(--text-secondary)' }}>{t('hearings.loading')}</p>
                             <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .animate-spin { animation: spin 1s linear infinite; }`}</style>
                         </div>
                     ) : filteredHearings.length === 0 ? (
                         <div style={{ ...glassStyle, padding: '4rem', textAlign: 'center' }}>
                             <Calendar size={48} color="var(--text-secondary)" style={{ opacity: 0.5, marginBottom: '1rem' }} />
-                            <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem' }}>No hearings found</h3>
-                            <p style={{ color: 'var(--text-secondary)' }}>You don't have any matching hearings.</p>
+                            <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem' }}>{t('hearings.noHearings')}</h3>
+                            <p style={{ color: 'var(--text-secondary)' }}>{t('hearings.noHearingsDescription')}</p>
                         </div>
                     ) : (
                         filteredHearings.map(hearing => {
@@ -241,7 +264,7 @@ export default function HearingsPage() {
                                         </div>
                                         <div className="hearing-meta" style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Clock size={14} /> {hearing.time}</div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><MapPin size={14} /> Virtual Court</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><MapPin size={14} /> {t('hearings.virtualCourt')}</div>
                                         </div>
                                     </div>
 
@@ -252,14 +275,38 @@ export default function HearingsPage() {
                                                 padding: '0.75rem 1.5rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
                                                 boxShadow: '0 4px 12px rgba(30, 42, 68, 0.3)'
                                             }}>
-                                                <Video size={18} /> Join Now
+                                                <Video size={18} /> {t('hearings.joinNow')}
                                             </button>
                                         ) : (
                                             <div style={{
                                                 padding: '0.75rem 1.5rem', borderRadius: '0.75rem', background: 'rgba(100, 116, 139, 0.1)',
                                                 color: 'var(--text-secondary)', fontWeight: '600', fontSize: '0.9rem'
                                             }}>
-                                                {hearing.isUpcoming ? 'upcoming' : 'Completed'}
+                                                {hearing.isUpcoming ? t('hearings.upcoming') : t('hearings.completed')}
+
+                                            {hearing.isUpcoming && (
+                                         <button
+                                          onClick={() => handleReminder(hearing)}
+                                              style={{
+                                               background: reminders[hearing.id]
+                                               ? 'var(--color-primary)'
+                                               : 'var(--bg-glass-strong)',
+                                               border: 'var(--border-glass-strong)',
+                                               color: reminders[hearing.id]
+                                               ? 'white'
+                                               : 'var(--text-main)',
+                                               borderRadius: '0.75rem',
+                                               padding: '0.75rem 1rem',
+                                               cursor: 'pointer',
+                                               marginTop: '0.5rem'
+                     }}
+                 >
+                {reminders[hearing.id]
+                 ? '✅ Reminder Set'
+                 : '🔔 Set Reminder'}
+                                 </button>
+                )} 
+
                                             </div>
                                         )}
                                     </div>
@@ -273,7 +320,7 @@ export default function HearingsPage() {
                 <div className="hearings-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div className="overview-card" style={glassStyle}>
                         <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Calendar size={18} color="var(--color-primary)" /> Weekly Overview
+                            <Calendar size={18} color="var(--color-primary)" /> {t('hearings.weeklyOverview')}
                         </h3>
                         <div className="calendar-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem', marginBottom: '1rem' }}>
                             {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
@@ -295,7 +342,7 @@ export default function HearingsPage() {
                         </div>
                         <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Your Hearings</span>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{t('hearings.yourHearings')}</span>
                                 <span style={{ color: 'var(--text-main)', fontWeight: '700' }}>{hearings.filter(h => h.fullDate && h.fullDate.toDateString() === today.toDateString()).length}</span>
                             </div>
                         </div>
@@ -303,13 +350,13 @@ export default function HearingsPage() {
 
                     <div className="legal-aid-card" style={{ ...glassStyle, background: 'rgba(30, 42, 68, 0.05)', border: '1px solid rgba(30, 42, 68, 0.2)' }}>
                         <div style={{ color: 'var(--color-primary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <BookOpen size={14} /> Legal Aid
+                            <BookOpen size={14} /> {t('hearings.legalAid')}
                         </div>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.6', margin: 0 }}>
-                            Need help preparing for court? Access our library of litigant rights and procedural guidelines.
+                            {t('hearings.legalAidDescription')}
                         </p>
                         <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-primary)', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer' }}>
-                            View Resources <ArrowUpRight size={14} />
+                            {t('hearings.viewResources')} <ArrowUpRight size={14} />
                         </div>
                     </div>
                 </div>

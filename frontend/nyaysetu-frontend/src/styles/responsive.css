@@ -68,7 +68,13 @@
 
     /* Padding adjustments */
     section {
-        padding: 3rem 1rem !important;
+        /*
+         * NOTE: Don't use !important here.
+         * Many pages (especially Landing) set section padding inline to
+         * compensate for the fixed header. Using !important overrides those
+         * values on mobile and causes headings to slide under the navbar.
+         */
+        padding: 3rem 1rem;
     }
 
     /* Constitution page */
@@ -260,10 +266,10 @@
     }
 
     /* Make buttons visible and touch-friendly */
-    button,
+    button:not(.guest-continue-btn):not(.guest-btn-primary):not(.guest-btn-secondary):not(.guest-btn-ghost):not(.auth-full-width-btn),
     .next-btn,
     .prev-btn,
-    button[type="submit"],
+    button[type="submit"]:not(.auth-full-width-btn),
     div[class*="button"] {
         min-height: 48px !important;
         padding: 12px 20px !important;
@@ -300,6 +306,7 @@
     /* Fix any overflowing elements */
     * {
         max-width: 100vw !important;
+    }
 
     /* Hearings Page */
     .hearings-header {
@@ -433,7 +440,7 @@ html {
 
 /* Focus visible for keyboard navigation */
 *:focus-visible {
-    outline: 2px solid #8b5cf6;
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
     border-radius: 0.25rem;
 }
