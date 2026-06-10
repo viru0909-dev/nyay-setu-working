@@ -1,322 +1,160 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Search, BookOpen, Globe, Download, Bookmark, MessageCircle, Share2, X, BookmarkPlus, Loader2 } from 'lucide-react';
+import {
+    Search, BookOpen, Globe, Download, Bookmark, MessageCircle, Share2, X, BookmarkPlus, Loader2, Map,
+    ShieldCheck,
+    Landmark,
+    Scale,
+    Building2,
+    Users
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { brainAPI } from '../services/api';
+import { useTranslation } from 'react-i18next';
+
+import useGuest from '../hooks/useGuest';
+import useAuthStore from '../store/authStore';
+import GuestBlurredResults from '../components/guest/GuestBlurredResults';
 
 export default function Constitution() {
     const navigate = useNavigate();
-    const { language, toggleLanguage, t } = useLanguage();
+    const { t, i18n } = useTranslation('constitution');
+
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedPart, setSelectedPart] = useState(null);
-    const [selectedArticle, setSelectedArticle] = useState(null);
+    const [selectedPartId, setSelectedPartId] = useState(null);
+    const [selectedArticleNumber, setSelectedArticleNumber] = useState(null);
     const [showAIChat, setShowAIChat] = useState(false);
     const [bookmarks, setBookmarks] = useState([]);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [systemVoices, setSystemVoices] = useState([]);
+
+// Warm up and capture device engine voices on mount
+useEffect(() => {
+    const updateVoices = () => {
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            setSystemVoices(window.speechSynthesis.getVoices());
+        }
+    };
+
+    updateVoices();
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = updateVoices;
+    }
+}, []);
     const [aiQuery, setAiQuery] = useState('');
     const [aiResponse, setAiResponse] = useState('');
     const [isAiLoading, setIsAiLoading] = useState(false);
     const [sessionId, setSessionId] = useState(null);
+    const language = i18n.language;
+    const { isGuest } = useGuest();
+    const updateGuestPrefs = useAuthStore((s) => s.updateGuestPrefs);
+    const setGuestIntent = useAuthStore((s) => s.setGuestIntent);
 
     // Enhanced Constitution Data with more articles
-    const constitutionData = {
-        en: {
-            parts: [
-                {
-                    id: 1,
-                    title: "Part I - The Union and its Territory",
-                    description: "Articles defining the territory of India",
-                    articles: [
-                        {
-                            number: "1",
-                            title: "Name and territory of the Union",
-                            content: "India, that is Bharat, shall be a Union of States. The territory of India shall comprise: (a) the territories of the States; (b) the Union territories specified in the First Schedule; and (c) such other territories as may be acquired.",
-                            keywords: ["name", "bharat", "territory", "union"]
-                        },
-                        {
-                            number: "2",
-                            title: "Admission or establishment of new States",
-                            content: "Parliament may by law admit into the Union, or establish, new States on such terms and conditions as it thinks fit.",
-                            keywords: ["parliament", "new states", "admission"]
-                        },
-                        {
-                            number: "3",
-                            title: "Formation of new States and alteration of areas",
-                            content: "Parliament may by law: (a) form a new State; (b) increase or diminish the area of any State; (c) alter the boundaries of any State; (d) alter the name of any State.",
-                            keywords: ["formation", "boundaries", "areas"]
-                        }
-                    ]
-                },
-                {
-                    id: 2,
-                    title: "Part II - Citizenship",
-                    description: "Articles related to citizenship of India",
-                    articles: [
-                        {
-                            number: "5",
-                            title: "Citizenship at the commencement of the Constitution",
-                            content: "At the commencement of this Constitution, every person who has his domicile in the territory of India and who was born in the territory of India, or either of whose parents was born in the territory of India, or who has been ordinarily resident in the territory of India for not less than five years immediately preceding such commencement, shall be a citizen of India.",
-                            keywords: ["citizenship", "constitution", "domicile", "india"]
-                        },
-                        {
-                            number: "6",
-                            title: "Rights of citizenship of certain persons who have migrated from Pakistan to India",
-                            content: "A person who has migrated to the territory of India from Pakistan shall be deemed to be a citizen of India if he or either of his parents or grandparents was born in India as defined in the Government of India Act, 1935, and if certain conditions relating to migration and registration are fulfilled.",
-                            keywords: ["migration", "pakistan", "citizenship", "registration"]
-                        },
-                        {
-                            number: "7",
-                            title: "Rights of citizenship of certain migrants to Pakistan",
-                            content: "A person who has after the first day of March, 1947, migrated from the territory of India to Pakistan shall not be deemed to be a citizen of India unless he has returned to India under a permit for resettlement or permanent return.",
-                            keywords: ["migration", "pakistan", "permit", "citizenship"]
-                        },
-                        {
-                            number: "8",
-                            title: "Rights of citizenship of certain persons of Indian origin residing outside India",
-                            content: "Any person of Indian origin residing outside India who or either of whose parents or grandparents was born in India may register as a citizen of India through diplomatic or consular representatives of India in the country where they reside.",
-                            keywords: ["indian origin", "outside india", "citizenship", "registration"]
-                        },
-                        {
-                            number: "9",
-                            title: "Persons voluntarily acquiring citizenship of a foreign State not to be citizens",
-                            content: "No person shall be a citizen of India if he has voluntarily acquired the citizenship of any foreign State.",
-                            keywords: ["foreign state", "citizenship", "voluntary"]
-                        },
-                        {
-                            number: "10",
-                            title: "Continuance of the rights of citizenship",
-                            content: "Every person who is or is deemed to be a citizen of India under the foregoing provisions shall continue to be such citizen, subject to the provisions of any law made by Parliament.",
-                            keywords: ["rights", "citizenship", "parliament"]
-                        },
-                         {
-                            number: "11",
-                            title: "Parliament to regulate the right of citizenship by law",
-                            content: "Nothing in the foregoing provisions shall derogate from the power of Parliament to make any provision with respect to the acquisition and termination of citizenship and all other matters relating to citizenship.",
-                            keywords: ["parliament", "citizenship", "law", "termination"]
-                        }
-                    ]
-                },
-                {
-                    id: 3,
-                    title: "Part III - Fundamental Rights",
-                    description: "Basic human rights guaranteed to all citizens",
-                    articles: [
-                        {
-                            number: "14",
-                            title: "Equality before law",
-                            content: "The State shall not deny to any person equality before the law or the equal protection of the laws within the territory of India. Prohibition of discrimination on grounds of religion, race, caste, sex or place of birth.",
-                            keywords: ["equality", "law", "discrimination"]
-                        },
-                        {
-                            number: "19",
-                            title: "Protection of certain rights regarding freedom of speech, etc.",
-                            content: "All citizens shall have the right to: (a) freedom of speech and expression; (b) assemble peaceably and without arms; (c) form associations or unions; (d) move freely throughout the territory of India; (e) reside and settle in any part of the territory of India; (f) practice any profession, or to carry on any occupation, trade or business.",
-                            keywords: ["freedom", "speech", "expression", "movement"]
-                        },
-                        {
-                            number: "21",
-                            title: "Protection of life and personal liberty",
-                            content: "No person shall be deprived of his life or personal liberty except according to procedure established by law. The right to life includes the right to live with human dignity.",
-                            keywords: ["life", "liberty", "dignity"]
-                        },
-                        {
-                            number: "21A",
-                            title: "Right to education",
-                            content: "The State shall provide free and compulsory education to all children of the age of six to fourteen years in such manner as the State may, by law, determine.",
-                            keywords: ["education", "children", "free education"]
-                        }
-                    ]
-                },
-                {
-                    id: 4,
-                    title: "Part IV - Directive Principles of State Policy",
-                    description: "Guidelines for governance and policy-making",
-                    articles: [
-                        {
-                            number: "38",
-                            title: "State to secure a social order for the promotion of welfare of the people",
-                            content: "The State shall strive to promote the welfare of the people by securing and protecting as effectively as it may a social order in which justice, social, economic and political, shall inform all the institutions of the national life.",
-                            keywords: ["welfare", "social order", "justice"]
-                        },
-                        {
-                            number: "39",
-                            title: "Certain principles of policy to be followed by the State",
-                            content: "The State shall direct its policy towards securing: (a) that the citizens, men and women equally, have the right to an adequate means of livelihood; (b) that the ownership and control of material resources is distributed to subserve the common good; (c) that the operation of the economic system does not result in concentration of wealth.",
-                            keywords: ["policy", "livelihood", "resources", "wealth"]
-                        }
-                    ]
-                },
-                {
-                    id: 4.5,
-                    title: "Part IVA - Fundamental Duties",
-                    description: "Basic duties of every Indian citizen",
-                    articles: [
-                        {
-                            number: "51",
-                            title: "Fundamental Duties",
-                            content: "It shall be the duty of every citizen of India: (a) to abide by the Constitution; (b) to cherish and follow the noble ideals of the freedom struggle; (c) to uphold and protect the sovereignty, unity and integrity of India; (d) to defend the country; (e) to promote harmony and spirit of common brotherhood; (f) to value and preserve the rich heritage of our composite culture; (g) to protect natural environment; (h) to develop scientific temper; (i) to safeguard public property; (j) to strive towards excellence.",
-                            keywords: ["duties", "citizens", "responsibility", "protection"]
-                        }
-                    ]
-                }
-            ]
-        },
-        hi: {
-            parts: [
-                {
-                    id: 1,
-                    title: "भाग I - संघ और उसका राज्यक्षेत्र",
-                    description: "भारत के राज्यक्षेत्र को परिभाषित करने वाले अनुच्छेद",
-                    articles: [
-                        {
-                            number: "1",
-                            title: "संघ का नाम और राज्यक्षेत्र",
-                            content: "भारत, अर्थात् इंडिया, राज्यों का संघ होगा। भारत का राज्यक्षेत्र निम्नलिखित से मिलकर बनेगा: (क) राज्यों के राज्यक्षेत्र; (ख) पहली अनुसूची में विनिर्दिष्ट संघ राज्यक्षेत्र; और (ग) ऐसे अन्य राज्यक्षेत्र जो अर्जित किए जाएं।",
-                            keywords: ["नाम", "भारत", "राज्यक्षेत्र", "संघ"]
-                        },
-                        {
-                            number: "2",
-                            title: "नए राज्यों का प्रवेश या स्थापना",
-                            content: "संसद विधि द्वारा ऐसे निबंधनों और शर्तों पर, जो वह ठीक समझे, संघ में नए राज्यों का प्रवेश या उनकी स्थापना कर सकेगी।",
-                            keywords: ["संसद", "नए राज्य", "प्रवेश"]
-                        },
-                        {
-                            number: "3",
-                            title: "नए राज्यों का निर्माण और क्षेत्रों का परिवर्तन",
-                            content: "संसद विधि द्वारा: (क) नया राज्य बना सकेगी; (ख) किसी राज्य के क्षेत्र को बढ़ा या घटा सकेगी; (ग) किसी राज्य की सीमाओं को बदल सकेगी; (घ) किसी राज्य का नाम बदल सकेगी।",
-                            keywords: ["निर्माण", "सीमाएं", "क्षेत्र"]
-                        }
-                    ]
-                },
-                {
-                    id: 2,
-                    title: "भाग II - नागरिकता",
-                    description: "भारत की नागरिकता से संबंधित अनुच्छेद",
-                    articles: [
-                        {
-                            number: "5",
-                            title: "संविधान के प्रारंभ पर नागरिकता",
-                            content: "इस संविधान के प्रारंभ पर प्रत्येक व्यक्ति, जिसका भारत के राज्यक्षेत्र में अधिवास है और जो भारत के राज्यक्षेत्र में जन्मा था या जिसके माता या पिता में से कोई भारत के राज्यक्षेत्र में जन्मा था या जो ऐसे प्रारंभ से ठीक पहले कम से कम पाँच वर्ष तक भारत में सामान्य रूप से निवास कर रहा था, भारत का नागरिक होगा।",
-                            keywords: ["नागरिकता", "संविधान", "अधिवास", "भारत"]
-                        },
-                        {
-                            number: "6",
-                            title: "पाकिस्तान से भारत आए कुछ व्यक्तियों के नागरिकता के अधिकार",
-                            content: "जो व्यक्ति पाकिस्तान से भारत आया है, वह भारत का नागरिक माना जाएगा यदि वह या उसके माता-पिता या दादा-दादी में से कोई भारत में जन्मा था तथा प्रव्रजन और पंजीकरण से संबंधित शर्तें पूरी करता हो।",
-                            keywords: ["प्रव्रजन", "पाकिस्तान", "नागरिकता", "पंजीकरण"]
-                        },
-                        {
-                            number: "7",
-                            title: "पाकिस्तान जाने वाले कुछ प्रवासियों के नागरिकता के अधिकार",
-                            content: "जो व्यक्ति 1 मार्च 1947 के बाद भारत से पाकिस्तान चला गया है, वह भारत का नागरिक नहीं माना जाएगा, जब तक कि वह पुनर्वास या स्थायी वापसी के परमिट के अंतर्गत भारत वापस न आया हो।",
-                            keywords: ["प्रवास", "पाकिस्तान", "परमिट", "नागरिकता"]
-                        },
-                        {
-                            number: "8",
-                            title: "भारत के बाहर रहने वाले भारतीय मूल के कुछ व्यक्तियों के नागरिकता के अधिकार",
-                            content: "भारत के बाहर रहने वाला भारतीय मूल का कोई व्यक्ति, जिसके माता-पिता या दादा-दादी में से कोई भारत में जन्मा था, उस देश में भारत के राजनयिक या वाणिज्य दूतावास प्रतिनिधि के समक्ष पंजीकरण कराकर भारत का नागरिक बन सकता है।",
-                            keywords: ["भारतीय मूल", "विदेश", "नागरिकता", "पंजीकरण"]
-                        },
-                        {
-                            number: "9",
-                            title: "विदेशी राज्य की नागरिकता स्वेच्छा से ग्रहण करने वाले व्यक्ति भारत के नागरिक नहीं होंगे",
-                            content: "यदि किसी व्यक्ति ने स्वेच्छा से किसी विदेशी राज्य की नागरिकता ग्रहण कर ली है, तो वह भारत का नागरिक नहीं होगा।",
-                            keywords: ["विदेशी राज्य", "नागरिकता", "स्वेच्छा"]
-                        },
-                        {
-                            number: "10",
-                            title: "नागरिकता के अधिकारों का बना रहना",
-                            content: "जो व्यक्ति उपर्युक्त उपबंधों के अधीन भारत का नागरिक है या माना गया है, वह संसद द्वारा बनाई गई विधि के अधीन नागरिक बना रहेगा।",
-                            keywords: ["अधिकार", "नागरिकता", "संसद"]
-                        },  
-                        {   
-                           number: "11",
-                            title: "संसद द्वारा नागरिकता के अधिकार का विनियमन",
-                            content: "उपर्युक्त उपबंध संसद की उस शक्ति को प्रभावित नहीं करेंगे जिसके द्वारा वह नागरिकता के अर्जन और समाप्ति तथा नागरिकता से संबंधित अन्य विषयों पर विधि बना सके।",
-                            keywords: ["संसद", "नागरिकता", "विधि", "समाप्ति"]
-                        }
-                    ]
-                },
-                {
-                    id: 3,
-                    title: "भाग III - मौलिक अधिकार",
-                    description: "सभी नागरिकों को गारंटीकृत मूल मानव अधिकार",
-                    articles: [
-                        {
-                            number: "14",
-                            title: "विधि के समक्ष समता",
-                            content: "राज्य, भारत के राज्यक्षेत्र में किसी व्यक्ति को विधि के समक्ष समता से या विधियों के समान संरक्षण से वंचित नहीं करेगा। धर्म, मूलवंश, जाति, लिंग या जन्मस्थान के आधार पर विभेद का प्रतिषेध।",
-                            keywords: ["समानता", "कानून", "भेदभाव"]
-                        },
-                        {
-                            number: "19",
-                            title: "वाक्-स्वातंत्र्य आदि विषयक कुछ अधिकारों का संरक्षण",
-                            content: "सभी नागरिकों को: (क) वाक्-स्वातंत्र्य और अभिव्यक्ति स्वातंत्र्य; (ख) शांतिपूर्वक और बिना हथियारों के सम्मेलन करने; (ग) संगम या संघ बनाने; (घ) भारत के राज्यक्षेत्र में सर्वत्र अबाध संचरण करने; (ङ) भारत के राज्यक्षेत्र के किसी भाग में निवास करने और बस जाने; (च) कोई वृत्ति, उपजीविका, व्यापार या कारबार करने का अधिकार होगा।",
-                            keywords: ["स्वतंत्रता", "भाषण", "अभिव्यक्ति", "आवाजाही"]
-                        },
-                        {
-                            number: "21",
-                            title: "प्राण और दैहिक स्वतंत्रता का संरक्षण",
-                            content: "विधि द्वारा स्थापित प्रक्रिया के अनुसार ही किसी व्यक्ति को उसके प्राण या दैहिक स्वतंत्रता से वंचित किया जाएगा, अन्यथा नहीं। जीवन के अधिकार में मानवीय गरिमा के साथ जीने का अधिकार शामिल है।",
-                            keywords: ["जीवन", "स्वतंत्रता", "गरिमा"]
-                        },
-                        {
-                            number: "21क",
-                            title: "शिक्षा का अधिकार",
-                            content: "राज्य छह से चौदह वर्ष की आयु के सभी बच्चों को ऐसी रीति में, जो राज्य विधि द्वारा अवधारित करे, निःशुल्क और अनिवार्य शिक्षा उपलब्ध कराएगा।",
-                            keywords: ["शिक्षा", "बच्चे", "निःशुल्क शिक्षा"]
-                        }
-                    ]
-                },
-                {
-                    id: 4,
-                    title: "भाग IV - राज्य की नीति के निदेशक तत्त्व",
-                    description: "शासन और नीति-निर्माण के लिए दिशानिर्देश",
-                    articles: [
-                        {
-                            number: "38",
-                            title: "राज्य लोक कल्याण की अभिवृद्धि के लिए सामाजिक व्यवस्था बनाएगा",
-                            content: "राज्य लोक कल्याण की अभिवृद्धि के लिए सामाजिक व्यवस्था को, जिसमें सामाजिक, आर्थिक और राजनीतिक न्याय राष्ट्रीय जीवन की सभी संस्थाओं को अनुप्राणित करे, प्रभावी रूप से इस प्रकार बनाएगा कि उस व्यवस्था को बनाए रखने का प्रयास करेगा।",
-                            keywords: ["कल्याण", "सामाजिक व्यवस्था", "न्याय"]
-                        },
-                        {
-                            number: "39",
-                            title: "राज्य द्वारा अनुसरणीय कुछ नीति तत्त्व",
-                            content: "राज्य अपनी नीति का इस प्रकार संचालन करेगा कि सुनिश्चित रूप से: (क) पुरुष और स्त्री सभी नागरिकों को समान रूप से जीविका के पर्याप्त साधन प्राप्त करने का अधिकार हो; (ख) भौतिक संसाधनों का स्वामित्व और नियंत्रण इस प्रकार बंटा हो जिससे सामूहिक हित का उत्तम साधन हो; (ग) आर्थिक व्यवस्था के संचालन से धन का संकेंद्रण न हो।",
-                            keywords: ["नीति", "जीविका", "संसाधन", "धन"]
-                        }
-                    ]
-                },
-                {
-                    id: 4.5,
-                    title: "भाग IVक - मूल कर्तव्य",
-                    description: "प्रत्येक भारतीय नागरिक के मूल कर्तव्य",
-                    articles: [
-                        {
-                            number: "51",
-                            title: "मूल कर्तव्य",
-                            content: "भारत के प्रत्येक नागरिक का यह कर्तव्य होगा कि वह: (क) संविधान का पालन करे; (ख) स्वतंत्रता के लिए हमारे राष्ट्रीय आंदोलन को प्रेरित करने वाले उच्च आदर्शों को हृदय में संजोए रखे; (ग) भारत की संप्रभुता, एकता और अखंडता की रक्षा करे; (घ) देश की रक्षा करे; (ङ) सामंजस्य और समान भ्रातृत्व की भावना का निर्माण करे; (च) हमारी सामासिक संस्कृति की गौरवशाली परंपरा का महत्व समझे; (छ) प्राकृतिक पर्यावरण की रक्षा करे; (ज) वैज्ञानिक दृष्टिकोण विकसित करे; (झ) सार्वजनिक संपत्ति की सुरक्षा करे; (ञ) उत्कर्ष की ओर बढ़ने का सतत प्रयास करे।",
-                            keywords: ["कर्तव्य", "नागरिक", "जिम्मेदारी", "संरक्षण"]
-                        }
-                    ]
-                }
-            ]
-        }
+    const partIcons = {
+        1: <Map size={40} />,
+        3: <ShieldCheck size={40} />,
+        4: <Landmark size={40} />,
+        5: <Scale size={40} />,
+        6: <Building2 size={40} />,
+        9: <Users size={40} />,
     };
 
-    const data = constitutionData[language];
+    const parts = useMemo(() => {
+        return i18n.getResource(
+            i18n.language,
+            'constitution',
+            'parts'
+        ) || [];
+    }, [i18n.language]);
 
-    const filteredParts = data.parts.filter(part =>
+    const selectedPart = useMemo(() => {
+        return parts.find(
+            part => part.id === selectedPartId
+        );
+    }, [parts, selectedPartId]);
+
+    const selectedArticle = useMemo(() => {
+        return selectedPart?.articles.find(
+            article => article.number === selectedArticleNumber
+        );
+    }, [selectedPart, selectedArticleNumber]);
+
+    const filteredParts = parts.filter(part =>
         part.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         part.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         part.articles.some(article =>
             article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             article.content.toLowerCase().includes(searchQuery.toLowerCase())
         )
+    );
+
+    const searchMatches = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) return [];
+
+        const matches = [];
+        parts.forEach((part) => {
+            part.articles.forEach((article) => {
+                if (
+                    article.title.toLowerCase().includes(q) ||
+                    article.content.toLowerCase().includes(q) ||
+                    part.title.toLowerCase().includes(q)
+                ) {
+                    matches.push({
+                        ...article,
+                        partId: part.id,
+                        partTitle: part.title,
+                        matchId: `${part.id}-${article.number}`,
+                    });
+                }
+            });
+        });
+        return matches;
+    }, [parts, searchQuery]);
+
+    useEffect(() => {
+        if (isGuest) {
+            updateGuestPrefs({ visitedConstitution: true });
+        }
+    }, [isGuest, updateGuestPrefs]);
+
+    const handleGuestSignUp = () => {
+        setGuestIntent({ path: '/constitution', feature: 'view all search matches' });
+        navigate('/signup', { state: { from: { pathname: '/constitution' } } });
+    };
+
+    const renderSearchMatchCard = (article, _index, isLockedPreview) => (
+        <div
+            className={`guest-search-card${isLockedPreview ? ' guest-search-card--locked' : ''}`}
+            onClick={isLockedPreview ? undefined : () => { setSelectedPartId(article.partId); setSelectedArticleNumber(article.number); }}
+            onKeyDown={isLockedPreview ? undefined : (e) => { if (e.key === 'Enter') { setSelectedPartId(article.partId); setSelectedArticleNumber(article.number); } }}
+            role={isLockedPreview ? undefined : 'button'}
+            tabIndex={isLockedPreview ? undefined : 0}
+            style={{
+                padding: '1.5rem',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-light)',
+                borderRadius: '1rem',
+                marginBottom: '1rem',
+                cursor: isLockedPreview ? 'default' : 'pointer'
+            }}
+        >
+            <span className="guest-search-card__part" style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem' }}>
+                {article.partTitle}
+            </span>
+            <h3 style={{ color: 'var(--color-primary)', fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.45rem', lineHeight: 1.35 }}>
+                {t('article')} {article.number}: {article.title}
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>
+                {article.content.substring(0, 140)}…
+            </p>
+        </div>
     );
 
     const toggleBookmark = (article) => {
@@ -326,11 +164,93 @@ export default function Constitution() {
             setBookmarks([...bookmarks, article]);
         }
     };
+  const handleSpeak = (text) => {
+    if (isPlaying) {
+        window.speechSynthesis.cancel();
+        setIsPlaying(false);
+        return;
+    }
+
+    if (!text) return;
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    // Map i18n codes to standard regional voice tags
+    const langMapping = {
+        en: 'en-IN',
+        hi: 'hi-IN',
+        mr: 'mr-IN',
+        ta: 'ta-IN',
+        te: 'te-IN'
+    };
+
+    const targetLang = langMapping[language] || 'en-IN';
+    utterance.lang = targetLang;
+
+    // Use our state-cached system voices list
+    const voicesList = systemVoices.length > 0 ? systemVoices : window.speechSynthesis.getVoices();
+    
+    // Look for an exact accent match (e.g., ta-IN)
+    let matchingVoice = voicesList.find(voice => 
+        voice.lang.toLowerCase().replace('_', '-').includes(targetLang.toLowerCase())
+    );
+
+    // Fallback: Look for the primary language prefix (e.g., ta)
+    if (!matchingVoice) {
+        matchingVoice = voicesList.find(voice => 
+            voice.lang.toLowerCase().startsWith(language.toLowerCase())
+        );
+    }
+
+    // Secondary Fallback: Fall back to Indian English accent so it reads something out loud
+    if (!matchingVoice) {
+        console.warn(`Native audio accent pack not found on this device for code: ${targetLang}. Falling back to default.`);
+        matchingVoice = voicesList.find(voice => 
+            voice.lang.toLowerCase().replace('_', '-').includes('en-in')
+        );
+    }
+
+    if (matchingVoice) {
+        utterance.voice = matchingVoice;
+    }
+
+    utterance.onend = () => setIsPlaying(false);
+    utterance.onerror = (e) => {
+        console.error("Speech Synthesis Error:", e);
+        setIsPlaying(false);
+    };
+
+    setIsPlaying(true);
+    window.speechSynthesis.speak(utterance);
+};
+// Clean up speech if the user navigates away or closes the article
+useEffect(() => {
+    return () => {
+        window.speechSynthesis.cancel();
+    };
+}, [selectedArticleNumber]);
 
     const handleDownloadPDF = () => {
-        alert(language === 'en'
-            ? 'PDF download feature coming soon! This will download the complete Constitution of India.'
-            : 'PDF डाउनलोड सुविधा जल्द आ रही है! यह भारत के पूर्ण संविधान को डाउनलोड करेगी।');
+        const pdfByLanguage = {
+            en: {
+                href: '/documents/COI_MAY2024.pdf',
+                filename: 'Constitution_of_India_English.pdf',
+            },
+            hi: {
+                href: '/documents/COI_MAY2024_Hindi.pdf',
+                filename: 'Constitution_of_India_Hindi.pdf',
+            },
+        };
+    
+        // Use Hindi PDF when page is in Hindi, otherwise English
+        const pdf = language === 'hi' ? pdfByLanguage.hi : pdfByLanguage.en;
+    
+        const link = document.createElement('a');
+        link.href = pdf.href;
+        link.setAttribute('download', pdf.filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
     };
 
     const handleAIChat = async () => {
@@ -343,25 +263,28 @@ export default function Constitution() {
             if (response.data.sessionId) setSessionId(response.data.sessionId);
         } catch (error) {
             console.error('AI Chat Error:', error);
-            setAiResponse(language === 'en'
-                ? 'Sorry, I encountered an error. Please try again.'
-                : 'क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।');
+            setAiResponse(t('aiError'));
         } finally {
             setIsAiLoading(false);
         }
     };
 
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
             <Header />
 
             {/* geometric grid pattern — same as Landing hero */}
             <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', backgroundImage: `linear-gradient(rgba(124,92,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,92,255,0.03) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />
-            <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '6rem 2rem 4rem', position: 'relative', zIndex: 1 }}>
+            
+            <div style={{ maxWidth: '1600px', width: '100%', margin: '0 auto', padding: '6rem 2rem 4rem', position: 'relative', zIndex: 1, flex: '1 0 auto' }}>
                 {/* Page Header */}
                 <div style={{
                     padding: '3rem',
                     background: 'var(--bg-glass)',
+                    backgroundImage: "url('/assets/constitution.png')",
+                    backgroundPosition: 'center',
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
                     border: '1px solid var(--border-light)',
@@ -380,17 +303,19 @@ export default function Constitution() {
                             </div>
                             <div>
                                 <h1 style={{ color: 'var(--color-primary)', fontSize: '2.5rem', fontWeight: '900', margin: '0 0 0.5rem 0' }}>
-                                    {t('constitutionOfIndia')}
+                                    {t('constitution:title')}
                                 </h1>
                                 <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: 0 }}>
-                                    {language === 'en' ? 'The Supreme Law of India' : 'भारत का सर्वोच्च कानून'}
+                                    {t('constitution:subtitle')}
                                 </p>
                             </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                             <button
-                                onClick={toggleLanguage}
+                                onClick={() =>
+                                    i18n.changeLanguage(language === 'en' ? 'hi' : 'en')
+                                }
                                 style={{
                                     padding: '0.75rem 1.5rem',
                                     background: 'var(--color-primary)',
@@ -406,14 +331,16 @@ export default function Constitution() {
                                     transition: 'all 0.3s'
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.opacity = '0.9';
+                                    e.currentTarget.style.opacity = '0.9';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.target.style.opacity = '1';
+                                    e.currentTarget.style.opacity = '1';
                                 }}
                             >
                                 <Globe size={20} />
-                                {language === 'en' ? 'हिंदी में पढ़ें' : 'Read in English'}
+                                {language === 'en'
+                                    ? t('readHindi')
+                                    : t('readEnglish')}
                             </button>
 
                             <button
@@ -432,11 +359,11 @@ export default function Constitution() {
                                     fontSize: '1rem',
                                     transition: 'transform 0.2s'
                                 }}
-                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                             >
                                 <Download size={20} />
-                                {t('downloadPDF')}
+                                {t('constitution:downloadPDF')}
                             </button>
 
                             <button
@@ -457,7 +384,7 @@ export default function Constitution() {
                                 }}
                             >
                                 <MessageCircle size={20} />
-                                {t('askAI')}
+                                {t('constitution:askAI')}
                             </button>
                         </div>
                     </div>
@@ -502,17 +429,17 @@ export default function Constitution() {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: showAIChat ? '1fr 400px' : '1fr', gap: '2rem' }}>
-                    {/* Main Content */}
+                <div style={{ display: 'grid', gridTemplateColumns: showAIChat ? '1fr 400px' : '1fr', gap: '2rem', alignItems: 'start' }}>
+                    {/* Main Content Pane */}
                     <div>
-                        {selectedArticle ? (
-                            // Article Detail View
+                        {selectedArticleNumber && selectedArticle ? (
+                            // 1. Article Detail View
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                             >
                                 <button
-                                    onClick={() => setSelectedArticle(null)}
+                                    onClick={() => setSelectedArticleNumber(null)}
                                     style={{
                                         padding: '0.75rem 1.5rem',
                                         background: 'var(--bg-hover)',
@@ -525,7 +452,7 @@ export default function Constitution() {
                                         fontSize: '1rem'
                                     }}
                                 >
-                                    ← {language === 'en' ? 'Back' : 'वापस जाएं'}
+                                    {t('constitution:back')}
                                 </button>
 
                                 <div style={{
@@ -544,10 +471,34 @@ export default function Constitution() {
                                             fontWeight: '800',
                                             fontSize: '1.125rem'
                                         }}>
-                                            {t('article')} {selectedArticle.number}
+                                            {t('constitution:article')} {selectedArticle.number}
                                         </span>
 
                                         <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                            <button
+    onClick={() => handleSpeak(`${selectedArticle.title}. ${selectedArticle.content}`)}
+    style={{
+        padding: '0.75rem',
+        background: isPlaying ? '#EF4444' : 'var(--bg-hover)',
+        border: '1px solid var(--border-light)',
+        borderRadius: '0.75rem',
+        color: isPlaying ? 'white' : 'var(--color-primary)',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transition: 'all 0.3s',
+        minWidth: '44px',
+        minHeight: '44px'
+    }}
+    title={isPlaying ? "Stop Listening" : "Listen to Article"}
+>
+    {isPlaying ? (
+        <X size={20} />
+    ) : (
+        <span style={{ fontSize: '1.25rem', display: 'inline-block', transform: 'scaleX(-1)' }}>📣</span>
+    )}
+</button>
                                             <button
                                                 onClick={() => toggleBookmark(selectedArticle)}
                                                 style={{
@@ -555,7 +506,7 @@ export default function Constitution() {
                                                     background: bookmarks.find(b => b.number === selectedArticle.number) ? 'var(--color-primary)' : '#F1F5F9',
                                                     border: '1px solid #E2E8F0',
                                                     borderRadius: '0.75rem',
-                                                    color: 'white',
+                                                    color: bookmarks.find(b => b.number === selectedArticle.number) ? 'white' : 'var(--color-primary)',
                                                     cursor: 'pointer',
                                                     transition: 'all 0.3s'
                                                 }}
@@ -566,10 +517,10 @@ export default function Constitution() {
                                                 onClick={() => alert('Share feature coming soon!')}
                                                 style={{
                                                     padding: '0.75rem',
-                                                    background: 'var(--bg-glass)',
-                                                    border: 'var(--border-glass)',
+                                                    background: 'var(--bg-hover)',
+                                                    border: '1px solid var(--border-light)',
                                                     borderRadius: '0.75rem',
-                                                    color: 'white',
+                                                    color: 'var(--text-main)',
                                                     cursor: 'pointer'
                                                 }}
                                             >
@@ -591,8 +542,8 @@ export default function Constitution() {
                                             {selectedArticle.keywords.map((keyword, idx) => (
                                                 <span key={idx} style={{
                                                     padding: '0.5rem 1rem',
-                                                    background: 'var(--bg-glass)',
-                                                    border: 'var(--border-glass)',
+                                                    background: 'var(--bg-hover)',
+                                                    border: '1px solid var(--border-light)',
                                                     borderRadius: '0.5rem',
                                                     color: 'var(--color-primary)',
                                                     fontSize: '0.9rem',
@@ -605,11 +556,11 @@ export default function Constitution() {
                                     )}
                                 </div>
                             </motion.div>
-                        ) : selectedPart ? (
-                            // Part Detail View
+                        ) : selectedPartId && selectedPart ? (
+                            // 2. Part Detail View / Article Stack
                             <div>
                                 <button
-                                    onClick={() => setSelectedPart(null)}
+                                    onClick={() => setSelectedPartId(null)}
                                     style={{
                                         padding: '0.75rem 1.5rem',
                                         background: 'var(--bg-hover)',
@@ -622,7 +573,7 @@ export default function Constitution() {
                                         fontSize: '1rem'
                                     }}
                                 >
-                                    ← {language === 'en' ? 'Back to Parts' : 'भागों पर वापस जाएं'}
+                                    ← {t('constitution:backToParts')}
                                 </button>
 
                                 <div style={{
@@ -647,8 +598,8 @@ export default function Constitution() {
                                             key={idx}
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: idx * 0.1 }}
-                                            onClick={() => setSelectedArticle(article)}
+                                            transition={{ delay: idx * 0.05 }}
+                                            onClick={() => setSelectedArticleNumber(article.number)}
                                             whileHover={{ x: 8 }}
                                             style={{
                                                 padding: '2rem',
@@ -668,7 +619,7 @@ export default function Constitution() {
                                                 e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
                                             }}
                                         >
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                                 <span style={{
                                                     padding: '0.6rem 1.25rem',
                                                     background: 'var(--color-primary)',
@@ -677,7 +628,7 @@ export default function Constitution() {
                                                     fontWeight: '800',
                                                     fontSize: '0.95rem'
                                                 }}>
-                                                    {t('article')} {article.number}
+                                                    {t('constitution:article')} {article.number}
                                                 </span>
                                                 <button
                                                     onClick={(e) => {
@@ -706,8 +657,39 @@ export default function Constitution() {
                                     ))}
                                 </div>
                             </div>
+                        ) : searchQuery.trim() && searchMatches.length > 0 ? (
+                            // 3. Search Results Mode
+                            <div>
+                                <p className="guest-search-banner" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                                    <Search size={16} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+                                    <span>
+                                        <strong style={{ color: 'var(--text-main)' }}>{searchMatches.length}</strong>
+                                        {' '}article{searchMatches.length > 1 ? 's' : ''} found
+                                        {isGuest && ' · Showing a preview — sign up for full results'}
+                                    </span>
+                                </p>
+                                {isGuest ? (
+                                    <GuestBlurredResults
+                                        items={searchMatches.map((m) => ({ ...m, id: m.matchId }))}
+                                        renderItem={renderSearchMatchCard}
+                                        onSignUp={handleGuestSignUp}
+                                        signUpLabel="Sign up to view all matches"
+                                    />
+                                ) : (
+                                    <div style={{ display: 'grid', gap: '1rem' }}>
+                                        {searchMatches.map((article, idx) => (
+                                            <div key={article.matchId}>{renderSearchMatchCard(article, idx, false)}</div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : searchQuery.trim() ? (
+                            // 4. Empty Search State
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '4rem 2rem' }}>
+                                {language === 'en' ? 'No articles matched your search.' : 'आपकी खोज से कोई अनुच्छेद मेल नहीं खाता।'}
+                            </p>
                         ) : (
-                            // Parts List View
+                            // 5. Default Grid Layout (Parts Overview)
                             <div style={{
                                 display: 'grid',
                                 gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
@@ -718,11 +700,11 @@ export default function Constitution() {
                                         key={part.id}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
+                                        transition={{ delay: idx * 0.05 }}
                                         whileHover={{ y: -8, scale: 1.02 }}
-                                        onClick={() => setSelectedPart(part)}
+                                        onClick={() => setSelectedPartId(part.id)}
                                         style={{
-                                            padding: '2.5rem',
+                                            padding: '4rem 2.5rem 2.5rem',
                                             background: 'var(--bg-surface)',
                                             borderRadius: '1.5rem',
                                             border: '1px solid var(--border-light)',
@@ -743,214 +725,103 @@ export default function Constitution() {
                                     >
                                         <div style={{
                                             position: 'absolute',
-                                            top: '1rem',
-                                            right: '1rem',
-                                            padding: '0.5rem 1rem',
-                                            border: '1px solid rgba(30, 42, 68, 0.1)',
-                                            borderRadius: '0.75rem',
-                                            fontSize: '0.85rem',
-                                            fontWeight: '800',
-                                            background: 'var(--color-primary)',
-                                            color: '#FFFFFF'
+                                            top: '1.5rem',
+                                            right: '1.5rem',
+                                            color: 'var(--color-primary)',
+                                            opacity: 0.15
                                         }}>
-                                            {part.articles.length} {t('articles')}
+                                            {partIcons[part.id] || <BookOpen size={40} />}
                                         </div>
 
-                                        <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '800', marginBottom: '1rem', lineHeight: '1.3', paddingRight: '3rem' }}>
+                                        <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.75rem' }}>
                                             {part.title}
                                         </h3>
-
-                                        <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
                                             {part.description}
                                         </p>
-
-                                        <div style={{ color: 'var(--color-primary)', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            {t('readMore')} →
-                                        </div>
+                                        <span style={{ display: 'inline-block', marginTop: '1.5rem', fontSize: '0.9rem', fontWeight: '700', color: 'var(--color-primary)' }}>
+                                            {part.articles?.length || 0} {t('articles', { defaultValue: 'Articles' })} →
+                                        </span>
                                     </motion.div>
                                 ))}
                             </div>
                         )}
                     </div>
 
-                    {/* AI Chat Sidebar */}
+                    {/* AI Assistant Side Draw Panel */}
                     <AnimatePresence>
                         {showAIChat && (
                             <motion.div
-                                initial={{ opacity: 0, x: 100 }}
+                                initial={{ opacity: 0, x: 50 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 100 }}
+                                exit={{ opacity: 0, x: 50 }}
                                 style={{
+                                    background: 'var(--bg-surface)',
+                                    borderRadius: '1.5rem',
+                                    border: '1px solid var(--border-light)',
+                                    padding: '1.5rem',
+                                    boxShadow: 'var(--shadow-glass)',
                                     position: 'sticky',
                                     top: '6rem',
-                                    height: 'fit-content',
-                                    maxHeight: 'calc(100vh - 8rem)',
+                                    height: 'calc(100vh - 10rem)',
                                     display: 'flex',
                                     flexDirection: 'column'
                                 }}
                             >
-                                <div style={{
-                                    padding: '2rem',
-                                    background: 'var(--bg-surface)',
-                                    borderRadius: '1.5rem',
-                                    border: '1px solid var(--border-light)',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '1.5rem',
-                                    boxShadow: 'var(--shadow-glass)'
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>
-                                            {t('aiChatbotTitle')}
-                                        </h3>
-                                        <button
-                                            onClick={() => setShowAIChat(false)}
-                                            style={{
-                                                background: 'none',
-                                                border: 'none',
-                                                color: '#94a3b8',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            <X size={24} />
-                                        </button>
-                                    </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--color-primary)', margin: 0 }}>
+                                        Constitution AI
+                                    </h3>
+                                    <button onClick={() => setShowAIChat(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+                                        <X size={20} />
+                                    </button>
+                                </div>
 
-                                    <p style={{ color: '#94a3b8', fontSize: '0.95rem', margin: 0 }}>
-                                        {t('askQuestion')}
-                                    </p>
-
-                                    <div style={{
-                                        padding: '1.5rem',
-                                        background: 'var(--bg-hover)',
-                                        borderRadius: '1rem',
-                                        border: '1px solid var(--border-light)'
-                                    }}>
-                                        <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
-                                            {language === 'en'
-                                                ? 'Try asking: "What are fundamental rights?" or "Explain Article 21"'
-                                                : 'पूछें: "मौलिक अधिकार क्या हैं?" या "अनुच्छेद 21 समझाएं"'
-                                            }
+                                <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1rem', background: 'var(--bg-main)', borderRadius: '1rem', padding: '1rem' }}>
+                                    {aiResponse ? (
+                                        <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: '1.6', margin: 0 }}>
+                                            {aiResponse}
                                         </p>
-                                    </div>
+                                    ) : (
+                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textAlign: 'center', margin: '2rem 0' }}>
+                                            Ask anything about parts, contextual clauses, or legal language mutations.
+                                        </p>
+                                    )}
+                                </div>
 
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
                                     <input
                                         type="text"
                                         value={aiQuery}
                                         onChange={(e) => setAiQuery(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleAIChat()}
-                                        placeholder={t('typeMessage')}
+                                        placeholder="Ask AI assistant..."
                                         style={{
-                                            padding: '1rem',
-                                            background: 'var(--bg-input)',
-                                            border: '1px solid var(--border-light)',
+                                            flex: 1,
+                                            padding: '0.75rem 1rem',
                                             borderRadius: '0.75rem',
+                                            border: '1px solid var(--border-light)',
+                                            background: 'var(--bg-input)',
                                             color: 'var(--text-main)',
-                                            fontSize: '1rem',
-                                            outline: 'none',
-                                            width: '100%'
+                                            outline: 'none'
                                         }}
-                                        onFocus={(e) => e.target.style.borderColor = 'var(--border-focus)'}
-                                        onBlur={(e) => e.target.style.borderColor = 'var(--border-light)'}
                                     />
-
                                     <button
                                         onClick={handleAIChat}
-                                        disabled={isAiLoading || !aiQuery.trim()}
+                                        disabled={isAiLoading}
                                         style={{
-                                            padding: '1rem',
-                                            background: isAiLoading || !aiQuery.trim()
-                                                ? 'rgba(30, 42, 68, 0.3)'
-                                                : 'var(--color-primary)',
+                                            padding: '0.75rem 1.25rem',
+                                            background: 'var(--color-primary)',
+                                            color: 'white',
                                             border: 'none',
                                             borderRadius: '0.75rem',
-                                            color: 'white',
-                                            fontSize: '1rem',
-                                            fontWeight: '700',
-                                            cursor: isAiLoading || !aiQuery.trim() ? 'not-allowed' : 'pointer',
-                                            transition: 'all 0.2s',
+                                            cursor: 'pointer',
                                             display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '0.5rem'
+                                            alignItems: 'center'
                                         }}
-                                        onMouseEnter={(e) => !isAiLoading && aiQuery.trim() && (e.target.style.transform = 'scale(1.05)')}
-                                        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                                     >
-                                        {isAiLoading ? (
-                                            <>
-                                                <Loader2 size={20} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
-                                                {language === 'en' ? 'Thinking...' : 'सोच रहा हूँ...'}
-                                            </>
-                                        ) : (
-                                            t('send')
-                                        )}
+                                        {isAiLoading ? <Loader2 size={18} className="animate-spin" /> : 'Send'}
                                     </button>
-
-                                    {aiResponse && (
-                                        <div style={{
-                                            marginTop: '1rem',
-                                            padding: '1.5rem',
-                                            background: 'var(--bg-hover)',
-                                            borderRadius: '1rem',
-                                            border: '1px solid var(--border-light)'
-                                        }}>
-                                            <div style={{ display: 'flex', alignItems: 'start', gap: '1rem' }}>
-                                                <MessageCircle size={24} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
-                                                <div>
-                                                    <h4 style={{ color: 'var(--color-primary)', fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem' }}>
-                                                        {language === 'en' ? 'AI Response:' : 'AI उत्तर:'}
-                                                    </h4>
-                                                    <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: '1.6', margin: 0, whiteSpace: 'pre-wrap' }}>
-                                                        {aiResponse}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
-
-                                {/* Bookmarks */}
-                                {bookmarks.length > 0 && (
-                                    <div style={{
-                                        marginTop: '1.5rem',
-                                        padding: '1.5rem',
-                                        background: 'var(--bg-glass)',
-                                        backdropFilter: 'blur(12px)',
-                                        WebkitBackdropFilter: 'blur(12px)',
-                                        borderRadius: '1.5rem',
-                                        border: '1px solid var(--border-light)'
-                                    }}>
-                                        <h4 style={{ color: 'var(--color-primary)', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <Bookmark size={20} fill="var(--color-primary)" color="var(--color-primary)" />
-                                            {t('bookmarks')}
-                                        </h4>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                            {bookmarks.map((bookmark, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    onClick={() => setSelectedArticle(bookmark)}
-                                                    style={{
-                                                        padding: '0.75rem',
-                                                        background: 'rgba(30, 42, 68, 0.05)',
-                                                        borderRadius: '0.75rem',
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.3s'
-                                                    }}
-                                                    onMouseEnter={(e) => e.target.style.background = 'rgba(30, 42, 68, 0.1)'}
-                                                    onMouseLeave={(e) => e.target.style.background = 'rgba(30, 42, 68, 0.05)'}
-                                                >
-                                                    <p style={{ color: 'var(--color-primary)', fontSize: '0.85rem', fontWeight: '700', margin: '0 0 0.25rem 0' }}>
-                                                        {t('article')} {bookmark.number}
-                                                    </p>
-                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
-                                                        {bookmark.title.length > 40 ? bookmark.title.substring(0, 40) + '...' : bookmark.title}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -958,13 +829,6 @@ export default function Constitution() {
             </div>
 
             <Footer />
-
-            <style>{`
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-            `}</style>
-        </div >
+        </div>
     );
 }

@@ -1,1 +1,38 @@
-{"placeholder": "To be added"}
+{
+  "notification": {
+    "notifications": "सूचनाएँ",
+    "markAllRead": "सभी को पढ़ा हुआ चिह्नित करें",
+
+    "syncing": "सिंक हो रहा है...",
+
+    "allCaughtUp": "सब कुछ अपडेट है!",
+    "noNotifications": "फिलहाल कोई नई सूचना नहीं है।",
+
+    "justNow": "अभी अभी",
+
+    "newLabel": "नया",
+
+    "failedLoad": "सूचनाएँ लोड करने में विफल",
+
+    "time": {
+      "minutesAgo": "{{count}} मिनट पहले",
+      "hoursAgo": "{{count}} घंटे पहले"
+    },
+
+    "titles": {
+      "caseUpdate": "मामला अपडेट",
+      "newMessage": "नया संदेश",
+      "hearingReminder": "सुनवाई अनुस्मारक",
+      "documentUploaded": "दस्तावेज़ अपलोड किया गया",
+      "lawyerAssigned": "वकील नियुक्त किया गया"
+    },
+
+    "messages": {
+      "caseAccepted": "आपका मामला स्वीकार कर लिया गया है।",
+      "newDocument": "एक नया दस्तावेज़ अपलोड किया गया है।",
+      "hearingTomorrow": "आपकी सुनवाई कल निर्धारित है।",
+      "proposalReceived": "आपको एक नया प्रस्ताव प्राप्त हुआ है।",
+      "messageReceived": "आपको एक नया संदेश प्राप्त हुआ है।"
+    }
+  }
+}

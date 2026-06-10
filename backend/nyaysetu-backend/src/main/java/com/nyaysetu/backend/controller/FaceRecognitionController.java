@@ -7,6 +7,7 @@ import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.FaceRecognitionService;
 import com.nyaysetu.backend.service.JwtService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 @Tag(name = "Face Recognition", description = "Enroll and verify user identity using facial recognition")
 @RestController
-@RequestMapping("/api/face")
+@RequestMapping("/face")
 @RequiredArgsConstructor
 @Slf4j
 public class FaceRecognitionController {
@@ -30,7 +31,7 @@ public class FaceRecognitionController {
     private final UserDetailsService userDetailsService;
 
     @PostMapping("/enroll")
-    public ResponseEntity<?> enrollFace(@RequestBody FaceEnrollRequest request, Authentication auth) {
+    public ResponseEntity<?> enrollFace(@Valid @RequestBody FaceEnrollRequest request, Authentication auth) {
         try {
             if (auth == null || auth.getName() == null) {
                 return ResponseEntity.status(401).body(Map.of("message", "Not authenticated"));
@@ -48,7 +49,7 @@ public class FaceRecognitionController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyFace(@RequestBody FaceLoginRequest request) {
+    public ResponseEntity<?> verifyFace(@Valid @RequestBody FaceLoginRequest request) {
         try {
             User user = faceRecognitionService.verifyFace(request.getEmail(), request.getFaceDescriptor());
             

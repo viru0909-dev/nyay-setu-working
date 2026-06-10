@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Tag(name = "Lawyer Portal", description = "Lawyer dashboard — client cases, evidence and hearing schedule")
 @RestController
-@RequestMapping("/api/lawyer")
+@RequestMapping("/lawyer")
 @RequiredArgsConstructor
 @Slf4j
 public class LawyerController {
