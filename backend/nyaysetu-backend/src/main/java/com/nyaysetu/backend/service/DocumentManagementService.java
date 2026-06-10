@@ -98,8 +98,11 @@ public class DocumentManagementService {
     }
 
     public List<DocumentDto> getCaseDocumentsWithAccessControl(UUID caseId, Long userId, String userRole) {
-        return documentRepository.findByCaseId(caseId).stream()
-                .filter(doc -> hasDocumentAccess(doc, userId, userRole))
+    return documentRepository.findByCaseId(caseId).stream()
+            .filter(doc -> hasDocumentAccess(doc, userId, userRole))
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
+}
     
     /**
      * Get case documents with access control based on user's role
@@ -130,6 +133,9 @@ public class DocumentManagementService {
     }
 
     private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole) {
+    return hasDocumentAccess(doc, userId, userRole, false);
+}
+
 
     
     /**
@@ -138,30 +144,15 @@ public class DocumentManagementService {
     private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole, boolean isCaseLawyer) {
         String visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : "PUBLIC";
 
-        switch (visibility) {
-            case "PUBLIC":
-                return true;
-
-            case "RESTRICTED":
-                if ("JUDGE".equals(userRole)) return true;
-                if (userId.equals(doc.getUploadedBy())) return true;
-                return false;
-
-            case "SEALED":
-                return "JUDGE".equals(userRole);
-
-            default:
-                return false;
-        }
-        
-        return switch (visibility) {
-            case "PUBLIC" -> true; // Everyone can see public documents
-            case "RESTRICTED" -> "JUDGE".equals(userRole)
+       return switch (visibility) {
+    case "PUBLIC" -> true;
+    case "RESTRICTED" ->
+            "JUDGE".equals(userRole)
                     || (userId != null && userId.equals(doc.getUploadedBy()))
-                    || isCaseLawyer; // Assigned lawyers can access restricted case documents
-            case "SEALED" -> "JUDGE".equals(userRole); // Only judge
-            default -> false; // Unknown visibility level - deny by default
-        };
+                    || isCaseLawyer;
+    case "SEALED" -> "JUDGE".equals(userRole);
+    default -> false;
+};
     }
 
     public DocumentDto getDocumentById(UUID id) {
