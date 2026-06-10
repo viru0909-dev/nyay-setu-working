@@ -160,7 +160,7 @@ export default function MyFirsPage() {
                                     transition: 'all 0.2s',
                                     cursor: 'pointer'
                                 }}
-                                onClick={() => navigate(`/police/fir/${fir.id}`)}
+                                onClick={() => navigate(`/police/investigation/${fir.id}`)}
                                 onMouseOver={(e) => {
                                     e.currentTarget.style.borderColor = 'var(--color-accent)';
                                     e.currentTarget.style.transform = 'translateY(-2px)';

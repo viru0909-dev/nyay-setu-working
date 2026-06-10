@@ -111,7 +111,7 @@
 .face-detected .face-guideline {
     border-color: var(--color-primary);
     border-style: solid;
-    box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--color-success) 30%, transparent);
     opacity: 1;
 }
 
@@ -148,7 +148,7 @@
 
     50% {
         color: var(--color-error);
-        text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        text-shadow: 0 0 10px color-mix(in srgb, var(--color-error) 50%, transparent);
     }
 
     100% {
@@ -170,7 +170,7 @@
 
 .btn-primary-bio {
     background: var(--color-accent);
-    color: white;
+    color: var(--text-on-accent);
     border: none;
     box-shadow: var(--shadow-glass);
 }
@@ -204,7 +204,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    background: rgba(0, 0, 0, 0.6);
+    background: color-mix(in srgb, var(--text-main) 60%, transparent);
     /* Slightly darker for modal focus */
     backdrop-filter: blur(8px);
 }
@@ -252,6 +252,22 @@
     background: var(--bg-glass-hover);
     color: var(--text-main);
     border-color: var(--color-accent);
+}
+
+/* Keyboard focus states - Fix #909 */
+.btn-primary-bio:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.btn-secondary-bio:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.biometric-close-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
 }
 
 /* Typography & Layout */
@@ -313,7 +329,7 @@
 
 .biometric-input:focus {
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 10%, transparent);
 }
 
 .biometric-error-msg {

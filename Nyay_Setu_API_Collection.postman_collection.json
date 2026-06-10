@@ -1,0 +1,701 @@
+{
+  "info": {
+    "_postman_id": "nyay-setu-api-collection-v1",
+    "name": "Nyay Setu API Collection",
+    "description": "Complete API collection for Nyay Setu - Legal Platform\n\n**Base URLs:**\n- Development: http://localhost:8080\n- Staging: https://staging.nyaysetu.in\n- Production: https://nyaysetu.in\n\n**Authentication:**\nUse the Login request to get a token, then it will be automatically set in the Authorization header for all requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "User authentication endpoints",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('userId', pm.response.json().id);",
+                  "    pm.environment.set('userEmail', pm.response.json().email);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"lawyer@example.com\",\n  \"password\": \"SecurePassword123\",\n  \"role\": \"LAWYER\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+919876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('authToken', jsonData.token);",
+                  "    pm.environment.set('refreshToken', jsonData.refreshToken);",
+                  "    pm.environment.set('userId', jsonData.user.id);",
+                  "    console.log('Token set: ' + jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"lawyer@example.com\",\n  \"password\": \"SecurePassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate user and get JWT token"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Get a new access token using refresh token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cases",
+      "description": "Case management endpoints",
+      "item": [
+        {
+          "name": "List Cases",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cases?page=0&size=20&sort=createdAt,desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["cases"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get list of all cases with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Case",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('caseId', pm.response.json().id);",
+                  "    console.log('Case created: ' + pm.environment.get('caseId'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Smith vs. Johnson - Property Dispute\",\n  \"description\": \"A civil dispute regarding property ownership and boundary lines\",\n  \"court\": \"District Court, Delhi\",\n  \"caseType\": \"CIVIL\",\n  \"parties\": [\n    {\n      \"name\": \"John Smith\",\n      \"role\": \"PLAINTIFF\"\n    },\n    {\n      \"name\": \"Jane Johnson\",\n      \"role\": \"DEFENDANT\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cases",
+              "host": ["{{baseUrl}}"],
+              "path": ["cases"]
+            },
+            "description": "Create a new legal case"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Case Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cases/{{caseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cases", "{{caseId}}"]
+            },
+            "description": "Get detailed information about a specific case"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Case",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Smith vs. Johnson - Property Dispute (Updated)\",\n  \"description\": \"Updated case description with additional information\",\n  \"caseType\": \"CIVIL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cases/{{caseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cases", "{{caseId}}"]
+            },
+            "description": "Update case details"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "description": "Document management endpoints",
+      "item": [
+        {
+          "name": "Upload Document",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('documentId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "caseId",
+                  "value": "{{caseId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "documentType",
+                  "value": "COMPLAINT",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "[\"initial\", \"important\"]",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "upload"]
+            },
+            "description": "Upload a document to a case (supports PDF, DOC, DOCX, TXT up to 10MB)"
+          },
+          "response": []
+        },
+        {
+          "name": "Analyze Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"analysisType\": \"LEGAL_REVIEW\",\n  \"includeAI\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/{{documentId}}/analyze",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "{{documentId}}", "analyze"]
+            },
+            "description": "Analyze document using AI (legal review, evidence extraction, timeline, summary)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Evidence",
+      "description": "Evidence management with blockchain verification",
+      "item": [
+        {
+          "name": "Add Evidence",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('evidenceId', pm.response.json().evidenceId);",
+                  "    pm.environment.set('blockchainHash', pm.response.json().blockchainHash);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"caseId\": \"{{caseId}}\",\n  \"title\": \"Property Deed Document\",\n  \"description\": \"Original property deed with official stamps\",\n  \"evidenceType\": \"DOCUMENT\",\n  \"chainOfCustody\": {\n    \"collectedBy\": \"John Doe\",\n    \"collectionDate\": \"2026-06-01T10:30:00Z\",\n    \"location\": \"Government Registry Office, Delhi\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/evidence",
+              "host": ["{{baseUrl}}"],
+              "path": ["evidence"]
+            },
+            "description": "Add evidence with blockchain verification (SHA-256 hashing)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Hearings",
+      "description": "Hearing scheduling and management",
+      "item": [
+        {
+          "name": "Schedule Hearing",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.environment.set('hearingId', pm.response.json().hearingId);",
+                  "    if (pm.response.json().videoConferenceLink) {",
+                  "        pm.environment.set('videoConferenceLink', pm.response.json().videoConferenceLink);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"caseId\": \"{{caseId}}\",\n  \"scheduledDate\": \"2026-07-15T10:00:00Z\",\n  \"courtroom\": \"Room 301, Court Building A\",\n  \"hearingType\": \"HYBRID\",\n  \"participants\": [\n    \"judge-id\",\n    \"lawyer-id\",\n    \"defendant-id\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/hearings",
+              "host": ["{{baseUrl}}"],
+              "path": ["hearings"]
+            },
+            "description": "Schedule a hearing (PHYSICAL, VIRTUAL, or HYBRID)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "LawGPT - Legal Document Generation",
+      "description": "AI-powered legal document generation",
+      "item": [
+        {
+          "name": "Generate Affidavit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"AFFIDAVIT\",\n  \"caseId\": \"{{caseId}}\",\n  \"context\": {\n    \"deponentName\": \"John Smith\",\n    \"deponentRole\": \"PLAINTIFF\",\n    \"statements\": [\n      \"I own the property since 2020\",\n      \"The property boundaries are clearly marked\"\n    ]\n  },\n  \"language\": \"EN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lawgpt/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["lawgpt", "generate"]
+            },
+            "description": "Generate an affidavit for the case"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate RTI Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"RTI\",\n  \"caseId\": \"{{caseId}}\",\n  \"context\": {\n    \"requestorName\": \"John Smith\",\n    \"publicAuthority\": \"District Collector's Office\",\n    \"informationRequested\": \"Property registration records\"\n  },\n  \"language\": \"EN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lawgpt/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["lawgpt", "generate"]
+            },
+            "description": "Generate an RTI (Right to Information) request"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Complaint",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"COMPLAINT\",\n  \"caseId\": \"{{caseId}}\",\n  \"context\": {\n    \"complaintAgainst\": \"Jane Johnson\",\n    \"complaintType\": \"Property Dispute\",\n    \"facts\": \"Unauthorized boundary encroachment\"\n  },\n  \"language\": \"EN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lawgpt/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["lawgpt", "generate"]
+            },
+            "description": "Generate a formal complaint"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "NLP - Legal Reasoning & Analysis",
+      "description": "Advanced legal reasoning with NLP",
+      "item": [
+        {
+          "name": "Analyze Case with Legal Reasoning (SSE Stream)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "text/event-stream",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"caseId\": \"{{caseId}}\",\n  \"query\": \"What are the legal implications of the property boundary dispute?\",\n  \"analysisDepth\": \"STANDARD\",\n  \"includeForensics\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/nlp/analyze",
+              "host": ["{{baseUrl}}"],
+              "path": ["nlp", "analyze"]
+            },
+            "description": "Run 5-layer legal reasoning pipeline with streaming response. This analyzes:\n1. Sanitizes input\n2. Decomposes case\n3. Retrieves relevant legal documents\n4. Performs legal reasoning\n5. Synthesizes response"
+          },
+          "response": []
+        },
+        {
+          "name": "Forensic Analysis",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"evidenceId\": \"{{evidenceId}}\",\n  \"analysisType\": \"DIGITAL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/forensics/analyze",
+              "host": ["{{baseUrl}}"],
+              "path": ["forensics", "analyze"]
+            },
+            "description": "Perform digital forensic analysis on evidence"
+          },
+          "response": []
+        },
+        {
+          "name": "Modi Script OCR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/modi/ocr",
+              "host": ["{{baseUrl}}"],
+              "path": ["modi", "ocr"]
+            },
+            "description": "Extract text from Modi script handwritten documents"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set base URL based on environment",
+          "if (!pm.environment.get('baseUrl')) {",
+          "    pm.environment.set('baseUrl', 'http://localhost:8080');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "caseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "documentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "evidenceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "blockchainHash",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "hearingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "videoConferenceLink",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

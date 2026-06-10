@@ -6,80 +6,119 @@ class NotificationService {
         this.ws = null;
         this.listeners = [];
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 3;
+        this.maxReconnectAttempts = 10;
         this.API_BASE_URL = API_BASE_URL;
         this.isConnecting = false;
         this.connectionFailed = false;
     }
 
     /**
-     * Connects to the WebSocket for real-time notifications
-     * Silently fails if WebSocket is not available
+     * Connects to the WebSocket for real-time notifications securely
      */
     connect(token) {
-        // Skip if already connected, connecting, or permanently failed
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             return;
         }
-        if (this.isConnecting || this.connectionFailed) {
+        if (this.isConnecting) {
+            return;
+        }
+        if (!token || token === 'null' || token === 'undefined') {
             return;
         }
 
-        // Detect production environment
         const isProduction = !window.location.hostname.includes('localhost');
 
         try {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const host = new URL(this.API_BASE_URL).host;
-            const wsUrl = `${protocol}//${host}/api/ws/notifications?token=${token}`;
+            const parsedUrl = new URL(this.API_BASE_URL);
+            const protocol = parsedUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${parsedUrl.host}/api/ws/notifications`;
 
             this.isConnecting = true;
+            this.connectionFailed = false;
 
-            // Only log in development
             if (!isProduction) {
                 if (import.meta.env.DEV) {
-                      console.log('Connecting to WebSocket:', wsUrl);
-                  }
-                
+                    console.log('Connecting to WebSocket:', wsUrl);
+                }
             }
 
             this.ws = new WebSocket(wsUrl);
 
             this.ws.onopen = () => {
                 if (!isProduction) {
-                   if (import.meta.env.DEV) {
-                       console.log('✅ WebSocket connected');
-                  }
-                    
+                    if (import.meta.env.DEV) {
+                        console.log('✅ WebSocket connected');
+                    }
                 }
                 this.reconnectAttempts = 0;
                 this.isConnecting = false;
+
+                this.ws.send(JSON.stringify({
+                    type: 'AUTH',
+                    token: token
+                }));
             };
 
             this.ws.onmessage = (event) => {
                 try {
-                    const notification = JSON.parse(event.data);
-                    this.notifyListeners(notification);
+                    const message = JSON.parse(event.data);
+
+                    if (message.type === 'AUTH_SUCCESS') {
+                        if (!isProduction) {
+                            if (import.meta.env.DEV) {
+                                console.log('✅ Notification WebSocket authenticated');
+                            }
+                        }
+                        this.reconnectAttempts = 0;
+                        this.isConnecting = false;
+                        this.connectionFailed = false;
+                        return;
+                    }
+
+                    if (message.type === 'AUTH_ERROR') {
+                        this.isConnecting = false;
+                        this.connectionFailed = true;
+                        this.disconnect();
+                        return;
+                    }
+
+                    if (message.type === 'NOTIFICATION') {
+                        this.notifyListeners(message.payload);
+                        return;
+                    }
+
+                    this.notifyListeners(message);
                 } catch (error) {
-                    // Silent fail on parse errors
+                    if (!isProduction) {
+                        if (import.meta.env.DEV) {
+                            console.warn('Invalid notification WebSocket message format received');
+                        }
+                    }
                 }
             };
 
             this.ws.onerror = () => {
-                // Suppress error logs
                 this.isConnecting = false;
             };
 
-            this.ws.onclose = () => {
+            this.ws.onclose = (event) => {
                 this.isConnecting = false;
-                if (!this.connectionFailed) {
-                    this.attemptReconnect(token);
+                this.ws = null;
+
+                if (event.code === 1008) {
+                    this.connectionFailed = true;
+                    return;
                 }
+
+                if (this.connectionFailed) {
+                    return;
+                }
+
+                this.attemptReconnect(token);
             };
         } catch (error) {
-            // Silent fail
             this.isConnecting = false;
-            this.connectionFailed = true;
+            this.connectionFailed = false;
         }
     }
 
@@ -95,8 +134,10 @@ class NotificationService {
                 this.connect(token);
             }, delay);
         } else {
-            // Stop trying after max attempts
-            this.connectionFailed = true;
+            this.reconnectAttempts = 0;
+            setTimeout(() => {
+                this.connect(token);
+            }, 60000);
         }
     }
 
@@ -112,7 +153,7 @@ class NotificationService {
             try {
                 callback(notification);
             } catch (error) {
-                // Silent fail
+                // Silent catch to keep listener loops active
             }
         });
     }
@@ -126,6 +167,10 @@ class NotificationService {
         this.reconnectAttempts = 0;
         this.isConnecting = false;
         this.connectionFailed = false;
+    }
+
+    resetConnection() {
+        this.disconnect();
     }
 
     // --- REST API Methods ---
@@ -149,7 +194,7 @@ class NotificationService {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch (error) {
-            // Silent fail
+            // Suppress error responses
         }
     }
 }

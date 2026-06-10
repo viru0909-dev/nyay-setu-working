@@ -6,10 +6,12 @@ import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.PasswordResetTokenRepository;
 import com.nyaysetu.backend.service.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +27,7 @@ import java.util.regex.Pattern;
 
 @Tag(name = "Authentication", description = "Register, login, password reset and face login")
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
@@ -39,6 +41,7 @@ public class AuthController {
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @SecurityRequirements
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
         try {
@@ -51,7 +54,7 @@ public class AuthController {
                     req.getEmail(),
                     req.getName(),
                     req.getPassword(),
-                    req.getRole() != null ? req.getRole() : Role.LITIGANT // default to LITIGANT
+                    Role.LITIGANT // public registration always creates LITIGANT — role is not caller-controlled
             );
             
             // Auto-login after registration
@@ -83,6 +86,7 @@ public class AuthController {
         return ResponseEntity.ok("pong");
     }
 
+    @SecurityRequirements
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         log.debug("Login endpoint reached for email: {}", req.getEmail());
@@ -93,11 +97,14 @@ public class AuthController {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(req.getEmail());
             String token = jwtService.generateToken(new HashMap<>(), userDetails);
+            String refreshToken = jwtService.generateRefreshToken(userDetails);
 
             var user = authService.findByEmail(req.getEmail());
 
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
+            response.put("accessToken", token);
+            response.put("refreshToken", refreshToken);
             response.put("user", Map.of(
                 "id", user.getId(),
                 "name", user.getName(),
@@ -112,10 +119,42 @@ public class AuthController {
         }
     }
 
+    @SecurityRequirements
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest req) {
+        try {
+            String refreshToken = req.getRefreshToken();
+            String username = jwtService.extractUsername(refreshToken);
+
+            if (username == null) {
+                return ResponseEntity.status(401).body(Map.of("message", "Invalid refresh token"));
+            }
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            if (!jwtService.isTokenValid(refreshToken, userDetails)) {
+                return ResponseEntity.status(401).body(Map.of("message", "Refresh token expired or invalid. Please login again."));
+            }
+
+            // Issue a new short-lived access token
+            String newAccessToken = jwtService.generateToken(new HashMap<>(), userDetails);
+
+            return ResponseEntity.ok(Map.of(
+                    "accessToken", newAccessToken,
+                    "message", "Token refreshed successfully"
+            ));
+
+        } catch (Exception e) {
+            log.error("Token refresh failed", e);
+            return ResponseEntity.status(401).body(Map.of("message", "Token refresh failed. Please login again."));
+        }
+    }
+
     // ==================== PASSWORD RESET ENDPOINTS ====================
 
+    @SecurityRequirements
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest req) {
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
         try {
             emailService.sendPasswordResetEmail(req.getEmail());
             return ResponseEntity.ok(Map.of(
@@ -152,7 +191,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest req) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
         try {
             PasswordResetToken resetToken = tokenRepository.findByToken(req.getToken())
                     .orElseThrow(() -> new RuntimeException("Invalid token"));
@@ -185,9 +224,10 @@ public class AuthController {
     // ==================== FACE LOGIN ENDPOINTS ====================
 
     @PostMapping("/face/enroll")
-    public ResponseEntity<?> enrollFace(@RequestBody FaceEnrollRequest req) {
+    public ResponseEntity<?> enrollFace(@Valid @RequestBody FaceEnrollRequest req, Authentication auth) {
         try {
-            faceRecognitionService.enrollFace(req.getUserId(), req.getFaceDescriptor());
+            User user = authService.findByEmail(auth.getName());
+            faceRecognitionService.enrollFace(user.getId(), req.getFaceDescriptor());
             return ResponseEntity.ok(Map.of("message", "Face enrolled successfully"));
         } catch (Exception e) {
             log.error("Error enrolling face", e);
@@ -196,7 +236,7 @@ public class AuthController {
     }
 
     @PostMapping("/face/login")
-    public ResponseEntity<?> loginWithFace(@RequestBody FaceLoginRequest req) {
+    public ResponseEntity<?> loginWithFace(@Valid @RequestBody FaceLoginRequest req) {
         try {
             User user = faceRecognitionService.verifyFace(req.getEmail(), req.getFaceDescriptor());
 
@@ -222,9 +262,10 @@ public class AuthController {
     }
 
     @DeleteMapping("/face/disable")
-    public ResponseEntity<?> disableFaceLogin(@RequestParam Long userId) {
+    public ResponseEntity<?> disableFaceLogin(Authentication auth) {
         try {
-            faceRecognitionService.disableFaceLogin(userId);
+            User user = authService.findByEmail(auth.getName());
+            faceRecognitionService.disableFaceLogin(user.getId());
             return ResponseEntity.ok(Map.of("message", "Face login disabled"));
         } catch (Exception e) {
             return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
@@ -232,9 +273,10 @@ public class AuthController {
     }
 
     @GetMapping("/face/status")
-    public ResponseEntity<?> getFaceLoginStatus(@RequestParam Long userId) {
+    public ResponseEntity<?> getFaceLoginStatus(Authentication auth) {
         try {
-            boolean enrolled = faceRecognitionService.hasFaceEnrolled(userId);
+            User user = authService.findByEmail(auth.getName());
+            boolean enrolled = faceRecognitionService.hasFaceEnrolled(user.getId());
             return ResponseEntity.ok(Map.of("enrolled", enrolled));
         } catch (Exception e) {
             return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));

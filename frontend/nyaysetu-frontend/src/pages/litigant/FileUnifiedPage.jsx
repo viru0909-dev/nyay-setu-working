@@ -146,7 +146,7 @@ export default function FileUnifiedPage() {
                 title: aiSuggestion.title,
                 description: aiSuggestion.description
             });
-            setCurrentStep(2); // Skip to details
+            setCurrentStep(2);
         }
         setShowAiAssistant(false);
         setAiQuery('');
@@ -162,7 +162,6 @@ export default function FileUnifiedPage() {
     };
 
     const analyzeDocument = (index) => {
-        // Mock AI analysis for document
         const newDocs = [...formData.documents];
         newDocs[index].analyzing = true;
         setFormData({ ...formData, documents: newDocs });
@@ -182,7 +181,6 @@ export default function FileUnifiedPage() {
         });
     };
 
-    // Submit Court Case
     const handleSubmitCase = async () => {
         setUploading(true);
         try {
@@ -221,7 +219,6 @@ export default function FileUnifiedPage() {
         }
     };
 
-    // Submit FIR
     const handleSubmitFir = async () => {
         if (!firData.title || !firData.description) {
             alert(t('popups.titleDescriptionRequired'));
@@ -252,13 +249,12 @@ export default function FileUnifiedPage() {
         switch (currentStep) {
             case 1: return formData.caseType !== '';
             case 2: return formData.title && formData.description && formData.petitioner && formData.respondent;
-            case 3: return true; // Documents optional
+            case 3: return true;
             case 4: return true;
             default: return false;
         }
     };
 
-    // Success Result
     if (result) {
         return (
             <div style={{ maxWidth: '700px', margin: '0 auto' }}>
@@ -341,7 +337,6 @@ export default function FileUnifiedPage() {
                     </p>
                 </div>
 
-                {/* AI Assistant Button */}
                 <button
                     onClick={() => setShowAiAssistant(true)}
                     style={{
@@ -410,23 +405,49 @@ export default function FileUnifiedPage() {
                                     background: 'var(--color-primary)', transition: 'width 0.3s'
                                 }} />
                             </div>
-                            {steps.map((step) => (
-                                <div key={step.number} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, position: 'relative', zIndex: 1 }}>
+                            {steps.map((step) => {
+                                const isCompleted = step.number < currentStep;
+                                return (
+                                <div 
+                                    key={step.number} 
+                                    onClick={() => {
+                                        if (isCompleted) {
+                                            setCurrentStep(step.number);
+                                        }
+                                    }}
+                                    style={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        alignItems: 'center', 
+                                        flex: 1, 
+                                        position: 'relative', 
+                                        zIndex: 1,
+                                        cursor: isCompleted ? 'pointer' : 'default',
+                                        transition: 'opacity 0.2s'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        if (isCompleted) e.currentTarget.style.opacity = '0.7';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        if (isCompleted) e.currentTarget.style.opacity = '1';
+                                    }}
+                                >
                                     <div style={{
                                         width: '40px', height: '40px', borderRadius: '50%',
                                         background: step.number <= currentStep ? 'var(--color-primary)' : 'var(--bg-glass)',
                                         border: step.number === currentStep ? '3px solid rgba(30, 42, 68, 0.4)' : 'none',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700',
-                                        color: step.number <= currentStep ? 'white' : 'var(--text-secondary)', marginBottom: '0.75rem'
+                                        color: step.number <= currentStep ? 'white' : 'var(--text-secondary)', marginBottom: '0.75rem',
+                                        transition: 'all 0.2s'
                                     }}>
-                                        {step.number < currentStep ? <CheckCircle2 size={20} /> : step.number}
+                                        {isCompleted ? <CheckCircle2 size={20} /> : step.number}
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.875rem', fontWeight: '600', color: step.number <= currentStep ? 'var(--color-primary)' : 'var(--text-secondary)' }}>{step.name}</div>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{step.desc}</div>
                                     </div>
                                 </div>
-                            ))}
+                            )})}
                         </div>
                     </div>
 
@@ -435,18 +456,27 @@ export default function FileUnifiedPage() {
                         background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)',
                         borderRadius: '1.5rem', padding: '2.5rem', minHeight: '400px'
                     }}>
-                        {/* Step 1: Case Type */}
+                        {/* Step 1: Case Type - WITH HORIZONTAL SCROLL BAR */}
                         {currentStep === 1 && (
                             <div>
-                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>{t('fileUnified.selectCaseType')}</h2>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
+                                    {t('fileUnified.selectCaseType')}
+                                </h2>
+                                
+                                {/* Horizontal Scroll Container with VISIBLE SCROLLBAR */}
                                 <div style={{
                                     display: 'flex',
                                     gap: '1.5rem',
                                     overflowX: 'auto',
-                                    paddingBottom: '1rem',
-                                    scrollbarWidth: 'none',
-                                    msOverflowStyle: 'none'
-                                }}>
+                                    overflowY: 'hidden',
+                                    paddingBottom: '1.5rem',
+                                    cursor: 'grab',
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: 'var(--color-primary) rgba(255,255,255,0.2)',
+                                    WebkitOverflowScrolling: 'touch',
+                                }}
+                                className="horizontal-scroll-cards"
+                                >
                                     {caseTypes.map((type) => {
                                         const Icon = type.icon;
                                         const isSelected = formData.caseType === type.id;
@@ -455,25 +485,65 @@ export default function FileUnifiedPage() {
                                                 key={type.id}
                                                 onClick={() => setFormData({ ...formData, caseType: type.id })}
                                                 style={{
-                                                    minWidth: '320px',
+                                                    minWidth: '280px',
                                                     flex: '0 0 auto',
-                                                    padding: '2rem',
+                                                    padding: '1.5rem',
                                                     background: isSelected ? `${type.color}20` : 'var(--bg-glass)',
-                                                    border: isSelected ? `2px solid ${type.color}` : 'var(--border-glass)',
-                                                    borderRadius: '1.25rem', cursor: 'pointer', textAlign: 'left',
-                                                    transition: 'all 0.2s ease'
+                                                    border: isSelected ? `2px solid ${type.color}` : '1px solid rgba(255,255,255,0.1)',
+                                                    borderRadius: '1.25rem',
+                                                    cursor: 'pointer',
+                                                    textAlign: 'left',
+                                                    transition: 'all 0.2s ease',
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!isSelected) {
+                                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                                        e.currentTarget.style.borderColor = type.color;
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!isSelected) {
+                                                        e.currentTarget.style.transform = 'translateY(0)';
+                                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                                                    }
                                                 }}
                                             >
-                                                <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: `${type.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
-                                                    <Icon size={32} color={type.color} />
+                                                <div style={{
+                                                    width: '50px', height: '50px',
+                                                    borderRadius: '12px',
+                                                    background: `${type.color}20`,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    marginBottom: '1rem'
+                                                }}>
+                                                    <Icon size={28} color={type.color} />
                                                 </div>
-                                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>{t(`fileUnified.${type.nameKey}`)}</h3>
-                                                <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>{t(`fileUnified.${type.descKey}`)}</p>
+                                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                                    {t(`fileUnified.${type.nameKey}`)}
+                                                </h3>
+                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                                    {t(`fileUnified.${type.descKey}`)}
+                                                </p>
                                             </button>
                                         );
                                     })}
-                                    {/* Spacer for right padding in scroll view */}
-                                    <div style={{ width: '1px', flex: '0 0 1px' }}></div>
+                                </div>
+                                
+                                {/* Scroll Hint */}
+                                <div style={{
+                                    textAlign: 'center',
+                                    marginTop: '0.5rem',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--text-secondary)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem'
+                                }}>
+                                    <ChevronLeft size={14} />
+                                    <span>Scroll to see more case types</span>
+                                    <ChevronRight size={14} />
                                 </div>
                             </div>
                         )}
@@ -724,6 +794,46 @@ export default function FileUnifiedPage() {
                     </div>
                 </div>
             )}
+
+            {/* Add custom CSS for scrollbar */}
+            <style>{`
+                .horizontal-scroll-cards::-webkit-scrollbar {
+                    height: 6px;
+                }
+                .horizontal-scroll-cards::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 10px;
+                }
+                .horizontal-scroll-cards::-webkit-scrollbar-thumb {
+                    background: var(--color-primary);
+                    border-radius: 10px;
+                }
+                .horizontal-scroll-cards::-webkit-scrollbar-thumb:hover {
+                    background: #7c3aed;
+                    cursor: pointer;
+                }
+                @keyframes slideUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                .animate-spin {
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 }

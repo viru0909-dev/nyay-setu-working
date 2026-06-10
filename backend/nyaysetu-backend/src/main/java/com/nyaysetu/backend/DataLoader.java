@@ -8,9 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
+import org.springframework.context.annotation.Profile;
 @Slf4j
 @Component
+@Profile("!prod")
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
 
@@ -37,7 +38,7 @@ public class DataLoader implements CommandLineRunner {
             User user = optionalUser.get();
             user.setPassword(encoder.encode(pass));
             userRepository.save(user);
-            log.info("User already exists, password updated: {}", email);
+            log.debug("User already exists, password updated: {}", email);
         } else {
             // User doesn't exist - CREATE
             User u = User.builder()

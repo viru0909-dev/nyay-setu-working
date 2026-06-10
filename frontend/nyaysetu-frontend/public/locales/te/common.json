@@ -3,9 +3,16 @@
     "nav": {
       "home": "హోమ్",
       "features": "ఫీచర్లు",
+      "upcomingFeatures": "రాబోయే లక్షణాలు",
       "constitution": "రాజ్యాంగం",
       "aiAssistant": "AI సహాయకుడు",
-      "about": "గురించి"
+      "about": "గురించి",
+      "portal": "పోర్టల్",
+      "roles": {
+        "litigant": "వాది",
+        "lawyer": "న్యాయవాది",
+        "judge": "న్యాయమూర్తి"
+      }
     },
 
     "cta": {

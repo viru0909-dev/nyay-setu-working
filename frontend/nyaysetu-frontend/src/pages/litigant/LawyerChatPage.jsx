@@ -193,7 +193,7 @@ export default function LawyerChatPage() {
 
             // Assuming response has id
             const docId = res.data.id;
-            const downloadUrl = `/api/documents/${docId}/download`;
+            const downloadUrl = `/api/v1/documents/${docId}/download`;
 
             const fileMsg = `${t('lawyerChat.sharedFile')} ${file.name}`;
             await handleSendMessage(fileMsg, 'FILE', downloadUrl);
@@ -270,7 +270,7 @@ export default function LawyerChatPage() {
             });
 
             const docId = res.data.id;
-            const downloadUrl = `/api/documents/${docId}/download`;
+            const downloadUrl = `/api/v1/documents/${docId}/download`;
 
             await handleSendMessage(`🎤 ${t('lawyerChat.voiceMessage')}`, 'AUDIO', downloadUrl);
         } catch (error) {

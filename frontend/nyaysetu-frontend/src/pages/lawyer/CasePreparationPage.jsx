@@ -302,7 +302,7 @@ export default function CasePreparationPage() {
                                     if (confirm("Send this draft to the client for approval?")) {
                                         try {
                                             await import('../../services/api').then(({ default: api }) =>
-                                                api.post(`/api/cases/${selectedCaseId}/submit-draft`, { draftContent })
+                                                api.post(`/api/v1/cases/${selectedCaseId}/submit-draft`, { draftContent })
                                             );
                                             alert("Draft sent to client!");
                                             fetchCaseDetails(selectedCaseId);

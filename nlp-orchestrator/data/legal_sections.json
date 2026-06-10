@@ -22,12 +22,12 @@
     },
     "BNS": {
       "display_name": "BNS",
-      "section_range": [1, 200],
+      "section_range": [1, 358],
       "aliases": ["bns"]
     },
     "BNSS": {
       "display_name": "BNSS",
-      "section_range": [1, 200],
+      "section_range": [1, 531],
       "aliases": ["bnss"]
     },
     "Article": {
