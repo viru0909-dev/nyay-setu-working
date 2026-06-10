@@ -2,12 +2,15 @@ import json
 import re
 from pathlib import Path
 from typing import Any
+from functools import lru_cache
+
 
 from legal_utils.citation_extractor import extract_legal_citations
 
 DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "legal_sections.json"
 
 
+@lru_cache(maxsize=1)  
 def _load_legal_sections() -> dict[str, Any]:
     with open(DATA_PATH, "r", encoding="utf-8") as handle:
         return json.load(handle)

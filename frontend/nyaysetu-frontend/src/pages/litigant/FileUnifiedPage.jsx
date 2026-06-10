@@ -7,20 +7,59 @@ import {
     Bot, Sparkles, Wand2, Loader2, BrainCircuit, ClipboardList, Siren
 } from 'lucide-react';
 import { caseAPI, documentAPI, clientFirAPI, vakilFriendAPI, brainAPI } from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 // Case types for court cases
+// const caseTypes = [
+//     { id: 'civil', name: 'Civil Case', icon: Scale, desc: 'Property, contracts, disputes', color: '#3b82f6' },
+//     { id: 'criminal', name: 'Criminal Case', icon: AlertCircle, desc: 'Criminal offenses', color: '#ef4444' },
+//     { id: 'family', name: 'Family Law', icon: Users, desc: 'Divorce, custody, inheritance', color: '#ec4899' },
+//     { id: 'property', name: 'Property Dispute', icon: HomeIcon, desc: 'Land, ownership disputes', color: '#10b981' },
+//     { id: 'commercial', name: 'Commercial', icon: Briefcase, desc: 'Business, trade matters', color: '#f59e0b' }
+// ];
+
 const caseTypes = [
-    { id: 'civil', name: 'Civil Case', icon: Scale, desc: 'Property, contracts, disputes', color: '#3b82f6' },
-    { id: 'criminal', name: 'Criminal Case', icon: AlertCircle, desc: 'Criminal offenses', color: '#ef4444' },
-    { id: 'family', name: 'Family Law', icon: Users, desc: 'Divorce, custody, inheritance', color: '#ec4899' },
-    { id: 'property', name: 'Property Dispute', icon: HomeIcon, desc: 'Land, ownership disputes', color: '#10b981' },
-    { id: 'commercial', name: 'Commercial', icon: Briefcase, desc: 'Business, trade matters', color: '#f59e0b' }
+    {
+        id: 'civil',
+        nameKey: 'civilCase',
+        descKey: 'civilCaseDesc',
+        icon: Scale,
+        color: '#3b82f6'
+    },
+    {
+        id: 'criminal',
+        nameKey: 'criminalCase',
+        descKey: 'criminalCaseDesc',
+        icon: AlertCircle,
+        color: '#ef4444'
+    },
+    {
+        id: 'family',
+        nameKey: 'familyLaw',
+        descKey: 'familyLawDesc',
+        icon: Users,
+        color: '#ec4899'
+    },
+    {
+        id: 'property',
+        nameKey: 'propertyDispute',
+        descKey: 'propertyDisputeDesc',
+        icon: HomeIcon,
+        color: '#10b981'
+    },
+    {
+        id: 'commercial',
+        nameKey: 'commercial',
+        descKey: 'commercialDesc',
+        icon: Briefcase,
+        color: '#f59e0b'
+    }
 ];
 
 export default function FileUnifiedPage() {
     // Tab: 'case' or 'fir'
     const [activeTab, setActiveTab] = useState('case');
-
+    const { t } = useTranslation('litigant');
     // AI Assistant State
     const [showAiAssistant, setShowAiAssistant] = useState(false);
     const [aiQuery, setAiQuery] = useState('');
@@ -52,12 +91,19 @@ export default function FileUnifiedPage() {
     const [result, setResult] = useState(null);
     const navigate = useNavigate();
 
+    // const steps = [
+    //     { number: 1, name: 'Case Type', desc: 'Select category' },
+    //     { number: 2, name: 'Case Details', desc: 'Provide information' },
+    //     { number: 3, name: 'Documents', desc: 'Upload files' },
+    //     { number: 4, name: 'Review', desc: 'Confirm & submit' }
+    // ];
+
     const steps = [
-        { number: 1, name: 'Case Type', desc: 'Select category' },
-        { number: 2, name: 'Case Details', desc: 'Provide information' },
-        { number: 3, name: 'Documents', desc: 'Upload files' },
-        { number: 4, name: 'Review', desc: 'Confirm & submit' }
-    ];
+    { number: 1, name: t('fileUnified.caseType'), desc: t('fileUnified.selectCategory') },
+    { number: 2, name: t('fileUnified.caseDetails'), desc: t('fileUnified.provideInformation') },
+    { number: 3, name: t('fileUnified.documents'), desc: t('fileUnified.uploadFiles') },
+    { number: 4, name: t('fileUnified.review'), desc: t('fileUnified.confirmSubmit') }
+];
 
     const handleAiAssist = async () => {
         if (!aiQuery.trim()) return;
@@ -76,7 +122,7 @@ export default function FileUnifiedPage() {
 
         } catch (e) {
             console.error(e);
-            alert("Nyay Saarthi is having trouble connecting right now. Please try again.");
+            alert(t('popups.aiConnectionIssue'));
         } finally {
             setAiThinking(false);
         }
@@ -100,7 +146,7 @@ export default function FileUnifiedPage() {
                 title: aiSuggestion.title,
                 description: aiSuggestion.description
             });
-            setCurrentStep(2); // Skip to details
+            setCurrentStep(2);
         }
         setShowAiAssistant(false);
         setAiQuery('');
@@ -116,7 +162,6 @@ export default function FileUnifiedPage() {
     };
 
     const analyzeDocument = (index) => {
-        // Mock AI analysis for document
         const newDocs = [...formData.documents];
         newDocs[index].analyzing = true;
         setFormData({ ...formData, documents: newDocs });
@@ -136,7 +181,6 @@ export default function FileUnifiedPage() {
         });
     };
 
-    // Submit Court Case
     const handleSubmitCase = async () => {
         setUploading(true);
         try {
@@ -169,16 +213,15 @@ export default function FileUnifiedPage() {
             setResult({ type: 'case', data: response.data });
         } catch (error) {
             console.error('Error creating case:', error);
-            alert('Failed to create case. Please try again.');
+            alert(t('popups.caseCreateFailed'));
         } finally {
             setUploading(false);
         }
     };
 
-    // Submit FIR
     const handleSubmitFir = async () => {
         if (!firData.title || !firData.description) {
-            alert('Please provide a title and description');
+            alert(t('popups.titleDescriptionRequired'));
             return;
         }
 
@@ -196,7 +239,7 @@ export default function FileUnifiedPage() {
             setResult({ type: 'fir', data: response.data });
         } catch (error) {
             console.error('Error filing FIR:', error);
-            alert('Failed to file FIR. Please check your connection and try again.');
+            alert(t('popups.firFiledFailed'));
         } finally {
             setUploading(false);
         }
@@ -206,13 +249,12 @@ export default function FileUnifiedPage() {
         switch (currentStep) {
             case 1: return formData.caseType !== '';
             case 2: return formData.title && formData.description && formData.petitioner && formData.respondent;
-            case 3: return true; // Documents optional
+            case 3: return true;
             case 4: return true;
             default: return false;
         }
     };
 
-    // Success Result
     if (result) {
         return (
             <div style={{ maxWidth: '700px', margin: '0 auto' }}>
@@ -232,12 +274,12 @@ export default function FileUnifiedPage() {
                         <CheckCircle2 size={40} color="white" />
                     </div>
                     <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#10b981', marginBottom: '0.5rem' }}>
-                        ✅ {result.type === 'case' ? 'Case Filed Successfully!' : 'FIR Submitted Successfully!'}
+                        ✅ {result.type === 'case' ? t('fileUnified.caseFiledSuccess') : t('fileUnified.firSubmittedSuccess')}
                     </h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
                         {result.type === 'case'
-                            ? 'Your case has been registered with the court'
-                            : 'Your FIR has been sent for police review'
+                            ? t('fileUnified.caseRegistered')
+                            : t('fileUnified.firSentReview')
                         }
                     </p>
                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
@@ -249,7 +291,7 @@ export default function FileUnifiedPage() {
                                 border: 'none', borderRadius: '0.75rem', color: 'white', fontWeight: '700', cursor: 'pointer'
                             }}
                         >
-                            Go to Case Diary
+                            {t('fileUnified.goToCaseDiary')}
                         </button>
                         <button
                             onClick={() => {
@@ -264,7 +306,7 @@ export default function FileUnifiedPage() {
                                 color: 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer'
                             }}
                         >
-                            File Another
+                            {t('fileUnified.fileAnother')}
                         </button>
                     </div>
                 </div>
@@ -285,17 +327,16 @@ export default function FileUnifiedPage() {
                             fontSize: '0.875rem', cursor: 'pointer', marginBottom: '1rem'
                         }}
                     >
-                        <ChevronLeft size={16} /> Back to Dashboard
+                        <ChevronLeft size={16} /> {t('fileUnified.backToDashboard')}
                     </button>
                     <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <ClipboardList size={32} color="var(--color-primary)" /> File Case / FIR
+                        <ClipboardList size={32} color="var(--color-primary)" /> {t('fileUnified.fileCaseFir')}
                     </h1>
                     <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
-                        Choose between filing a court case or a police FIR
+                        {t('fileUnified.chooseFilingType')}
                     </p>
                 </div>
 
-                {/* AI Assistant Button */}
                 <button
                     onClick={() => setShowAiAssistant(true)}
                     style={{
@@ -308,7 +349,7 @@ export default function FileUnifiedPage() {
                         animation: 'pulse 2s infinite'
                     }}
                 >
-                    <Sparkles size={20} /> Ask Nyay Saarthi
+                    <Sparkles size={20} /> {t('fileUnified.askNyaySaarthi')}
                 </button>
                 <style>{`@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); } }`}</style>
             </div>
@@ -329,7 +370,7 @@ export default function FileUnifiedPage() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
                     }}
                 >
-                    <Scale size={20} /> Court Case
+                    <Scale size={20} /> {t('fileUnified.courtCase')}
                 </button>
                 <button
                     onClick={() => setActiveTab('fir')}
@@ -342,7 +383,7 @@ export default function FileUnifiedPage() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
                     }}
                 >
-                    <Shield size={20} /> Police FIR
+                    <Shield size={20} /> {t('fileUnified.policeFir')}
                 </button>
             </div>
 
@@ -364,23 +405,49 @@ export default function FileUnifiedPage() {
                                     background: 'var(--color-primary)', transition: 'width 0.3s'
                                 }} />
                             </div>
-                            {steps.map((step) => (
-                                <div key={step.number} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, position: 'relative', zIndex: 1 }}>
+                            {steps.map((step) => {
+                                const isCompleted = step.number < currentStep;
+                                return (
+                                <div 
+                                    key={step.number} 
+                                    onClick={() => {
+                                        if (isCompleted) {
+                                            setCurrentStep(step.number);
+                                        }
+                                    }}
+                                    style={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        alignItems: 'center', 
+                                        flex: 1, 
+                                        position: 'relative', 
+                                        zIndex: 1,
+                                        cursor: isCompleted ? 'pointer' : 'default',
+                                        transition: 'opacity 0.2s'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        if (isCompleted) e.currentTarget.style.opacity = '0.7';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        if (isCompleted) e.currentTarget.style.opacity = '1';
+                                    }}
+                                >
                                     <div style={{
                                         width: '40px', height: '40px', borderRadius: '50%',
                                         background: step.number <= currentStep ? 'var(--color-primary)' : 'var(--bg-glass)',
                                         border: step.number === currentStep ? '3px solid rgba(30, 42, 68, 0.4)' : 'none',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700',
-                                        color: step.number <= currentStep ? 'white' : 'var(--text-secondary)', marginBottom: '0.75rem'
+                                        color: step.number <= currentStep ? 'white' : 'var(--text-secondary)', marginBottom: '0.75rem',
+                                        transition: 'all 0.2s'
                                     }}>
-                                        {step.number < currentStep ? <CheckCircle2 size={20} /> : step.number}
+                                        {isCompleted ? <CheckCircle2 size={20} /> : step.number}
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.875rem', fontWeight: '600', color: step.number <= currentStep ? 'var(--color-primary)' : 'var(--text-secondary)' }}>{step.name}</div>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{step.desc}</div>
                                     </div>
                                 </div>
-                            ))}
+                            )})}
                         </div>
                     </div>
 
@@ -389,18 +456,27 @@ export default function FileUnifiedPage() {
                         background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)',
                         borderRadius: '1.5rem', padding: '2.5rem', minHeight: '400px'
                     }}>
-                        {/* Step 1: Case Type */}
+                        {/* Step 1: Case Type - WITH HORIZONTAL SCROLL BAR */}
                         {currentStep === 1 && (
                             <div>
-                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Select Case Type</h2>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
+                                    {t('fileUnified.selectCaseType')}
+                                </h2>
+                                
+                                {/* Horizontal Scroll Container with VISIBLE SCROLLBAR */}
                                 <div style={{
                                     display: 'flex',
                                     gap: '1.5rem',
                                     overflowX: 'auto',
-                                    paddingBottom: '1rem',
-                                    scrollbarWidth: 'none',
-                                    msOverflowStyle: 'none'
-                                }}>
+                                    overflowY: 'hidden',
+                                    paddingBottom: '1.5rem',
+                                    cursor: 'grab',
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: 'var(--color-primary) rgba(255,255,255,0.2)',
+                                    WebkitOverflowScrolling: 'touch',
+                                }}
+                                className="horizontal-scroll-cards"
+                                >
                                     {caseTypes.map((type) => {
                                         const Icon = type.icon;
                                         const isSelected = formData.caseType === type.id;
@@ -409,25 +485,65 @@ export default function FileUnifiedPage() {
                                                 key={type.id}
                                                 onClick={() => setFormData({ ...formData, caseType: type.id })}
                                                 style={{
-                                                    minWidth: '320px',
+                                                    minWidth: '280px',
                                                     flex: '0 0 auto',
-                                                    padding: '2rem',
+                                                    padding: '1.5rem',
                                                     background: isSelected ? `${type.color}20` : 'var(--bg-glass)',
-                                                    border: isSelected ? `2px solid ${type.color}` : 'var(--border-glass)',
-                                                    borderRadius: '1.25rem', cursor: 'pointer', textAlign: 'left',
-                                                    transition: 'all 0.2s ease'
+                                                    border: isSelected ? `2px solid ${type.color}` : '1px solid rgba(255,255,255,0.1)',
+                                                    borderRadius: '1.25rem',
+                                                    cursor: 'pointer',
+                                                    textAlign: 'left',
+                                                    transition: 'all 0.2s ease',
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!isSelected) {
+                                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                                        e.currentTarget.style.borderColor = type.color;
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!isSelected) {
+                                                        e.currentTarget.style.transform = 'translateY(0)';
+                                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                                                    }
                                                 }}
                                             >
-                                                <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: `${type.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
-                                                    <Icon size={32} color={type.color} />
+                                                <div style={{
+                                                    width: '50px', height: '50px',
+                                                    borderRadius: '12px',
+                                                    background: `${type.color}20`,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    marginBottom: '1rem'
+                                                }}>
+                                                    <Icon size={28} color={type.color} />
                                                 </div>
-                                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>{type.name}</h3>
-                                                <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>{type.desc}</p>
+                                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                                    {t(`fileUnified.${type.nameKey}`)}
+                                                </h3>
+                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                                    {t(`fileUnified.${type.descKey}`)}
+                                                </p>
                                             </button>
                                         );
                                     })}
-                                    {/* Spacer for right padding in scroll view */}
-                                    <div style={{ width: '1px', flex: '0 0 1px' }}></div>
+                                </div>
+                                
+                                {/* Scroll Hint */}
+                                <div style={{
+                                    textAlign: 'center',
+                                    marginTop: '0.5rem',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--text-secondary)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem'
+                                }}>
+                                    <ChevronLeft size={14} />
+                                    <span>Scroll to see more case types</span>
+                                    <ChevronRight size={14} />
                                 </div>
                             </div>
                         )}
@@ -435,31 +551,31 @@ export default function FileUnifiedPage() {
                         {/* Step 2: Case Details */}
                         {currentStep === 2 && (
                             <div>
-                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Case Details</h2>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>{t('fileUnified.caseDetails')}</h2>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Case Title *</label>
-                                        <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="Brief title of your case" style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.caseTitle')} *</label>
+                                        <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder={t('fileUnified.caseTitlePlaceholder')} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
                                     </div>
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Case Description *</label>
-                                        <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Detailed description..." rows={5} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)', resize: 'vertical' }} />
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.caseDescription')} *</label>
+                                        <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder={t('fileUnified.caseDescriptionPlaceholder')} rows={5} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)', resize: 'vertical' }} />
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                         <div>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Petitioner *</label>
-                                            <input type="text" value={formData.petitioner} onChange={(e) => setFormData({ ...formData, petitioner: e.target.value })} placeholder="Your name" style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.petitioner')} *</label>
+                                            <input type="text" value={formData.petitioner} onChange={(e) => setFormData({ ...formData, petitioner: e.target.value })} placeholder={t('fileUnified.petitionerPlaceholder')} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
                                         </div>
                                         <div>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Respondent *</label>
-                                            <input type="text" value={formData.respondent} onChange={(e) => setFormData({ ...formData, respondent: e.target.value })} placeholder="Other party" style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.respondent')} *</label>
+                                            <input type="text" value={formData.respondent} onChange={(e) => setFormData({ ...formData, respondent: e.target.value })} placeholder={t('fileUnified.respondentPlaceholder')} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
                                         </div>
                                     </div>
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Urgency</label>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.urgency')}</label>
                                         <div style={{ display: 'flex', gap: '1rem' }}>
                                             {['normal', 'urgent', 'critical'].map((level) => (
-                                                <button key={level} onClick={() => setFormData({ ...formData, urgency: level })} style={{ flex: 1, padding: '0.75rem', background: formData.urgency === level ? 'rgba(30, 42, 68, 0.2)' : 'var(--bg-glass)', border: formData.urgency === level ? '2px solid var(--color-primary)' : 'var(--border-glass)', borderRadius: '0.75rem', color: formData.urgency === level ? 'var(--color-primary)' : 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer', textTransform: 'capitalize' }}>{level}</button>
+                                                <button key={level} onClick={() => setFormData({ ...formData, urgency: level })} style={{ flex: 1, padding: '0.75rem', background: formData.urgency === level ? 'rgba(30, 42, 68, 0.2)' : 'var(--bg-glass)', border: formData.urgency === level ? '2px solid var(--color-primary)' : 'var(--border-glass)', borderRadius: '0.75rem', color: formData.urgency === level ? 'var(--color-primary)' : 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer', textTransform: 'capitalize' }}>{t(`fileUnified.${level}`)}</button>
                                             ))}
                                         </div>
                                     </div>
@@ -470,12 +586,12 @@ export default function FileUnifiedPage() {
                         {/* Step 3: Documents */}
                         {currentStep === 3 && (
                             <div>
-                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Upload Documents</h2>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>{t('fileUnified.uploadDocuments')}</h2>
                                 <label style={{ display: 'block', padding: '3rem', background: 'var(--bg-glass)', border: '2px dashed var(--border-glass)', borderRadius: '1rem', textAlign: 'center', cursor: 'pointer', marginBottom: '1.5rem' }}>
                                     <input type="file" multiple onChange={handleFileUpload} style={{ display: 'none' }} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                                     <Upload size={40} style={{ color: 'var(--color-primary)', margin: '0 auto 1rem' }} />
-                                    <p style={{ fontWeight: '600', color: 'var(--text-main)' }}>Click to upload files</p>
-                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>PDF, DOC, JPG, PNG (max 10MB)</p>
+                                    <p style={{ fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.clickUploadFiles')}</p>
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{t('fileUnified.supportedFormats')}</p>
                                 </label>
                                 {formData.documents.length > 0 && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -496,7 +612,7 @@ export default function FileUnifiedPage() {
                                                                 disabled={doc.analyzing}
                                                                 style={{ fontSize: '0.75rem', color: '#8b5cf6', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                                                             >
-                                                                {doc.analyzing ? 'Thinking...' : '✨ Analyze Document'}
+                                                                {doc.analyzing ? t('fileUnified.thinking'): t('fileUnified.analyzeDocument')}
                                                             </button>
                                                         )}
                                                     </div>
@@ -512,23 +628,23 @@ export default function FileUnifiedPage() {
                         {/* Step 4: Review */}
                         {currentStep === 4 && (
                             <div>
-                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>Review & Confirm</h2>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem' }}>{t('fileUnified.reviewConfirm')}</h2>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     <div style={{ padding: '1rem', background: 'var(--bg-glass)', borderRadius: '0.75rem' }}>
-                                        <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Case Type:</span>
-                                        <p style={{ fontWeight: '600', color: 'var(--text-main)' }}>{caseTypes.find(t => t.id === formData.caseType)?.name}</p>
+                                        <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{t('fileUnified.caseType')}:</span>
+                                        <p style={{ fontWeight: '600', color: 'var(--text-main)' }}>{t(`fileUnified.${caseTypes.find((c) =>c.id === formData.caseType)?.nameKey}`)}</p>
                                     </div>
                                     <div style={{ padding: '1rem', background: 'var(--bg-glass)', borderRadius: '0.75rem' }}>
-                                        <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Title:</span>
+                                        <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{t('fileUnified.title')}:</span>
                                         <p style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formData.title}</p>
                                     </div>
                                     <div style={{ padding: '1rem', background: 'var(--bg-glass)', borderRadius: '0.75rem' }}>
-                                        <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Petitioner vs Respondent:</span>
+                                        <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{t('fileUnified.petitionerRespondent')}:</span>
                                         <p style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formData.petitioner} vs {formData.respondent}</p>
                                     </div>
                                     <div style={{ padding: '1rem', background: 'var(--bg-glass)', borderRadius: '0.75rem' }}>
-                                        <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Documents:</span>
-                                        <p style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formData.documents.length} files</p>
+                                        <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{t('fileUnified.documents')}:</span>
+                                        <p style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formData.documents.length} {t('fileUnified.files')}</p>
                                     </div>
                                 </div>
                             </div>
@@ -538,15 +654,15 @@ export default function FileUnifiedPage() {
                     {/* Navigation */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem' }}>
                         <button onClick={() => setCurrentStep(Math.max(1, currentStep - 1))} disabled={currentStep === 1} style={{ padding: '1rem 2rem', background: currentStep === 1 ? 'var(--bg-glass)' : 'rgba(30, 42, 68, 0.1)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: currentStep === 1 ? 'var(--text-secondary)' : 'var(--color-primary)', fontWeight: '600', cursor: currentStep === 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <ChevronLeft size={20} /> Previous
+                            <ChevronLeft size={20} /> {t('fileUnified.previous')}
                         </button>
                         {currentStep < 4 ? (
                             <button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()} style={{ padding: '1rem 2rem', background: canProceed() ? 'var(--color-primary)' : 'var(--bg-glass)', border: 'none', borderRadius: '0.75rem', color: canProceed() ? 'white' : 'var(--text-secondary)', fontWeight: '700', cursor: canProceed() ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                Next <ChevronRight size={20} />
+                                {t('fileUnified.next')} <ChevronRight size={20} />
                             </button>
                         ) : (
                             <button onClick={handleSubmitCase} disabled={uploading} style={{ padding: '1rem 2rem', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', borderRadius: '0.75rem', color: 'white', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <CheckCircle2 size={20} /> {uploading ? 'Submitting...' : 'Submit Case'}
+                                <CheckCircle2 size={20} /> {uploading ? t('fileUnified.submitting'): t('fileUnified.submitCase')}
                             </button>
                         )}
                     </div>
@@ -557,29 +673,29 @@ export default function FileUnifiedPage() {
             {activeTab === 'fir' && (
                 <div style={{ background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)', borderRadius: '1.5rem', padding: '2.5rem' }}>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <Siren size={24} color="#ef4444" /> File Police FIR
+                        <Siren size={24} color="#ef4444" /> {t('fileUnified.filePoliceFir')}
                     </h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Incident Title *</label>
-                            <input type="text" value={firData.title} onChange={(e) => setFirData({ ...firData, title: e.target.value })} placeholder="e.g., Theft at residence" style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.incidentTitle')}*</label>
+                            <input type="text" value={firData.title} onChange={(e) => setFirData({ ...firData, title: e.target.value })} placeholder={t('fileUnified.incidentTitlePlaceholder')} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}><Calendar size={16} /> Incident Date</label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}><Calendar size={16} /> {t('fileUnified.incidentDate')}</label>
                                 <input type="date" value={firData.incidentDate} onChange={(e) => setFirData({ ...firData, incidentDate: e.target.value })} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
                             </div>
                             <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}><MapPin size={16} /> Location</label>
-                                <input type="text" value={firData.incidentLocation} onChange={(e) => setFirData({ ...firData, incidentLocation: e.target.value })} placeholder="e.g., Near City Mall, Pune" style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}><MapPin size={16} /> {t('fileUnified.location')}</label>
+                                <input type="text" value={firData.incidentLocation} onChange={(e) => setFirData({ ...firData, incidentLocation: e.target.value })} placeholder={t('fileUnified.locationPlaceholder')} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
                             </div>
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Incident Description *</label>
-                            <textarea value={firData.description} onChange={(e) => setFirData({ ...firData, description: e.target.value })} placeholder="Describe what happened in detail..." rows={6} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)', resize: 'vertical' }} />
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.incidentDescription')} *</label>
+                            <textarea value={firData.description} onChange={(e) => setFirData({ ...firData, description: e.target.value })} placeholder={t('fileUnified.incidentDescriptionPlaceholder')} rows={6} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)', resize: 'vertical' }} />
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>Evidence (Optional)</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.evidenceOptional')}</label>
                             <div onClick={() => document.getElementById('fir-file').click()} style={{ padding: '2rem', background: 'var(--bg-glass)', border: '2px dashed var(--border-glass)', borderRadius: '0.75rem', textAlign: 'center', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', transition: 'all 0.2s' }}>
                                 <input id="fir-file" type="file" accept=".pdf,.jpg,.jpeg,.png,.mp4" onChange={(e) => setFirFile(e.target.files[0])} style={{ display: 'none' }} />
                                 {firFile ? (
@@ -597,15 +713,15 @@ export default function FileUnifiedPage() {
                                             <Upload size={32} style={{ color: 'var(--color-primary)' }} />
                                         </div>
                                         <div>
-                                            <p style={{ color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.25rem' }}>Click to upload evidence</p>
-                                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Supported: PDF, JPG, PNG, MP4</p>
+                                            <p style={{ color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.25rem' }}>{t('fileUnified.clickUploadEvidence')}</p>
+                                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{t('fileUnified.supportedEvidenceFormats')}</p>
                                         </div>
                                     </>
                                 )}
                             </div>
                         </div>
                         <button onClick={handleSubmitFir} disabled={uploading || !firData.title || !firData.description} style={{ marginTop: '1rem', padding: '1rem', background: (!firData.title || !firData.description) ? 'var(--bg-glass)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', border: 'none', borderRadius: '0.75rem', color: (!firData.title || !firData.description) ? 'var(--text-secondary)' : 'white', fontWeight: '700', cursor: (!firData.title || !firData.description) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                            <Shield size={20} /> {uploading ? 'Submitting...' : 'Submit FIR to Police'}
+                            <Shield size={20} /> {uploading? t('fileUnified.submitting'): t('fileUnified.submitFirPolice')}
                         </button>
                     </div>
                 </div>
@@ -621,8 +737,8 @@ export default function FileUnifiedPage() {
                                     <Bot size={28} color="white" />
                                 </div>
                                 <div>
-                                    <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>Nyay Saarthi Assist</h2>
-                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Describe your situation, I'll help you file.</p>
+                                    <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>{t('fileUnified.nyaySaarthiAssist')}</h2>
+                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('fileUnified.aiAssistDescription')}</p>
                                 </div>
                             </div>
                             <button onClick={() => setShowAiAssistant(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><X size={24} /></button>
@@ -633,7 +749,7 @@ export default function FileUnifiedPage() {
                                 <textarea
                                     value={aiQuery}
                                     onChange={e => setAiQuery(e.target.value)}
-                                    placeholder="e.g., My landlord is refusing to return my deposit even though I gave notice..."
+                                    placeholder={t('fileUnified.aiPlaceholder')}
                                     rows={5}
                                     style={{ width: '100%', padding: '1rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '1rem', color: 'var(--text-main)', marginBottom: '1.5rem', fontSize: '1rem' }}
                                 />
@@ -643,7 +759,7 @@ export default function FileUnifiedPage() {
                                     style={{ width: '100%', padding: '1rem', background: 'var(--color-primary)', border: 'none', borderRadius: '1rem', color: 'white', fontWeight: '700', cursor: (aiThinking || !aiQuery.trim()) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                                 >
                                     {aiThinking ? <Loader2 size={20} className="animate-spin" /> : <Wand2 size={20} />}
-                                    {aiThinking ? 'Analyzing your case...' : 'Analyze & Suggest'}
+                                    {aiThinking? t('fileUnified.analyzingCase'): t('fileUnified.analyzeSuggest')}
                                 </button>
                             </>
                         ) : (
@@ -654,15 +770,15 @@ export default function FileUnifiedPage() {
                                     </p>
                                     <div style={{ display: 'grid', gap: '0.5rem', fontSize: '0.9rem' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ color: 'var(--text-secondary)' }}>Recommended Filing:</span>
-                                            <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{aiSuggestion.type === 'fir' ? 'Police FIR' : 'Court Case'}</span>
+                                            <span style={{ color: 'var(--text-secondary)' }}>{t('fileUnified.recommendedFiling')}:</span>
+                                            <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{aiSuggestion.type === 'fir'? t('fileUnified.policeFir'): t('fileUnified.courtCase')}</span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ color: 'var(--text-secondary)' }}>Category:</span>
-                                            <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{aiSuggestion.caseType === 'criminal' ? 'Criminal' : 'Civil'}</span>
+                                            <span style={{ color: 'var(--text-secondary)' }}>{t('fileUnified.category')}:</span>
+                                            <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{aiSuggestion.caseType === 'criminal'? t('fileUnified.criminal'): t('fileUnified.civil')}</span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ color: 'var(--text-secondary)' }}>Suggested Title:</span>
+                                            <span style={{ color: 'var(--text-secondary)' }}>{t('fileUnified.suggestedTitle')}:</span>
                                             <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{aiSuggestion.title}</span>
                                         </div>
                                     </div>
@@ -671,13 +787,53 @@ export default function FileUnifiedPage() {
                                     onClick={applyAiSuggestion}
                                     style={{ width: '100%', padding: '1rem', background: 'var(--color-primary)', border: 'none', borderRadius: '1rem', color: 'white', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                                 >
-                                    <CheckCircle2 size={20} /> Convert to Filing
+                                    <CheckCircle2 size={20} /> {t('fileUnified.convertToFiling')}
                                 </button>
                             </div>
                         )}
                     </div>
                 </div>
             )}
+
+            {/* Add custom CSS for scrollbar */}
+            <style>{`
+                .horizontal-scroll-cards::-webkit-scrollbar {
+                    height: 6px;
+                }
+                .horizontal-scroll-cards::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 10px;
+                }
+                .horizontal-scroll-cards::-webkit-scrollbar-thumb {
+                    background: var(--color-primary);
+                    border-radius: 10px;
+                }
+                .horizontal-scroll-cards::-webkit-scrollbar-thumb:hover {
+                    background: #7c3aed;
+                    cursor: pointer;
+                }
+                @keyframes slideUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                .animate-spin {
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 }

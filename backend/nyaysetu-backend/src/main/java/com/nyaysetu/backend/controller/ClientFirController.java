@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @Tag(name = "Client FIR", description = "Litigant-facing FIR filing — manual or AI-assisted")
 @RestController
-@RequestMapping("/api/client/fir")
+@RequestMapping("/client/fir")
 @RequiredArgsConstructor
 @Slf4j
 public class ClientFirController {

@@ -1,0 +1,127 @@
+{
+  "sidebar": {
+    "collapseSidebar": "பக்கப்பட்டியை சுருக்கு",
+    "litigant": {
+      "dashboard": "டாஷ்போர்டு",
+      "vakilFriendAI": "ந்யாய் சாரதி",
+      "fileCaseFIR": "வழக்கு / FIR பதிவு செய்",
+      "caseDiary": "வழக்கு குறிப்பேடு",
+      "hearings": "விசாரணைகள்",
+      "lawyerChat": "வழக்கறிஞர் அரட்டை",
+      "generateDocument": "ஆவணத்தை உருவாக்கவும்",
+      "profile": "சுயவிவரம்"
+    },
+    "lawyer": {
+      "dashboard": "டாஷ்போர்டு",
+      "litigantDirectory": "வழக்குதாரர் அடைவு",
+      "activeCases": "செயலில் உள்ள வழக்குகள்",
+      "aiLegalAssistant": "AI சட்ட உதவியாளர்",
+      "hearings": "விசாரணைகள்",
+      "analytics": "பகுப்பாய்வு",
+      "profile": "சுயவிவரம்"
+    },
+    "judge": {
+      "judicialOverview": "நீதித்துறை பார்வை",
+      "myDocket": "என் வழக்குப் பட்டியல்",
+      "unassignedPool": "ஒதுக்கப்படாத தொகுப்பு",
+      "liveHearing": "நேரடி விசாரணை",
+      "courtAnalytics": "நீதிமன்ற பகுப்பாய்வு",
+      "profile": "சுயவிவரம்"
+    },
+    "admin": {
+      "dashboard": "டாஷ்போர்டு",
+      "userManagement": "பயனர் மேலாண்மை",
+      "caseManagement": "வழக்கு மேலாண்மை",
+      "judgeAssignment": "நீதிபதி நியமனம்",
+      "reports": "அறிக்கைகள்",
+      "settings": "அமைப்புகள்",
+      "profile": "சுயவிவரம்"
+    },
+    "techAdmin": {
+      "dashboard": "டாஷ்போர்டு",
+      "aiModels": "AI மாதிரிகள்",
+      "videoSystem": "வீடியோ அமைப்பு",
+      "logs": "பதிவுகள்",
+      "configuration": "உள்ளமைவு",
+      "profile": "சுயவிவரம்"
+    },
+    "police": {
+      "dashboard": "டாஷ்போர்டு",
+      "investigationUnit": "விசாரணைப் பிரிவு",
+      "uploadFIR": "FIR பதிவேற்று",
+      "myFIRs": "என் FIR-கள்",
+      "profile": "சுயவிவரம்"
+    }
+  },
+  "litigant": {
+    "fileCaseFIR": "வழக்கு / FIR பதிவு செய்",
+    "fileCaseDesc": "ந்யாய் சாரதியின் AI உதவியுடன் சிவில் வழக்கு அல்லது குற்ற FIR பதிவு செய்யவும்",
+    "getStarted": "தொடங்குங்கள்",
+    "pendingApprovals": "நிலுவையிலுள்ள அனுமதிகள்",
+    "reviewDraft": "வரைவை பரிசீலிக்கவும்",
+    "actionRequired": "நடவடிக்கை தேவை",
+    "sentBy": "அனுப்பியவர்",
+    "awaitingSignature": "உங்கள் டிஜிட்டல் கையொப்பத்துக்காக காத்திருக்கிறது",
+    "viewDetails": "விவரங்களை காண்க",
+    "approveSign": "அனுமதி & மின்னணு கையொப்பம்",
+    "myCases": "என் வழக்குகள்",
+    "upcomingHearings": "வரவிருக்கும் விசாரணைகள்",
+    "documents": "ஆவணங்கள்",
+    "legalChat": "சட்ட உரையாடல்",
+    "active": "செயலில்",
+    "chatWithLawyer": "வழக்கறிஞருடன் உரையாடவும்",
+    "thisMonth": "இந்த மாதம் +1",
+    "newDocs": "+2 புதியவை",
+    "recentCases": "சமீபத்திய வழக்குகள்",
+    "viewAll": "அனைத்தையும் காண்க",
+    "noCases": "இதுவரை எந்த வழக்கும் பதிவு செய்யப்படவில்லை",
+    "fileFirstCase": "உங்கள் முதல் வழக்கை பதிவு செய்யவும்",
+    "filed": "பதிவு செய்யப்பட்டது",
+    "noUpcomingHearings": "வரவிருக்கும் விசாரணைகள் இல்லை",
+    "hearingsAppearHere": "திட்டமிடப்பட்டதும் விசாரணைகள் இங்கு தோன்றும்",
+    "joinVirtualCourt": "மெய்நிகர் நீதிமன்றத்தில் சேரவும்",
+    "startsIn": "{{minutes}} நிமிடங்களில் தொடங்கும்",
+    "loading": "ஏற்றப்படுகிறது..."
+  },
+  "lawyer": {
+    "dashboard": "டாஷ்போர்டு",
+    "clientManagement": "வாடிக்கையாளர் மேலாண்மை",
+    "activeCases": "செயலில் உள்ள வழக்குகள்",
+    "aiAssistant": "AI சட்ட உதவியாளர்",
+    "hearings": "விசாரணைகள்",
+    "analytics": "பகுப்பாய்வு",
+    "profile": "சுயவிவரம்"
+  },
+  "judge": {
+    "judicialOverview": "நீதித்துறை பார்வை",
+    "myDocket": "என் வழக்குப் பட்டியல்",
+    "unassignedPool": "ஒதுக்கப்படாத தொகுப்பு",
+    "courtAnalytics": "நீதிமன்ற பகுப்பாய்வு"
+  },
+  "police": {
+    "dashboard": "போலீஸ் டாஷ்போர்டு",
+    "investigationUnit": "விசாரணைப் பிரிவு",
+    "uploadFIR": "FIR பதிவேற்று",
+    "myFIRs": "என் FIR-கள்"
+  },
+  "common": {
+    "dashboard": "டாஷ்போர்டு",
+    "welcomeBack": "மீண்டும் வரவேற்கிறோம்",
+    "viewProfile": "சுயவிவரத்தை காண்க",
+    "language": "மொழி",
+    "search": "தேடுக...",
+    "notifications": "அறிவிப்புகள்",
+    "profile": "சுயவிவரம்",
+    "logout": "வெளியேறு",
+    "loading": "ஏற்றப்படுகிறது...",
+    "next": "அடுத்து",
+    "previous": "முந்தையது",
+    "submit": "சமர்ப்பிக்கவும்",
+    "cancel": "ரத்து செய்",
+    "save": "சேமி",
+    "delete": "நீக்கு",
+    "edit": "திருத்து",
+    "viewAll": "அனைத்தையும் காண்க",
+    "noData": "தரவு இல்லை"
+  }
+}
