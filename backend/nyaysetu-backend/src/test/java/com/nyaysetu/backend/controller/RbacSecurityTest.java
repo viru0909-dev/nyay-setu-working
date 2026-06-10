@@ -28,10 +28,10 @@ public class RbacSecurityTest {
 
     @RestController
     static class DummyTestController {
-        @GetMapping("/api/v1/client/fir/test")
+        @GetMapping("/client/fir/test")
         public String litigantEndpoint() { return "Litigant OK"; }
 
-        @GetMapping("/api/v1/lawyer/test")
+        @GetMapping("/lawyer/test")
         public String lawyerEndpoint() { return "Lawyer OK"; }
     }
 
