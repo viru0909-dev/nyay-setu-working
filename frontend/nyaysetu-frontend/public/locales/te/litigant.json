@@ -347,56 +347,6 @@
     "backToDashboard": "Dashboard కి తిరిగి వెళ్ళండి"
   },
 
-  "forensics": {
-    "title": "ప్రమాద Forensic విశ్లేషణ",
-    "subtitle": "Video Crime Scene Reconstruction",
-    "noVideo": "Video ఏదీ Upload కాలేదు",
-    "uploadTitle": "ప్రమాద footage Upload చేయండి",
-    "uploadDescription": "MP4, MOV లేదా AVI ఫైల్లు 500MB వరకు",
-    "engineStatus": "Forensic Engine స్థితి",
-    "processing": "ప్రాసెసింగ్ జరుగుతోంది...",
-    "timeline": "పునర్నిర్మించిన Timeline",
-    "waitingAnalysis": "Frame విశ్లేషణ కోసం వేచి ఉంది...",
-    "legalImplications": "న్యాయ చిక్కులు",
-    "analyzingViolations": "ఉల్లంఘనలు విశ్లేషిస్తోంది...",
-    "logs": "FORENSIC_ENGINE_LOGS",
-    "reportReady": "బాధ్యతా అంచనా సిద్ధంగా ఉంది",
-    "primaryLiable": "ప్రాథమిక బాధ్యత పక్షం గుర్తించబడింది:",
-    "viewReport": "కేసు నివేదిక చూడండి",
-
-    "events": {
-      "startExtraction": "AI: Forensic Frame Extraction ప్రారంభిస్తోంది...",
-      "timelineExtraction": "Gemini: Video frames నుండి Timeline సేకరిస్తోంది...",
-      "legalLookup": "Groq: సంబంధిత న్యాయ విభాగాలను (MVA, IPC) వెతుకుతోంది...",
-      "reportGenerated": "విజయం: బాధ్యతా నివేదిక రూపొందించబడింది"
-    },
-
-    "avatar": {
-      "analysisStart": "నేను Video footage విశ్లేషిస్తున్నాను. జంక్షన్‌లో వాహనం B దారి ఇవ్వకుండా ఢీకొన్నట్లు కనిపిస్తోంది.",
-      "legalSections": "నా విశ్లేషణ ప్రకారం, బాధ్యతారాహిత్యంగా వాహనం నడపడం మరియు సిగ్నల్ ఉల్లంఘన కారణంగా ఇక్కడ IPC 279 మరియు MVA 184 విభాగాలు వర్తిస్తాయి.",
-      "finalReport": "తుది బాధ్యతా నివేదిక సిద్ధంగా ఉంది. వాహనం B ప్రమాదానికి ప్రాథమికంగా బాధ్యత వహిస్తుంది."
-    },
-
-    "timelineEvents": {
-      "vehicleA": "వాహనం A 45 km/h వేగంతో జంక్షన్‌లోకి ప్రవేశిస్తోంది",
-      "vehicleB": "వాహనం B ఎర్ర సిగ్నల్‌లో ఆగడం లేదు",
-      "impact": "మధ్య-ఎడమ లేన్‌లో ఢీకొనే స్థానం"
-    },
-
-    "legalSections": {
-      "dangerousDriving": "ప్రమాదకరమైన వాహనం నడపడం",
-      "rashDriving": "పబ్లిక్ రోడ్డుపై బాధ్యతారాహిత్యంగా వాహనం నడపడం",
-      "mvaPenalty": "6 నెలల వరకు జైలు లేదా జరిమానా",
-      "ipcPenalty": "ప్రమాణిత న్యాయ శిక్ష వర్తిస్తుంది"
-    },
-
-    "report": {
-      "vehicleB": "వాహనం B (తెల్ల SUV)",
-      "signalViolation": "సిగ్నల్ ఉల్లంఘన",
-      "overspeeding": "అతి వేగం"
-    }
-  },
-
   "hearings": {
     "title": "విచారణలు",
     "subtitle": "మీ షెడ్యూల్ చేయబడిన virtual న్యాయస్థాన సెషన్లు",

@@ -41,7 +41,9 @@ export default function Footer() {
     ];
 
     const quickLinks = [
+        { label: t('common:header.nav.home'), href: '/', isRoute: true },
         { label: t('common:header.nav.features'), href: '/#features' },
+        { label: t('common:header.nav.upcomingFeatures'), href: '/upcoming-features', isRoute: true },
         { label: t('common:header.nav.constitution'), href: '/constitution', isRoute: true },
         { label: t('common:header.nav.aiAssistant'), action: () => setShowAIModal(true) },
         { label: t('common:header.nav.about'), href: '/about', isRoute: true }
@@ -78,12 +80,17 @@ export default function Footer() {
                 margin: '0 auto',
                 padding: '0 2rem'
             }}>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '3rem',
-                    marginBottom: '3rem'
-                }}>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                    style={{
+                        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px,1fr))',
+                        gap: '3rem',
+                        marginBottom: '3rem'
+                    }}>
                     {/* Brand Section */}
                     <div>
                         <div style={{
@@ -123,7 +130,11 @@ export default function Footer() {
                                     href={link.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    whileHover={{ scale: 1.1, y: -3 }}
+
+                                    whileHover={{
+                                        scale: 1.15,
+                                        y: -5
+                                    }}
                                     whileTap={{ scale: 0.95 }}
                                     style={{
                                         width: '40px',
@@ -137,13 +148,21 @@ export default function Footer() {
                                         color: 'white',
                                         transition: 'all 0.3s'
                                     }}
+
                                     onMouseEnter={(e) => {
                                         e.currentTarget.style.background = link.color;
                                         e.currentTarget.style.borderColor = link.color;
+                                        e.currentTarget.style.boxShadow =
+                                            `0 0 18px ${link.color}`;
                                     }}
+
+
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                                        e.currentTarget.style.background =
+                                            'rgba(255, 255, 255, 0.05)';
+                                        e.currentTarget.style.borderColor =
+                                            'rgba(255, 255, 255, 0.1)';
+                                        e.currentTarget.style.boxShadow = 'none';
                                     }}
                                 >
                                     {link.icon}
@@ -159,6 +178,8 @@ export default function Footer() {
                             fontSize: '1.125rem',
                             fontWeight: '700',
                             marginBottom: '1.5rem'
+
+
                         }}>
                             {t('landing:footer.quickLinks')}
                         </h3>
@@ -173,17 +194,57 @@ export default function Footer() {
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 textDecoration: 'none',
                                                 fontSize: '0.95rem',
-                                                transition: 'color 0.2s',
+
+                                                transition: 'all 0.3s ease',
+                                                display: 'inline-block',
+                                                position: 'relative',
                                                 background: 'none',
                                                 border: 'none',
                                                 padding: 0,
                                                 cursor: 'pointer',
                                                 fontFamily: 'inherit'
                                             }}
-                                            onMouseEnter={(e) => e.currentTarget.style.color = 'white'}
-                                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'}
+
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.color = 'white';
+                                                e.currentTarget.style.transform =
+                                                    'translateX(5px)';
+                                                e.currentTarget.style.textShadow =
+                                                    '0 0 10px rgba(255,255,255,0.4)';
+                                                e.currentTarget.style.borderBottom =
+                                                    '2px solid #8b5cf6';
+                                                const underline = e.currentTarget.querySelector('span');
+                                                if (underline) underline.style.width = '100%';
+                                            }}
+
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.color =
+                                                    'rgba(255,255,255,0.7)';
+                                                e.currentTarget.style.transform =
+                                                    'translateX(0)';
+                                                e.currentTarget.style.textShadow =
+                                                    'none';
+                                                e.currentTarget.style.borderBottom =
+                                                    '2px solid transparent';
+                                                const underline = e.currentTarget.querySelector('span');
+                                                if (underline) underline.style.width = '0%';
+                                            }}
                                         >
-                                            {link.label}
+                                            <>
+                                                {link.label}
+                                                <span
+                                                    style={{
+                                                        position: 'absolute',
+                                                        left: 0,
+                                                        bottom: '-3px',
+                                                        width: '0%',
+                                                        height: '2px',
+                                                        background: 'linear-gradient(90deg, #8b5cf6, #ec4899)',
+                                                        transition: 'width 0.3s ease',
+                                                        pointerEvents: 'none'
+                                                    }}
+                                                />
+                                            </>
                                         </button>
                                     ) : link.isRoute ? (
                                         <Link
@@ -192,12 +253,51 @@ export default function Footer() {
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 textDecoration: 'none',
                                                 fontSize: '0.95rem',
-                                                transition: 'color 0.2s'
+
+                                                transition: 'all 0.3s ease',
+                                                display: 'inline-block',
+                                                position: 'relative'
                                             }}
-                                            onMouseEnter={(e) => e.currentTarget.style.color = 'white'}
-                                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'}
+
+
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.color = 'white';
+                                                e.currentTarget.style.transform = 'translateX(5px)';
+                                                e.currentTarget.style.textShadow =
+                                                    '0 0 10px rgba(255,255,255,0.4)';
+                                                e.currentTarget.style.borderBottom =
+                                                    '2px solid #8b5cf6';
+                                                const underline = e.currentTarget.querySelector('span');
+                                                if (underline) underline.style.width = '100%';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.color =
+                                                    'rgba(255,255,255,0.7)';
+                                                e.currentTarget.style.transform = 'translateX(0)';
+                                                e.currentTarget.style.textShadow = 'none';
+                                                e.currentTarget.style.borderBottom =
+                                                    '2px solid transparent';
+                                                const underline = e.currentTarget.querySelector('span');
+                                                if (underline) underline.style.width = '0%';
+                                            }}
+
                                         >
-                                            {link.label}
+
+                                            <>
+                                                {link.label}
+                                                <span
+                                                    style={{
+                                                        position: 'absolute',
+                                                        left: 0,
+                                                        bottom: '-3px',
+                                                        width: '0%',
+                                                        height: '2px',
+                                                        background: 'linear-gradient(90deg, #8b5cf6, #ec4899)',
+                                                        transition: 'width 0.3s ease',
+                                                        pointerEvents: 'none'
+                                                    }}
+                                                />
+                                            </>
                                         </Link>
                                     ) : (
                                         <a
@@ -206,12 +306,49 @@ export default function Footer() {
                                                 color: 'rgba(255, 255, 255, 0.7)',
                                                 textDecoration: 'none',
                                                 fontSize: '0.95rem',
-                                                transition: 'color 0.2s'
+                                                // transition: 'color 0.2s'
+                                                transition: 'all 0.3s ease',
+                                                display: 'inline-block',
+                                                position: 'relative'
                                             }}
-                                            onMouseEnter={(e) => e.currentTarget.style.color = 'white'}
-                                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'}
+
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.color = 'white';
+                                                e.currentTarget.style.transform = 'translateX(5px)';
+                                                e.currentTarget.style.textShadow =
+                                                    '0 0 10px rgba(255,255,255,0.4)';
+                                                const underline = e.currentTarget.querySelector('span');
+                                                if (underline) underline.style.width = '100%';
+
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.color =
+                                                    'rgba(255,255,255,0.7)';
+                                                e.currentTarget.style.transform = 'translateX(0)';
+                                                e.currentTarget.style.textShadow = 'none';
+                                                e.currentTarget.style.borderBottom =
+                                                    '2px solid transparent';
+                                                const underline = e.currentTarget.querySelector('span');
+                                                if (underline) underline.style.width = '0%';
+
+                                            }}
                                         >
-                                            {link.label}
+
+                                            <>
+                                                {link.label}
+                                                <span
+                                                    style={{
+                                                        position: 'absolute',
+                                                        left: 0,
+                                                        bottom: '-3px',
+                                                        width: '0%',
+                                                        height: '2px',
+                                                        background: 'linear-gradient(90deg, #8b5cf6, #ec4899)',
+                                                        transition: 'width 0.3s ease',
+                                                        pointerEvents: 'none'
+                                                    }}
+                                                />
+                                            </>
                                         </a>
                                     )}
                                 </li>
@@ -238,12 +375,47 @@ export default function Footer() {
                                             color: 'rgba(255, 255, 255, 0.7)',
                                             textDecoration: 'none',
                                             fontSize: '0.95rem',
-                                            transition: 'color 0.2s'
+
+                                            transition: 'all 0.3s ease',
+                                            display: 'inline-block',
+                                            position: 'relative'
                                         }}
-                                        onMouseEnter={(e) => e.target.style.color = 'white'}
-                                        onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.7)'}
+
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.color = 'white';
+                                            e.currentTarget.style.transform =
+                                                'translateX(5px)';
+                                            e.currentTarget.style.textShadow =
+                                                '0 0 10px rgba(255,255,255,0.4)';
+                                            const underline = e.currentTarget.querySelector('span');
+                                            if (underline) underline.style.width = '100%';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.color =
+                                                'rgba(255,255,255,0.7)';
+                                            e.currentTarget.style.transform =
+                                                'translateX(0)';
+                                            e.currentTarget.style.textShadow =
+                                                'none';
+                                            const underline = e.currentTarget.querySelector('span');
+                                            if (underline) underline.style.width = '0%';
+                                        }}
                                     >
-                                        {link.label}
+
+                                        <>
+                                            {link.label}
+                                            <span
+                                                style={{
+                                                    position: 'absolute',
+                                                    left: 0,
+                                                    bottom: '-4px',
+                                                    width: '0%',
+                                                    height: '2px',
+                                                    background: 'linear-gradient(90deg, #8b5cf6, #ec4899)',
+                                                    transition: 'width 0.3s ease'
+                                                }}
+                                            />
+                                        </>
                                     </Link>
                                 </li>
                             ))}
@@ -267,16 +439,42 @@ export default function Footer() {
                                     color: 'rgba(255, 255, 255, 0.7)',
                                     textDecoration: 'none',
                                     fontSize: '0.95rem',
+                                    transition: 'all 0.3s ease',
+                                    display: 'inline-block',
+                                    position: 'relative',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '0.5rem'
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = 'white'}
-                                onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.7)'}
+
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.color = 'white';
+                                    e.currentTarget.style.transform = 'translateX(5px)';
+                                    e.currentTarget.style.textShadow =
+                                        '0 0 10px rgba(255,255,255,0.4)';
+                                    const icon = e.currentTarget.querySelector('.contact-icon');
+                                    if (icon) icon.style.transform = 'scale(1.15)';
+                                    icon.style.filter = 'drop-shadow(0 0 8px #8b5cf6)';
+
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.color =
+                                        'rgba(255,255,255,0.7)';
+                                    e.currentTarget.style.transform =
+                                        'translateX(0)';
+                                    e.currentTarget.style.textShadow = 'none';
+                                    const icon = e.currentTarget.querySelector('.contact-icon');
+                                    if (icon) icon.style.transform = 'scale(1)';
+                                }}
                             >
-                                <FaEnvelope size={16} />
-                                gadekarvidera4@gmail.com
-                            </a>
+
+                                <span className="contact-icon" style={{
+                                    display: 'inline-flex',
+                                    transition: 'transform 0.3s ease'
+                                }}>
+                                    <FaEnvelope size={16} />
+                                </span>
+                                gadekarvidera4@gmail.com              </a>
                             <a
                                 href="https://github.com/viru0909-dev/nyay-setu-working"
                                 target="_blank"
@@ -286,18 +484,45 @@ export default function Footer() {
                                     textDecoration: 'none',
                                     fontSize: '0.95rem',
                                     display: 'flex',
+                                    transition: 'all 0.3s ease',
+                                    position: 'relative',
                                     alignItems: 'center',
                                     gap: '0.5rem'
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = 'white'}
-                                onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.7)'}
+
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.color = 'white';
+                                    e.currentTarget.style.transform = 'translateX(5px)';
+                                    e.currentTarget.style.textShadow =
+                                        '0 0 10px rgba(255,255,255,0.4)';
+                                    const icon = e.currentTarget.querySelector('.contact-icon');
+                                    if (icon) icon.style.transform = 'scale(1.15)';
+
+                                    icon.style.filter = 'drop-shadow(0 0 8px #8b5cf6)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.color =
+                                        'rgba(255,255,255,0.7)';
+                                    e.currentTarget.style.transform =
+                                        'translateX(0)';
+                                    e.currentTarget.style.textShadow = 'none';
+                                    const icon = e.currentTarget.querySelector('.contact-icon');
+                                    if (icon) icon.style.transform = 'scale(1)';
+                                    icon.style.filter = 'none';
+                                }}
                             >
-                                <FaGithub size={16} />
+                                <span className="contact-icon" style={{
+                                    display: 'inline-flex',
+                                    transition: 'transform 0.3s ease'
+                                }}>
+                                    <FaGithub size={16} />
+                                </span>
                                 {t('landing:footer.viewRepository')}
+
                             </a>
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Bottom Bar */}
                 <div style={{

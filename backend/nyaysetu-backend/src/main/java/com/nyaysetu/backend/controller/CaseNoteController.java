@@ -1,7 +1,6 @@
 package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.dto.AddNoteRequest;
-import com.nyaysetu.backend.dto.CreateNoteRequest;
 import com.nyaysetu.backend.entity.CaseNote;
 import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.CaseNoteRepository;
@@ -11,7 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.UUID;
 @Tag(name = "Case Notes", description = "Add and retrieve private notes on a case")
 @RestController

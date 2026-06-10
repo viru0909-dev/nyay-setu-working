@@ -37,13 +37,14 @@ class DocumentFields(BaseModel):
     case_description: str
     incident_date: str
     relief_sought: Optional[str] = ""
+    notice_period: Optional[str] = ""
     court_name: Optional[str] = ""
     department_name: Optional[str] = ""
     pio_name: Optional[str] = ""
 
 
 class GenerateRequest(BaseModel):
-    doc_type: Literal["affidavit", "rti", "complaint", "notice"]
+    doc_type: Literal["affidavit", "rti", "complaint", "notice", "demand_letter"]
     fields: DocumentFields
     language: str = Field(default="en")
 
@@ -175,7 +176,7 @@ Complainant
 {petitioner_name}
 """
 
-NOTICE_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL NOTICE.
+NOTICE_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL NOTICE in {language}.
 Use this legal context: {legal_context}
 
 Sender: {petitioner_name}, {petitioner_address}
@@ -211,11 +212,51 @@ Advocate
 [Address]
 """
 
+DEMAND_LETTER_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal DEMAND LETTER in {language}.
+Use this legal context: {legal_context}
+
+Sender: {petitioner_name}, {petitioner_address}
+Recipient: {respondent_name}, {respondent_address}
+Issue: {case_description}
+Date of incident: {incident_date}
+Relief/Demand: {relief_sought}
+Notice period: {notice_period} days
+
+Format EXACTLY as:
+DEMAND LETTER
+
+Date: {incident_date}
+
+To,
+{respondent_name}
+{respondent_address}
+
+Dear Sir/Madam,
+
+This letter is served on behalf of {petitioner_name} of {petitioner_address}
+with reference to the above matter.
+
+1. That my client is [relationship/context].
+2. [Statement of facts in numbered paragraphs including the incident and loss suffered]
+3. [Legal grounds and applicable provisions cited from context]
+4. [Demanded relief and compensation]
+
+You are requested to remedy the matter and comply with the demand within
+{notice_period} days from receipt of this letter, failing which my client
+will initiate appropriate legal proceedings without further notice.
+
+Yours faithfully,
+
+{petitioner_name}
+{petitioner_address}
+"""
+
 PROMPT_MAP: Dict[str, str] = {
     "affidavit": AFFIDAVIT_PROMPT,
     "rti": RTI_PROMPT,
     "complaint": COMPLAINT_PROMPT,
     "notice": NOTICE_PROMPT,
+    "demand_letter": DEMAND_LETTER_PROMPT,
 }
 
 TITLE_MAP: Dict[str, str] = {
@@ -223,6 +264,7 @@ TITLE_MAP: Dict[str, str] = {
     "rti": "APPLICATION UNDER RIGHT TO INFORMATION ACT, 2005",
     "complaint": "LEGAL COMPLAINT",
     "notice": "LEGAL NOTICE",
+    "demand_letter": "DEMAND LETTER",
 }
 
 
@@ -324,6 +366,17 @@ def _get_doc_llm():
 
 # ── Core generation logic ─────────────────────────────────────────────────────
 
+def _map_language_label(language: str) -> str:
+    mapping = {
+        "en": "English",
+        "hi": "Hindi",
+        "ta": "Tamil",
+        "mr": "Marathi",
+        "kn": "Kannada",
+    }
+    return mapping.get(language.lower(), language)
+
+
 def _generate_document(request: GenerateRequest) -> GenerateResponse:
     """Shared generation logic used by both /generate and /generate/pdf."""
     fields: DocumentFields = request.fields
@@ -367,9 +420,11 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
         "case_description": fields.case_description,
         "incident_date": fields.incident_date,
         "relief_sought": fields.relief_sought or "N/A",
+        "notice_period": fields.notice_period or "15",
         "court_name": fields.court_name or "___",
         "department_name": fields.department_name or "___",
         "pio_name": fields.pio_name or "The Public Information Officer",
+        "language": _map_language_label(request.language),
     }
 
     # If external templates provided required_fields, enforce them
