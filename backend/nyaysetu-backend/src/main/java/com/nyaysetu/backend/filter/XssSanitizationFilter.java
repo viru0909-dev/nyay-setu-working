@@ -11,21 +11,13 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.HtmlUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * XSS Sanitization Filter.
- *
- * Intercepts incoming HTTP requests and sanitizes the JSON request body
- * by escaping HTML special characters. This provides a global defense
- * layer against XSS and HTML injection attacks for all backend controllers.
- *
- * Only processes requests with JSON content type to avoid breaking
- * file uploads and other binary content.
- */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class XssSanitizationFilter extends OncePerRequestFilter {
@@ -36,47 +28,81 @@ public class XssSanitizationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        String contentType = request.getContentType();
-
-        // Only sanitize JSON request bodies
-        if (contentType != null && contentType.contains("application/json")) {
-            XssSanitizedRequestWrapper wrappedRequest = new XssSanitizedRequestWrapper(request);
-            filterChain.doFilter(wrappedRequest, response);
-        } else {
-            filterChain.doFilter(request, response);
-        }
+        XssSanitizedRequestWrapper wrappedRequest = new XssSanitizedRequestWrapper(request);
+        filterChain.doFilter(wrappedRequest, response);
     }
 
-    /**
-     * Wrapper that reads the original request body, sanitizes HTML entities
-     * within JSON string values, and provides the sanitized body to
-     * downstream filters and controllers.
-     */
     private static class XssSanitizedRequestWrapper extends HttpServletRequestWrapper {
 
-        private final byte[] sanitizedBody;
+        private byte[] sanitizedBody;
+        private final Map<String, String[]> sanitizedParameters;
+        private final Map<String, String> sanitizedHeaders;
 
         public XssSanitizedRequestWrapper(HttpServletRequest request) throws IOException {
             super(request);
 
-            // Read the original body
+            this.sanitizedBody = sanitizeBody(request);
+            this.sanitizedParameters = sanitizeParameters(request);
+            this.sanitizedHeaders = sanitizeHeaders(request);
+        }
+
+        private byte[] sanitizeBody(HttpServletRequest request) throws IOException {
+            int contentLength = request.getContentLength();
+            if (contentLength == 0 || contentLength == -1) {
+                return new byte[0];
+            }
+
+            String contentType = request.getContentType();
+            if (contentType != null && (contentType.contains("multipart") || contentType.contains("octet-stream"))) {
+                String originalBody;
+                try (BufferedReader reader = request.getReader()) {
+                    originalBody = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+                }
+                return originalBody.getBytes(StandardCharsets.UTF_8);
+            }
+
             String originalBody;
             try (BufferedReader reader = request.getReader()) {
                 originalBody = reader.lines().collect(Collectors.joining(System.lineSeparator()));
             }
 
-            // Sanitize HTML within JSON string values
+            if (originalBody == null || originalBody.isEmpty()) {
+                return new byte[0];
+            }
+
             String sanitized = sanitizeJsonStringValues(originalBody);
-            this.sanitizedBody = sanitized.getBytes(StandardCharsets.UTF_8);
+            return sanitized.getBytes(StandardCharsets.UTF_8);
         }
 
-        /**
-         * Sanitize HTML special characters within JSON string values.
-         *
-         * This uses a simple approach: find JSON string values (content between
-         * quotes after a colon) and escape HTML entities within them.
-         * This preserves JSON structure while neutralizing XSS payloads.
-         */
+        private Map<String, String[]> sanitizeParameters(HttpServletRequest request) {
+            Map<String, String[]> sanitized = new LinkedHashMap<>();
+            Map<String, String[]> original = request.getParameterMap();
+
+            for (Map.Entry<String, String[]> entry : original.entrySet()) {
+                String[] sanitizedValues = Arrays.stream(entry.getValue())
+                        .map(v -> v != null ? HtmlUtils.htmlEscape(v) : null)
+                        .toArray(String[]::new);
+                sanitized.put(entry.getKey(), sanitizedValues);
+            }
+
+            return sanitized;
+        }
+
+        private Map<String, String> sanitizeHeaders(HttpServletRequest request) {
+            Map<String, String> sanitized = new LinkedHashMap<>();
+            Enumeration<String> headerNames = request.getHeaderNames();
+
+            if (headerNames != null) {
+                while (headerNames.hasMoreElements()) {
+                    String name = headerNames.nextElement();
+                    String value = request.getHeader(name);
+                    sanitized.put(name, value != null ? HtmlUtils.htmlEscape(value) : null);
+                }
+            }
+
+            return sanitized;
+        }
+
         private String sanitizeJsonStringValues(String json) {
             if (json == null || json.isEmpty()) {
                 return json;
@@ -108,18 +134,68 @@ public class XssSanitizationFilter extends OncePerRequestFilter {
                 }
 
                 if (inString) {
-                    // Escape HTML special characters within string values
-                    switch (c) {
-                        case '<' -> result.append("&lt;");
-                        case '>' -> result.append("&gt;");
-                        default -> result.append(c);
-                    }
+                    result.append(HtmlUtils.htmlEscape(String.valueOf(c)));
                 } else {
                     result.append(c);
                 }
             }
 
             return result.toString();
+        }
+
+        @Override
+        public String getParameter(String name) {
+            String[] values = sanitizedParameters.get(name);
+            return values != null && values.length > 0 ? values[0] : null;
+        }
+
+        @Override
+        public Map<String, String[]> getParameterMap() {
+            return Collections.unmodifiableMap(sanitizedParameters);
+        }
+
+        @Override
+        public String[] getParameterValues(String name) {
+            return sanitizedParameters.get(name);
+        }
+
+        @Override
+        public Enumeration<String> getParameterNames() {
+            return Collections.enumeration(sanitizedParameters.keySet());
+        }
+
+        @Override
+        public String getQueryString() {
+            String query = ((HttpServletRequest) getRequest()).getQueryString();
+            return query != null ? HtmlUtils.htmlEscape(query) : null;
+        }
+
+        @Override
+        public String getHeader(String name) {
+            return sanitizedHeaders.get(name);
+        }
+
+        @Override
+        public Enumeration<String> getHeaderNames() {
+            return Collections.enumeration(sanitizedHeaders.keySet());
+        }
+
+        @Override
+        public Enumeration<String> getHeaders(String name) {
+            String value = sanitizedHeaders.get(name);
+            return Collections.enumeration(value != null ? Collections.singletonList(value) : Collections.emptyList());
+        }
+
+        @Override
+        public int getIntHeader(String name) {
+            String value = sanitizedHeaders.get(name);
+            return value != null ? Integer.parseInt(value) : super.getIntHeader(name);
+        }
+
+        @Override
+        public long getDateHeader(String name) {
+            String value = sanitizedHeaders.get(name);
+            return value != null ? super.getDateHeader(name) : -1L;
         }
 
         @Override
@@ -138,7 +214,6 @@ public class XssSanitizationFilter extends OncePerRequestFilter {
 
                 @Override
                 public void setReadListener(ReadListener readListener) {
-                    // Not needed for synchronous processing
                 }
 
                 @Override

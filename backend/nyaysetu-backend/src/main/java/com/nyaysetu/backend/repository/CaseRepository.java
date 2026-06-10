@@ -7,6 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.CaseStatus;
 import com.nyaysetu.backend.entity.User;
@@ -24,6 +28,11 @@ public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
     
     // Count cases assigned to a judge (for round-robin)
     long countByJudgeId(Long judgeId);
+
+    long countByStatusInAndUpdatedAtGreaterThanEqualAndUpdatedAtLessThan(
+            Collection<CaseStatus> statuses,
+            LocalDateTime start,
+            LocalDateTime end);
     
     // Lawyer-specific queries
     List<CaseEntity> findByLawyer(User lawyer);

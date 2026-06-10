@@ -7,6 +7,7 @@ import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.DocumentEntity;
 import com.nyaysetu.backend.entity.DocumentStorageType;
 import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.entity.VisibilityLevel;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.repository.UserRepository;
@@ -61,6 +62,7 @@ public class DocumentManagementService {
                 .uploadIp(uploadIp)
                 .isVerified(fileHash != null)
                 .visibilityLevel("RESTRICTED")
+                .visibilityLevel(VisibilityLevel.RESTRICTED) // Default: only uploader, their lawyer, and judge can see
                 .build();
 
         DocumentEntity saved = documentRepository.save(document);
@@ -153,6 +155,15 @@ public class DocumentManagementService {
     case "SEALED" -> "JUDGE".equals(userRole);
     default -> false;
 };
+        VisibilityLevel visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : VisibilityLevel.PUBLIC;
+        
+        return switch (visibility) {
+            case PUBLIC -> true; // Everyone can see public documents
+            case RESTRICTED -> "JUDGE".equals(userRole)
+                    || (userId != null && userId.equals(doc.getUploadedBy()))
+                    || isCaseLawyer; // Assigned lawyers can access restricted case documents
+            case SEALED -> "JUDGE".equals(userRole); // Only judge
+        };
     }
 
     public DocumentDto getDocumentById(UUID id) {

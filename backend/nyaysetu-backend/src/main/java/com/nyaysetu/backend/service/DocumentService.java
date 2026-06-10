@@ -5,6 +5,7 @@ import com.nyaysetu.backend.dto.UploadDocumentResponse;
 import com.nyaysetu.backend.entity.DocumentEntity;
 import com.nyaysetu.backend.entity.DocumentStorageType;
 import com.nyaysetu.backend.entity.DocumentVersion;
+import com.nyaysetu.backend.entity.VisibilityLevel;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -136,6 +137,13 @@ public class DocumentService {
             default:
                 return false;
         }
+        VisibilityLevel visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : VisibilityLevel.PUBLIC;
+        
+        return switch (visibility) {
+            case PUBLIC -> true;
+            case RESTRICTED -> "JUDGE".equals(userRole) || userId.equals(doc.getUploadedBy());
+            case SEALED -> "JUDGE".equals(userRole);
+        };
     }
 
     public DocumentEntity getDocument(UUID id) {
