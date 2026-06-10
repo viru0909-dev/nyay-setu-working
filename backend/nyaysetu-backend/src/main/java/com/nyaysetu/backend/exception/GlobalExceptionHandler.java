@@ -50,11 +50,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(com.nyaysetu.backend.exception.AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleCustomAccessDenied(com.nyaysetu.backend.exception.AccessDeniedException e) {
-        ErrorResponse error = new ErrorResponse("Access Denied", e.getMessage(), 403);
-        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
-    }
+
 
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(org.springframework.dao.DataIntegrityViolationException e) {
