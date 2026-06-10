@@ -1,0 +1,5 @@
+# <b>Article</b> <b>140</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=101688
+# Fetch query: Constitution of India Article 140
+
+Article 140 in Constitution of India 140. Ancillary powers of Supreme Court Parliament may by law make provision for conferring upon the Supreme Court such supplemental powers not inconsistent with any of the provisions of this Constitution as may appear to be necessary or desirable for the purpose of enabling the court more effectively to exercise the jurisdiction conferred upon it by or under this Constitution.

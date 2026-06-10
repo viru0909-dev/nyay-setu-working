@@ -8,26 +8,37 @@ Endpoints:
   POST /api/legal/analyze           — Sync version (testing only)
   GET  /health                      — Health check
 """
+import os
 from utils import async_retry
 import asyncio
 import json
+
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
+import time
+import uuid
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sse_starlette.sse import EventSourceResponse
 
+from cache import (
+    generate_cache_key,
+    get_cached_response,
+    set_cached_response
+)
 from config import FRONTEND_ORIGIN, GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KEY, GEMINI_MODEL
 from decomposer import decompose_query
 from router import route_questions
-from research import run_parallel_research
-from synthesizer import synthesize_answers
+from research import run_parallel_research, execute_with_fallback
+from synthesizer import synthesize_answers, stream_synthesize_answers, synthesize_answers_structured, stream_synthesize_answers_structured
+from validators.citation_validator import validate_citations_from_text
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
-from routers.forensics import router as forensics_router
+from sanitizer import sanitize_user_input, sanitize_prompt_input
 
 # Initialize clients for deep research pipeline
 from groq import AsyncGroq
@@ -38,7 +49,46 @@ gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nlp-orchestrator")
+# ─── Sensitive fields to redact in production ─────────────────────────────────
+SENSITIVE_FIELDS = {"authorization", "password", "token", "api_key", "secret"}
 
+def redact(headers: dict) -> dict:
+    """Mask sensitive header values in production."""
+    if os.getenv("ENV", "development") != "production":
+        return dict(headers)
+    return {
+        k: "***REDACTED***" if k.lower() in SENSITIVE_FIELDS else v
+        for k, v in headers.items()
+    }
+
+# ─── Logging Middleware ───────────────────────────────────────────────────────
+class LoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        request_id = str(uuid.uuid4())
+
+        logger.info({
+            "event": "request_received",
+            "request_id": request_id,
+            "method": request.method,
+            "path": request.url.path,
+            "client_ip": request.client.host,
+            "headers": redact(dict(request.headers)),
+        })
+
+        start_time = time.perf_counter()
+        response = await call_next(request)
+        duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
+
+        response.headers["X-Request-ID"] = request_id
+
+        logger.info({
+            "event": "request_completed",
+            "request_id": request_id,
+            "status_code": response.status_code,
+            "duration_ms": duration_ms,
+        })
+
+        return response
 
 # ─── App Setup ────────────────────────────────────────────────────────────────
 
@@ -54,16 +104,41 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
-
+app.add_middleware(LoggingMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_ORIGIN, "http://localhost:3000", "http://localhost:8080"],
+    allow_origins=[
+        FRONTEND_ORIGIN,
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8080",
+        "https://nyaysetu-lovat.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(forensics_router)
+try:
+    from routers.forensics import router as forensics_router
+    app.include_router(forensics_router)
+    logger.info("Loaded forensics router.")
+except ImportError:
+    logger.warning("Skipping forensics router due to missing dependencies.")
+
+try:
+    from routers.modi_ocr import router as modi_ocr_router
+    app.include_router(modi_ocr_router)
+    logger.info("Loaded modi_ocr router.")
+except ImportError:
+    logger.warning("Skipping modi_ocr router due to missing dependencies.")
+try:
+    from routers.ocr import router as ocr_router
+    app.include_router(ocr_router)
+    logger.info("Loaded ocr router.")
+except ImportError:
+    logger.warning("Skipping ocr router due to missing dependencies.")
+
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
@@ -71,6 +146,24 @@ app.include_router(forensics_router)
 class LegalQuery(BaseModel):
     query: str
     language: str = "en"
+
+    @field_validator("query")
+    @classmethod
+    def validate_and_sanitize_query(cls, v):
+        v = sanitize_user_input(v)
+        if not v:
+            raise ValueError("Query cannot be empty")
+        if len(v) > 2000:
+            raise ValueError("Query exceeds maximum length of 2000 characters")
+        return v
+
+    @field_validator("language")
+    @classmethod
+    def validate_language(cls, v):
+        allowed = {"en", "hi", "hinglish"}
+        if v not in allowed:
+            raise ValueError(f"Language must be one of: {allowed}")
+        return v
 
 
 # ─── SSE Event Builder ────────────────────────────────────────────────────────
@@ -85,21 +178,20 @@ def sse_event(event_type: str, data: dict) -> str:
 async def legal_reasoning_pipeline(query: str, language: str):
     """
     Async generator that yields SSE events through the full 5-layer pipeline.
-
-    Fix: Removed inner async generator — research now runs as a background
-    asyncio.Task while interim messages are yielded from the outer generator.
     """
     kanoon_task = None
     research_task = None
 
     try:
         # ── Layer 1: Decompose ───────────────────────────────────
-        logger.info(f"[Layer 1] Decomposing: {query[:60]}...")
+        # Sanitize query for prompt injection before sending to AI
+        safe_query = sanitize_prompt_input(query)
+        logger.info(f"[Layer 1] Decomposing: {safe_query[:60]}...")
         yield sse_event("avatar_update", {"message": "Aapka sawaal samajh raha hoon, thoda wait karein..."})
 
         kanoon_task = asyncio.create_task(build_kanoon_context(query, max_results=3))
 
-        sub_questions = await decompose_query(query)
+        sub_questions = await decompose_query(safe_query)
         logger.info(f"[Layer 1] Got {len(sub_questions)} sub-questions")
         yield sse_event("sub_questions", {"questions": sub_questions})
 
@@ -145,8 +237,28 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("synthesis_start", {})
         yield sse_event("avatar_update", {"message": "Sab information mila di, ab aapke liye summary bana raha hoon..."})
 
-        logger.info("[Layer 4] Synthesizing...")
-        synthesized_md = await synthesize_answers(query, results)
+        logger.info("[Layer 4] Synthesizing with structured streaming...")
+        
+        synthesized_md = ""
+        cited_laws_from_stream = []
+        
+        # Stream synthesis tokens using the structured generator
+        async for chunk in stream_synthesize_answers_structured(safe_query, results):
+            if chunk.get("text"):
+                synthesized_md += chunk["text"]
+                yield sse_event("synthesis_token", {"chunk": chunk["text"]})
+            if chunk.get("citations"):
+                cited_laws_from_stream = chunk["citations"]
+        
+        logger.info("[Layer 4] Synthesis complete")
+
+        try:
+            validation_results = validate_citations_from_text(synthesized_md)
+            if validation_results:
+                logger.info("[Layer 4] Citation validation results: %s", validation_results)
+        except Exception as e:
+            logger.warning("[Layer 4] Citation validation failed (non-blocking): %s", e)
+            validation_results = []
 
         # ── Layer 5b: Hinglish Conversion ────────────────────────
         logger.info("[Layer 5] Converting to Hinglish...")
@@ -154,7 +266,9 @@ async def legal_reasoning_pipeline(query: str, language: str):
 
         yield sse_event("final_answer", {
             "markdown": synthesized_md,
-            "hinglish": hinglish_dialogue
+            "hinglish": hinglish_dialogue,
+            "cited_laws": cited_laws_from_stream,
+            "citation_validation": validation_results
         })
 
         yield sse_event("done", {"message": "Research complete"})
@@ -191,22 +305,32 @@ async def legal_reasoning_pipeline(query: str, language: str):
 async def health():
     return {"status": "ok", "service": "nlp-orchestrator", "port": 8001}
 
+@app.get("/models")
+async def get_models():
+    return {
+        "groq": {
+            "model": GROQ_MODEL_FAST,
+            "available": bool(GROQ_API_KEY)
+        },
+        "gemini": {
+            "model": GEMINI_MODEL,
+            "available": bool(GEMINI_API_KEY)
+        }
+    }
 
 @app.post("/api/legal/analyze-stream")
 async def analyze_stream(body: LegalQuery, request: Request):
     """
     Primary SSE endpoint — streams the full legal reasoning pipeline.
     Frontend connects using fetch + ReadableStream for real-time updates.
+    Input validation and sanitization is handled by the LegalQuery Pydantic model.
     """
-    if not body.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
-    if len(body.query) > 2000:
-        raise HTTPException(status_code=400, detail="Query exceeds maximum length of 2000 characters")
 
     logger.info(f"[Stream] New query: {body.query[:80]}")
 
     async def event_generator():
         pipeline = legal_reasoning_pipeline(body.query, body.language)
+
         try:
             async for event in pipeline:
                 if await request.is_disconnected():
@@ -224,11 +348,8 @@ async def analyze_sync(body: LegalQuery):
     """
     Synchronous endpoint — runs the full pipeline and returns all results at once.
     Use only for testing. In production, use /analyze-stream for real-time UX.
+    Input validation and sanitization is handled by the LegalQuery Pydantic model.
     """
-    if not body.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
-    if len(body.query) > 2000:
-        raise HTTPException(status_code=400, detail="Query exceeds maximum length of 2000 characters")
 
     logger.info(f"[Sync] Analyzing: {body.query[:80]}")
 
@@ -240,7 +361,17 @@ async def analyze_sync(body: LegalQuery):
         logger.error("[Sync] Indian Kanoon fetch failed: %s", e)
         kanoon_context = ""
     results = await run_parallel_research(routed, kanoon_context=kanoon_context)
-    synthesized = await synthesize_answers(body.query, results)
+    synthesis = await synthesize_answers_structured(body.query, results)
+    synthesized = synthesis.answer_markdown
+
+    try:
+        validation_results = validate_citations_from_text(synthesized)
+        if validation_results:
+            logger.info("[Sync] Citation validation results: %s", validation_results)
+    except Exception as e:
+        logger.warning("[Sync] Citation validation failed (non-blocking): %s", e)
+        validation_results = []
+
     hinglish = await convert_to_hinglish(synthesized)
 
     return JSONResponse({
@@ -249,29 +380,37 @@ async def analyze_sync(body: LegalQuery):
         "research": results,
         "final_answer": {
             "markdown": synthesized,
-            "hinglish": hinglish
+            "hinglish": hinglish,
+            "cited_laws": synthesis.cited_laws,
+            "citation_validation": validation_results
         }
     })
 
 # ─── Deep Research Pipeline ──────────────────────────────────────────────────
 
-DEEP_RESEARCH_SYSTEM_PROMPT = """You are Nyay Saarthi legal AI. Answer ONLY using the provided Indian Kanoon legal context below.
-If the answer is not in the context, say "I need to verify this — please consult an advocate."
+DEEP_RESEARCH_SYSTEM_PROMPT = """You are Nyay Saarthi, a specialized Indian Legal AI Assistant. 
+Your SOLE purpose is to provide legal information, analysis, and guidance based on Indian Law (IPC, BNS, MVA, Constitution, etc.).
+
+STRICT MANDATE:
+- If the user query is NOT related to Indian Law, legal procedures, or the Indian justice system, you MUST politely refuse to answer.
+- State: "I am a specialized Legal AI Assistant. I can only assist with queries related to Indian Law and legal procedures. Your question seems to be outside my legal domain."
+- DO NOT answer questions about technology, science, general history, or other non-legal topics.
+- Answer ONLY using the provided Indian Kanoon legal context below when possible.
 
 CONTEXT FROM INDIAN KANOON:
 {kanoon_context}
 
 USER QUERY: {user_query}
 
-Provide a thorough legal analysis. Cite the exact section or judgment you used.
+If the topic is legal but not found in the context, use your internal legal knowledge but cite relevant sections and add a disclaimer.
 Structure your response with:
 1. Direct answer to the question
 2. Relevant legal sections with exact numbers
-3. Key case precedents cited
+3. Key case precedents cited (if any)
 4. Practical steps for the citizen
 5. Important caveats or disclaimers
 
-Format in Markdown. Be precise and cite sources."""
+Format in Markdown. Be precise and professional."""
 
 @async_retry(max_attempts=3)
 async def call_groq_with_retry(grounded_prompt, query):
@@ -296,7 +435,9 @@ async def deep_research_pipeline(query: str, language: str):
     """
     try:
         # ── Stage 1: UNDERSTANDING ────────────────────────────────
-        logger.info(f"[Deep Research] Stage 1: Understanding query: {query[:60]}...")
+        # Sanitize query for prompt injection before sending to AI
+        safe_query = sanitize_prompt_input(query)
+        logger.info(f"[Deep Research] Stage 1: Understanding query: {safe_query[:60]}...")
         
         domain = detect_domain(query)
         domain_label = domain.upper() if domain != "general" else "GENERAL LEGAL"
@@ -346,10 +487,9 @@ async def deep_research_pipeline(query: str, language: str):
         logger.info("[Deep Research] Stage 3: Routing...")
         
         # Compute complexity score for display
-        from router import classify_question, COMPLEX_KEYWORDS, SIMPLE_KEYWORDS
+        from router import COMPLEX_KEYWORDS
         lower_q = query.lower()
         complex_score = sum(1 for kw in COMPLEX_KEYWORDS if kw in lower_q)
-        simple_score = sum(1 for kw in SIMPLE_KEYWORDS if kw in lower_q)
         word_count = len(query.split())
         
         # Normalized complexity 0-1
@@ -396,34 +536,63 @@ async def deep_research_pipeline(query: str, language: str):
 
         # Build grounded prompt with Kanoon context
         grounded_prompt = DEEP_RESEARCH_SYSTEM_PROMPT.format(
-            kanoon_context=kanoon_context if kanoon_context else "No specific Indian Kanoon context found. Use your general legal knowledge but clearly state you cannot verify specific judgments.",
+            kanoon_context=kanoon_context if kanoon_context else "No specific Indian Kanoon judgments found for this query. If the query is legal in nature, provide general legal guidance based on Indian statutes. If the query is non-legal, follow the refusal mandate in your system prompt.",
             user_query=query
         )
 
-        # Call the AI model and stream reasoning
         ai_answer = None
+        cached = False
+
         if model_choice == "gemini" and gemini_client:
-            try:
-                loop = asyncio.get_event_loop()
-                response = await loop.run_in_executor(
-                    None,
-                    lambda: gemini_client.models.generate_content(
-                        model=GEMINI_MODEL,
-                        contents=grounded_prompt
-                    )
-                )
-                ai_answer = response.text.strip()
-            except Exception as e:
-                logger.error(f"Gemini failed, falling back to Groq: {e}")
-                model_choice = "groq"
-                ai_answer = None
-        
-        if model_choice == "groq" or (model_choice == "gemini" and not gemini_client):
-           response = await call_groq_with_retry(
-               grounded_prompt,
-               query
+            cache_key = generate_cache_key(
+                "gemini",
+                grounded_prompt,
+                GEMINI_MODEL,
+                user_query=query
             )
-           ai_answer = response.choices[0].message.content.strip()
+            cached_response = get_cached_response(cache_key)
+            if cached_response:
+                logger.info("[Deep Research] Gemini cache hit")
+                ai_answer = cached_response
+                cached = True
+
+        if not cached and (model_choice == "groq" or (model_choice == "gemini" and not gemini_client)):
+            cache_key = generate_cache_key(
+                "groq",
+                grounded_prompt,
+                GROQ_MODEL_FAST,
+                user_query=query
+            )
+            cached_response = get_cached_response(cache_key)
+            if cached_response:
+                logger.info("[Deep Research] Groq cache hit")
+                ai_answer = cached_response
+                cached = True
+
+        if not cached:
+            # Use the unified fallback coordinator for deep research to avoid
+            # duplicating retry/fallback logic between Gemini and Groq.
+            result = await execute_with_fallback(query, kanoon_context, primary_provider=model_choice)
+            ai_answer = result.get("answer", "")
+            model_choice = result.get("source", model_choice)
+
+            if ai_answer:
+                if model_choice == "gemini":
+                    cache_key = generate_cache_key(
+                        "gemini",
+                        grounded_prompt,
+                        GEMINI_MODEL,
+                        user_query=query
+                    )
+                    set_cached_response(cache_key, ai_answer)
+                elif model_choice == "groq":
+                    cache_key = generate_cache_key(
+                        "groq",
+                        grounded_prompt,
+                        GROQ_MODEL_FAST,
+                        user_query=query
+                    )
+                    set_cached_response(cache_key, ai_answer)
 
         # Stream reasoning text in chunks for live display
         if ai_answer:
@@ -442,12 +611,17 @@ async def deep_research_pipeline(query: str, language: str):
 
         # ── Stage 5: VERDICT ──────────────────────────────────────
         logger.info("[Deep Research] Stage 5: Verdict...")
-        
+
         yield sse_event("stage", {
             "stage": "verdict",
             "status": "active",
             "message": "Preparing final legal conclusion..."
         })
+
+        # Validate citations in AI response
+        citation_validation = validate_citations_from_text(ai_answer) if ai_answer else []
+        if citation_validation:
+            logger.info("[Deep Research] Citation validation: %s", citation_validation)
 
         # Convert to Hinglish for avatar speech
         hinglish_verdict = await convert_to_hinglish(ai_answer or "Analysis could not be completed.")
@@ -468,6 +642,7 @@ async def deep_research_pipeline(query: str, language: str):
             "answer": ai_answer or "Unable to generate analysis.",
             "hinglish": hinglish_verdict,
             "citations": citations,
+            "citation_validation": citation_validation,
             "model_used": model_choice,
             "domain": domain_label
         })
@@ -498,15 +673,12 @@ async def deep_research(body: LegalQuery, request: Request):
     Indian Kanoon context. Frontend connects directly to this for
     the reasoning panel + avatar speech updates.
     """
-    if not body.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
-    if len(body.query) > 2000:
-        raise HTTPException(status_code=400, detail="Query exceeds maximum length of 2000 characters")
-
+    # Input validation and sanitization is handled by the LegalQuery Pydantic model.
     logger.info(f"[Deep Research] New query: {body.query[:80]}")
 
     async def event_generator():
         pipeline = deep_research_pipeline(body.query, body.language)
+
         try:
             async for event in pipeline:
                 if await request.is_disconnected():
@@ -523,5 +695,5 @@ async def deep_research(body: LegalQuery, request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
-
+    port = int(os.getenv("PORT", 8001))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

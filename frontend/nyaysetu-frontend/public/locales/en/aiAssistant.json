@@ -1,0 +1,19 @@
+{
+  "title": "AI-Powered Legal Brain",
+  "description": "Your intelligent assistant that understands Indian law and provides instant answers to your legal queries.",
+  "tryAsking": "💡 Try Asking",
+  "startChat": "Start Chatting Now!",
+  "legalAssistant": "Legal AI Assistant",
+  "thinking": "Thinking...",
+  "placeholder": "Ask me anything about Indian law...",
+  "error": "Sorry, I encountered an error. Please try again.",
+  "askQuestion": "Ask any legal question",
+  "poweredBy": "Powered by NyaySetu AI",
+  "sampleQuestions": [
+    "What are my fundamental rights?",
+    "How do I file a case online?",
+    "Explain Article 21 of the Constitution",
+    "What is bail and how does it work?",
+    "How to find a lawyer near me?"
+  ]
+}

@@ -4,12 +4,13 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "test": "vitest",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.71.2",
+    "@anthropic-ai/sdk": "^0.100.1",
     "@react-three/drei": "^9.117.3",
     "@react-three/fiber": "^8.17.10",
     "aos": "^2.3.4",
@@ -21,6 +22,7 @@
     "i18next": "^25.8.10",
     "i18next-browser-languagedetector": "^8.2.1",
     "i18next-http-backend": "^3.0.2",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-canvas-confetti": "^2.0.7",
@@ -29,19 +31,23 @@
     "react-i18next": "^16.5.4",
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^6.20.0",
+    "react-router-dom": "^7.16.0",
     "react-webcam": "^7.2.0",
     "remark-gfm": "^4.0.1",
     "simple-peer": "^9.11.1",
     "socket.io-client": "^4.8.1",
-    "three": "^0.181.2",
+    "three": "^0.184.0",
     "vite-plugin-pwa": "^1.2.0",
-    "zustand": "^4.4.7"
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^14.0.0",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.0.8"
+    "jsdom": "^29.1.1",
+    "vite": "^5.0.8",
+    "vitest": "^3.2.4"
   }
 }

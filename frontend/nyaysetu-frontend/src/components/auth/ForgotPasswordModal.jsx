@@ -16,15 +16,22 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
         setLoading(true);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/auth/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
             });
 
             if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || 'Failed to send reset email');
+                let errorMessage = 'Failed to send reset email';
+                try {
+                    const text = await response.text();
+                    const data = text ? JSON.parse(text) : {};
+                    errorMessage = data.message || errorMessage;
+                } catch (e) {
+                    console.error('Invalid JSON response');
+                }
+                throw new Error(errorMessage);
             }
 
             setSuccess(true);
@@ -56,7 +63,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
                 >
                     <div className="biometric-header-decor"></div>
 
-                    <button onClick={onClose} className="biometric-close-btn">
+                    <button onClick={onClose} aria-label="Close" className="biometric-close-btn">
                         <X size={20} />
                     </button>
 
@@ -128,6 +135,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
                                 </p>
                                 <button
                                     onClick={onClose}
+                                    aria-label="Close"
                                     className="biometric-btn btn-secondary-bio"
                                     style={{ margin: '0 auto' }}
                                 >

@@ -1,17 +1,56 @@
+import ipaddress
+import socket
+from urllib.parse import urlparse
+
+BLOCKED_NETWORKS = [
+    ipaddress.ip_network("127.0.0.0/8"),
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.168.0.0/16"),
+    ipaddress.ip_network("169.254.0.0/16"),
+    ipaddress.ip_network("::1/128"),
+    ipaddress.ip_network("fc00::/7"),
+]
+
+def validate_url_for_ssrf(url: str) -> None:
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(f"Disallowed scheme: {parsed.scheme}")
+    hostname = parsed.hostname
+    if not hostname:
+        raise ValueError("No hostname found in URL.")
+    try:
+        resolved_ip = socket.getaddrinfo(hostname, None)[0][4][0]
+    except socket.gaierror:
+        raise ValueError(f"Cannot resolve hostname: {hostname}")
+    ip_obj = ipaddress.ip_address(resolved_ip)
+    for blocked in BLOCKED_NETWORKS:
+        if ip_obj in blocked:
+            raise ValueError(f"URL resolves to blocked IP: {resolved_ip}")
+
 import cv2
 import os
 import aiohttp
 import asyncio
 from typing import List
 
+from services.url_security import validate_public_video_url
+
 UPLOAD_DIR = "/tmp/nyaysetu_forensics"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 async def download_video(url: str, job_id: str) -> str:
+    try:
+        validate_url_for_ssrf(url)
+    except ValueError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=f"Unsafe URL rejected: {e}")
     """Download video from URL (which will be a MinIO/Spring Boot endpoint) to a local temp file."""
     # If the URL is already a local path (for testing), just return it
     if url.startswith("/") and os.path.exists(url):
         return url
+
+    safe_url = validate_public_video_url(url)
         
     local_path = os.path.join(UPLOAD_DIR, f"{job_id}_video.mp4")
     
@@ -20,7 +59,7 @@ async def download_video(url: str, job_id: str) -> str:
         return local_path
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(safe_url) as response:
             if response.status == 200:
                 with open(local_path, 'wb') as f:
                     while True:
@@ -45,12 +84,9 @@ async def extract_frames(video_path: str, job_id: str, frame_interval: int = 30)
     # Run OpenCV extraction in a thread to not block asyncio pool
     def _extract():
         cap = cv2.VideoCapture(video_path)
-        fps = int(cap.get(cv2.CAP_PROP_FPS))
-        if fps == 0:
-            fps = 30 # default assumed
-            
-        # extract 1 frame per second
-        interval = fps 
+
+        # extract every frame_interval frames
+        interval = max(1, frame_interval)
         
         count = 0
         success, image = cap.read()
@@ -75,7 +111,7 @@ async def extract_frames(video_path: str, job_id: str, frame_interval: int = 30)
         cap.release()
         return extracted_frames
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _extract)
 
 def cleanup_job(job_id: str):

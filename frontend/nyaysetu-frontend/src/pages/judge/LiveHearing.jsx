@@ -8,6 +8,7 @@ export default function LiveHearing() {
     const [searchTerm, setSearchTerm] = useState('');
     const [hearings, setHearings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState('');
     const [activeHearing, setActiveHearing] = useState(null);
 
     useEffect(() => {
@@ -37,9 +38,15 @@ export default function LiveHearing() {
             });
 
             setHearings(formatted);
+            setErrorMessage('');
         } catch (error) {
             console.error('Error fetching hearings:', error);
             setHearings([]);
+            if (error.response?.status === 429) {
+                setErrorMessage('Server is busy due to too many requests. Retrying shortly...');
+            } else {
+                setErrorMessage('Failed to load schedule. Please try refreshing.');
+            }
         } finally {
             setLoading(false);
         }
@@ -118,6 +125,7 @@ export default function LiveHearing() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                             <button
                                 onClick={endCall}
+                                aria-label="Leave hearing"
                                 style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
                             >
                                 <ArrowLeft size={20} />
@@ -220,7 +228,22 @@ export default function LiveHearing() {
                     </div>
                 </div>
             </div>
-
+            {errorMessage && (
+                <div style={{
+                    ...glassStyle,
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#ef4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    marginBottom: '1.5rem',
+                    padding: '1rem 1.5rem'
+                }}>
+                    <AlertTriangle size={20} />
+                    <span style={{ fontWeight: '600', fontSize: '0.95rem' }}>{errorMessage}</span>
+                </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '2rem' }}>
                 {/* Main: Hearings List */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

@@ -70,7 +70,7 @@ export default function UploadFirPage() {
 
             const response = await policeAPI.uploadFir(data);
             setResult(response.data);
-            console.log('FIR Uploaded Successfully:', response.data);
+          //  console.log('FIR Uploaded Successfully:', response.data);
         } catch (err) {
             console.error('Upload error:', err);
             setError(err.response?.data?.message || 'Failed to upload FIR. Please try again.');

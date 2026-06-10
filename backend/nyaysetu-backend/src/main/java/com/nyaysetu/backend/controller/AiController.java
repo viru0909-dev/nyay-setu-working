@@ -3,11 +3,15 @@ package com.nyaysetu.backend.controller;
 import com.nyaysetu.backend.dto.*;
 import com.nyaysetu.backend.service.AiService;
 import com.nyaysetu.backend.service.OllamaService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+
+@Tag(name = "AI Services", description = "Text summarization and AI chat via Groq and Ollama")
 @RestController
-@RequestMapping("/ai")
+@RequestMapping("/api/ai")
 @RequiredArgsConstructor
 public class AiController {
 
@@ -15,13 +19,13 @@ public class AiController {
     private final OllamaService ollamaService;
 
     @PostMapping("/summarize")
-    public SummarizeResponse summarize(@RequestBody SummarizeRequest request) {
+    public SummarizeResponse summarize(@Valid @RequestBody SummarizeRequest request) {
         String result = aiService.summarize(request.getText());
         return new SummarizeResponse(result);
     }
 
     @PostMapping("/chat")
-    public ChatResponse chat(@RequestBody ChatRequest request) {
+    public ChatResponse chat(@Valid @RequestBody ChatRequest request) {
         String result = aiService.chat(request.getMessage());
         return new ChatResponse(result);
     }

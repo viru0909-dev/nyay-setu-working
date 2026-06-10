@@ -1,0 +1,5 @@
+# <b>Article</b> <b>85</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=284788
+# Fetch query: Constitution of India Article 85
+
+Article 85 in Constitution of India 85. Sessions of Parliament, prorogation and dissolution (1)The President shall form lime to time summon each House of Parliament to meet at such time and place as he thinks fit, but six months shall not intervene between its last sitting in one session and the date appointed for its first sitting in the next session.(2)The President may from lime to time--(a)prorogue the Houses or either House;(b)dissolve the House of the People.

@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.0</version>
+        <version>4.0.6</version>
         <relativePath/>
     </parent>
 
@@ -30,7 +30,7 @@
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-bom</artifactId>
-                <version>0.26.1</version>
+                <version>1.16.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -50,6 +50,12 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.2.4</version>
+        </dependency>
+
         <!-- Spring Boot Security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -60,6 +66,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- OpenAPI/Swagger Documentation -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.3.0</version>
         </dependency>
 
         <!-- PostgreSQL Driver -->
@@ -90,7 +103,7 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.11.5</version>
+            <version>0.13.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -147,6 +160,11 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <version>12.7.0</version>        
+        </dependency>
 
         <!-- Bucket4j for Rate Limiting -->
         <dependency>
@@ -155,11 +173,18 @@
             <version>8.10.1</version>
         </dependency>
 
+
         <!-- Dotenv for local development -->
         <dependency>
             <groupId>me.paulschwarz</groupId>
             <artifactId>spring-dotenv</artifactId>
-            <version>4.0.0</version>
+            <version>5.1.0</version>
+        </dependency>
+
+        <!-- Caffeine Cache -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
 
         <!-- Testing -->
@@ -174,6 +199,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- H2 In-Memory Database for tests -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
 
         <!-- LangChain4j Core & Vector DB -->
         <dependency>
@@ -185,7 +217,7 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
-            <version>0.26.1</version>
+            <version>0.36.2</version>
         </dependency>
 
     </dependencies>
@@ -200,7 +232,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.30</version>
+                            <version>1.18.46</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

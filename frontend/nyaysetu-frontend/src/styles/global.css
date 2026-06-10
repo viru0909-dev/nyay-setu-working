@@ -332,11 +332,41 @@ a:hover { color: var(--color-primary); }
   border-color: var(--color-primary);
   transform: rotate(15deg);
 }
+.theme-toggle svg {
+  transform: translateY(1px);
+}
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-main); }
-::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: var(--radius-full); }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+/* ===== Modern Themed Scrollbar (Improved) ===== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-main);
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-medium) var(--bg-main);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
 
 @media (max-width: 1024px) {
   .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
@@ -347,4 +377,42 @@ a:hover { color: var(--color-primary); }
   .grid-cols-3,
   .grid-cols-4 { grid-template-columns: 1fr; }
   .container   { padding: 0 var(--spacing-lg); }
+}
+
+/* Floating action base (shared by assistant + scroll button) */
+.fab {
+  position: fixed;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+  color: var(--text-on-accent);
+  border: none;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4); /* accent shadow for prominence */
+  cursor: pointer;
+  z-index: 1001;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.fab:hover { transform: translateY(-4px); box-shadow: var(--shadow-glass); }
+
+/* Assistant button sits slightly above the bottom */
+.assistant-button { bottom: 2rem; }
+
+/* Scroll-to-top floating button uses the same FAB styles, but allows bottom override */
+.scroll-top-button { bottom: var(--scroll-top-bottom, 7.3rem); }
+.scroll-top-bottom-low { --scroll-top-bottom: 3.2rem; }
+
+/* Exact assistant styling copied for scroll button */
+.fab-assistant-style {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+  color: white;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
 }

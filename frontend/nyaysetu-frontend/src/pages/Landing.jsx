@@ -1,9 +1,9 @@
-// CHANGED: Added useTheme to switch the hero image between light/dark variants
+import ScrollProgress from "../components/ScrollProgress";
 import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Smartphone, Bot, BookOpen, Video, ShieldCheck } from 'lucide-react';
+import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Download, Bot, BookOpen, Video, ShieldCheck, Cpu, Cuboid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/landing/Header';
 import Footer from '../components/landing/Footer';
@@ -11,44 +11,35 @@ import AIChatbot from '../components/landing/AIChatbot';
 import AchievementsSection from '../components/landing/AchievementsSection';
 import HowItWorks from '../components/landing/HowItWorks';
 import TrustIndicators from '../components/landing/TrustIndicators';
-
-// CHANGED: Removed ISO Certified — only meaningful trust stats kept
-const TRUST_STATS = [
-    { value: '50K+', label: 'Active Users', icon: Users },
-    { value: '99%', label: 'Success Rate', icon: Star },
-    { value: '24/7', label: 'Availability', icon: CheckCircle },
-];
-
-// CHANGED: Three glassmorphic quick-action cards below the hero replace the old stats strip
-const QUICK_CARDS = [
-    {
-        icon: UserPlus,
-        title: 'Create Account',
-        desc: 'Create your account and activate your access in seconds — no paperwork required.',
-        color: '#7C5CFF',
-        bg: 'rgba(124,92,255,0.08)',
-    },
-    {
-        icon: FileText,
-        title: 'Submit Your Case',
-        desc: 'Submit your cases from anywhere with secure document management.',
-        color: '#3F5DCC',
-        bg: 'rgba(63,93,204,0.08)',
-    },
-    {
-        icon: Zap,
-        title: 'Powerful Features',
-        desc: 'Access AI-powered legal tech with real-time tracking and transparency.',
-        color: '#10B981',
-        bg: 'rgba(16,185,129,0.08)',
-    },
-];
+import useProtectedFeature from '../hooks/useProtectedFeature';
+import useGuest from '../hooks/useGuest';
+import GuestAccessDeniedModal from '../components/guest/GuestAccessDeniedModal';
+import GuestInlineCTA from '../components/guest/GuestInlineCTA';
+import GuestLockedCard from '../components/guest/GuestLockedCard';
 
 export default function Landing() {
-    const { t } = useTranslation(['landing', 'common']);
-    // CHANGED: Pull current theme to conditionally render light/dark hero image
+    const { t } = useTranslation('landing');
     const { theme } = useTheme();
     const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const heroImage = theme === 'dark'
+        ? {
+            fallbackSrc: '/scales-dark-720.jpg',
+            fallbackSrcSet: '/scales-dark-480.jpg 480w, /scales-dark-720.jpg 720w',
+            webpSrcSet: '/scales-dark-480.webp 480w, /scales-dark-720.webp 720w',
+        }
+        : {
+            fallbackSrc: '/scales-light-720.jpg',
+            fallbackSrcSet: '/scales-light-480.jpg 480w, /scales-light-720.jpg 720w',
+            webpSrcSet: '/scales-light-480.webp 480w, /scales-light-720.webp 720w',
+        };
+    const { isGuest } = useGuest();
+    const {
+        showDeniedModal,
+        setShowDeniedModal,
+        inlineMessage,
+        tryAccess,
+        goToSignup,
+    } = useProtectedFeature('file a case', { intentPath: '/litigant/file' });
 
     useEffect(() => {
         const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); window.deferredPrompt = e; };
@@ -63,23 +54,72 @@ export default function Landing() {
         else alert('Already installed, or use browser menu.');
     };
 
+    const TRUST_STATS = [
+        { value: '50K+', label: t('trustStats.activeUsers'), icon: Users },
+        { value: '99%', label: t('trustStats.successRate'), icon: Star },
+        { value: '24/7', label: t('trustStats.availability'), icon: CheckCircle },
+    ];
+
+    const QUICK_CARDS = [
+        {
+            icon: UserPlus,
+            title: t('quickCards.createAccount.title'),
+            desc: t('quickCards.createAccount.desc'),
+            cta: t('quickCards.createAccount.cta'),
+            color: '#7C5CFF',
+            bg: 'rgba(124,92,255,0.08)',
+        },
+        {
+            icon: FileText,
+            title: t('quickCards.submitCase.title'),
+            desc: t('quickCards.submitCase.desc'),
+            cta: t('quickCards.submitCase.cta'),
+            color: '#3F5DCC',
+            bg: 'rgba(63,93,204,0.08)',
+        },
+        {
+            icon: Zap,
+            title: t('quickCards.powerfulFeatures.title'),
+            desc: t('quickCards.powerfulFeatures.desc'),
+            cta: t('quickCards.powerfulFeatures.cta'),
+            color: '#10B981',
+            bg: 'rgba(16,185,129,0.08)',
+        },
+    ];
+
+    const handleSubmitCaseClick = () => {
+        tryAccess();
+    };
+
+    const FEATURES = [
+        { icon: Bot, title: t('features.aiLegalAssistant.title'), desc: t('features.aiLegalAssistant.description'), color: '#3F5DCC' },
+        { icon: BookOpen, title: t('features.constitutionReader.title'), desc: t('features.constitutionReader.description'), color: '#7C5CFF' },
+        { icon: FileText, title: t('features.fileCases.title'), desc: t('features.fileCases.description'), color: '#10B981' },
+        { icon: Video, title: t('features.virtualHearings.title'), desc: t('features.virtualHearings.description'), color: '#F59E0B' },
+        { icon: ShieldCheck, title: t('features.securePrivate.title'), desc: t('features.securePrivate.description'), color: '#EF4444' },
+        { icon: Zap, title: t('features.realTimeUpdates.title'), desc: t('features.realTimeUpdates.description'), color: '#8B5CF6' },
+    ];
+
     return (
+        <>
+        <ScrollProgress />
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
             <Header />
             <AIChatbot />
 
-            <main>
+            {/* Offset content for the fixed header (mobile-safe). */}
+            <main style={{ paddingTop: '75px' }}>
                 {/* ── Hero ──────────────────────────────────────────── */}
                 <section style={{
                     minHeight: '100vh',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    padding: '9rem 2rem 4rem',
+                    // Keep existing spacing while accounting for <Header /> fixed height.
+                    padding: 'calc(9rem - 75px) 2rem 4rem',
                     position: 'relative',
                     overflow: 'hidden',
                 }}>
-                    {/* Geometric background pattern */}
                     <div style={{
                         position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
                         backgroundImage: `
@@ -88,14 +128,12 @@ export default function Landing() {
                         `,
                         backgroundSize: '60px 60px',
                     }} />
-                    {/* Top-right gradient blob */}
                     <div style={{
                         position: 'absolute', top: '-80px', right: '-80px',
                         width: '500px', height: '500px', borderRadius: '50%',
                         background: 'radial-gradient(circle, rgba(124,92,255,0.10) 0%, transparent 70%)',
                         pointerEvents: 'none',
                     }} />
-                    {/* Bottom-left blob */}
                     <div style={{
                         position: 'absolute', bottom: '0', left: '-100px',
                         width: '400px', height: '400px', borderRadius: '50%',
@@ -103,7 +141,6 @@ export default function Landing() {
                         pointerEvents: 'none',
                     }} />
 
-                    {/* Two-column layout */}
                     <div style={{
                         maxWidth: '1320px', margin: '0 auto', width: '100%',
                         display: 'grid',
@@ -127,7 +164,7 @@ export default function Landing() {
                                 fontFamily: 'var(--font-heading)',
                                 marginBottom: '0.5rem',
                             }}>
-                                AI-Powered<br />Digital Justice
+                                {t('hero.title')}
                             </h1>
                             <h1 style={{
                                 fontSize: 'clamp(2.6rem, 4.5vw, 4rem)',
@@ -141,7 +178,7 @@ export default function Landing() {
                                 WebkitTextFillColor: 'transparent',
                                 backgroundClip: 'text',
                             }}>
-                                for Every Citizen
+                                {t('hero.titleHighlight')}
                             </h1>
 
                             <p style={{
@@ -151,7 +188,7 @@ export default function Landing() {
                                 marginBottom: '2.5rem',
                                 maxWidth: '480px',
                             }}>
-                                Access justice from anywhere, anytime. File cases, track progress, attend virtual hearings, and get AI-powered legal assistance—all on a single transparent platform.
+                                {t('hero.subtitle')}
                             </p>
 
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '3.5rem' }}>
@@ -170,16 +207,16 @@ export default function Landing() {
                                     onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(63,93,204,0.35)'; }}
                                     onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(63,93,204,0.25)'; }}
                                 >
-                                    Get Started Free <ArrowRight size={18} />
+                                    {t('hero.getStartedFree')} <ArrowRight size={18} />
                                 </Link>
 
                                 <motion.button
-                                    whileHover={{ scale: 1.08 }}
+                                    whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleInstall}
-                                    title="Install App"
+                                    title={t('hero.installApp')}
                                     style={{
-                                        width: '48px', height: '48px',
+                                        gap: '0.5rem', padding: '0.8rem 1rem',
                                         borderRadius: '12px',
                                         border: '1px solid var(--border-medium)',
                                         background: 'var(--bg-surface)',
@@ -187,9 +224,12 @@ export default function Landing() {
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         cursor: 'pointer',
                                         boxShadow: 'var(--shadow-sm)',
+                                        fontWeight: '600',
+                                        whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    <Smartphone size={20} />
+                                    <Download size={18} />
+                                    {t('hero.installApp')}
                                 </motion.button>
                             </div>
 
@@ -210,14 +250,13 @@ export default function Landing() {
                             </div>
                         </motion.div>
 
-                        {/* Right — scales image blended into the page background */}
+                        {/* Right — scales image */}
                         <motion.div
                             initial={{ opacity: 0, x: 30, scale: 0.95 }}
                             animate={{ opacity: 1, x: 0, scale: 1 }}
                             transition={{ duration: 0.8, ease: 'easeOut' }}
                             style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}
                         >
-                            {/* purple glow blob behind the image */}
                             <div style={{
                                 position: 'absolute',
                                 width: '420px', height: '420px', borderRadius: '50%',
@@ -226,21 +265,35 @@ export default function Landing() {
                                 zIndex: 0,
                             }} />
                             <div className="hero-img-wrap">
-                                <motion.img
-                                    src={theme === 'dark' ? '/scales-dark.png' : '/scales-light.png'}
-                                    alt="Scales of Justice"
-                                    className="hero-img"
-                                    animate={{ y: [0, -14, 0] }}
-                                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                                    style={{
-                                        width: '100%',
-                                        maxWidth: '480px',
-                                        height: 'auto',
-                                        display: 'block',
-                                        position: 'relative',
-                                        zIndex: 1,
-                                    }}
-                                />
+                                <picture>
+                                    <source
+                                        type="image/webp"
+                                        srcSet={heroImage.webpSrcSet}
+                                        sizes="(max-width: 900px) 480px, min(50vw, 480px)"
+                                    />
+                                    <motion.img
+                                        src={heroImage.fallbackSrc}
+                                        srcSet={heroImage.fallbackSrcSet}
+                                        sizes="(max-width: 900px) 480px, min(50vw, 480px)"
+                                        alt="Scales of Justice"
+                                        className="hero-img"
+                                        width="720"
+                                        height="720"
+                                        loading="eager"
+                                        fetchpriority="high"
+                                        decoding="async"
+                                        animate={{ y: [0, -14, 0] }}
+                                        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                        style={{
+                                            width: '100%',
+                                            maxWidth: '480px',
+                                            height: 'auto',
+                                            display: 'block',
+                                            position: 'relative',
+                                            zIndex: 1,
+                                        }}
+                                    />
+                                </picture>
                             </div>
                         </motion.div>
                     </div>
@@ -294,22 +347,58 @@ export default function Landing() {
                                 <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '1.25rem' }}>
                                     {card.desc}
                                 </p>
-                                <Link to="/signup" style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                                    color: card.color,
-                                    fontSize: '0.875rem', fontWeight: '700',
-                                    textDecoration: 'none',
-                                    transition: 'gap 0.2s ease',
-                                }}
-                                    onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
-                                    onMouseLeave={e => e.currentTarget.style.gap = '0.35rem'}
-                                >
-                                    Get Started <ArrowRight size={14} />
-                                </Link>
+                                {i === 1 ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmitCaseClick}
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '0.35rem',
+                                            color: card.color,
+                                            fontSize: '0.875rem',
+                                            fontWeight: '700',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            padding: 0,
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        {card.cta} <ArrowRight size={14} />
+                                    </button>
+                                ) : (
+                                    <Link to="/signup" style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                                        color: card.color,
+                                        fontSize: '0.875rem', fontWeight: '700',
+                                        textDecoration: 'none',
+                                        transition: 'gap 0.2s ease',
+                                    }}
+                                        onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
+                                        onMouseLeave={e => e.currentTarget.style.gap = '0.35rem'}
+                                    >
+                                        {card.cta} <ArrowRight size={14} />
+                                    </Link>
+                                )}
+
+                                {inlineMessage && i === 1 && (
+                                    <GuestInlineCTA message={inlineMessage} onSignUp={goToSignup} compact />
+                                )}
                             </motion.div>
                         ))}
                     </div>
                 </section>
+
+                <GuestAccessDeniedModal
+                    isOpen={showDeniedModal}
+                    feature="file a case"
+                    onClose={() => setShowDeniedModal(false)}
+                    onUpgrade={() => {
+                        setShowDeniedModal(false);
+                        goToSignup();
+                    }}
+                    onContinue={() => setShowDeniedModal(false)}
+                />
 
                 {/* ── How It Works ──────────────────────────────────── */}
                 <HowItWorks />
@@ -320,8 +409,11 @@ export default function Landing() {
                     background: 'var(--bg-surface)',
                     borderTop: '1px solid var(--border-light)',
                     borderBottom: '1px solid var(--border-light)',
+                    boxSizing: 'border-box',
+                    width: '100%',
+                    overflowX: 'hidden',
                 }}>
-                    <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
+                    <div style={{ maxWidth: '1320px', margin: '0 auto', width: '100%', boxSizing: 'border-box'}}>
                         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                             <div style={{
                                 display: 'inline-block', padding: '0.4rem 1rem', marginBottom: '1rem',
@@ -329,55 +421,90 @@ export default function Landing() {
                                 borderRadius: '2rem',
                             }}>
                                 <span style={{ color: 'var(--color-accent)', fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                                    Platform Features
+                                    {t('features.badge')}
                                 </span>
                             </div>
                             <h2 style={{ fontSize: 'clamp(1.9rem,3.5vw,2.6rem)', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem', letterSpacing: '-0.025em' }}>
-                                Powerful Features for{' '}
-                                <span style={{ color: 'var(--color-secondary)' }}>Modern Justice</span>
+                                {t('features.title')}{' '}
+                                <span style={{ color: 'var(--color-secondary)' }}>{t('features.titleHighlight')}</span>
                             </h2>
                             <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', maxWidth: '560px', margin: '0 auto' }}>
-                                Everything you need to navigate the legal system efficiently
+                                {t('features.subtitle')}
                             </p>
                         </div>
 
                         <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
-                            {[
-                                { icon: Bot, title: 'AI Legal Assistant', desc: '24/7 AI-powered chatbot for instant legal guidance', color: '#3F5DCC' },
-                                { icon: BookOpen, title: 'Constitution Reader', desc: 'Browse Indian Constitution with intelligent search and Q&A', color: '#7C5CFF' },
-                                { icon: FileText, title: 'File Cases Online', desc: 'Submit legal cases digitally with secure document management', color: '#10B981' },
-                                { icon: Video, title: 'Virtual Hearings', desc: 'Attend court proceedings remotely with video conferencing', color: '#F59E0B' },
-                                { icon: ShieldCheck, title: 'Secure & Private', desc: 'Bank-grade encryption ensures your data stays protected', color: '#EF4444' },
-                                { icon: Zap, title: 'Real-time Updates', desc: 'Get instant notifications on case progress and hearings', color: '#8B5CF6' },
-                            ].map((f, i) => {
+                            {FEATURES.map((f, i) => {
                                 const FeatureIcon = f.icon;
                                 return (
                                     <motion.div key={i}
                                         initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
+                                        whileInView={{ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.4, ease: 'easeOut' } }}
                                         viewport={{ once: true }}
-                                        transition={{ delay: i * 0.07 }}
-                                        whileHover={{ y: -5 }}
+                                        className="feature-card"
                                         style={{
                                             padding: '2.25rem',
                                             background: 'var(--bg-main)',
-                                            border: '1px solid var(--border-light)',
+                                            borderWidth: '1px',
+                                            borderStyle: 'solid',
+                                            borderColor: 'var(--border-light)',
                                             borderRadius: '16px',
                                             cursor: 'default',
-                                            transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
+                                            '--card-glow-color': f.color,
                                         }}
-                                        onMouseEnter={e => { e.currentTarget.style.borderColor = f.color + '50'; e.currentTarget.style.boxShadow = `0 8px 24px ${f.color}15`; }}
-                                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.boxShadow = 'none'; }}
                                     >
-                                        <div style={{
-                                            width: '52px', height: '52px', borderRadius: '14px',
-                                            background: f.color + '12',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            marginBottom: '1.1rem',
-                                        }}>
+                                        <div
+                                            className="feature-icon-wrapper"
+                                            style={{
+                                                width: '52px', height: '52px', borderRadius: '14px',
+                                                background: f.color + '12',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                marginBottom: '1.1rem',
+                                            }}
+                                        >
                                             <FeatureIcon size={26} style={{ color: f.color }} />
                                         </div>
-                                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.65rem' }}>{f.title}</h3>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                gap: '0.75rem',
+                                                marginBottom: '0.65rem',
+                                            }}
+                                        >
+                                            <h3
+                                                style={{
+                                                    fontSize: '1.1rem',
+                                                    fontWeight: '700',
+                                                    color: 'var(--text-main)',
+                                                    margin: 0,
+                                                }}
+                                            >
+                                                {f.title}
+                                            </h3>
+
+                                            {isGuest && (
+                                                f.title === t('features.fileCases.title') ||
+                                                f.title === t('features.virtualHearings.title')
+                                            ) && (
+                                                    <span
+                                                        style={{
+                                                            padding: '0.28rem 0.55rem',
+                                                            borderRadius: '999px',
+                                                            fontSize: '0.68rem',
+                                                            fontWeight: '700',
+                                                            background: 'rgba(245,158,11,0.10)',
+                                                            border: '1px solid rgba(245,158,11,0.18)',
+                                                            color: '#f59e0b',
+                                                            letterSpacing: '0.02em',
+                                                            whiteSpace: 'nowrap',
+                                                        }}
+                                                    >
+                                                        Account Required
+                                                    </span>
+                                                )}
+                                        </div>
                                         <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
                                     </motion.div>
                                 );
@@ -388,6 +515,109 @@ export default function Landing() {
 
                 <TrustIndicators />
                 <AchievementsSection />
+
+
+                <section style={{
+                    padding: '6rem 2rem',
+                    background: 'var(--bg-surface)',
+                    borderTop: '1px solid var(--border-light)',
+                    borderBottom: '1px solid var(--border-light)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        position: 'absolute', top: '50%', right: '-5%', transform: 'translateY(-50%)',
+                        width: '600px', height: '600px', borderRadius: '50%',
+                        background: 'radial-gradient(circle, rgba(124,92,255,0.06) 0%, transparent 60%)',
+                        pointerEvents: 'none', zIndex: 0
+                    }} />
+
+                    <div style={{ maxWidth: '1320px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+                        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                            <div style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                padding: '0.4rem 1rem', marginBottom: '1rem',
+                                background: 'rgba(124,92,255,0.08)', border: '1px solid rgba(124,92,255,0.15)',
+                                borderRadius: '2rem',
+                            }}>
+                                <Star size={14} color="#7C5CFF" />
+                                <span style={{ color: '#7C5CFF', fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                                    Nyay-GPT Vision
+                                </span>
+                            </div>
+                            <h2 style={{ fontSize: 'clamp(1.9rem,3.5vw,2.6rem)', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem', letterSpacing: '-0.025em' }}>
+                                The Next Generation of <br />
+                                <span style={{ color: '#7C5CFF' }}>Multimodal Legal Intelligence</span>
+                            </h2>
+                            <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', maxWidth: '650px', margin: '0 auto' }}>
+                                We are actively developing a self-hosted, multimodal legal workspace designed to demolish cognitive barriers and forensic dimensional voids.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
+                            {[
+                                { icon: Cpu, title: 'Conversational Workspace', desc: 'Dynamic split-screen analysis with generated artifacts.', color: '#7C5CFF' },
+                                { icon: Cuboid, title: '3D Spatial Forensics', desc: 'Navigate photorealistic 3D reconstructions of accident scenes.', color: '#F59E0B' },
+                                { icon: Video, title: 'Live Multimodal Streaming', desc: 'Real-time WebRTC streaming for immediate legal guidance.', color: '#EF4444' }
+                            ].map((item, i) => {
+                                const Icon = item.icon;
+                                return (
+                                    <motion.div key={i}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: i * 0.1 }}
+                                        whileHover={{ y: -5 }}
+                                        style={{
+                                            background: 'var(--bg-main)',
+                                            border: '1px solid var(--border-light)',
+                                            borderRadius: '20px',
+                                            padding: '2.5rem 2rem',
+                                            boxShadow: 'var(--shadow-sm)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            textAlign: 'center',
+                                            transition: 'border-color 0.25s ease, box-shadow 0.25s ease'
+                                        }}
+                                        onMouseEnter={e => { e.currentTarget.style.borderColor = item.color + '50'; e.currentTarget.style.boxShadow = `0 10px 30px ${item.color}15`; }}
+                                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
+                                    >
+                                        <div style={{
+                                            width: '60px', height: '60px', borderRadius: '16px',
+                                            background: `${item.color}15`, border: `1px solid ${item.color}30`,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            marginBottom: '1.5rem',
+                                        }}>
+                                            <Icon size={30} color={item.color} />
+                                        </div>
+                                        <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+                                            {item.title}
+                                        </h3>
+                                        <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6' }}>
+                                            {item.desc}
+                                        </p>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+
+                        <div style={{ textAlign: 'center' }}>
+                            <Link to="/upcoming-features" style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                padding: '0.8rem 1.8rem', background: 'transparent',
+                                color: '#7C5CFF', border: '2px solid #7C5CFF',
+                                borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
+                                textDecoration: 'none', transition: 'all 0.2s ease',
+                            }}
+                                onMouseEnter={e => { e.currentTarget.style.background = '#7C5CFF'; e.currentTarget.style.color = '#FFF'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#7C5CFF'; }}
+                            >
+                                Explore the Full Roadmap <ArrowRight size={18} />
+                            </Link>
+                        </div>
+                    </div>
+                </section>
 
                 {/* ── Final CTA ─────────────────────────────────────── */}
                 <section style={{ padding: '7rem 2rem', background: 'var(--bg-main)' }}>
@@ -412,21 +642,21 @@ export default function Landing() {
                                 borderRadius: '2rem',
                             }}>
                                 <span style={{ color: 'var(--color-accent)', fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                                    Get Started Today
+                                    {t('cta.badge')}
                                 </span>
                             </div>
                             <h2 style={{ fontSize: 'clamp(1.75rem,3.5vw,2.5rem)', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem', letterSpacing: '-0.025em' }}>
-                                Ready to Start Your Journey to Justice?
+                                {t('cta.title')}
                             </h2>
                             <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', maxWidth: '560px', margin: '0 auto 0.75rem', lineHeight: '1.7' }}>
-                                Join thousands of citizens already using NyaySetu for their legal needs
+                                {t('cta.subtitle')}
                             </p>
                             <p style={{
                                 fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '2rem',
                                 padding: '0.4rem 0.9rem', display: 'inline-block',
                                 background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '6px',
                             }}>
-                                AI outputs are for guidance only and do not constitute legal advice.
+                                {t('cta.disclaimer')}
                             </p>
                             <div style={{ display: 'block' }}>
                                 <Link to="/signup" style={{
@@ -441,7 +671,7 @@ export default function Landing() {
                                     onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                     onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
                                 >
-                                    Create Free Account <ArrowRight size={18} />
+                                    {t('cta.createAccount')} <ArrowRight size={18} />
                                 </Link>
                             </div>
                         </motion.div>
@@ -451,36 +681,74 @@ export default function Landing() {
 
             <Footer />
 
-            {/* Responsive grid + hero image blend rules */}
             <style>{`
                 .hero-img-wrap {
                     position: relative;
                     z-index: 1;
-                    -webkit-mask-image: radial-gradient(
-                        ellipse 80% 80% at 50% 50%,
-                        black 45%,
-                        transparent 100%
-                    );
-                    mask-image: radial-gradient(
-                        ellipse 80% 80% at 50% 50%,
-                        black 45%,
-                        transparent 100%
-                    );
+                    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 45%, transparent 100%);
+                    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 45%, transparent 100%);
                 }
-                .hero-img {
-                    border-radius: 0;
+                .hero-img { border-radius: 0; }
+                
+                .feature-card {
+                    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
                 }
+                
+                .feature-card:hover {
+                    transform: translateY(-6px) !important;
+                    border-color: color-mix(in srgb, var(--card-glow-color) 50%, transparent) !important;
+                    box-shadow: 0 12px 30px color-mix(in srgb, var(--card-glow-color) 15%, transparent),
+                                0 0 15px color-mix(in srgb, var(--card-glow-color) 10%, transparent) !important;
+                }
+                
+                .feature-icon-wrapper {
+                    transition: transform 0.3s ease !important;
+                }
+                
+                .feature-card:hover .feature-icon-wrapper {
+                    transform: scale(1.12) rotate(5deg) !important;
+                }
+
                 @media (max-width: 900px) {
                     .hero-grid { grid-template-columns: 1fr !important; }
                     .hero-grid > div:last-child { display: none; }
                     .quick-cards-grid { grid-template-columns: 1fr !important; }
                     .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
                 }
+
                 @media (max-width: 600px) {
                     .quick-cards-grid { grid-template-columns: 1fr !important; }
                     .features-grid { grid-template-columns: 1fr !important; }
                 }
+
+                /* ── Fix for very small screens (332px and below) ── */
+                @media (max-width: 400px) {
+                    .features-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 1rem !important;
+                    }
+                    .quick-cards-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 1rem !important;
+                    }
+                }
+
+                /* ── Prevent any grid/section from overflowing viewport ── */
+                .features-grid,
+                .quick-cards-grid,
+                .hero-grid {
+                    width: 100%;
+                    box-sizing: border-box;
+                    min-width: 0;
+                }
+
+                /* ── Global overflow guard ── */
+                html, body {
+                    overflow-x: hidden;
+                    max-width: 100%;
+                }
             `}</style>
         </div>
+        </>
     );
 }

@@ -1,45 +1,45 @@
 import { motion } from 'framer-motion';
 import { Shield, Award, Users, TrendingUp, Clock, Lock } from 'lucide-react';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export default function TrustIndicators() {
-    const { language } = useLanguage();
+    const { t } = useTranslation('landing');
 
     const indicators = [
         {
             icon: Shield,
-            title: language === 'en' ? "Bank-Grade Security" : "बैंक-ग्रेड सुरक्षा",
-            description: language === 'en' ? "256-bit encryption protects your data" : "256-bit एन्क्रिप्शन आपके डेटा की सुरक्षा करता है",
+            title: t('trustIndicators.bankSecurity.title'),
+            description: t('trustIndicators.bankSecurity.description'),
             color: "#8b5cf6"
         },
         {
             icon: Award,
-            title: language === 'en' ? "Government Certified" : "सरकार द्वारा प्रमाणित",
-            description: language === 'en' ? "Approved by Ministry of Law & Justice" : "कानून और न्याय मंत्रालय द्वारा अनुमोदित",
+            title: t('trustIndicators.govCertified.title'),
+            description: t('trustIndicators.govCertified.description'),
             color: "#10b981"
         },
         {
             icon: Users,
-            title: language === 'en' ? "50,000+ Active Users" : "50,000+ सक्रिय उपयोगकर्ता",
-            description: language === 'en' ? "Growing community of satisfied citizens" : "संतुष्ट नागरिकों का बढ़ता समुदाय",
+            title: t('trustIndicators.activeUsers.title'),
+            description: t('trustIndicators.activeUsers.description'),
             color: "#6366f1"
         },
         {
             icon: TrendingUp,
-            title: language === 'en' ? "99% Success Rate" : "99% सफलता दर",
-            description: language === 'en' ? "Cases resolved efficiently and fairly" : "मामलों का कुशलता और निष्पक्षता से समाधान",
+            title: t('trustIndicators.successRate.title'),
+            description: t('trustIndicators.successRate.description'),
             color: "#ec4899"
         },
         {
             icon: Clock,
-            title: language === 'en' ? "24/7 Availability" : "24/7 उपलब्धता",
-            description: language === 'en' ? "Access justice anytime, anywhere" : "कभी भी, कहीं भी न्याय तक पहुंच",
+            title: t('trustIndicators.availability.title'),
+            description: t('trustIndicators.availability.description'),
             color: "#f59e0b"
         },
         {
             icon: Lock,
-            title: language === 'en' ? "Data Privacy" : "डेटा गोपनीयता",
-            description: language === 'en' ? "GDPR compliant & ISO certified" : "GDPR अनुपालक और ISO प्रमाणित",
+            title: t('trustIndicators.dataPrivacy.title'),
+            description: t('trustIndicators.dataPrivacy.description'),
             color: "#3b82f6"
         }
     ];
@@ -47,7 +47,7 @@ export default function TrustIndicators() {
     return (
         <section style={{
             padding: '5rem 2rem',
-            background: 'var(--bg-glass-strong)', // Use variable
+            background: 'var(--bg-glass-strong)',
             backdropFilter: 'var(--glass-blur)',
             borderTop: 'var(--border-glass)',
             borderBottom: 'var(--border-glass)'
@@ -76,14 +76,11 @@ export default function TrustIndicators() {
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>
-                            {language === 'en' ? 'Trusted by Thousands' : 'हजारों द्वारा विश्वसनीय'}
+                            {t('trustIndicators.heading')}
                         </span>
                     </h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>
-                        {language === 'en'
-                            ? 'Your security and privacy are our top priorities'
-                            : 'आपकी सुरक्षा और गोपनीयता हमारी सर्वोच्च प्राथमिकताएं हैं'
-                        }
+                        {t('trustIndicators.subheading')}
                     </p>
                 </motion.div>
 
@@ -93,7 +90,7 @@ export default function TrustIndicators() {
                     style={{
                         maxWidth: '100%',
                         overflow: 'hidden',
-                        padding: '1rem 0', // Extra vertical padding for hover effects
+                        padding: '1rem 0',
                         maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
                         WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)'
                     }}
@@ -104,13 +101,13 @@ export default function TrustIndicators() {
                             display: 'flex',
                             gap: '2rem',
                             width: 'max-content',
-                            padding: '1rem 0' // Internal padding to prevent border clipping
+                            padding: '1rem 0'
                         }}
                     >
-                        {/* Duplicate lists for seamless loop */}
                         {[...indicators, ...indicators].map((item, idx) => (
                             <motion.div
-                                key={`${idx}-${item.title}`} // Unique key using index and title
+                                key={`${idx}-${item.title}`}
+                                className="trust-card"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
@@ -118,10 +115,10 @@ export default function TrustIndicators() {
                                 whileHover={{ y: -10, transition: { duration: 0.3 } }}
                                 style={{
                                     padding: '4rem 3rem',
-                                    background: 'rgba(255, 255, 255, 0.4)', // Light glass
-                                    backdropFilter: 'blur(10px)',
+                                    background: 'var(--bg-glass)',
+                                    backdropFilter: 'var(--glass-blur)',
                                     borderRadius: '24px',
-                                    border: 'var(--border-glass)',
+                                    border: '1px solid var(--border-light)',
                                     textAlign: 'center',
                                     cursor: 'pointer',
                                     boxShadow: 'var(--shadow-glass)',
@@ -130,17 +127,18 @@ export default function TrustIndicators() {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.borderColor = item.color;
                                     e.currentTarget.style.boxShadow = `0 15px 40px ${item.color}20`;
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)';
+                                    e.currentTarget.style.background = 'var(--bg-glass-strong)';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                                    e.currentTarget.style.borderColor = 'var(--border-light)';
                                     e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)';
+                                    e.currentTarget.style.background = 'var(--bg-glass)';
                                 }}
                             >
                                 {/* Icon */}
@@ -191,9 +189,33 @@ export default function TrustIndicators() {
                     .trust-track:hover {
                         animation-play-state: paused;
                     }
+
+                    /* Mobile: keep the marquee horizontal + prevent clipping.
+                       responsive.css has broad rules that can force flex wrap/column on mobile. */
+                    @media (max-width: 768px) {
+                        .trust-scroll-mask {
+                            overflow-x: auto !important;
+                            overflow-y: hidden !important;
+                            -webkit-overflow-scrolling: touch;
+                            mask-image: none !important;
+                            -webkit-mask-image: none !important;
+                            padding: 0.75rem 0 !important;
+                        }
+                        .trust-scroll-mask .trust-track {
+                            flex-direction: row !important;
+                            flex-wrap: nowrap !important;
+                            width: max-content !important;
+                            animation: none !important; /* better UX than auto-scroll on small screens */
+                            padding: 0.75rem 0 !important;
+                            gap: 1rem !important;
+                        }
+                        .trust-scroll-mask .trust-card {
+                            min-width: min(85vw, 360px) !important;
+                            padding: 2.25rem 1.5rem !important;
+                        }
+                    }
                 `}</style>
             </div>
         </section>
     );
 }
-

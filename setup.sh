@@ -27,6 +27,28 @@ else
     echo "ℹ️ frontend/.env already exists, skipping."
 fi
 
+# 3. Download face-api.js model weights for offline face recognition
+echo "📥 Downloading face-api.js model weights..."
+MODELS_DIR="frontend/nyaysetu-frontend/public/models"
+if [ ! -d "$MODELS_DIR" ] || [ -z "$(ls -A "$MODELS_DIR" 2>/dev/null)" ]; then
+    mkdir -p "$MODELS_DIR"
+    BASE_URL="https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights"
+    for file in \
+        tiny_face_detector_model-weights_manifest.json \
+        tiny_face_detector_model-shard1 \
+        face_landmark_68_model-weights_manifest.json \
+        face_landmark_68_model-shard1 \
+        face_recognition_model-weights_manifest.json \
+        face_recognition_model-shard1 \
+        face_recognition_model-shard2; do
+        echo "  Downloading $file..."
+        curl -sL "$BASE_URL/$file" -o "$MODELS_DIR/$file"
+    done
+    echo "✅ Model weights downloaded to $MODELS_DIR."
+else
+    echo "ℹ️ Model weights already exist, skipping."
+fi
+
 echo "🚀 Setup Complete!"
 echo "Next steps:"
 echo "1. Run 'psql -f local_setup.sql' to create your database."

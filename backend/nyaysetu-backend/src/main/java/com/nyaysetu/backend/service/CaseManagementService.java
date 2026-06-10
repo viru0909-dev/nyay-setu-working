@@ -6,6 +6,7 @@ import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CaseRepository;
+import com.nyaysetu.backend.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class CaseManagementService {
     private final HearingRepository hearingRepository;
     private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
     private final com.nyaysetu.backend.service.CaseTimelineService timelineService;
+    private final DocumentRepository documentRepository;
 
     @Transactional
     public CaseDTO createCase(CreateCaseRequest request, User client) {
@@ -109,6 +111,18 @@ public class CaseManagementService {
         return convertToDTO(updated);
     }
 
+    /** Allow controller to fetch raw entity for simple status transitions */
+    public CaseEntity getCaseEntity(UUID id) {
+        return caseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Case not found: " + id));
+    }
+
+    /** Allow controller to save a modified entity directly */
+    @Transactional
+    public void saveCaseEntity(CaseEntity caseEntity) {
+        caseRepository.save(caseEntity);
+    }
+
     @Transactional
     public void deleteCase(UUID id) {
         if (!caseRepository.existsById(id)) {
@@ -127,6 +141,7 @@ public class CaseManagementService {
 
         caseEntity.setDraftPetition(draftContent);
         caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.DRAFT_PENDING_CLIENT);
+        caseEntity.setDraftApprovalStatus("AWAITING_CLIENT");
         // Ensure Document Status is set for frontend logic
         caseEntity.setDocumentStatus(com.nyaysetu.backend.entity.DocumentStatus.PENDING_REVIEW);
         
@@ -168,10 +183,10 @@ public class CaseManagementService {
             // BUT, to satisfy "dedicated storage", we really should create a document record.
             // Let's inject DocumentRepository and create a record pointing to a placeholder.
             
-        } catch (Exception e) {
-           // log error but don't fail transaction
-           System.err.println("Failed to auto-generate draft document: " + e.getMessage());
-        }
+          } catch (Exception e) {
+              // log error but don't fail transaction
+              log.error("Failed to auto-generate draft document", e);
+          }
 
         // Notify Client
         if (caseEntity.getClient() != null) {
@@ -196,7 +211,8 @@ public class CaseManagementService {
         CaseEntity caseEntity = caseRepository.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
 
-        if (!com.nyaysetu.backend.entity.CaseStatus.DRAFT_PENDING_CLIENT.equals(caseEntity.getStatus())) {
+        if (!com.nyaysetu.backend.entity.CaseStatus.DRAFT_PENDING_CLIENT.equals(caseEntity.getStatus()) &&
+            !com.nyaysetu.backend.entity.CaseStatus.PENDING.equals(caseEntity.getStatus())) {
             throw new RuntimeException("Case is not in draft review state");
         }
 
@@ -241,7 +257,7 @@ public class CaseManagementService {
                 .assignedJudge(entity.getAssignedJudge())
                 .clientId(entity.getClient() != null ? entity.getClient().getId() : null)
                 .clientName(entity.getClient() != null ? entity.getClient().getName() : null)
-                .documentsCount(0) // TODO: Count from documents table
+                .documentsCount((int) documentRepository.countByCaseId(entity.getId()))
                 .lawyerProposalStatus(entity.getLawyerProposalStatus())
                 .draftPetition(entity.getDraftPetition())
                 .lawyerId(entity.getLawyer() != null ? entity.getLawyer().getId() : null)
@@ -256,6 +272,10 @@ public class CaseManagementService {
                 .respondentPhone(entity.getRespondentPhone())
                 .respondentAddress(entity.getRespondentAddress())
                 .respondentIdentified(entity.getRespondentIdentified())
+                // Stepper fields
+                .currentJudicialStage(entity.getCurrentJudicialStage())
+                .stage(entity.getStage())
+                .assignedLawyer(entity.getLawyer() != null)
                 .build();
     }
 
@@ -277,40 +297,130 @@ public class CaseManagementService {
         CaseEntity caseEntity = caseRepository.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
 
-        // Check if respondent email is available
-        if (caseEntity.getRespondentEmail() == null || caseEntity.getRespondentEmail().trim().isEmpty()) {
-            throw new RuntimeException("Cannot order notice: Respondent email not available. Please update respondent details first.");
-        }
-
-        // Update status or flag if needed
+        // Update status to SUMMONS_SERVED — advances stepper to Stage 2 (Notice Issued)
         caseEntity.setSummonsStatus("ISSUED");
+        caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.SUMMONS_SERVED);
+        caseEntity.setStage(com.nyaysetu.backend.entity.CaseStage.APPEARANCE);
+        caseEntity.setCurrentJudicialStage(2);
         caseRepository.save(caseEntity);
 
         // Add to timeline
         timelineService.addEvent(
-            caseId, 
-            "SUMMONS_ISSUED", 
+            caseId,
+            "SUMMONS_ISSUED",
             "Judge ordered formal notice to Respondent. Electronic summons initiated."
         );
 
-        // Use the respondent's email from the case entity
+        // Only send email if respondent email is available
         String respondentEmail = caseEntity.getRespondentEmail();
-        
-        // Trigger Email
-        String nextHearingStr = caseEntity.getNextHearing() != null ? 
-            caseEntity.getNextHearing().toLocalDate().toString() : "To be scheduled";
-            
-        com.nyaysetu.backend.service.EmailService emailService = getEmailService();
-        if (emailService != null) {
-            emailService.sendRespondentSummons(
-                respondentEmail, 
-                caseEntity.getRespondent(), 
-                caseEntity.getId().toString(), 
-                nextHearingStr
-            );
+        if (respondentEmail != null && !respondentEmail.trim().isEmpty()) {
+            String nextHearingStr = caseEntity.getNextHearing() != null ?
+                caseEntity.getNextHearing().toLocalDate().toString() : "To be scheduled";
+
+            com.nyaysetu.backend.service.EmailService emailService = getEmailService();
+            if (emailService != null) {
+                emailService.sendRespondentSummons(
+                    respondentEmail,
+                    caseEntity.getRespondent(),
+                    caseEntity.getId().toString(),
+                    nextHearingStr
+                );
+            }
         }
-        
+
         log.info("Summons ordered for case {} to respondent email: {}", caseId, respondentEmail);
+    }
+    
+    @Transactional
+    public void startHearings(UUID caseId) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.IN_PROGRESS);
+        caseEntity.setCurrentJudicialStage(3);
+        caseEntity.setStage(com.nyaysetu.backend.entity.CaseStage.FRAMING_OF_CHARGES);
+        caseRepository.save(caseEntity);
+
+        timelineService.addEvent(
+            caseId,
+            "HEARINGS_STARTED",
+            "Judge has initiated the hearings phase for this case."
+        );
+        log.info("Hearings started for case {}", caseId);
+    }
+
+    @Transactional
+    public void startEvidence(UUID caseId) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        // Stage 4 = Evidence
+        caseEntity.setCurrentJudicialStage(4);
+        caseEntity.setStage(com.nyaysetu.backend.entity.CaseStage.EVIDENCE);
+        caseRepository.save(caseEntity);
+
+        timelineService.addEvent(
+            caseId,
+            "EVIDENCE_STARTED",
+            "Judge has initiated the evidence phase for this case."
+        );
+        log.info("Evidence phase started for case {}", caseId);
+    }
+
+    @Transactional
+    public void startArguments(UUID caseId) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        // Stage 5 = Arguments
+        caseEntity.setCurrentJudicialStage(5);
+        caseEntity.setStage(com.nyaysetu.backend.entity.CaseStage.ARGUMENTS);
+        caseRepository.save(caseEntity);
+
+        timelineService.addEvent(
+            caseId,
+            "ARGUMENTS_STARTED",
+            "Judge has initiated the final arguments phase for this case."
+        );
+        log.info("Arguments phase started for case {}", caseId);
+    }
+
+    @Transactional
+    public void startJudgment(UUID caseId) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        // Stage 6 = Judgment
+        caseEntity.setCurrentJudicialStage(6);
+        caseEntity.setStage(com.nyaysetu.backend.entity.CaseStage.JUDGMENT);
+        caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.JUDGMENT_PENDING);
+        caseRepository.save(caseEntity);
+
+        timelineService.addEvent(
+            caseId,
+            "JUDGMENT_PENDING",
+            "Arguments have concluded. The judge is now deliberating on the verdict."
+        );
+        log.info("Judgment pending phase started for case {}", caseId);
+    }
+
+    @Transactional
+    public void deliverVerdict(UUID caseId, String verdictDetails) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found"));
+
+        // Stage 7 = Verdict
+        caseEntity.setCurrentJudicialStage(7);
+        caseEntity.setStage(com.nyaysetu.backend.entity.CaseStage.VERDICT);
+        caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.COMPLETED);
+        caseRepository.save(caseEntity);
+
+        timelineService.addEvent(
+            caseId,
+            "VERDICT_DELIVERED",
+            "The final verdict has been delivered: " + verdictDetails
+        );
+        log.info("Verdict delivered for case {}", caseId);
     }
     
     
