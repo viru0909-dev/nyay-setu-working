@@ -6,6 +6,7 @@ import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CaseRepository;
+import com.nyaysetu.backend.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class CaseManagementService {
     private final HearingRepository hearingRepository;
     private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
     private final com.nyaysetu.backend.service.CaseTimelineService timelineService;
+    private final DocumentRepository documentRepository;
 
     @Transactional
     public CaseDTO createCase(CreateCaseRequest request, User client) {
@@ -255,7 +257,7 @@ public class CaseManagementService {
                 .assignedJudge(entity.getAssignedJudge())
                 .clientId(entity.getClient() != null ? entity.getClient().getId() : null)
                 .clientName(entity.getClient() != null ? entity.getClient().getName() : null)
-                .documentsCount(0) // TODO: Count from documents table
+                .documentsCount((int) documentRepository.countByCaseId(entity.getId()))
                 .lawyerProposalStatus(entity.getLawyerProposalStatus())
                 .draftPetition(entity.getDraftPetition())
                 .lawyerId(entity.getLawyer() != null ? entity.getLawyer().getId() : null)
