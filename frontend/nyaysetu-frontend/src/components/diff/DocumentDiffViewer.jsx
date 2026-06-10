@@ -4,7 +4,10 @@ import VersionTimeline from './VersionTimeline';
 
 export default function DocumentDiffViewer({
     originalText,
-    revisedText
+    revisedText,
+    versions,
+    baseVersion,
+    compareVersion
 }) {
     const differences = diffWords(
         originalText,
@@ -37,22 +40,9 @@ export default function DocumentDiffViewer({
                 Green = Added Text | Red = Removed Text
             </p>
             <VersionTimeline
-                versions={[
-                    {
-                        id: 'v1',
-                        label: 'Version 1'
-                    },
-                    {
-                        id: 'v2',
-                        label: 'Version 2'
-                    },
-                    {
-                        id: 'v3',
-                        label: 'Version 3'
-                    }
-                ]}
-                baseVersion="v1"
-                compareVersion="v3"
+                versions={versions}
+                baseVersion={baseVersion}
+                compareVersion={compareVersion}
             />
             <div
                 style={{
