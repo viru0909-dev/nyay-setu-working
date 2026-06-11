@@ -103,7 +103,8 @@ export default function Landing() {
     return (
         <>
         <ScrollProgress />
-        <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
+        
+       <div style={{ minHeight: '200vh', background: 'var(--bg-main)', position: 'relative' }}>
             <Header />
             <AIChatbot />
 
@@ -140,6 +141,7 @@ export default function Landing() {
                         background: 'radial-gradient(circle, rgba(63,93,204,0.07) 0%, transparent 70%)',
                         pointerEvents: 'none',
                     }} />
+
 
                     <div style={{
                         maxWidth: '1320px', margin: '0 auto', width: '100%',

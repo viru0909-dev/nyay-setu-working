@@ -416,3 +416,43 @@ a:hover { color: var(--color-primary); }
   border-radius: 50%;
   border: none;
 }
+<<<<<<< HEAD
+=======
+/* ===== Scrollbar Styling ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e5e5e5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333; /* DARK */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #000;
+}
+/* Scrollbar Track */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Background */
+::-webkit-scrollbar-track {
+  background: #e5e7eb; /* light grey */
+}
+
+/* Scroll Thumb */
+::-webkit-scrollbar-thumb {
+  background: #111827; /* dark black */
+  border-radius: 10px;
+}
+
+/* Hover Effect */
+::-webkit-scrollbar-thumb:hover {
+  background: #000000;
+}
+>>>>>>> fix-clean-websocket
