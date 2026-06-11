@@ -1,5 +1,6 @@
 import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import './styles/global.css'
 import './styles/responsive.css'
 import './styles/guest.css'
@@ -61,19 +62,22 @@ const Root = () => {
     }, []);
 
     return (
-        <StrictMode>
-            {showWarning && (
-                <SessionWarningBanner
-                    onRefresh={handleRefresh}
-                    onDismiss={() => setShowWarning(false)}
-                />
-            )}
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+            <StrictMode>
+                {/* 4. The Session Banner renders here when showWarning is true */}
+                {showWarning && (
+                    <SessionWarningBanner
+                        onRefresh={handleRefresh}
+                        onDismiss={() => setShowWarning(false)}
+                    />
+                )}
 
-            <>
-                <Toaster position="top-right" />
-                <App swRegistration={swRegistration} />
-            </>
-        </StrictMode>
+                <>
+                    <Toaster position="top-right" />
+                    <App swRegistration={swRegistration} />
+                </>
+            </StrictMode>
+        </GoogleOAuthProvider>
     );
 };
 

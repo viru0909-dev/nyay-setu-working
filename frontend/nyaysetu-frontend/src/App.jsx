@@ -49,6 +49,7 @@ const Constitution = retryLazy(() => import('./pages/Constitution'));
 const Login = retryLazy(() => import('./pages/Login'));
 const Signup = retryLazy(() => import('./pages/Signup'));
 const ResetPassword = retryLazy(() => import('./pages/ResetPassword'));
+const OAuth2Callback = retryLazy(() => import('./pages/OAuth2Callback'));
 const About = retryLazy(() => import('./pages/About'));
 const PrivacyPolicy = retryLazy(() => import('./pages/PrivacyPolicy'));
 const Terms = retryLazy(() => import('./pages/Terms'));
@@ -229,6 +230,7 @@ function App({ swRegistration }) {
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/signup" element={<Signup />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
+                                <Route path="/oauth2/callback" element={<OAuth2Callback />} />
                                 <Route path="/constitution" element={<Constitution />} />
                                 <Route path="/about" element={<About />} />
                                 <Route path="/privacy" element={<PrivacyPolicy />} />

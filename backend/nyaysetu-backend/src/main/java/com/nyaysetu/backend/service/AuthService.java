@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.service;
 
+import com.nyaysetu.backend.entity.AuthProvider;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,7 +30,7 @@ public class AuthService implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(u.getEmail())
-                .password(u.getPassword())
+                .password(u.getPassword() != null ? u.getPassword() : "")
                 .roles(u.getRole().name())
                 .build();
     }
@@ -40,6 +41,7 @@ public class AuthService implements UserDetailsService {
         u.setName(name);
         u.setPassword(passwordEncoder.encode(password));
         u.setRole(role);
+        u.setAuthProvider(AuthProvider.LOCAL);
         userRepository.save(u);
     }
 

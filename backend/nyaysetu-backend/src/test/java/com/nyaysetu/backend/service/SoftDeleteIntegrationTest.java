@@ -50,7 +50,7 @@ public class SoftDeleteIntegrationTest {
         userRepository.delete(user);
         userRepository.flush(); // ensure changes are flushed to DB
 
-        // 3. Verify user is no longer retrieved via JPA standard methods due to @Where annotation
+        // 3. Verify user is no longer retrieved via JPA standard methods due to @SQLRestriction annotation
         Optional<User> softDeletedUser = userRepository.findById(user.getId());
         assertFalse(softDeletedUser.isPresent());
 

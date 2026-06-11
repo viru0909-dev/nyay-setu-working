@@ -28,16 +28,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.nyaysetu.backend.security.CustomOAuth2UserService;
+import com.nyaysetu.backend.security.OAuth2AuthenticationSuccessHandler;
+import com.nyaysetu.backend.security.OAuth2AuthenticationFailureHandler;
+import com.nyaysetu.backend.security.HttpCookieOAuth2AuthorizationRequestRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-<<<<<<< HEAD
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-=======
->>>>>>> origin/main
 
 @Configuration
 @EnableMethodSecurity
@@ -50,6 +47,9 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final RateLimitFilter rateLimitFilter;
     private final Environment environment;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Value("${cors.allowed.origins}")
     private String allowedOrigins;
@@ -83,8 +83,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -97,61 +96,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-<<<<<<< HEAD
-
-
-        // SAFE DEFAULT (Localhost fallback)
-        List<String> defaultOrigins = Arrays.asList(
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "http://localhost"
-        );
-
-        if (allowedOrigins != null && !allowedOrigins.trim().isEmpty()) {
-=======
-        
         // Use origins from application.properties / Env Var
         if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
->>>>>>> origin/main
             List<String> origins = Arrays.stream(allowedOrigins.split(","))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
                     .collect(Collectors.toList());
 
-<<<<<<< HEAD
-            if (origins.contains("*")) {
-                // SECURITY: Reject bare "*" when credentials are true
-                logger.warn("CORS_ALLOWED_ORIGINS contains bare '*'. This is unsafe with credentials. Falling back to localhost defaults.");
-                configuration.setAllowedOrigins(defaultOrigins);
-            } else if (origins.stream().anyMatch(o -> o.contains("*"))) {
-                // Specific patterns like https://*.example.com are safe
-                configuration.setAllowedOriginPatterns(origins);
-            } else {
-                // Exact valid domains
-                configuration.setAllowedOrigins(origins);
-            }
-        } else {
-            // Fallback if environment variable is missing
-            configuration.setAllowedOrigins(defaultOrigins);
-        }
-
-        // SECURITY IMPROVEMENTS:
-        // 1. Always allow credentials for the resolved safe origins
-        configuration.setAllowCredentials(true);
-
-        // 2. Add "PATCH" to allowed methods
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-
-        // 3. Restrict headers instead of using wildcard "*" for better security
-        configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "Accept",
-                "Origin",
-                "X-Requested-With"
-        ));
-
-=======
             if (origins.isEmpty()) {
                 // SAFE DEFAULT: Allow local development origins only
                 configuration.setAllowedOrigins(Arrays.asList(
@@ -192,14 +143,17 @@ public class SecurityConfig {
             configuration.setAllowCredentials(true);
         }
         
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        
->>>>>>> origin/main
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+    @Bean
+    public HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
+        return new HttpCookieOAuth2AuthorizationRequestRepository();
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -234,18 +188,6 @@ public class SecurityConfig {
                                 ))
                 )
                 .authorizeHttpRequests(auth -> auth
-<<<<<<< HEAD
-                        // 2. Only strictly public endpoints allowed
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/forgot-password").permitAll()
-                        .requestMatchers("/api/health/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
-
-                        // 3. The exact fix for the bug: Everything else MUST be authenticated
-                        .anyRequest().authenticated()
-                )
-
-=======
                         // ── Public endpoints ──────────────────────────────────────────────
                         .requestMatchers(
                                 "/api/v1/auth/register",
@@ -257,7 +199,9 @@ public class SecurityConfig {
                                 "/api/v1/auth/ping",
                                 "/api/v1/auth/test",
                                 "/api/v1/health",
-                                "/api/v1/police/health"
+                                "/api/v1/police/health",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**"
                         ).permitAll()
 
                         // ── WebSocket endpoints ───────────────────────────────────────────
@@ -346,8 +290,17 @@ public class SecurityConfig {
                         // ── Everything else requires authentication ────────────────────────
                         .anyRequest().authenticated()
                 )
->>>>>>> origin/main
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/oauth2/authorization")
+                                .authorizationRequestRepository(cookieAuthorizationRequestRepository()))
+                        .redirectionEndpoint(redirection -> redirection
+                                .baseUri("/login/oauth2/code/*"))
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService))
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                        .failureHandler(oAuth2AuthenticationFailureHandler))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(xssSanitizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)

@@ -82,7 +82,7 @@ class DocumentManagementControllerTest {
 
         ResponseEntity<?> response = controller.downloadCertificate(documentId, auth);
 
-        assertEquals(500, response.getStatusCodeValue());
+        assertEquals(500, response.getStatusCode().value());
         assertNotNull(response.getBody());
         Map<?, ?> body = (Map<?, ?>) response.getBody();
         assertEquals("Certificate generation failed: Generator failure", body.get("error"));

@@ -4,6 +4,7 @@ import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.HearingRepository;
+import com.nyaysetu.backend.repository.DocumentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,11 +34,14 @@ public class CaseManagementServiceTest {
     @Mock
     private com.nyaysetu.backend.service.CaseTimelineService timelineService;
 
+    @Mock
+    private DocumentRepository documentRepository;
+
     private CaseManagementService service;
 
     @BeforeEach
     public void setup() {
-        service = new CaseManagementService(caseRepository, hearingRepository, notificationService, timelineService);
+        service = new CaseManagementService(caseRepository, hearingRepository, notificationService, timelineService, documentRepository);
     }
 
     @Test
