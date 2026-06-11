@@ -30,7 +30,7 @@ export default function ResetPassword() {
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/verify-reset-token?token=${token}`);
+                const response = await fetch(`${API_BASE_URL}/api/v1/auth/verify-reset-token?token=${token}`);
                 if (!response.ok) {
                     const data = await response.json();
                     throw new Error(data.message || 'Token verification failed');
@@ -61,7 +61,7 @@ export default function ResetPassword() {
         setError('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/auth/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

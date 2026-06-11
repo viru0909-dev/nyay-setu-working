@@ -105,18 +105,7 @@ export default function HowItWorks() {
 
                 {/* Steps */}
                 <div style={{ position: 'relative' }}>
-                    {/* Connection Line */}
-                    <div className="hiw-connector" style={{
-                        position: 'absolute',
-                        top: '80px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        width: '80%',
-                        height: '2px',
-                        background: 'linear-gradient(90deg, #8b5cf6 0%, #6366f1 33%, #ec4899 66%, #10b981 100%)',
-                        opacity: 0.25,
-                        zIndex: 0,
-                    }} />
+                    
 
                     <div style={{
                         display: 'grid',
@@ -223,16 +212,29 @@ export default function HowItWorks() {
 
                                 {/* Arrow for desktop */}
                                 {idx < steps.length - 1 && (
-                                    <div className="hiw-arrow" style={{
-                                        position: 'absolute',
-                                        top: '60px',
-                                        right: '-50px',
-                                        color: step.color,
-                                        opacity: 0.5,
-                                    }}>
-                                        <ArrowRight size={32} />
-                                    </div>
-                                )}
+    <div
+        className="hiw-arrow"
+        style={{
+            position: 'absolute',
+            top: '72px',
+            right: '-65px',
+            display: 'flex',
+            alignItems: 'center',
+            color: step.color,
+            zIndex: 10,
+        }}
+    >
+        <div
+            style={{
+                width: '35px',
+                height: '2px',
+                background: step.color,
+                opacity: 0.4,
+            }}
+        />
+        <ArrowRight size={24} />
+    </div>
+)}
                             </motion.div>
                         ))}
                     </div>

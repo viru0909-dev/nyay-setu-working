@@ -1,0 +1,94 @@
+package com.nyaysetu.backend.notification.event;
+
+import com.nyaysetu.backend.handler.NotificationWebSocketHandler;
+import com.nyaysetu.backend.notification.entity.Notification;
+import com.nyaysetu.backend.notification.repository.NotificationRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.Instant;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class NotificationWebSocketEventListenerTest {
+
+    @Mock
+    private NotificationRepository notificationRepository;
+
+    @Mock
+    private NotificationWebSocketHandler webSocketHandler;
+
+    @InjectMocks
+    private NotificationWebSocketEventListener listener;
+
+    @Test
+    void handleNotificationCreatedShouldSendWebSocketNotification() {
+        Notification notification = new Notification();
+        notification.setId(1L);
+        notification.setUserId(10L);
+        notification.setTitle("Case Update");
+        notification.setMessage("Your case has been updated");
+        notification.setCreatedAt(Instant.parse("2026-06-02T10:00:00Z"));
+        notification.setReadFlag(false);
+
+        when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+
+        listener.handleNotificationCreated(new NotificationCreatedEvent(1L));
+
+        ArgumentCaptor<Map<String, Object>> payloadCaptor =
+                ArgumentCaptor.forClass(Map.class);
+
+        verify(webSocketHandler).sendNotification(eq(10L), payloadCaptor.capture());
+
+        Map<String, Object> payload = payloadCaptor.getValue();
+
+        assertEquals(1L, payload.get("id"));
+        assertEquals("Case Update", payload.get("title"));
+        assertEquals("Your case has been updated", payload.get("message"));
+        assertEquals("2026-06-02T10:00:00Z", payload.get("timestamp"));
+        assertEquals(false, payload.get("read"));
+    }
+
+    @Test
+    void handleNotificationCreatedShouldNotSendWhenEventIdIsNull() {
+        listener.handleNotificationCreated(new NotificationCreatedEvent(null));
+
+        verify(notificationRepository, never()).findById(anyLong());
+        verify(webSocketHandler, never()).sendNotification(anyLong(), anyMap());
+    }
+
+    @Test
+    void handleNotificationCreatedShouldNotSendWhenNotificationNotFound() {
+        when(notificationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        listener.handleNotificationCreated(new NotificationCreatedEvent(1L));
+
+        verify(webSocketHandler, never()).sendNotification(anyLong(), anyMap());
+    }
+
+    @Test
+    void handleNotificationCreatedShouldNotSendWhenUserIdIsNull() {
+        Notification notification = new Notification();
+        notification.setId(1L);
+        notification.setUserId(null);
+
+        when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+
+        listener.handleNotificationCreated(new NotificationCreatedEvent(1L));
+
+        verify(webSocketHandler, never()).sendNotification(anyLong(), anyMap());
+    }
+}

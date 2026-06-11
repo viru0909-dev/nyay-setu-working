@@ -2,40 +2,39 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   backend-tests:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v6
 
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
 
-    - name: Run Backend Tests
-      run: |
-        cd backend/nyaysetu-backend
-        mvn test
-          
+      - name: Run Backend Tests
+        run: |
+          cd backend/nyaysetu-backend
+          mvn test
 
   frontend-tests:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
@@ -49,18 +48,17 @@ jobs:
           cd frontend/nyaysetu-frontend
           npm run test -- --run
 
-
   nlp-tests:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install NLP Dependencies
         run: |
@@ -74,7 +72,6 @@ jobs:
         run: |
           cd nlp-orchestrator
           python -m pytest
-
 
   build-and-push:
     needs:
@@ -90,10 +87,44 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
+
+      - name: Resolve Backend Maven Dependencies
+        run: mvn -B -f backend/nyaysetu-backend/pom.xml dependency:go-offline
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
+
+      - name: Run Trivy Scan - Backend
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "./backend/nyaysetu-backend"
+          severity: "CRITICAL"
+          exit-code: "0"
+
+      - name: Run Trivy Scan - Frontend
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "./frontend/nyaysetu-frontend"
+          severity: "CRITICAL"
+          exit-code: "0"
+
+      - name: Run Trivy Scan - NLP
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "./nlp-orchestrator"
+          severity: "CRITICAL"
+          exit-code: "0"
 
       - name: Login to GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -104,7 +135,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push Spring Boot
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./backend/nyaysetu-backend
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -113,7 +144,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and Push Python
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./nlp-orchestrator
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -121,7 +152,7 @@ jobs:
           cache-from: type=gha
 
       - name: Build and Push React
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./frontend/nyaysetu-frontend
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}

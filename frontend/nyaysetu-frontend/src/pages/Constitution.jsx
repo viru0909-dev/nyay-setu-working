@@ -2,7 +2,14 @@ import { useState, useEffect, useRef ,useMemo } from 'react';
 
 
 import { useTheme } from '../contexts/ThemeContext';
-import { Search, BookOpen, Globe, Download, Bookmark, MessageCircle, Share2, X, BookmarkPlus, Loader2 } from 'lucide-react';
+import {
+    Search, BookOpen, Globe, Download, Bookmark, MessageCircle, Share2, X, BookmarkPlus, Loader2, Map,
+    ShieldCheck,
+    Landmark,
+    Scale,
+    Building2,
+    Users
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/landing/Header';
@@ -41,6 +48,22 @@ export default function Constitution() {
     const [showAIChat, setShowAIChat] = useState(false);
     const [isPanelMinimized, setIsPanelMinimized] = useState(false);
     const [bookmarks, setBookmarks] = useState([]);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [systemVoices, setSystemVoices] = useState([]);
+
+// Warm up and capture device engine voices on mount
+useEffect(() => {
+    const updateVoices = () => {
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            setSystemVoices(window.speechSynthesis.getVoices());
+        }
+    };
+
+    updateVoices();
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = updateVoices;
+    }
+}, []);
     const [aiQuery, setAiQuery] = useState('');
     const [aiResponse, setAiResponse] = useState('');
     const [isAiLoading, setIsAiLoading] = useState(false);
@@ -59,8 +82,14 @@ export default function Constitution() {
     const responseEndRef = useRef(null);
 
     // Enhanced Constitution Data with more articles
-
-
+    const partIcons = {
+        1: <Map size={40} />,
+        3: <ShieldCheck size={40} />,
+        4: <Landmark size={40} />,
+        5: <Scale size={40} />,
+        6: <Building2 size={40} />,
+        9: <Users size={40} />,
+    };
 
     const parts = useMemo(() => {
         return i18n.getResource(
@@ -81,7 +110,6 @@ export default function Constitution() {
             article => article.number === selectedArticleNumber
         );
     }, [selectedPart, selectedArticleNumber]);
-
 
     const filteredParts = parts.filter(part =>
         part.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -106,6 +134,7 @@ export default function Constitution() {
                 ) {
                     matches.push({
                         ...article,
+                        partId: part.id,
                         partTitle: part.title,
                         matchId: `${part.id}-${article.number}`,
                     });
@@ -133,8 +162,18 @@ export default function Constitution() {
             onKeyDown={isLockedPreview ? undefined : (e) => { if (e.key === 'Enter') { setSelectedPartId(article.partId); setSelectedArticleNumber(article.number); } }}
             role={isLockedPreview ? undefined : 'button'}
             tabIndex={isLockedPreview ? undefined : 0}
+            style={{
+                padding: '1.5rem',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-light)',
+                borderRadius: '1rem',
+                marginBottom: '1rem',
+                cursor: isLockedPreview ? 'default' : 'pointer'
+            }}
         >
-            <span className="guest-search-card__part">{article.partTitle}</span>
+            <span className="guest-search-card__part" style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: 'bold', display: 'block', marginBottom: '0.25rem' }}>
+                {article.partTitle}
+            </span>
             <h3 style={{ color: 'var(--color-primary)', fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.45rem', lineHeight: 1.35 }}>
                 {t('article')} {article.number}: {article.title}
             </h3>
@@ -151,9 +190,93 @@ export default function Constitution() {
             setBookmarks([...bookmarks, article]);
         }
     };
+  const handleSpeak = (text) => {
+    if (isPlaying) {
+        window.speechSynthesis.cancel();
+        setIsPlaying(false);
+        return;
+    }
+
+    if (!text) return;
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    // Map i18n codes to standard regional voice tags
+    const langMapping = {
+        en: 'en-IN',
+        hi: 'hi-IN',
+        mr: 'mr-IN',
+        ta: 'ta-IN',
+        te: 'te-IN'
+    };
+
+    const targetLang = langMapping[language] || 'en-IN';
+    utterance.lang = targetLang;
+
+    // Use our state-cached system voices list
+    const voicesList = systemVoices.length > 0 ? systemVoices : window.speechSynthesis.getVoices();
+    
+    // Look for an exact accent match (e.g., ta-IN)
+    let matchingVoice = voicesList.find(voice => 
+        voice.lang.toLowerCase().replace('_', '-').includes(targetLang.toLowerCase())
+    );
+
+    // Fallback: Look for the primary language prefix (e.g., ta)
+    if (!matchingVoice) {
+        matchingVoice = voicesList.find(voice => 
+            voice.lang.toLowerCase().startsWith(language.toLowerCase())
+        );
+    }
+
+    // Secondary Fallback: Fall back to Indian English accent so it reads something out loud
+    if (!matchingVoice) {
+        console.warn(`Native audio accent pack not found on this device for code: ${targetLang}. Falling back to default.`);
+        matchingVoice = voicesList.find(voice => 
+            voice.lang.toLowerCase().replace('_', '-').includes('en-in')
+        );
+    }
+
+    if (matchingVoice) {
+        utterance.voice = matchingVoice;
+    }
+
+    utterance.onend = () => setIsPlaying(false);
+    utterance.onerror = (e) => {
+        console.error("Speech Synthesis Error:", e);
+        setIsPlaying(false);
+    };
+
+    setIsPlaying(true);
+    window.speechSynthesis.speak(utterance);
+};
+// Clean up speech if the user navigates away or closes the article
+useEffect(() => {
+    return () => {
+        window.speechSynthesis.cancel();
+    };
+}, [selectedArticleNumber]);
 
     const handleDownloadPDF = () => {
-        alert(t('pdfComingSoon'));
+        const pdfByLanguage = {
+            en: {
+                href: '/documents/COI_MAY2024.pdf',
+                filename: 'Constitution_of_India_English.pdf',
+            },
+            hi: {
+                href: '/documents/COI_MAY2024_Hindi.pdf',
+                filename: 'Constitution_of_India_Hindi.pdf',
+            },
+        };
+    
+        // Use Hindi PDF when page is in Hindi, otherwise English
+        const pdf = language === 'hi' ? pdfByLanguage.hi : pdfByLanguage.en;
+    
+        const link = document.createElement('a');
+        link.href = pdf.href;
+        link.setAttribute('download', pdf.filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
     };
 
     const handleAIChat = async () => {
@@ -176,16 +299,21 @@ export default function Constitution() {
     };
 
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
             <Header />
 
             {/* geometric grid pattern — same as Landing hero */}
             <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', backgroundImage: `linear-gradient(rgba(124,92,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,92,255,0.03) 1px, transparent 1px)`, backgroundSize: '60px 60px' }} />
-            <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '6rem 2rem 4rem', position: 'relative', zIndex: 1 }}>
+            
+            <div style={{ maxWidth: '1600px', width: '100%', margin: '0 auto', padding: '6rem 2rem 4rem', position: 'relative', zIndex: 1, flex: '1 0 auto' }}>
                 {/* Page Header */}
                 <div style={{
                     padding: '3rem',
                     background: 'var(--bg-glass)',
+                    backgroundImage: "url('/assets/constitution.png')",
+                    backgroundPosition: 'center',
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
                     border: '1px solid var(--border-light)',
@@ -232,10 +360,10 @@ export default function Constitution() {
                                     transition: 'all 0.3s'
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.target.style.opacity = '0.9';
+                                    e.currentTarget.style.opacity = '0.9';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.target.style.opacity = '1';
+                                    e.currentTarget.style.opacity = '1';
                                 }}
                             >
                                 <Globe size={20} />
@@ -260,8 +388,8 @@ export default function Constitution() {
                                     fontSize: '1rem',
                                     transition: 'transform 0.2s'
                                 }}
-                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                             >
                                 <Download size={20} />
                                 {t('constitution:downloadPDF')}
@@ -330,11 +458,11 @@ export default function Constitution() {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
-                    {/* Main Content */}
+                <div style={{ display: 'grid', gridTemplateColumns: showAIChat ? '1fr 400px' : '1fr', gap: '2rem', alignItems: 'start' }}>
+                    {/* Main Content Pane */}
                     <div>
                         {selectedArticleNumber && selectedArticle ? (
-                            // Article Detail View
+                            // 1. Article Detail View
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -353,7 +481,7 @@ export default function Constitution() {
                                         fontSize: '1rem'
                                     }}
                                 >
-                                    ← {t('constitution:back')}
+                                    {t('constitution:back')}
                                 </button>
 
                                 <div style={{
@@ -377,6 +505,30 @@ export default function Constitution() {
 
                                         <div style={{ display: 'flex', gap: '0.75rem' }}>
                                             <button
+    onClick={() => handleSpeak(`${selectedArticle.title}. ${selectedArticle.content}`)}
+    style={{
+        padding: '0.75rem',
+        background: isPlaying ? '#EF4444' : 'var(--bg-hover)',
+        border: '1px solid var(--border-light)',
+        borderRadius: '0.75rem',
+        color: isPlaying ? 'white' : 'var(--color-primary)',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transition: 'all 0.3s',
+        minWidth: '44px',
+        minHeight: '44px'
+    }}
+    title={isPlaying ? "Stop Listening" : "Listen to Article"}
+>
+    {isPlaying ? (
+        <X size={20} />
+    ) : (
+        <span style={{ fontSize: '1.25rem', display: 'inline-block', transform: 'scaleX(-1)' }}>📣</span>
+    )}
+</button>
+                                            <button
                                                 onClick={() => toggleBookmark(selectedArticle)}
                                                 style={{
                                                     padding: '0.75rem',
@@ -394,10 +546,10 @@ export default function Constitution() {
                                                 onClick={() => alert('Share feature coming soon!')}
                                                 style={{
                                                     padding: '0.75rem',
-                                                    background: 'var(--bg-glass)',
-                                                    border: 'var(--border-glass)',
+                                                    background: 'var(--bg-hover)',
+                                                    border: '1px solid var(--border-light)',
                                                     borderRadius: '0.75rem',
-                                                    color: 'white',
+                                                    color: 'var(--text-main)',
                                                     cursor: 'pointer'
                                                 }}
                                             >
@@ -419,8 +571,8 @@ export default function Constitution() {
                                             {selectedArticle.keywords.map((keyword, idx) => (
                                                 <span key={idx} style={{
                                                     padding: '0.5rem 1rem',
-                                                    background: 'var(--bg-glass)',
-                                                    border: 'var(--border-glass)',
+                                                    background: 'var(--bg-hover)',
+                                                    border: '1px solid var(--border-light)',
                                                     borderRadius: '0.5rem',
                                                     color: 'var(--color-primary)',
                                                     fontSize: '0.9rem',
@@ -434,7 +586,7 @@ export default function Constitution() {
                                 </div>
                             </motion.div>
                         ) : selectedPartId && selectedPart ? (
-                            // Part Detail View
+                            // 2. Part Detail View / Article Stack
                             <div>
                                 <button
                                     onClick={() => setSelectedPartId(null)}
@@ -475,7 +627,7 @@ export default function Constitution() {
                                             key={idx}
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: idx * 0.1 }}
+                                            transition={{ delay: idx * 0.05 }}
                                             onClick={() => setSelectedArticleNumber(article.number)}
                                             whileHover={{ x: 8 }}
                                             style={{
@@ -496,7 +648,7 @@ export default function Constitution() {
                                                 e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
                                             }}
                                         >
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                                 <span style={{
                                                     padding: '0.6rem 1.25rem',
                                                     background: 'var(--color-primary)',
@@ -535,8 +687,9 @@ export default function Constitution() {
                                 </div>
                             </div>
                         ) : searchQuery.trim() && searchMatches.length > 0 ? (
+                            // 3. Search Results Mode
                             <div>
-                                <p className="guest-search-banner">
+                                <p className="guest-search-banner" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
                                     <Search size={16} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
                                     <span>
                                         <strong style={{ color: 'var(--text-main)' }}>{searchMatches.length}</strong>
@@ -560,11 +713,12 @@ export default function Constitution() {
                                 )}
                             </div>
                         ) : searchQuery.trim() ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>
+                            // 4. Empty Search State
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '4rem 2rem' }}>
                                 {language === 'en' ? 'No articles matched your search.' : 'आपकी खोज से कोई अनुच्छेद मेल नहीं खाता।'}
                             </p>
                         ) : (
-                            // Parts List View
+                            // 5. Default Grid Layout (Parts Overview)
                             <div style={{
                                 display: 'grid',
                                 gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
@@ -575,7 +729,7 @@ export default function Constitution() {
                                         key={part.id}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
+                                        transition={{ delay: idx * 0.05 }}
                                         whileHover={{ y: -8, scale: 1.02 }}
                                         onClick={() => setSelectedPartId(part.id)}
                                         style={{
@@ -600,30 +754,23 @@ export default function Constitution() {
                                     >
                                         <div style={{
                                             position: 'absolute',
-                                            top: '1rem',
-                                            right: '1rem',
-                                            padding: '0.5rem 1rem',
-                                            border: '1px solid rgba(30, 42, 68, 0.1)',
-                                            borderRadius: '0.75rem',
-                                            fontSize: '0.85rem',
-                                            fontWeight: '800',
-                                            background: 'var(--color-primary)',
-                                            color: '#FFFFFF'
+                                            top: '1.5rem',
+                                            right: '1.5rem',
+                                            color: 'var(--color-primary)',
+                                            opacity: 0.15
                                         }}>
-                                            {part.articles.length} {t('constitution:articles')}
+                                            {partIcons[part.id] || <BookOpen size={40} />}
                                         </div>
 
-                                        <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '800', marginBottom: '1rem', lineHeight: '1.3', paddingRight: '3rem' }}>
+                                        <h3 style={{ color: 'var(--color-primary)', fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.75rem' }}>
                                             {part.title}
                                         </h3>
-
-                                        <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
                                             {part.description}
                                         </p>
-
-                                        <div style={{ color: 'var(--color-primary)', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            {t('constitution:readMore')} →
-                                        </div>
+                                        <span style={{ display: 'inline-block', marginTop: '1.5rem', fontSize: '0.9rem', fontWeight: '700', color: 'var(--color-primary)' }}>
+                                            {part.articles?.length || 0} {t('articles', { defaultValue: 'Articles' })} →
+                                        </span>
                                     </motion.div>
                                 ))}
                             </div>

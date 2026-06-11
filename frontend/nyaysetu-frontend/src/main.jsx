@@ -21,7 +21,9 @@ const Root = () => {
 
     // 3. The temporary function for the "Stay Logged In" button
     const handleRefresh = () => {
-        console.log("User wants to stay logged in!");
+        if (import.meta.env.DEV) {
+            console.log("User wants to stay logged in!");
+        }
         setShowWarning(false);
     };
 
@@ -36,6 +38,25 @@ const Root = () => {
                     console.log('✅ App is ready to work offline');
                 },
             });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (import.meta.env.DEV) {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+
+            if (!token || !user) {
+                const devUser = {
+                    id: 1,
+                    name: 'Dev User',
+                    role: 'LITIGANT',
+                };
+
+                localStorage.setItem('token', 'dev-token');
+                localStorage.setItem('user', JSON.stringify(devUser));
+                console.log('🔧 DEV auth bypass enabled for local QA: litigant user seeded');
+            }
         }
     }, []);
 

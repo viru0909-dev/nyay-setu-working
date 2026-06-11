@@ -6,6 +6,7 @@ import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CaseRepository;
+import com.nyaysetu.backend.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class CaseManagementService {
     private final HearingRepository hearingRepository;
     private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
     private final com.nyaysetu.backend.service.CaseTimelineService timelineService;
+    private final DocumentRepository documentRepository;
 
     @Transactional
     public CaseDTO createCase(CreateCaseRequest request, User client) {
@@ -139,6 +141,7 @@ public class CaseManagementService {
 
         caseEntity.setDraftPetition(draftContent);
         caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.DRAFT_PENDING_CLIENT);
+        caseEntity.setDraftApprovalStatus("AWAITING_CLIENT");
         // Ensure Document Status is set for frontend logic
         caseEntity.setDocumentStatus(com.nyaysetu.backend.entity.DocumentStatus.PENDING_REVIEW);
         
@@ -180,10 +183,10 @@ public class CaseManagementService {
             // BUT, to satisfy "dedicated storage", we really should create a document record.
             // Let's inject DocumentRepository and create a record pointing to a placeholder.
             
-        } catch (Exception e) {
-           // log error but don't fail transaction
-           System.err.println("Failed to auto-generate draft document: " + e.getMessage());
-        }
+          } catch (Exception e) {
+              // log error but don't fail transaction
+              log.error("Failed to auto-generate draft document", e);
+          }
 
         // Notify Client
         if (caseEntity.getClient() != null) {
@@ -254,7 +257,7 @@ public class CaseManagementService {
                 .assignedJudge(entity.getAssignedJudge())
                 .clientId(entity.getClient() != null ? entity.getClient().getId() : null)
                 .clientName(entity.getClient() != null ? entity.getClient().getName() : null)
-                .documentsCount(0) // TODO: Count from documents table
+                .documentsCount((int) documentRepository.countByCaseId(entity.getId()))
                 .lawyerProposalStatus(entity.getLawyerProposalStatus())
                 .draftPetition(entity.getDraftPetition())
                 .lawyerId(entity.getLawyer() != null ? entity.getLawyer().getId() : null)
