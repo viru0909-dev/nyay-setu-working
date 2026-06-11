@@ -4,12 +4,14 @@ import { LogOut, ChevronDown, User, Menu, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/authStore';
 import NotificationBell from '../components/NotificationBell';
+import useThemeStore from '../store/themeStore';
 
 export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const { logout } = useAuthStore();
     const navigate = useNavigate();
     const { t, i18n } = useTranslation('dashboard');
+    const { isDark, toggleTheme } = useThemeStore();
 
     const handleLogout = () => {
         logout();
@@ -108,6 +110,21 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
             }}>
                 {/* Notifications */}
                 <NotificationBell />
+                <button
+                onClick={toggleTheme}
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                style={{
+                  background: 'none',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '20px',
+                  padding: '6px 12px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  color: 'inherit'
+                }}
+              >
+                {isDark ? '🌙' : '☀️'}
+              </button>
 
                 {/* Profile Dropdown */}
                 <div style={{ position: 'relative' }}>

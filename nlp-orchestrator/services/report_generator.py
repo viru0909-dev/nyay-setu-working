@@ -1,5 +1,3 @@
-import json
-from models.schemas import LiabilityReport
 
 def generate_report(job_id: str, gemini_timeline: str, groq_legal: str) -> dict:
     """

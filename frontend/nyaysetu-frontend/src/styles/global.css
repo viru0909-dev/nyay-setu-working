@@ -416,8 +416,7 @@ a:hover { color: var(--color-primary); }
   border-radius: 50%;
   border: none;
 }
-<<<<<<< HEAD
-=======
+
 /* ===== Scrollbar Styling ===== */
 ::-webkit-scrollbar {
   width: 8px;
@@ -435,24 +434,20 @@ a:hover { color: var(--color-primary); }
 ::-webkit-scrollbar-thumb:hover {
   background: #000;
 }
-/* Scrollbar Track */
-::-webkit-scrollbar {
-  width: 10px;
+/* Dark Mode Theme */
+.dark-mode {
+  --primary-dark: #1E293B;
+  --bg-light: #0F172A;
+  --glass-bg: rgba(15, 23, 42, 0.85);
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  background-color: #0F172A !important;
+  color: #F1F5F9 !important;
 }
+.dark-mode * {
+  border-color: #334155;
+}
+.dark-mode .card, .dark-mode .navbar, .dark-mode header, .dark-mode nav {
+  background-color: #
 
-/* Background */
-::-webkit-scrollbar-track {
-  background: #e5e7eb; /* light grey */
-}
 
-/* Scroll Thumb */
-::-webkit-scrollbar-thumb {
-  background: #111827; /* dark black */
-  border-radius: 10px;
-}
-
-/* Hover Effect */
-::-webkit-scrollbar-thumb:hover {
-  background: #000000;
-}
->>>>>>> fix-clean-websocket

@@ -23,6 +23,8 @@ import DocumentGeneratePage from './DocumentGeneratePage';
 describe('DocumentGeneratePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.URL.createObjectURL = vi.fn(() => 'blob:dummy');
+    window.URL.revokeObjectURL = vi.fn();
     lawgpt.preview.mockResolvedValue({ data: { title: 'AFFIDAVIT', content: 'dummy text', generatedAt: new Date().toISOString(), sources: [] } });
     lawgpt.downloadDocx.mockResolvedValue({ data: new Blob(['docx']) });
   });
