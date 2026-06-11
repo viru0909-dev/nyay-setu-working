@@ -84,14 +84,15 @@ async def test_all_providers_fail():
         assert res["source"] == "all_providers_failed"
 
 
-def test_non_retryable_error(monkeypatch):
+@pytest.mark.asyncio
+async def test_non_retryable_error(monkeypatch):
     exc = Exception("bad request")
     mock_attempt = AsyncMock(side_effect=exc)
     with patch("research.build_provider_queue", return_value=["groq"]), \
          patch("research._attempt_provider", mock_attempt), \
          patch("research.is_retryable_exception", return_value=False), \
          patch("research.RETRY_DELAY_SECONDS", 0):
-        # Run the coroutine
-        res = asyncio.get_event_loop().run_until_complete(execute_with_fallback("Q5", "", primary_provider="groq"))
+        # Run the coroutine directly using await
+        res = await execute_with_fallback("Q5", "", primary_provider="groq")
         assert res["is_fallback"] is True
         assert mock_attempt.call_count == 1

@@ -293,8 +293,8 @@ const DocumentGeneratePage = () => {
     const selectedDocInfo = DOC_TYPES.find(d => d.id === selectedType);
 
     // ── Shared styles ────────────────────────────────────────────────────────
-
-    const cardStyle = {
+    const cardStyle
+     = {
         background: 'var(--bg-surface)',
         border: '1px solid var(--color-border)',
         borderRadius: '1rem',
