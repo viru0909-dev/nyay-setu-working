@@ -45,8 +45,9 @@ public class DocumentEntity {
     private String uploadIp;
     
     // Access control: PUBLIC (all parties), RESTRICTED (uploader+lawyer+judge), SEALED (judge only)
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private String visibilityLevel = "PUBLIC";
+    private VisibilityLevel visibilityLevel = VisibilityLevel.PUBLIC;
 
     @Builder.Default
     private Boolean isVerified = true;

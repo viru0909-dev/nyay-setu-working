@@ -84,4 +84,17 @@ public class EvidenceRecord {
 
     @Column(name = "content_type")
     private String contentType;
+
+    // External anchoring fields
+    @Column(name = "external_anchor_proof", columnDefinition = "TEXT")
+    private String externalAnchorProof;
+
+    @Column(name = "merkle_root", length = 64)
+    private String merkleRoot;
+
+    @Column(name = "anchored_at")
+    private LocalDateTime anchoredAt;
+
+    @Column(name = "anchor_service", length = 100)
+    private String anchorService;
 }

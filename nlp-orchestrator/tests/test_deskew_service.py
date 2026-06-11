@@ -3,10 +3,9 @@ Tests for deskew_service.py
 """
 
 import numpy as np
-import pytest
 from PIL import Image, ImageDraw
 
-from services.deskew_service import deskew_image, deskew_images, _estimate_skew_angle
+from services.deskew_service import deskew_image, deskew_images
 
 
 def _make_blank_image(width=400, height=200, color=255) -> Image.Image:
