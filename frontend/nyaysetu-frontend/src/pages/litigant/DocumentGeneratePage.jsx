@@ -177,7 +177,7 @@ const DocumentGeneratePage = () => {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL?.(url);
         } catch (err) {
             handleApiError(err);
         } finally {
@@ -217,7 +217,7 @@ const DocumentGeneratePage = () => {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL?.(url);
         } catch (err) {
             handleApiError(err);
         } finally {
@@ -293,8 +293,8 @@ const DocumentGeneratePage = () => {
     const selectedDocInfo = DOC_TYPES.find(d => d.id === selectedType);
 
     // ── Shared styles ────────────────────────────────────────────────────────
-
-    const cardStyle = {
+    const cardStyle
+     = {
         background: 'var(--bg-surface)',
         border: '1px solid var(--color-border)',
         borderRadius: '1rem',
@@ -415,12 +415,12 @@ const DocumentGeneratePage = () => {
                                     const Icon = docType.icon;
                                     return (
                                         <motion.div
-                                            key={docType.id}
-                                            whileHover={{ scale: 1.02, boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={() => selectDocType(docType.id)}
-                                            style={{
-                                                ...cardStyle,
+                                           key={docType.id}
+                                           tabIndex={0}
+                                           whileHover={{ scale: 1.02, boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}
+                                           whileTap={{ scale: 0.98 }}
+                                           onClick={() => selectDocType(docType.id)}
+                                            style={{     ...cardStyle,
                                                 cursor: 'pointer',
                                                 borderColor: selectedType === docType.id ? docType.color : '#E5E7EB',
                                                 transition: 'all 0.2s',

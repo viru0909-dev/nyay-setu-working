@@ -37,7 +37,10 @@ from config import (
     RETRY_MAX_ATTEMPTS,
     RETRY_DELAY_SECONDS,
     PROVIDER_ORDER,
+    OLLAMA_API_URL,
+    OLLAMA_MODEL,
 )
+import httpx
 
 from utils import (
     CircuitBreaker,
@@ -54,6 +57,7 @@ gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 # Module-level circuit breakers for persistent state across requests.
 groq_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 gemini_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
+ollama_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 
 
 # ─── Prompts ──────────────────────────────────────────────────────────────────
@@ -112,7 +116,7 @@ def _fallback_response(question: str, source: str) -> dict:
 
 def build_provider_queue(primary_provider: str) -> list[str]:
     """Return ordered, deduplicated provider list with primary first."""
-    ordered = [p for p in PROVIDER_ORDER if p in {"gemini", "groq"}]
+    ordered = [p for p in PROVIDER_ORDER if p in {"gemini", "groq", "ollama"}]
     if primary_provider in ordered:
         ordered = [primary_provider] + [p for p in ordered if p != primary_provider]
 
@@ -160,6 +164,19 @@ async def _attempt_provider(provider: str, question: str, kanoon_context: str | 
         except Exception as exc:
             groq_breaker.call_failed()
             logger.error(f"[Research/Groq] Provider attempt failed: {exc}")
+            raise
+
+    if provider == "ollama":
+        if not ollama_breaker.is_available():
+            logger.warning("[CircuitBreaker/Ollama] OPEN - skipping")
+            return _fallback_response(question, "ollama")
+        try:
+            res = await _call_ollama_once(question, kanoon_context)
+            ollama_breaker.call_succeeded()
+            return res
+        except Exception as exc:
+            ollama_breaker.call_failed()
+            logger.error(f"[Research/Ollama] Provider attempt failed: {exc}")
             raise
 
     return _fallback_response(question, provider)
@@ -280,6 +297,37 @@ async def _call_gemini_once(
 # These wrap the single-attempt functions with the tenacity retry policy.
 _call_groq_with_retry = retry_transient(_call_groq_once)
 _call_gemini_with_retry = retry_transient(_call_gemini_once)
+
+async def _call_ollama_once(question: str, kanoon_context: str | None = None) -> dict:
+    """Single attempt to call local Ollama model."""
+    user_prompt = _build_user_prompt(question, kanoon_context)
+    full_prompt = (
+        f"{LEGAL_SYSTEM_PROMPT}\n\n"
+        f"{KANOON_CONTEXT_PROMPT}\n\n"
+        f"Question: {user_prompt}"
+    )
+    
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": full_prompt,
+        "stream": False
+    }
+    
+    async with httpx.AsyncClient() as client:
+        # Use a generous timeout for local models which might take a bit to respond
+        response = await client.post(f"{OLLAMA_API_URL}/api/generate", json=payload, timeout=120.0)
+        response.raise_for_status()
+        data = response.json()
+        
+    return {
+        "question": question,
+        "answer": data.get("response", "").strip(),
+        "source": "ollama",
+        "grounded": bool(kanoon_context),
+        "error": None,
+    }
+
+_call_ollama_with_retry = retry_transient(_call_ollama_once)
 
 # ─── Public LLM entry points (circuit-breaker layer) ──────────────────────────
 

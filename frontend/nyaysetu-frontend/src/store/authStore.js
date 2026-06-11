@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { GUEST_SESSION_MAX_AGE_MS, GUEST_STORAGE_KEYS } from '../lib/guest';
 
+let storage = typeof window !== 'undefined' ? window.localStorage : {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+};
+
+export const configureStorage = (customStorage) => {
+    storage = customStorage;
+};
+
 const {
     user: GUEST_USER_KEY,
     sessionId: GUEST_SESSION_ID_KEY,
@@ -14,11 +24,8 @@ const {
 const isTokenExpired = (token) => {
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-
         if (!payload.exp) return true;
-
         const currentTime = Date.now() / 1000;
-
         return payload.exp < currentTime;
     } catch (error) {
         return true;
@@ -27,9 +34,9 @@ const isTokenExpired = (token) => {
 
 const createGuestSessionId = () => `guest_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
-const readJson = (key, fallback) => {
+const readJson = (storage, key, fallback) => {
     try {
-        const raw = localStorage.getItem(key);
+        const raw = storage.getItem(key);
         if (!raw || raw === 'null' || raw === 'undefined') return fallback;
         return JSON.parse(raw);
     } catch {
@@ -37,40 +44,32 @@ const readJson = (key, fallback) => {
     }
 };
 
-const writeJson = (key, value) => {
-    localStorage.setItem(key, JSON.stringify(value));
+const writeJson = (storage, key, value) => {
+    storage.setItem(key, JSON.stringify(value));
 };
 
-const clearGuestStorage = () => {
-    localStorage.removeItem(GUEST_USER_KEY);
-    localStorage.removeItem(GUEST_SESSION_ID_KEY);
-    localStorage.removeItem(GUEST_CREATED_AT_KEY);
-    localStorage.removeItem(GUEST_MODAL_SHOWN_KEY);
-    localStorage.removeItem(GUEST_PREFS_KEY);
-    localStorage.removeItem(GUEST_ONBOARDING_KEY);
+const clearGuestStorage = (storage) => {
+    storage.removeItem(GUEST_USER_KEY);
+    storage.removeItem(GUEST_SESSION_ID_KEY);
+    storage.removeItem(GUEST_CREATED_AT_KEY);
+    storage.removeItem(GUEST_MODAL_SHOWN_KEY);
+    storage.removeItem(GUEST_PREFS_KEY);
+    storage.removeItem(GUEST_ONBOARDING_KEY);
 };
 
-const useAuthStore = create((set, get) => ({
+export const useAuthStore = create((set, get) => ({
     user: null,
     token: null,
     isAuthenticated: false,
     isGuest: false,
 
     setAuth: (user, token) => {
-    // Store token in memory only (not localStorage) to prevent XSS token theft
-    // Only non-sensitive user metadata is persisted to localStorage
-    localStorage.setItem('user', JSON.stringify(user));
-    try {
-    const expiry = JSON.parse(atob(token.split('.')[1])).exp;
-    localStorage.setItem('token_expiry', expiry);
-} catch {
-    // Token may be a test/dev token without valid JWT structure
-    localStorage.removeItem('token_expiry');
-}
-    clearGuestStorage();
-    localStorage.removeItem(GUEST_INTENT_KEY);
-    set({ user, token, isAuthenticated: true, isGuest: false });
-},
+        storage.setItem('token', token);
+        storage.setItem('user', JSON.stringify(user));
+        clearGuestStorage(storage);
+        storage.removeItem(GUEST_INTENT_KEY);
+        set({ user, token, isAuthenticated: true, isGuest: false });
+    },
 
     setGuest: () => {
         const sessionId = createGuestSessionId();
@@ -83,15 +82,15 @@ const useAuthStore = create((set, get) => ({
             sessionId,
         };
 
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.setItem(GUEST_SESSION_ID_KEY, sessionId);
-        localStorage.setItem(GUEST_USER_KEY, JSON.stringify(guestUser));
-        localStorage.setItem(GUEST_CREATED_AT_KEY, new Date().toISOString());
-        localStorage.removeItem(GUEST_MODAL_SHOWN_KEY);
+        storage.removeItem('token');
+        storage.removeItem('user');
+        storage.setItem(GUEST_SESSION_ID_KEY, sessionId);
+        storage.setItem(GUEST_USER_KEY, JSON.stringify(guestUser));
+        storage.setItem(GUEST_CREATED_AT_KEY, new Date().toISOString());
+        storage.removeItem(GUEST_MODAL_SHOWN_KEY);
 
-        if (!localStorage.getItem(GUEST_PREFS_KEY)) {
-            writeJson(GUEST_PREFS_KEY, { theme: null, language: null, visitedConstitution: false });
+        if (!storage.getItem(GUEST_PREFS_KEY)) {
+            writeJson(storage, GUEST_PREFS_KEY, { theme: null, language: null, visitedConstitution: false });
         }
 
         set({ user: guestUser, token: null, isAuthenticated: false, isGuest: true });
@@ -103,26 +102,26 @@ const useAuthStore = create((set, get) => ({
     },
 
     logout: () => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token_expiry');
-        clearGuestStorage();
-        localStorage.removeItem(GUEST_INTENT_KEY);
+        storage.removeItem('token');
+        storage.removeItem('user');
+        clearGuestStorage(storage);
+        storage.removeItem(GUEST_INTENT_KEY);
         set({ user: null, token: null, isAuthenticated: false, isGuest: false });
     },
 
-    hasSeenGuestModal: () => localStorage.getItem(GUEST_MODAL_SHOWN_KEY) === 'true',
+    hasSeenGuestModal: () => storage.getItem(GUEST_MODAL_SHOWN_KEY) === 'true',
 
     markGuestModalShown: () => {
-        localStorage.setItem(GUEST_MODAL_SHOWN_KEY, 'true');
+        storage.setItem(GUEST_MODAL_SHOWN_KEY, 'true');
     },
 
     clearGuestModalShown: () => {
-        localStorage.removeItem(GUEST_MODAL_SHOWN_KEY);
+        storage.removeItem(GUEST_MODAL_SHOWN_KEY);
     },
 
     setGuestIntent: (intent) => {
         if (!intent?.path) return;
-        writeJson(GUEST_INTENT_KEY, {
+        writeJson(storage, GUEST_INTENT_KEY, {
             path: intent.path,
             label: intent.label || null,
             feature: intent.feature || null,
@@ -130,58 +129,51 @@ const useAuthStore = create((set, get) => ({
         });
     },
 
-    getGuestIntent: () => readJson(GUEST_INTENT_KEY, null),
+    getGuestIntent: () => readJson(storage, GUEST_INTENT_KEY, null),
 
     clearGuestIntent: () => {
-        localStorage.removeItem(GUEST_INTENT_KEY);
+        storage.removeItem(GUEST_INTENT_KEY);
     },
 
-    getGuestPrefs: () => readJson(GUEST_PREFS_KEY, {}),
+    getGuestPrefs: () => readJson(storage, GUEST_PREFS_KEY, {}),
 
     updateGuestPrefs: (patch) => {
         const next = { ...get().getGuestPrefs(), ...patch };
-        writeJson(GUEST_PREFS_KEY, next);
+        writeJson(storage, GUEST_PREFS_KEY, next);
         return next;
     },
 
-    hasDismissedOnboarding: () => localStorage.getItem(GUEST_ONBOARDING_KEY) === 'true',
+    hasDismissedOnboarding: () => storage.getItem(GUEST_ONBOARDING_KEY) === 'true',
 
     dismissOnboarding: () => {
-        localStorage.setItem(GUEST_ONBOARDING_KEY, 'true');
+        storage.setItem(GUEST_ONBOARDING_KEY, 'true');
     },
 
     initAuth: () => {
-        const tokenExpiry = localStorage.getItem('token_expiry');
-const userStr = localStorage.getItem('user');
-const token = get().token; // Read from memory only
+        const token = storage.getItem('token');
+        const userStr = storage.getItem('user');
 
-if (token && userStr && userStr !== 'null' && userStr !== 'undefined') {
-    try {
-        if (isTokenExpired(token)) {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token_expiry');
-
-                    set({
-                        token: null,
-                        user: null,
-                        isAuthenticated: false
-                    });
-
+        if (token && userStr && token !== 'null' && userStr !== 'null' && token !== 'undefined' && userStr !== 'undefined') {
+            try {
+                if (isTokenExpired(token)) {
+                    storage.removeItem('token');
+                    storage.removeItem('user');
+                    set({ token: null, user: null, isAuthenticated: false });
                     return;
                 }
                 const user = JSON.parse(userStr);
                 set({ token, user, isAuthenticated: true, isGuest: false });
             } catch (error) {
                 console.error('Failed to parse user from localStorage:', error);
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                storage.removeItem('token');
+                storage.removeItem('user');
             }
             return;
         }
 
-        const guestUserStr = localStorage.getItem(GUEST_USER_KEY);
-        const guestSessionId = localStorage.getItem(GUEST_SESSION_ID_KEY);
-        const guestCreatedAt = localStorage.getItem(GUEST_CREATED_AT_KEY);
+        const guestUserStr = storage.getItem(GUEST_USER_KEY);
+        const guestSessionId = storage.getItem(GUEST_SESSION_ID_KEY);
+        const guestCreatedAt = storage.getItem(GUEST_CREATED_AT_KEY);
 
         if (guestUserStr && guestSessionId && guestUserStr !== 'null' && guestUserStr !== 'undefined') {
             try {
@@ -190,8 +182,8 @@ if (token && userStr && userStr !== 'null' && userStr !== 'undefined') {
                     const sessionAge = Number.isFinite(createdAtMs) ? Date.now() - createdAtMs : Infinity;
 
                     if (sessionAge > GUEST_SESSION_MAX_AGE_MS) {
-                        clearGuestStorage();
-                        localStorage.removeItem(GUEST_INTENT_KEY);
+                        clearGuestStorage(storage);
+                        storage.removeItem(GUEST_INTENT_KEY);
                         try {
                             window.dispatchEvent(new CustomEvent('guest:session-expired'));
                         } catch {
@@ -201,7 +193,7 @@ if (token && userStr && userStr !== 'null' && userStr !== 'undefined') {
                         return;
                     }
                 } else {
-                    clearGuestStorage();
+                    clearGuestStorage(storage);
                     set({ user: null, token: null, isAuthenticated: false, isGuest: false });
                     return;
                 }
@@ -215,11 +207,10 @@ if (token && userStr && userStr !== 'null' && userStr !== 'undefined') {
                 }
             } catch (error) {
                 console.error('Failed to parse guest user from localStorage:', error);
-                clearGuestStorage();
+                clearGuestStorage(storage);
                 set({ user: null, token: null, isAuthenticated: false, isGuest: false });
             }
         } else {
-            // No guest session and no auth token
             set({ user: null, token: null, isAuthenticated: false, isGuest: false });
         }
     },

@@ -1,5 +1,14 @@
 package com.nyaysetu.backend.service;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.nyaysetu.backend.dto.DocumentDto;
 import com.nyaysetu.backend.dto.UploadDocumentRequest;
 import com.nyaysetu.backend.entity.DocumentEntity;
@@ -8,15 +17,8 @@ import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -31,10 +33,43 @@ public class DocumentManagementService {
 
     @Transactional
     public DocumentDto uploadDocument(MultipartFile file, UploadDocumentRequest request, User uploader, String uploadIp) {
+        // ── File Validation (CWE-434 / Issue #1061) ──────────────────────
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File must not be empty");
+        }
+
+        final long MAX_FILE_SIZE = 10 * 1024 * 1024L;
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("File size exceeds maximum allowed size of 10MB");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            throw new IllegalArgumentException("File name must not be empty");
+        }
+        String ext = originalFilename.substring(originalFilename.lastIndexOf('.')).toLowerCase();
+        java.util.Set<String> allowedExtensions = java.util.Set.of(".pdf", ".docx", ".txt", ".png", ".jpg", ".jpeg");
+        if (!allowedExtensions.contains(ext)) {
+            throw new IllegalArgumentException("Invalid file type. Allowed: pdf, docx, txt, png, jpg, jpeg");
+        }
+
+        String contentType = file.getContentType();
+        java.util.Set<String> allowedMimeTypes = java.util.Set.of(
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "text/plain",
+            "image/png",
+            "image/jpeg"
+        );
+        if (contentType == null || !allowedMimeTypes.contains(contentType)) {
+            throw new IllegalArgumentException("Invalid file MIME type: " + contentType);
+        }
+        // ── End Validation ───────────────────────────────────────────────
+
+      
         // Store file
         String category = request.getCategory() != null ? request.getCategory() : "OTHER";
         String filePath = fileStorageService.storeFile(file, category);
-
         // Calculate SHA-256 hash for data integrity (Section 63(4) compliance)
         String fileHash = null;
         try {
