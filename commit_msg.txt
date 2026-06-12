@@ -1,0 +1,13 @@
+fix: add external anchoring to evidence blockchain, fix BSA 63(4) compliance
+
+Closes #1220 - Evidence blockchain was single-DB linked list without external anchoring
+
+- EvidenceRecord.java: added merkleRoot, externalAnchorProof, anchoredAt, anchorService fields
+- EvidenceAnchoringService.java: Merkle tree computation + simulated external anchoring
+- BlockchainEvidenceService: upload now computes Merkle root, anchors it externally,
+  updates all case evidence records with proof; verifyEvidence and verifyChain both
+  validate external anchor alongside block hash integrity
+- CertificateService: BSA 63(4) certificates now include Merkle root, anchor service,
+  and anchor proof in the PDF output
+- BlockchainService: remains the SHA-256 engine; anchoring provides the external
+  verifiability layer
