@@ -67,7 +67,7 @@ class ErrorBoundary extends React.Component {
                             color: 'white',
                             marginBottom: '1rem'
                         }}>
-                            Oops! Something went wrong
+                            {this.props.title || "Oops! Something went wrong"}
                         </h1>
 
                         {/* Description */}

@@ -243,14 +243,36 @@ function App({ swRegistration }) {
                                     </ProtectedWorkspace>
                                 }>
                                     <Route index element={<LitigantDashboard />} />
-                                    <Route path="vakil-friend" element={<VakilFriendPage />} />
-                                    <Route path="file" element={<FileUnifiedPage />} />
-                                    <Route path="case-diary" element={<CaseDiaryPage />} />
+                                    <Route
+                                    path="vakil-friend"
+                                    element={
+                                   <ErrorBoundary>
+                                   <VakilFriendPage />
+                                   </ErrorBoundary>
+                                    }
+                                    />
+                                    <Route path="file" element={
+                                        <ErrorBoundary>
+                                        <FileUnifiedPage />
+                                        </ErrorBoundary>
+                                        } 
+                                        />
+                                    <Route path="case-diary" element={
+                                        <ErrorBoundary>
+                                        <CaseDiaryPage />
+                                        </ErrorBoundary>
+                                        } />
                                     <Route path="case-diary/:caseId" element={<CaseDetailPage />} />
                                     <Route path="hearings" element={<HearingsPage />} />
-                                    <Route path="chat" element={<LawyerChatPage />} />
+
+                                     <Route path="chat" element={
+                                     <ErrorBoundary>
+                                     <LawyerChatPage />
+                                     </ErrorBoundary>
+                                      } />
                                     <Route path="find-lawyer" element={<FindLawyerPage />} />
                                     <Route path="feedback" element={<LawyerFeedbackPage />} />
+
                                     <Route path="profile" element={<ProfilePage />} />
                                     <Route path="generate-document" element={<DocumentGeneratePage />} />
                                     <Route path="*" element={<Navigate to="/litigant" replace />} />
@@ -263,16 +285,29 @@ function App({ swRegistration }) {
                                     </ProtectedWorkspace>
                                 }>
                                     <Route index element={<LawyerDashboard />} />
-                                    <Route path="cases" element={<LawyerCasesPage />} />
+                                    <Route path="cases" element={
+                                        <ErrorBoundary>
+                                         <LawyerCasesPage />
+                                        </ErrorBoundary>
+                                       } 
+                                       />
                                     <Route path="case/:caseId" element={<LawyerCaseDetailsPage />} />
                                     <Route path="case/:caseId/workspace" element={<CaseWorkspace />} />
                                     <Route path="clients" element={<MyClientsPage />} />
                                     <Route path="preparation" element={<CasePreparationPage />} />
                                     <Route path="evidence" element={<EvidenceVaultPage />} />
-                                    <Route path="ai-assistant" element={<AILegalAssistantPage />} />
+                                    <Route path="ai-assistant" element={
+                                        <ErrorBoundary>
+                                         <AILegalAssistantPage />
+                                        </ErrorBoundary>
+                                       } />
                                     <Route path="hearings" element={<LawyerHearingsPage />} />
                                     <Route path="analytics" element={<LawyerAnalyticsPage />} />
-                                    <Route path="chat" element={<ClientChatPage />} />
+                                    <Route path="chat" element={
+                                        <ErrorBoundary>
+                                        <ClientChatPage />
+                                        </ErrorBoundary>
+                                        } />
                                     <Route path="profile" element={<LawyerProfilePage />} />
                                     <Route path="offline-drafts" element={<OfflineDraftsPage />} />
                                     <Route path="*" element={<Navigate to="/lawyer" replace />} />
@@ -285,11 +320,30 @@ function App({ swRegistration }) {
                                     </ProtectedWorkspace>
                                 }>
                                     <Route index element={<JudicialOverview />} />
-                                    <Route path="docket" element={<MyDocket />} />
+                                    {/* New Unified Workspace Routes */}
+                                     <Route path="docket" element={
+                                     <ErrorBoundary>
+                                     <MyDocket />
+                                     </ErrorBoundary>
+                                     } />
                                     <Route path="unassigned" element={<UnassignedPool />} />
                                     <Route path="hearings" element={<JudgeHearingsPage />} />
-                                    <Route path="live-hearing" element={<LiveHearing />} />
-                                    <Route path="case/:caseId" element={<JudgeCaseWorkspace />} />
+                                    <Route path="live-hearing" element={
+                                     <ErrorBoundary>
+                                     <LiveHearing />
+                                     </ErrorBoundary>
+                                     } />
+                                    <Route path="case/:caseId" element={
+                                     <ErrorBoundary>
+                                    <JudgeCaseWorkspace />
+                                    </ErrorBoundary>
+                                    } />
+                                    <Route path="case/:caseId" element={
+                                        <ErrorBoundary>
+                                         <JudgeCaseWorkspace />
+                                        </ErrorBoundary>
+                                       } />
+                                    {/* Keep only essential old routes */}
                                     <Route path="conduct" element={<ConductHearingPage />} />
                                     <Route path="analytics" element={<CourtAnalyticsPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
