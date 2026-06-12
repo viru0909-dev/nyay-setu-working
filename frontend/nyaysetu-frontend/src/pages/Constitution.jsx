@@ -8,6 +8,11 @@ import Footer from '../components/landing/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { brainAPI } from '../services/api';
 
+const Z_INDEX = {
+  FLOATING_PANEL: 1000,
+  FLOATING_PANEL_OVERLAY: 1001,
+};
+
 // ── Reactive mobile breakpoint hook ──────────────────────────────────────────
 function useIsMobile(breakpoint = 768) {
     const [isMobile, setIsMobile] = useState(
@@ -815,7 +820,7 @@ export default function Constitution() {
                                     position: 'fixed',
                                     bottom: isMobile ? '24px' : '28px',
                                     right: isMobile ? '20px' : '28px',
-                                    zIndex: 1000,
+                                    zIndex: Z_INDEX.FLOATING_PANEL,
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px',
@@ -860,7 +865,7 @@ export default function Constitution() {
                                 style={{
                                     position: 'fixed', inset: 0,
                                     background: 'rgba(0,0,0,0.6)',
-                                    zIndex: 1000,
+                                    zIndex: Z_INDEX.FLOATING_PANEL,
                                     backdropFilter: 'blur(3px)',
                                     WebkitBackdropFilter: 'blur(3px)',
                                 }}
@@ -886,7 +891,7 @@ export default function Constitution() {
                                 transition={{ duration: isMobile ? 0.35 : 0.26, ease: isMobile ? [0.32, 0.72, 0, 1] : [0.34, 1.56, 0.64, 1] }}
                                 style={{
                                     position: 'fixed',
-                                    zIndex: 1001,
+                                    zIndex: Z_INDEX.FLOATING_PANEL_OVERLAY,
                                     display: 'flex',
                                     flexDirection: 'column',
                                     background: 'var(--bg-surface)',
