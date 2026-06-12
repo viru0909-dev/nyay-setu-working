@@ -1,5 +1,5 @@
 package com.nyaysetu.backend.service;
-
+ 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -25,14 +25,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-
+ 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
+ 
 /**
  * Vakil-Friend AI Service for Chat-First Case Filing
  * Uses Groq API (free, fast Llama models) for full conversational AI
@@ -42,13 +43,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class VakilFriendService {
-
+ 
     @Value("${groq.api.key:}")
     private String groqApiKey;
     
     @Value("${groq.model:llama-3.1-8b-instant}")
     private String groqModel;
-
+ 
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate; // Injected bean with timeouts — see RestTemplateConfig
     private final ChatSessionRepository chatSessionRepository;
@@ -59,21 +60,21 @@ public class VakilFriendService {
     private final OllamaService ollamaService;
     private final BhashiniService bhashiniService;
     private final VakilFriendDocumentService vakilFriendDocumentService;
-
+ 
     // Optional — only present when rag.enabled=true. Null-safe usage below.
     @Autowired(required = false)
     private RagService ragService;
     
-
+ 
     
     // Lazy injection to avoid circular dependency
     @Autowired
     @Lazy
     private CaseAssignmentService caseAssignmentService;
-
+ 
     // Groq API - Fast, free Llama models
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-
+ 
     private static final String SYSTEM_PROMPT = """
         You are Vakil-Friend, an intelligent and empathetic AI legal guide for Nyay-Setu, India's digital judiciary platform.
         
@@ -119,7 +120,7 @@ public class VakilFriendService {
         
         Then say: "Your case is ready to file! Click the 'Complete Filing' button to submit."
         """;
-
+ 
     /**
      * Start a new case assistance session with context
      */
@@ -127,7 +128,7 @@ public class VakilFriendService {
     public ChatSession startCaseAssistanceSession(User user, UUID caseId) {
         CaseEntity caseEntity = caseRepository.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
-
+ 
         String caseContext = buildCaseContext(caseEntity);
         
         List<Map<String, String>> conversation = new ArrayList<>();
@@ -135,7 +136,7 @@ public class VakilFriendService {
         String systemPrompt = "You are an AI legal assistant helping with a specific case. " +
                 "Here is the case context:\n" + caseContext + 
                 "\n\nAnswer the user's questions based on this context.";
-
+ 
         if (user.getRole() == com.nyaysetu.backend.entity.Role.JUDGE || user.getRole() == com.nyaysetu.backend.entity.Role.SUPER_JUDGE) {
              systemPrompt += "\n\nROLE: You are a Judicial Assistant. Your goal is to be impartial, focus on facts, contradictions in evidence, and timeline analysis. Do not take sides. Provide objective summaries.";
         } else if (user.getRole() == com.nyaysetu.backend.entity.Role.LAWYER) {
@@ -145,7 +146,7 @@ public class VakilFriendService {
         }
         
         systemPrompt += "\nDo not ask for case details again. Be helpful and specific.";
-
+ 
         Map<String, String> systemMsg = new HashMap<>();
         systemMsg.put("role", "system");
         systemMsg.put("content", systemPrompt);
@@ -155,7 +156,7 @@ public class VakilFriendService {
         aiMsg.put("role", "assistant");
         aiMsg.put("content", "I have reviewed your case details for **" + caseEntity.getTitle() + "**. How can I assist you with this case today?");
         conversation.add(aiMsg);
-
+ 
         try {
             ChatSession session = ChatSession.builder()
                 .user(user)
@@ -172,7 +173,7 @@ public class VakilFriendService {
             throw new RuntimeException("Failed to start session", e);
         }
     }
-
+ 
     private String buildCaseContext(CaseEntity caseEntity) {
         StringBuilder sb = new StringBuilder();
         sb.append("Case Title: ").append(caseEntity.getTitle()).append("\n");
@@ -217,7 +218,7 @@ public class VakilFriendService {
         
         return sb.toString();
     }
-
+ 
     /**
      * Start a new chat session for case filing
      */
@@ -233,7 +234,7 @@ public class VakilFriendService {
         
         return chatSessionRepository.save(session);
     }
-
+ 
     /**
      * Send a message to Vakil-Friend and get response
      */
@@ -241,14 +242,21 @@ public class VakilFriendService {
     public Map<String, Object> chat(UUID sessionId, com.nyaysetu.backend.dto.ChatMessageRequest request, User user) {
         ChatSession session = chatSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Chat session not found"));
-
+ 
+        // SECURITY: verify the requesting user owns this session.
+        // Without this check, any authenticated user who knows (or guesses)
+        // a sessionId can read and inject messages into another user's session.
+        if (!session.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("You do not have permission to access this session");
+        }
+ 
         if (session.getStatus() != ChatSessionStatus.ACTIVE) {
             throw new RuntimeException("Chat session is no longer active");
         }
-
+ 
         String userLang = request.getLanguage() != null ? request.getLanguage() : "en";
         String userMessage = request.getMessage();
-
+ 
         // 1. Handle Audio Input (ASR)
         if (request.getAudioData() != null && !request.getAudioData().isEmpty()) {
             userMessage = bhashiniService.speechToText(request.getAudioData(), userLang);
@@ -258,7 +266,7 @@ public class VakilFriendService {
                 userMessage = "[Audio unintelligible]";
             }
         }
-
+ 
         // 2. Translate to English if needed (for better AI reasoning)
         String englishMessage = userMessage;
         if (!"en".equalsIgnoreCase(userLang)) {
@@ -269,9 +277,9 @@ public class VakilFriendService {
             englishMessage =
                 """
                 Historical document OCR context:
-
+ 
                 %s
-
+ 
                 User question:
                 %s
                 """.formatted(
@@ -289,13 +297,13 @@ public class VakilFriendService {
         } catch (Exception e) {
             conversation = new ArrayList<>();
         }
-
+ 
         // Add user message (Store English for AI Context)
         Map<String, String> userMsg = new HashMap<>();
         userMsg.put("role", "user");
         userMsg.put("content", englishMessage); // Storing English
         conversation.add(userMsg);
-
+ 
         // Retrieve relevant legal context from Vector Database using English query
         // RagService is optional (disabled by default via rag.enabled property).
         String ragContext = "";
@@ -307,10 +315,10 @@ public class VakilFriendService {
                 log.warn("RAG context retrieval skipped: {}", e.getMessage());
             }
         }
-
+ 
         // Get AI response (English)
         String aiResponseEnglish = getAIResponse(conversation, ragContext);
-
+ 
         // Check for specific "Complete Filing" instruction in AI response
         // Sometimes AI strictly follows the prompt, sometimes it chats.
         
@@ -319,13 +327,13 @@ public class VakilFriendService {
         if (!"en".equalsIgnoreCase(userLang)) {
             finalResponse = bhashiniService.translate(aiResponseEnglish, "en", userLang);
         }
-
+ 
         // Add AI response to history (Store English)
         Map<String, String> assistantMsg = new HashMap<>();
         assistantMsg.put("role", "assistant");
         assistantMsg.put("content", aiResponseEnglish); // Storing English
         conversation.add(assistantMsg);
-
+ 
         // Log to Case Diary if session is linked to a case (SHA-256 protected)
         if (session.getCaseEntity() != null && vakilFriendDocumentService != null && user != null) {
             try {
@@ -341,7 +349,7 @@ public class VakilFriendService {
                 log.warn("Failed to log to case diary: {}", e.getMessage());
             }
         }
-
+ 
         // Save updated conversation
         try {
             session.setConversationData(objectMapper.writeValueAsString(conversation));
@@ -355,20 +363,20 @@ public class VakilFriendService {
         }
         session.setUpdatedAt(LocalDateTime.now());
         chatSessionRepository.save(session);
-
+ 
         // Check if ready to create case (simple heuristic)
         boolean readyToFile = isReadyToFile(conversation);
-
+ 
         Map<String, Object> result = new HashMap<>();
         result.put("sessionId", sessionId);
         result.put("message", finalResponse); // Return Localized Response
         result.put("originalMessage", aiResponseEnglish); // Optional: send original too
         result.put("transcribedText", userMessage); // Send back what was heard
         result.put("readyToFile", readyToFile);
-
+ 
         return result;
     }
-
+ 
     /**
      * Complete the chat session and create a case
      */
@@ -382,24 +390,32 @@ public class VakilFriendService {
         
         ChatSession session = chatSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Chat session not found"));
+ 
+        // SECURITY: verify ownership before completing.
+        // An attacker who reaches completeSession() on a victim's session
+        // would create a real FIR or court case under the victim's identity.
+        if (!session.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("You do not have permission to complete this session");
+        }
+ 
         log.info("📋 Found session, extracting case data");
-
+ 
         // Extract case data from conversation
         Map<String, String> caseData = extractCaseData(session.getConversationData());
         log.info("📋 Extracted case data: type={}, urgency={}, target={}", caseData.get("caseType"), caseData.get("urgency"), caseData.get("target"));
-
+ 
         // Removed artificial 10,000 character truncation.
         // The database TEXT column can safely handle large transcripts without data loss.
         String chatTranscript = session.getConversationData();
-
+ 
         Object resultEntity;
         String target = caseData.getOrDefault("target", "COURT");
         String caseType = caseData.getOrDefault("caseType", "CIVIL");
-
+ 
         // Logic check: If target is explicitly POLICE OR (Type is CRIMINAL/THEFT and user clearly wanted FIR)
         // We defer to the explicit target extraction.
         boolean isFir = "POLICE".equalsIgnoreCase(target);
-
+ 
         if (isFir) {
             log.info("🚨 Identified as POLICE FIR filing intent");
             // Create FIR Record
@@ -435,13 +451,13 @@ public class VakilFriendService {
                     .aiGeneratedSummary(generateSummary(session.getConversationData()))
                     .build();
             log.info("📋 Built CaseEntity, saving to database");
-
+ 
             resultEntity = caseRepository.save(newCase);
             log.info("📋 Saved case with ID: {}", ((CaseEntity)resultEntity).getId());
             
             // Link back to separate session field if needed, but we use generic link usually
             session.setCaseEntity((CaseEntity)resultEntity);
-
+ 
             // Backfill Case Diary with Chat History
             if (vakilFriendDocumentService != null) {
                 try {
@@ -457,7 +473,7 @@ public class VakilFriendService {
                 }
             }
         }
-
+ 
         // Mark session as completed
         session.setStatus(ChatSessionStatus.COMPLETED);
         session.setUpdatedAt(LocalDateTime.now());
@@ -476,7 +492,7 @@ public class VakilFriendService {
              // Actually, let's check FirRecord definition if I can view it. I haven't viewed it.
              // But for safer side, I'll only link for CaseEntity which has UUID.
         }
-
+ 
         return resultEntity;
     }
     
@@ -517,7 +533,7 @@ public class VakilFriendService {
         caseEntity.setNextHearing(hearingDate);
         return caseRepository.save(caseEntity);
     }
-
+ 
     private String getAIResponse(List<Map<String, String>> conversation, String ragContext) {
         // Log key presence (safely)
         if (groqApiKey == null || groqApiKey.trim().isEmpty()) {
@@ -596,7 +612,7 @@ public class VakilFriendService {
         
         return aiText;
     }
-
+ 
     /**
      * Smart fallback when API is unavailable
      */
@@ -608,7 +624,7 @@ public class VakilFriendService {
                "Please provide the details of your case (what happened, who is involved, and any evidence you have). " +
                "Once our connection is restored, I will process everything for you.";
     }
-
+ 
     /**
      * Check if we have enough information to file - looks for CASE SUMMARY in AI response
      */
@@ -627,19 +643,19 @@ public class VakilFriendService {
         // Removed 8-message fallback to ensure mandatory fields are actually collected
         return false;
     }
-
+ 
     /**
      * Extract case data from conversation - parses AI summary and user messages
      */
     private Map<String, String> extractCaseData(String conversationJson) {
         Map<String, String> caseData = new HashMap<>();
-
+ 
         try {
             List<Map<String, String>> conversation = objectMapper.readValue(
                     conversationJson,
                     objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class)
             );
-
+ 
             StringBuilder userText = new StringBuilder();
             StringBuilder aiText = new StringBuilder();
             String firstUserMessage = "";
@@ -655,10 +671,10 @@ public class VakilFriendService {
                     aiText.append(content).append(" ");
                 }
             }
-
+ 
             String text = userText.toString().toLowerCase();
             String fullAiContent = aiText.toString();
-
+ 
             // 1. Primary Strategy: Look for the standardized summary block (most recent one)
             String summaryBlock = "";
             int startIdx = fullAiContent.lastIndexOf("### CASE SUMMARY START ###");
@@ -675,7 +691,7 @@ public class VakilFriendService {
                     log.info("Found fallback summary block for extraction");
                 }
             }
-
+ 
             // 2. Extract specific fields from the summary block (or full content if block missing)
             String sourceForExtraction = summaryBlock.isEmpty() ? fullAiContent : summaryBlock;
             
@@ -683,7 +699,7 @@ public class VakilFriendService {
             if (!target.isEmpty()) {
                 caseData.put("target", target.toUpperCase());
             }
-
+ 
             String petitioner = extractAfterLabel(sourceForExtraction, "Petitioner:", "पेटिशनर:");
             if (!petitioner.isEmpty() && !petitioner.equalsIgnoreCase("[NAME]")) {
                 caseData.put("petitioner", petitioner);
@@ -703,7 +719,7 @@ public class VakilFriendService {
                 else if (typeLower.contains("commercial") || typeLower.contains("कमर्शियल")) caseData.put("caseType", "COMMERCIAL");
                 else caseData.put("caseType", "CIVIL");
             }
-
+ 
             String extractedUrgency = extractAfterLabel(sourceForExtraction, "Urgency:", "अर्जेंसी:", "महत्व:");
             if (!extractedUrgency.isEmpty() && !extractedUrgency.equalsIgnoreCase("[LEVEL]")) {
                 String urgLower = extractedUrgency.toLowerCase();
@@ -711,7 +727,7 @@ public class VakilFriendService {
                 else if (urgLower.contains("urgent") || urgLower.contains("अर्जेंट")) caseData.put("urgency", "URGENT");
                 else caseData.put("urgency", "NORMAL");
             }
-
+ 
             // 3. Fallback extraction from keywords if summary extraction failed
             if (!caseData.containsKey("caseType")) {
                 if (text.contains("criminal") || text.contains("attack") || text.contains("violence") || 
@@ -730,7 +746,7 @@ public class VakilFriendService {
                     caseData.put("caseType", "CIVIL");
                 }
             }
-
+ 
             if (!caseData.containsKey("urgency")) {
                 if (text.contains("critical") || text.contains("emergency") || text.contains("immediate")) {
                     caseData.put("urgency", "CRITICAL");
@@ -740,12 +756,12 @@ public class VakilFriendService {
                     caseData.put("urgency", "NORMAL");
                 }
             }
-
+ 
             // 4. Generate professional title using specialized AI call
             String title = generateCaseTitle(sourceForExtraction.isEmpty() ? fullAiContent : sourceForExtraction, firstUserMessage);
             if (title != null && title.length() > 200) title = title.substring(0, 200);
             caseData.put("title", title != null ? title : "Case filed via Vakil-Friend");
-
+ 
             // Use AI-extracted issue if available, otherwise fallback to user message
             String description = extractAfterLabel(sourceForExtraction.isEmpty() ? fullAiContent : sourceForExtraction, "Issue:", "समस्या:", "Issue Description:");
             if (description.isEmpty() || description.equalsIgnoreCase("[DESCRIPTION]")) {
@@ -756,13 +772,13 @@ public class VakilFriendService {
                 description = description.substring(0, 1000) + "...";
             }
             caseData.put("description", description);
-
+ 
             // Set mandatory defaults
             caseData.putIfAbsent("petitioner", "Petitioner");
             caseData.putIfAbsent("respondent", "Respondent");
             caseData.putIfAbsent("caseType", "CIVIL");
             caseData.putIfAbsent("urgency", "NORMAL");
-
+ 
             // Safety truncation
             caseData.entrySet().forEach(entry -> {
                 String val = entry.getValue();
@@ -770,11 +786,11 @@ public class VakilFriendService {
                     entry.setValue(val.substring(0, 2000));
                 }
             });
-
+ 
         } catch (Exception e) {
             log.error("Serious error extracting case data", e);
         }
-
+ 
         return caseData;
     }
     
@@ -793,7 +809,7 @@ public class VakilFriendService {
                 "**" + cleanLabel + "**",
                 cleanLabel
             };
-
+ 
             for (String pattern : possiblePatterns) {
                 int idx = text.indexOf(pattern);
                 if (idx >= 0) {
@@ -815,7 +831,7 @@ public class VakilFriendService {
         }
         return "";
     }
-
+ 
     /**
      * Generate AI summary for judge
      */
@@ -825,26 +841,26 @@ public class VakilFriendService {
                     conversationJson,
                     objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class)
             );
-
+ 
             StringBuilder summary = new StringBuilder();
             summary.append("## Vakil-Friend Case Summary\n\n");
             summary.append("**Filing Method:** AI-Assisted Chat\n");
             summary.append("**Messages Exchanged:** ").append(conversation.size()).append("\n\n");
             summary.append("**Key Points from Complainant:**\n");
-
+ 
             for (Map<String, String> msg : conversation) {
                 if ("user".equals(msg.get("role"))) {
                     summary.append("- ").append(msg.get("content")).append("\n");
                 }
             }
-
+ 
             return summary.toString();
-
+ 
         } catch (Exception e) {
             return "AI summary generation failed";
         }
     }
-
+ 
     /**
      * Generate a short, descriptive title for the chat session using AI
      */
@@ -883,7 +899,7 @@ public class VakilFriendService {
             return "New Legal Chat";
         }
     }
-
+ 
     /**
      * Generate a professional case title using AI
      */
@@ -901,7 +917,7 @@ public class VakilFriendService {
             // If summary is just the raw chat (long), rely more on user input
             String relevantContext = cleanedSummary.length() > 500 ? 
                 firstMessage : cleanedSummary + "\nContext: " + firstMessage;
-
+ 
             List<Map<String, String>> prompt = new ArrayList<>();
             Map<String, String> systemMsg = new HashMap<>();
             systemMsg.put("role", "system");
@@ -945,12 +961,12 @@ public class VakilFriendService {
             } catch (Exception e) {
                 log.warn("⚠️ Failed to parse title JSON, attempting raw text fallback. Response: {}", jsonResponse);
             }
-
+ 
             // Fallback: If JSON parsing failed, check if response ITSELF is a short title
             if (jsonResponse != null && jsonResponse.length() < 100 && !jsonResponse.contains("\n") && !jsonResponse.contains("{")) {
                 return jsonResponse.trim().replace("\"", "");
             }
-
+ 
             // Final Fallback: Extraction
             String p = extractAfterLabel(summaryText, "Petitioner:", "पेटिशनर:");
             String r = extractAfterLabel(summaryText, "Respondent:", "रेस्पोंडेंट:");
@@ -959,21 +975,29 @@ public class VakilFriendService {
                 return p + " vs. " + r;
             }
             return "Case: " + (firstMessage.length() > 50 ? firstMessage.substring(0, 50) + "..." : firstMessage);
-
+ 
         } catch (Exception e) {
             log.error("Title generation failed: {}", e.getMessage());
             return "Case: " + (firstMessage.length() > 50 ? firstMessage.substring(0, 50) + "..." : firstMessage);
         }
     }
-
+ 
     /**
-     * Get session by ID
+     * Get session by ID — only the owning user may retrieve it.
      */
-    public ChatSession getSession(UUID sessionId) {
-        return chatSessionRepository.findById(sessionId)
+    public ChatSession getSession(UUID sessionId, User user) {
+        ChatSession session = chatSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Chat session not found"));
+ 
+        // SECURITY: conversationData contains the user's full legal complaint including
+        // names, dates, and alleged offences. Never return it to a non-owning user.
+        if (!session.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("You do not have permission to access this session");
+        }
+ 
+        return session;
     }
-
+ 
     /**
      * Get user's active sessions
      */

@@ -1341,10 +1341,10 @@ function TimelineTab({ caseData }) {
 
             // Fetch from BOTH legacy timeline AND new CaseEvents API
             const [timelineRes, eventsRes] = await Promise.allSettled([
-                axios.get(`${API_BASE_URL}/api/timeline/${caseData.id}`, {
+                axios.get(`${API_BASE_URL}/api/v1/timeline/${caseData.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
-                axios.get(`${API_BASE_URL}/api/cases/${caseData.id}/events`, {
+                axios.get(`${API_BASE_URL}/api/v1/cases/${caseData.id}/events`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ]);

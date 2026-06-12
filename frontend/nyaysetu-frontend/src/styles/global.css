@@ -416,3 +416,19 @@ a:hover { color: var(--color-primary); }
   border-radius: 50%;
   border: none;
 }
+/* Dark Mode Theme */
+.dark-mode {
+  --primary-dark: #1E293B;
+  --bg-light: #0F172A;
+  --glass-bg: rgba(15, 23, 42, 0.85);
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  background-color: #0F172A !important;
+  color: #F1F5F9 !important;
+}
+.dark-mode * {
+  border-color: #334155;
+}
+.dark-mode .card, .dark-mode .navbar, .dark-mode header, .dark-mode nav {
+  background-color: #
+

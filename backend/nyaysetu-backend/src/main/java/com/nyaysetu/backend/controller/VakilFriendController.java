@@ -7,7 +7,11 @@ import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.ChatSession;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.entity.VakilAiDiaryEntry;
+import com.nyaysetu.backend.exception.AccessDeniedException;
+import com.nyaysetu.backend.exception.NotFoundException;
+import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.UserRepository;
+import com.nyaysetu.backend.repository.VakilAiDiaryEntryRepository;
 import com.nyaysetu.backend.service.VakilFriendService;
 import com.nyaysetu.backend.service.VakilFriendDocumentService;
 
@@ -40,6 +44,8 @@ public class VakilFriendController {
     private final VakilFriendService vakilFriendService;
     private final VakilFriendDocumentService documentService;
     private final UserRepository userRepository;
+    private final CaseRepository caseRepository;
+    private final VakilAiDiaryEntryRepository diaryEntryRepository;
 
     /**
      * Start a new chat session for case assistance (linked to a specific case)
@@ -140,9 +146,10 @@ public class VakilFriendController {
         log.info("Uploading document for session {}", sessionId);
         User user = getCurrentUser(auth);
         if (user == null) {
-            return ResponseEntity.status(401).build(); // Or throw exception
+            return ResponseEntity.status(401).build();
         }
-        // Use analyzeDocument with null caseId
+
+        validateSessionOwnership(vakilFriendService.getSession(sessionId), user);
         DocumentAnalysisResponse response = documentService.analyzeDocument(null, sessionId, file, user);
         return ResponseEntity.ok(response);
     }
@@ -157,6 +164,11 @@ public class VakilFriendController {
             Authentication auth
     ) {
         User user = getCurrentUser(auth);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        validateSessionOwnership(vakilFriendService.getSession(sessionId), user);
         Map<String, Object> response = vakilFriendService.chat(sessionId, request, user);
         
         log.info("Processed message in session {}", sessionId);
@@ -253,7 +265,12 @@ public class VakilFriendController {
             @PathVariable UUID sessionId,
             Authentication auth
     ) {
-        ChatSession session = vakilFriendService.getSession(sessionId);
+        User user = getCurrentUser(auth);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        ChatSession session = vakilFriendService.getSession(sessionId, user);
         
         ChatSessionResponse response = ChatSessionResponse.builder()
                 .sessionId(session.getId())
@@ -396,6 +413,12 @@ public class VakilFriendController {
             return ResponseEntity.status(401).build();
         }
 
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() -> new NotFoundException("Case not found"));
+        if (!caseEntity.getClient().getId().equals(user.getId())) {
+            throw new AccessDeniedException("You do not have access to this case diary");
+        }
+
         List<VakilAiDiaryEntry> entries = documentService.getDiaryEntries(caseId);
         return ResponseEntity.ok(entries);
     }
@@ -413,6 +436,12 @@ public class VakilFriendController {
             return ResponseEntity.status(401).build();
         }
 
+        VakilAiDiaryEntry entry = diaryEntryRepository.findById(entryId)
+                .orElseThrow(() -> new NotFoundException("Diary entry not found"));
+        if (!entry.getUserId().equals(user.getId())) {
+            throw new AccessDeniedException("You do not have access to this diary entry");
+        }
+
         try {
             boolean isValid = documentService.verifyDiaryEntryIntegrity(entryId);
             return ResponseEntity.ok(Map.of(
@@ -425,6 +454,12 @@ public class VakilFriendController {
                     "error", "Entry not found",
                     "message", e.getMessage()
             ));
+        }
+    }
+
+    private void validateSessionOwnership(ChatSession session, User user) {
+        if (!session.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("You do not have access to this session");
         }
     }
 

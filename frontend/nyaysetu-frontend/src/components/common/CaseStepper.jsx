@@ -353,7 +353,7 @@ export default function CaseStepper({ currentStatus, judicialStage, compact = fa
                                     left: '50%',
                                     transform: 'translateX(-50%)',
                                     background: 'var(--text-main)',
-                                    color: 'white',
+                                    color: 'var(--bg-main)',
                                     padding: '0.6rem 0.85rem',
                                     borderRadius: '0.6rem',
                                     fontSize: '0.75rem',
