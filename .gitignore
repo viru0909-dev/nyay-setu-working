@@ -101,10 +101,23 @@ mvnw.cmd
 coverage/
 .nyc_output/
 nlp-orchestrator/.env
+
+*.json
+input_videos/
+output_frames/
+
+__pycache__/
+*.pyc
+
+reconstruction/colmap_workspace/
+reconstruction/output_frames/
+reconstruction/metadata.json
+*.db
+__pycache__/
+*.pyc
 __pycache__/
 *.pyc
 .pytest_cache/
 backend/nyaysetu-backend/src/main/resources/application.properties
 
 *.zip
-

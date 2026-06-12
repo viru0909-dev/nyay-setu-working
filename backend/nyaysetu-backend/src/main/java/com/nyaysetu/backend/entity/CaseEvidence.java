@@ -7,10 +7,16 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Case Evidence Entity with SHA-256 protection for Evidence Vault.
- * Documents stored here are cryptographically secured for legal validity.
+ * AI-analyzed evidence vault record.
+ *
+ * Stores uploaded evidence metadata, SHA-256 verification, AI analysis,
+ * validity assessment, and secure-vault state.
+ *
+ * EvidenceRecord remains the append-only blockchain audit-chain record.
  */
+
 @Entity
+@Table(name = "case_evidence")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,7 +28,9 @@ public class CaseEvidence {
     @GeneratedValue
     private UUID id;
 
-    private UUID legalCaseId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "case_id", nullable = false)
+    private CaseEntity caseEntity;
 
     private String fileName;
 
@@ -86,4 +94,7 @@ public class CaseEvidence {
 
     @Column(columnDefinition = "TEXT")
     private String metadata; // Additional JSON metadata
+
+    @Version
+    private Long version;
 }

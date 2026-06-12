@@ -3,9 +3,16 @@
     "nav": {
       "home": "முகப்பு",
       "features": "அம்சங்கள்",
+      "upcomingFeatures": "வரவிருக்கும் அம்சங்கள்",
       "constitution": "அரசியலமைப்பு",
       "aiAssistant": "AI உதவியாளர்",
-      "about": "எங்களை பற்றி"
+      "about": "எங்களை பற்றி",
+      "portal": "போர்டல்",
+      "roles": {
+        "litigant": "வாதி",
+        "lawyer": "வழக்கறிஞர்",
+        "judge": "நீதிபதி"
+      }
     },
 
     "cta": {

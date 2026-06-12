@@ -19,6 +19,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from lawgpt.retriever import retrieve
+from lawgpt.prompt_builder import build_prompt, validate_required_fields, detect_prompt_injection
 
 load_dotenv()
 logger = logging.getLogger("lawgpt")
@@ -36,13 +37,14 @@ class DocumentFields(BaseModel):
     case_description: str
     incident_date: str
     relief_sought: Optional[str] = ""
+    notice_period: Optional[str] = ""
     court_name: Optional[str] = ""
     department_name: Optional[str] = ""
     pio_name: Optional[str] = ""
 
 
 class GenerateRequest(BaseModel):
-    doc_type: Literal["affidavit", "rti", "complaint", "notice"]
+    doc_type: Literal["affidavit", "rti", "complaint", "notice", "demand_letter"]
     fields: DocumentFields
     language: str = Field(default="en")
 
@@ -174,7 +176,7 @@ Complainant
 {petitioner_name}
 """
 
-NOTICE_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL NOTICE.
+NOTICE_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL NOTICE in {language}.
 Use this legal context: {legal_context}
 
 Sender: {petitioner_name}, {petitioner_address}
@@ -210,11 +212,51 @@ Advocate
 [Address]
 """
 
+DEMAND_LETTER_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal DEMAND LETTER in {language}.
+Use this legal context: {legal_context}
+
+Sender: {petitioner_name}, {petitioner_address}
+Recipient: {respondent_name}, {respondent_address}
+Issue: {case_description}
+Date of incident: {incident_date}
+Relief/Demand: {relief_sought}
+Notice period: {notice_period} days
+
+Format EXACTLY as:
+DEMAND LETTER
+
+Date: {incident_date}
+
+To,
+{respondent_name}
+{respondent_address}
+
+Dear Sir/Madam,
+
+This letter is served on behalf of {petitioner_name} of {petitioner_address}
+with reference to the above matter.
+
+1. That my client is [relationship/context].
+2. [Statement of facts in numbered paragraphs including the incident and loss suffered]
+3. [Legal grounds and applicable provisions cited from context]
+4. [Demanded relief and compensation]
+
+You are requested to remedy the matter and comply with the demand within
+{notice_period} days from receipt of this letter, failing which my client
+will initiate appropriate legal proceedings without further notice.
+
+Yours faithfully,
+
+{petitioner_name}
+{petitioner_address}
+"""
+
 PROMPT_MAP: Dict[str, str] = {
     "affidavit": AFFIDAVIT_PROMPT,
     "rti": RTI_PROMPT,
     "complaint": COMPLAINT_PROMPT,
     "notice": NOTICE_PROMPT,
+    "demand_letter": DEMAND_LETTER_PROMPT,
 }
 
 TITLE_MAP: Dict[str, str] = {
@@ -222,7 +264,33 @@ TITLE_MAP: Dict[str, str] = {
     "rti": "APPLICATION UNDER RIGHT TO INFORMATION ACT, 2005",
     "complaint": "LEGAL COMPLAINT",
     "notice": "LEGAL NOTICE",
+    "demand_letter": "DEMAND LETTER",
 }
+
+
+# ── External templates loader (optional) ────────────────────────────────────────
+import json
+from pathlib import Path
+
+# Module-level templates dict (may be empty if no external JSON provided)
+_templates: Dict[str, dict] = {}
+
+_templates_path = Path(__file__).parent.parent / "templates" / "document_templates.json"
+if _templates_path.exists():
+    try:
+        with _templates_path.open("r", encoding="utf-8") as fh:
+            _templates = json.load(fh)
+        # Override PROMPT_MAP and TITLE_MAP if keys exist in JSON
+        for k, v in _templates.items():
+            if "prompt_template" in v:
+                PROMPT_MAP[k] = v["prompt_template"]
+            if "title" in v:
+                TITLE_MAP[k] = v["title"]
+        logger.info("Loaded document templates from %s", _templates_path)
+    except Exception:
+        logger.exception("Failed to load external document templates — using defaults")
+else:
+    logger.debug("No external document templates found at %s", _templates_path)
 
 
 # ── LLM resolution (shared with context.py) ───────────────────────────────────
@@ -232,7 +300,11 @@ _doc_llm_label: str = "none"
 
 
 def _get_doc_llm():
-    """Lazy-initialise and return the LLM instance for document generation."""
+    """Lazy-initialise and return the LLM instance for document generation.
+
+    Falls back to a lightweight DummyLLM when langchain or other LLM
+    integrations are not available (useful for local QA and tests).
+    """
     global _doc_llm, _doc_llm_label
 
     if _doc_llm is not None:
@@ -241,40 +313,69 @@ def _get_doc_llm():
     groq_key: Optional[str] = os.getenv("GROQ_API_KEY")
     gemini_key: Optional[str] = os.getenv("GEMINI_API_KEY")
 
-    if groq_key:
-        from langchain_groq import ChatGroq
-        _doc_llm = ChatGroq(
-            model="llama-3.3-70b-versatile",
-            temperature=0.3,
-            groq_api_key=groq_key,
-            max_tokens=2000,
-        )
-        _doc_llm_label = "groq"
-        logger.info("📝 Document LLM: Groq (llama-3.3-70b-versatile)")
-    elif gemini_key:
-        from langchain_google_genai import ChatGoogleGenerativeAI
-        _doc_llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-pro",
-            temperature=0.3,
-            google_api_key=gemini_key,
-            max_output_tokens=2000,
-        )
-        _doc_llm_label = "gemini"
-        logger.info("📝 Document LLM: Google Gemini (gemini-1.5-pro)")
-    else:
-        from langchain_community.llms import Ollama
-        _doc_llm = Ollama(
-            model="llama3",
-            base_url="http://localhost:11434",
-            temperature=0.3,
-        )
-        _doc_llm_label = "ollama"
-        logger.info("📝 Document LLM: Ollama (llama3, local)")
+    try:
+        if groq_key:
+            from langchain_groq import ChatGroq
+            _doc_llm = ChatGroq(
+                model="llama-3.3-70b-versatile",
+                temperature=0.3,
+                groq_api_key=groq_key,
+                max_tokens=2000,
+            )
+            _doc_llm_label = "groq"
+            logger.info("📝 Document LLM: Groq (llama-3.3-70b-versatile)")
+        elif gemini_key:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            _doc_llm = ChatGoogleGenerativeAI(
+                model="gemini-1.5-pro",
+                temperature=0.3,
+                google_api_key=gemini_key,
+                max_output_tokens=2000,
+            )
+            _doc_llm_label = "gemini"
+            logger.info("📝 Document LLM: Google Gemini (gemini-1.5-pro)")
+        else:
+            from langchain_community.llms import Ollama
+            _doc_llm = Ollama(
+                model="llama3",
+                base_url="http://localhost:11434",
+                temperature=0.3,
+            )
+            _doc_llm_label = "ollama"
+            logger.info("📝 Document LLM: Ollama (llama3, local)")
 
-    return _doc_llm, _doc_llm_label
+        return _doc_llm, _doc_llm_label
+
+    except Exception as e:
+        fake_llm_flag = os.getenv("LAWGPT_FAKE_LLM") == "1"
+        if fake_llm_flag:
+            class DummyLLM:
+                def invoke(self, prompt):
+                    return {
+                        "content": f"DUMMY GENERATED DOCUMENT\n\n{prompt[:400]}"
+                    }
+
+            _doc_llm = DummyLLM()
+            _doc_llm_label = "dummy"
+            logger.warning("Using DummyLLM fallback because LLM integrations are not available: %s", e)
+            return _doc_llm, _doc_llm_label
+
+        logger.error("No LLM integration available and LAWGPT_FAKE_LLM is not enabled: %s", e)
+        raise
 
 
 # ── Core generation logic ─────────────────────────────────────────────────────
+
+def _map_language_label(language: str) -> str:
+    mapping = {
+        "en": "English",
+        "hi": "Hindi",
+        "ta": "Tamil",
+        "mr": "Marathi",
+        "kn": "Kannada",
+    }
+    return mapping.get(language.lower(), language)
+
 
 def _generate_document(request: GenerateRequest) -> GenerateResponse:
     """Shared generation logic used by both /generate and /generate/pdf."""
@@ -290,6 +391,10 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
             status_code=503,
             detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.",
         )
+    except ImportError:
+        # langchain/FAISS not available in this environment (tests/dev). Continue with empty context.
+        logger.warning("langchain_community not available; proceeding without legal context")
+        results = []
 
     # Build context and sources
     context_parts: List[str] = []
@@ -306,19 +411,38 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
 
     # 2. Build prompt
     prompt_template: str = PROMPT_MAP[doc_type]
-    prompt: str = prompt_template.format(
-        legal_context=legal_context,
-        petitioner_name=fields.petitioner_name,
-        petitioner_address=fields.petitioner_address,
-        respondent_name=fields.respondent_name or "N/A",
-        respondent_address=fields.respondent_address or "N/A",
-        case_description=fields.case_description,
-        incident_date=fields.incident_date,
-        relief_sought=fields.relief_sought or "N/A",
-        court_name=fields.court_name or "___",
-        department_name=fields.department_name or "___",
-        pio_name=fields.pio_name or "The Public Information Officer",
-    )
+    # Prepare a simple dict of fields for prompt construction
+    field_map = {
+        "petitioner_name": fields.petitioner_name,
+        "petitioner_address": fields.petitioner_address,
+        "respondent_name": fields.respondent_name or "N/A",
+        "respondent_address": fields.respondent_address or "N/A",
+        "case_description": fields.case_description,
+        "incident_date": fields.incident_date,
+        "relief_sought": fields.relief_sought or "N/A",
+        "notice_period": fields.notice_period or "15",
+        "court_name": fields.court_name or "___",
+        "department_name": fields.department_name or "___",
+        "pio_name": fields.pio_name or "The Public Information Officer",
+        "language": _map_language_label(request.language),
+    }
+
+    # If external templates provided required_fields, enforce them
+    required = []
+    if _templates and doc_type in _templates:
+        required = _templates[doc_type].get("required_fields", [])
+
+    # Validate required fields early and return a clear error to the client
+    missing = validate_required_fields({k: v for k, v in field_map.items()}, required)
+    if missing:
+        raise HTTPException(status_code=422, detail={"missing_fields": missing})
+
+    # Check for obvious prompt-injection patterns in user inputs
+    suspicious = detect_prompt_injection({k: v for k, v in field_map.items()})
+    if suspicious:
+        raise HTTPException(status_code=400, detail={"prompt_injection_detected": suspicious})
+
+    prompt: str = build_prompt(prompt_template, field_map, legal_context=legal_context)
 
     # 3. Call LLM
     try:
@@ -473,6 +597,51 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
     return buffer
 
 
+def _create_docx(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
+    """Convert generated document text to a simple DOCX in-memory file using python-docx."""
+    try:
+        from docx import Document as DocxDocument
+        from docx.shared import Pt
+    except ImportError:
+        raise HTTPException(
+            status_code=500,
+            detail="python-docx is not installed. Run: pip install python-docx",
+        )
+
+    doc = DocxDocument()
+
+    # Header
+    p = doc.add_paragraph()
+    run = p.add_run("NYAY SETU — AI Generated Legal Document")
+    run.bold = True
+    run.font.size = Pt(8)
+
+    # Title
+    doc.add_paragraph(response.title).bold = True
+
+    # Body — add each non-empty line as a paragraph
+    for line in response.content.split("\n"):
+        stripped = line.strip()
+        if not stripped:
+            doc.add_paragraph("")
+        else:
+            para = doc.add_paragraph(stripped)
+            para.style.font.size = Pt(11)
+
+    # Sources
+    if response.sources:
+        doc.add_paragraph("\nSources:")
+        doc.add_paragraph(", ".join(response.sources))
+
+    # Disclaimer footer
+    doc.add_paragraph("\nThis document is AI-generated and should be reviewed by a qualified lawyer")
+
+    bio = io.BytesIO()
+    doc.save(bio)
+    bio.seek(0)
+    return bio
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # POST /generate — Generate legal document text
 # ══════════════════════════════════════════════════════════════════════════════
@@ -503,6 +672,23 @@ async def generate_document_pdf(request: GenerateRequest):
     return StreamingResponse(
         pdf_buffer,
         media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+        },
+    )
+
+
+@router.post("/generate/docx")
+async def generate_document_docx(request: GenerateRequest):
+    """Generate a legal document and return it as a downloadable DOCX file."""
+    response: GenerateResponse = _generate_document(request)
+    docx_buffer: io.BytesIO = _create_docx(response, request.fields.petitioner_name)
+
+    filename: str = f"{request.doc_type}_{request.fields.petitioner_name.replace(' ', '_')}.docx"
+
+    return StreamingResponse(
+        docx_buffer,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
         },

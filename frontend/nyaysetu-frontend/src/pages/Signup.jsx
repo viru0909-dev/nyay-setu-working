@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authAPI } from '../services/api';
 import useAuthStore from '../store/authStore';
@@ -7,6 +7,8 @@ import { Mail, Lock, Eye, EyeOff, User as UserIcon, Briefcase, Scale, Gavel, Che
 import Header from '../components/landing/Header';
 import FaceCapture from '../components/auth/FaceCapture';
 import { useFaceRecognition } from '../hooks/useFaceRecognition';
+import ContinueAsGuestButton from '../components/guest/ContinueAsGuestButton';
+import { resolvePostAuthPath } from '../utils/authRedirect';
 import '../styles/Biometrics.css';
 
 export default function Signup() {
@@ -26,6 +28,7 @@ export default function Signup() {
     const [registeredUser, setRegisteredUser] = useState(null);
     const [registeredToken, setRegisteredToken] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
     const { setAuth } = useAuthStore();
     const { enrollFace } = useFaceRecognition();
 
@@ -112,13 +115,7 @@ export default function Signup() {
 
     const completeSignup = () => {
         setAuth(registeredUser, registeredToken);
-        const roleRoutes = {
-            ADMIN: '/admin',
-            JUDGE: '/judge',
-            LAWYER: '/lawyer',
-            LITIGANT: '/litigant'
-        };
-        navigate(roleRoutes[registeredUser.role] || '/');
+        navigate(resolvePostAuthPath(registeredUser.role, location.state));
     };
 
     const strength = formData.password ? getPasswordStrength(formData.password) : null;
@@ -176,7 +173,12 @@ export default function Signup() {
                 }}>
                     {/* Left Side - Benefits (hidden on mobile) */}
                     {!isMobile && (
-                        <div style={{ color: 'var(--text-main)' }}>
+    <div
+        style={{
+            color: 'var(--text-main)',
+            transform: 'translateY(-120px)'
+        }}
+    >
                             <div style={{ marginBottom: '3rem' }}>
                                 <h1 style={{
                                     fontSize: '3.5rem',
@@ -529,6 +531,7 @@ export default function Signup() {
                                     {/* Create Account Button */}
                                     <button
                                         type="submit"
+                                        className="auth-full-width-btn"
                                         disabled={loading}
                                         style={{
                                             width: '100%',
@@ -548,6 +551,14 @@ export default function Signup() {
                                     >
                                         {loading ? t('auth:signup.signingUp') : t('auth:signup.signUp')}
                                     </button>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1rem 0 0.5rem' }}>
+                                        <div style={{ flex: 1, height: '1px', background: 'rgba(148, 163, 184, 0.25)' }} />
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>or</span>
+                                        <div style={{ flex: 1, height: '1px', background: 'rgba(148, 163, 184, 0.25)' }} />
+                                    </div>
+
+                                    <ContinueAsGuestButton showDivider={false} />
                                 </form>
 
                                 <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>

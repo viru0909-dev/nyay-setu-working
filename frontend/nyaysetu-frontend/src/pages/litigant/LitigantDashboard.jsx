@@ -1,4 +1,5 @@
 import SkeletonCard from '../../components/common/SkeletonCard';
+import CaseCard from '../../components/dashboard/CaseCard';
 import CaseStepper from '../../components/common/CaseStepper';
 import { useState, useEffect } from 'react';
 import { FolderOpen, Video, FileText, TrendingUp, Clock, Bot, MessageCircle, MessageSquare, Loader2, Scale, AlertCircle, Eye } from 'lucide-react';
@@ -239,7 +240,7 @@ export default function LitigantDashboard() {
                                         onClick={() => {
                                             if (confirm('Are you sure you want to approve this draft? This will notify your lawyer.')) {
                                                 import('../../services/api').then(({ default: api }) => {
-                                                    api.put(`/api/cases/${draft.id}/approve-draft`, { approved: true })
+                                                    api.put(`/api/v1/cases/${draft.id}/approve-draft`, { approved: true })
                                                         .then(() => {
                                                             alert('Draft Approved! Your status is now updated.');
                                                             window.location.reload();
@@ -384,51 +385,17 @@ export default function LitigantDashboard() {
                             </div>
                         ) : (
                             recentCases.map((caseItem, index) => (
-                                <div
-                                    key={index}
+                                <CaseCard
+                                    key={caseItem.fullId || index}
+                                    id={caseItem.id}
+                                    title={caseItem.title}
+                                    status={caseItem.status}
+                                    date={caseItem.date}
+                                    filedLabel={t('litigant.filed')}
                                     onClick={() => navigate(`/litigant/case-diary/${caseItem.fullId}`)}
-                                    style={{
-                                        padding: '1rem',
-                                        background: 'var(--bg-glass)',
-                                        borderRadius: '0.75rem',
-                                        border: 'var(--border-glass)',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s'
-                                    }}
-                                    onMouseOver={(e) => {
-                                        e.currentTarget.style.borderColor = 'var(--color-primary)';
-                                    }}
-                                    onMouseOut={(e) => {
-                                        e.currentTarget.style.borderColor = '';
-                                    }}
                                 >
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: '600' }}>
-                                            {caseItem.id}
-                                        </span>
-                                        <span style={{
-                                            fontSize: '0.75rem',
-                                            padding: '0.25rem 0.75rem',
-                                            borderRadius: '9999px',
-                                            background: caseItem.status === 'PENDING' ? 'rgba(245, 158, 11, 0.1)' :
-                                                caseItem.status === 'OPEN' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                                            color: caseItem.status === 'PENDING' ? '#f59e0b' :
-                                                caseItem.status === 'OPEN' ? '#3b82f6' : '#10b981',
-                                            fontWeight: '600'
-                                        }}>
-                                            {caseItem.status}
-                                        </span>
-                                    </div>
-                                    <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                                        {caseItem.title}
-                                    </h4>
-                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                                        {t('litigant.filed')}: {caseItem.date}
-                                    </p>
-                                    <div style={{ marginTop: '0.5rem' }}>
-                                        <CaseStepper currentStatus={caseItem.status} judicialStage={caseItem.currentJudicialStage} compact={true} />
-                                    </div>
-                                </div>
+                                    <CaseStepper currentStatus={caseItem.status} judicialStage={caseItem.currentJudicialStage} compact={true} />
+                                </CaseCard>
                             ))
                         )}
                     </div>
