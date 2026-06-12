@@ -30,8 +30,8 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final FileStorageConfig fileStorageConfig;
 
-    private static final List<String> ALLOWED_CONTENT_TYPES =
-            Arrays.asList("application/pdf", "image/jpeg", "image/png");
+   private static final List<String> ALLOWED_CONTENT_TYPES =
+       List.of("application/pdf", "image/jpeg", "image/png");
 
     public UploadDocumentResponse save(MultipartFile file, UUID caseId, Long uploadedBy) {
 
