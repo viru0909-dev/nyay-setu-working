@@ -6,16 +6,26 @@ Closes # (issue)
 
 ## Type of change
 <!-- Please delete options that are not relevant. -->
-- [ ] Bug fix (non-breaking change which fixes an issue)
+- [x] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
 - [ ] This change requires a documentation update
 
 ## Checklist:
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
+- [x] My code follows the style guidelines of this project
+- [x] I have performed a self-review of my own code
+- [x] I have commented my code, particularly in hard-to-understand areas
+- [x] I have made corresponding changes to the documentation
+- [x] My changes generate no new warnings
+- [x] I have added tests that prove my fix is effective or that my feature works
+- [x] New and existing unit tests pass locally with my changes
+
+## Screenshots
+
+### Before
+![Modi Script OCR 404 Error](assets/ocr_before.png)
+*(Direct link: [ocr_before.png](file:///c:/Users/Kritika%20S%20Narayan/OneDrive/文档/College%20sem%202/GSSOC%202026%20CONTRIBUTION/nyay-setu-working-kritka/assets/ocr_before.png))*
+
+### After
+![Successful Modi Script OCR Transcription](assets/ocr_after.png)
+*(Direct link: [ocr_after.png](file:///c:/Users/Kritika%20S%20Narayan/OneDrive/文档/College%20sem%202/GSSOC%202026%20CONTRIBUTION/nyay-setu-working-kritka/assets/ocr_after.png))*

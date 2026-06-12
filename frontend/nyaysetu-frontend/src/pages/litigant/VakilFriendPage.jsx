@@ -866,7 +866,7 @@ export default function VakilFriendChat() {
         const formData = new FormData();
         formData.append('file', file);
 
-        // OCR API call — routed to FastAPI NLP Orchestrator (port 8001)
+        // OCR API call — routed to FastAPI NLP Orchestrator
         const response = await axios.post(
             `${NLP_BASE_URL}/ocr/modi`,
             formData,

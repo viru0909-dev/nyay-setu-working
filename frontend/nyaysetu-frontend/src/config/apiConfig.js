@@ -6,12 +6,14 @@ const isLocalhost = typeof window !== 'undefined' &&
 
 const PROD_BACKEND = 'https://nyaysetubackend.onrender.com';
 
+const DEFAULT_NLP_PORT = '8001';
+
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
     import.meta.env.VITE_API_URL ||
     (isLocalhost ? 'http://localhost:8080' : PROD_BACKEND);
 
-// FastAPI NLP Orchestrator base URL (TrOCR, ML models — port 8001)
+// FastAPI NLP Orchestrator base URL (TrOCR, ML models)
 export const NLP_BASE_URL = import.meta.env.VITE_NLP_BASE_URL ||
-    (isLocalhost ? 'http://localhost:8001' : PROD_BACKEND);
+    (isLocalhost ? `http://localhost:${DEFAULT_NLP_PORT}` : PROD_BACKEND);
 
 export default API_BASE_URL;
