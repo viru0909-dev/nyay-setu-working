@@ -416,6 +416,24 @@ a:hover { color: var(--color-primary); }
   border-radius: 50%;
   border: none;
 }
+
+/* ===== Scrollbar Styling ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e5e5e5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333; /* DARK */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #000;
+}
 /* Dark Mode Theme */
 .dark-mode {
   --primary-dark: #1E293B;
@@ -431,4 +449,5 @@ a:hover { color: var(--color-primary); }
 }
 .dark-mode .card, .dark-mode .navbar, .dark-mode header, .dark-mode nav {
   background-color: #
+
 
