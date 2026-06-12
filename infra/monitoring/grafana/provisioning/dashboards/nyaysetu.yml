@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: NyaySetu
+    orgId: 1
+    folder: NyaySetu
+    type: file
+    disableDeletion: true
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

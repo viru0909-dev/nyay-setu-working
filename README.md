@@ -394,6 +394,7 @@ For environment variables, copy `.env.example` to `.env` and fill in your values
 ### Additional Resources
 | Document | Description |
 |---|---|
+| [Monitoring Guide](./docs/monitoring.md) | Prometheus and Grafana setup for backend observability |
 | [AI Integration Guide](./AI_INTEGRATION_GUIDE.md) | Groq API and NLP orchestrator technical deep-dive |
 | [API Documentation](./SYSTEM_DOCUMENTATION.md) | All REST endpoints with request and response specifications |
 | [Postman Collection](./postman_collection.json) | Postman collection (v2.1) for testing Spring Boot & Python APIs |
