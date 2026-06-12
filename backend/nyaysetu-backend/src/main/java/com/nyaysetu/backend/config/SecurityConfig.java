@@ -176,20 +176,7 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // ── WebSocket endpoints ───────────────────────────────────────────
-                        .requestMatchers("/api/ws/**").permitAll()
-
-                        // ── AI endpoints (open for now; restrict if misuse detected) ──────
-                        .requestMatchers(
-                                "/ai/summarize",
-                                "/ai/chat",
-                                "/ai/chat/ollama",
-                                "/ai/constitution/qa",
-                                "/ai/ollama/status",
-                                "/ai/ollama/models",
-                                "/api/v1/brain/analyze-case",
-                                "/api/v1/brain/suggest-documents"
-                        ).permitAll()
-
+       
                         // ── Auth-only: any authenticated user ─────────────────────────────
                         .requestMatchers(
                                 "/api/v1/auth/face/enroll",
