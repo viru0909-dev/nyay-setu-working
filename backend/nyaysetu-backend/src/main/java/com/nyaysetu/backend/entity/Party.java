@@ -19,7 +19,7 @@ public class Party {
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     private UUID id;
 
-    private UUID legalCaseId;
+    private UUID CaseEntityId;
 
     private String name;
 

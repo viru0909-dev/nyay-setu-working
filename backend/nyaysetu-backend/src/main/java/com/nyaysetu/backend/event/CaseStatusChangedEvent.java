@@ -1,15 +1,17 @@
 package com.nyaysetu.backend.event;
 
-import com.nyaysetu.backend.entity.LegalCase;
-import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
+
+import com.nyaysetu.backend.entity.CaseEntity;
+
+import lombok.Getter;
 
 @Getter
 public class CaseStatusChangedEvent extends ApplicationEvent {
-    private final LegalCase legalCase;
+    private final CaseEntity CaseEntity;
 
-    public CaseStatusChangedEvent(Object source, LegalCase legalCase) {
+    public CaseStatusChangedEvent(Object source, CaseEntity CaseEntity) {
         super(source);
-        this.legalCase = legalCase;
+        this.CaseEntity = CaseEntity;
     }
 }

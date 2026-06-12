@@ -1,6 +1,6 @@
 package com.nyaysetu.backend.event;
 
-import com.nyaysetu.backend.entity.LegalCase;
+import com.nyaysetu.backend.entity.CaseEntity;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -15,20 +15,20 @@ public class CaseEventListener {
     @Async
     @EventListener
     public void handleCaseStatusChange(CaseStatusChangedEvent event) {
-        LegalCase legalCase = event.getLegalCase();
-        logger.info("Received real-time case status change event for Case ID: " + legalCase.getId());
+        CaseEntity CaseEntity = event.getCaseEntity();
+        logger.info("Received real-time case status change event for Case ID: " + CaseEntity.getId());
 
         // String-safe matching prevents missing enum property boundaries on diverse build pipelines
-        if (legalCase.getStatus() != null && 
-           ("REGISTERED".equalsIgnoreCase(legalCase.getStatus().name()) || 
-            "REGISTERED".equalsIgnoreCase(legalCase.getStatus().toString()))) {
+        if (CaseEntity.getStatus() != null && 
+           ("REGISTERED".equalsIgnoreCase(CaseEntity.getStatus().name()) || 
+            "REGISTERED".equalsIgnoreCase(CaseEntity.getStatus().toString()))) {
             
             logger.info("Real-time synchronization workflow processed for case status: REGISTERED");
-            sendRealTimeNotification(legalCase);
+            sendRealTimeNotification(CaseEntity);
         }
     }
 
-    private void sendRealTimeNotification(LegalCase legalCase) {
-        logger.info("Action: Dispatching instant notification payload stream for case: " + legalCase.getTitle());
+    private void sendRealTimeNotification(CaseEntity CaseEntity) {
+        logger.info("Action: Dispatching instant notification payload stream for case: " + CaseEntity.getTitle());
     }
 }

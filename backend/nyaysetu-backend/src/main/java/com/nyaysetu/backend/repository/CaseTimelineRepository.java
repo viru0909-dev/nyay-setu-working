@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CaseTimelineRepository extends JpaRepository<CaseTimeline, UUID> {
-    List<CaseTimeline> findByLegalCaseIdOrderByTimestampAsc(UUID legalCaseId);
+    List<CaseTimeline> findByCaseEntityIdOrderByTimestampAsc(UUID CaseEntityId);
 }
