@@ -5,9 +5,6 @@ import useAuthStore from '../store/authStore';
 // Use explicit backend URL - Vite proxy can be unreliable
 // In development: http://localhost:8080
 // In production: Replace with actual backend URL via environment variable
-// Use explicit backend URL - Vite proxy can be unreliable
-// In development: http://localhost:8080
-// In production: Replace with actual backend URL via environment variable
 // Check multiple variable names to be safe
 // Smart Base URL detection with safe fallbacks
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -226,7 +223,6 @@ export const assignmentAPI = {
     getLawyers: () => api.get('/api/v1/users/lawyers'),
 };
 
-// Message API
 // Message API
 export const messageAPI = {
     send: (caseId, messageOrPayload) => {
