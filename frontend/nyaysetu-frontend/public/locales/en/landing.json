@@ -58,6 +58,7 @@
     }
     },
     "hero": {
+        "aboutHeroTag" : "India's First AI-Powered Judiciary Platform",
         "badge": "INDIA'S FIRST AI-POWERED JUDICIARY PLATFORM",
         "installApp": "Install App",
         "title": "AI-Powered Digital Justice",
@@ -136,6 +137,8 @@
         "ctaText": "🎯 Ready to experience the future of justice?",
         "ctaButton": "Start Your Journey"
     },
+    
+    
     "quickCards": {
     "createAccount": {
         "title": "Create Account",
@@ -161,7 +164,10 @@
         "viewRepository": "View Repository",
         "copyright": "NyaySetu. Made with",
         "by": "by Virendra Gadekar",
-        "allRightsReserved": "All rights reserved."
+        "allRightsReserved": "All rights reserved.",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfService": "Terms of Service",
+        "disclaimer": "Disclaimer"
     }
     
 }

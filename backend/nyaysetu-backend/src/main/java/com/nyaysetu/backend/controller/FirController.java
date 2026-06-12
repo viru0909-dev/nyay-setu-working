@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 @Tag(name = "FIR (Police)", description = "Police-facing FIR creation, upload and case submission")
 @RestController
-@RequestMapping("/api/police")
+@RequestMapping("/police")
 @RequiredArgsConstructor
 @Slf4j
 public class FirController {

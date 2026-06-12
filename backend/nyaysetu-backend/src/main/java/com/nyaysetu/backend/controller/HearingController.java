@@ -7,7 +7,9 @@ import com.nyaysetu.backend.service.HearingService;
 import com.nyaysetu.backend.notification.service.NotificationService;
 import com.nyaysetu.backend.notification.entity.Notification;
 import com.nyaysetu.backend.entity.CaseEntity;
+import com.nyaysetu.backend.entity.User;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,17 +24,19 @@ import java.util.UUID;
 
 @Tag(name = "Hearings", description = "Schedule, manage and record virtual court hearings")
 @RestController
-@RequestMapping("/api/hearings")
+@RequestMapping("/hearings")
 @RequiredArgsConstructor
 @Slf4j
 public class HearingController {
     
     private final HearingService hearingService;
     private final NotificationService notificationService;
+    private final com.nyaysetu.backend.service.AuthService authService;
+    private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
     
     @PostMapping("/schedule")
     public ResponseEntity<Map<String, Object>> scheduleHearing(
-            @RequestBody ScheduleHearingRequest request,
+            @Valid @RequestBody ScheduleHearingRequest request,
             Authentication authentication
     ) {
         log.info("Scheduling hearing for case: {}", request.getCaseId());
@@ -150,7 +154,7 @@ public class HearingController {
     @PostMapping("/{hearingId}/outcome")
     public ResponseEntity<?> recordOutcome(
             @PathVariable UUID hearingId,
-            @RequestBody com.nyaysetu.backend.dto.HearingOutcomeRequest request
+            @Valid @RequestBody com.nyaysetu.backend.dto.HearingOutcomeRequest request
     ) {
         try {
             Hearing hearing = hearingService.recordOutcome(hearingId, request);
@@ -178,7 +182,11 @@ public class HearingController {
     }
     
     @GetMapping("/case/{caseId}")
-    public ResponseEntity<List<Map<String, Object>>> getCaseHearings(@PathVariable UUID caseId) {
+    public ResponseEntity<List<Map<String, Object>>> getCaseHearings(
+            @PathVariable UUID caseId,
+            Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(caseId, user);
         List<Hearing> hearings = hearingService.getCaseHearings(caseId);
         List<Map<String, Object>> response = hearings.stream().map(h -> {
             Map<String, Object> dto = new HashMap<>();

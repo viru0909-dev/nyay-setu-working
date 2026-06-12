@@ -4,15 +4,31 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { brainAPI } from '../../services/api';
+import StreamFallbackBanner from '../stream/StreamFallbackBanner';
+import {
+    downloadPartialStreamContent,
+    executeWithResilience,
+} from '../../utils/streamResilience';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useTranslation } from 'react-i18next';
 
 export default function AIAssistantModal({ isOpen, onClose }) {
-    const { language } = useLanguage();
+
+    const { t, i18n } = useTranslation('aiAssistant');
+    const language = i18n.language;
+    const [chatStarted, setChatStarted] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [sessionId, setSessionId] = useState(null);
+    const [assistantNetworkState, setAssistantNetworkState] = useState({
+    status: 'idle',
+    attempt: 0,
+    error: null,
+    lastRetryDelay: 0,
+    });
+    const lastPromptRef = useRef('');
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -26,51 +42,99 @@ export default function AIAssistantModal({ isOpen, onClose }) {
             setMessages([]);
             setInputMessage('');
             setSessionId(null);
-        }
+            setAssistantNetworkState({
+                status: 'idle',
+                attempt: 0,
+                error: null,
+                lastRetryDelay: 0,
+            });
+            lastPromptRef.current = '';
+       }
     }, [isOpen]);
 
-    const sendMessage = async (text) => {
-        if (!text.trim()) return;
+    const savePartialAssistantChat = () => {
+    const content = messages
+        .map((msg) => `## ${msg.role === 'user' ? 'User' : 'AI Assistant'}\n\n${msg.content}`)
+        .join('\n\n---\n\n');
+
+    downloadPartialStreamContent('ai-assistant-partial-chat.md', content);
+};
+
+const sendMessage = async (text, { appendUserMessage = true } = {}) => {
+    if (!text.trim() || isLoading) return;
+
+    lastPromptRef.current = text;
+
+    if (appendUserMessage) {
         const userMessage = { role: 'user', content: text };
         setMessages(prev => [...prev, userMessage]);
         setInputMessage('');
-        setIsLoading(true);
-        try {
-            const response = await brainAPI.chat(text, sessionId);
-            const aiMessage = { role: 'ai', content: response.data.message };
-            setMessages(prev => [...prev, aiMessage]);
-            if (response.data.sessionId) setSessionId(response.data.sessionId);
-        } catch (error) {
-            console.error('AI Chat Error:', error);
-            const errorMessage = {
-                role: 'ai',
-                content: language === 'en'
-                    ? 'Sorry, I encountered an error. Please try again.'
-                    : 'क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।'
-            };
-            setMessages(prev => [...prev, errorMessage]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    }
+
+    setIsLoading(true);
+    setAssistantNetworkState({
+        status: 'connecting',
+        attempt: 0,
+        error: null,
+        lastRetryDelay: 0,
+    });
+
+    try {
+        const response = await executeWithResilience(
+            () => brainAPI.chat(text, sessionId),
+            {
+                breakerKey: 'landing-ai-assistant-chat',
+                maxRetries: 2,
+                baseDelayMs: 700,
+                maxDelayMs: 4000,
+                onRetry: ({ attempt, delay, error }) => {
+                    setAssistantNetworkState({
+                        status: 'reconnecting',
+                        attempt,
+                        error,
+                        lastRetryDelay: delay,
+                    });
+                },
+            }
+        );
+
+        const aiMessage = { role: 'ai', content: response.data.message };
+        setMessages(prev => [...prev, aiMessage]);
+
+        if (response.data.sessionId) setSessionId(response.data.sessionId);
+
+        setAssistantNetworkState({
+            status: 'completed',
+            attempt: 0,
+            error: null,
+            lastRetryDelay: 0,
+        });
+    } catch (error) {
+        console.error('AI Chat Error:', error);
+
+        setAssistantNetworkState({
+            status: 'failed',
+            attempt: 2,
+            error,
+            lastRetryDelay: 0,
+        });
+
+        const errorMessage = {
+            role: 'ai',
+            content: '⚠️ AI connection is currently unstable. Your chat is preserved. Please use Retry or Save partial.',
+        };
+
+        setMessages(prev => [...prev, errorMessage]);
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     if (!isOpen) return null;
 
-    const sampleQuestions = language === 'en'
-        ? [
-            "What are my fundamental rights?",
-            "How do I file a case online?",
-            "Explain Article 21 of the Constitution",
-            "What is bail and how does it work?",
-            "How to find a lawyer near me?"
-        ]
-        : [
-            "मेरे मौलिक अधिकार क्या हैं?",
-            "मैं ऑनलाइन मामला कैसे दर्ज करूं?",
-            "संविधान के अनुच्छेद 21 को समझाएं",
-            "जमानत क्या है और यह कैसे काम करती है?",
-            "मेरे पास वकील कैसे खोजें?"
-        ];
+    const sampleQuestions = t('sampleQuestions', {
+        returnObjects: true
+    });
 
     return createPortal(
         <AnimatePresence>
@@ -147,7 +211,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                         lineHeight: 1.2,
                                         fontFamily: 'var(--font-heading)'
                                     }}>
-                                        {language === 'en' ? 'Legal AI Assistant' : 'कानूनी AI सहायक'}
+                                        {t('legalAssistant')}
                                     </h2>
                                     <p style={{
                                         fontSize: '0.75rem',
@@ -155,7 +219,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                         margin: 0,
                                         lineHeight: 1
                                     }}>
-                                        {language === 'en' ? 'Powered by NyaySetu AI' : 'NyaySetu AI द्वारा संचालित'}
+                                        {t('poweredBy')}
                                     </p>
                                 </div>
                             </div>
@@ -165,6 +229,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                 whileTap={{ scale: 0.92 }}
                                 transition={{ type: 'spring', stiffness: 350 }}
                                 onClick={onClose}
+                                aria-label="Close"
                                 style={{
                                     background: 'var(--bg-hover)',
                                     border: '1px solid var(--border-medium)',
@@ -203,6 +268,18 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                             flexDirection: 'column',
                             gap: '0'
                         }}>
+
+                        <StreamFallbackBanner
+    state={assistantNetworkState}
+    onRetry={() => {
+        if (lastPromptRef.current) {
+            sendMessage(lastPromptRef.current, { appendUserMessage: false });
+        }
+    }}
+    onSavePartial={savePartialAssistantChat}
+    hasPartialContent={messages.length > 0}
+/>
+
                             {/* Suggestions */}
                             {messages.length === 0 && (
                                 <div>
@@ -227,7 +304,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                         </div>
                                         <div>
                                             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1 }}>
-                                                {language === 'en' ? 'Try Asking' : 'पूछ कर देखें'}
+                                                {t('poweredBy')}
                                             </div>
                                             <div style={{
                                                 fontSize: '0.95rem',
@@ -236,7 +313,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                                 lineHeight: 1.2,
                                                 fontFamily: 'var(--font-heading)'
                                             }}>
-                                                {language === 'en' ? 'Common Questions' : 'सामान्य प्रश्न'}
+                                                {t('askQuestion')}
                                             </div>
                                         </div>
                                     </div>
@@ -387,7 +464,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                     }}>
                                         <Loader2 size={14} style={{ color: 'var(--color-accent)', animation: 'spin 1s linear infinite' }} />
                                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                                            {language === 'en' ? 'Thinking…' : 'सोच रहा हूँ…'}
+                                            {t('thinking')}
                                         </span>
                                     </div>
                                 </motion.div>
@@ -411,11 +488,7 @@ export default function AIAssistantModal({ isOpen, onClose }) {
                                 value={inputMessage}
                                 onChange={e => setInputMessage(e.target.value)}
                                 onKeyPress={e => e.key === 'Enter' && sendMessage(inputMessage)}
-                                placeholder={
-                                    language === 'en'
-                                        ? 'Ask about Indian law (e.g. Article 21, bail, FIR…)'
-                                        : 'भारतीय कानून के बारे में कुछ भी पूछें…'
-                                }
+                                placeholder={t('placeholder')}
                                 style={{
                                     flex: 1,
                                     padding: '0.75rem 1rem',

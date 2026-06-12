@@ -5,6 +5,7 @@ import com.nyaysetu.backend.dto.JoinMeetingRequest;
 import com.nyaysetu.backend.dto.MeetingResponse;
 import com.nyaysetu.backend.service.MeetingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,12 +22,12 @@ public class MeetingController {
     private final MeetingService meetingService;
 
     @PostMapping
-    public ResponseEntity<MeetingResponse> create(@RequestBody CreateMeetingRequest dto) {
+    public ResponseEntity<MeetingResponse> create(@Valid  @RequestBody CreateMeetingRequest dto) {
         return ResponseEntity.ok(meetingService.createMeeting(dto));
     }
 
     @PostMapping("/join")
-    public ResponseEntity<MeetingResponse> join(@RequestBody JoinMeetingRequest dto) {
+    public ResponseEntity<MeetingResponse> join(@Valid @RequestBody JoinMeetingRequest dto) {
         return ResponseEntity.ok(meetingService.joinMeeting(dto));
     }
 

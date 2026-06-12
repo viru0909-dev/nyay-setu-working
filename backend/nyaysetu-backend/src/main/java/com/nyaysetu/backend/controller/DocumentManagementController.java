@@ -24,13 +24,14 @@ import java.util.UUID;
 @Slf4j
 @Tag(name = "Documents", description = "Upload, download and manage case documents")
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/documents")
 @RequiredArgsConstructor
 public class DocumentManagementController {
 
     private final DocumentManagementService documentManagementService;
     private final CaseManagementService caseManagementService;
     private final AuthService authService;
+    private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
     private final com.nyaysetu.backend.service.DocumentAnalysisService documentAnalysisService;
     private final com.nyaysetu.backend.service.CertificateService certificateService;
 
@@ -102,8 +103,11 @@ public class DocumentManagementController {
      * Trigger AI analysis for a document
      */
     @PostMapping("/{id}/analyze")
-    public ResponseEntity<?> analyzeDocument(@PathVariable UUID id) {
+    public ResponseEntity<?> analyzeDocument(@PathVariable UUID id, Authentication authentication) {
         try {
+            User user = authService.findByEmail(authentication.getName());
+            documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
             // Trigger async analysis
             documentManagementService.triggerAnalysis(id);
             return ResponseEntity.ok(Map.of(
@@ -119,8 +123,11 @@ public class DocumentManagementController {
      * Get AI analysis for a document
      */
     @GetMapping("/{id}/analysis")
-    public ResponseEntity<?> getDocumentAnalysis(@PathVariable UUID id) {
+    public ResponseEntity<?> getDocumentAnalysis(@PathVariable UUID id, Authentication authentication) {
         try {
+            User user = authService.findByEmail(authentication.getName());
+            documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
             if (!documentAnalysisService.hasAnalysis(id)) {
                 return ResponseEntity.status(404).body(Map.of("error", "Analysis not found"));
             }
@@ -138,8 +145,11 @@ public class DocumentManagementController {
      * Check if document has analysis
      */
     @GetMapping("/{id}/has-analysis")
-    public ResponseEntity<?> checkAnalysis(@PathVariable UUID id) {
+    public ResponseEntity<?> checkAnalysis(@PathVariable UUID id, Authentication authentication) {
         try {
+            User user = authService.findByEmail(authentication.getName());
+            documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
             boolean hasAnalysis = documentAnalysisService.hasAnalysis(id);
             return ResponseEntity.ok(Map.of(
                 "documentId", id.toString(),
@@ -178,29 +188,43 @@ public class DocumentManagementController {
         String userRole = "VISITOR"; // Default
         if (user.getRole() == com.nyaysetu.backend.entity.Role.JUDGE) {
             userRole = "JUDGE";
+        } else if (caseData.getLawyerId() != null && caseData.getLawyerId().equals(user.getId())) {
+            userRole = "LAWYER";
+        } else if (user.getRole() == com.nyaysetu.backend.entity.Role.LAWYER) {
+            userRole = "LAWYER";
         } else if (caseData.getClientId() != null && caseData.getClientId().equals(user.getId())) {
             userRole = "PETITIONER";
         } else if (user.getEmail().equals(caseData.getRespondentEmail())) {
             userRole = "RESPONDENT";
+        } else if (caseData.getLawyerId() != null && caseData.getLawyerId().equals(user.getId())) {
+            userRole = "LAWYER";
         }
+
+        boolean isCaseLawyer = caseData.getLawyerId() != null && caseData.getLawyerId().equals(user.getId());
         
         // Get filtered documents based on role
         List<DocumentDto> documents = documentManagementService.getCaseDocumentsWithAccessControl(
-            caseId, user.getId(), userRole
+            caseId, user.getId(), userRole, isCaseLawyer
         );
         return ResponseEntity.ok(documents);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DocumentDto> getDocument(@PathVariable UUID id) {
-        DocumentDto document = documentManagementService.getDocumentById(id);
+    public ResponseEntity<DocumentDto> getDocument(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        DocumentDto document = documentManagementService.getDocumentById(id, user);
         return ResponseEntity.ok(document);
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<?> downloadDocument(@PathVariable UUID id) {
+    public ResponseEntity<?> downloadDocument(
+            @PathVariable UUID id,
+            Authentication authentication) {
         try {
-            DocumentDto metadata = documentManagementService.getDocumentById(id);
+            User user = authService.findByEmail(authentication.getName());
+            DocumentDto metadata = documentManagementService.getDocumentById(id, user);
             Resource resource = documentManagementService.downloadDocument(id);
 
             return ResponseEntity.ok()
@@ -232,8 +256,11 @@ public class DocumentManagementController {
      * Download Section 63(4) Evidence Certificate for a document
      */
     @GetMapping("/{id}/certificate")
-    public ResponseEntity<?> downloadCertificate(@PathVariable UUID id) {
+    public ResponseEntity<?> downloadCertificate(@PathVariable UUID id, Authentication authentication) {
         try {
+            User user = authService.findByEmail(authentication.getName());
+            documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
             byte[] pdfBytes = certificateService.generateDocumentCertificate(id);
             
             return ResponseEntity.ok()
@@ -242,7 +269,7 @@ public class DocumentManagementController {
                             "attachment; filename=\"Certificate_" + id + ".pdf\"")
                     .body(pdfBytes);
         } catch (Exception e) {
-            e.printStackTrace(); // Log stack trace to console
+            log.error("Certificate generation failed for document {}", id, e);
             return ResponseEntity.status(500).body(Map.of("error", "Certificate generation failed: " + e.getMessage()));
         }
     }
@@ -250,7 +277,10 @@ public class DocumentManagementController {
      * Verify document hash (SHA-256) againts stored fingerprint
      */
     @GetMapping("/{id}/verify-hash")
-    public ResponseEntity<?> verifyHash(@PathVariable UUID id) {
+    public ResponseEntity<?> verifyHash(@PathVariable UUID id, Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
+
         boolean isValid = documentManagementService.verifyDocumentHash(id);
         return ResponseEntity.ok(Map.of("id", id, "valid", isValid));
     }

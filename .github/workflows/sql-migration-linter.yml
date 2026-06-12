@@ -1,0 +1,30 @@
+name: Database Migration Linter
+
+on:
+  pull_request:
+    paths:
+      - 'backend/nyaysetu-backend/src/main/resources/db/migration/**'
+
+jobs:
+  lint-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Verify Migration Filename Format
+        run: |
+          MIGRATION_DIR="backend/nyaysetu-backend/src/main/resources/db/migration"
+          if [ -d "$MIGRATION_DIR" ]; then
+            for file in "$MIGRATION_DIR"/*; do
+              filename=$(basename "$file")
+              if [[ ! "$filename" =~ ^V[0-9]+__.*\.sql$ ]]; then
+                echo "❌ Invalid migration filename: $filename"
+                echo "Expected format: V<number>__<description>.sql (e.g., V51__add_deleted_at.sql)"
+                exit 1
+              fi
+            done
+            echo "✅ All migration files follow the Flyway naming convention!"
+          else
+            echo "ℹ️ No migration directory found, skipping check."
+          fi

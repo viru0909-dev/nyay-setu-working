@@ -124,7 +124,15 @@ export default function VakilAvatar3D({ state = 'idle', audioData }) {
     if (state === 'listening') mode = 'listening';
 
     return (
-        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        // FIX: force GPU compositing layer — prevents Safari from painting
+        // Three.js frame updates on the main thread, which caused stutter
+        <div style={{
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+            transform: 'translateZ(0)',
+            willChange: 'transform',
+        }}>
             <Canvas camera={{ position: [0, 0, 3], fov: 40 }}>
                 {/* Lighting */}
                 <ambientLight intensity={0.6} />

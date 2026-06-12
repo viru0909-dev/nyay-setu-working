@@ -332,11 +332,41 @@ a:hover { color: var(--color-primary); }
   border-color: var(--color-primary);
   transform: rotate(15deg);
 }
+.theme-toggle svg {
+  transform: translateY(1px);
+}
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-main); }
-::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: var(--radius-full); }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+/* ===== Modern Themed Scrollbar (Improved) ===== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-main);
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-medium) var(--bg-main);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
 
 @media (max-width: 1024px) {
   .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
@@ -386,3 +416,19 @@ a:hover { color: var(--color-primary); }
   border-radius: 50%;
   border: none;
 }
+/* Dark Mode Theme */
+.dark-mode {
+  --primary-dark: #1E293B;
+  --bg-light: #0F172A;
+  --glass-bg: rgba(15, 23, 42, 0.85);
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  background-color: #0F172A !important;
+  color: #F1F5F9 !important;
+}
+.dark-mode * {
+  border-color: #334155;
+}
+.dark-mode .card, .dark-mode .navbar, .dark-mode header, .dark-mode nav {
+  background-color: #
+

@@ -1,0 +1,3766 @@
+openapi: 3.0.0
+info:
+  title: NyaySetu Unified API
+  version: 1.0.0
+  description: REST API specification for the NyaySetu Digital Judiciary Platform. Covers Spring Boot backend services and Python microservices.
+servers:
+  - url: http://localhost:8080
+    description: Spring Boot Backend Server
+  - url: http://localhost:8001
+    description: Python Services (NLP Orchestrator / LawGPT)
+paths:
+  /api/legal/analyze:
+    post:
+      tags:
+        - NLP Orchestrator
+      summary: "Synchronous legal query analysis and research (testing only)"
+      description: "Synchronous legal query analysis and research (testing only) (Served by Python microservice on port 8001)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                query: "What is the penalty for driving without a license in India?"
+                language: en
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/legal/analyze-stream:
+    post:
+      tags:
+        - NLP Orchestrator
+      summary: "Primary SSE streaming legal reasoning pipeline"
+      description: "Primary SSE streaming legal reasoning pipeline (Served by Python microservice on port 8001)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                query: "What is the penalty for driving without a license in India?"
+                language: en
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/api/ai/chat:
+    post:
+      tags:
+        - AI Services
+      summary: "Execute chat"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/api/ai/chat/ollama:
+    post:
+      tags:
+        - AI Services
+      summary: "Execute chatWithOllama"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/api/ai/constitution/qa:
+    post:
+      tags:
+        - AI Services
+      summary: "Execute constitutionQA"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/api/ai/ollama/models:
+    get:
+      tags:
+        - AI Services
+      summary: "Execute getAvailableModels"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/api/ai/ollama/status:
+    get:
+      tags:
+        - AI Services
+      summary: "Execute checkOllamaStatus"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/api/ai/summarize:
+    post:
+      tags:
+        - AI Services
+      summary: "Execute summarize"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/api/documents/generate/download:
+    post:
+      tags:
+        - Document Generation
+      summary: "Generate a document and download as PDF.  POST /api/document"
+      description: "Generate a document and download as PDF.  POST /api/documents/generate/download  Same request body as /preview. Returns: PDF file as application/pdf with Content-Disposition: attachment (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                docType: complaint
+                petitionerName: Jane Doe
+                petitionerAddress: "123 Lane, Mumbai"
+                respondentName: John Respondent
+                respondentAddress: "456 Street, Delhi"
+                caseDescription: Bicycle theft from residential premises.
+                incidentDate: "2026-06-01"
+                reliefSought: Recovery of the stolen bicycle or equivalent compensation.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/api/documents/generate/preview:
+    post:
+      tags:
+        - Document Generation
+      summary: "Request body: { \"docType\": \"affidavit|rti|complaint|notice\","
+      description: "Request body: { \"docType\": \"affidavit|rti|complaint|notice\", \"petitionerName\": \"string\", \"petitionerAddress\": \"string\", \"respondentName\": \"string\", \"respondentAddress\": \"string\", \"caseDescription\": \"string\", \"incidentDate\": \"string\", \"reliefSought\": \"string\", \"courtName\": \"string (optional)\", \"departmentName\": \"string (RTI only)\", \"pioName\": \"string (RTI only)\" } (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                docType: complaint
+                petitionerName: Jane Doe
+                petitionerAddress: "123 Lane, Mumbai"
+                respondentName: John Respondent
+                respondentAddress: "456 Street, Delhi"
+                caseDescription: Bicycle theft from residential premises.
+                incidentDate: "2026-06-01"
+                reliefSought: Recovery of the stolen bicycle or equivalent compensation.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/audit/log:
+    post:
+      tags:
+        - Audit Logs
+      summary: "Execute createLog"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/face/disable:
+    delete:
+      tags:
+        - Authentication
+      summary: "Execute disableFaceLogin"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/face/enroll:
+    post:
+      tags:
+        - Authentication
+      summary: "Execute enrollFace"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                faceDescriptor:
+                  - 0.1
+                  - -0.2
+                  - 0.3
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/face/login:
+    post:
+      tags:
+        - Authentication
+      summary: "Execute loginWithFace"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: "litigant@example.com"
+                faceDescriptor:
+                  - 0.1
+                  - -0.2
+                  - 0.3
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/face/status:
+    get:
+      tags:
+        - Authentication
+      summary: "Execute getFaceLoginStatus"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: "Execute forgotPassword"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: "litigant@example.com"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: "Execute login"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: "litigant@example.com"
+                password: "Password@123"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/ping:
+    get:
+      tags:
+        - Authentication
+      summary: "Execute ping"
+      description: " (Served by Spring Boot backend)"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: "Execute refreshToken"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                refreshToken: eyJhbGci...
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: "Execute register"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: "litigant@example.com"
+                name: Jane Doe
+                password: "Password@123"
+                role: LITIGANT
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: "Execute resetPassword"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                token: "reset-token-here"
+                newPassword: "NewPassword@123"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/test:
+    get:
+      tags:
+        - Authentication
+      summary: "Execute test"
+      description: " (Served by Spring Boot backend)"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/auth/verify-reset-token:
+    get:
+      tags:
+        - Authentication
+      summary: "Execute verifyResetToken"
+      description: " (Served by Spring Boot backend)"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/brain/analyze-case:
+    post:
+      tags:
+        - Brain AI
+      summary: "Analyze case intent (FIR vs Court Case)"
+      description: "Analyze case intent (FIR vs Court Case) (Served by Spring Boot backend)"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/brain/chat:
+    post:
+      tags:
+        - Brain AI
+      summary: "unified brain chat endpoint"
+      description: "unified brain chat endpoint (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/brain/suggest-documents:
+    post:
+      tags:
+        - Brain AI
+      summary: "Suggest documents based on case details"
+      description: "Suggest documents based on case details (Served by Spring Boot backend)"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases:
+    get:
+      tags:
+        - Case Management
+      summary: "Execute getMyCases"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Case of Breach of Contract
+                description: The respondent failed to deliver the goods as agreed.
+                caseType: CIVIL
+                jurisdiction: Delhi High Court
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+    post:
+      tags:
+        - Case Management
+      summary: "Execute createCase"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Case of Breach of Contract
+                description: The respondent failed to deliver the goods as agreed.
+                caseType: CIVIL
+                jurisdiction: Delhi High Court
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/judge-workload:
+    get:
+      tags:
+        - Case Assignment
+      summary: "Get judge workload (for admin dashboard)"
+      description: "Get judge workload (for admin dashboard) (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/judge/{judgeId}/events:
+    get:
+      tags:
+        - Case Events
+      summary: "Get events for a judge's assigned cases."
+      description: "Get events for a judge's assigned cases. (Served by Spring Boot backend)"
+      parameters:
+        - name: judgeId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The judgeId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/lawyers/available:
+    get:
+      tags:
+        - Case Assignment
+      summary: "Get list of available lawyers for client selection"
+      description: "Get list of available lawyers for client selection (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/pending-assignment:
+    get:
+      tags:
+        - Case Assignment
+      summary: "Get cases pending judge assignment (for admin)"
+      description: "Get cases pending judge assignment (for admin) (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/transition/{caseId}/advance-stage:
+    post:
+      tags:
+        - Case Transitions
+      summary: "JUDGE: Advance case to next stage in the 7-step process. Bod"
+      description: "JUDGE: Advance case to next stage in the 7-step process. Body: { \"judgeId\": 123, \"judgeName\": \"...\" } (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                judgeId: 101
+                judgeName: Justice Dixit
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/transition/{caseId}/approve-draft:
+    post:
+      tags:
+        - Case Transitions
+      summary: "LITIGANT: Approve draft petition (enables court submission)."
+      description: "LITIGANT: Approve draft petition (enables court submission). Body: { \"litigantId\": \"...\", \"litigantName\": \"...\" } (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                litigantId: U789
+                litigantName: Jane Doe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/transition/{caseId}/health:
+    get:
+      tags:
+        - Case Transitions
+      summary: "Get case health status (trial readiness check)."
+      description: "Get case health status (trial readiness check). (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/transition/{caseId}/reject-draft:
+    post:
+      tags:
+        - Case Transitions
+      summary: "LITIGANT: Reject draft petition. Body: { \"litigantId\": \"...\""
+      description: "LITIGANT: Reject draft petition. Body: { \"litigantId\": \"...\", \"litigantName\": \"...\", \"reason\": \"...\" } (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                litigantId: U789
+                litigantName: Jane Doe
+                reason: Draft needs updates on incident date.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/transition/{caseId}/save-draft:
+    post:
+      tags:
+        - Case Transitions
+      summary: "LAWYER: Save draft petition (triggers client approval workfl"
+      description: "LAWYER: Save draft petition (triggers client approval workflow). Body: { \"lawyerId\": \"...\", \"lawyerName\": \"...\", \"draftContent\": \"...\" } (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                lawyerId: L456
+                lawyerName: Advocate Sharma
+                draftContent: Detailed petition draft text...
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/transition/{caseId}/submit-to-court:
+    post:
+      tags:
+        - Case Transitions
+      summary: "POLICE → COURT: Submit case to court for cognizance. Body: {"
+      description: "POLICE → COURT: Submit case to court for cognizance. Body: { \"officerId\": \"...\", \"officerName\": \"...\" } (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                officerId: P123
+                officerName: Officer Kumar
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/transition/{caseId}/summons-served:
+    post:
+      tags:
+        - Case Transitions
+      summary: "SYSTEM: Mark summons as served."
+      description: "SYSTEM: Mark summons as served. (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/transition/{caseId}/take-cognizance:
+    post:
+      tags:
+        - Case Transitions
+      summary: "JUDGE: Take cognizance of case. Body: { \"judgeId\": 123, \"jud"
+      description: "JUDGE: Take cognizance of case. Body: { \"judgeId\": 123, \"judgeName\": \"...\" } (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                judgeId: 101
+                judgeName: Justice Dixit
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/assign-judge:
+    post:
+      tags:
+        - Case Assignment
+      summary: "Auto-assign a judge to a case"
+      description: "Auto-assign a judge to a case (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/document-status:
+    post:
+      tags:
+        - Case Assignment
+      summary: "Execute updateDocumentStatus"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/events:
+    get:
+      tags:
+        - Case Events
+      summary: "Get timeline events for a case (ordered chronologically for"
+      description: "Get timeline events for a case (ordered chronologically for display). This powers the frontend Timeline component. (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/events/recent:
+    get:
+      tags:
+        - Case Events
+      summary: "Get recent events for a case (newest first)."
+      description: "Get recent events for a case (newest first). (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/evidence:
+    post:
+      tags:
+        - Evidence Management
+      summary: "Execute uploadEvidence"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/messages:
+    get:
+      tags:
+        - Case Messaging
+      summary: "Execute getMessages"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+    post:
+      tags:
+        - Case Messaging
+      summary: "Execute sendMessage"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/notes:
+    post:
+      tags:
+        - Case Notes
+      summary: "Execute addNote"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                content: Note regarding latest documents uploaded.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/propose-lawyer:
+    post:
+      tags:
+        - Case Assignment
+      summary: "Propose a lawyer for a case"
+      description: "Propose a lawyer for a case (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/respond-proposal:
+    post:
+      tags:
+        - Case Assignment
+      summary: "Respond to a lawyer proposal"
+      description: "Respond to a lawyer proposal (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/take-cognizance:
+    post:
+      tags:
+        - Case Assignment
+      summary: "Execute takeCognizance"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{caseId}/update-summons:
+    post:
+      tags:
+        - Case Assignment
+      summary: "Execute updateSummons"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}:
+    delete:
+      tags:
+        - Case Management
+      summary: "Execute deleteCase"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+    get:
+      tags:
+        - Case Management
+      summary: "Execute getCaseById"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+    put:
+      tags:
+        - Case Management
+      summary: "Execute updateCase"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/approve-draft:
+    put:
+      tags:
+        - Case Management
+      summary: "Execute approveDraft"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/deliver-verdict:
+    post:
+      tags:
+        - Case Management
+      summary: "Execute deliverVerdict"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/file-in-court:
+    post:
+      tags:
+        - Case Management
+      summary: "Handover D: Lawyer files the approved petition in court Rout"
+      description: "Handover D: Lawyer files the approved petition in court Routes through CaseStateTransitionService for audit trail and validation. (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/order-notice:
+    post:
+      tags:
+        - Case Management
+      summary: "Execute orderNotice"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/parties:
+    post:
+      tags:
+        - Case Management
+      summary: "Execute addParty"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: John Respondent
+                role: RESPONDENT
+                address: "456 Street, Delhi"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/respondent-details:
+    put:
+      tags:
+        - Case Management
+      summary: "Execute updateRespondentDetails"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                respondentName: John Respondent
+                respondentAddress: "456 Street, Delhi"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/review-draft:
+    post:
+      tags:
+        - Case Management
+      summary: "Handover C: Client reviews draft"
+      description: "Handover C: Client reviews draft (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/start-arguments:
+    post:
+      tags:
+        - Case Management
+      summary: "Execute startArguments"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/start-evidence:
+    post:
+      tags:
+        - Case Management
+      summary: "Execute startEvidence"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/start-hearings:
+    post:
+      tags:
+        - Case Management
+      summary: "Execute startHearings"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/start-judgment:
+    post:
+      tags:
+        - Case Management
+      summary: "Execute startJudgment"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/cases/{id}/submit-draft:
+    post:
+      tags:
+        - Case Management
+      summary: "Handover C: Lawyer submits draft"
+      description: "Handover C: Lawyer submits draft (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/client/fir:
+    post:
+      tags:
+        - Client FIRs
+      summary: "Client files an FIR (Manual or AI-assisted)"
+      description: "Client files an FIR (Manual or AI-assisted) (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                complainantName: Jane Doe
+                complainantAddress: "123 Lane, Mumbai"
+                accusedName: Unknown
+                description: Bicycle theft from residential premises.
+                incidentDate: "2026-06-01"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/client/fir/list:
+    get:
+      tags:
+        - Client FIRs
+      summary: "Get all FIRs filed by the current client"
+      description: "Get all FIRs filed by the current client (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/client/fir/stats:
+    get:
+      tags:
+        - Client FIRs
+      summary: "Get client FIR stats for dashboard"
+      description: "Get client FIR stats for dashboard (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/client/fir/{id}:
+    get:
+      tags:
+        - Client FIRs
+      summary: "Get FIR details by ID"
+      description: "Get FIR details by ID (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents:
+    get:
+      tags:
+        - Document Management
+      summary: "Execute getUserDocuments"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents/case/{caseId}:
+    get:
+      tags:
+        - Document Management
+      summary: "Execute getCaseDocuments"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents/upload:
+    post:
+      tags:
+        - Document Management
+      summary: "Execute uploadDocument"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents/user/cases:
+    get:
+      tags:
+        - Document Management
+      summary: "Execute getUserCases"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents/{id}:
+    delete:
+      tags:
+        - Document Management
+      summary: "Execute deleteDocument"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+    get:
+      tags:
+        - Document Management
+      summary: "Execute getDocument"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents/{id}/analysis:
+    get:
+      tags:
+        - Document Management
+      summary: "Get AI analysis for a document"
+      description: "Get AI analysis for a document (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents/{id}/analyze:
+    post:
+      tags:
+        - Document Management
+      summary: "Trigger AI analysis for a document"
+      description: "Trigger AI analysis for a document (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents/{id}/certificate:
+    get:
+      tags:
+        - Document Management
+      summary: "Download Section 63(4) Evidence Certificate for a document"
+      description: "Download Section 63(4) Evidence Certificate for a document (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents/{id}/download:
+    get:
+      tags:
+        - Document Management
+      summary: "Execute downloadDocument"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents/{id}/has-analysis:
+    get:
+      tags:
+        - Document Management
+      summary: "Check if document has analysis"
+      description: "Check if document has analysis (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/documents/{id}/verify-hash:
+    get:
+      tags:
+        - Document Management
+      summary: "Verify document hash (SHA-256) againts stored fingerprint"
+      description: "Verify document hash (SHA-256) againts stored fingerprint (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/evidence/case/{caseId}:
+    get:
+      tags:
+        - Blockchain Evidence Vault
+      summary: "Get all evidence for a case"
+      description: "Get all evidence for a case (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/evidence/case/{caseId}/verify-chain:
+    get:
+      tags:
+        - Blockchain Evidence Vault
+      summary: "Verify entire evidence chain for a case"
+      description: "Verify entire evidence chain for a case (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/evidence/upload:
+    post:
+      tags:
+        - Blockchain Evidence Vault
+      summary: "Upload evidence with blockchain hash"
+      description: "Upload evidence with blockchain hash (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/evidence/{evidenceId}:
+    get:
+      tags:
+        - Blockchain Evidence Vault
+      summary: "Get evidence details by ID"
+      description: "Get evidence details by ID (Served by Spring Boot backend)"
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The evidenceId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/evidence/{evidenceId}/certificate:
+    get:
+      tags:
+        - Blockchain Evidence Vault
+      summary: "Download Section 63(4) Certificate"
+      description: "Download Section 63(4) Certificate (Served by Spring Boot backend)"
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The evidenceId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/evidence/{evidenceId}/verify:
+    get:
+      tags:
+        - Blockchain Evidence Vault
+      summary: "Verify single evidence integrity"
+      description: "Verify single evidence integrity (Served by Spring Boot backend)"
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The evidenceId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/face/enroll:
+    post:
+      tags:
+        - Face Recognition
+      summary: "Execute enrollFace"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/face/remove:
+    delete:
+      tags:
+        - Face Recognition
+      summary: "Execute removeFace"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/face/status:
+    get:
+      tags:
+        - Face Recognition
+      summary: "Execute getFaceStatus"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/face/verify:
+    post:
+      tags:
+        - Face Recognition
+      summary: "Execute verifyFace"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/forensics/report/{jobId}:
+    get:
+      tags:
+        - Forensics Analysis
+      summary: "Execute getReport"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The jobId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/forensics/stream/{jobId}:
+    get:
+      tags:
+        - Forensics Analysis
+      summary: "Execute streamAnalysis"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The jobId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/forensics/upload:
+    post:
+      tags:
+        - Forensics Analysis
+      summary: "Execute uploadVideo"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/health:
+    get:
+      tags:
+        - Health & Monitoring
+      summary: "Execute healthCheck"
+      description: " (Served by Spring Boot backend)"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/hearings/case/{caseId}:
+    get:
+      tags:
+        - Hearings
+      summary: "Execute getCaseHearings"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/hearings/my:
+    get:
+      tags:
+        - Hearings
+      summary: "Execute getMyHearings"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/hearings/schedule:
+    post:
+      tags:
+        - Hearings
+      summary: "Execute scheduleHearing"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                caseId: "case-uuid-here"
+                hearingDate: "2026-07-15T10:00:00"
+                hearingType: PRELIMINARY
+                description: Initial hearing for plea
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/hearings/{hearingId}:
+    get:
+      tags:
+        - Hearings
+      summary: "Execute getHearing"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: hearingId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The hearingId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/hearings/{hearingId}/complete:
+    put:
+      tags:
+        - Hearings
+      summary: "Execute completeHearing"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: hearingId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The hearingId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/hearings/{hearingId}/join:
+    post:
+      tags:
+        - Hearings
+      summary: "Execute joinHearing"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: hearingId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The hearingId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/hearings/{hearingId}/leave:
+    post:
+      tags:
+        - Hearings
+      summary: "Execute leaveHearing"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: hearingId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The hearingId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/hearings/{hearingId}/outcome:
+    post:
+      tags:
+        - Hearings
+      summary: "Execute recordOutcome"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: hearingId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The hearingId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                outcome: "Hearing adjourned. Next hearing on 2026-08-01."
+                nextHearingDate: "2026-08-01T10:00:00"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/hearings/{hearingId}/participants:
+    get:
+      tags:
+        - Hearings
+      summary: "Execute getParticipants"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: hearingId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The hearingId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Advocate Sharma
+                role: LAWYER
+                email: "lawyer@example.com"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+    post:
+      tags:
+        - Hearings
+      summary: "Execute addParticipant"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: hearingId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The hearingId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Advocate Sharma
+                role: LAWYER
+                email: "lawyer@example.com"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/judge/analytics:
+    get:
+      tags:
+        - Judge Dashboard
+      summary: "Execute getJudgeAnalytics"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/judge/case/{id}/ai-summary:
+    get:
+      tags:
+        - Judge Dashboard
+      summary: "AI Case Summary for Judge (Digital Court Master)"
+      description: "AI Case Summary for Judge (Digital Court Master) (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/judge/cases:
+    get:
+      tags:
+        - Judge Dashboard
+      summary: "Get all cases assigned to the logged-in judge"
+      description: "Get all cases assigned to the logged-in judge (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/judge/cases/{id}/claim:
+    post:
+      tags:
+        - Judge Dashboard
+      summary: "Execute claimCase"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/judge/cases/{id}/issue-summons:
+    post:
+      tags:
+        - Judge Dashboard
+      summary: "Issue Summons (Step 4)"
+      description: "Issue Summons (Step 4) (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/judge/hearings/schedule-ai:
+    post:
+      tags:
+        - Judge Dashboard
+      summary: "AI-Assisted Hearing Scheduling Parses natural language reque"
+      description: "AI-Assisted Hearing Scheduling Parses natural language request to schedule a hearing (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/judge/hearings/today:
+    get:
+      tags:
+        - Judge Dashboard
+      summary: "Get hearings scheduled for today"
+      description: "Get hearings scheduled for today (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/judge/unassigned:
+    get:
+      tags:
+        - Judge Dashboard
+      summary: "Execute getUnassignedCases"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/lawyer/cases:
+    get:
+      tags:
+        - Lawyer Dashboard
+      summary: "Execute getMyCases"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/lawyer/clients:
+    get:
+      tags:
+        - Lawyer Dashboard
+      summary: "Execute getMyClients"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/lawyer/draft:
+    post:
+      tags:
+        - Lawyer Dashboard
+      summary: "Execute generateDraft"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/lawyer/draft/save:
+    post:
+      tags:
+        - Lawyer Dashboard
+      summary: "Execute saveDraft"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/lawyer/stats:
+    get:
+      tags:
+        - Lawyer Dashboard
+      summary: "Execute getStats"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/meetings:
+    post:
+      tags:
+        - Meetings
+      summary: "Execute create"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/meetings/case/{caseId}:
+    get:
+      tags:
+        - Meetings
+      summary: "Execute byCase"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/meetings/end/{id}:
+    post:
+      tags:
+        - Meetings
+      summary: "Execute end"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/meetings/join:
+    post:
+      tags:
+        - Meetings
+      summary: "Execute join"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/notifications/send:
+    post:
+      tags:
+        - Notifications
+      summary: "Execute send"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                userId: 1
+                title: New Hearing Scheduled
+                message: "A hearing has been scheduled for Case #102 on 2026-07-15."
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/notifications/user/{userId}:
+    get:
+      tags:
+        - Notifications
+      summary: "Execute forUser"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The userId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/notifications/{id}/read:
+    post:
+      tags:
+        - Notifications
+      summary: "Execute markRead"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/orders:
+    post:
+      tags:
+        - Court Orders
+      summary: "Create a new court order"
+      description: "Create a new court order (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                caseId: "case-uuid-here"
+                title: Adjournment Order
+                content: Hearing adjourned till next scheduled date.
+                status: DRAFT
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/orders/case/{caseId}:
+    get:
+      tags:
+        - Court Orders
+      summary: "Get all orders for a specific case"
+      description: "Get all orders for a specific case (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/orders/my-orders:
+    get:
+      tags:
+        - Court Orders
+      summary: "Get all orders issued by the current judge"
+      description: "Get all orders issued by the current judge (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/orders/{orderId}:
+    delete:
+      tags:
+        - Court Orders
+      summary: "Delete an order (only drafts can be deleted)"
+      description: "Delete an order (only drafts can be deleted) (Served by Spring Boot backend)"
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The orderId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Final Order
+                content: Case dismissed due to lack of evidence.
+                status: PUBLISHED
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+    put:
+      tags:
+        - Court Orders
+      summary: "Update an existing order"
+      description: "Update an existing order (Served by Spring Boot backend)"
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The orderId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Final Order
+                content: Case dismissed due to lack of evidence.
+                status: PUBLISHED
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/fir/list:
+    get:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Get all FIRs uploaded by the current officer"
+      description: "Get all FIRs uploaded by the current officer (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/fir/pending:
+    get:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Get all FIRs pending police review (client-filed FIRs)"
+      description: "Get all FIRs pending police review (client-filed FIRs) (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/fir/upload:
+    post:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Upload FIR document with SHA-256 digital stamping"
+      description: "Upload FIR document with SHA-256 digital stamping (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/fir/{id}:
+    get:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Get FIR details by ID"
+      description: "Get FIR details by ID (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/fir/{id}/status:
+    put:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Update FIR status (REGISTERED or REJECTED)"
+      description: "Update FIR status (REGISTERED or REJECTED) (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/fir/{id}/verify:
+    post:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Verify FIR integrity by re-hashing uploaded file"
+      description: "Verify FIR integrity by re-hashing uploaded file (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/health:
+    get:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Health check endpoint"
+      description: "Health check endpoint (Served by Spring Boot backend)"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/investigation/list:
+    get:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Get FIRs currently under investigation"
+      description: "Get FIRs currently under investigation (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/investigation/{id}/draft-submission:
+    get:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Draft Court Submission using Groq (Charge Sheet)"
+      description: "Draft Court Submission using Groq (Charge Sheet) (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/investigation/{id}/evidence:
+    post:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Upload additional evidence to FIR"
+      description: "Upload additional evidence to FIR (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/investigation/{id}/start:
+    post:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Start investigation on an FIR"
+      description: "Start investigation on an FIR (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/investigation/{id}/submit:
+    post:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Submit investigation findings to court"
+      description: "Submit investigation findings to court (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/investigation/{id}/summary:
+    get:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Generate AI Summary using Groq"
+      description: "Generate AI Summary using Groq (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/stats:
+    get:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Get police dashboard statistics"
+      description: "Get police dashboard statistics (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/summons/pending:
+    get:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Get pending summons delivery tasks for police"
+      description: "Get pending summons delivery tasks for police (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/police/summons/{caseId}/complete:
+    post:
+      tags:
+        - Police FIRs & Investigations
+      summary: "Mark summons as served"
+      description: "Mark summons as served (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/profile/create-or-update:
+    post:
+      tags:
+        - User Profiles
+      summary: "Execute createOrUpdate"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                phone: +919876543210
+                address: "123 Lane, Mumbai"
+                bio: Legal professional specializing in corporate law.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/profile/{userId}:
+    get:
+      tags:
+        - User Profiles
+      summary: "Execute getByUserId"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The userId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/profile/{userId}/upload-picture:
+    post:
+      tags:
+        - User Profiles
+      summary: "Execute uploadPicture"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The userId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/timeline/{caseId}:
+    get:
+      tags:
+        - Timeline
+      summary: "Execute getTimeline"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/case/{caseId}/analyze-document:
+    post:
+      tags:
+        - Vakil Friend AI
+      summary: "Upload and analyze a document with Vakil Friend AI. Features"
+      description: "Upload and analyze a document with Vakil Friend AI. Features: - SHA-256 hash computation for integrity - AI analysis (validity, usefulness, type detection) - Automatic storage to Evidence Vault if important - Case Diary logging with cryptographic protection (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/case/{caseId}/diary:
+    get:
+      tags:
+        - Vakil Friend AI
+      summary: "Get all Vakil AI diary entries for a case. Each entry is pro"
+      description: "Get all Vakil AI diary entries for a case. Each entry is protected with SHA-256 hash for integrity. (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/case/{caseId}/start:
+    post:
+      tags:
+        - Vakil Friend AI
+      summary: "Start a new chat session for case assistance (linked to a sp"
+      description: "Start a new chat session for case assistance (linked to a specific case) (Served by Spring Boot backend)"
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The caseId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/chat/{sessionId}:
+    post:
+      tags:
+        - Vakil Friend AI
+      summary: "Send a message in the chat session"
+      description: "Send a message in the chat session (Served by Spring Boot backend)"
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The sessionId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                message: "What are my rights if my landlord refuses to return my security deposit?"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/chat/{sessionId}/upload:
+    post:
+      tags:
+        - Vakil Friend AI
+      summary: "Upload and analyze a document"
+      description: "Upload and analyze a document (Served by Spring Boot backend)"
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The sessionId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/complete/{sessionId}:
+    post:
+      tags:
+        - Vakil Friend AI
+      summary: "Complete the session and create a case"
+      description: "Complete the session and create a case (Served by Spring Boot backend)"
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The sessionId identifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/diary/{entryId}/verify:
+    get:
+      tags:
+        - Vakil Friend AI
+      summary: "Verify integrity of a diary entry using SHA-256 hash."
+      description: "Verify integrity of a diary entry using SHA-256 hash. (Served by Spring Boot backend)"
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The entryId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/session/{sessionId}:
+    get:
+      tags:
+        - Vakil Friend AI
+      summary: "Get session details"
+      description: "Get session details (Served by Spring Boot backend)"
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The sessionId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/session/{sessionId}/analyze-document:
+    post:
+      tags:
+        - Vakil Friend AI
+      summary: "Upload document for general analysis (not linked to a case)."
+      description: "Upload document for general analysis (not linked to a case). Used during initial case filing via Vakil Friend. (Served by Spring Boot backend)"
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The sessionId identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/sessions:
+    get:
+      tags:
+        - Vakil Friend AI
+      summary: "Get user's chat sessions"
+      description: "Get user's chat sessions (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/vakil-friend/start:
+    post:
+      tags:
+        - Vakil Friend AI
+      summary: "Start a new chat session for case filing"
+      description: "Start a new chat session for case filing (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/verify/admin/approve/{id}:
+    post:
+      tags:
+        - Verification
+      summary: "Execute approve"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/verify/admin/pending:
+    get:
+      tags:
+        - Verification
+      summary: "Execute getPending"
+      description: " (Served by Spring Boot backend)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/verify/admin/reject/{id}:
+    post:
+      tags:
+        - Verification
+      summary: "Execute reject"
+      description: " (Served by Spring Boot backend)"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "The id identifier"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /api/v1/verify/request:
+    post:
+      tags:
+        - Verification
+      summary: "Execute createRequest"
+      description: " (Served by Spring Boot backend)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Jane Doe
+                documentType: Aadhar
+                documentNumber: 123456789012
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /chat:
+    post:
+      tags:
+        - LawGPT Service
+      summary: "Retrieve context from vector DB and generate grounded LLM an"
+      description: "Retrieve context from vector DB and generate grounded LLM answer (Served by Python microservice on port 8001)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                question: "What is Section 302 of IPC?"
+                session_id: "session-123"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /context:
+    post:
+      tags:
+        - LawGPT Service
+      summary: "Primary RAG retrieval. Returns raw retrieved context chunks"
+      description: "Primary RAG retrieval. Returns raw retrieved context chunks from vector DB (Served by Python microservice on port 8001)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                question: "What does Section 302 of the Indian Penal Code deal with?"
+                max_results: 3
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /forensics/analyze-stream:
+    post:
+      tags:
+        - NLP Orchestrator
+      summary: "SSE streaming for 5-stage accident forensics video analysis"
+      description: "SSE streaming for 5-stage accident forensics video analysis (Served by Python microservice on port 8001)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                jobId: "job-123"
+                videoUrls:
+                  - "https://example.com/accident.mp4"
+                citizenDescription: Red car hit the pedestrian at the crossing.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /generate:
+    post:
+      tags:
+        - LawGPT Service
+      summary: "Generate drafted legal document text (affidavit, RTI, compla"
+      description: "Generate drafted legal document text (affidavit, RTI, complaint, notice) (Served by Python microservice on port 8001)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                doc_type: complaint
+                fields:
+                  petitioner_name: Jane Doe
+                  petitioner_address: "123 Lane, Mumbai"
+                  respondent_name: John Respondent
+                  respondent_address: "456 Street, Delhi"
+                  case_description: "Breach of tenancy agreement and non-payment of rent."
+                  incident_date: "2026-06-01"
+                  relief_sought: Eviction of tenant and recovery of rent arrears.
+                language: en
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /generate/docx:
+    post:
+      tags:
+        - LawGPT Service
+      summary: "Generate drafted legal document as a downloadable DOCX strea"
+      description: "Generate drafted legal document as a downloadable DOCX stream (Served by Python microservice on port 8001)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                doc_type: complaint
+                fields:
+                  petitioner_name: Jane Doe
+                  petitioner_address: "123 Lane, Mumbai"
+                  respondent_name: John Respondent
+                  respondent_address: "456 Street, Delhi"
+                  case_description: "Breach of tenancy agreement and non-payment of rent."
+                  incident_date: "2026-06-01"
+                  relief_sought: Eviction of tenant and recovery of rent arrears.
+                language: en
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /generate/pdf:
+    post:
+      tags:
+        - LawGPT Service
+      summary: "Generate drafted legal document as a downloadable PDF stream"
+      description: "Generate drafted legal document as a downloadable PDF stream (Served by Python microservice on port 8001)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                doc_type: complaint
+                fields:
+                  petitioner_name: Jane Doe
+                  petitioner_address: "123 Lane, Mumbai"
+                  respondent_name: John Respondent
+                  respondent_address: "456 Street, Delhi"
+                  case_description: "Breach of tenancy agreement and non-payment of rent."
+                  incident_date: "2026-06-01"
+                  relief_sought: Eviction of tenant and recovery of rent arrears.
+                language: en
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /health:
+    get:
+      tags:
+        - LawGPT Service
+        - NLP Orchestrator
+      summary: "NLP Orchestrator: NLP Orchestrator Health Check / LawGPT Service: RAG database status, load index, and model details"
+      description: "[NLP Orchestrator] NLP Orchestrator Health Check (Python microservice) | [LawGPT Service] RAG database status, load index, and model details (Python microservice)"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /models:
+    get:
+      tags:
+        - NLP Orchestrator
+      summary: "Get available AI models and status"
+      description: "Get available AI models and status (Served by Python microservice on port 8001)"
+      security: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /ocr/modi:
+    post:
+      tags:
+        - NLP Orchestrator
+      summary: "Run OCR and Devanagari cleanup on uploaded Modi script docum"
+      description: "Run OCR and Devanagari cleanup on uploaded Modi script document image (Served by Python microservice on port 8001)"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+  /research/deep:
+    post:
+      tags:
+        - NLP Orchestrator
+      summary: "Streams 5-stage legal reasoning with Indian Kanoon context v"
+      description: "Streams 5-stage legal reasoning with Indian Kanoon context via SSE (Served by Python microservice on port 8001)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                query: "Can a tenant be evicted during the lease period under Indian Rent Control laws?"
+                language: en
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Successful operation"
+        '401':
+          description: "Unauthorized"
+        '403':
+          description: "Forbidden"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "JWT Token from /api/v1/auth/login"
