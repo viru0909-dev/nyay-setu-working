@@ -219,6 +219,16 @@
             <artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
             <version>0.36.2</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 
@@ -235,6 +245,9 @@
                             <version>1.18.46</version>
                         </path>
                     </annotationProcessorPaths>
+                    <source>25</source>
+                    <target>25</target>
+                    <compilerArgs>--enable-preview</compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
