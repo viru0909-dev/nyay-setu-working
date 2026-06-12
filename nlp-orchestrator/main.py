@@ -139,6 +139,14 @@ try:
 except ImportError:
     logger.warning("Skipping ocr router due to missing dependencies.")
 
+try:
+    from routers.contradictions import router as contradictions_router
+
+    app.include_router(contradictions_router)
+    logger.info("Loaded contradictions router.")
+except Exception as e:
+    logger.warning("Skipping contradictions router: %s", e)
+
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────

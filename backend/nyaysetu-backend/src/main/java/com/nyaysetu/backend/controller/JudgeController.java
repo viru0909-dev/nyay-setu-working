@@ -7,6 +7,9 @@ import com.nyaysetu.backend.service.GroqDocumentVerificationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -36,9 +39,12 @@ public class JudgeController {
      * Get all cases assigned to the logged-in judge
      */
     @GetMapping("/cases")
-    public ResponseEntity<?> getJudgeCases(Authentication authentication) {
+    public ResponseEntity<Page<CaseEntity>> getJudgeCases(
+            Authentication authentication,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
         User judge = authService.findByEmail(authentication.getName());
-        List<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName());
+        Page<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName(), pageable);
         return ResponseEntity.ok(judgeCases);
     }
 

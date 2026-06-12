@@ -95,9 +95,75 @@ export default function Header({ hideAuthButtons = false }) {
         background: 'none',
         border: 'none',
         fontFamily: 'inherit',
+        transition: 'color 0.3s ease',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        lineHeight: '1',
     });
 
     const renderNavItem = (item) => {
+        const baseStyle = navLinkStyle(item.href);
+
+        const displayLabel =
+            t(item.labelKey) === item.labelKey
+                ? item.labelKey
+                : t(item.labelKey);
+
+        const underline = (
+            <span
+                style={{
+                    position: 'absolute',
+                    left: '50%',
+                    bottom: '-4px',
+                    width: '72%',
+                    height: '3px',
+                    borderRadius: '999px',
+                    background:'var(--color-primary)',
+
+                    transform:
+                        location.pathname === item.href
+                            ? 'translateX(-50%) scaleX(1)'
+                            : 'translateX(-50%) scaleX(0)',
+
+                    transformOrigin: 'center',
+                    transition: 'transform 0.3s ease',
+                }}
+                className="nav-underline"
+            />
+        );
+
+        const sharedProps = {
+            style: baseStyle,
+            onMouseEnter: e => {
+                e.currentTarget.style.color = 'var(--color-primary)';
+                const underline =
+                    e.currentTarget.querySelector('.nav-underline');
+
+                if (underline) {
+                    underline.style.transform =
+                        'translateX(-50%) scaleX(1)';
+                }
+            },
+
+            onMouseLeave: e => {
+                e.currentTarget.style.color =
+                    location.pathname === item.href
+                        ? 'var(--color-primary)'
+                        : 'var(--text-secondary)';
+
+                const underline =
+                    e.currentTarget.querySelector('.nav-underline');
+
+                if (
+                    underline &&
+                    location.pathname !== item.href
+                ) {
+                    underline.style.transform =
+                        'translateX(-50%) scaleX(0)';
+                }
+            },
+        };
         const currentPathWithHash = location.pathname + location.hash;
         let isActive = false;
         if (item.href === '/') {
@@ -119,36 +185,44 @@ export default function Header({ hideAuthButtons = false }) {
                 <button
                     key={item.labelKey}
                     onClick={item.action}
+                    {...sharedProps}
                     className="header-nav-link"
                     data-active={isActive ? 'true' : undefined}
                     style={baseStyle}
                 >
                     {displayLabel}
+                    {underline}
                 </button>
             );
         }
+
         if (item.isRoute) {
             return (
                 <Link
                     key={item.labelKey}
                     to={item.href}
+                    {...sharedProps}
                     className="header-nav-link"
                     data-active={isActive ? 'true' : undefined}
                     style={baseStyle}
                 >
                     {displayLabel}
+                    {underline}
                 </Link>
             );
         }
+
         return (
             <a
                 key={item.labelKey}
                 href={item.href}
+                {...sharedProps}
                 className="header-nav-link"
                 data-active={isActive ? 'true' : undefined}
                 style={baseStyle}
             >
                 {displayLabel}
+                {underline}
             </a>
         );
     };
