@@ -26,6 +26,10 @@ const api = axios.create({
 // Add token to requests if available
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
+    console.log(
+    "JWT TOKEN:",
+    localStorage.getItem("token")
+);
 
     // Only add Authorization header if token exists and is not null/undefined
     if (token && token !== 'null' && token !== 'undefined') {

@@ -1,8 +1,9 @@
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-    `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Use bundled worker for reliable PDF extraction in Vite (fixes CDN worker failures)
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 export async function extractTextFromFile(file) {
     const extension =
@@ -15,10 +16,9 @@ export async function extractTextFromFile(file) {
     if (extension === 'docx') {
         const buffer = await file.arrayBuffer();
 
-        const result =
-            await mammoth.extractRawText({
-                arrayBuffer: buffer
-            });
+        const result = await mammoth.extractRawText({
+            arrayBuffer: buffer
+        });
 
         return result.value;
     }
@@ -26,10 +26,9 @@ export async function extractTextFromFile(file) {
     if (extension === 'pdf') {
         const buffer = await file.arrayBuffer();
 
-        const pdf =
-            await pdfjsLib.getDocument({
-                data: buffer
-            }).promise;
+        const pdf = await pdfjsLib.getDocument({
+            data: buffer
+        }).promise;
 
         let text = '';
 
@@ -38,18 +37,15 @@ export async function extractTextFromFile(file) {
             pageNum <= pdf.numPages;
             pageNum++
         ) {
-            const page =
-                await pdf.getPage(pageNum);
-
-            const content =
-                await page.getTextContent();
+            const page = await pdf.getPage(pageNum);
+            const content = await page.getTextContent();
 
             text += content.items
                 .map((item) => item.str)
                 .join(' ');
         }
 
-        return text;
+        return text.trim();
     }
 
     throw new Error('Unsupported file type');

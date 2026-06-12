@@ -1,81 +1,56 @@
-import { diffWords } from 'diff';
+import DiffHighlighter from './DiffHighlighter';
 
+/**
+ * Side-by-side panel with synchronized scrolling support for long documents.
+ */
 export default function SideBySidePanel({
     title,
     content,
     compareText,
-    isOriginal = false
+    isOriginal = false,
+    scrollRef,
+    onScroll
 }) {
-    const diff = diffWords(
-        isOriginal ? content : compareText,
-        isOriginal ? compareText : content
-    );
     return (
         <div
             style={{
-                flex: 1,
+                flex: '1 1 300px',
                 padding: '1rem',
                 border: '1px solid #374151',
                 borderRadius: '12px',
                 background: '#111827',
-                minHeight: '250px'
+                minHeight: '250px',
+                display: 'flex',
+                flexDirection: 'column'
             }}
         >
             <h3
                 style={{
                     marginBottom: '1rem',
-                    color: '#ffffff'
+                    color: '#ffffff',
+                    flexShrink: 0
                 }}
             >
                 {title}
             </h3>
 
             <div
+                ref={scrollRef}
+                onScroll={onScroll}
                 style={{
                     whiteSpace: 'pre-wrap',
-                    lineHeight: '1.9'
+                    lineHeight: '1.9',
+                    overflowY: 'auto',
+                    maxHeight: '360px',
+                    flex: 1
                 }}
             >
-                {diff.map((part, index) => {
-                    if (
-                        isOriginal &&
-                        part.added
-                    )
-                        return null;
-
-                    if (
-                        !isOriginal &&
-                        part.removed
-                    )
-                        return null;
-
-                    return (
-                        <span
-                            key={index}
-                            style={{
-                                background:
-                                    part.added
-                                        ? '#14532d'
-                                        : part.removed
-                                        ? '#7f1d1d'
-                                        : 'transparent',
-                                color: 'white',
-                                padding:
-                                    part.added ||
-                                    part.removed
-                                        ? '2px 4px'
-                                        : 0,
-                                borderRadius:
-                                    part.added ||
-                                    part.removed
-                                        ? '4px'
-                                        : 0
-                            }}
-                        >
-                            {part.value}
-                        </span>
-                    );
-                })}
+                <DiffHighlighter
+                    originalText={isOriginal ? content : compareText}
+                    revisedText={isOriginal ? compareText : content}
+                    blockPrefix={isOriginal ? 'side-original' : 'side-revised'}
+                    side="side"
+                />
             </div>
         </div>
     );

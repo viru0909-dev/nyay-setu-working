@@ -1,18 +1,35 @@
-import { diffWords } from 'diff';
 import SideBySidePanel from './SideBySidePanel';
 import VersionTimeline from './VersionTimeline';
+import DocumentMetadataPanel from './DocumentMetadataPanel';
+import DiffHighlighter from './DiffHighlighter';
+import DiffNavigator from './DiffNavigator';
+import { useRef } from 'react';
 
 export default function DocumentDiffViewer({
     originalText,
     revisedText,
     versions,
     baseVersion,
-    compareVersion
+    compareVersion,
+    baseMetadata,
+    compareMetadata,
+    onVersionClick
 }) {
-    const differences = diffWords(
-        originalText,
-        revisedText
-    );
+    const leftScrollRef = useRef(null);
+    const rightScrollRef = useRef(null);
+    const isSyncingRef = useRef(false);
+
+    const syncScroll = (source, target) => {
+        if (isSyncingRef.current || !source.current || !target.current) {
+            return;
+        }
+
+        isSyncingRef.current = true;
+        target.current.scrollTop = source.current.scrollTop;
+        requestAnimationFrame(() => {
+            isSyncingRef.current = false;
+        });
+    };
 
     return (
         <div
@@ -31,24 +48,63 @@ export default function DocumentDiffViewer({
             >
                 Legal Document Comparison
             </h2>
+
             <p
                 style={{
                     marginBottom: '20px',
                     color: '#9ca3af'
                 }}
             >
-                Green = Added Text | Red = Removed Text
+                Green = Added | Red = Removed | Amber = Modified
             </p>
+
             <VersionTimeline
                 versions={versions}
                 baseVersion={baseVersion}
                 compareVersion={compareVersion}
+                onVersionClick={onVersionClick}
             />
+
             <div
                 style={{
                     display: 'flex',
                     gap: '1rem',
-                    marginBottom: '2rem'
+                    marginBottom: '2rem',
+                    marginTop: '1rem',
+                    flexWrap: 'wrap'
+                }}
+            >
+                <DocumentMetadataPanel
+                    title={
+                        baseMetadata?.id
+                            ? `Version ${baseMetadata.id.replace('v', '')}`
+                            : 'Base Version Metadata'
+                    }
+                    metadata={baseMetadata}
+                />
+
+                <DocumentMetadataPanel
+                    title={
+                        compareMetadata?.id
+                            ? `Version ${compareMetadata.id.replace('v', '')}`
+                            : 'Compare Version Metadata'
+                    }
+                    metadata={compareMetadata}
+                />
+            </div>
+
+            <DiffNavigator
+                originalText={originalText}
+                revisedText={revisedText}
+            />
+
+            <div
+                style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    marginBottom: '2rem',
+                    flexDirection: 'row',
+                    flexWrap: 'wrap'
                 }}
             >
                 <SideBySidePanel
@@ -56,6 +112,10 @@ export default function DocumentDiffViewer({
                     content={originalText}
                     compareText={revisedText}
                     isOriginal={true}
+                    scrollRef={leftScrollRef}
+                    partnerScrollRef={rightScrollRef}
+                    isSyncingRef={isSyncingRef}
+                    onScroll={() => syncScroll(leftScrollRef, rightScrollRef)}
                 />
 
                 <SideBySidePanel
@@ -63,50 +123,31 @@ export default function DocumentDiffViewer({
                     content={revisedText}
                     compareText={originalText}
                     isOriginal={false}
+                    scrollRef={rightScrollRef}
+                    partnerScrollRef={leftScrollRef}
+                    isSyncingRef={isSyncingRef}
+                    onScroll={() => syncScroll(rightScrollRef, leftScrollRef)}
                 />
             </div>
 
             <div
+                id="diff-scroll-container"
                 style={{
                     lineHeight: '2',
                     fontSize: '15px',
-                    whiteSpace: 'pre-wrap'
+                    whiteSpace: 'pre-wrap',
+                    maxHeight: '420px',
+                    overflowY: 'auto',
+                    padding: '0.5rem',
+                    border: '1px solid #374151',
+                    borderRadius: '8px'
                 }}
             >
-                {differences.map((part, index) => (
-                    <span
-                        key={index}
-                        style={{
-                            backgroundColor: part.added
-                                ? '#14532d'
-                                : part.removed
-                                    ? '#7f1d1d'
-                                    : 'transparent',
-
-                            color: part.added || part.removed
-                                ? '#ffffff'
-                                : '#d1d5db',
-
-                            padding:
-                                part.added || part.removed
-                                    ? '2px 4px'
-                                    : '0',
-
-                            borderRadius:
-                                part.added || part.removed
-                                    ? '4px'
-                                    : '0',
-
-                            textDecoration: part.removed
-                                ? 'line-through'
-                                : 'none'
-                        }}
-                    >
-                        {part.value}
-                    </span>
-                ))}
+                <DiffHighlighter
+                    originalText={originalText}
+                    revisedText={revisedText}
+                />
             </div>
         </div>
-
     );
 }

@@ -14,6 +14,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.nyaysetu.backend.service.DocumentVersionService;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +30,8 @@ public class DocumentManagementService {
     private final FileStorageService fileStorageService;
     private final DocumentAnalysisService documentAnalysisService;
     private final BlockchainService blockchainService;
+    private final DocumentVersionService
+        documentVersionService;
 
     @Transactional
     public DocumentDto uploadDocument(MultipartFile file, UploadDocumentRequest request, User uploader, String uploadIp) {
@@ -66,6 +69,11 @@ public class DocumentManagementService {
                 .build();
 
         DocumentEntity saved = documentRepository.save(document);
+        documentVersionService
+        .createVersion(
+                saved,
+                uploader.getName()
+        );
         return convertToDto(saved);
     }
 

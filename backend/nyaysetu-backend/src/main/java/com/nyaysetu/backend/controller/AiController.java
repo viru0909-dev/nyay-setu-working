@@ -16,11 +16,23 @@ public class AiController {
 
     private final AiService aiService;
     private final OllamaService ollamaService;
+    private final com.nyaysetu.backend.service.TextDiffService textDiffService;
 
     @PostMapping("/summarize")
     public SummarizeResponse summarize(@RequestBody SummarizeRequest request) {
         String result = aiService.summarize(request.getText());
         return new SummarizeResponse(result);
+    }
+
+    /** Compare original document text against an AI-generated summary artifact. */
+    @PostMapping("/artifacts/compare")
+    public AiArtifactCompareResponse compareArtifacts(
+            @RequestBody AiArtifactCompareRequest request
+    ) {
+        return textDiffService.compareAiArtifacts(
+                request.getOriginalText(),
+                request.getSummaryText()
+        );
     }
 
     @PostMapping("/chat")

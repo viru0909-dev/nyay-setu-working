@@ -1,8 +1,15 @@
 export default function VersionTimeline({
     versions,
     baseVersion,
-    compareVersion
+    compareVersion,
+    onVersionClick
 }) {
+    const handleClick = (versionId) => {
+        if (onVersionClick) {
+            onVersionClick(versionId);
+        }
+    };
+
     return (
         <div
             style={{
@@ -10,49 +17,64 @@ export default function VersionTimeline({
                 alignItems: 'center',
                 gap: '1rem',
                 marginBottom: '2rem',
-                flexWrap: 'wrap'
+                flexWrap: 'wrap',
+                overflowX: 'auto',
+                paddingBottom: '0.5rem'
             }}
         >
-            {versions.map((version, index) => (
-                <div
-                    key={version.id}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center'
-                    }}
-                >
+            {versions.map((version, index) => {
+                const isSelected =
+                    version.id === baseVersion ||
+                    version.id === compareVersion;
+
+                return (
                     <div
+                        key={version.id}
                         style={{
-                            padding: '0.75rem',
-                            borderRadius: '10px',
-                            border:
-                                version.id === baseVersion ||
-                                version.id === compareVersion
-                                    ? '2px solid #22c55e'
-                                    : '1px solid #374151',
-                            background:
-                                version.id === baseVersion ||
-                                version.id === compareVersion
-                                    ? '#14532d'
-                                    : '#111827'
+                            display: 'flex',
+                            alignItems: 'center'
                         }}
                     >
-                        {version.label}
-                    </div>
-
-                    {index <
-                        versions.length - 1 && (
-                        <div
+                        <button
+                            type="button"
+                            onClick={() => handleClick(version.id)}
+                            title={
+                                onVersionClick
+                                    ? 'Click to set as compare version'
+                                    : undefined
+                            }
                             style={{
-                                width: '40px',
-                                height: '2px',
-                                background:
-                                    '#374151'
+                                padding: '0.75rem',
+                                borderRadius: '10px',
+                                border: isSelected
+                                    ? '2px solid #22c55e'
+                                    : '1px solid #374151',
+                                background: isSelected
+                                    ? '#14532d'
+                                    : '#111827',
+                                color: '#ffffff',
+                                cursor: onVersionClick
+                                    ? 'pointer'
+                                    : 'default',
+                                fontSize: '0.9rem'
                             }}
-                        />
-                    )}
-                </div>
-            ))}
+                        >
+                            {version.label || version.id}
+                        </button>
+
+                        {index < versions.length - 1 && (
+                            <div
+                                style={{
+                                    width: '40px',
+                                    height: '2px',
+                                    background: '#374151',
+                                    flexShrink: 0
+                                }}
+                            />
+                        )}
+                    </div>
+                );
+            })}
         </div>
     );
 }

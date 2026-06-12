@@ -1,19 +1,24 @@
-export async function getDocumentVersions(documentId) {
-    return [
+import api from './api';
+
+export async function getVersions(documentId) {
+    const response = await api.get(
+        `/api/documents/${documentId}/versions`
+    );
+
+    return response.data;
+}
+
+export async function compareVersions(
+    baseVersionId,
+    compareVersionId
+) {
+    const response = await api.post(
+        '/api/documents/compare',
         {
-            id: 'v1',
-            label: 'Version 1',
-            createdAt: '2026-06-01'
-        },
-        {
-            id: 'v2',
-            label: 'Version 2',
-            createdAt: '2026-06-03'
-        },
-        {
-            id: 'v3',
-            label: 'Version 3',
-            createdAt: '2026-06-07'
+            baseVersionId,
+            compareVersionId
         }
-    ];
+    );
+
+    return response.data;
 }
