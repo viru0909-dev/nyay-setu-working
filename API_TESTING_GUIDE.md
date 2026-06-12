@@ -119,6 +119,8 @@ npm start
     └──────────────────────────────────┘
 ```
 
+> **Routing note:** All Spring Boot (`localhost:8080`) endpoints are globally prefixed with `/api/v1` via `WebMvcConfig`. LawGPT and NLP Orchestrator are standalone Python/FastAPI services and are **not** affected by this prefix.
+
 ### Service Responsibilities
 
 | Service | Purpose | Key Features |
@@ -343,68 +345,64 @@ curl -X POST http://localhost:8080/api/v1/documents/upload \
 
 #### 4. Generate Legal Document
 ```bash
-curl -X POST http://localhost:8000/api/v1/lawgpt/generate \
-  -H "Authorization: Bearer $TOKEN" \
+# LawGPT is a standalone Python service on port 8000
+curl -X POST http://localhost:8000/generate \
   -H "Content-Type: application/json" \
   -d '{
-    "documentType": "AFFIDAVIT",
-    "caseId": "'$CASE_ID'",
-    "context": {
-      "deponentName": "John Smith",
-      "deponentRole": "PLAINTIFF",
-      "statements": ["I own the property since 2020"]
+    "doc_type": "affidavit",
+    "fields": {
+      "petitioner_name": "John Smith",
+      "petitioner_address": "123 Main St, Delhi",
+      "case_description": "Property ownership dispute",
+      "incident_date": "2024-01-15"
     },
-    "language": "EN"
+    "language": "en"
   }' | jq '.'
 ```
 
 #### 5. Analyze Case with NLP (Streaming)
 ```bash
-curl -X POST http://localhost:8001/api/v1/nlp/analyze \
-  -H "Authorization: Bearer $TOKEN" \
+# NLP Orchestrator is a standalone Python service on port 8001
+curl -X POST http://localhost:8001/api/legal/analyze-stream \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{
-    "caseId": "'$CASE_ID'",
-    "query": "What are the legal implications?",
-    "analysisDepth": "STANDARD"
+    "query": "What are the legal implications of a property dispute?",
+    "language": "en"
   }' \
-  --raw
+  --no-buffer
 ```
 
 #### 6. Deep Legal Research (SSE via /research/deep)
 ```bash
-curl -X POST http://localhost:8001/api/v1/research/deep \
-  -H "Authorization: Bearer $TOKEN" \
+curl -X POST http://localhost:8001/api/legal/analyze-stream \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{
     "query": "What are legal remedies for property dispute in India?",
-    "caseId": "'$CASE_ID'"
+    "language": "en"
   }' \
   --no-buffer
 ```
 
 JavaScript `EventSource` example:
 
-```
+```javascript
 const source = new EventSource(
-  `http://localhost:8001/api/v1/research/deep`
+  `http://localhost:8001/api/legal/analyze-stream`
 );
 
 source.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  console.log(`[${data.stage}]`, data.content);
   if (data.stage === 'done') source.close();
 };
 
 source.onerror = (err) => {
-  console.error('SSE error:', err);
   source.close();
 };
 ```
 
-Stages returned: `understanding` → `sub_questions` → `kanoon_results` → `reasoning` → `final` → `done`
+Stages returned: `avatar_update` → `sub_questions` → `sub_answer` → `synthesis_token` → `final_answer` → `done`
 
 ---
 
@@ -422,13 +420,13 @@ class NyaySetuClient:
         self.base_url = base_url
         self.token = None
         self.session = requests.Session()
-    
+
     def login(self, email: str, password: str) -> bool:
         """Login and store token"""
         response = self.session.post(
-        f"{self.base_url}/api/v1/auth/login",
-        json={"email": email, "password": password},
-        timeout=30,
+            f"{self.base_url}/api/v1/auth/login",
+            json={"email": email, "password": password},
+            timeout=30,
         )
         if response.status_code == 200:
             data = response.json()
@@ -438,7 +436,7 @@ class NyaySetuClient:
             })
             return True
         return False
-    
+
     def create_case(self, case_data: Dict) -> Optional[Dict]:
         """Create a new case"""
         response = self.session.post(
@@ -449,8 +447,8 @@ class NyaySetuClient:
         if response.status_code == 201:
             return response.json()
         raise Exception(f"Error: {response.status_code} - {response.text}")
-    
-    def upload_document(self, case_id: str, file_path: str, 
+
+    def upload_document(self, case_id: str, file_path: str,
                        doc_type: str = "COMPLAINT") -> Optional[Dict]:
         """Upload a document"""
         with open(file_path, 'rb') as f:
@@ -460,40 +458,42 @@ class NyaySetuClient:
                 'documentType': doc_type
             }
             response = self.session.post(
-              f"{self.base_url}/api/v1/documents/upload",
+                f"{self.base_url}/api/v1/documents/upload",
                 files=files,
                 data=data
             )
-            
+
         if response.status_code == 201:
             return response.json()
         raise Exception(f"Error: {response.status_code} - {response.text}")
-    
+
     def list_cases(self, page: int = 0, size: int = 20) -> Dict:
         """List all cases"""
         response = self.session.get(
-        f"{self.base_url}/api/v1/cases",
-        params={'page': page, 'size': size, 'sort': 'createdAt,desc'},
-        timeout=30
+            f"{self.base_url}/api/v1/cases",
+            params={'page': page, 'size': size, 'sort': 'createdAt,desc'},
+            timeout=30
         )
         return response.json()
-    
+
     def get_case(self, case_id: str) -> Dict:
         """Get case details"""
-        response = self.session.get(f"{self.base_url}/api/v1/cases/{case_id}", timeout=30)
+        response = self.session.get(
+            f"{self.base_url}/api/v1/cases/{case_id}",
+            timeout=30
+        )
         if response.status_code == 200:
             return response.json()
         raise Exception(f"Case not found: {case_id}")
-    
-    def generate_legal_document(self, case_id: str, doc_type: str,
-                               context: Dict, language: str = "EN") -> Dict:
-        """Generate AI-powered legal document"""
-        response = self.session.post(
-          "http://localhost:8000/api/v1/lawgpt/generate",
+
+    def generate_legal_document(self, doc_type: str,
+                                fields: Dict, language: str = "en") -> Dict:
+        """Generate AI-powered legal document via LawGPT (port 8000)"""
+        response = requests.post(
+            "http://localhost:8000/generate",
             json={
-                "documentType": doc_type,
-                "caseId": case_id,
-                "context": context,
+                "doc_type": doc_type,
+                "fields": fields,
                 "language": language
             }
         )
@@ -501,17 +501,18 @@ class NyaySetuClient:
             return response.json()
         raise Exception(f"Generation failed: {response.status_code}")
 
+
 # Usage Example
 if __name__ == "__main__":
     client = NyaySetuClient()
-    
+
     # Login
     if client.login("user@example.com", "SecurePassword123"):
         print("✓ Logged in successfully")
     else:
         print("✗ Login failed")
         exit(1)
-    
+
     # Create case
     case_data = {
         "title": "Smith vs. Johnson - Property Dispute",
@@ -526,26 +527,10 @@ if __name__ == "__main__":
     case = client.create_case(case_data)
     case_id = case['id']
     print(f"✓ Case created: {case_id}")
-    
-    # Upload document
-    # doc = client.upload_document(case_id, "path/to/document.pdf")
-    # print(f"✓ Document uploaded: {doc['id']}")
-    
+
     # List cases
     cases = client.list_cases()
     print(f"✓ Found {cases['totalElements']} cases")
-    
-    # Generate legal document
-    # affidavit = client.generate_legal_document(
-    #     case_id, 
-    #     "AFFIDAVIT",
-    #     {
-    #         "deponentName": "John Smith",
-    #         "deponentRole": "PLAINTIFF",
-    #         "statements": ["I own the property since 2020"]
-    #     }
-    # )
-    # print(f"✓ Affidavit generated")
 ```
 
 ### JavaScript/Node.js Example
@@ -554,7 +539,7 @@ if __name__ == "__main__":
 const axios = require('axios');
 
 class NyaySetuClient {
-    constructor(baseUrl = 'http://localhost:8080') {
+  constructor(baseUrl = 'http://localhost:8080') {
     this.baseUrl = baseUrl;
     this.token = null;
     this.client = axios.create({ timeout: 30000 });
@@ -562,54 +547,52 @@ class NyaySetuClient {
 
   async login(email, password) {
     try {
-      const response = await this.client.post(`${this.baseUrl}/api/v1/auth/login`, {
-        email,
-        password
-      });
+      const response = await this.client.post(
+        `${this.baseUrl}/api/v1/auth/login`,
+        { email, password }
+      );
       this.token = response.data.token;
-      this.client.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
+      this.client.defaults.headers.common['Authorization'] =
+        `Bearer ${this.token}`;
       return response.data;
     } catch (error) {
-      console.error('Login failed:', error.response?.data);
       throw error;
     }
   }
 
   async createCase(caseData) {
     try {
-      const response = await this.client.post(`${this.baseUrl}/api/v1/cases`, caseData);
+      const response = await this.client.post(
+        `${this.baseUrl}/api/v1/cases`,
+        caseData
+      );
       return response.data;
     } catch (error) {
-      console.error('Case creation failed:', error.response?.data);
       throw error;
     }
   }
 
   async listCases(page = 0, size = 20) {
     try {
-      const response = await this.client.get(`${this.baseUrl}/api/v1/cases`, {
-        params: { page, size, sort: 'createdAt,desc' }
-      });
+      const response = await this.client.get(
+        `${this.baseUrl}/api/v1/cases`,
+        { params: { page, size, sort: 'createdAt,desc' } }
+      );
       return response.data;
     } catch (error) {
-      console.error('Failed to list cases:', error.response?.data);
       throw error;
     }
   }
 
-  async generateDocument(documentType, caseId, context, language = 'EN') {
+  async generateDocument(docType, fields, language = 'en') {
+    // LawGPT is a standalone Python service on port 8000
     try {
-      const response = await axios.post(`http://localhost:8000/api/v1/lawgpt/generate`, {
-        documentType,
-        caseId,
-        context,
-        language
-      }, {
-        headers: { Authorization: `Bearer ${this.token}` }
-      });
+      const response = await axios.post(
+        'http://localhost:8000/generate',
+        { doc_type: docType, fields, language }
+      );
       return response.data;
     } catch (error) {
-      console.error('Document generation failed:', error.response?.data);
       throw error;
     }
   }
@@ -618,11 +601,11 @@ class NyaySetuClient {
 // Usage Example
 (async () => {
   const client = new NyaySetuClient();
-  
+
   // Login
   await client.login('user@example.com', 'SecurePassword123');
   console.log('✓ Logged in successfully');
-  
+
   // Create case
   const case_ = await client.createCase({
     title: 'Smith vs. Johnson - Property Dispute',
@@ -635,7 +618,7 @@ class NyaySetuClient {
     ]
   });
   console.log('✓ Case created:', case_.id);
-  
+
   // List cases
   const cases = await client.listCases();
   console.log(`✓ Found ${cases.totalElements} cases`);
@@ -645,6 +628,8 @@ class NyaySetuClient {
 ---
 
 ## API Endpoint Categories
+
+> All Spring Boot backend endpoints below are served at `http://localhost:8080` and globally prefixed with `/api/v1` via `WebMvcConfig`.
 
 ### 1. Authentication Endpoints
 - `POST /api/v1/auth/register` - Register new user
@@ -669,31 +654,32 @@ class NyaySetuClient {
 - `GET /api/v1/documents/{documentId}/download` - Download document
 
 ### 4. Evidence Management
-- `POST /api/v1/evidence` - Add evidence
-- `GET /api/v1/evidence` - List evidence
+- `POST /api/v1/evidence/upload` - Add evidence
+- `GET /api/v1/evidence/case/{caseId}` - List evidence
 - `GET /api/v1/evidence/{evidenceId}` - Get evidence details
-- `POST /api/v1/evidence/{evidenceId}/verify` - Blockchain verification
+- `GET /api/v1/evidence/{evidenceId}/verify` - Blockchain verification
 
 ### 5. Hearings
-- `POST /api/v1/hearings` - Schedule hearing
-- `GET /api/v1/hearings` - List hearings
-- `PUT /api/v1/hearings/{hearingId}` - Update hearing
-- `POST /api/v1/hearings/{hearingId}/record` - Record hearing outcome
+- `POST /api/v1/hearings/schedule` - Schedule hearing
+- `GET /api/v1/hearings/my` - List my hearings
+- `PUT /api/v1/hearings/{hearingId}/complete` - Complete hearing
+- `POST /api/v1/hearings/{hearingId}/outcome` - Record hearing outcome
 
 ### 6. Court Orders
 - `POST /api/v1/orders` - Issue order
-- `GET /api/v1/orders` - List orders
+- `GET /api/v1/orders/case/{caseId}` - List orders for case
 - `PUT /api/v1/orders/{orderId}` - Update order
 
-### 7. Legal Document Generation (LawGPT)
-- `POST /api/v1/lawgpt/generate` - Generate document
-- `GET /api/v1/lawgpt/templates` - List templates
+### 7. Legal Document Generation (LawGPT — port 8000)
+- `POST http://localhost:8000/generate` - Generate document
+- `POST http://localhost:8000/generate/pdf` - Generate PDF
+- `POST http://localhost:8000/context` - RAG retrieval
 
-### 8. Legal Reasoning (NLP Orchestrator)
-- `POST /api/v1/nlp/analyze` - Analyze case (with streaming)
-- `POST /api/v1/research/deep` - Deep legal research (SSE streaming)
-- `POST /api/v1/forensics/analyze` - Forensic analysis
-- `POST /api/v1/modi/ocr` - Modi script OCR
+### 8. Legal Reasoning (NLP Orchestrator — port 8001)
+- `POST http://localhost:8001/api/legal/analyze-stream` - Streaming legal analysis (SSE)
+- `POST http://localhost:8001/api/legal/analyze` - Synchronous analysis (testing only)
+- `POST http://localhost:8001/forensics/analyze-stream` - Forensic analysis
+- `POST http://localhost:8001/ocr/modi` - Modi script OCR
 
 ---
 
@@ -732,7 +718,7 @@ curl -X POST http://localhost:8080/api/v1/documents/upload \
   -F "file=@complaint.pdf"
 
 # 4. Schedule hearing
-curl -X POST http://localhost:8080/api/v1/hearings \
+curl -X POST http://localhost:8080/api/v1/hearings/schedule \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -746,30 +732,27 @@ curl -X POST http://localhost:8080/api/v1/hearings \
 ### Workflow 2: Document Generation and Analysis
 
 ```bash
-# 1. Generate affidavit
-AFFIDAVIT=$(curl -s -X POST http://localhost:8000/api/v1/lawgpt/generate \
-  -H "Authorization: Bearer $TOKEN" \
+# 1. Generate affidavit via LawGPT (port 8000)
+AFFIDAVIT=$(curl -s -X POST http://localhost:8000/generate \
   -H "Content-Type: application/json" \
   -d '{
-    "documentType": "AFFIDAVIT",
-    "caseId": "'$CASE_ID'",
-    "context": {
-      "deponentName": "John Smith",
-      "deponentRole": "PLAINTIFF",
-      "statements": ["I own the property", "Dispute started in 2023"]
+    "doc_type": "affidavit",
+    "fields": {
+      "petitioner_name": "John Smith",
+      "petitioner_address": "123 Main St, Delhi",
+      "case_description": "Property ownership dispute",
+      "incident_date": "2024-01-15"
     },
-    "language": "EN"
+    "language": "en"
   }')
 
-# 2. Analyze case with legal reasoning
-curl -X POST http://localhost:8001/api/v1/nlp/analyze \
-  -H "Authorization: Bearer $TOKEN" \
+# 2. Analyze case with legal reasoning via NLP Orchestrator (port 8001)
+curl -X POST http://localhost:8001/api/legal/analyze-stream \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{
-    "caseId": "'$CASE_ID'",
     "query": "What are legal remedies for property dispute?",
-    "analysisDepth": "DEEP"
+    "language": "en"
   }'
 ```
 
@@ -777,28 +760,21 @@ curl -X POST http://localhost:8001/api/v1/nlp/analyze \
 
 ```bash
 # 1. Add evidence with chain of custody
-EVIDENCE=$(curl -s -X POST http://localhost:8080/api/v1/evidence \
+EVIDENCE=$(curl -s -X POST http://localhost:8080/api/v1/evidence/upload \
   -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "caseId": "'$CASE_ID'",
-    "title": "Property Deed",
-    "description": "Original property deed with stamps",
-    "evidenceType": "DOCUMENT",
-    "chainOfCustody": {
-      "collectedBy": "John Smith",
-      "collectionDate": "2026-06-01T10:30:00Z",
-      "location": "Registry Office"
-    }
-  }')
+  -F "caseId=$CASE_ID" \
+  -F "title=Property Deed" \
+  -F "description=Original property deed with stamps" \
+  -F "evidenceType=DOCUMENT" \
+  -F "file=@deed.pdf")
 
-EVIDENCE_ID=$(echo $EVIDENCE | jq -r '.evidenceId')
-HASH=$(echo $EVIDENCE | jq -r '.blockchainHash')
+EVIDENCE_ID=$(echo $EVIDENCE | jq -r '.id')
+HASH=$(echo $EVIDENCE | jq -r '.blockHash')
 
 echo "Evidence stored with blockchain hash: $HASH"
 
 # 2. Verify evidence integrity
-curl -X POST http://localhost:8080/api/v1/evidence/$EVIDENCE_ID/verify \
+curl -X GET http://localhost:8080/api/v1/evidence/$EVIDENCE_ID/verify \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -814,7 +790,6 @@ curl -X POST http://localhost:8080/api/v1/evidence/$EVIDENCE_ID/verify \
 
 **Solutions:**
 ```bash
-# Check if token is expired
 # Solution 1: Re-login to get new token
 TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -854,14 +829,16 @@ netstat -an | grep 8080  # For backend
 
 #### 4. SSE Streaming Not Working
 
-**Error:** No streaming response from `/nlp/analyze`
+**Error:** No streaming response from `/api/legal/analyze-stream`
 
 **Solutions:**
 ```bash
-# Ensure Accept header is set
-curl -X POST http://localhost:8001/api/v1/nlp/analyze \
+# Ensure Accept header is set and --no-buffer is used
+curl -X POST http://localhost:8001/api/legal/analyze-stream \
+  -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
-  ...
+  -d '{"query": "your question", "language": "en"}' \
+  --no-buffer
 ```
 
 #### 5. CORS Errors
@@ -889,7 +866,7 @@ python main.py
 ### Health Check Endpoints
 
 ```bash
-# Backend health
+# Backend health (Spring Boot Actuator — not prefixed with /api/v1)
 curl http://localhost:8080/actuator/health
 
 # LawGPT health
