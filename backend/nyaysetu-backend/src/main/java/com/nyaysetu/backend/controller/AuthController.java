@@ -54,7 +54,7 @@ public class AuthController {
                     req.getEmail(),
                     req.getName(),
                     req.getPassword(),
-                    req.getRole() != null ? req.getRole() : Role.LITIGANT // default to LITIGANT
+                    Role.LITIGANT // public registration always creates LITIGANT — role is not caller-controlled
             );
             
             // Auto-login after registration
