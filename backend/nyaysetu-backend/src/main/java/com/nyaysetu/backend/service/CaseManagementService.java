@@ -6,7 +6,11 @@ import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CaseRepository;
+import com.nyaysetu.backend.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +33,7 @@ public class CaseManagementService {
     private final HearingRepository hearingRepository;
     private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
     private final com.nyaysetu.backend.service.CaseTimelineService timelineService;
+    private final DocumentRepository documentRepository;
 
     @Transactional
     public CaseDTO createCase(CreateCaseRequest request, User client) {
@@ -48,19 +53,8 @@ public class CaseManagementService {
     }
     
 
-    public List<CaseDTO> getCasesByUser(User user) {
-        // Find cases where user is the client (petitioner)
-        List<CaseEntity> casesAsClient = caseRepository.findByClient(user);
-        
-        // Find cases where user's email matches respondent email
-        List<CaseEntity> casesAsRespondent = caseRepository.findByRespondentEmail(user.getEmail());
-        
-        // Combine both lists and remove duplicates
-        Set<CaseEntity> allCases = new HashSet<>();
-        allCases.addAll(casesAsClient);
-        allCases.addAll(casesAsRespondent);
-        
-        return allCases.stream()
+    public Page<CaseDTO> getCasesByUser(User user, Pageable pageable) {
+        return caseRepository.findByClientOrRespondentEmail(user, user.getEmail(), pageable)
                 .map(caseEntity -> {
                     CaseDTO dto = convertToDTO(caseEntity);
                     // Set user role based on relationship to case
@@ -70,22 +64,17 @@ public class CaseManagementService {
                         dto.setUserRole("RESPONDENT");
                     }
                     return dto;
-                })
-                .collect(Collectors.toList());
+                });
     }
 
-    public List<CaseDTO> getCasesByLawyer(User lawyer) {
-        List<CaseEntity> cases = caseRepository.findByLawyer(lawyer);
-        return cases.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public Page<CaseDTO> getCasesByLawyer(User lawyer, Pageable pageable) {
+        return caseRepository.findByLawyer(lawyer, pageable)
+                .map(this::convertToDTO);
     }
 
-    public List<CaseSummaryDto> getUserCaseSummaries(User user) {
-        List<CaseEntity> cases = caseRepository.findByClient(user);
-        return cases.stream()
-                .map(this::convertToSummaryDto)
-                .collect(Collectors.toList());
+    public Page<CaseSummaryDto> getUserCaseSummaries(User user, Pageable pageable) {
+        return caseRepository.findByClientOrRespondentEmail(user, user.getEmail(), pageable)
+                .map(this::convertToSummaryDto);
     }
 
     public CaseDTO getCaseById(UUID id) {
@@ -181,10 +170,10 @@ public class CaseManagementService {
             // BUT, to satisfy "dedicated storage", we really should create a document record.
             // Let's inject DocumentRepository and create a record pointing to a placeholder.
             
-        } catch (Exception e) {
-           // log error but don't fail transaction
-           System.err.println("Failed to auto-generate draft document: " + e.getMessage());
-        }
+          } catch (Exception e) {
+              // log error but don't fail transaction
+              log.error("Failed to auto-generate draft document", e);
+          }
 
         // Notify Client
         if (caseEntity.getClient() != null) {
@@ -255,7 +244,7 @@ public class CaseManagementService {
                 .assignedJudge(entity.getAssignedJudge())
                 .clientId(entity.getClient() != null ? entity.getClient().getId() : null)
                 .clientName(entity.getClient() != null ? entity.getClient().getName() : null)
-                .documentsCount(0) // TODO: Count from documents table
+                .documentsCount((int) documentRepository.countByCaseId(entity.getId()))
                 .lawyerProposalStatus(entity.getLawyerProposalStatus())
                 .draftPetition(entity.getDraftPetition())
                 .lawyerId(entity.getLawyer() != null ? entity.getLawyer().getId() : null)

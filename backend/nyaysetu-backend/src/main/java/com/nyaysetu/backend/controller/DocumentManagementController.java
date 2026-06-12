@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -161,16 +164,22 @@ public class DocumentManagementController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DocumentDto>> getUserDocuments(Authentication authentication) {
+    public ResponseEntity<Page<DocumentDto>> getUserDocuments(
+            Authentication authentication,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
         User user = authService.findByEmail(authentication.getName());
-        List<DocumentDto> documents = documentManagementService.getUserDocuments(user.getId());
+        Page<DocumentDto> documents = documentManagementService.getUserDocuments(user.getId(), pageable);
         return ResponseEntity.ok(documents);
     }
 
     @GetMapping("/user/cases")
-    public ResponseEntity<List<CaseSummaryDto>> getUserCases(Authentication authentication) {
+    public ResponseEntity<Page<CaseSummaryDto>> getUserCases(
+            Authentication authentication,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
         User user = authService.findByEmail(authentication.getName());
-        List<CaseSummaryDto> cases = caseManagementService.getUserCaseSummaries(user);
+        Page<CaseSummaryDto> cases = caseManagementService.getUserCaseSummaries(user, pageable);
         return ResponseEntity.ok(cases);
     }
 
@@ -188,6 +197,10 @@ public class DocumentManagementController {
         String userRole = "VISITOR"; // Default
         if (user.getRole() == com.nyaysetu.backend.entity.Role.JUDGE) {
             userRole = "JUDGE";
+        } else if (caseData.getLawyerId() != null && caseData.getLawyerId().equals(user.getId())) {
+            userRole = "LAWYER";
+        } else if (user.getRole() == com.nyaysetu.backend.entity.Role.LAWYER) {
+            userRole = "LAWYER";
         } else if (caseData.getClientId() != null && caseData.getClientId().equals(user.getId())) {
             userRole = "PETITIONER";
         } else if (user.getEmail().equals(caseData.getRespondentEmail())) {
@@ -265,7 +278,7 @@ public class DocumentManagementController {
                             "attachment; filename=\"Certificate_" + id + ".pdf\"")
                     .body(pdfBytes);
         } catch (Exception e) {
-            e.printStackTrace(); // Log stack trace to console
+            log.error("Certificate generation failed for document {}", id, e);
             return ResponseEntity.status(500).body(Map.of("error", "Certificate generation failed: " + e.getMessage()));
         }
     }

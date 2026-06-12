@@ -2,10 +2,10 @@ package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.UploadEvidenceResponse;
 import com.nyaysetu.backend.entity.CaseEvidence;
-import com.nyaysetu.backend.entity.LegalCase;
+import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.CaseEvidenceRepository;
-import com.nyaysetu.backend.repository.LegalCaseRepository;
+import com.nyaysetu.backend.repository.CaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,7 @@ import java.util.UUID;
 public class EvidenceService {
 
     private final CaseEvidenceRepository evidenceRepository;
-    private final LegalCaseRepository legalCaseRepository;
+    private final CaseRepository caseRepository;
     private final CaseTimelineService timelineService;
 
     private final GroqDocumentVerificationService groqService;
@@ -33,7 +33,7 @@ public class EvidenceService {
     @Transactional
     public UploadEvidenceResponse upload(UUID caseId, MultipartFile file, Long uploaderId) {
 
-        LegalCase lc = legalCaseRepository.findById(caseId)
+        CaseEntity caseEntity = caseRepository.findById(caseId)
                 .orElseThrow(() -> new NotFoundException("Case not found " + caseId));
 
         File folder = new File(uploadDir);
@@ -61,8 +61,8 @@ File savedFile = new File(folder, filename);
                 content, 
                 filename, 
                 "Evidence", 
-                lc.getTitle(), 
-                "Legal Case" // CaseType missing in LegalCase entity
+                caseEntity.getTitle(),
+                caseEntity.getCaseType()
             );
             
             if ("PROCEDURAL_ERROR".equals(result.getStatus())) {
@@ -79,7 +79,7 @@ File savedFile = new File(folder, filename);
         }
 
         CaseEvidence evidence = CaseEvidence.builder()
-                .legalCaseId(caseId)
+                .caseEntity(caseEntity)
                 .fileName(filename)
                 .fileUrl("/files/evidence/" + filename)
                 .uploadedBy(uploaderId)
@@ -93,6 +93,6 @@ File savedFile = new File(folder, filename);
     }
 
     public List<CaseEvidence> getEvidence(UUID caseId) {
-        return evidenceRepository.findByLegalCaseId(caseId);
+        return evidenceRepository.findByCaseEntity_Id(caseId);
     }
 }
