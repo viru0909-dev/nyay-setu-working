@@ -139,7 +139,7 @@ export default function DocumentComparisonPage() {
                 base.backendVersionId,
                 compare.backendVersionId
             ).catch((error) => {
-                console.warn(
+                setError(
                     'Backend compare unavailable, using client diff',
                     error
                 );
@@ -154,7 +154,7 @@ export default function DocumentComparisonPage() {
             const data = await getVersions(id);
             setBackendVersions(data);
         } catch (error) {
-            console.error('Failed to load versions', error);
+            setError('Failed to load versions', error);
         }
     }
 
@@ -231,7 +231,7 @@ export default function DocumentComparisonPage() {
 
             await loadVersions(uploadedDoc.id);
         } catch (error) {
-            console.error('Upload failed', error);
+            setError('Upload failed', error);
             setUploadWarning(
                 `Upload failed: ${error.message || 'Unknown error'}`
             );
@@ -285,7 +285,7 @@ export default function DocumentComparisonPage() {
 
             await loadVersions(uploadedDoc.id);
         } catch (error) {
-            console.error('Upload failed', error);
+            setError('Upload failed', error);
             setUploadWarning(
                 `Upload failed: ${error.message || 'Unknown error'}`
             );
@@ -309,6 +309,8 @@ export default function DocumentComparisonPage() {
     );
 
     const canCompare = originalText && revisedText;
+    const border_color = '#374151';
+    const background_color = '#111827';
 
     return (
         <div
@@ -340,9 +342,9 @@ export default function DocumentComparisonPage() {
                     style={{
                         padding: '0.75rem',
                         borderRadius: '8px',
-                        background: '#111827',
+                        background: `${background_color}`,
                         color: 'white',
-                        border: '1px solid #374151',
+                        border: `1px solid ${border_color}`,
                         width: '100%',
                         maxWidth: '400px'
                     }}
@@ -360,7 +362,7 @@ export default function DocumentComparisonPage() {
                         marginBottom: '1.5rem',
                         padding: '1rem',
                         background: '#78350f',
-                        border: '1px solid #f59e0b',
+                        border: `1px solid #f59e0b`,
                         borderRadius: '8px',
                         color: '#fde68a'
                     }}
@@ -398,8 +400,8 @@ export default function DocumentComparisonPage() {
                             style={{
                                 padding: '0.75rem',
                                 marginBottom: '0.5rem',
-                                background: '#111827',
-                                border: '1px solid #374151',
+                                background: `${background_color}`,
+                                border: `1px solid ${border_color}`,
                                 borderRadius: '8px'
                             }}
                         >

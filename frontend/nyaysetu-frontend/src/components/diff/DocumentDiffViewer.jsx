@@ -18,7 +18,8 @@ export default function DocumentDiffViewer({
     const leftScrollRef = useRef(null);
     const rightScrollRef = useRef(null);
     const isSyncingRef = useRef(false);
-
+    const border_color = '#374151';
+    const background_color = '#111827';
     const syncScroll = (source, target) => {
         if (isSyncingRef.current || !source.current || !target.current) {
             return;
@@ -34,10 +35,10 @@ export default function DocumentDiffViewer({
     return (
         <div
             style={{
-                background: '#111827',
+                background: `${background_color}`,
                 padding: '24px',
                 borderRadius: '12px',
-                border: '1px solid #374151'
+                border: `1px solid ${border_color}`
             }}
         >
             <h2

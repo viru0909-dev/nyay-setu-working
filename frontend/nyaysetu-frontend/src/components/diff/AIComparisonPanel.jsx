@@ -51,13 +51,14 @@ export default function AIComparisonPanel({
             cancelled = true;
         };
     }, [originalText, summaryText]);
-
+    const border_color = '#374151';
+    const background_color = '#111827';
     const sectionStyle = {
         flex: '1 1 250px',
         padding: '1rem',
         borderRadius: '10px',
-        border: '1px solid #374151',
-        background: '#0f172a'
+        border: `1px solid ${border_color}`,
+        background: `${background_color}`
     };
 
     const listStyle = {
@@ -89,10 +90,10 @@ export default function AIComparisonPanel({
         <div
             style={{
                 marginBottom: '2rem',
-                border: '1px solid #374151',
+                border: `1px solid ${border_color}`,
                 borderRadius: '12px',
                 padding: '1.5rem',
-                background: '#111827'
+                background: `${background_color}`
             }}
         >
             <h3

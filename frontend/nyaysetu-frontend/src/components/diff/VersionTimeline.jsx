@@ -9,6 +9,8 @@ export default function VersionTimeline({
             onVersionClick(versionId);
         }
     };
+    const border_color = '#374151';
+    const background_color = '#111827';
 
     return (
         <div
@@ -47,11 +49,11 @@ export default function VersionTimeline({
                                 padding: '0.75rem',
                                 borderRadius: '10px',
                                 border: isSelected
-                                    ? '2px solid #22c55e'
-                                    : '1px solid #374151',
+                                    ? `2px solid #22c55e`
+                                    : `1px solid ${border_color}`,
                                 background: isSelected
                                     ? '#14532d'
-                                    : '#111827',
+                                    : `${background_color}`,
                                 color: '#ffffff',
                                 cursor: onVersionClick
                                     ? 'pointer'
@@ -67,7 +69,7 @@ export default function VersionTimeline({
                                 style={{
                                     width: '40px',
                                     height: '2px',
-                                    background: '#374151',
+                                    background: `${border_color}`,
                                     flexShrink: 0
                                 }}
                             />

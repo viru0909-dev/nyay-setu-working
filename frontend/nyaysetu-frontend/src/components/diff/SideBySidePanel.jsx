@@ -10,15 +10,18 @@ export default function SideBySidePanel({
     isOriginal = false,
     scrollRef,
     onScroll
+    
 }) {
+    const border_color = '#374151';
+    const background_color = '#111827';
     return (
         <div
             style={{
                 flex: '1 1 300px',
                 padding: '1rem',
-                border: '1px solid #374151',
+                border: `1px solid ${border_color}`,
                 borderRadius: '12px',
-                background: '#111827',
+                background: `${background_color}`,
                 minHeight: '250px',
                 display: 'flex',
                 flexDirection: 'column'

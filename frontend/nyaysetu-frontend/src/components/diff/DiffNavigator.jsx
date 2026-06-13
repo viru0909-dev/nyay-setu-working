@@ -14,7 +14,7 @@ export default function DiffNavigator({
     if (blocks.length === 0) {
         return null;
     }
-
+    const border_color = '#374151';
     const scrollToChange = (blockId) => {
         const target = document.getElementById(
             `${blockPrefix}-${blockId.replace('change-', '')}`
@@ -45,7 +45,7 @@ export default function DiffNavigator({
             style={{
                 marginBottom: '1.5rem',
                 padding: '1rem',
-                border: '1px solid #374151',
+                border: `1px solid ${border_color}`,
                 borderRadius: '12px',
                 background: '#0f172a'
             }}
@@ -77,7 +77,7 @@ export default function DiffNavigator({
                         style={{
                             padding: '0.4rem 0.75rem',
                             borderRadius: '8px',
-                            border: '1px solid #374151',
+                            border: `1px solid ${border_color}`,
                             background:
                                 block.type === 'modified'
                                     ? '#78350f'

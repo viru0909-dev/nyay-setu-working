@@ -4,6 +4,8 @@ export default function VersionSelector({
     selected,
     onChange
 }) {
+    const border_color = '#374151';
+    const background_color = '#111827';
     return (
         <div>
             <label
@@ -24,9 +26,9 @@ export default function VersionSelector({
                 style={{
                     padding: '0.75rem',
                     borderRadius: '8px',
-                    background: '#111827',
+                    background: `${background_color}`,
                     color: 'white',
-                    border: '1px solid #374151'
+                    border: `1px solid ${border_color}`
                 }}
             >
                 {versions.map((version) => (
