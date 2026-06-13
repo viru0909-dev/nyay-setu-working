@@ -64,4 +64,66 @@ public class CaseManagementServiceTest {
         verify(caseRepository, atLeastOnce()).save(ArgumentMatchers.any(CaseEntity.class));
         verify(timelineService).addEvent(eq(caseId), eq("DRAFT_SUBMITTED"), anyString());
     }
+
+    @Test
+    public void orderRespondentNotice_notifiesClientAndLawyer() {
+        UUID caseId = UUID.randomUUID();
+
+        User client = User.builder().id(1L).email("client@example.com").name("Client").build();
+        User lawyer = User.builder().id(2L).email("lawyer@example.com").name("Lawyer").build();
+
+        CaseEntity caseEntity = CaseEntity.builder()
+                .id(caseId)
+                .client(client)
+                .lawyer(lawyer)
+                .build();
+
+        when(caseRepository.findById(caseId)).thenReturn(Optional.of(caseEntity));
+        when(caseRepository.save(ArgumentMatchers.any(CaseEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.orderRespondentNotice(caseId);
+
+        verify(notificationService, times(2)).save(ArgumentMatchers.any(com.nyaysetu.backend.notification.entity.Notification.class));
+        verify(timelineService).addEvent(eq(caseId), eq("SUMMONS_ISSUED"), anyString());
+    }
+
+    @Test
+    public void startHearings_notifiesOnlyClient_whenNoLawyerAssigned() {
+        UUID caseId = UUID.randomUUID();
+
+        User client = User.builder().id(1L).email("client@example.com").name("Client").build();
+
+        CaseEntity caseEntity = CaseEntity.builder()
+                .id(caseId)
+                .client(client)
+                .build();
+
+        when(caseRepository.findById(caseId)).thenReturn(Optional.of(caseEntity));
+        when(caseRepository.save(ArgumentMatchers.any(CaseEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.startHearings(caseId);
+
+        verify(notificationService, times(1)).save(ArgumentMatchers.any(com.nyaysetu.backend.notification.entity.Notification.class));
+        verify(timelineService).addEvent(eq(caseId), eq("HEARINGS_STARTED"), anyString());
+    }
+
+    @Test
+    public void deliverVerdict_notifiesClientWithVerdictMessage() {
+        UUID caseId = UUID.randomUUID();
+
+        User client = User.builder().id(1L).email("client@example.com").name("Client").build();
+
+        CaseEntity caseEntity = CaseEntity.builder()
+                .id(caseId)
+                .client(client)
+                .build();
+
+        when(caseRepository.findById(caseId)).thenReturn(Optional.of(caseEntity));
+        when(caseRepository.save(ArgumentMatchers.any(CaseEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.deliverVerdict(caseId, "Case dismissed");
+
+        verify(notificationService, times(1)).save(ArgumentMatchers.any(com.nyaysetu.backend.notification.entity.Notification.class));
+        verify(timelineService).addEvent(eq(caseId), eq("VERDICT_DELIVERED"), anyString());
+    }
 }
