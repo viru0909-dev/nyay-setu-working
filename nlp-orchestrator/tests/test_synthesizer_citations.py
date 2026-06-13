@@ -20,13 +20,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from models.schemas import SynthesisResult
-from synthesizer import (
-    _dedupe_cited_laws,
-    _normalize_cited_law,
-    _strip_json_fence,
-    extract_cited_laws_from_markdown,
-    synthesize_answers_structured,
-)
+from synthesizer import (_dedupe_cited_laws, _normalize_cited_law,
+                         _strip_json_fence, extract_cited_laws_from_markdown,
+                         synthesize_answers_structured)
 
 RESEARCH = [
     {

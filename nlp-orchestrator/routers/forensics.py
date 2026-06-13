@@ -8,7 +8,8 @@ from sanitizer import sanitize_prompt_input
 from services.gemini_analyzer import analyze_frames
 from services.groq_router import legal_section_lookup
 from services.report_generator import generate_avatar_script, generate_report
-from services.video_processor import cleanup_job, download_video, extract_frames
+from services.video_processor import (cleanup_job, download_video,
+                                      extract_frames)
 from sse_starlette.sse import EventSourceResponse
 
 logger = logging.getLogger("forensics-router")

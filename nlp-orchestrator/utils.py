@@ -1,19 +1,13 @@
 import asyncio
 import logging
 import time
-
 # for async retry
 from functools import wraps
 
 import aiohttp
 import httpx
-from tenacity import (
-    before_sleep_log,
-    retry,
-    retry_if_exception_type,
-    stop_after_attempt,
-    wait_exponential,
-)
+from tenacity import (before_sleep_log, retry, retry_if_exception_type,
+                      stop_after_attempt, wait_exponential)
 
 logger = logging.getLogger(__name__)
 

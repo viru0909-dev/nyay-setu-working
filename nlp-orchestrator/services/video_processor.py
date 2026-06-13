@@ -2,6 +2,14 @@ import ipaddress
 import socket
 from urllib.parse import urlparse
 
+import asyncio
+import os
+from typing import List
+
+import aiohttp
+import cv2
+from services.url_security import validate_public_video_url
+
 BLOCKED_NETWORKS = [
     ipaddress.ip_network("127.0.0.0/8"),
     ipaddress.ip_network("10.0.0.0/8"),
@@ -31,14 +39,6 @@ def validate_url_for_ssrf(url: str) -> None:
         if ip_obj in blocked:
             raise ValueError(f"URL resolves to blocked IP: {resolved_ip}")
 
-
-import asyncio
-import os
-from typing import List
-
-import aiohttp
-import cv2
-from services.url_security import validate_public_video_url
 
 UPLOAD_DIR = "/tmp/nyaysetu_forensics"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
