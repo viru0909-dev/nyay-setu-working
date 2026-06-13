@@ -357,4 +357,31 @@ export const caseTransitionAPI = {
     getCaseHealth: (caseId) => api.get(`/api/v1/cases/transition/${caseId}/health`),
 };
 
+// ===== NEW: Evidence Ledger API (Hyperledger Fabric-backed Chain-of-Custody) =====
+export const evidenceLedgerAPI = {
+    // Register evidence on the distributed ledger
+    registerEvidence: (data) => api.post('/api/v1/ledger/evidence/register', data),
+
+    // Transfer custody between organizations
+    transferCustody: (evidenceId, transferData) =>
+        api.post(`/api/v1/ledger/evidence/${evidenceId}/transfer`, transferData),
+
+    // Get full chain-of-custody trail
+    getCustodyTrail: (evidenceId) =>
+        api.get(`/api/v1/ledger/evidence/${evidenceId}/custody-trail`),
+
+    // Verify file hash against ledger record (pass hash as query param)
+    verifyHash: (evidenceId, fileHash) =>
+        api.post(`/api/v1/ledger/evidence/${evidenceId}/verify-hash`, null, {
+            params: { fileHash },
+        }),
+
+    // Get immutable access audit log
+    getAuditLog: (evidenceId) =>
+        api.get(`/api/v1/ledger/evidence/${evidenceId}/audit-log`),
+
+    // Get world state statistics
+    getStats: () => api.get('/api/v1/ledger/evidence/stats'),
+};
+
 export default api;

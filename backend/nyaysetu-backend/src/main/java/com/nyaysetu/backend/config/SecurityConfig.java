@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.config;
 
+import com.nyaysetu.backend.filter.EvidenceReadAuditFilter;
 import com.nyaysetu.backend.filter.JwtAuthFilter;
 
 import com.nyaysetu.backend.filter.RateLimitFilter;
@@ -143,7 +144,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             JwtAuthFilter jwtAuthFilter,
-            XssSanitizationFilter xssSanitizationFilter) throws Exception {
+            XssSanitizationFilter xssSanitizationFilter,
+            EvidenceReadAuditFilter evidenceReadAuditFilter) throws Exception {
 
         http
                 // 1. CORS fix (Restricting to specific origins instead of all)
@@ -274,6 +276,14 @@ public class SecurityConfig {
                                 "/api/v1/cases/transition/*/summons-served"
                         ).hasAnyRole("POLICE", "JUDGE", "SUPER_JUDGE", "ADMIN")
 
+                        // ── Evidence Ledger endpoints ─────────────────────────────────────
+                        .requestMatchers(
+                                "/api/v1/ledger/evidence/stats"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/api/v1/ledger/evidence/**"
+                        ).authenticated()
+
                         // ── Everything else requires authentication ────────────────────────
                         .anyRequest().authenticated()
                 )
@@ -281,7 +291,8 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(xssSanitizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(evidenceReadAuditFilter, JwtAuthFilter.class);
 
         return http.build();
     }

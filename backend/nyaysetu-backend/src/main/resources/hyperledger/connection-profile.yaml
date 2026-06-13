@@ -1,0 +1,155 @@
+# ============================================================================
+# Hyperledger Fabric Connection Profile — NyaySetu Evidence Ledger Network
+# ============================================================================
+# This profile defines a 3-organization consortium network for
+# immutable chain-of-custody tracking under Sec. 65B compliance.
+#
+# Organizations:
+#   1. PoliceOrg    — Police / Investigating Agencies
+#   2. JudiciaryOrg — The Judiciary (Judges, Courts)
+#   3. ForensicOrg  — Forensic Laboratories
+#
+# Channel: evidence-channel
+# Chaincode: evidence-ledger (EvidenceLedgerContract)
+# ============================================================================
+
+name: "nyaysetu-evidence-network"
+version: "1.0.0"
+description: "NyaySetu Consortium Network for Digital Evidence Chain-of-Custody"
+
+# ── Client Configuration ────────────────────────────────────────────────────
+client:
+  organization: JudiciaryOrg
+  connection:
+    timeout:
+      peer:
+        endorser: "300"
+      orderer: "300"
+
+# ── Channel Definition ──────────────────────────────────────────────────────
+channels:
+  evidence-channel:
+    orderers:
+      - orderer.nyaysetu.gov.in
+    peers:
+      peer0.police.nyaysetu.gov.in:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      peer0.judiciary.nyaysetu.gov.in:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      peer0.forensic.nyaysetu.gov.in:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+# ── Organizations ───────────────────────────────────────────────────────────
+organizations:
+  PoliceOrg:
+    mspid: PoliceOrgMSP
+    peers:
+      - peer0.police.nyaysetu.gov.in
+    certificateAuthorities:
+      - ca.police.nyaysetu.gov.in
+    adminPrivateKey:
+      path: crypto-config/peerOrganizations/police.nyaysetu.gov.in/users/Admin@police.nyaysetu.gov.in/msp/keystore/priv_sk
+    signedCert:
+      path: crypto-config/peerOrganizations/police.nyaysetu.gov.in/users/Admin@police.nyaysetu.gov.in/msp/signcerts/Admin@police.nyaysetu.gov.in-cert.pem
+
+  JudiciaryOrg:
+    mspid: JudiciaryOrgMSP
+    peers:
+      - peer0.judiciary.nyaysetu.gov.in
+    certificateAuthorities:
+      - ca.judiciary.nyaysetu.gov.in
+    adminPrivateKey:
+      path: crypto-config/peerOrganizations/judiciary.nyaysetu.gov.in/users/Admin@judiciary.nyaysetu.gov.in/msp/keystore/priv_sk
+    signedCert:
+      path: crypto-config/peerOrganizations/judiciary.nyaysetu.gov.in/users/Admin@judiciary.nyaysetu.gov.in/msp/signcerts/Admin@judiciary.nyaysetu.gov.in-cert.pem
+
+  ForensicOrg:
+    mspid: ForensicOrgMSP
+    peers:
+      - peer0.forensic.nyaysetu.gov.in
+    certificateAuthorities:
+      - ca.forensic.nyaysetu.gov.in
+    adminPrivateKey:
+      path: crypto-config/peerOrganizations/forensic.nyaysetu.gov.in/users/Admin@forensic.nyaysetu.gov.in/msp/keystore/priv_sk
+    signedCert:
+      path: crypto-config/peerOrganizations/forensic.nyaysetu.gov.in/users/Admin@forensic.nyaysetu.gov.in/msp/signcerts/Admin@forensic.nyaysetu.gov.in-cert.pem
+
+# ── Orderer Nodes ───────────────────────────────────────────────────────────
+orderers:
+  orderer.nyaysetu.gov.in:
+    url: grpcs://orderer.nyaysetu.gov.in:7050
+    grpcOptions:
+      ssl-target-name-override: orderer.nyaysetu.gov.in
+      grpc.keepalive_time_ms: 600000
+    tlsCACerts:
+      path: crypto-config/ordererOrganizations/nyaysetu.gov.in/orderers/orderer.nyaysetu.gov.in/msp/tlscacerts/tlsca.nyaysetu.gov.in-cert.pem
+
+# ── Peer Nodes ──────────────────────────────────────────────────────────────
+peers:
+  peer0.police.nyaysetu.gov.in:
+    url: grpcs://peer0.police.nyaysetu.gov.in:7051
+    grpcOptions:
+      ssl-target-name-override: peer0.police.nyaysetu.gov.in
+      grpc.keepalive_time_ms: 600000
+    tlsCACerts:
+      path: crypto-config/peerOrganizations/police.nyaysetu.gov.in/peers/peer0.police.nyaysetu.gov.in/msp/tlscacerts/tlsca.police.nyaysetu.gov.in-cert.pem
+
+  peer0.judiciary.nyaysetu.gov.in:
+    url: grpcs://peer0.judiciary.nyaysetu.gov.in:8051
+    grpcOptions:
+      ssl-target-name-override: peer0.judiciary.nyaysetu.gov.in
+      grpc.keepalive_time_ms: 600000
+    tlsCACerts:
+      path: crypto-config/peerOrganizations/judiciary.nyaysetu.gov.in/peers/peer0.judiciary.nyaysetu.gov.in/msp/tlscacerts/tlsca.judiciary.nyaysetu.gov.in-cert.pem
+
+  peer0.forensic.nyaysetu.gov.in:
+    url: grpcs://peer0.forensic.nyaysetu.gov.in:9051
+    grpcOptions:
+      ssl-target-name-override: peer0.forensic.nyaysetu.gov.in
+      grpc.keepalive_time_ms: 600000
+    tlsCACerts:
+      path: crypto-config/peerOrganizations/forensic.nyaysetu.gov.in/peers/peer0.forensic.nyaysetu.gov.in/msp/tlscacerts/tlsca.forensic.nyaysetu.gov.in-cert.pem
+
+# ── Certificate Authorities ─────────────────────────────────────────────────
+certificateAuthorities:
+  ca.police.nyaysetu.gov.in:
+    url: https://ca.police.nyaysetu.gov.in:7054
+    caName: ca-police
+    httpOptions:
+      verify: true
+    tlsCACerts:
+      path: crypto-config/peerOrganizations/police.nyaysetu.gov.in/ca/ca.police.nyaysetu.gov.in-cert.pem
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+
+  ca.judiciary.nyaysetu.gov.in:
+    url: https://ca.judiciary.nyaysetu.gov.in:8054
+    caName: ca-judiciary
+    httpOptions:
+      verify: true
+    tlsCACerts:
+      path: crypto-config/peerOrganizations/judiciary.nyaysetu.gov.in/ca/ca.judiciary.nyaysetu.gov.in-cert.pem
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+
+  ca.forensic.nyaysetu.gov.in:
+    url: https://ca.forensic.nyaysetu.gov.in:9054
+    caName: ca-forensic
+    httpOptions:
+      verify: true
+    tlsCACerts:
+      path: crypto-config/peerOrganizations/forensic.nyaysetu.gov.in/ca/ca.forensic.nyaysetu.gov.in-cert.pem
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
