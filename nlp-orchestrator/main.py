@@ -311,7 +311,15 @@ async def legal_reasoning_pipeline(query: str, language: str):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "nlp-orchestrator", "port": 8001}
+    return {
+        "status": "ok",
+        "service": "nlp-orchestrator",
+        "port": 8001,
+        "dependencies": {
+            "groq_api": "configured" if bool(GROQ_API_KEY) else "missing",
+            "gemini_api": "configured" if bool(GEMINI_API_KEY) else "missing"
+        }
+    }
 
 @app.get("/models")
 async def get_models():
