@@ -143,7 +143,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             JwtAuthFilter jwtAuthFilter,
-            XssSanitizationFilter xssSanitizationFilter) throws Exception {
+            XssSanitizationFilter xssSanitizationFilter,
+            RestAccessDeniedHandler restAccessDeniedHandler) throws Exception {
 
         http
                 // 1. CORS fix (Restricting to specific origins instead of all)
@@ -278,6 +279,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(restAccessDeniedHandler)
+                        .accessDeniedHandler(restAccessDeniedHandler)
+                )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(xssSanitizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
