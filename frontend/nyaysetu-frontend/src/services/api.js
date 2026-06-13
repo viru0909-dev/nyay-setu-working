@@ -105,6 +105,18 @@ export const authAPI = {
     },
 };
 
+// Profile API
+export const profileAPI = {
+    createOrUpdate: (profileData) => api.post('/api/v1/profile/create-or-update', profileData),
+    getByUserId: (userId) => api.get(`/api/v1/profile/${userId}`),
+    uploadPicture: (userId, file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return api.post(`/api/v1/profile/${userId}/upload-picture`, formData);
+    },
+    deleteAccount: () => api.delete('/api/v1/profile'),
+};
+
 // Case API
 export const caseAPI = {
     create: (caseData) => api.post('/api/v1/cases', caseData),
