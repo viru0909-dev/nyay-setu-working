@@ -248,6 +248,8 @@ export default function Header({ hideAuthButtons = false }) {
                 <div className="header-container" style={{
                     maxWidth: '1400px',
                     margin: '0 auto',
+                    width: '100%',
+                    boxSizing: 'border-box',
                 }}>
                     {/* Logo */}
                     <Link to="/" style={{
@@ -285,13 +287,13 @@ export default function Header({ hideAuthButtons = false }) {
                     {/* Desktop Nav */}
                     <nav
                         className="desktop-nav"
-                        style={{ display: 'flex', gap: '2rem', alignItems: 'center', flex: 1, justifyContent: 'center' }}
+                        style={{ display: 'flex', gap: 'clamp(0.5rem, 1.5vw, 2rem)', flexWrap: 'wrap', alignItems: 'center', flex: 1, justifyContent: 'center' }}
                     >
                         {navItems.map(renderNavItem)}
                     </nav>
 
                     {/* Right Controls */}
-                    <div className="desktop-cta" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+                    <div className="desktop-cta" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
                         {/* Role Selector */}
                         <div id="role-selector" style={{ position: 'relative' }}>
                             <button
@@ -800,9 +802,11 @@ export default function Header({ hideAuthButtons = false }) {
                         flex-direction: row !important;
                         justify-content: space-between !important;
                         align-items: center !important;
-                        flex-wrap: nowrap !important;
+                        flex-wrap: wrap !important;
                         gap: 1rem !important;
                         padding: 0.7rem 2rem;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
                     }
 
                     @media (max-width: 900px) {
