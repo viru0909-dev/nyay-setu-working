@@ -29,7 +29,7 @@ except Exception as e:
 
 def log_document_access(user_id, document_id, action):
     """
-    Logs document access events asynchronously to avoid blocking the main request thread.
+    Logs document access events asynchronously to avoid blocking the main req thread.
     """
     try:
         # Capture request-context specific data before passing to thread

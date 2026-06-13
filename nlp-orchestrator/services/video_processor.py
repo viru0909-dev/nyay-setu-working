@@ -50,7 +50,8 @@ async def download_video(url: str, job_id: str) -> str:
         from fastapi import HTTPException
 
         raise HTTPException(status_code=400, detail=f"Unsafe URL rejected: {e}")
-    """Download video from URL (which will be a MinIO/Spring Boot endpoint) to a local temp file."""
+    """Download video from URL (which will be a MinIO/Spring Boot endpoint) to 
+    a local temp file."""
     # If the URL is already a local path (for testing), just return it
     if url.startswith("/") and os.path.exists(url):
         return url
@@ -126,7 +127,8 @@ async def extract_frames(
 
 
 def cleanup_job(job_id: str):
-    """Delete the downloaded video and frames after analysis to comply with DPDP Act 2023."""
+    """Delete the downloaded video and frames after analysis
+    to comply with DPDP Act 2023."""
     import shutil
 
     video_path = os.path.join(UPLOAD_DIR, f"{job_id}_video.mp4")

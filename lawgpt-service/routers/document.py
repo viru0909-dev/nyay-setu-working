@@ -7,9 +7,11 @@ Provides:
 """
 
 import io
+import json
 import logging
 import os
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Literal, Optional
 
 from dotenv import load_dotenv
@@ -22,8 +24,6 @@ from lawgpt.prompt_builder import (
 )
 from lawgpt.retriever import retrieve
 from pydantic import BaseModel, Field
-import json
-from pathlib import Path
 
 load_dotenv()
 logger = logging.getLogger("lawgpt")

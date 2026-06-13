@@ -61,7 +61,10 @@ async def test_deep_research_pipeline_gemini_cache_hit(
     )
     mock_get_cached_response.return_value = "Cached analysis"
 
-    query = "This is a long enough complex query designed to trigger the Gemini model choice and hit cache"
+    query = (
+        "This is a long enough complex query designed to"
+        " trigger the Gemini model choice and hit cache"
+    )
     events = []
 
     with patch("main.gemini_client", True):

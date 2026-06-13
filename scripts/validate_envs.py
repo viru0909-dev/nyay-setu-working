@@ -161,10 +161,10 @@ def main():
         missing_keys = used_keys - allowed_keys
 
         # Some custom project handling/exclusions:
-        # If GOOGLE_GEMINI_API_KEY is defined in template, allow GEMINI_API_KEY in code (alias)
+        # If GOOGLE_GEMINI_API_KEY is defined in template then
+        # allow GEMINI_API_KEY in code (alias)
         if "GEMINI_API_KEY" in missing_keys and "GOOGLE_GEMINI_API_KEY" in allowed_keys:
             missing_keys.remove("GEMINI_API_KEY")
-        # If REACT_APP_API_URL or REACT_APP_API_BASE_URL are checked in code but VITE_API_URL exists
         if (
             "REACT_APP_API_URL" in missing_keys
             and "REACT_APP_API_BASE_URL" in allowed_keys
@@ -172,21 +172,19 @@ def main():
             missing_keys.remove("REACT_APP_API_URL")
 
         if missing_keys:
-            print(
-                "  [ERROR] Mismatches found! The following keys are used in code but missing from .env.example:"
-            )
+            print("[ERROR] Mismatches found! The following keys")
+            print(" are used in code but missing from .env.example:")
             for key in sorted(missing_keys):
                 print(f"    - {key}")
             mismatch_found = True
         else:
             print(
-                "  [OK] Validation passed! All code env keys are documented in templates."
+                "[OK] Validation passed! All code env keys are documented in templates."
             )
 
     if mismatch_found:
-        print(
-            "\n[FAILED] Environment variable validation failed. Please update your .env.example files."
-        )
+        print("\n[FAILED] Environment variable validation failed.")
+        print("Please update your .env.example files.")
         sys.exit(1)
     else:
         print("\n[SUCCESS] Environment variable validation completed successfully!")

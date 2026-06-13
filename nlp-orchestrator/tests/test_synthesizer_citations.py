@@ -78,7 +78,8 @@ async def test_parses_json_object_with_cited_laws(mock_create):
     mock_create.return_value = _mock_response(
         json.dumps(
             {
-                "answer_markdown": "## Answer\nMurder is punishable under Section 302 IPC.",
+                "answer_markdown": "## Answer\nMurder is punishable under"
+                " Section 302 IPC.",
                 "cited_laws": ["IPC Sec 302", "CrPC Sec 144"],
             }
         )

@@ -26,9 +26,16 @@ def generate_avatar_script(job_id: str, groq_legal: str) -> str:
     # To keep this fast, we'll use a template based on whether Groq found sections.
 
     if "279" in groq_legal or "337" in groq_legal or "304A" in groq_legal:
-        return "Analysis complete ho gayi. Aapki accident ki timeline aur IPC sections report me daal di gayi hai. Court report tab me check karein."
+        return (
+            "Analysis complete ho gayi. "
+            "Aapki accident ki timeline aur IPC sections report me daal di gayi hai. "
+            "Court report tab me check karein."
+        )
     elif len(groq_legal) > 50:
-        return "Motor Vehicles Act ke under applicable sections dhund liye gaye hain. PDF report ready hai court ke liye. Kripya check karein."
+        return (
+            "Motor Vehicles Act ke under applicable sections dhund liye gaye hain. "
+            "PDF report ready hai court ke liye. Kripya check karein."
+        )
     else:
         return (
             "Forensic analysis poori ho gayi hai. Liability report extract kar li hai."
