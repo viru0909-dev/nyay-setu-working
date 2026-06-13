@@ -19,7 +19,6 @@ with open(r"reconstruction\aligned_frames.json", "w") as file:
     json.dump(aligned_frames, file, indent=4)
 
 print("Frame synchronization completed")
-import json
 
 
 def synchronize_frames(metadata_file):

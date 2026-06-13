@@ -2,8 +2,8 @@
 routers/document.py — Legal document generation endpoints for Nyay Setu LawGPT.
 
 Provides:
-    POST /generate      — Generate legal document text (affidavit, RTI, complaint, notice)
-    POST /generate/pdf  — Generate legal document as downloadable PDF
+    POST /generate — Generate legal document text (affidavit, RTI, complaint, notice)
+    POST /generate/pdf — Generate legal document as downloadable PDF
 """
 
 import io
@@ -22,6 +22,8 @@ from lawgpt.prompt_builder import (
 )
 from lawgpt.retriever import retrieve
 from pydantic import BaseModel, Field
+import json
+from pathlib import Path
 
 load_dotenv()
 logger = logging.getLogger("lawgpt")
@@ -63,7 +65,8 @@ class GenerateResponse(BaseModel):
 
 # ── Prompt templates ───────────────────────────────────────────────────────────
 
-AFFIDAVIT_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal AFFIDAVIT.
+AFFIDAVIT_PROMPT: str = """You are an expert Indian legal drafter.
+Generate a formal AFFIDAVIT.
 Use this legal context for accuracy: {legal_context}
 
 Petitioner: {petitioner_name}, {petitioner_address}
@@ -92,7 +95,8 @@ That the contents of the above affidavit are true to the best of my knowledge.
 Deponent
 """
 
-RTI_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal RTI APPLICATION
+RTI_PROMPT: str = """You are an expert Indian legal drafter.
+Generate a formal RTI APPLICATION
 under the Right to Information Act, 2005.
 Use this legal context: {legal_context}
 
@@ -132,7 +136,8 @@ Yours faithfully,
 Date: {incident_date}
 """
 
-COMPLAINT_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL COMPLAINT.
+COMPLAINT_PROMPT: str = """You are an expert Indian legal drafter.
+Generate a formal LEGAL COMPLAINT.
 Use this legal context for accurate section references: {legal_context}
 
 Complainant: {petitioner_name}, {petitioner_address}
@@ -179,7 +184,8 @@ Complainant
 {petitioner_name}
 """
 
-NOTICE_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL NOTICE in {language}.
+NOTICE_PROMPT: str = """You are an expert Indian legal drafter.
+Generate a formal LEGAL NOTICE in {language}.
 Use this legal context: {legal_context}
 
 Sender: {petitioner_name}, {petitioner_address}
@@ -215,7 +221,8 @@ Advocate
 [Address]
 """
 
-DEMAND_LETTER_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal DEMAND LETTER in {language}.
+DEMAND_LETTER_PROMPT: str = """You are an expert Indian legal drafter.
+Generate a formal DEMAND LETTER in {language}.
 Use this legal context: {legal_context}
 
 Sender: {petitioner_name}, {petitioner_address}
@@ -272,8 +279,6 @@ TITLE_MAP: Dict[str, str] = {
 
 
 # ── External templates loader (optional) ────────────────────────────────────────
-import json
-from pathlib import Path
 
 # Module-level templates dict (may be empty if no external JSON provided)
 _templates: Dict[str, dict] = {}
@@ -363,7 +368,7 @@ def _get_doc_llm():
             _doc_llm = DummyLLM()
             _doc_llm_label = "dummy"
             logger.warning(
-                "Using DummyLLM fallback because LLM integrations are not available: %s",
+                "Using DummyLLM fallback because LLM integrations are not available:%s",
                 e,
             )
             return _doc_llm, _doc_llm_label
@@ -400,10 +405,10 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
     except FileNotFoundError:
         raise HTTPException(
             status_code=503,
-            detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.",
+            detail="Legal database not initialized.Run 'python lawgpt/ingest.py'first.",
         )
     except ImportError:
-        # langchain/FAISS not available in this environment (tests/dev). Continue with empty context.
+        # langchain/FAISS not available in this environment (tests/dev).
         logger.warning(
             "langchain_community not available; proceeding without legal context"
         )
@@ -600,7 +605,7 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
     story.append(Spacer(1, 30))
     story.append(
         Paragraph(
-            "This document is AI-generated and should be reviewed by a qualified lawyer",
+            "This document is AI-generated & should be reviewed by a qualified lawyer",
             footer_style,
         )
     )
@@ -611,7 +616,7 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
 
 
 def _create_docx(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
-    """Convert generated document text to a simple DOCX in-memory file using python-docx."""
+    """Convert generated doc text to a simple DOCX in-memory file using python-docx."""
     try:
         from docx import Document as DocxDocument
         from docx.shared import Pt

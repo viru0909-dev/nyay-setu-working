@@ -2,12 +2,11 @@ import sys
 from unittest.mock import Mock
 
 import pytest
+import services.video_processor as vp
+from services.video_processor import extract_frames
 
 sys.modules.setdefault("cv2", Mock())
 sys.modules.setdefault("aiohttp", Mock())
-
-import services.video_processor as vp
-from services.video_processor import extract_frames
 
 
 class DummyCap:

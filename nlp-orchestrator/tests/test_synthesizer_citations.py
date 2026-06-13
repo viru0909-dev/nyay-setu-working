@@ -11,11 +11,8 @@ synthesize_answers_structured:
 and that the pure helper functions behave correctly.
 """
 
-import os
-
-os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
-
 import json
+import os
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -27,6 +24,8 @@ from synthesizer import (
     extract_cited_laws_from_markdown,
     synthesize_answers_structured,
 )
+
+os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
 
 RESEARCH = [
     {
