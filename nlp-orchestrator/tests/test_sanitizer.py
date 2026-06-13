@@ -10,8 +10,12 @@ Covers:
 """
 
 import pytest
-from sanitizer import (sanitize_prompt_input, sanitize_url,
-                       sanitize_user_input, strip_html_tags)
+from sanitizer import (
+    sanitize_prompt_input,
+    sanitize_url,
+    sanitize_user_input,
+    strip_html_tags,
+)
 
 # ─── strip_html_tags ─────────────────────────────────────────────────────────
 

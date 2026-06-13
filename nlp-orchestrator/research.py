@@ -26,10 +26,19 @@ import asyncio
 import logging
 
 import httpx
-from config import (GEMINI_API_KEY, GEMINI_MODEL, GROQ_API_KEY,
-                    GROQ_MODEL_FAST, GROUND_RESEARCH, OLLAMA_API_URL,
-                    OLLAMA_MODEL, PROVIDER_ORDER, RETRY_DELAY_SECONDS,
-                    RETRY_ENABLED, RETRY_MAX_ATTEMPTS)
+from config import (
+    GEMINI_API_KEY,
+    GEMINI_MODEL,
+    GROQ_API_KEY,
+    GROQ_MODEL_FAST,
+    GROUND_RESEARCH,
+    OLLAMA_API_URL,
+    OLLAMA_MODEL,
+    PROVIDER_ORDER,
+    RETRY_DELAY_SECONDS,
+    RETRY_ENABLED,
+    RETRY_MAX_ATTEMPTS,
+)
 from google import genai
 from groq import AsyncGroq
 

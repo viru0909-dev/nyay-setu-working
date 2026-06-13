@@ -15,8 +15,11 @@ from typing import Dict, List, Literal, Optional
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from lawgpt.prompt_builder import (build_prompt, detect_prompt_injection,
-                                   validate_required_fields)
+from lawgpt.prompt_builder import (
+    build_prompt,
+    detect_prompt_injection,
+    validate_required_fields,
+)
 from lawgpt.retriever import retrieve
 from pydantic import BaseModel, Field
 
