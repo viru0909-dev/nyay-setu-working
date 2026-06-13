@@ -26,9 +26,15 @@ router = APIRouter()
 
 # ── Request / Response models ──────────────────────────────────────────────────
 
+
 class ContextRequest(BaseModel):
     question: str
     max_results: int = Field(default=3, ge=1, le=20)
+    statute: Optional[str] = Field(
+        default=None,
+        description="Restrict retrieval to a single statute. "
+        "Valid values: IPC, BNS, BNSS, CRPC, CONSTITUTION, BSA, EVIDENCE",
+    )
 
 
 class ContextResponse(BaseModel):
@@ -83,6 +89,7 @@ def get_llm():
 
     if groq_key:
         from langchain_groq import ChatGroq
+
         _llm = ChatGroq(
             model="llama-3.3-70b-versatile",
             temperature=0.2,
@@ -92,6 +99,7 @@ def get_llm():
         logger.info("🤖 LLM backend: Groq (llama-3.3-70b-versatile)")
     elif gemini_key:
         from langchain_google_genai import ChatGoogleGenerativeAI
+
         _llm = ChatGoogleGenerativeAI(
             model="gemini-1.5-pro",
             temperature=0.2,
@@ -101,6 +109,7 @@ def get_llm():
         logger.info("🤖 LLM backend: Google Gemini (gemini-1.5-pro)")
     else:
         from langchain_community.llms import Ollama
+
         _llm = Ollama(
             model="llama3",
             base_url="http://localhost:11434",
@@ -137,14 +146,18 @@ Answer:
 # POST /context — PRIMARY endpoint (called by Java RagService proxy)
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @router.post("/context", response_model=ContextResponse)
 async def get_context(request: ContextRequest) -> ContextResponse:
     """
-    Retrieve top-k relevant legal chunks from the FAISS vector store.
+    Retrieve top-k relevant legal chunks from the ChromaDB vector store.
+    Pass `statute` to scope retrieval to a single Act (e.g. "IPC", "BNS").
     Does NOT call any LLM — returns raw retrieved context.
     """
     try:
-        results = retrieve(query=request.question, k=request.max_results)
+        results = retrieve(
+            query=request.question, k=request.max_results, statute=request.statute
+        )
     except FileNotFoundError:
         raise HTTPException(
             status_code=503,
@@ -179,6 +192,7 @@ async def get_context(request: ContextRequest) -> ContextResponse:
 # POST /chat — STANDALONE endpoint (for direct testing / future use)
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
     """
@@ -211,13 +225,21 @@ async def chat(request: ChatRequest) -> ChatResponse:
         if source_label not in sources:
             sources.append(source_label)
 
-    context: str = "\n\n".join(context_parts) if context_parts else "No context available."
+    context: str = (
+        "\n\n".join(context_parts) if context_parts else "No context available."
+    )
 
     # Call LLM
-    prompt: str = LEGAL_PROMPT_TEMPLATE.format(context=context, question=request.question)
-    
-    from utils.query_cache import get_cached_response, set_cached_response, is_static_query
-    
+    prompt: str = LEGAL_PROMPT_TEMPLATE.format(
+        context=context, question=request.question
+    )
+
+    from utils.query_cache import (
+        get_cached_response,
+        set_cached_response,
+        is_static_query,
+    )
+
     cached_answer = None
     if is_static_query(request.question):
         cached_answer = get_cached_response(request.question)
@@ -226,7 +248,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
             answer = cached_answer
         else:
             logger.info("Cache miss for legal query")
-            
+
     if not cached_answer:
         try:
             llm = get_llm()
@@ -236,7 +258,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
                 answer = answer_raw.content
             else:
                 answer = answer_raw
-                
+
             if is_static_query(request.question):
                 set_cached_response(request.question, answer)
         except Exception as e:
@@ -254,6 +276,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
 # ══════════════════════════════════════════════════════════════════════════════
 # GET /health — Service health check
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @router.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
