@@ -28,10 +28,10 @@ public class RbacSecurityTest {
 
     @RestController
     static class DummyTestController {
-        @GetMapping("/client/fir/test")
+        @GetMapping("/api/v1/client/fir/test")
         public String litigantEndpoint() { return "Litigant OK"; }
 
-        @GetMapping("/lawyer/test")
+        @GetMapping("/api/v1/lawyer/test")
         public String lawyerEndpoint() { return "Lawyer OK"; }
     }
 
@@ -41,9 +41,13 @@ public class RbacSecurityTest {
             "/api/v1/cases/pending-assignment"
     })
     @WithMockUser(username = "litigant@example.com", roles = {"LITIGANT"})
-    public void shouldDenyLitigantAccess(String endpoint) throws Exception {
-        mockMvc.perform(get(endpoint))
-                .andExpect(status().isForbidden());
+    public void shouldDenyLitigantAccess(String endpoint) {
+        try {
+            mockMvc.perform(get(endpoint))
+                    .andExpect(status().isForbidden());
+        } catch (Exception e) {
+            throw new AssertionError("MockMvc call failed", e);
+        }
     }
 
     @ParameterizedTest
@@ -52,22 +56,34 @@ public class RbacSecurityTest {
             "/api/v1/cases/pending-assignment"
     })
     @WithMockUser(username = "lawyer@example.com", roles = {"LAWYER"})
-    public void shouldDenyLawyerAccess(String endpoint) throws Exception {
-        mockMvc.perform(get(endpoint))
-                .andExpect(status().isForbidden());
+    public void shouldDenyLawyerAccess(String endpoint) {
+        try {
+            mockMvc.perform(get(endpoint))
+                    .andExpect(status().isForbidden());
+        } catch (Exception e) {
+            throw new AssertionError("MockMvc call failed", e);
+        }
     }
 
     @Test
     @WithMockUser(username = "litigant@example.com", roles = {"LITIGANT"})
-    public void shouldAllowLitigantAccessToLitigantEndpoint() throws Exception {
-        mockMvc.perform(get("/api/v1/client/fir/test"))
-                .andExpect(status().isOk());
+    public void shouldAllowLitigantAccessToLitigantEndpoint() {
+        try {
+            mockMvc.perform(get("/api/v1/client/fir/test"))
+                    .andExpect(status().isOk());
+        } catch (Exception e) {
+            throw new AssertionError("MockMvc call failed", e);
+        }
     }
 
     @Test
     @WithMockUser(username = "lawyer@example.com", roles = {"LAWYER"})
-    public void shouldAllowLawyerAccessToLawyerEndpoint() throws Exception {
-        mockMvc.perform(get("/api/v1/lawyer/test"))
-                .andExpect(status().isOk());
+    public void shouldAllowLawyerAccessToLawyerEndpoint() {
+        try {
+            mockMvc.perform(get("/api/v1/lawyer/test"))
+                    .andExpect(status().isOk());
+        } catch (Exception e) {
+            throw new AssertionError("MockMvc call failed", e);
+        }
     }
 }
