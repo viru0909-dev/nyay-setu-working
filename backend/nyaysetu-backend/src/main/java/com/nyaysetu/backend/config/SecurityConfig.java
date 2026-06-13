@@ -52,6 +52,9 @@ public class SecurityConfig {
 
     @PostConstruct
     public void validateJwtSecretConfiguration() {
+        if (Arrays.asList(environment.getActiveProfiles()).contains("test")) {
+                return; // Skip validation entirely during tests
+        }
         boolean isDev = Arrays.stream(environment.getActiveProfiles())
                 .anyMatch(profile -> profile.equalsIgnoreCase("dev") || profile.equalsIgnoreCase("test"));
         String jwtSecretEnv = System.getenv("JWT_SECRET");

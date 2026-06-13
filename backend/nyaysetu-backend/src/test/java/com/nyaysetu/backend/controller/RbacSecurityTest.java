@@ -18,7 +18,12 @@ public class RbacSecurityTest {
 
     @Autowired
     private MockMvc mockMvc;
-
+    @MockBean
+    private JwtAuthFilter jwtAuthFilter;
+    @MockBean
+    private RateLimitFilter rateLimitFilter;
+    @MockBean
+    private XssSanitizationFilter xssSanitizationFilter;
     @Test
     @WithMockUser(username = "litigant@example.com", roles = {"LITIGANT"})
     public void shouldDenyLitigantAccessToJudgeEndpoint() throws Exception {
