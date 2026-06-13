@@ -409,12 +409,23 @@ export default function About() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.15 }}
+                                whileHover={{ y: -6 }}
                                 style={{
                                     background: 'var(--bg-glass)',
                                     border: 'var(--border-glass)',
                                     borderRadius: '1.5rem',
                                     padding: '2rem',
-                                    boxShadow: 'var(--shadow-glass)'
+                                    boxShadow: 'var(--shadow-glass)',
+                                    transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    cursor: 'default'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.boxShadow = `0 25px 50px -12px ${phase.color}40, 0 8px 16px -2px rgba(0, 0, 0, 0.1)`;
+                                    e.currentTarget.style.borderColor = `${phase.color}60`;
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
+                                    e.currentTarget.style.borderColor = 'var(--border-glass)';
                                 }}
                             >
                                 <div style={{
@@ -423,51 +434,77 @@ export default function About() {
                                     alignItems: 'center',
                                     marginBottom: '1rem'
                                 }}>
-                                    <span style={{
-                                        padding: '0.25rem 0.75rem',
-                                        background: `${phase.color}15`,
-                                        borderRadius: '0.5rem',
-                                        color: phase.color,
-                                        fontWeight: '700',
-                                        fontSize: '0.85rem'
-                                    }}>
+                                    <motion.span 
+                                        style={{
+                                            padding: '0.25rem 0.75rem',
+                                            background: `${phase.color}15`,
+                                            borderRadius: '0.5rem',
+                                            color: phase.color,
+                                            fontWeight: '700',
+                                            fontSize: '0.85rem',
+                                            display: 'inline-block',
+                                            transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            transformOrigin: 'center'
+                                        }}
+                                        whileHover={{ scale: 1.08 }}
+                                    >
                                         {t(phase.phase)}
-                                    </span>
-                                    <span style={{
-                                        fontSize: '0.75rem',
-                                        fontWeight: '700',
-                                        textTransform: 'uppercase',
-                                        color: phase.color
-                                    }}>
+                                    </motion.span>
+                                    <motion.span 
+                                        style={{
+                                            fontSize: '0.75rem',
+                                            fontWeight: '700',
+                                            textTransform: 'uppercase',
+                                            color: phase.color,
+                                            transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            letterSpacing: '0.05em'
+                                        }}
+                                        whileHover={{ letterSpacing: '0.08em' }}
+                                    >
                                         {/* {t(phase.status) === 'live' ? '✓ Live' :
                                             t(phase.status) === 'in-progress' ? '⏳ In Progress' : '📅 Planned'} */}
                                         {t(phase.status)}
-                                    </span>
+                                    </motion.span>
                                 </div>
 
-                                <h3 style={{
-                                    fontSize: '1.5rem',
-                                    fontWeight: '800',
-                                    color: 'var(--text-main)',
-                                    marginBottom: '1.5rem'
-                                }}>
+                                <motion.h3 
+                                    style={{
+                                        fontSize: '1.5rem',
+                                        fontWeight: '800',
+                                        color: 'var(--text-main)',
+                                        marginBottom: '1.5rem',
+                                        transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)'
+                                    }}
+                                    whileHover={{ color: phase.color }}
+                                >
                                     {t(phase.title)}
-                                </h3>
+                                </motion.h3>
 
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                     {phase.items.map((item, idx) => (
-                                        <li key={idx} style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.75rem',
-                                            padding: '0.75rem 0',
-                                            borderBottom: idx < phase.items.length - 1 ? '1px solid var(--border-glass)' : 'none',
-                                            color: 'var(--text-secondary)',
-                                            fontSize: '0.95rem'
-                                        }}>
-                                            <CheckCircle2 size={16} style={{ color: phase.color, flexShrink: 0 }} />
+                                        <motion.li 
+                                            key={idx} 
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.75rem',
+                                                padding: '0.75rem 0',
+                                                borderBottom: idx < phase.items.length - 1 ? '1px solid var(--border-glass)' : 'none',
+                                                color: 'var(--text-secondary)',
+                                                fontSize: '0.95rem',
+                                                transition: 'all 0.3s ease'
+                                            }}
+                                            whileHover={{ paddingLeft: '0.5rem', color: 'var(--text-main)' }}
+                                        >
+                                            <motion.div
+                                                style={{ flexShrink: 0 }}
+                                                whileHover={{ scale: 1.15, rotate: 8 }}
+                                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                            >
+                                                <CheckCircle2 size={16} style={{ color: phase.color }} />
+                                            </motion.div>
                                             {t(item)}
-                                        </li>
+                                        </motion.li>
                                     ))}
                                 </ul>
                             </motion.div>
