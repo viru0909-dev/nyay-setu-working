@@ -1,6 +1,5 @@
 package com.nyaysetu.backend.controller;
 
-import com.nyaysetu.backend.dto.CaseDTO;
 import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.repository.*;
 import com.nyaysetu.backend.service.AuthService;
@@ -8,10 +7,14 @@ import com.nyaysetu.backend.service.GroqDocumentVerificationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -19,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Tag(name = "Judge Portal", description = "Judge dashboard — assigned cases, hearings and verdict management")
 @RestController
-@RequestMapping("/api/judge")
+@RequestMapping("/judge")
 @RequiredArgsConstructor
 @Slf4j
 public class JudgeController {
@@ -28,8 +31,6 @@ public class JudgeController {
     private final HearingRepository hearingRepository;
     private final com.nyaysetu.backend.service.HearingService hearingService;
     private final AuthService authService;
-    private final UserRepository userRepository;
-    private final DocumentRepository documentRepository;
     private final GroqDocumentVerificationService groqService;
     private final com.nyaysetu.backend.service.AuditService auditService;
     private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
@@ -38,9 +39,12 @@ public class JudgeController {
      * Get all cases assigned to the logged-in judge
      */
     @GetMapping("/cases")
-    public ResponseEntity<?> getJudgeCases(Authentication authentication) {
+    public ResponseEntity<Page<CaseEntity>> getJudgeCases(
+            Authentication authentication,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
         User judge = authService.findByEmail(authentication.getName());
-        List<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName());
+        Page<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName(), pageable);
         return ResponseEntity.ok(judgeCases);
     }
 
@@ -75,7 +79,7 @@ public class JudgeController {
             }
             
             return ResponseEntity.ok(Map.of("message", "Case claimed successfully", "caseId", id));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Error claiming case", e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -117,7 +121,7 @@ public class JudgeController {
             }
 
             return ResponseEntity.ok(Map.of("message", "Summons issued successfully. Police notified."));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
              log.error("Error issuing summons", e);
              return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -161,6 +165,7 @@ public class JudgeController {
         stats.put("pendingCases", pending); 
         stats.put("activeCases", active); 
         stats.put("closedCases", closed);
+        stats.put("unassignedCases", unassignedCount);
         stats.put("byStatus", byStatus);
         stats.put("byType", byType);
         stats.put("monthlyTrend", monthlyTrend);
@@ -220,7 +225,7 @@ public class JudgeController {
             }
             
             return ResponseEntity.ok(Map.of("summary", summary));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Error generating AI summary", e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -270,27 +275,26 @@ public class JudgeController {
             context.append("}");
 
             String aiResponse = groqService.chatWithAI(context.toString());
-            
+
             // Clean response
             String jsonStr = aiResponse.replaceAll("```json", "").replaceAll("```", "").trim();
-            
+
             // Parse JSON
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(jsonStr);
-            
+
             UUID caseId = UUID.fromString(root.get("caseId").asText());
             LocalDateTime date = LocalDateTime.parse(root.get("scheduledDate").asText());
             int duration = root.get("durationMinutes").asInt(60);
-            
+
             // Schedule the hearing
             Hearing hearing = hearingService.scheduleHearing(caseId, date, duration);
-            
+
             return ResponseEntity.ok(Map.of(
                 "message", "Hearing scheduled successfully via AI",
                 "hearing", hearing
             ));
-
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             log.error("Error in AI scheduling", e);
             return ResponseEntity.badRequest().body(Map.of("error", "Failed to schedule: " + e.getMessage()));
         }

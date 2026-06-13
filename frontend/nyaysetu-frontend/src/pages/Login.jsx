@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authAPI } from '../services/api';
 import useAuthStore from '../store/authStore';
@@ -7,6 +7,8 @@ import { Mail, Lock, Eye, EyeOff, Camera, CheckCircle2, Scale, Shield, User, Bri
 import Header from '../components/landing/Header';
 import FaceLoginModal from '../components/auth/FaceLoginModal';
 import ForgotPasswordModal from '../components/auth/ForgotPasswordModal';
+import ContinueAsGuestButton from '../components/guest/ContinueAsGuestButton';
+import { resolvePostAuthPath } from '../utils/authRedirect';
 
 export default function Login() {
     const [searchParams] = useSearchParams();
@@ -21,6 +23,7 @@ export default function Login() {
     const [showFaceLogin, setShowFaceLogin] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const { setAuth } = useAuthStore();
 
     // Mobile detection
@@ -63,18 +66,7 @@ export default function Login() {
 
             setAuth(user, token);
 
-            const roleRoutes = {
-                ADMIN: '/admin',
-                JUDGE: '/judge',
-                LAWYER: '/lawyer',
-                LITIGANT: '/litigant',
-                POLICE: '/police',
-                TECH_ADMIN: '/admin',
-                TECHNICAL_TEAM: '/admin',
-                SUPER_JUDGE: '/admin'
-            };
-
-            navigate(roleRoutes[user.role] || '/');
+            navigate(resolvePostAuthPath(user.role, location.state));
         } catch (err) {
             console.error('Login error:', err);
             setError(err.response?.data?.message || 'Invalid email or password');
@@ -136,7 +128,12 @@ export default function Login() {
                 }}>
                     {/* Left Side - Welcome (hidden on mobile) */}
                     {!isMobile && (
-                        <div style={{ color: 'var(--text-main)' }}>
+    <div
+        style={{
+            color: 'var(--text-main)',
+            transform: 'translateY(-40px)'
+        }}
+    >
                             <div style={{ marginBottom: '2rem' }}>
                                 <h1 style={{
                                     fontSize: '2.8rem',
@@ -445,6 +442,7 @@ export default function Login() {
                             {/* Sign In Button */}
                             <button
                                 type="submit"
+                                className="auth-full-width-btn"
                                 disabled={loading}
                                 style={{
                                     width: '100%',
@@ -469,6 +467,7 @@ export default function Login() {
                             {/* Face Login */}
                             <button
                                 type="button"
+                                className="auth-full-width-btn"
                                 onClick={() => setShowFaceLogin(true)}
                                 style={{
                                     width: '100%',
@@ -498,6 +497,14 @@ export default function Login() {
                                 <Camera size={20} />
                                 {t('auth:login.loginWithFace')}
                             </button>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1rem 0' }}>
+                                <div style={{ flex: 1, height: '1px', background: 'rgba(148, 163, 184, 0.25)' }} />
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>or</span>
+                                <div style={{ flex: 1, height: '1px', background: 'rgba(148, 163, 184, 0.25)' }} />
+                            </div>
+
+                            <ContinueAsGuestButton showDivider={false} />
                         </form>
 
                         <div style={{ textAlign: 'center', marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
@@ -521,16 +528,7 @@ export default function Login() {
                     onClose={() => setShowFaceLogin(false)}
                     onSuccess={({ token, user }) => {
                         setAuth(user, token);
-                        const roleRoutes = {
-                            ADMIN: '/admin',
-                            JUDGE: '/judge',
-                            LAWYER: '/lawyer',
-                            LITIGANT: '/litigant',
-                            TECH_ADMIN: '/admin',
-                            TECHNICAL_TEAM: '/admin',
-                            SUPER_JUDGE: '/admin'
-                        };
-                        navigate(roleRoutes[user.role] || '/');
+                        navigate(resolvePostAuthPath(user.role, location.state));
                     }}
                 />
 

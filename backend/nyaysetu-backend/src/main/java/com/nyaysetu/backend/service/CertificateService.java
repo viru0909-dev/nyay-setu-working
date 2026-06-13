@@ -8,7 +8,6 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
@@ -38,7 +37,10 @@ public class CertificateService {
                 evidence.getFileHash(),
                 evidence.getCreatedAt().format(DATE_FORMATTER),
                 evidence.getUploadIp(),
-                "BLOCKCHAIN_RECORD"
+                "BLOCKCHAIN_RECORD",
+                evidence.getMerkleRoot(),
+                evidence.getExternalAnchorProof(),
+                evidence.getAnchorService()
         );
     }
 
@@ -57,11 +59,15 @@ public class CertificateService {
                 doc.getFileHash(),
                 timestamp,
                 doc.getUploadIp(),
-                "CASE_DOCUMENT"
+                "CASE_DOCUMENT",
+                null, null, null
         );
     }
 
-    private byte[] createCertificatePdf(String fileName, String hash, String timestamp, String ip, String type) throws IOException {
+    private byte[] createCertificatePdf(String fileName, String hash, String timestamp,
+                                         String ip, String type,
+                                         String merkleRoot, String anchorProof,
+                                         String anchorService) throws IOException {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
@@ -117,7 +123,6 @@ public class CertificateService {
                 yPosition -= 50;
                 float tableWidth = page.getMediaBox().getWidth() - 120;
                 float rowHeight = 30;
-                float col1Width = 150;
                 
                 drawTable(contentStream, 60, yPosition, tableWidth, rowHeight, "Attribute", "Details");
                 drawTable(contentStream, 60, yPosition - rowHeight, tableWidth, rowHeight, "File Name", fileName);
@@ -129,8 +134,16 @@ public class CertificateService {
                 float hashRowY = yPosition - 5 * rowHeight;
                 drawTable(contentStream, 60, hashRowY, tableWidth, 40, "SHA-256 Hash", hash != null ? hash : "PENDING_VERIFICATION");
 
+                // Merkle Root & Anchor Proof
+                float anchorRowY = hashRowY - 40;
+                drawTable(contentStream, 60, anchorRowY, tableWidth, 40, "Merkle Root", merkleRoot != null ? merkleRoot : "N/A");
+                float proofRowY = anchorRowY - 40;
+                drawTable(contentStream, 60, proofRowY, tableWidth, 40, "Anchor Service", anchorService != null ? anchorService : "N/A");
+                float proofDetailY = proofRowY - 40;
+                drawTable(contentStream, 60, proofDetailY, tableWidth, 40, "Anchor Proof", anchorProof != null ? anchorProof.substring(0, Math.min(anchorProof.length(), 64)) + "..." : "N/A");
+
                 // 5. Verification Statement
-                yPosition = hashRowY - 60;
+                yPosition = proofDetailY - 60;
                 contentStream.setNonStrokingColor(Color.BLACK);
                 drawText(contentStream, 60, yPosition, "I hereby certify that:", 12);
                 yPosition -= 20;
@@ -219,7 +232,7 @@ public class CertificateService {
         else contentStream.setFont(PDType1Font.HELVETICA, 10);
         
         contentStream.newLineAtOffset(x + col1Width + 10, y - (height/2) - 4);
-        contentStream.showText(value != null ? value : "-");
+        contentStream.showText(value);
         contentStream.endText();
     }
 }

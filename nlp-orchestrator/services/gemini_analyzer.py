@@ -53,7 +53,7 @@ async def analyze_frames(frame_paths: list[str], job_id: str) -> str:
         logger.info(f"[{job_id}] Sending {len(images)} frames to Gemini for analysis...")
         
         # Run in executor to not block async loop
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         response = await loop.run_in_executor(
             None,
             lambda: client.models.generate_content(

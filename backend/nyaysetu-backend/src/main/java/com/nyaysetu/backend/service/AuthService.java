@@ -1,10 +1,5 @@
 package com.nyaysetu.backend.service;
 
-import com.nyaysetu.backend.entity.Role;
-import com.nyaysetu.backend.entity.User;
-import com.nyaysetu.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,11 +7,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.nyaysetu.backend.entity.Role;
+import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.repository.UserRepository;
+
 @Service
 public class AuthService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthService(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;

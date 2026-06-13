@@ -39,7 +39,7 @@ public class NyaySetuBrainService {
     private String groqModel;
 
     private final ObjectMapper objectMapper;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate; // Injected bean with timeouts — see RestTemplateConfig
     private final ChatSessionRepository chatSessionRepository;
     private final OllamaService ollamaService;
     private final CaseRepository caseRepository;
@@ -415,12 +415,6 @@ public class NyaySetuBrainService {
 
         org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(requestBody.toString(), headers);
         
-        // Use RestTemplate (assumed injected or new)
-        // Since we don't see RestTemplate in imports, let's check if we can reuse the existing logic's RestTemplate if any.
-        // Actually, let's see how the existing callGroqAPI calls it.
-        // It's likely using a RestTemplate bean or new RestTemplate().
-        // I need to see the implementation of the existing callGroqAPI further down.
-        // But for now, I'll use new RestTemplate() to be safe, or check imports.
-        return new org.springframework.web.client.RestTemplate().postForObject("https://api.groq.com/openai/v1/chat/completions", entity, String.class);
+        return restTemplate.postForObject("https://api.groq.com/openai/v1/chat/completions", entity, String.class);
     }
 }

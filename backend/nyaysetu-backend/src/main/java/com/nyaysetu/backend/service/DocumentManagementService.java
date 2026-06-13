@@ -6,10 +6,13 @@ import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.DocumentEntity;
 import com.nyaysetu.backend.entity.DocumentStorageType;
 import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.entity.VisibilityLevel;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,20 +65,16 @@ public class DocumentManagementService {
                 .fileHash(fileHash)
                 .uploadIp(uploadIp)
                 .isVerified(fileHash != null)
-                .visibilityLevel("RESTRICTED") // Default: only uploader, their lawyer, and judge can see
+                .visibilityLevel(VisibilityLevel.RESTRICTED) // Default: only uploader, their lawyer, and judge can see
                 .build();
 
         DocumentEntity saved = documentRepository.save(document);
         return convertToDto(saved);
     }
 
-    public List<DocumentDto> getUserDocuments(Long userId) {
-        List<DocumentEntity> documents = documentRepository.findAll().stream()
-                .filter(doc -> doc.getUploadedBy().equals(userId))
-                .collect(Collectors.toList());
-        return documents.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public Page<DocumentDto> getUserDocuments(Long userId, Pageable pageable) {
+        return documentRepository.findByUploadedBy(userId, pageable)
+                .map(this::convertToDto);
     }
 
     public List<DocumentDto> getCaseDocuments(UUID caseId) {
@@ -88,43 +87,58 @@ public class DocumentManagementService {
     /**
      * Get case documents with access control based on user's role
      */
-    public List<DocumentDto> getCaseDocumentsWithAccessControl(UUID caseId, Long userId, String userRole) {
+    public List<DocumentDto> getCaseDocumentsWithAccessControl(UUID caseId, Long userId, String userRole, boolean isCaseLawyer) {
         List<DocumentEntity> allDocuments = documentRepository.findByCaseId(caseId);
         
         return allDocuments.stream()
-                .filter(doc -> hasDocumentAccess(doc, userId, userRole))
+                .filter(doc -> hasDocumentAccess(doc, userId, userRole, isCaseLawyer))
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    public void ensureDocumentAccess(UUID id, Long userId, String userRole) {
+        DocumentEntity document = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        boolean isCaseLawyer = false;
+        if ("LAWYER".equals(userRole) && userId != null && document.getCaseId() != null) {
+            isCaseLawyer = caseRepository.findById(document.getCaseId())
+                    .map(caseEntity -> caseEntity.getLawyer() != null && userId.equals(caseEntity.getLawyer().getId()))
+                    .orElse(false);
+        }
+
+        if (!hasDocumentAccess(document, userId, userRole, isCaseLawyer)) {
+            throw new RuntimeException("Unauthorized to access this document");
+        }
     }
     
     /**
      * Check if user has access to a document
      */
-    private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole) {
-        String visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : "PUBLIC";
+    private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole, boolean isCaseLawyer) {
+        VisibilityLevel visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : VisibilityLevel.PUBLIC;
         
-        switch (visibility) {
-            case "PUBLIC":
-                return true; // Everyone can see public documents
-                
-            case "RESTRICTED":
-                // Judge, uploader, or their lawyer can see
-                if ("JUDGE".equals(userRole)) return true;
-                if (userId.equals(doc.getUploadedBy())) return true;
-                // TODO: Add lawyer check
-                return false;
-                
-            case "SEALED":
-                return "JUDGE".equals(userRole); // Only judge
-                
-            default:
-                return false; // Unknown visibility level - deny by default
-        }
+        return switch (visibility) {
+            case PUBLIC -> true; // Everyone can see public documents
+            case RESTRICTED -> "JUDGE".equals(userRole)
+                    || (userId != null && userId.equals(doc.getUploadedBy()))
+                    || isCaseLawyer; // Assigned lawyers can access restricted case documents
+            case SEALED -> "JUDGE".equals(userRole); // Only judge
+        };
     }
 
     public DocumentDto getDocumentById(UUID id) {
         DocumentEntity document = documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
+        return convertToDto(document);
+    }
+
+    public DocumentDto getDocumentById(UUID id, User user) {
+        DocumentEntity document = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+        if (!canAccessDocument(document, user)) {
+            throw new com.nyaysetu.backend.exception.AccessDeniedException("You do not have access to this document");
+        }
         return convertToDto(document);
     }
 
@@ -163,6 +177,29 @@ public class DocumentManagementService {
         
         // Trigger async analysis
         documentAnalysisService.analyzeDocumentAsync(document, file);
+    }
+
+    /**
+     * Check if a user can access a document based on their relationship to the case
+     */
+    public boolean canAccessDocument(DocumentEntity doc, User user) {
+        if (doc.getCaseId() == null) {
+            return user.getId().equals(doc.getUploadedBy());
+        }
+        CaseEntity caseEntity = caseRepository.findById(doc.getCaseId()).orElse(null);
+        if (caseEntity == null) {
+            return user.getId().equals(doc.getUploadedBy());
+        }
+        if (user.getRole() == com.nyaysetu.backend.entity.Role.ADMIN
+                || user.getRole() == com.nyaysetu.backend.entity.Role.SUPER_JUDGE) {
+            return true;
+        }
+        if (caseEntity.getClient() != null && caseEntity.getClient().getId().equals(user.getId())) return true;
+        if (caseEntity.getLawyer() != null && caseEntity.getLawyer().getId().equals(user.getId())) return true;
+        if (caseEntity.getJudgeId() != null && caseEntity.getJudgeId().equals(user.getId())) return true;
+        if (user.getRole() == com.nyaysetu.backend.entity.Role.JUDGE) return true;
+        if (user.getEmail() != null && user.getEmail().equals(caseEntity.getRespondentEmail())) return true;
+        return user.getId().equals(doc.getUploadedBy());
     }
 
     /**
