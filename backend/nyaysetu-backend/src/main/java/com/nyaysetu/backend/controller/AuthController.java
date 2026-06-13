@@ -6,6 +6,7 @@ import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.PasswordResetTokenRepository;
 import com.nyaysetu.backend.service.*;
+import com.nyaysetu.backend.util.PasswordValidator;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -153,23 +154,47 @@ public class AuthController {
     // ==================== PASSWORD RESET ENDPOINTS ====================
 
     @SecurityRequirements
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+	    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
         try {
-            emailService.sendPasswordResetEmail(req.getEmail());
-            return ResponseEntity.ok(Map.of(
-                "message", "Password reset email sent successfully",
-                "email", req.getEmail()
-            ));
-        } catch (MessagingException e) {
-            log.error("Failed to send password reset email", e);
-            return ResponseEntity.status(500).body(Map.of("message", "Failed to send email"));
+            // Check if passwords match
+            if (!req.getNewPassword().equals(req.getConfirmPassword())) {
+                return ResponseEntity.status(400).body(Map.of("message", "Passwords do not match"));
+            }
+            
+            // Validate password strength
+            PasswordValidator.ValidationResult validation = PasswordValidator.validate(req.getNewPassword());
+            if (!validation.isValid()) {
+                return ResponseEntity.status(400).body(Map.of("message", validation.getMessage()));
+            }
+            
+            PasswordResetToken resetToken = tokenRepository.findByToken(req.getToken())
+                    .orElseThrow(() -> new RuntimeException("Invalid token"));
+
+            if (resetToken.isUsed()) {
+                return ResponseEntity.status(400).body(Map.of("message", "Token already used"));
+            }
+
+            if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+                return ResponseEntity.status(400).body(Map.of("message", "Token expired"));
+            }
+
+            // Update password
+            User user = resetToken.getUser();
+            user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+            authService.updateUser(user);
+
+            // Mark token as used
+            resetToken.setUsed(true);
+            tokenRepository.save(resetToken);
+
+            log.info("Password reset successful for user: {}", user.getEmail());
+            return ResponseEntity.ok(Map.of("message", "Password reset successful"));
         } catch (Exception e) {
-            log.error("Error in forgot password", e);
+            log.error("Error resetting password", e);
             return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
         }
     }
-
     @GetMapping("/verify-reset-token")
     public ResponseEntity<?> verifyResetToken(@RequestParam String token) {
         try {
