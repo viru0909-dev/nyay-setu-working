@@ -8,9 +8,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class AiService {
 
@@ -20,8 +22,8 @@ public class AiService {
     @Value("${groq.model:llama-3.1-8b-instant}")
     private String groqModel;
 
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RestTemplate restTemplate; // Injected bean with timeouts — see RestTemplateConfig
+    private final ObjectMapper objectMapper;
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 

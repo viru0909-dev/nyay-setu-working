@@ -6,6 +6,7 @@ import {
     Users, Scale, X, Check, Award, Shield, AlertTriangle, Gavel
 } from 'lucide-react';
 import { caseAPI, clientFirAPI, caseAssignmentAPI } from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 const statusColors = {
     'PENDING': { bg: '#f5930020', border: '#f59e0b', text: '#f59e0b' },
@@ -14,7 +15,8 @@ const statusColors = {
     'UNDER_REVIEW': { bg: 'rgba(30, 42, 68, 0.1)', border: 'var(--color-primary)', text: 'var(--color-primary)' },
     'AWAITING_DOCUMENTS': { bg: '#ef444420', border: '#ef4444', text: '#ef4444' },
     'COMPLETED': { bg: 'rgba(16, 185, 129, 0.1)', border: '#10b981', text: '#10b981' },
-    'CLOSED': { bg: '#64748b20', border: '#64748b', text: '#64748b' }
+    'CLOSED': { bg: '#64748b20', border: '#64748b', text: '#64748b' },
+    'PENDING_POLICE_REVIEW': {bg: '#f59e0b20',border: '#f59e0b',text: '#f59e0b'}
 };
 
 const formatDate = (dateString) => {
@@ -23,18 +25,16 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-const formatStatus = (status) => {
-    if (!status) return 'Pending';
-    return status.replace(/_/g, ' ').split(' ').map(word =>
-        word.charAt(0) + word.slice(1).toLowerCase()
-    ).join(' ');
-};
+
+
+
 
 export default function CaseDiaryPage() {
     const [activeTab, setActiveTab] = useState('cases'); // 'cases' or 'firs'
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [viewMode, setViewMode] = useState('grid');
+    const { t } = useTranslation('litigant');
 
     const [cases, setCases] = useState([]);
     const [firs, setFirs] = useState([]);
@@ -45,6 +45,14 @@ export default function CaseDiaryPage() {
     const [error, setError] = useState(null);
     const [showHireModal, setShowHireModal] = useState(false);
     const [selectedCaseForLawyer, setSelectedCaseForLawyer] = useState(null);
+
+    const formatStatus = (status) => {
+    if (!status) {
+        return t('statuses.pending');
+    }
+
+    return t(`statuses.${status.toLowerCase()}`);
+    };
 
     useEffect(() => {
         fetchData();
@@ -126,10 +134,10 @@ export default function CaseDiaryPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
                     <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                        Case Diary
+                        {t('caseDiary.title')}
                     </h1>
                     <p style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>
-                        Manage your court cases and police FIRs
+                        {t('caseDiary.subtitle')}
                     </p>
                 </div>
                 <Link
@@ -144,7 +152,7 @@ export default function CaseDiaryPage() {
                     }}
                 >
                     <Plus size={20} />
-                    File New Case
+                    {t('caseDiary.fileNewCase')}
                 </Link>
             </div>
 
@@ -152,21 +160,21 @@ export default function CaseDiaryPage() {
             <div className="grid grid-cols-4 gap-md" style={{ marginBottom: '2rem' }}>
                 <div className="card flex flex-col justify-between">
                     <div className="flex justify-between items-center">
-                        <p className="text-secondary font-semibold text-sm">Total Cases</p>
+                        <p className="text-secondary font-semibold text-sm">{t('caseDiary.total')} {t('caseDiary.cases')}</p>
                         <Scale size={20} className="text-primary" style={{ color: 'var(--color-primary)', opacity: 0.5 }} />
                     </div>
                     <p className="font-bold text-primary" style={{ fontSize: '2rem', color: 'var(--color-primary)' }}>{cases.length}</p>
                 </div>
                 <div className="card flex flex-col justify-between">
                     <div className="flex justify-between items-center">
-                        <p className="text-secondary font-semibold text-sm">Total FIRs</p>
+                        <p className="text-secondary font-semibold text-sm">{t('caseDiary.total')} {t('caseDiary.firs')}</p>
                         <Shield size={20} style={{ color: '#ef4444', opacity: 0.5 }} />
                     </div>
                     <p className="font-bold" style={{ fontSize: '2rem', color: '#ef4444' }}>{firs.length}</p>
                 </div>
                 <div className="card flex flex-col justify-between">
                     <div className="flex justify-between items-center">
-                        <p className="text-secondary font-semibold text-sm">Active</p>
+                        <p className="text-secondary font-semibold text-sm">{t('statuses.active')} </p>
                         <Clock size={20} style={{ color: 'var(--color-primary)', opacity: 0.5 }} />
                     </div>
                     <p className="font-bold" style={{ fontSize: '2rem', color: 'var(--color-primary)' }}>
@@ -175,7 +183,7 @@ export default function CaseDiaryPage() {
                 </div>
                 <div className="card flex flex-col justify-between">
                     <div className="flex justify-between items-center">
-                        <p className="text-secondary font-semibold text-sm">Pending Action</p>
+                        <p className="text-secondary font-semibold text-sm">{t('statuses.pending')} {t('caseDiary.action')}</p>
                         <AlertTriangle size={20} style={{ color: '#f59e0b', opacity: 0.5 }} />
                     </div>
                     <p className="font-bold" style={{ fontSize: '2rem', color: '#f59e0b' }}>
@@ -197,7 +205,7 @@ export default function CaseDiaryPage() {
                         background: activeTab === 'cases' ? 'rgba(30, 42, 68, 0.05)' : 'transparent',
                     }}
                 >
-                    <Scale size={20} /> Court Cases
+                    <Scale size={20} /> {t('caseDiary.court')} {t('caseDiary.cases')}
                 </button>
                 <button
                     onClick={() => setActiveTab('firs')}
@@ -210,7 +218,7 @@ export default function CaseDiaryPage() {
                         background: activeTab === 'firs' ? 'linear-gradient(to top, rgba(239, 68, 68, 0.1), transparent)' : 'transparent',
                     }}
                 >
-                    <Shield size={20} /> Police FIRs
+                    <Shield size={20} /> {t('caseDiary.police')} {t('caseDiary.firs')}
                 </button>
             </div>
 
@@ -225,7 +233,10 @@ export default function CaseDiaryPage() {
                     <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                     <input
                         type="text"
-                        placeholder={activeTab === 'cases' ? "Search by title or Case ID..." : "Search by title or FIR ID..."}
+                        placeholder={activeTab === 'cases'
+                            ? t('caseDiary.searchCasePlaceholder')
+                            : t('caseDiary.searchFirPlaceholder')
+                        }
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 3rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.5rem', color: 'var(--text-main)' }}
@@ -253,13 +264,13 @@ export default function CaseDiaryPage() {
             {loading ? (
                 <div style={{ textAlign: 'center', padding: '4rem' }}>
                     <Loader2 size={40} className="animate-spin" style={{ color: 'var(--color-primary)', margin: '0 auto 1rem' }} />
-                    <p style={{ color: 'var(--text-secondary)' }}>Loading your diary...</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>{t('caseDiary.loadingDiary')} </p>
                 </div>
             ) : filteredItems.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '4rem', background: 'var(--bg-glass)', borderRadius: '1rem' }}>
-                    <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>No entries found</p>
+                    <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{t('caseDiary.noEntries')} </p>
                     <Link to="/litigant/file" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', background: 'var(--color-primary)', borderRadius: '0.5rem', color: 'white', fontWeight: '600' }}>
-                        <Plus size={18} /> File New
+                        <Plus size={18} /> {t('caseDiary.fileNew')}
                     </Link>
                 </div>
             ) : (
@@ -284,14 +295,14 @@ export default function CaseDiaryPage() {
 
                             {activeTab === 'cases' && (
                                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                                    {item.caseType || 'No Type'} • ID: {item.id}
+                                    {item.caseType || t('caseDiary.noType') } • ID: {item.id}
                                 </p>
                             )}
 
                             {activeTab === 'firs' && (
                                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
                                     <Shield size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                                    Police FIR • ID: {item.id} • {item.incidentLocation || 'No Loc'}
+                                    {t('caseDiary.policeFir')} • ID: {item.id} • {item.incidentLocation || t('caseDiary.noLocation')}
                                 </p>
                             )}
 
@@ -303,7 +314,7 @@ export default function CaseDiaryPage() {
                                 {activeTab === 'cases' ? (
                                     <>
                                         <Link to={`/litigant/case-diary/${item.id}`} style={{ flex: 1, textAlign: 'center', padding: '0.75rem', background: 'rgba(30, 42, 68, 0.1)', color: 'var(--color-primary)', borderRadius: '0.5rem', fontWeight: '600' }}>
-                                            View Details
+                                            {t('caseDiary.viewDetails')}
                                         </Link>
                                         {!item.assignedLawyer && item.status !== 'CLOSED' && (
                                             item.lawyerProposalStatus === 'PENDING' ? (
@@ -324,7 +335,7 @@ export default function CaseDiaryPage() {
                                                         gap: '0.5rem'
                                                     }}
                                                 >
-                                                    <Clock size={16} /> Request Sent
+                                                    <Clock size={16} /> {t('caseDiary.requestSent')}
                                                 </button>
                                             ) : (
                                                 <button
@@ -346,7 +357,7 @@ export default function CaseDiaryPage() {
                                                         gap: '0.5rem'
                                                     }}
                                                 >
-                                                    <Gavel size={16} /> Hire Lawyer
+                                                    <Gavel size={16} /> {t('caseDiary.hireLawyer')}
                                                 </button>
                                             )
                                         )}
@@ -370,11 +381,11 @@ export default function CaseDiaryPage() {
                                                 gap: '0.5rem'
                                             }}
                                         >
-                                            <Scale size={16} /> View Linked Court Case
+                                            <Scale size={16} /> {t('caseDiary.viewLinkedCourtCase')}
                                         </Link>
                                     ) : (
                                         <button disabled style={{ flex: 1, textAlign: 'center', padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '0.5rem', fontWeight: '600', opacity: 0.7 }}>
-                                            {item.status === 'REJECTED' ? 'Application Rejected' : 'Processing'}
+                                            {item.status === 'REJECTED' ? t('caseDiary.applicationRejected') : t('caseDiary.processing')}
                                         </button>
                                     )
                                 )}
@@ -404,7 +415,7 @@ export default function CaseDiaryPage() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                 <div>
                                     <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
-                                        Match with Legal Experts
+                                        {t('lawyers.matchExperts')}
                                     </h2>
                                     <p style={{ color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
                                         Select the best lawyer for: <span style={{ color: 'var(--color-primary)', fontWeight: '600' }}>{selectedCaseForLawyer?.title}</span>
@@ -418,13 +429,13 @@ export default function CaseDiaryPage() {
                             {lawyerLoading ? (
                                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem' }}>
                                     <Loader2 size={48} style={{ color: 'var(--color-primary)', animation: 'spin 1s linear infinite' }} />
-                                    <p style={{ color: '#94a3b8', marginTop: '1rem' }}>Sourcing available legal experts...</p>
+                                    <p style={{ color: '#94a3b8', marginTop: '1rem' }}>{t('lawyers.sourcingExperts')}</p>
                                 </div>
                             ) : availableLawyers.length === 0 ? (
                                 <div style={{ flex: 1, textAlign: 'center', padding: '4rem' }}>
                                     <Users size={64} style={{ color: 'var(--text-secondary)', margin: '0 auto 1.5rem' }} />
-                                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem' }}>No lawyers available currently</h3>
-                                    <p style={{ color: 'var(--text-secondary)' }}>Our partner lawyers are currently handling other cases. Please try again shortly.</p>
+                                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem' }}>{t('lawyers.noLawyersAvailable')}</h3>
+                                    <p style={{ color: 'var(--text-secondary)' }}>{t('lawyers.noLawyersDescription')}</p>
                                 </div>
                             ) : (
                                 <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.25rem', padding: '0.5rem' }}>
@@ -458,11 +469,11 @@ export default function CaseDiaryPage() {
 
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                                                 <div style={{ background: 'var(--bg-glass-strong)', padding: '0.75rem', borderRadius: '0.75rem', textAlign: 'center' }}>
-                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: '700' }}>Experience</p>
-                                                    <p style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '600' }}>8+ Years</p>
+                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: '700' }}>{t('lawyers.experience')}</p>
+                                                    <p style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '600' }}>{t('lawyers.experienceValue')}</p>
                                                 </div>
                                                 <div style={{ background: 'var(--bg-glass-strong)', padding: '0.75rem', borderRadius: '0.75rem', textAlign: 'center' }}>
-                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: '700' }}>Cases</p>
+                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem', fontWeight: '700' }}>{t('lawyers.cases')}</p>
                                                     <p style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '600' }}>{lawyer.casesHandled || '120'}+</p>
                                                 </div>
                                             </div>
@@ -485,7 +496,7 @@ export default function CaseDiaryPage() {
                                                 }}
                                             >
                                                 <Check size={18} />
-                                                Select & Send Proposal
+                                                {t('lawyers.selectAndSendProposal')}
                                             </button>
                                         </div>
                                     ))}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authAPI } from '../services/api';
 import useAuthStore from '../store/authStore';
@@ -7,6 +7,8 @@ import { Mail, Lock, Eye, EyeOff, User as UserIcon, Briefcase, Scale, Gavel, Che
 import Header from '../components/landing/Header';
 import FaceCapture from '../components/auth/FaceCapture';
 import { useFaceRecognition } from '../hooks/useFaceRecognition';
+import ContinueAsGuestButton from '../components/guest/ContinueAsGuestButton';
+import { resolvePostAuthPath } from '../utils/authRedirect';
 import '../styles/Biometrics.css';
 
 export default function Signup() {
@@ -26,6 +28,7 @@ export default function Signup() {
     const [registeredUser, setRegisteredUser] = useState(null);
     const [registeredToken, setRegisteredToken] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
     const { setAuth } = useAuthStore();
     const { enrollFace } = useFaceRecognition();
 
@@ -44,10 +47,17 @@ export default function Signup() {
     ];
 
     const getPasswordStrength = (pass) => {
-        if (pass.length < 6) return { label: t('auth:signup.passwordStrength.tooShort', 'Too Short'), color: '#f87171', width: '25%' };
-        if (pass.length < 8) return { label: t('auth:signup.passwordStrength.weak', 'Weak'), color: '#fb923c', width: '50%' };
-        if (!/[A-Z]/.test(pass) || !/[0-9]/.test(pass)) return { label: t('auth:signup.passwordStrength.fair', 'Fair'), color: '#fbbf24', width: '75%' };
-        return { label: t('auth:signup.passwordStrength.strong', 'Strong'), color: '#10b981', width: '100%' };
+        const checks = {
+            minLength: pass.length >= 8,
+            hasUpper: /[A-Z]/.test(pass),
+            hasNumber: /[0-9]/.test(pass),
+            hasSpecial: /[@#$!%*?&]/.test(pass),
+        };
+        const passed = Object.values(checks).filter(Boolean).length;
+        if (passed <= 1) return { label: t('auth:signup.passwordStrength.weak', 'Weak'), color: '#f87171', width: '25%', checks };
+        if (passed === 2) return { label: t('auth:signup.passwordStrength.fair', 'Fair'), color: '#fb923c', width: '50%', checks };
+        if (passed === 3) return { label: t('auth:signup.passwordStrength.good', 'Good'), color: '#fbbf24', width: '75%', checks };
+        return { label: t('auth:signup.passwordStrength.strong', 'Strong'), color: '#10b981', width: '100%', checks };
     };
 
     const handleSubmit = async (e) => {
@@ -59,8 +69,14 @@ export default function Signup() {
             return;
         }
 
-        if (formData.password.length < 6) {
-            setError(t('auth:signup.errors.passwordTooShort', 'Password must be at least 6 characters'));
+        const pwChecks = {
+            minLength: formData.password.length >= 8,
+            hasUpper: /[A-Z]/.test(formData.password),
+            hasNumber: /[0-9]/.test(formData.password),
+            hasSpecial: /[@#$!%*?&]/.test(formData.password),
+        };
+        if (!Object.values(pwChecks).every(Boolean)) {
+            setError('Password must be at least 8 characters, include an uppercase letter, a number, and a special character (@#$!%*?&).');
             return;
         }
 
@@ -99,13 +115,7 @@ export default function Signup() {
 
     const completeSignup = () => {
         setAuth(registeredUser, registeredToken);
-        const roleRoutes = {
-            ADMIN: '/admin',
-            JUDGE: '/judge',
-            LAWYER: '/lawyer',
-            LITIGANT: '/litigant'
-        };
-        navigate(roleRoutes[registeredUser.role] || '/');
+        navigate(resolvePostAuthPath(registeredUser.role, location.state));
     };
 
     const strength = formData.password ? getPasswordStrength(formData.password) : null;
@@ -163,7 +173,12 @@ export default function Signup() {
                 }}>
                     {/* Left Side - Benefits (hidden on mobile) */}
                     {!isMobile && (
-                        <div style={{ color: 'var(--text-main)' }}>
+    <div
+        style={{
+            color: 'var(--text-main)',
+            transform: 'translateY(-120px)'
+        }}
+    >
                             <div style={{ marginBottom: '3rem' }}>
                                 <h1 style={{
                                     fontSize: '3.5rem',
@@ -443,6 +458,18 @@ export default function Signup() {
                                                 <div style={{ height: '4px', background: 'rgba(148, 163, 184, 0.2)', borderRadius: '2px' }}>
                                                     <div style={{ width: strength.width, height: '100%', background: strength.color, borderRadius: '2px', transition: 'width 0.3s' }} />
                                                 </div>
+                                                <ul style={{ margin: '0.5rem 0 0 0', padding: 0, listStyle: 'none' }}>
+                                                    {[
+                                                        [strength.checks?.minLength, 'At least 8 characters'],
+                                                        [strength.checks?.hasUpper,  'At least one uppercase letter'],
+                                                        [strength.checks?.hasNumber, 'At least one number'],
+                                                        [strength.checks?.hasSpecial,'At least one special character (@#$!%*?&)'],
+                                                    ].map(([ok, label]) => (
+                                                        <li key={label} style={{ fontSize: '0.75rem', color: ok ? '#10b981' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.2rem' }}>
+                                                            <span>{ok ? '✓' : '○'}</span> {label}
+                                                        </li>
+                                                    ))}
+                                                </ul>
                                             </div>
                                         )}
                                     </div>
@@ -504,6 +531,7 @@ export default function Signup() {
                                     {/* Create Account Button */}
                                     <button
                                         type="submit"
+                                        className="auth-full-width-btn"
                                         disabled={loading}
                                         style={{
                                             width: '100%',
@@ -523,6 +551,14 @@ export default function Signup() {
                                     >
                                         {loading ? t('auth:signup.signingUp') : t('auth:signup.signUp')}
                                     </button>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1rem 0 0.5rem' }}>
+                                        <div style={{ flex: 1, height: '1px', background: 'rgba(148, 163, 184, 0.25)' }} />
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>or</span>
+                                        <div style={{ flex: 1, height: '1px', background: 'rgba(148, 163, 184, 0.25)' }} />
+                                    </div>
+
+                                    <ContinueAsGuestButton showDivider={false} />
                                 </form>
 
                                 <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
