@@ -7,6 +7,7 @@ Or directly: python tests/test_chunker.py
 
 import sys
 from pathlib import Path
+
 from services.retrieval import chunker
 
 # Allow direct execution from the project root.

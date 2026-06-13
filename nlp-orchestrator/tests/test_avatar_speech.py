@@ -29,12 +29,8 @@ if str(_ROOT) not in sys.path:
 # exit in CI environments without a .env file.
 with patch.dict(os.environ, {"GROQ_API_KEY": "test-key-for-ci"}):
     import avatar_speech
-    from avatar_speech import (
-        HINGLISH_CONVERSION_PROMPT,
-        convert_to_hinglish,
-        detect_domain,
-        get_interim_messages,
-    )
+    from avatar_speech import (HINGLISH_CONVERSION_PROMPT, convert_to_hinglish,
+                               detect_domain, get_interim_messages)
 
 
 # ── Prompt contract: register-tuning regression guards ───────────────────────

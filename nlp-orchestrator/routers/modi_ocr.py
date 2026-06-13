@@ -3,15 +3,10 @@ import time
 from typing import List, Optional
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from pydantic import BaseModel
-
 from models.schemas import ModiOCRResponse
-from services.modi_ocr import (
-    InvalidImageError,
-    ModiOCRServiceError,
-    recognize_modi_image,
-    recognize_modi_pages,
-)
+from pydantic import BaseModel
+from services.modi_ocr import (InvalidImageError, ModiOCRServiceError,
+                               recognize_modi_image, recognize_modi_pages)
 
 logger = logging.getLogger("modi-ocr-router")
 router = APIRouter(prefix="/ocr", tags=["OCR"])

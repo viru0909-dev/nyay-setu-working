@@ -11,18 +11,16 @@ Usage:
 
 import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 # pyrefly: ignore [missing-import]
 import fitz  # PyMuPDF
-
+# pyrefly: ignore [missing-import]
+from langchain.schema import Document
 # pyrefly: ignore [missing-import]
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-
-# pyrefly: ignore [missing-import]
-from langchain.schema import Document
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 BASE_DIR: Path = Path(__file__).resolve().parent.parent

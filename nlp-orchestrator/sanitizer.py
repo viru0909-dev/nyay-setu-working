@@ -11,8 +11,8 @@ All user-facing input should pass through these functions before
 being processed or injected into AI prompts.
 """
 
-import re
 import html
+import re
 
 
 def strip_html_tags(text: str) -> str:

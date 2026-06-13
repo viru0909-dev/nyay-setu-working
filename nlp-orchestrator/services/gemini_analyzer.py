@@ -1,7 +1,8 @@
-from google import genai
 import asyncio
-from config import GEMINI_API_KEY, GEMINI_MODEL
 import logging
+
+from config import GEMINI_API_KEY, GEMINI_MODEL
+from google import genai
 
 logger = logging.getLogger("gemini-analyzer")
 client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None

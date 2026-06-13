@@ -1,6 +1,7 @@
-from groq import AsyncGroq
 import logging
+
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
+from groq import AsyncGroq
 
 logger = logging.getLogger("groq-router")
 client = AsyncGroq(api_key=GROQ_API_KEY)

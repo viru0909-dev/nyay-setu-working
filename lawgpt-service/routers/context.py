@@ -14,9 +14,8 @@ from typing import List, Optional
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
+from lawgpt.retriever import get_chunk_count, is_index_loaded, retrieve
 from pydantic import BaseModel, Field
-
-from lawgpt.retriever import retrieve, is_index_loaded, get_chunk_count
 
 load_dotenv()
 logger = logging.getLogger("lawgpt")
@@ -226,11 +225,8 @@ async def chat(request: ChatRequest) -> ChatResponse:
         context=context, question=request.question
     )
 
-    from utils.query_cache import (
-        get_cached_response,
-        set_cached_response,
-        is_static_query,
-    )
+    from utils.query_cache import (get_cached_response, is_static_query,
+                                   set_cached_response)
 
     cached_answer = None
     if is_static_query(request.question):

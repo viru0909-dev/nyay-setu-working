@@ -16,17 +16,13 @@ import os
 os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
 
 import json
-import pytest
 from unittest.mock import AsyncMock, patch
 
-from synthesizer import (
-    synthesize_answers_structured,
-    extract_cited_laws_from_markdown,
-    _normalize_cited_law,
-    _dedupe_cited_laws,
-    _strip_json_fence,
-)
+import pytest
 from models.schemas import SynthesisResult
+from synthesizer import (_dedupe_cited_laws, _normalize_cited_law,
+                         _strip_json_fence, extract_cited_laws_from_markdown,
+                         synthesize_answers_structured)
 
 RESEARCH = [
     {

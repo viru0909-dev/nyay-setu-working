@@ -1,9 +1,10 @@
-from cachetools import TTLCache
-from threading import Lock
 import hashlib
-import os
-from dotenv import load_dotenv
 import logging
+import os
+from threading import Lock
+
+from cachetools import TTLCache
+from dotenv import load_dotenv
 
 load_dotenv()
 logger = logging.getLogger("lawgpt")

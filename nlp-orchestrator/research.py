@@ -25,28 +25,15 @@ Architecture:
 import asyncio
 import logging
 
+import httpx
+from config import (GEMINI_API_KEY, GEMINI_MODEL, GROQ_API_KEY,
+                    GROQ_MODEL_FAST, GROUND_RESEARCH, OLLAMA_API_URL,
+                    OLLAMA_MODEL, PROVIDER_ORDER, RETRY_DELAY_SECONDS,
+                    RETRY_ENABLED, RETRY_MAX_ATTEMPTS)
 from google import genai
 from groq import AsyncGroq
-from config import (
-    GEMINI_API_KEY,
-    GEMINI_MODEL,
-    GROQ_API_KEY,
-    GROQ_MODEL_FAST,
-    GROUND_RESEARCH,
-    RETRY_ENABLED,
-    RETRY_MAX_ATTEMPTS,
-    RETRY_DELAY_SECONDS,
-    PROVIDER_ORDER,
-    OLLAMA_API_URL,
-    OLLAMA_MODEL,
-)
-import httpx
 
-from utils import (
-    CircuitBreaker,
-    retry_transient,
-    is_retryable_exception,
-)
+from utils import CircuitBreaker, is_retryable_exception, retry_transient
 
 logger = logging.getLogger(__name__)
 

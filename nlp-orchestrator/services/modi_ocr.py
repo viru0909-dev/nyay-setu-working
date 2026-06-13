@@ -8,10 +8,9 @@ from typing import Any
 
 import cv2
 import numpy as np
+from config import HF_TOKEN, TROCR_DEVICE, TROCR_MODEL_NAME
 from PIL import Image, UnidentifiedImageError
 from services.deskew_service import deskew_image
-
-from config import HF_TOKEN, TROCR_DEVICE, TROCR_MODEL_NAME
 
 logger = logging.getLogger("modi-ocr-service")
 

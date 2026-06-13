@@ -6,8 +6,9 @@ Includes relevant IPC / BNS / MVA section references.
 
 import json
 import re
-from groq import AsyncGroq
+
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
+from groq import AsyncGroq
 from legal_utils.citation_extractor import extract_legal_citations
 from models.schemas import SynthesisResult
 

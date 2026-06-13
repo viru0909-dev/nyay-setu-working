@@ -8,10 +8,11 @@ Closes #1115
 
 import io
 import logging
-from PIL import Image
-import pytesseract
+
 import cv2
 import numpy as np
+import pytesseract
+from PIL import Image
 
 logger = logging.getLogger("ocr-service")
 

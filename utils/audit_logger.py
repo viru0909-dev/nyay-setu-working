@@ -1,10 +1,11 @@
 import json
 import logging
-from logging.handlers import RotatingFileHandler
 import os
 from datetime import datetime, timezone
-from flask import request, current_app
+from logging.handlers import RotatingFileHandler
 from threading import Thread
+
+from flask import current_app, request
 
 # 6. Optional (Bonus - Production Ready)
 # Move log file path to .env

@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 cam1_path = r"reconstruction\output_frames\cam1"
 cam2_path = r"reconstruction\output_frames\cam2"

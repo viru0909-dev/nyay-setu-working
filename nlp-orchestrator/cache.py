@@ -2,9 +2,9 @@
 Simple In-Memory TTL Cache for NLP Responses
 """
 
-import time
 import hashlib
 import logging
+import time
 
 logger = logging.getLogger("nlp-cache")
 

@@ -14,8 +14,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 from fastapi import FastAPI
-
-from lawgpt.retriever import load_vectorstore, get_chunk_count
+from lawgpt.retriever import get_chunk_count, load_vectorstore
 from routers.context import router as context_router
 from routers.document import router as document_router
 

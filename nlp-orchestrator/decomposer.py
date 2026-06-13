@@ -4,8 +4,9 @@ Breaks a complex legal question into 3-5 focused sub-questions using Groq LPU.
 """
 
 import json
-from groq import AsyncGroq
+
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
+from groq import AsyncGroq
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 

@@ -5,8 +5,9 @@ Layer 5: Avatar Speech Layer
 """
 
 import random
-from groq import AsyncGroq
+
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
+from groq import AsyncGroq
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 

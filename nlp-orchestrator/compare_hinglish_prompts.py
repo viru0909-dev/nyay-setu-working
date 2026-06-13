@@ -116,7 +116,8 @@ async def run_prompt(client, model: str, prompt_template: str, answer: str) -> s
 
 
 async def main_async(new_prompt: str, model: str) -> int:
-    from groq import AsyncGroq  # imported here so --dry-run needs no groq install
+    from groq import \
+        AsyncGroq  # imported here so --dry-run needs no groq install
 
     client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
     old_total, new_total = 0, 0

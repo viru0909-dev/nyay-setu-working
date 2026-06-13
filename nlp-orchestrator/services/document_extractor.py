@@ -2,10 +2,10 @@ import io
 import logging
 
 try:
-    from pdf2image import convert_from_bytes
-    import pytesseract
-    from PIL import Image
     import docx
+    import pytesseract
+    from pdf2image import convert_from_bytes
+    from PIL import Image
 except ImportError:
     logging.warning(
         "Optional dependencies for multi-modal extraction missing. Run pip install pytesseract pdf2image python-docx"

@@ -23,7 +23,7 @@ import time
 from unittest.mock import patch
 
 import services.modi_ocr as modi_ocr
-from services.modi_ocr import recognize_modi_pages, ModiOCRServiceError
+from services.modi_ocr import ModiOCRServiceError, recognize_modi_pages
 
 
 @pytest.mark.asyncio

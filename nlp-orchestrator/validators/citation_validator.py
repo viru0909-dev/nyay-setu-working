@@ -1,9 +1,8 @@
 import json
 import re
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
-from functools import lru_cache
-
 
 from legal_utils.citation_extractor import extract_legal_citations
 

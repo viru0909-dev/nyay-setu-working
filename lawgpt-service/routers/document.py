@@ -15,14 +15,10 @@ from typing import Dict, List, Literal, Optional
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
-
+from lawgpt.prompt_builder import (build_prompt, detect_prompt_injection,
+                                   validate_required_fields)
 from lawgpt.retriever import retrieve
-from lawgpt.prompt_builder import (
-    build_prompt,
-    validate_required_fields,
-    detect_prompt_injection,
-)
+from pydantic import BaseModel, Field
 
 load_dotenv()
 logger = logging.getLogger("lawgpt")
@@ -495,15 +491,11 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
 def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
     """Convert generated document text to a styled A4 PDF using ReportLab."""
     try:
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import inch
-        from reportlab.platypus import (
-            SimpleDocTemplate,
-            Paragraph,
-            Spacer,
-        )
-        from reportlab.lib.enums import TA_CENTER, TA_LEFT
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
     except ImportError:
         raise HTTPException(
             status_code=500,

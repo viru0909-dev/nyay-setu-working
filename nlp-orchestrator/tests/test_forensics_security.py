@@ -4,9 +4,9 @@ import sys
 import types
 
 import pytest
-
 from models.schemas import ForensicsRequest
-from services.url_security import UnsafeVideoUrlError, validate_public_video_url
+from services.url_security import (UnsafeVideoUrlError,
+                                   validate_public_video_url)
 from services.video_processor import download_video
 
 
