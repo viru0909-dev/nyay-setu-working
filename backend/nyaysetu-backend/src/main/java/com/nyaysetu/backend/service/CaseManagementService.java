@@ -206,12 +206,16 @@ public class CaseManagementService {
         if (approved) {
             caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.APPROVED);
             timelineService.addEvent(caseId, "DRAFT_APPROVED", "Client approved the petition draft.");
+            notifyCaseParties(caseEntity, "Draft Approved",
+                    "The petition draft for your case has been approved by the client.");
         } else {
             // Revert or stay in draft? "Revert to in-progress" or "Changes Requested"
             // For now, staying in pending or moving back to lawyer
             // Ideally we need status CHANGES_REQUESTED
             caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.IN_PROGRESS); 
             timelineService.addEvent(caseId, "DRAFT_REJECTED", "Client requested changes: " + comments);
+            notifyCaseParties(caseEntity, "Draft Changes Requested",
+                    "The client has requested changes to the petition draft: " + comments);
         }
         
         caseRepository.save(caseEntity);
@@ -276,6 +280,38 @@ public class CaseManagementService {
     }
 
     /**
+     * Sends a real-time notification to the client and lawyer associated
+     * with a case whenever its status, stage, or judicial progress changes.
+     * Notifications are persisted and pushed over WebSocket via
+     * {@link com.nyaysetu.backend.notification.service.NotificationService}.
+     */
+    private void notifyCaseParties(CaseEntity caseEntity, String title, String message) {
+        if (caseEntity.getClient() != null) {
+            notificationService.save(
+                    com.nyaysetu.backend.notification.entity.Notification.builder()
+                            .userId(caseEntity.getClient().getId())
+                            .title(title)
+                            .message(message)
+                            .readFlag(false)
+                            .createdAt(java.time.Instant.now())
+                            .build()
+            );
+        }
+
+        if (caseEntity.getLawyer() != null) {
+            notificationService.save(
+                    com.nyaysetu.backend.notification.entity.Notification.builder()
+                            .userId(caseEntity.getLawyer().getId())
+                            .title(title)
+                            .message(message)
+                            .readFlag(false)
+                            .createdAt(java.time.Instant.now())
+                            .build()
+            );
+        }
+    }
+
+    /**
      * Judge orders a notice to be sent to the Respondent.
      * Triggers email via EmailService and updates case timeline.
      */
@@ -297,6 +333,9 @@ public class CaseManagementService {
             "SUMMONS_ISSUED",
             "Judge ordered formal notice to Respondent. Electronic summons initiated."
         );
+
+        notifyCaseParties(caseEntity, "Case Update: Notice Issued",
+                "The judge has ordered formal notice to be sent to the respondent. Your case has advanced to the Notice stage.");
 
         // Only send email if respondent email is available
         String respondentEmail = caseEntity.getRespondentEmail();
@@ -333,6 +372,8 @@ public class CaseManagementService {
             "HEARINGS_STARTED",
             "Judge has initiated the hearings phase for this case."
         );
+        notifyCaseParties(caseEntity, "Case Update: Hearings Started",
+                "Your case has moved into the Hearings stage.");
         log.info("Hearings started for case {}", caseId);
     }
 
@@ -351,6 +392,8 @@ public class CaseManagementService {
             "EVIDENCE_STARTED",
             "Judge has initiated the evidence phase for this case."
         );
+        notifyCaseParties(caseEntity, "Case Update: Evidence Phase",
+                "Your case has moved into the Evidence stage.");
         log.info("Evidence phase started for case {}", caseId);
     }
 
@@ -369,6 +412,8 @@ public class CaseManagementService {
             "ARGUMENTS_STARTED",
             "Judge has initiated the final arguments phase for this case."
         );
+        notifyCaseParties(caseEntity, "Case Update: Final Arguments",
+                "Your case has moved into the Final Arguments stage.");
         log.info("Arguments phase started for case {}", caseId);
     }
 
@@ -388,6 +433,8 @@ public class CaseManagementService {
             "JUDGMENT_PENDING",
             "Arguments have concluded. The judge is now deliberating on the verdict."
         );
+        notifyCaseParties(caseEntity, "Case Update: Judgment Pending",
+                "Arguments have concluded. The judge is now deliberating on the verdict for your case.");
         log.info("Judgment pending phase started for case {}", caseId);
     }
 
@@ -407,6 +454,8 @@ public class CaseManagementService {
             "VERDICT_DELIVERED",
             "The final verdict has been delivered: " + verdictDetails
         );
+        notifyCaseParties(caseEntity, "Case Update: Verdict Delivered",
+                "The final verdict has been delivered for your case.");
         log.info("Verdict delivered for case {}", caseId);
     }
     
