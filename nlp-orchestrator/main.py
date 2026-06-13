@@ -114,8 +114,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Nyay Saarthi — NLP Orchestrator",
-    description=("Legal Reasoning Pipeline: "
-                 "Decompose → Route → Research → Synthesize → Speak"),
+    description=(
+        "Legal Reasoning Pipeline: " "Decompose → Route → Research → Synthesize → Speak"
+    ),
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -572,7 +573,8 @@ async def deep_research_pipeline(query: str, language: str):
         complexity = min(1.0, (complex_score * 0.3 + word_count * 0.02))
         model_choice = "gemini" if complexity >= 0.5 else "groq"
         model_text = (
-            "Gemini for deep analysis" if model_choice == "gemini"
+            "Gemini for deep analysis"
+            if model_choice == "gemini"
             else "Groq for fast response"
         )
         yield sse_event(
