@@ -1,10 +1,9 @@
-import ipaddress
-import socket
-from urllib.parse import urlparse
-
 import asyncio
+import ipaddress
 import os
+import socket
 from typing import List
+from urllib.parse import urlparse
 
 import aiohttp
 import cv2

@@ -173,14 +173,14 @@ def main():
 
         if missing_keys:
             print(
-                f"  [ERROR] Mismatches found! The following keys are used in code but missing from .env.example:"
+                "  [ERROR] Mismatches found! The following keys are used in code but missing from .env.example:"
             )
             for key in sorted(missing_keys):
                 print(f"    - {key}")
             mismatch_found = True
         else:
             print(
-                f"  [OK] Validation passed! All code env keys are documented in templates."
+                "  [OK] Validation passed! All code env keys are documented in templates."
             )
 
     if mismatch_found:

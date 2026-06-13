@@ -15,10 +15,8 @@ from typing import Dict, List
 
 # pyrefly: ignore [missing-import]
 import fitz  # PyMuPDF
-
 # pyrefly: ignore [missing-import]
 from langchain.schema import Document
-
 # pyrefly: ignore [missing-import]
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings

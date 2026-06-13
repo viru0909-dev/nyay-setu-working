@@ -225,11 +225,8 @@ async def chat(request: ChatRequest) -> ChatResponse:
         context=context, question=request.question
     )
 
-    from utils.query_cache import (
-        get_cached_response,
-        is_static_query,
-        set_cached_response,
-    )
+    from utils.query_cache import (get_cached_response, is_static_query,
+                                   set_cached_response)
 
     cached_answer = None
     if is_static_query(request.question):

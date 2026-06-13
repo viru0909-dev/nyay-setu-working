@@ -17,21 +17,16 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 
-from avatar_speech import convert_to_hinglish, detect_domain, get_interim_messages
+from avatar_speech import (convert_to_hinglish, detect_domain,
+                           get_interim_messages)
 from cache import generate_cache_key, get_cached_response, set_cached_response
-from config import (
-    FRONTEND_ORIGIN,
-    GEMINI_API_KEY,
-    GEMINI_MODEL,
-    GROQ_API_KEY,
-    GROQ_MODEL_FAST,
-)
+from config import (FRONTEND_ORIGIN, GEMINI_API_KEY, GEMINI_MODEL,
+                    GROQ_API_KEY, GROQ_MODEL_FAST)
 from decomposer import decompose_query
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from google import genai
-
 # Initialize clients for deep research pipeline
 from groq import AsyncGroq
 from pydantic import BaseModel, field_validator
@@ -41,10 +36,8 @@ from sanitizer import sanitize_prompt_input, sanitize_user_input
 from services.kanoon_search import build_kanoon_context
 from sse_starlette.sse import EventSourceResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from synthesizer import (
-    stream_synthesize_answers_structured,
-    synthesize_answers_structured,
-)
+from synthesizer import (stream_synthesize_answers_structured,
+                         synthesize_answers_structured)
 from validators.citation_validator import validate_citations_from_text
 
 from utils import async_retry

@@ -138,41 +138,6 @@ def split_legal_sections(text: str) -> list[str]:
     return blocks
 
 
-def chunk_text(
-    text: str,
-    max_tokens: int = 512,
-    overlap_tokens: int = 64,
-) -> list[str]:
-    """
-    Split `text` into section-aligned blocks at legal-section headings.
-
-    Each returned block begins with its heading (e.g. "Section 304A ...") and
-    runs up to — but not including — the next heading. Any preamble before the
-    first heading is returned as its own leading block so no content is lost.
-
-    If the text contains no recognisable headings, a single-element list with
-    the whole (stripped) text is returned, which makes this a safe no-op for
-    free-form prose.
-    """
-    if not text or not text.strip():
-        return []
-
-    starts = [m.start() for m in _SECTION_HEADING_RE.finditer(text)]
-    if not starts:
-        return [text.strip()]
-
-    # Ensure the preamble (anything before the first heading) is preserved.
-    boundaries = starts if starts[0] == 0 else [0, *starts]
-
-    blocks: list[str] = []
-    for idx, start in enumerate(boundaries):
-        end = boundaries[idx + 1] if idx + 1 < len(boundaries) else len(text)
-        block = text[start:end].strip()
-        if block:
-            blocks.append(block)
-    return blocks
-
-
 def _chunk_block(
     text: str,
     max_tokens: int,

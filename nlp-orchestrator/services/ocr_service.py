@@ -70,3 +70,8 @@ def run_ocr(file_bytes: bytes, content_type: str, filename: str) -> dict:
         doc_type = "image"
     elif ct == SUPPORTED_PDF_TYPE:
         text = _extract_from_pdf(file_bytes)
+        doc_type = "pdf"
+    else:
+        raise ValueError("Unsupported file type.")
+
+    return {"text": text, "type": doc_type, "filename": filename}
