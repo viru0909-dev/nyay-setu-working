@@ -11,10 +11,10 @@ import './styles/accessibility.css';
 import ScrollProgressBar from './components/ScrollProgressBar';
 
 // PWA Components
-import OfflineIndicator from './components/OfflineIndicator';
-import UpdateNotification from './components/UpdateNotification';
-import GuestWelcomeToast from './components/guest/GuestWelcomeToast';
-import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
+import OfflineIndicator from "./components/OfflineIndicator";
+import UpdateNotification from "./components/UpdateNotification";
+import GuestWelcomeToast from "./components/guest/GuestWelcomeToast";
+import GuestOnboardingHint from "./components/guest/GuestOnboardingHint";
 
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
@@ -111,7 +111,7 @@ const InvestigationDetailsPage = retryLazy(() => import('./pages/police/Investig
 // CORE AUTH ROUTE LOGIC
 // ==========================================
 const GuestAuthRedirect = ({ location }) => {
-    const setGuestIntent = useAuthStore((s) => s.setGuestIntent);
+  const setGuestIntent = useAuthStore((s) => s.setGuestIntent);
 
     useEffect(() => {
         if (!location.pathname.includes('/signup') && !location.pathname.includes('/login')) {
@@ -122,7 +122,7 @@ const GuestAuthRedirect = ({ location }) => {
         }
     }, [location.pathname, location.search, setGuestIntent]);
 
-    return <Navigate to="/signup" replace state={{ from: location }} />;
+  return <Navigate to="/signup" replace state={{ from: location }} />;
 };
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -133,19 +133,19 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     const isGuest = useAuthStore((s) => s.isGuest);
     const user = useAuthStore((s) => s.user);
 
-    if (isGuest) {
-        return <GuestAuthRedirect location={location} />;
-    }
+  if (isGuest) {
+    return <GuestAuthRedirect location={location} />;
+  }
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace state={{ from: location }} />;
-    }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
 
-    if (allowedRoles && !allowedRoles.includes(user?.role)) {
-        return <Navigate to="/unauthorized" replace />;
-    }
+  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
-    return children;
+  return children;
 };
 
 // Structural Workspace wrapper isolating Suspense performance bounds
@@ -196,9 +196,15 @@ function App({ swRegistration }) {
     const initAuth = useAuthStore((s) => s.initAuth);
     const user = useAuthStore((s) => s.user);
 
-    useEffect(() => {
-        initAuth();
-    }, [initAuth]);
+  return (
+    // CHANGED: ThemeProvider is the outermost wrapper so the theme CSS attribute
+    // is set on <html> before any child renders — prevents flash of wrong theme
+    <ThemeProvider>
+      <ErrorBoundary>
+        <LanguageProvider>
+          {/* Global PWA Components */}
+          <OfflineIndicator />
+          <UpdateNotification registration={swRegistration} />
 
     return (
         <ThemeProvider>
