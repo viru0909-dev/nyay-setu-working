@@ -206,12 +206,14 @@ public class CaseManagementService {
         if (approved) {
             caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.APPROVED);
             timelineService.addEvent(caseId, "DRAFT_APPROVED", "Client approved the petition draft.");
+            sendCaseStatusNotification(caseEntity, "Draft Petition Approved", "The client has approved the draft petition. You can now file the case in court.", caseEntity.getClient() != null ? caseEntity.getClient().getId() : null);
         } else {
             // Revert or stay in draft? "Revert to in-progress" or "Changes Requested"
             // For now, staying in pending or moving back to lawyer
             // Ideally we need status CHANGES_REQUESTED
             caseEntity.setStatus(com.nyaysetu.backend.entity.CaseStatus.IN_PROGRESS); 
             timelineService.addEvent(caseId, "DRAFT_REJECTED", "Client requested changes: " + comments);
+            sendCaseStatusNotification(caseEntity, "Draft Petition Rejected", "The client has rejected the draft petition: " + comments, caseEntity.getClient() != null ? caseEntity.getClient().getId() : null);
         }
         
         caseRepository.save(caseEntity);
@@ -315,6 +317,7 @@ public class CaseManagementService {
             }
         }
 
+        sendCaseStatusNotification(caseEntity, "Summons Notice Issued", "Judge ordered formal notice to Respondent. Electronic summons initiated.", null);
         log.info("Summons ordered for case {} to respondent email: {}", caseId, respondentEmail);
     }
     
@@ -333,6 +336,7 @@ public class CaseManagementService {
             "HEARINGS_STARTED",
             "Judge has initiated the hearings phase for this case."
         );
+        sendCaseStatusNotification(caseEntity, "Hearings Phase Started", "Judge has initiated the hearings phase for this case.", null);
         log.info("Hearings started for case {}", caseId);
     }
 
@@ -351,6 +355,7 @@ public class CaseManagementService {
             "EVIDENCE_STARTED",
             "Judge has initiated the evidence phase for this case."
         );
+        sendCaseStatusNotification(caseEntity, "Evidence Phase Started", "Judge has initiated the evidence phase for this case.", null);
         log.info("Evidence phase started for case {}", caseId);
     }
 
@@ -369,6 +374,7 @@ public class CaseManagementService {
             "ARGUMENTS_STARTED",
             "Judge has initiated the final arguments phase for this case."
         );
+        sendCaseStatusNotification(caseEntity, "Arguments Phase Started", "Judge has initiated the final arguments phase for this case.", null);
         log.info("Arguments phase started for case {}", caseId);
     }
 
@@ -388,6 +394,7 @@ public class CaseManagementService {
             "JUDGMENT_PENDING",
             "Arguments have concluded. The judge is now deliberating on the verdict."
         );
+        sendCaseStatusNotification(caseEntity, "Judgment Pending", "Arguments have concluded. The judge is now deliberating on the verdict.", null);
         log.info("Judgment pending phase started for case {}", caseId);
     }
 
@@ -407,6 +414,7 @@ public class CaseManagementService {
             "VERDICT_DELIVERED",
             "The final verdict has been delivered: " + verdictDetails
         );
+        sendCaseStatusNotification(caseEntity, "Verdict Delivered", "The final verdict has been delivered: " + verdictDetails, null);
         log.info("Verdict delivered for case {}", caseId);
     }
     
@@ -495,6 +503,37 @@ public class CaseManagementService {
 
         log.info("Updated respondent details for case {}: Email={}, Identified={}", 
                  caseId, details.getRespondentEmail(), details.getRespondentIdentified());
+    }
+
+    private void sendCaseStatusNotification(CaseEntity caseEntity, String title, String message, Long excludeUserId) {
+        try {
+            // Notify Client (Litigant)
+            if (caseEntity.getClient() != null && !caseEntity.getClient().getId().equals(excludeUserId)) {
+                notificationService.save(com.nyaysetu.backend.notification.entity.Notification.builder()
+                        .userId(caseEntity.getClient().getId())
+                        .title(title)
+                        .message(message)
+                        .build());
+            }
+            // Notify Lawyer
+            if (caseEntity.getLawyer() != null && !caseEntity.getLawyer().getId().equals(excludeUserId)) {
+                notificationService.save(com.nyaysetu.backend.notification.entity.Notification.builder()
+                        .userId(caseEntity.getLawyer().getId())
+                        .title(title)
+                        .message(message)
+                        .build());
+            }
+            // Notify Judge
+            if (caseEntity.getJudgeId() != null && !caseEntity.getJudgeId().equals(excludeUserId)) {
+                notificationService.save(com.nyaysetu.backend.notification.entity.Notification.builder()
+                        .userId(caseEntity.getJudgeId())
+                        .title(title)
+                        .message(message)
+                        .build());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to send status notification: {}", e.getMessage());
+        }
     }
 }
 

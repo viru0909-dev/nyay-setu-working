@@ -17,6 +17,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.nyaysetu.backend.notification.entity.Notification;
+import com.nyaysetu.backend.notification.service.NotificationService;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +34,7 @@ public class DocumentManagementService {
     private final FileStorageService fileStorageService;
     private final DocumentAnalysisService documentAnalysisService;
     private final BlockchainService blockchainService;
+    private final NotificationService notificationService;
 
     @Transactional
     public DocumentDto uploadDocument(MultipartFile file, UploadDocumentRequest request, User uploader, String uploadIp) {
@@ -69,6 +72,48 @@ public class DocumentManagementService {
                 .build();
 
         DocumentEntity saved = documentRepository.save(document);
+
+        // Send Notification if associated with a case
+        if (saved.getCaseId() != null) {
+            try {
+                caseRepository.findById(saved.getCaseId()).ifPresent(caseObj -> {
+                    String notifTitle = "New Document Uploaded";
+                    String msg = String.format("A new document '%s' has been uploaded to case '%s' by %s.",
+                            saved.getFileName(), caseObj.getTitle(), uploader.getName());
+                    
+                    // Notify Client
+                    if (caseObj.getClient() != null && !caseObj.getClient().getId().equals(uploader.getId())) {
+                        notificationService.save(Notification.builder()
+                                .userId(caseObj.getClient().getId())
+                                .title(notifTitle)
+                                .message(msg)
+                                .build());
+                    }
+                    
+                    // Notify Lawyer
+                    if (caseObj.getLawyer() != null && !caseObj.getLawyer().getId().equals(uploader.getId())) {
+                        notificationService.save(Notification.builder()
+                                .userId(caseObj.getLawyer().getId())
+                                .title(notifTitle)
+                                .message(msg)
+                                .build());
+                    }
+                    
+                    // Notify Judge
+                    if (caseObj.getJudgeId() != null && !caseObj.getJudgeId().equals(uploader.getId())) {
+                        notificationService.save(Notification.builder()
+                                .userId(caseObj.getJudgeId())
+                                .title(notifTitle)
+                                .message(msg)
+                                .build());
+                    }
+                });
+            } catch (Exception e) {
+                org.slf4j.LoggerFactory.getLogger(DocumentManagementService.class)
+                    .warn("Failed to send document upload notification: {}", e.getMessage());
+            }
+        }
+
         return convertToDto(saved);
     }
 

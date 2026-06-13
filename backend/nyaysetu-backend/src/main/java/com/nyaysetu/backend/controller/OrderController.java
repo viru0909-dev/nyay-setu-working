@@ -3,6 +3,9 @@ package com.nyaysetu.backend.controller;
 import com.nyaysetu.backend.entity.CourtOrder;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CourtOrderRepository;
+import com.nyaysetu.backend.repository.CaseRepository;
+import com.nyaysetu.backend.notification.entity.Notification;
+import com.nyaysetu.backend.notification.service.NotificationService;
 import com.nyaysetu.backend.service.AuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,8 @@ public class OrderController {
 
     private final CourtOrderRepository orderRepository;
     private final AuthService authService;
+    private final CaseRepository caseRepository;
+    private final NotificationService notificationService;
 
     /**
      * Get all orders for a specific case
@@ -114,9 +119,41 @@ public class OrderController {
             }
             if (request.containsKey("status")) {
                 String newStatus = (String) request.get("status");
+                String oldStatus = order.getStatus();
                 order.setStatus(newStatus);
                 if ("ISSUED".equals(newStatus) || "FINAL".equals(newStatus)) {
                     order.setIssuedAt(LocalDateTime.now());
+                    
+                    // Notify parties if it transitions to ISSUED/FINAL
+                    if (!"ISSUED".equals(oldStatus) && !"FINAL".equals(oldStatus)) {
+                        try {
+                            caseRepository.findById(order.getCaseId()).ifPresent(caseEntity -> {
+                                String notifTitle = "New Court Order Issued";
+                                String msg = String.format("A new court order of type '%s' has been issued for your case '%s'.",
+                                        order.getOrderType(), caseEntity.getTitle());
+                                
+                                // Notify Litigant
+                                if (caseEntity.getClient() != null) {
+                                    notificationService.save(Notification.builder()
+                                            .userId(caseEntity.getClient().getId())
+                                            .title(notifTitle)
+                                            .message(msg)
+                                            .build());
+                                }
+                                
+                                // Notify Lawyer
+                                if (caseEntity.getLawyer() != null) {
+                                    notificationService.save(Notification.builder()
+                                            .userId(caseEntity.getLawyer().getId())
+                                            .title(notifTitle)
+                                            .message(msg)
+                                            .build());
+                                }
+                            });
+                        } catch (Exception e) {
+                            log.error("Failed to send order notification", e);
+                        }
+                    }
                 }
             }
             
