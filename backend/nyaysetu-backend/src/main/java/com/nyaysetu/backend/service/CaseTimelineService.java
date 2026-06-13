@@ -17,14 +17,14 @@ public class CaseTimelineService {
 
     public void addEvent(UUID caseId, String event) {
         repo.save(CaseTimeline.builder()
-                .legalCaseId(caseId)        // builder field assumed 'legalCaseId'
+                .CaseEntityId(caseId)        // builder field assumed 'CaseEntityId'
                 .event(event)
                 .timestamp(LocalDateTime.now())
                 .build());
     }
 
     public List<CaseTimeline> getTimeline(UUID caseId) {
-        return repo.findByLegalCaseIdOrderByTimestampAsc(caseId);
+        return repo.findByCaseEntityIdOrderByTimestampAsc(caseId);
     }
 
     public void logPoliceViewed(UUID caseId, String officerName) {
@@ -42,7 +42,7 @@ public class CaseTimelineService {
     public void addEvent(UUID caseId, String type, String description) {
         // Combine type and description into single event field
         repo.save(CaseTimeline.builder()
-                .legalCaseId(caseId)
+                .CaseEntityId(caseId)
                 .event(type + ": " + description)
                 .timestamp(LocalDateTime.now())
                 .build());

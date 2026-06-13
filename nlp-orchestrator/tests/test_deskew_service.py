@@ -4,7 +4,6 @@ Tests for deskew_service.py
 
 import numpy as np
 from PIL import Image, ImageDraw
-
 from services.deskew_service import deskew_image, deskew_images
 
 
@@ -19,6 +18,7 @@ def _make_skewed_image(angle_deg: float) -> Image.Image:
     draw = ImageDraw.Draw(img)
     # Draw a line at the given angle across the image
     import math
+
     cx, cy = 200, 100
     length = 150
     rad = math.radians(angle_deg)

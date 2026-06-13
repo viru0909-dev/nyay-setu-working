@@ -3,7 +3,6 @@ from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
-
 from main import app
 
 
@@ -15,7 +14,12 @@ class FakeLLM:
 @pytest.fixture(autouse=True)
 def patch_retriever_and_llm(monkeypatch):
     def fake_retrieve(query, k=3):
-        return [SimpleNamespace(page_content="Section: IPC 379 — Theft", metadata={"source": "IPC", "page": 1})]
+        return [
+            SimpleNamespace(
+                page_content="Section: IPC 379 — Theft",
+                metadata={"source": "IPC", "page": 1},
+            )
+        ]
 
     monkeypatch.setattr("routers.document.retrieve", fake_retrieve)
 
@@ -23,6 +27,7 @@ def patch_retriever_and_llm(monkeypatch):
         return FakeLLM(), "fake"
 
     monkeypatch.setattr("routers.document._get_doc_llm", fake_get_doc_llm)
+
     # Patch PDF/DOCX creation helpers to avoid heavy dependencies in tests
     def fake_create_pdf(response, petitioner_name):
         return io.BytesIO(b"%PDF\n" + response.content.encode("utf-8"))
@@ -68,7 +73,10 @@ def test_generate_docx_success():
     payload = {"doc_type": "complaint", "fields": base_fields()}
     resp = c.post("/generate/docx", json=payload)
     assert resp.status_code == 200, resp.text
-    assert resp.headers.get("content-type", "") == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    assert (
+        resp.headers.get("content-type", "")
+        == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
     cd = resp.headers.get("content-disposition", "")
     assert "attachment" in cd and payload["doc_type"] in cd
     data = resp.content

@@ -5,8 +5,9 @@ Layer 5: Avatar Speech Layer
 """
 
 import random
-from groq import AsyncGroq
+
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
+from groq import AsyncGroq
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
@@ -55,13 +56,84 @@ INTERIM_TEMPLATES = {
 
 # Domain detection keywords
 DOMAIN_KEYWORDS = {
-    "accident": ["accident", "vehicle", "car", "bike", "road", "collision", "injury", "mva", "motor"],
-    "property": ["property", "land", "house", "flat", "rent", "tenant", "possession", "registration"],
-    "criminal": ["fir", "police", "arrest", "bail", "crime", "criminal", "murder", "theft", "fraud", "ipc", "bns"],
-    "consumer": ["consumer", "product", "defect", "refund", "company", "service", "complaint"],
-    "family": ["divorce", "marriage", "custody", "alimony", "maintenance", "wife", "husband", "child"],
-    "labour": ["job", "employment", "salary", "fired", "boss", "company", "labour", "worker", "wage"],
-    "legal": ["law", "court", "judge", "advocate", "lawyer", "justice", "legal", "section", "article", "constitution", "act", "rule"],
+    "accident": [
+        "accident",
+        "vehicle",
+        "car",
+        "bike",
+        "road",
+        "collision",
+        "injury",
+        "mva",
+        "motor",
+    ],
+    "property": [
+        "property",
+        "land",
+        "house",
+        "flat",
+        "rent",
+        "tenant",
+        "possession",
+        "registration",
+    ],
+    "criminal": [
+        "fir",
+        "police",
+        "arrest",
+        "bail",
+        "crime",
+        "criminal",
+        "murder",
+        "theft",
+        "fraud",
+        "ipc",
+        "bns",
+    ],
+    "consumer": [
+        "consumer",
+        "product",
+        "defect",
+        "refund",
+        "company",
+        "service",
+        "complaint",
+    ],
+    "family": [
+        "divorce",
+        "marriage",
+        "custody",
+        "alimony",
+        "maintenance",
+        "wife",
+        "husband",
+        "child",
+    ],
+    "labour": [
+        "job",
+        "employment",
+        "salary",
+        "fired",
+        "boss",
+        "company",
+        "labour",
+        "worker",
+        "wage",
+    ],
+    "legal": [
+        "law",
+        "court",
+        "judge",
+        "advocate",
+        "lawyer",
+        "justice",
+        "legal",
+        "section",
+        "article",
+        "constitution",
+        "act",
+        "rule",
+    ],
 }
 
 
@@ -82,11 +154,11 @@ def get_interim_messages(query: str, count: int = 3) -> list[str]:
     domain = detect_domain(query)
     domain_messages = INTERIM_TEMPLATES.get(domain, INTERIM_TEMPLATES["general"])
     general_messages = INTERIM_TEMPLATES["general"]
-    
+
     # Mix domain-specific and general messages
     combined = domain_messages + general_messages
     random.shuffle(combined)
-    
+
     # Deduplicate and cap
     seen = set()
     result = []
@@ -94,21 +166,22 @@ def get_interim_messages(query: str, count: int = 3) -> list[str]:
         if msg not in seen and len(result) < count:
             seen.add(msg)
             result.append(msg)
-    
+
     return result
 
 
-HINGLISH_CONVERSION_PROMPT = """You are converting a formal English legal answer into a friendly,
-conversational Hinglish dialogue spoken by an AI legal assistant avatar named "Nyay Saarthi".
+HINGLISH_CONVERSION_PROMPT = """You are converting a formal English legal answer into a
+friendly,conversational Hinglish dialogue spoken by an AI legal assistant avatar named
+"Nyay Saarthi".
 
 TONE & REGISTER (most important):
-Speak the way an educated, bilingual Indian would explain things to a friend over chai —
+Speak the way an educated, bilingual Indian would explain things to a friend over chai—
 warm, simple and everyday. Do NOT sound like a government notice, a news anchor, or a
 court order. Use the EASY, COLLOQUIAL word, not the heavy "shuddh"/Sanskritised one.
 
 Use the common ENGLISH word whenever a normal Indian speaker would naturally say it in
 English. Keep these in English: court, judge, police, FIR, bail, case, lawyer, advocate,
-rights, complaint, refund, insurance, accident, property, rent, contract, notice, appeal,
+rights, complaint, refund, insurance, accident, property, rent, contract, notice,appeal,
 compensation, hearing, evidence. Forcing a formal Hindi translation for these makes the
 speech harder to understand, not easier.
 
@@ -137,7 +210,7 @@ OTHER RULES:
   Vehicles Act"), but explain what they mean in plain words.
 - Use "aap" (respectful), never "tum".
 - End with one short, encouraging line.
-- Plain text only, no markdown, no bullet points — it will be read aloud by text-to-speech.
+- Plain text only,no markdown,no bullet points—it will be read aloud by text-to-speech.
 
 STYLE EXAMPLE (match this register, do not copy the content):
 "Dekhiye, aapke case mein Motor Vehicles Act ka Section 166 lagta hai — iska matlab hai
@@ -161,14 +234,14 @@ async def convert_to_hinglish(markdown_answer: str) -> str:
                     "role": "user",
                     "content": HINGLISH_CONVERSION_PROMPT.format(
                         markdown_answer=markdown_answer
-                    )
+                    ),
                 }
             ],
             temperature=0.6,
-            max_tokens=512
+            max_tokens=512,
         )
         return response.choices[0].message.content.strip()
-    
+
     except Exception as e:
         print(f"[AvatarSpeech] Hinglish conversion error: {e}")
         # Fallback: extract first 3 sentences

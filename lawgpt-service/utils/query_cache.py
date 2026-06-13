@@ -1,9 +1,10 @@
-from cachetools import TTLCache
-from threading import Lock
 import hashlib
-import os
-from dotenv import load_dotenv
 import logging
+import os
+from threading import Lock
+
+from cachetools import TTLCache
+from dotenv import load_dotenv
 
 load_dotenv()
 logger = logging.getLogger("lawgpt")
@@ -31,6 +32,7 @@ def set_cached_response(query: str, response):
     with _cache_lock:
         _query_cache[key] = response
 
+
 def is_static_query(query: str) -> bool:
     """
     Checks if a query is static and safe to cache.
@@ -38,10 +40,9 @@ def is_static_query(query: str) -> bool:
     """
     normalized = f" {query.lower()} "
     personal_pronouns = [" i ", " my ", " me ", " we ", " our ", " mine ", " ours "]
-    
+
     for pronoun in personal_pronouns:
         if pronoun in normalized:
             return False
-            
-    return True
 
+    return True

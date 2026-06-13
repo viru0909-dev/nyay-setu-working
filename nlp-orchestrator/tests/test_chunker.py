@@ -7,6 +7,7 @@ Or directly: python tests/test_chunker.py
 
 import sys
 from pathlib import Path
+
 from services.retrieval import chunker
 
 # Allow direct execution from the project root.
@@ -104,7 +105,6 @@ def test_count_tokens_handles_empty():
     assert chunker.count_tokens("hello") >= 1
 
 
-
 # ─── Section-aware chunking (issue #846) ──────────────────────────────────────
 
 # Two sections separated only by a single newline (NO blank line). Fixed-size
@@ -114,7 +114,8 @@ TWO_SECTIONS_NO_BLANK_LINE = (
     "Section 103 — Punishment for murder. "
     "Whoever commits murder shall be punished with death or imprisonment for life.\n"
     "Section 104 — Punishment for murder by life convict. "
-    "Whoever being under sentence of imprisonment for life commits murder shall be punished."
+    "Whoever being under sentence of imprisonment for"
+    " life commits murder shall be punished."
 )
 
 
@@ -131,7 +132,10 @@ def test_split_legal_sections_no_headings_is_noop():
 
 
 def test_split_legal_sections_preserves_preamble():
-    text = "Preliminary note before any section.\nSection 5 — Definitions. Words mean things."
+    text = (
+        "Preliminary note before any section.\n"
+        "Section 5 — Definitions. Words mean things."
+    )
     blocks = chunker.split_legal_sections(text)
     assert len(blocks) == 2
     assert blocks[0].startswith("Preliminary note")
@@ -148,22 +152,31 @@ def test_split_legal_sections_recognises_article_and_symbol():
 
 def test_chunk_text_keeps_sections_separate_without_blank_lines():
     """No chunk should contain text from two different sections."""
-    chunks = chunker.chunk_text(TWO_SECTIONS_NO_BLANK_LINE, max_tokens=512, overlap_tokens=0)
+    chunks = chunker.chunk_text(
+        TWO_SECTIONS_NO_BLANK_LINE, max_tokens=512, overlap_tokens=0
+    )
     assert len(chunks) == 2
     for c in chunks:
         assert not ("Section 103" in c and "Section 104" in c)
 
 
 def test_chunk_text_every_chunk_anchored_to_a_heading():
-    chunks = chunker.chunk_text(TWO_SECTIONS_NO_BLANK_LINE, max_tokens=512, overlap_tokens=0)
+    chunks = chunker.chunk_text(
+        TWO_SECTIONS_NO_BLANK_LINE, max_tokens=512, overlap_tokens=0
+    )
     for c in chunks:
-        assert chunker._SECTION_HEADING_RE.search(c), f"chunk not anchored to a section: {c!r}"
+        assert chunker._SECTION_HEADING_RE.search(
+            c
+        ), f"chunk not anchored to a section: {c!r}"
 
 
 def test_respect_sections_false_restores_legacy_merge():
     """With the flag off, the two single-newline sections pack into one chunk."""
     merged = chunker.chunk_text(
-        TWO_SECTIONS_NO_BLANK_LINE, max_tokens=512, overlap_tokens=0, respect_sections=False
+        TWO_SECTIONS_NO_BLANK_LINE,
+        max_tokens=512,
+        overlap_tokens=0,
+        respect_sections=False,
     )
     assert len(merged) == 1
     assert "Section 103" in merged[0] and "Section 104" in merged[0]
@@ -171,7 +184,9 @@ def test_respect_sections_false_restores_legacy_merge():
 
 def test_overlap_does_not_cross_section_boundary():
     """Trailing context from section 103 must not leak into the section 104 chunk."""
-    chunks = chunker.chunk_text(TWO_SECTIONS_NO_BLANK_LINE, max_tokens=512, overlap_tokens=64)
+    chunks = chunker.chunk_text(
+        TWO_SECTIONS_NO_BLANK_LINE, max_tokens=512, overlap_tokens=64
+    )
     sec104 = [c for c in chunks if c.startswith("Section 104")]
     assert sec104, "expected a chunk starting at Section 104"
     assert "Section 103" not in sec104[0]
@@ -179,7 +194,9 @@ def test_overlap_does_not_cross_section_boundary():
 
 def test_long_section_still_splits_within_section():
     """A single oversized section is chunked internally but stays within itself."""
-    big_section = "Section 420 — Cheating. " + ("This clause restates the offence in detail. " * 200)
+    big_section = "Section 420 — Cheating. " + (
+        "This clause restates the offence in detail. " * 200
+    )
     chunks = chunker.chunk_text(big_section, max_tokens=80, overlap_tokens=20)
     assert len(chunks) >= 2
     for c in chunks:

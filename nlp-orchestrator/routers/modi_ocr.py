@@ -3,9 +3,8 @@ import time
 from typing import List, Optional
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from pydantic import BaseModel
-
 from models.schemas import ModiOCRResponse
+from pydantic import BaseModel
 from services.modi_ocr import (
     InvalidImageError,
     ModiOCRServiceError,
@@ -24,6 +23,7 @@ ALLOWED_IMAGE_CONTENT_TYPES = {
     "image/bmp",
     "image/tiff",
 }
+
 
 # Batch responses are shaped locally (rather than in models/schemas.py) to keep
 # this feature self-contained.

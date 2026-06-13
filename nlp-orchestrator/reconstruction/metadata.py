@@ -1,6 +1,7 @@
-import cv2
 import json
 import os
+
+import cv2
 
 video_path = r"input_videos\Sample.mp4"
 
@@ -27,7 +28,7 @@ metadata = {
     "fps": fps,
     "total_frames": frame_count,
     "resolution": [width, height],
-    "duration_seconds": duration
+    "duration_seconds": duration,
 }
 
 os.makedirs("metadata_output", exist_ok=True)

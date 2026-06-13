@@ -67,11 +67,11 @@ class WebSocketSecurityInterceptorTest {
     void connectWithValidJwtSucceeds() {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
         accessor.addNativeHeader("Authorization", "Bearer valid-token");
-        Message<?> message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
+        Message<byte[]> message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
 
         UserDetails userDetails = mock(UserDetails.class);
         when(userDetails.getUsername()).thenReturn("test@example.com");
-        when(userDetails.getAuthorities()).thenReturn(null);
+        when(userDetails.getAuthorities()).thenReturn(java.util.Collections.emptyList());
 
         when(jwtService.extractUsername("valid-token")).thenReturn("test@example.com");
         when(userDetailsService.loadUserByUsername("test@example.com")).thenReturn(userDetails);

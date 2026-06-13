@@ -1,13 +1,22 @@
 import re
 from typing import List
 
+ACT_REGEX = (
+    r"(?:IPC|CrPC|CPC|MVA|BNS|BNSS|Article|Art|"
+    r"Indian Penal Code|Criminal Procedure Code|Civil Procedure Code|"
+    r"Motor Vehicles Act)"
+)
+SECTION_REGEX = r"(?P<section>\d{1,4}[A-Za-z]?)"
+
 CITATION_PATTERNS = [
     re.compile(
-        r"\b(?P<act>IPC|CrPC|CPC|MVA|BNS|BNSS|Article|Art|Indian Penal Code|Criminal Procedure Code|Civil Procedure Code|Motor Vehicles Act)\s*(?:Section|Sec|S\.?|Article|Art)?\.?\s*(?P<section>\d{1,4}[A-Za-z]?)\b",
+        rf"\b(?P<act>{ACT_REGEX})\s*(?:Section|Sec|S\.?|Article|Art)?\.?\s*"
+        rf"{SECTION_REGEX}\b",
         re.IGNORECASE,
     ),
     re.compile(
-        r"\b(?:u/s|under section|section|sec|s\.?|article|art)\s*(?P<section>\d{1,4}[A-Za-z]?)\s*(?:of\s*)?(?P<act>IPC|CrPC|CPC|MVA|BNS|BNSS|Article|Art)\b",
+        rf"\b(?:u/s|under section|section|sec|s\.?|article|art)\s*"
+        rf"{SECTION_REGEX}\s*(?:of\s*)?(?P<act>{ACT_REGEX})\b",
         re.IGNORECASE,
     ),
 ]
@@ -44,7 +53,7 @@ def normalize_citation(raw: str, act: str, section: str) -> dict:
     return {
         "raw": raw.strip(),
         "act": normalize_act_name(act),
-        "section": section.strip()
+        "section": section.strip(),
     }
 
 
