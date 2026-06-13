@@ -26,7 +26,12 @@ GEMINI_MODEL: str = "gemini-1.5-flash"             # Fast + deep reasoning
 RETRY_ENABLED: bool = True
 RETRY_MAX_ATTEMPTS: int = 2
 RETRY_DELAY_SECONDS: float = 1.0
-PROVIDER_ORDER: list[str] = ["gemini", "groq"]
+PROVIDER_ORDER: list[str] = ["gemini", "groq", "ollama"]
+
+# ─── Ollama Configuration ─────────────────────────────────────────────────────
+OLLAMA_API_URL: str = os.getenv("OLLAMA_API_URL", "http://localhost:11434")
+OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama-3-8b")
+
 # ─── Model names ──────────────────────────────────────────────────────────────
 GROQ_MODEL_FAST: str = "llama-3.3-70b-versatile"
 GEMINI_MODEL: str = "gemini-1.5-flash"
@@ -47,7 +52,7 @@ FRONTEND_ORIGIN: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 
 # ─── Retrieval / RAG settings ─────────────────────────────────────────────────
 EMBEDDING_MODEL: str = os.getenv(
-    "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
+    "EMBEDDING_MODEL", "law-ai/InLegalBERT"
 )
 RERANKER_MODEL: str = os.getenv("RERANKER_MODEL", "BAAI/bge-reranker-base")
 CHROMA_PATH: str = os.getenv(

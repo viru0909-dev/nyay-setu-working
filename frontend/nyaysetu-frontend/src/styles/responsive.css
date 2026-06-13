@@ -463,3 +463,29 @@ li,
 span {
     text-rendering: optimizeLegibility;
 }
+/* Fix: Navbar shifts down and overlaps footer on mobile click (#1213) */
+@media (max-width: 768px) {
+  .navbar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .navbar .mobile-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9998 !important;
+    background: var(--glass-bg, rgba(255,255,255,0.95)) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  }
+
+  body {
+    padding-top: 64px !important;
+  }
+}

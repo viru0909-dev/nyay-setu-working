@@ -70,10 +70,13 @@ async def _search_kanoon_with_retry(
                 body = await resp.text()
                 logger.error(
                     "Indian Kanoon search returned %s: %s",
-                    resp.status, body[:200],
+                    resp.status,
+                    body[:200],
                 )
                 raise aiohttp.ClientResponseError(
-                    resp.request_info, resp.history, status=resp.status,
+                    resp.request_info,
+                    resp.history,
+                    status=resp.status,
                 )
             data = await resp.json(content_type=None)
 
@@ -96,7 +99,7 @@ async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
         logger.warning("Indian Kanoon API token not set; skipping search.")
         return []
 
-    if not kanoon_breaker.is_available():
+    if not await kanoon_breaker.is_available():
         logger.warning("[CircuitBreaker/Kanoon] OPEN — skipping search")
         return []
 
@@ -109,7 +112,33 @@ async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
 
     try:
         result = await _search_kanoon_with_retry(
-            query, url, params, headers, max_results,
+            query,
+            url,
+            params,
+            headers,
+            max_results,
+        )
+        await kanoon_breaker.call_succeeded()
+        return result
+    except Exception as e:
+        await kanoon_breaker.call_failed()
+        logger.error(f"Indian Kanoon search error: {type(e).__name__}: {e}")
+        return []
+
+    url = f"{INDIAN_KANOON_API_URL}/search/"
+    params = {"formInput": query, "pagenum": 0}
+    headers = {
+        "Authorization": f"Token {INDIAN_KANOON_TOKEN}",
+        "Accept": "application/json",
+    }
+
+    try:
+        result = await _search_kanoon_with_retry(
+            query,
+            url,
+            params,
+            headers,
+            max_results,
         )
         kanoon_breaker.call_succeeded()
         return result
@@ -132,10 +161,13 @@ async def _fetch_doc(
             body = await resp.text()
             logger.error(
                 "Kanoon doc fetch failed %s: %s",
-                resp.status, body[:200],
+                resp.status,
+                body[:200],
             )
             raise aiohttp.ClientResponseError(
-                resp.request_info, resp.history, status=resp.status,
+                resp.request_info,
+                resp.history,
+                status=resp.status,
             )
         data = await resp.json(content_type=None)
 
@@ -164,7 +196,7 @@ async def get_kanoon_doc(
     if not INDIAN_KANOON_TOKEN or not doc_id:
         return ""
 
-    if not kanoon_breaker.is_available():
+    if not await kanoon_breaker.is_available():
         logger.warning("[CircuitBreaker/Kanoon] OPEN — skipping doc fetch")
         return ""
 
@@ -180,10 +212,10 @@ async def get_kanoon_doc(
         else:
             async with aiohttp.ClientSession(timeout=DOC_TIMEOUT) as new_session:
                 result = await _fetch_doc(new_session, url, headers, max_chars)
-        kanoon_breaker.call_succeeded()
+        await kanoon_breaker.call_succeeded()
         return result
     except Exception as e:
-        kanoon_breaker.call_failed()
+        await kanoon_breaker.call_failed()
         logger.error(
             f"Kanoon doc fetch error (doc_id={doc_id}): {type(e).__name__}: {e}"
         )
@@ -302,7 +334,10 @@ async def build_kanoon_context(
     # Step 5: optional cross-encoder rerank.
     if RERANKER_ENABLED:
         candidates = await rr.rerank_async(
-            query, candidates, RETRIEVAL_TOP_K, RERANKER_MODEL,
+            query,
+            candidates,
+            RETRIEVAL_TOP_K,
+            RERANKER_MODEL,
         )
     else:
         candidates = candidates[:RETRIEVAL_TOP_K]
@@ -313,13 +348,13 @@ async def build_kanoon_context(
 
     # Summary log — read off everything important from one line.
     seed_chunks = sum(
-        1 for c in candidates
-        if c.get("metadata", {}).get("source") == "seed"
+        1 for c in candidates if c.get("metadata", {}).get("source") == "seed"
     )
     live_chunks = len(candidates) - seed_chunks
     top_score = (
         candidates[0].get("rerank_score", candidates[0].get("score", 0.0))
-        if candidates else 0.0
+        if candidates
+        else 0.0
     )
     logger.info(
         f"build_kanoon_context: query={query[:40]!r} | "
@@ -373,10 +408,12 @@ def _enrich_results(
         existing = best_per_doc.get(doc_id)
         if existing is None or score > existing["score"]:
             best_per_doc[doc_id] = {
-                "title": meta.get("title") or by_id.get(doc_id, {}).get("title", "Untitled"),
+                "title": meta.get("title")
+                or by_id.get(doc_id, {}).get("title", "Untitled"),
                 "doc_id": doc_id,
                 "snippet": by_id.get(doc_id, {}).get(
-                    "snippet", cand.get("chunk", "")[:200],
+                    "snippet",
+                    cand.get("chunk", "")[:200],
                 ),
                 "score": score,
                 "source": meta.get("source", "vector_store"),
@@ -409,7 +446,8 @@ async def _legacy_context(live_results: list[dict]) -> str:
         if isinstance(doc_text, BaseException):
             logger.error(
                 "Doc fetch error for %s: %s",
-                r.get("doc_id"), doc_text,
+                r.get("doc_id"),
+                doc_text,
             )
             doc_text = ""
         if doc_text:

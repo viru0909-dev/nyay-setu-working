@@ -173,7 +173,12 @@ export default function Signup() {
                 }}>
                     {/* Left Side - Benefits (hidden on mobile) */}
                     {!isMobile && (
-                        <div style={{ color: 'var(--text-main)' }}>
+    <div
+        style={{
+            color: 'var(--text-main)',
+            transform: 'translateY(-120px)'
+        }}
+    >
                             <div style={{ marginBottom: '3rem' }}>
                                 <h1 style={{
                                     fontSize: '3.5rem',

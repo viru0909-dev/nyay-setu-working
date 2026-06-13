@@ -86,4 +86,10 @@ public class RbacSecurityTest {
             throw new AssertionError("MockMvc call failed", e);
         }
     }
+    @Test
+    @WithMockUser(username = "litigant@example.com", roles = {"LITIGANT"})
+    public void shouldAllowLitigantAccessToOwnCases() throws Exception {
+        mockMvc.perform(get("/api/v1/cases"))
+                .andExpect(status().isOk());
+}
 }

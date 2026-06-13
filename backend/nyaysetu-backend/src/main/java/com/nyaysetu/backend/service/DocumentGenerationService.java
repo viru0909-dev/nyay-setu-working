@@ -1,20 +1,28 @@
 package com.nyaysetu.backend.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.extern.slf4j.Slf4j;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import jakarta.annotation.PostConstruct;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service for AI-powered legal document generation.
@@ -50,7 +58,9 @@ public class DocumentGenerationService {
      * Returns the response JSON from LawGPT as a Map.
      */
     public Map<String, Object> generatePreview(Map<String, Object> requestData) {
-        log.info("📝 Generating {} preview for {}", requestData.get("docType"), requestData.get("petitionerName"));
+        String docType = getStr(requestData, "docType");
+        String petitionerName = getStr(requestData, "petitionerName");
+        log.info("📝 Generating {} preview for {}", docType, petitionerName);
 
         try {
             // Build the Python request body with snake_case field names
@@ -67,8 +77,9 @@ public class DocumentGenerationService {
                     String.class
             );
 
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                JsonNode root = objectMapper.readTree(response.getBody());
+            String responseBody = response.getBody();
+            if (HttpStatus.OK.equals(response.getStatusCode()) && responseBody != null) {
+                JsonNode root = objectMapper.readTree(responseBody);
                 Map<String, Object> result = new LinkedHashMap<>();
                 result.put("docType", root.path("doc_type").asText());
                 result.put("title", root.path("title").asText());
@@ -84,11 +95,9 @@ public class DocumentGenerationService {
         } catch (org.springframework.web.client.HttpServerErrorException e) {
             log.warn("⚠️ LawGPT service unavailable (503): {}", e.getMessage());
             throw new RuntimeException("Legal AI service unavailable. Please try again later.");
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
+        } catch (org.springframework.web.client.RestClientException | java.io.IOException e) {
             log.error("❌ Document generation failed: {}", e.getMessage(), e);
-            throw new RuntimeException("Document generation failed: " + e.getMessage());
+            throw new RuntimeException("Document generation failed: " + e.getMessage(), e);
         }
     }
 
@@ -97,7 +106,9 @@ public class DocumentGenerationService {
      * Returns raw PDF bytes from LawGPT.
      */
     public byte[] generatePdf(Map<String, Object> requestData) {
-        log.info("📄 Generating {} PDF for {}", requestData.get("docType"), requestData.get("petitionerName"));
+        String docType = getStr(requestData, "docType");
+        String petitionerName = getStr(requestData, "petitionerName");
+        log.info("📄 Generating {} PDF for {}", docType, petitionerName);
 
         try {
             ObjectNode pythonBody = buildPythonRequest(requestData);
@@ -113,9 +124,10 @@ public class DocumentGenerationService {
                     byte[].class
             );
 
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                log.info("✅ PDF generated successfully ({} bytes)", response.getBody().length);
-                return response.getBody();
+            byte[] responseBody = response.getBody();
+            if (HttpStatus.OK.equals(response.getStatusCode()) && responseBody != null) {
+                log.info("✅ PDF generated successfully ({} bytes)", responseBody.length);
+                return responseBody;
             }
 
             throw new RuntimeException("Unexpected response from LawGPT: " + response.getStatusCode());
@@ -123,11 +135,48 @@ public class DocumentGenerationService {
         } catch (org.springframework.web.client.HttpServerErrorException e) {
             log.warn("⚠️ LawGPT service unavailable (503): {}", e.getMessage());
             throw new RuntimeException("Legal AI service unavailable. Please try again later.");
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
+        } catch (org.springframework.web.client.RestClientException | java.io.IOException e) {
             log.error("❌ PDF generation failed: {}", e.getMessage(), e);
-            throw new RuntimeException("PDF generation failed: " + e.getMessage());
+            throw new RuntimeException("PDF generation failed: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Generate a document as DOCX bytes.
+     */
+    public byte[] generateDocx(Map<String, Object> requestData) {
+        String docType = getStr(requestData, "docType");
+        String petitionerName = getStr(requestData, "petitionerName");
+        log.info("📄 Generating {} DOCX for {}", docType, petitionerName);
+
+        try {
+            ObjectNode pythonBody = buildPythonRequest(requestData);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(pythonBody), headers);
+
+            ResponseEntity<byte[]> response = restTemplate.postForEntity(
+                    lawgptUrl + "/generate/docx",
+                    entity,
+                    byte[].class
+            );
+
+            byte[] responseBody = response.getBody();
+            if (HttpStatus.OK.equals(response.getStatusCode()) && responseBody != null) {
+                log.info("✅ DOCX generated successfully ({} bytes)", responseBody.length);
+                return responseBody;
+            }
+
+            throw new RuntimeException("Unexpected response from LawGPT: " + response.getStatusCode());
+
+        } catch (org.springframework.web.client.HttpServerErrorException e) {
+            log.warn("⚠️ LawGPT service unavailable (503): {}", e.getMessage());
+            throw new RuntimeException("Legal AI service unavailable. Please try again later.");
+        } catch (org.springframework.web.client.RestClientException | java.io.IOException e) {
+            log.error("❌ DOCX generation failed: {}", e.getMessage(), e);
+            throw new RuntimeException("DOCX generation failed: " + e.getMessage(), e);
         }
     }
 
@@ -159,7 +208,7 @@ public class DocumentGenerationService {
     private ObjectNode buildPythonRequest(Map<String, Object> requestData) {
         ObjectNode root = objectMapper.createObjectNode();
         root.put("doc_type", (String) requestData.get("docType"));
-        root.put("language", "en");
+        root.put("language", getStr(requestData, "language"));
 
         ObjectNode fields = objectMapper.createObjectNode();
         fields.put("petitioner_name", getStr(requestData, "petitionerName"));
@@ -169,6 +218,7 @@ public class DocumentGenerationService {
         fields.put("case_description", getStr(requestData, "caseDescription"));
         fields.put("incident_date", getStr(requestData, "incidentDate"));
         fields.put("relief_sought", getStr(requestData, "reliefSought"));
+        fields.put("notice_period", getStr(requestData, "noticePeriod"));
         fields.put("court_name", getStr(requestData, "courtName"));
         fields.put("department_name", getStr(requestData, "departmentName"));
         fields.put("pio_name", getStr(requestData, "pioName"));
