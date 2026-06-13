@@ -215,15 +215,33 @@ async def chat(request: ChatRequest) -> ChatResponse:
 
     # Call LLM
     prompt: str = LEGAL_PROMPT_TEMPLATE.format(context=context, question=request.question)
-    try:
-        llm = get_llm()
-        answer: str = llm.invoke(prompt)
-        # LangChain LLMs may return AIMessage or str
-        if hasattr(answer, "content"):
-            answer = answer.content
-    except Exception as e:
-        logger.error("LLM invocation error: %s", e, exc_info=True)
-        raise HTTPException(status_code=502, detail=f"LLM error: {e}")
+    
+    from utils.query_cache import get_cached_response, set_cached_response, is_static_query
+    
+    cached_answer = None
+    if is_static_query(request.question):
+        cached_answer = get_cached_response(request.question)
+        if cached_answer:
+            logger.info("Cache hit for legal query")
+            answer = cached_answer
+        else:
+            logger.info("Cache miss for legal query")
+            
+    if not cached_answer:
+        try:
+            llm = get_llm()
+            answer_raw = llm.invoke(prompt)
+            # LangChain LLMs may return AIMessage or str
+            if hasattr(answer_raw, "content"):
+                answer = answer_raw.content
+            else:
+                answer = answer_raw
+                
+            if is_static_query(request.question):
+                set_cached_response(request.question, answer)
+        except Exception as e:
+            logger.error("LLM invocation error: %s", e, exc_info=True)
+            raise HTTPException(status_code=502, detail=f"LLM error: {e}")
 
     return ChatResponse(
         answer=str(answer),

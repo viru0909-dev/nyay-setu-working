@@ -161,8 +161,9 @@ export const documentAPI = {
 
 // Document Generation API (AI-powered legal document drafting)
 export const documentGenerateAPI = {
-    preview: (data) => api.post('/api/documents/generate/preview', data),
-    download: (data) => api.post('/api/documents/generate/download', data, { responseType: 'blob' }),
+    preview: (data) => api.post('/api/v1/documents/generate/preview', data),
+    download: (data) => api.post('/api/v1/documents/generate/download', data, { responseType: 'blob' }),
+    downloadDocx: (data) => api.post('/api/v1/documents/generate/download/docx', data, { responseType: 'blob' }),
 };
 
 // Hearing API

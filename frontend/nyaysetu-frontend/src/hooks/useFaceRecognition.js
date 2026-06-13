@@ -15,7 +15,6 @@ export const useFaceRecognition = () => {
     const [error, setError] = useState(null);
 
     // Load face-api models on mount
-    // TEMPORARILY DISABLED - Model compatibility issues
     useEffect(() => {
         loadModels();
     }, []);
@@ -23,17 +22,31 @@ export const useFaceRecognition = () => {
     const loadModels = async () => {
         try {
             setIsLoading(true);
-            // Using CDN for models since local models directory is empty
-            const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/';
+            // Try local models first (self-hosted, CSP-safe), fall back to CDN
+            const LOCAL_URL = '/models/';
+            const CDN_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/';
+
+            let modelUrl;
+            try {
+                const localCheck = await fetch(`${LOCAL_URL}tiny_face_detector_model-weights_manifest.json`);
+                if (localCheck.ok) {
+                    modelUrl = LOCAL_URL;
+                }
+            } catch {
+                modelUrl = CDN_URL;
+            }
+
+            if (!modelUrl) {
+                modelUrl = CDN_URL;
+            }
 
             await Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
+                faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl),
+                faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl)
             ]);
 
             setModelsLoaded(true);
-         //   console.log('Face recognition models loaded successfully');
         } catch (err) {
             console.error('Error loading face recognition models:', err);
             setError('Failed to load face recognition models');

@@ -2,10 +2,9 @@ package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.AddNoteRequest;
 import com.nyaysetu.backend.entity.CaseNote;
-import com.nyaysetu.backend.entity.LegalCase;
 import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.CaseNoteRepository;
-import com.nyaysetu.backend.repository.LegalCaseRepository;
+import com.nyaysetu.backend.repository.CaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,13 +18,13 @@ import java.util.UUID;
 public class CaseNoteService {
 
     private final CaseNoteRepository caseNoteRepository;
-    private final LegalCaseRepository legalCaseRepository;
+    private final CaseRepository caseRepository;
     private final CaseTimelineService timelineService;
 
     @Transactional
     public CaseNote addNote(UUID caseId, AddNoteRequest dto) {
 
-        LegalCase lc = legalCaseRepository.findById(caseId)
+        caseRepository.findById(caseId)
                 .orElseThrow(() -> new NotFoundException("Case not found " + caseId));
 
         CaseNote note = CaseNote.builder()
