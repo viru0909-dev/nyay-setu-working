@@ -1,34 +1,31 @@
 package com.nyaysetu.backend.event;
 
 import com.nyaysetu.backend.entity.CaseEntity;
+import com.nyaysetu.backend.entity.CaseStatus; // Ensure this import matches your project structure
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.logging.Logger;
-
+@Slf4j
 @Component
 public class CaseEventListener {
-
-    private static final Logger logger = Logger.getLogger(CaseEventListener.class.getName());
 
     @Async
     @EventListener
     public void handleCaseStatusChange(CaseStatusChangedEvent event) {
-        CaseEntity CaseEntity = event.getCaseEntity();
-        logger.info("Received real-time case status change event for Case ID: " + CaseEntity.getId());
+        CaseEntity caseEntity = event.getCaseEntity();
+        
+        log.info("Received real-time case status change event for Case ID: {}", caseEntity.getId());
 
-        // String-safe matching prevents missing enum property boundaries on diverse build pipelines
-        if (CaseEntity.getStatus() != null && 
-           ("REGISTERED".equalsIgnoreCase(CaseEntity.getStatus().name()) || 
-            "REGISTERED".equalsIgnoreCase(CaseEntity.getStatus().toString()))) {
+        if (caseEntity.getStatus() != null && caseEntity.getStatus() == CaseStatus.REGISTERED) {
             
-            logger.info("Real-time synchronization workflow processed for case status: REGISTERED");
-            sendRealTimeNotification(CaseEntity);
+            log.info("Real-time synchronization workflow processed for case status: REGISTERED");
+            sendRealTimeNotification(caseEntity);
         }
     }
 
-    private void sendRealTimeNotification(CaseEntity CaseEntity) {
-        logger.info("Action: Dispatching instant notification payload stream for case: " + CaseEntity.getTitle());
+    private void sendRealTimeNotification(CaseEntity caseEntity) {
+        log.info("Action: Dispatching instant notification payload stream for case: {}", caseEntity.getTitle());
     }
 }
