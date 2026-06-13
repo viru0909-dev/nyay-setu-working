@@ -22,7 +22,8 @@ def sse_event(event_type: str, data: dict) -> str:
 
 async def forensic_analysis_pipeline(request_data: ForensicsRequest):
     """
-    Async generator that yields SSE events for the 5 stages of the Accident Forensic Pipeline.
+    Async generator that yields SSE events for the
+    5 stages of the Accident Forensic Pipeline.
     """
     job_id = request_data.jobId
     video_urls = request_data.videoUrls
@@ -77,7 +78,8 @@ async def forensic_analysis_pipeline(request_data: ForensicsRequest):
             {
                 "jobId": job_id,
                 "stage": "AI_ANALYSIS",
-                "message": "Gemini AI accident ki timeline reconstruct kar rahi hai. Yeh deep analysis hai, thoda time lagega.",
+                "message": "Gemini AI accident ki timeline reconstruct kar rahi hai."
+                " Yeh deep analysis hai, thoda time lagega.",
             },
         )
 
@@ -93,7 +95,8 @@ async def forensic_analysis_pipeline(request_data: ForensicsRequest):
                 {
                     "jobId": job_id,
                     "stage": "AI_ANALYSIS",
-                    "message": "IPC aur Motor Vehicles Act check ho raha hai aapke case ke liye. Kaunse sections apply honge yeh pata chal raha hai.",
+                    "message": "IPC aur Motor Vehicles Act check ho raha hai aapke case"
+                    "ke liye. Kaunse sections apply honge yeh pata chal raha hai.",
                 },
             )
 
@@ -141,7 +144,8 @@ async def analyze_forensics_stream(request_data: ForensicsRequest, request: Requ
         async for event in forensic_analysis_pipeline(request_data):
             if await request.is_disconnected():
                 logger.info(
-                    f"[{request_data.jobId}] Client disconnected during forensics stream."
+                    f"[{request_data.jobId}] Client disconnected "
+                    f"during forensics stream."
                 )
                 break
             # sse-starlette format: yield {'data': <string>}

@@ -8,7 +8,8 @@ try:
     from PIL import Image
 except ImportError:
     logging.warning(
-        "Optional dependencies for multi-modal extraction missing. Run pip install pytesseract pdf2image python-docx"
+        "Optional dependencies for multi-modal extraction missing."
+        "Run pip install pytesseract pdf2image python-docx"
     )
 
 
@@ -20,18 +21,15 @@ class MultiModalExtractor:
         """
         Extract text from various document formats: images, Word, scanned PDFs
         """
+        DOC = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         try:
             if file_type == "application/pdf":
                 return self._extract_from_pdf(file_bytes)
-            elif file_type in ["image/png", "image/jpeg", "image/jpg"]:
+            if file_type in ["image/png", "image/jpeg", "image/jpg"]:
                 return self._extract_from_image(file_bytes)
-            elif (
-                file_type
-                == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            ):
+            if file_type == DOC:
                 return self._extract_from_docx(file_bytes)
-            else:
-                return file_bytes.decode("utf-8", errors="ignore")
+            return file_bytes.decode("utf-8", errors="ignore")
         except Exception as e:
             self.logger.error(f"Error extracting text: {e}")
             return ""

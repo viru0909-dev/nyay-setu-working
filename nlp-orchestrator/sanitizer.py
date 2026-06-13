@@ -50,7 +50,8 @@ def sanitize_prompt_input(text: str) -> str:
 
     # Common prompt injection patterns to neutralize
     injection_patterns = [
-        r"(?i)ignore\s+(all\s+)?(previous|above|prior)\s+(instructions?|prompts?|rules?)",
+        r"(?i)ignore\s+(all\s+)?(previous|above|prior)\s+"
+        r"(instructions?|prompts?|rules?)",
         r"(?i)you\s+are\s+now\s+",
         r"(?i)system\s*:\s*",
         r"(?i)\\n\s*system\s*:",

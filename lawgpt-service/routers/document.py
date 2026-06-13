@@ -712,9 +712,13 @@ async def generate_document_docx(request: GenerateRequest):
         f"{request.doc_type}_{request.fields.petitioner_name.replace(' ', '_')}.docx"
     )
 
+    DOCX_MEDIA_TYPE = (
+        "application/vnd.openxmlformats-officedocument."
+        "wordprocessingml.document"
+    )
     return StreamingResponse(
         docx_buffer,
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        media_type=DOCX_MEDIA_TYPE,
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
         },

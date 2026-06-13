@@ -50,7 +50,7 @@ async def download_video(url: str, job_id: str) -> str:
         from fastapi import HTTPException
 
         raise HTTPException(status_code=400, detail=f"Unsafe URL rejected: {e}")
-    """Download video from URL (which will be a MinIO/Spring Boot endpoint) to 
+    """Download video from URL (which will be a MinIO/Spring Boot endpoint) to
     a local temp file."""
     # If the URL is already a local path (for testing), just return it
     if url.startswith("/") and os.path.exists(url):

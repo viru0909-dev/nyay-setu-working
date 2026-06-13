@@ -117,7 +117,8 @@ def get_llm():
 
 # ── Legal prompt template ──────────────────────────────────────────────────────
 
-LEGAL_PROMPT_TEMPLATE: str = """You are Vakil Friend, the AI legal assistant of Nyay Setu.
+LEGAL_PROMPT_TEMPLATE: str = """You are Vakil Friend,the AI legal assistant of
+Nyay Setu.
 You help Indian citizens understand their legal rights and navigate the judiciary.
 
 Use ONLY the context provided below to answer the question.
@@ -152,7 +153,7 @@ async def get_context(request: ContextRequest) -> ContextResponse:
     except FileNotFoundError:
         raise HTTPException(
             status_code=503,
-            detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.",
+            detail="Legal database not initialized.Run 'python lawgpt/ingest.py'first.",
         )
     except Exception as e:
         logger.error("Context retrieval error: %s", e, exc_info=True)
@@ -198,7 +199,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
     except FileNotFoundError:
         raise HTTPException(
             status_code=503,
-            detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.",
+            detail="Legal database not initialized.Run 'python lawgpt/ingest.py'first.",
         )
     except Exception as e:
         logger.error("Chat retrieval error: %s", e, exc_info=True)

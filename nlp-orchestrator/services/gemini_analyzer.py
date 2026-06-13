@@ -7,7 +7,8 @@ from google import genai
 logger = logging.getLogger("gemini-analyzer")
 client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
-TIMELINE_RECONSTRUCTION_PROMPT = """SYSTEM: You are a forensic accident analyst for Indian courts.
+TIMELINE_RECONSTRUCTION_PROMPT = """SYSTEM: You are a forensic accident
+analyst for Indian courts.
 You have expertise in IPC 279, 304A, 337, 338, Motor Vehicles Act 1988, and BNS 2023.
 
 USER: Analyze this accident video frame by frame.
@@ -18,7 +19,8 @@ TIMESTAMP | EVENT | VEHICLE | BEHAVIOR | LEGAL FLAG
 Label each moment:
 PRE_INCIDENT / WARNING / TRIGGER / IMPACT / POST_IMPACT
 
-The TRIGGER moment is the most important — identify exactly who did what at what second that caused the accident.
+The TRIGGER moment is the most important — identify exactly who did what at what second
+that caused the accident.
 
 End with LIABILITY VERDICT:
 - Primary fault: Vehicle X because [reason]
@@ -34,7 +36,7 @@ async def analyze_frames(frame_paths: list[str], job_id: str) -> str:
         return "FALLBACK: Gemini API key not configured. Video frame analysis skipped."
 
     try:
-        # Note: For production with many frames, it's better to use Gemini File API to upload a video
+        # Note: For production with many frames,use Gemini File API to upload a video
         # But for this implementation we will upload the extracted frames directly
 
         # Load the images
