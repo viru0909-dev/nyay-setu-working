@@ -42,11 +42,16 @@ export default function AIAssistantModal({ isOpen, onClose }) {
             if (response.data.sessionId) setSessionId(response.data.sessionId);
         } catch (error) {
             console.error('AI Chat Error:', error);
+            const isNetworkError = !error.response;
             const errorMessage = {
                 role: 'ai',
-                content: language === 'en'
-                    ? 'Sorry, I encountered an error. Please try again.'
-                    : 'क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।'
+                content: isNetworkError
+                    ? (language === 'en'
+                        ? 'The AI service is temporarily unavailable. Please try again later.'
+                        : 'AI सेवा अस्थायी रूप से अनुपलब्ध है। कृपया बाद में पुनः प्रयास करें।')
+                    : (language === 'en'
+                        ? 'Sorry, I encountered an error. Please try again.'
+                        : 'क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।')
             };
             setMessages(prev => [...prev, errorMessage]);
         } finally {
