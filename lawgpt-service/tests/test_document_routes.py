@@ -17,7 +17,10 @@ def patch_retriever_and_llm(monkeypatch):
     # Patch retrieve to return predictable context
     def fake_retrieve(query, k=3):
         return [
-            SimpleNamespace(page_content="Section: IPC 379 — Theft", metadata={"source": "IPC", "page": 1})
+            SimpleNamespace(
+                page_content="Section: IPC 379 — Theft",
+                metadata={"source": "IPC", "page": 1},
+            )
         ]
 
     # Patch the router's imported reference to retrieve (routers.document imported it at module load)

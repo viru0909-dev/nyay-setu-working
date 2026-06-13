@@ -30,6 +30,7 @@ logger = logging.getLogger("lawgpt")
 
 # ── Lifespan (startup / shutdown) ─────────────────────────────────────────────
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Attempt to load the FAISS index at startup."""

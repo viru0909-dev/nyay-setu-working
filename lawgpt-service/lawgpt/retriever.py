@@ -11,8 +11,10 @@ from typing import Optional
 try:
     from langchain_community.embeddings import HuggingFaceEmbeddings
     from langchain_community.vectorstores import FAISS
+
     # pyrefly: ignore [missing-import]
     from langchain.schema import Document
+
     _HAS_LANGCHAIN = True
 except Exception:
     # Allow the module to be imported in environments without langchain for tests

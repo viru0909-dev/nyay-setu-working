@@ -63,8 +63,21 @@ MODULES = [
 # Standard env vars to ignore from scanning
 EXCLUDED_KEYS = {
     # System & Standard env vars
-    "PORT", "ENV", "MODE", "DEV", "PROD", "SSR", "BASE_URL", "PATH", "TEMP", "TMP",
-    "NODE_ENV", "USER", "HOME", "HOSTNAME", "SHELL",
+    "PORT",
+    "ENV",
+    "MODE",
+    "DEV",
+    "PROD",
+    "SSR",
+    "BASE_URL",
+    "PATH",
+    "TEMP",
+    "TMP",
+    "NODE_ENV",
+    "USER",
+    "HOME",
+    "HOSTNAME",
+    "SHELL",
     # Specific framework variables
     "VITE_USER_NODE_ENV",
 }
@@ -99,7 +112,10 @@ def scan_module_for_keys(module_config):
             continue
         for root, _, files in os.walk(scan_dir):
             # Skip node_modules, .git, venv, target, __pycache__, etc.
-            if any(p in root for p in ["node_modules", ".git", "venv", "target", "__pycache__"]):
+            if any(
+                p in root
+                for p in ["node_modules", ".git", "venv", "target", "__pycache__"]
+            ):
                 continue
             for file in files:
                 # Check if file matches pattern
@@ -121,8 +137,10 @@ def scan_module_for_keys(module_config):
 
 def main():
     print("Parsing .env.example templates...")
-    templates_parsed = {name: parse_env_example(path) for name, path in TEMPLATES.items()}
-    
+    templates_parsed = {
+        name: parse_env_example(path) for name, path in TEMPLATES.items()
+    }
+
     for name, keys in templates_parsed.items():
         print(f"  * {name} ({TEMPLATES[name]}): {len(keys)} keys found")
 
@@ -141,25 +159,34 @@ def main():
 
         # Find missing keys
         missing_keys = used_keys - allowed_keys
-        
+
         # Some custom project handling/exclusions:
         # If GOOGLE_GEMINI_API_KEY is defined in template, allow GEMINI_API_KEY in code (alias)
         if "GEMINI_API_KEY" in missing_keys and "GOOGLE_GEMINI_API_KEY" in allowed_keys:
             missing_keys.remove("GEMINI_API_KEY")
         # If REACT_APP_API_URL or REACT_APP_API_BASE_URL are checked in code but VITE_API_URL exists
-        if "REACT_APP_API_URL" in missing_keys and "REACT_APP_API_BASE_URL" in allowed_keys:
+        if (
+            "REACT_APP_API_URL" in missing_keys
+            and "REACT_APP_API_BASE_URL" in allowed_keys
+        ):
             missing_keys.remove("REACT_APP_API_URL")
 
         if missing_keys:
-            print(f"  [ERROR] Mismatches found! The following keys are used in code but missing from .env.example:")
+            print(
+                f"  [ERROR] Mismatches found! The following keys are used in code but missing from .env.example:"
+            )
             for key in sorted(missing_keys):
                 print(f"    - {key}")
             mismatch_found = True
         else:
-            print(f"  [OK] Validation passed! All code env keys are documented in templates.")
+            print(
+                f"  [OK] Validation passed! All code env keys are documented in templates."
+            )
 
     if mismatch_found:
-        print("\n[FAILED] Environment variable validation failed. Please update your .env.example files.")
+        print(
+            "\n[FAILED] Environment variable validation failed. Please update your .env.example files."
+        )
         sys.exit(1)
     else:
         print("\n[SUCCESS] Environment variable validation completed successfully!")
