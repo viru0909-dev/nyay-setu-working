@@ -1,5 +1,8 @@
-from lawgpt.prompt_builder import (build_prompt, detect_prompt_injection,
-                                   validate_required_fields)
+from lawgpt.prompt_builder import (
+    build_prompt,
+    detect_prompt_injection,
+    validate_required_fields,
+)
 
 
 def test_build_prompt_basic_replacement():

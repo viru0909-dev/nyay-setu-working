@@ -11,7 +11,7 @@ from main import deep_research_pipeline
 
 @pytest.mark.asyncio
 @patch("main.build_kanoon_context", new_callable=AsyncMock)
-@patch("main.synthesize_answers", new_callable=AsyncMock)
+@patch("main.synthesize_answers_structured", new_callable=AsyncMock)
 @patch("main.run_parallel_research", new_callable=AsyncMock)
 @patch("main.decompose_query", new_callable=AsyncMock)
 async def test_deep_research_pipeline_flow(

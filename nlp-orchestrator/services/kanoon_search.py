@@ -23,9 +23,17 @@ import logging
 import re
 
 import aiohttp
-from config import (CHROMA_PATH, EMBEDDING_MODEL, INDIAN_KANOON_API_URL,
-                    INDIAN_KANOON_TOKEN, RERANKER_ENABLED, RERANKER_MODEL,
-                    RETRIEVAL_ENABLED, RETRIEVAL_FETCH_K, RETRIEVAL_TOP_K)
+from config import (
+    CHROMA_PATH,
+    EMBEDDING_MODEL,
+    INDIAN_KANOON_API_URL,
+    INDIAN_KANOON_TOKEN,
+    RERANKER_ENABLED,
+    RERANKER_MODEL,
+    RETRIEVAL_ENABLED,
+    RETRIEVAL_FETCH_K,
+    RETRIEVAL_TOP_K,
+)
 from services.retrieval import chunker, embedder
 from services.retrieval import reranker as rr
 from services.retrieval import vectorstore

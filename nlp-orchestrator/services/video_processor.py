@@ -14,6 +14,8 @@ BLOCKED_NETWORKS = [
 
 
 def validate_url_for_ssrf(url: str) -> None:
+    if url.startswith("/"):
+        return
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https"):
         raise ValueError(f"Disallowed scheme: {parsed.scheme}")
