@@ -10,6 +10,7 @@ public enum CaseStatus {
     // Legacy statuses (for backward compatibility)
     PENDING,
     OPEN,
+    REGISTERED,
     IN_PROGRESS,
     UNDER_REVIEW,
     AWAITING_DOCUMENTS,

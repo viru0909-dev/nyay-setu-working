@@ -9,7 +9,6 @@ Provides:
 import io
 import logging
 import os
-import tempfile
 from datetime import datetime
 from typing import Dict, List, Literal, Optional
 
@@ -503,9 +502,8 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
             SimpleDocTemplate,
             Paragraph,
             Spacer,
-            PageBreak,
         )
-        from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
     except ImportError:
         raise HTTPException(
             status_code=500,

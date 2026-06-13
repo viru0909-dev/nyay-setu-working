@@ -19,7 +19,6 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 
-import synthesizer
 from synthesizer import (
     synthesize_answers_structured,
     extract_cited_laws_from_markdown,

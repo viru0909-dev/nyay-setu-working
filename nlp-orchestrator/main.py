@@ -38,8 +38,6 @@ from decomposer import decompose_query
 from router import route_questions
 from research import run_parallel_research, execute_with_fallback
 from synthesizer import (
-    synthesize_answers,
-    stream_synthesize_answers,
     synthesize_answers_structured,
     stream_synthesize_answers_structured,
 )

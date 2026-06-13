@@ -1,5 +1,3 @@
-import pytest
-
 from lawgpt.prompt_builder import (
     build_prompt,
     validate_required_fields,
