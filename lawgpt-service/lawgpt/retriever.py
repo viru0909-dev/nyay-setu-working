@@ -7,6 +7,7 @@ exposes retrieve() with optional statute-level metadata filtering.
 
 from pathlib import Path
 from typing import Optional
+from typing import Any
 
 try:
     from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -29,11 +30,12 @@ CHROMA_DIR: Path = BASE_DIR / "vector_store" / "chroma_db"
 COLLECTION_NAME: str = "legal_corpus"
 
 # ── Cached state ───────────────────────────────────────────────────────────────
-_vectorstore: Optional[object] = None  # Chroma at runtime
-_embeddings: Optional[object] = None  # HuggingFaceEmbeddings at runtime
+_vectorstore = None
+# Chroma at runtime
+_embeddings = None  # HuggingFaceEmbeddings at runtime
 
 
-def _get_embeddings() -> "HuggingFaceEmbeddings":
+def _get_embeddings() -> Any:
     """Return the singleton embedding model instance."""
     global _embeddings
     if not _HAS_LANGCHAIN:
@@ -43,7 +45,7 @@ def _get_embeddings() -> "HuggingFaceEmbeddings":
     return _embeddings
 
 
-def load_vectorstore() -> "Chroma":
+def load_vectorstore() -> Any:
     """
     Load the ChromaDB collection from disk. Caches the result after the first
     successful load so subsequent calls are instant.
