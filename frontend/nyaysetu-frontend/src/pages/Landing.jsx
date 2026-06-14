@@ -62,28 +62,34 @@ export default function Landing() {
 
     const QUICK_CARDS = [
         {
+            number: '01',
             icon: UserPlus,
             title: t('quickCards.createAccount.title'),
             desc: t('quickCards.createAccount.desc'),
             cta: t('quickCards.createAccount.cta'),
-            color: '#7C5CFF',
-            bg: 'rgba(124,92,255,0.08)',
+            color: '#3F5DCC',
+            accent: 'rgba(63,93,204,0.18)',
+            label: 'Access Layer',
         },
         {
+            number: '02',
             icon: FileText,
             title: t('quickCards.submitCase.title'),
             desc: t('quickCards.submitCase.desc'),
             cta: t('quickCards.submitCase.cta'),
-            color: '#3F5DCC',
-            bg: 'rgba(63,93,204,0.08)',
+            color: '#1F7A8C',
+            accent: 'rgba(31,122,140,0.18)',
+            label: 'Case Intake',
         },
         {
+            number: '03',
             icon: Zap,
             title: t('quickCards.powerfulFeatures.title'),
             desc: t('quickCards.powerfulFeatures.desc'),
             cta: t('quickCards.powerfulFeatures.cta'),
-            color: '#10B981',
-            bg: 'rgba(16,185,129,0.08)',
+            color: '#6C5CE7',
+            accent: 'rgba(108,92,231,0.18)',
+            label: 'Legal Support',
         },
     ];
 
@@ -300,92 +306,167 @@ export default function Landing() {
 
                     {/* ── Quick cards strip ─────────────────────────── */}
                     <div style={{
-                        maxWidth: '1320px', margin: '4rem auto 0',
+                        maxWidth: '1320px',
+                        margin: '4rem auto 0',
                         width: '100%',
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: '1.25rem',
-                        position: 'relative', zIndex: 1,
-                    }} className="quick-cards-grid">
-                        {QUICK_CARDS.map((card, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.6 + i * 0.1 }}
-                                whileHover={{ y: -5 }}
-                                style={{
-                                    background: 'var(--bg-glass-strong)',
-                                    backdropFilter: 'blur(16px)',
-                                    WebkitBackdropFilter: 'blur(16px)',
-                                    border: '1px solid var(--border-light)',
-                                    borderRadius: '20px',
-                                    padding: '1.75rem',
-                                    boxShadow: 'var(--shadow-glass)',
-                                    transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
-                                }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.borderColor = card.color + '50';
-                                    e.currentTarget.style.boxShadow = `0 10px 28px ${card.color}18`;
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.borderColor = 'var(--border-light)';
-                                    e.currentTarget.style.boxShadow = 'var(--shadow-glass)';
-                                }}
-                            >
-                                <div style={{
-                                    width: '44px', height: '44px', borderRadius: '12px',
-                                    background: card.bg,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    marginBottom: '1rem',
-                                }}>
-                                    <card.icon size={22} style={{ color: card.color }} />
-                                </div>
-                                <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                                    {card.title}
-                                </h3>
-                                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '1.25rem' }}>
-                                    {card.desc}
-                                </p>
-                                {i === 1 ? (
-                                    <button
-                                        type="button"
-                                        onClick={handleSubmitCaseClick}
+                        position: 'relative',
+                        zIndex: 1,
+                        borderTop: '1px solid var(--border-light)',
+                        borderBottom: '1px solid var(--border-light)',
+                        padding: '1.75rem 0 0.5rem',
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.9rem',
+                            marginBottom: '1.25rem',
+                            padding: '0 0.5rem',
+                        }}>
+                            <span style={{
+                                fontSize: '0.72rem',
+                                fontWeight: '800',
+                                letterSpacing: '0.18em',
+                                textTransform: 'uppercase',
+                                color: 'var(--text-muted)',
+                                fontFamily: 'var(--font-mono)',
+                            }}>
+                                Procedural Flow
+                            </span>
+                            <div style={{
+                                height: '1px',
+                                flex: 1,
+                                background: 'linear-gradient(90deg, var(--border-light), transparent)',
+                            }} />
+                        </div>
+
+                        <div className="quick-cards-grid" style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                            gap: 0,
+                        }}>
+                            {QUICK_CARDS.map((card, i) => {
+                                const CardIcon = card.icon;
+                                return (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, y: 16 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.56 + i * 0.08, duration: 0.5, ease: 'easeOut' }}
+                                        whileHover={{ y: -2 }}
+                                        className="workflow-step"
                                         style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: '0.35rem',
-                                            color: card.color,
-                                            fontSize: '0.875rem',
-                                            fontWeight: '700',
-                                            background: 'transparent',
-                                            border: 'none',
-                                            padding: 0,
-                                            cursor: 'pointer',
+                                            padding: '1.35rem 1.5rem 1.45rem',
+                                            minHeight: '214px',
+                                            position: 'relative',
+                                            borderLeft: i === 0 ? 'none' : '1px solid var(--border-light)',
+                                            background: 'linear-gradient(180deg, rgba(255,255,255,0.02), transparent 100%)',
+                                            transition: 'transform 0.2s ease, border-color 0.2s ease, background 0.2s ease',
                                         }}
                                     >
-                                        {card.cta} <ArrowRight size={14} />
-                                    </button>
-                                ) : (
-                                    <Link to="/signup" style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                                        color: card.color,
-                                        fontSize: '0.875rem', fontWeight: '700',
-                                        textDecoration: 'none',
-                                        transition: 'gap 0.2s ease',
-                                    }}
-                                        onMouseEnter={e => e.currentTarget.style.gap = '0.6rem'}
-                                        onMouseLeave={e => e.currentTarget.style.gap = '0.35rem'}
-                                    >
-                                        {card.cta} <ArrowRight size={14} />
-                                    </Link>
-                                )}
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.75rem',
+                                            marginBottom: '1.15rem',
+                                        }}>
+                                            <span style={{
+                                                fontFamily: 'var(--font-mono)',
+                                                fontSize: '0.86rem',
+                                                letterSpacing: '0.2em',
+                                                color: 'var(--text-muted)',
+                                                lineHeight: 1,
+                                            }}>
+                                                {card.number}
+                                            </span>
+                                            <div style={{
+                                                flex: 1,
+                                                height: '1px',
+                                                background: 'linear-gradient(90deg, rgba(255,255,255,0.16), transparent)',
+                                            }} />
+                                            <span style={{
+                                                fontSize: '0.68rem',
+                                                fontWeight: '700',
+                                                letterSpacing: '0.16em',
+                                                textTransform: 'uppercase',
+                                                color: card.color,
+                                            }}>
+                                                {card.label}
+                                            </span>
+                                        </div>
 
-                                {inlineMessage && i === 1 && (
-                                    <GuestInlineCTA message={inlineMessage} onSignUp={goToSignup} compact />
-                                )}
-                            </motion.div>
-                        ))}
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.65rem',
+                                            marginBottom: '0.9rem',
+                                        }}>
+                                            <div style={{
+                                                width: '1.65rem',
+                                                height: '1.65rem',
+                                                borderRadius: '50%',
+                                                border: `1px solid ${card.accent}`,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexShrink: 0,
+                                            }}>
+                                                <CardIcon size={14} style={{ color: card.color }} />
+                                            </div>
+                                            <h3 style={{
+                                                fontSize: '1.05rem',
+                                                fontWeight: '800',
+                                                color: 'var(--text-main)',
+                                                letterSpacing: '-0.02em',
+                                                margin: 0,
+                                            }}>
+                                                {card.title}
+                                            </h3>
+                                        </div>
+
+                                        <p style={{
+                                            fontSize: '0.92rem',
+                                            color: 'var(--text-secondary)',
+                                            lineHeight: '1.75',
+                                            margin: 0,
+                                            maxWidth: '26ch',
+                                        }}>
+                                            {card.desc}
+                                        </p>
+
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            gap: '0.75rem',
+                                            marginTop: '1.4rem',
+                                            paddingTop: '1rem',
+                                            borderTop: '1px solid var(--border-light)',
+                                        }}>
+                                            <span style={{
+                                                fontSize: '0.7rem',
+                                                letterSpacing: '0.14em',
+                                                textTransform: 'uppercase',
+                                                color: 'var(--text-muted)',
+                                            }}>
+                                                Step {card.number}
+                                            </span>
+                                            <Link to="/signup" style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '0.4rem',
+                                                color: card.color,
+                                                fontSize: '0.84rem',
+                                                fontWeight: '800',
+                                                letterSpacing: '0.04em',
+                                                textDecoration: 'none',
+                                            }}>
+                                                {card.cta} <ArrowRight size={14} />
+                                            </Link>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </section>
 
@@ -433,82 +514,196 @@ export default function Landing() {
                             </p>
                         </div>
 
-                        <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
-                            {FEATURES.map((f, i) => {
-                                const FeatureIcon = f.icon;
-                                return (
-                                    <motion.div key={i}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.4, ease: 'easeOut' } }}
-                                        viewport={{ once: true }}
-                                        className="feature-card"
-                                        style={{
-                                            padding: '2.25rem',
-                                            background: 'var(--bg-main)',
-                                            borderWidth: '1px',
-                                            borderStyle: 'solid',
-                                            borderColor: 'var(--border-light)',
-                                            borderRadius: '16px',
-                                            cursor: 'default',
-                                            '--card-glow-color': f.color,
-                                        }}
-                                    >
-                                        <div
-                                            className="feature-icon-wrapper"
-                                            style={{
-                                                width: '52px', height: '52px', borderRadius: '14px',
-                                                background: f.color + '12',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                marginBottom: '1.1rem',
-                                            }}
-                                        >
-                                            <FeatureIcon size={26} style={{ color: f.color }} />
-                                        </div>
-                                        <div
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between',
-                                                gap: '0.75rem',
-                                                marginBottom: '0.65rem',
-                                            }}
-                                        >
-                                            <h3
-                                                style={{
-                                                    fontSize: '1.1rem',
-                                                    fontWeight: '700',
-                                                    color: 'var(--text-main)',
-                                                    margin: 0,
-                                                }}
-                                            >
-                                                {f.title}
-                                            </h3>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'minmax(260px, 360px) minmax(0, 1fr)',
+                            gap: '2rem',
+                            alignItems: 'stretch',
+                        }} className="features-system-grid">
+                            <div style={{
+                                padding: '2rem',
+                                border: '1px solid var(--border-light)',
+                                borderRadius: '14px',
+                                background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
+                                position: 'relative',
+                                overflow: 'hidden',
+                            }}>
+                                <div style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    marginBottom: '1rem',
+                                }}>
+                                    <span style={{
+                                        fontSize: '0.7rem',
+                                        fontWeight: '800',
+                                        letterSpacing: '0.18em',
+                                        textTransform: 'uppercase',
+                                        color: 'var(--text-muted)',
+                                        fontFamily: 'var(--font-mono)',
+                                    }}>
+                                        Platform Stack
+                                    </span>
+                                    <span style={{
+                                        width: '34px',
+                                        height: '1px',
+                                        background: 'var(--border-light)',
+                                    }} />
+                                </div>
 
-                                            {isGuest && (
-                                                f.title === t('features.fileCases.title') ||
-                                                f.title === t('features.virtualHearings.title')
-                                            ) && (
-                                                    <span
-                                                        style={{
-                                                            padding: '0.28rem 0.55rem',
-                                                            borderRadius: '999px',
-                                                            fontSize: '0.68rem',
-                                                            fontWeight: '700',
-                                                            background: 'rgba(245,158,11,0.10)',
-                                                            border: '1px solid rgba(245,158,11,0.18)',
-                                                            color: '#f59e0b',
-                                                            letterSpacing: '0.02em',
-                                                            whiteSpace: 'nowrap',
-                                                        }}
-                                                    >
-                                                        Account Required
-                                                    </span>
-                                                )}
+                                <h3 style={{
+                                    fontSize: 'clamp(1.45rem, 2vw, 2rem)',
+                                    fontWeight: '800',
+                                    color: 'var(--text-main)',
+                                    letterSpacing: '-0.03em',
+                                    lineHeight: '1.15',
+                                    margin: '0 0 1rem',
+                                    maxWidth: '12ch',
+                                }}>
+                                    Structured tools for case intake, guidance, and follow-through.
+                                </h3>
+
+                                <p style={{
+                                    margin: 0,
+                                    color: 'var(--text-secondary)',
+                                    fontSize: '0.95rem',
+                                    lineHeight: '1.8',
+                                    maxWidth: '30ch',
+                                }}>
+                                    A single legal workflow, organized as an operational system instead of disconnected marketing tiles.
+                                </p>
+
+                                <div style={{
+                                    marginTop: '1.75rem',
+                                    display: 'grid',
+                                    gap: '0.9rem',
+                                }}>
+                                    {[
+                                        'Case handling built for public service contexts',
+                                        'Readable process cues and clear scanning order',
+                                        'Reduced visual noise for higher trust and clarity',
+                                    ].map((item, index) => (
+                                        <div key={index} style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.75rem',
+                                            paddingTop: index === 0 ? 0 : '0.9rem',
+                                            borderTop: index === 0 ? 'none' : '1px solid var(--border-light)',
+                                        }}>
+                                            <span style={{
+                                                width: '0.45rem',
+                                                height: '0.45rem',
+                                                borderRadius: '50%',
+                                                background: 'var(--color-secondary)',
+                                                flexShrink: 0,
+                                            }} />
+                                            <span style={{
+                                                color: 'var(--text-secondary)',
+                                                fontSize: '0.88rem',
+                                                lineHeight: '1.6',
+                                            }}>
+                                                {item}
+                                            </span>
                                         </div>
-                                        <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
-                                    </motion.div>
-                                );
-                            })}
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 0 }}>
+                                {FEATURES.map((f, i) => {
+                                    const FeatureIcon = f.icon;
+                                    const isLast = i === FEATURES.length - 1;
+                                    return (
+                                        <motion.div key={i}
+                                            initial={{ opacity: 0, x: 18 }}
+                                            whileInView={{ opacity: 1, x: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: i * 0.06 }}
+                                            whileHover={{ x: 4 }}
+                                            style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: '72px minmax(0, 1fr)',
+                                                gap: '1rem',
+                                                padding: '1.2rem 0',
+                                                borderTop: i === 0 ? '1px solid var(--border-light)' : 'none',
+                                                borderBottom: '1px solid var(--border-light)',
+                                                alignItems: 'start',
+                                                cursor: 'default',
+                                            }}
+                                        >
+                                            <div style={{
+                                                position: 'relative',
+                                                minHeight: '100%',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                            }}>
+                                                <div style={{
+                                                    width: '34px',
+                                                    height: '34px',
+                                                    borderRadius: '50%',
+                                                    border: `1px solid ${f.color}40`,
+                                                    background: 'var(--bg-main)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    position: 'relative',
+                                                    zIndex: 1,
+                                                }}>
+                                                    <FeatureIcon size={16} style={{ color: f.color }} />
+                                                </div>
+                                                {!isLast && (
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        top: '34px',
+                                                        bottom: '-1.2rem',
+                                                        width: '1px',
+                                                        background: 'linear-gradient(180deg, rgba(255,255,255,0.18), transparent)',
+                                                    }} />
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    gap: '1rem',
+                                                    marginBottom: '0.4rem',
+                                                }}>
+                                                    <h3 style={{
+                                                        fontSize: '1.08rem',
+                                                        fontWeight: '800',
+                                                        color: 'var(--text-main)',
+                                                        margin: 0,
+                                                        letterSpacing: '-0.02em',
+                                                    }}>
+                                                        {f.title}
+                                                    </h3>
+                                                    <span style={{
+                                                        fontSize: '0.68rem',
+                                                        fontWeight: '800',
+                                                        letterSpacing: '0.16em',
+                                                        textTransform: 'uppercase',
+                                                        color: f.color,
+                                                        whiteSpace: 'nowrap',
+                                                    }}>
+                                                        {String(i + 1).padStart(2, '0')}
+                                                    </span>
+                                                </div>
+                                                <p style={{
+                                                    fontSize: '0.92rem',
+                                                    color: 'var(--text-secondary)',
+                                                    lineHeight: '1.75',
+                                                    margin: 0,
+                                                    maxWidth: '62ch',
+                                                }}>
+                                                    {f.desc}
+                                                </p>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -713,12 +908,19 @@ export default function Landing() {
                     .hero-grid { grid-template-columns: 1fr !important; }
                     .hero-grid > div:last-child { display: none; }
                     .quick-cards-grid { grid-template-columns: 1fr !important; }
+                    .workflow-step { border-left: 0 !important; border-top: 1px solid var(--border-light); }
+                    .workflow-step:first-child { border-top: 0; }
+                    .features-system-grid { grid-template-columns: 1fr !important; }
                     .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
                 }
 
                 @media (max-width: 600px) {
                     .quick-cards-grid { grid-template-columns: 1fr !important; }
                     .features-grid { grid-template-columns: 1fr !important; }
+                    .features-system-grid { gap: 1.25rem !important; }
+                    .features-system-grid > div:first-child { padding: 1.5rem !important; }
+                    .features-grid > div { grid-template-columns: 56px minmax(0, 1fr) !important; gap: 0.85rem !important; }
+                    .workflow-step { padding: 1.1rem 0.5rem 1.25rem !important; min-height: unset !important; }
                 }
 
                 /* ── Fix for very small screens (332px and below) ── */
