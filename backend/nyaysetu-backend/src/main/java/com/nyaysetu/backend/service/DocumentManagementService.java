@@ -6,10 +6,13 @@ import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.DocumentEntity;
 import com.nyaysetu.backend.entity.DocumentStorageType;
 import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.entity.VisibilityLevel;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,20 +65,16 @@ public class DocumentManagementService {
                 .fileHash(fileHash)
                 .uploadIp(uploadIp)
                 .isVerified(fileHash != null)
-                .visibilityLevel("RESTRICTED") // Default: only uploader, their lawyer, and judge can see
+                .visibilityLevel(VisibilityLevel.RESTRICTED) // Default: only uploader, their lawyer, and judge can see
                 .build();
 
         DocumentEntity saved = documentRepository.save(document);
         return convertToDto(saved);
     }
 
-    public List<DocumentDto> getUserDocuments(Long userId) {
-        List<DocumentEntity> documents = documentRepository.findAll().stream()
-                .filter(doc -> doc.getUploadedBy().equals(userId))
-                .collect(Collectors.toList());
-        return documents.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public Page<DocumentDto> getUserDocuments(Long userId, Pageable pageable) {
+        return documentRepository.findByUploadedBy(userId, pageable)
+                .map(this::convertToDto);
     }
 
     public List<DocumentDto> getCaseDocuments(UUID caseId) {
@@ -117,15 +116,14 @@ public class DocumentManagementService {
      * Check if user has access to a document
      */
     private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole, boolean isCaseLawyer) {
-        String visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : "PUBLIC";
+        VisibilityLevel visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : VisibilityLevel.PUBLIC;
         
         return switch (visibility) {
-            case "PUBLIC" -> true; // Everyone can see public documents
-            case "RESTRICTED" -> "JUDGE".equals(userRole)
+            case PUBLIC -> true; // Everyone can see public documents
+            case RESTRICTED -> "JUDGE".equals(userRole)
                     || (userId != null && userId.equals(doc.getUploadedBy()))
                     || isCaseLawyer; // Assigned lawyers can access restricted case documents
-            case "SEALED" -> "JUDGE".equals(userRole); // Only judge
-            default -> false; // Unknown visibility level - deny by default
+            case SEALED -> "JUDGE".equals(userRole); // Only judge
         };
     }
 

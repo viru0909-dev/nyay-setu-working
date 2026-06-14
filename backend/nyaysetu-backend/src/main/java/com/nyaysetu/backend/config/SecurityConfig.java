@@ -1,6 +1,7 @@
 package com.nyaysetu.backend.config;
 
 import com.nyaysetu.backend.filter.JwtAuthFilter;
+
 import com.nyaysetu.backend.filter.RateLimitFilter;
 import com.nyaysetu.backend.filter.XssSanitizationFilter;
 import jakarta.annotation.PostConstruct;
@@ -30,6 +31,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 
 @Configuration
 @EnableMethodSecurity
@@ -89,62 +91,54 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Use origins from application.properties / Env Var
-        if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
+        // SAFE DEFAULT (Localhost fallback)
+        List<String> defaultOrigins = Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "http://localhost"
+        );
+
+        if (allowedOrigins != null && !allowedOrigins.trim().isEmpty()) {
             List<String> origins = Arrays.stream(allowedOrigins.split(","))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
                     .collect(Collectors.toList());
 
-            if (origins.isEmpty()) {
-                // SAFE DEFAULT: Allow local development origins only
-                configuration.setAllowedOrigins(Arrays.asList(
-                    "http://localhost:5173",
-                    "http://localhost:3000",
-                    "http://localhost"
-                ));
-                configuration.setAllowCredentials(true);
+            if (origins.contains("*")) {
+                // SECURITY: Reject bare "*" when credentials are true
+                logger.warn("CORS_ALLOWED_ORIGINS contains bare '*'. This is unsafe with credentials. Falling back to localhost defaults.");
+                configuration.setAllowedOrigins(defaultOrigins);
+            } else if (origins.stream().anyMatch(o -> o.contains("*"))) {
+                // Specific patterns like https://*.example.com are safe
+                configuration.setAllowedOriginPatterns(origins);
             } else {
-                // Security: reject bare "*" — it allows any origin to make credentialed requests
-                boolean hasBareWildcard = origins.stream().anyMatch(o -> o.trim().equals("*"));
-                if (hasBareWildcard) {
-                    logger.warn("CORS_ALLOWED_ORIGINS contains bare '*'. "
-                            + "This is unsafe with credentials. Falling back to localhost defaults.");
-                    configuration.setAllowedOrigins(Arrays.asList(
-                        "http://localhost:5173",
-                        "http://localhost:3000",
-                        "http://localhost"
-                    ));
-                } else {
-                    boolean hasPattern = origins.stream().anyMatch(o -> o.contains("*"));
-                    if (hasPattern) {
-                        // Specific patterns like https://*.example.com are safe with credentials
-                        configuration.setAllowedOriginPatterns(origins);
-                    } else {
-                        configuration.setAllowedOrigins(origins);
-                    }
-                }
-                configuration.setAllowCredentials(true);
+                // Exact valid domains
+                configuration.setAllowedOrigins(origins);
             }
         } else {
-            // SAFE DEFAULT: Allow local development origins only
-            configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173", 
-                "http://localhost:3000", 
-                "http://localhost"
-            ));
-            configuration.setAllowCredentials(true);
+            // Fallback if environment variable is missing
+            configuration.setAllowedOrigins(defaultOrigins);
         }
-        
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        
+
+        // SECURITY IMPROVEMENTS:
+        // 1. Always allow credentials for the resolved safe origins
+        configuration.setAllowCredentials(true);
+
+        // 2. Add "PATCH" to allowed methods
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
+        // 3. Restrict headers instead of using wildcard "*" for better security
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin",
+                "X-Requested-With"
+        ));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -152,6 +146,7 @@ public class SecurityConfig {
             XssSanitizationFilter xssSanitizationFilter) throws Exception {
 
         http
+                // 1. CORS fix (Restricting to specific origins instead of all)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers
@@ -189,7 +184,11 @@ public class SecurityConfig {
                                 "/api/v1/auth/ping",
                                 "/api/v1/auth/test",
                                 "/api/v1/health",
-                                "/api/v1/police/health"
+                                "/api/v1/police/health",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/actuator/**"
                         ).permitAll()
 
                         // ── WebSocket endpoints ───────────────────────────────────────────
@@ -262,6 +261,7 @@ public class SecurityConfig {
 
                         // ── Admin/oversight-only endpoints ────────────────────────────────
                         .requestMatchers(
+                                "/api/admin/**",
                                 "/api/v1/cases/pending-assignment",
                                 "/api/v1/cases/judge-workload",
                                 "/verify/admin/**",

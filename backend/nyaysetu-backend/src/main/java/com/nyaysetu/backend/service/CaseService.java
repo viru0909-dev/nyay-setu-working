@@ -3,7 +3,7 @@ package com.nyaysetu.backend.service;
 import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.exception.NotFoundException;
-import com.nyaysetu.backend.repository.LegalCaseRepository;
+import com.nyaysetu.backend.repository.CaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,20 +18,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CaseService {
 
-    private final LegalCaseRepository legalCaseRepository;
+    private final CaseRepository caseRepository;
     private final CaseTimelineService timelineService;
 
     @Transactional
-    public LegalCase createCase(CreateCaseRequest dto) {
+    public CaseEntity createCase(CreateCaseRequest dto) {
 
-        LegalCase legalCase = LegalCase.builder()
+        CaseEntity caseEntity = CaseEntity.builder()
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 // judgeId and parties removed from CreateCaseRequest
                 .status(CaseStatus.OPEN)
                 .build();
 
-        LegalCase saved = legalCaseRepository.save(legalCase);
+        CaseEntity saved = caseRepository.save(caseEntity);
 
         // Parties functionality removed from CreateCaseRequest
         // if (dto.getParties() != null && !dto.getParties().isEmpty()) {
@@ -51,21 +51,21 @@ public class CaseService {
         return saved;
     }
 
-    public LegalCase getCase(UUID id) {
-        return legalCaseRepository.findById(id)
+    public CaseEntity getCase(UUID id) {
+        return caseRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Case not found " + id));
     }
 
-    // Refactored method to accept page and size and return Page<LegalCase>
-    public Page<LegalCase> getAllCases(int page, int size) {
+    // Returns paginated CaseEntity records.
+    public Page<CaseEntity> getAllCases(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return legalCaseRepository.findAll(pageable);
+        return caseRepository.findAll(pageable);
     }
 
-    public LegalCase updateStatus(UUID caseId, CaseStatus status) {
-        LegalCase lc = getCase(caseId);
+    public CaseEntity updateStatus(UUID caseId, CaseStatus status) {
+        CaseEntity lc = getCase(caseId);
         lc.setStatus(status);
-        legalCaseRepository.save(lc);
+        caseRepository.save(lc);
 
         timelineService.addEvent(caseId, "Case status updated to " + status);
         return lc;

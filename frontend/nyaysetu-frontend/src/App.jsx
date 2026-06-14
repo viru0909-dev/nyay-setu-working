@@ -6,6 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import ScrollToTop from './ScrollToTop';
+import BackToTop from './components/BackToTop';
 import './styles/accessibility.css';
 import ScrollProgressBar from './components/ScrollProgressBar';
 
@@ -17,6 +18,8 @@ import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
 
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
+
+// Imported Feature Component
 
 // ==========================================
 // VITE CHUNK BREAKAGE MITIGATION WRAPPER
@@ -219,6 +222,7 @@ function App({ swRegistration }) {
                         <GuestWelcomeToast />
                         <GuestOnboardingHint />
                         <ScrollToTop />
+                        <BackToTop />
                         
                         <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
                             <Routes>

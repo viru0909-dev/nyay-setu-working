@@ -8,8 +8,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Evidence Record with blockchain security
- * Each record contains cryptographic hashes for tamper detection
+ * Append-only blockchain audit record for secured evidence.
+ *
+ * CaseEvidence stores uploaded evidence metadata and AI analysis.
+ * EvidenceRecord stores blockchain integrity, chain ordering,
+ * verification, and external anchoring information.
  */
 @Entity
 @Table(name = "evidence_records")
@@ -22,6 +25,9 @@ public class EvidenceRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Version
+    private Long version;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "case_id", nullable = false)
