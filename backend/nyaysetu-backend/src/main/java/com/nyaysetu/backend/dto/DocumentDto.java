@@ -1,8 +1,10 @@
 package com.nyaysetu.backend.dto;
 
+import com.nyaysetu.backend.entity.DocumentVersion;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -11,6 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class DocumentDto {
+
     private UUID id;
     private String fileName;
     private String contentType;
@@ -24,5 +27,8 @@ public class DocumentDto {
     private String fileUrl;
     private String fileHash; // SHA-256 hash for Section 63(4) compliance
     private String uploadIp; // IP address for audit trail
-    private Boolean isVerified; // True if file hash was successfully calculated
+    private Boolean isVerified;
+
+    // ✅ VERSION HISTORY ADDED
+    private List<DocumentVersion> versions;
 }
