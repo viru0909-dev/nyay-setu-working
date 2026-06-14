@@ -133,7 +133,7 @@ git checkout -b feat/your-feature-name
 
 Services will be available at:
 - Backend: `http://localhost:8080`
-- LawGPT: `http://localhost:8000`
+- LawGPT: `http://localhost:8001`
 - NLP Orchestrator: `http://localhost:8001`
 - Signaling Server: `http://localhost:3001`
 - Frontend: `http://localhost:3000`
@@ -163,7 +163,7 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python main.py
-# LawGPT runs on http://localhost:8000
+# LawGPT runs on http://localhost:8001
 ```
 
 #### NLP Orchestrator Setup (Python)

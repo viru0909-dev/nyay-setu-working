@@ -63,7 +63,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python main.py
 
-# Runs on http://localhost:8000
+# Runs on http://localhost:8001
 ```
 
 #### 3. NLP Orchestrator (Python)
@@ -100,7 +100,7 @@ npm start
              │            │                 │
     ┌────────▼────┐  ┌────▼─────┐  ┌──────▼────────┐
     │   Backend   │  │  LawGPT  │  │ NLP Orchestrator│
-    │  (Port 8080)│  │(Port 8000)│  │   (Port 8001)  │
+    │  (Port 8080)│  │(Port 8001)│  │   (Port 8001)  │
     └────────┬────┘  └────┬─────┘  └──────┬────────┘
              │            │                 │
              └────────────┼─────────────────┘
@@ -343,7 +343,7 @@ curl -X POST http://localhost:8080/api/v1/documents/upload \
 
 #### 4. Generate Legal Document
 ```bash
-curl -X POST http://localhost:8000/api/v1/lawgpt/generate \
+curl -X POST http://localhost:8001/api/v1/lawgpt/generate \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -489,7 +489,7 @@ class NyaySetuClient:
                                context: Dict, language: str = "EN") -> Dict:
         """Generate AI-powered legal document"""
         response = self.session.post(
-          "http://localhost:8000/api/v1/lawgpt/generate",
+          "http://localhost:8001/api/v1/lawgpt/generate",
             json={
                 "documentType": doc_type,
                 "caseId": case_id,
@@ -599,7 +599,7 @@ class NyaySetuClient {
 
   async generateDocument(documentType, caseId, context, language = 'EN') {
     try {
-      const response = await axios.post(`http://localhost:8000/api/v1/lawgpt/generate`, {
+      const response = await axios.post("http://localhost:8001/api/v1/lawgpt/generate", {
         documentType,
         caseId,
         context,
@@ -747,7 +747,7 @@ curl -X POST http://localhost:8080/api/v1/hearings \
 
 ```bash
 # 1. Generate affidavit
-AFFIDAVIT=$(curl -s -X POST http://localhost:8000/api/v1/lawgpt/generate \
+AFFIDAVIT=$(curl -s -X POST http://localhost:8001/api/v1/lawgpt/generate \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -893,7 +893,7 @@ python main.py
 curl http://localhost:8080/actuator/health
 
 # LawGPT health
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 
 # NLP Orchestrator health
 curl http://localhost:8001/health
