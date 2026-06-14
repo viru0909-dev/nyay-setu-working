@@ -295,7 +295,17 @@ export default function Signup() {
                                             <input
                                                 type="text"
                                                 value={formData.name}
-                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                onChange={(e) => {
+                                                    const rawValue = e.target.value;
+
+                                                    if (/[^A-Za-z ]/.test(rawValue)) {
+                                                        setError("Enter a valid full name");
+                                                    }
+
+                                                    const value = rawValue.replace(/[^A-Za-z ]/g, "");
+
+                                                    setFormData({ ...formData, name: value });
+                                                }}
                                                 placeholder={t('auth:signup.fullNamePlaceholder')}
                                                 required
                                                 style={{
@@ -308,6 +318,7 @@ export default function Signup() {
                                                     fontSize: '1rem'
                                                 }}
                                             />
+
                                         </div>
                                     </div>
 
@@ -333,9 +344,22 @@ export default function Signup() {
                                             <input
                                                 type="email"
                                                 value={formData.email}
-                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                onChange={(e) => {
+                                                    const rawValue = e.target.value;
+
+                                                    if (
+                                                        rawValue.length > 0 &&
+                                                        !/^[a-zA-Z0-9._%+-]*@?[a-zA-Z0-9.-]*\.?[a-zA-Z]*$/.test(rawValue)
+                                                    ) {
+                                                        setError("Enter a valid email address");
+                                                    }
+
+                                                    setFormData({ ...formData, email: rawValue });
+                                                }}
                                                 placeholder={t('auth:signup.emailPlaceholder')}
                                                 required
+                                                maxLength={100}
+                                                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                                                 style={{
                                                     width: '100%',
                                                     padding: '0.875rem 1rem 0.875rem 3rem',
@@ -461,9 +485,9 @@ export default function Signup() {
                                                 <ul style={{ margin: '0.5rem 0 0 0', padding: 0, listStyle: 'none' }}>
                                                     {[
                                                         [strength.checks?.minLength, 'At least 8 characters'],
-                                                        [strength.checks?.hasUpper,  'At least one uppercase letter'],
+                                                        [strength.checks?.hasUpper, 'At least one uppercase letter'],
                                                         [strength.checks?.hasNumber, 'At least one number'],
-                                                        [strength.checks?.hasSpecial,'At least one special character (@#$!%*?&)'],
+                                                        [strength.checks?.hasSpecial, 'At least one special character (@#$!%*?&)'],
                                                     ].map(([ok, label]) => (
                                                         <li key={label} style={{ fontSize: '0.75rem', color: ok ? '#10b981' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.2rem' }}>
                                                             <span>{ok ? '✓' : '○'}</span> {label}
