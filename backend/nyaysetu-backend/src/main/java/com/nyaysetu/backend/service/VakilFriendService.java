@@ -474,14 +474,14 @@ public class VakilFriendService {
             }
         }
  
-        // Mark session as completed
+        transferDocumentsBeforeCompletion(sessionId, resultEntity);
+
+        // Mark session as completed only after document transfer succeeds.
         session.setStatus(ChatSessionStatus.COMPLETED);
         session.setUpdatedAt(LocalDateTime.now());
         chatSessionRepository.save(session);
-        // Link any uploaded documents to the new case/FIR
-        if (resultEntity instanceof CaseEntity) {
-             vakilFriendDocumentService.transferDocumentsToCase(sessionId, ((CaseEntity)resultEntity).getId());
-        } else if (resultEntity instanceof FirRecord) {
+
+        else if (resultEntity instanceof FirRecord) {
              // For FIRs, we might need a different logic or linked entity, currently linking to "caseId" which is UUID. 
              // But FirRecord uses String ID usually? No, let's see. 
              // FirRecord usually has a String firNumber. 
@@ -495,6 +495,36 @@ public class VakilFriendService {
  
         return resultEntity;
     }
+
+    /**
+ * Transfers uploaded Vakil-Friend documents before completing the session.
+ * If transfer fails, the transaction is rolled back and the session remains active.
+ */
+private void transferDocumentsBeforeCompletion(UUID sessionId, Object resultEntity) {
+    if (!(resultEntity instanceof CaseEntity)) {
+        log.debug(
+                "Skipping document transfer for non-case filing result: {}",
+                resultEntity.getClass().getSimpleName()
+        );
+        return;
+    }
+
+    CaseEntity caseEntity = (CaseEntity) resultEntity;
+
+    try {
+        vakilFriendDocumentService.transferDocumentsToCase(sessionId, caseEntity.getId());
+    } catch (Exception e) {
+        log.error(
+                "Failed to transfer Vakil-Friend documents before completing session: {}",
+                sessionId,
+                e
+        );
+        throw new RuntimeException(
+                "Failed to transfer uploaded documents. Session was not completed.",
+                e
+        );
+    }
+}
     
     /**
      * Auto-schedule the first hearing for a case
