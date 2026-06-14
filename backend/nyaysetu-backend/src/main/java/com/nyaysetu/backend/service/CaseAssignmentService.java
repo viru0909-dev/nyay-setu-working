@@ -109,7 +109,7 @@ public class CaseAssignmentService {
                         .name(lawyer.getName())
                         .email(lawyer.getEmail())
                         .specialization("General Practice") // TODO: Add specialization field
-                        .casesHandled(0) // TODO: Count from cases
+                        .casesHandled(Math.toIntExact(caseRepository.countByLawyer(lawyer)))
                         .rating(4.5) // TODO: Add rating system
                         .build())
                 .collect(Collectors.toList());
