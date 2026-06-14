@@ -1,10 +1,19 @@
+ feature/court-fee-calculator
+import { Suspense, lazy, useEffect } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { LanguageProvider } from './contexts/LanguageContext.jsx';
+import useAuthStore from './store/authStore';
+// CHANGED: ThemeProvider added — wraps the entire app so all components can access theme
+
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, Suspense, lazy, useState } from 'react';
 import useAuthStore from './store/authStore';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
+ main
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ScrollToTop from './ScrollToTop';
 import BackToTop from './components/BackToTop';
 import './styles/accessibility.css';
