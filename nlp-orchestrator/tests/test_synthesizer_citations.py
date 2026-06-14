@@ -11,15 +11,7 @@ synthesize_answers_structured:
 and that the pure helper functions behave correctly.
 """
 
-import os
-
-os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
-
-import json
-import pytest
-from unittest.mock import AsyncMock, patch
-
-import synthesizer
+from models.schemas import SynthesisResult
 from synthesizer import (
     synthesize_answers_structured,
     extract_cited_laws_from_markdown,
@@ -27,12 +19,20 @@ from synthesizer import (
     _dedupe_cited_laws,
     _strip_json_fence,
 )
-from models.schemas import SynthesisResult
+from unittest.mock import AsyncMock, patch
+import pytest
+import json
+import os
+
+os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
 
 
 RESEARCH = [
-    {"question": "What is the punishment for murder?", "source": "groq",
-     "answer": "Section 302 IPC prescribes death or life imprisonment."},
+    {
+        "question": "What is the punishment for murder?",
+        "source": "groq",
+        "answer": "Section 302 IPC prescribes death or life imprisonment.",
+    },
 ]
 
 
@@ -75,10 +75,14 @@ def test_extract_cited_laws_from_markdown():
 @pytest.mark.asyncio
 @patch("synthesizer.client.chat.completions.create", new_callable=AsyncMock)
 async def test_parses_json_object_with_cited_laws(mock_create):
-    mock_create.return_value = _mock_response(json.dumps({
-        "answer_markdown": "## Answer\nMurder is punishable under Section 302 IPC.",
-        "cited_laws": ["IPC Sec 302", "CrPC Sec 144"],
-    }))
+    mock_create.return_value = _mock_response(
+        json.dumps(
+            {
+                "answer_markdown": "## Answer\nMurder is punishable under Section 302 IPC.",  # noqa: E501
+                "cited_laws": ["IPC Sec 302", "CrPC Sec 144"],
+            }
+        )
+    )
 
     result = await synthesize_answers_structured("punishment for murder?", RESEARCH)
 
@@ -91,12 +95,14 @@ async def test_parses_json_object_with_cited_laws(mock_create):
 @patch("synthesizer.client.chat.completions.create", new_callable=AsyncMock)
 async def test_strips_fence_and_normalizes_and_dedupes(mock_create):
     mock_create.return_value = _mock_response(
-        '```json\n'
-        + json.dumps({
-            "answer_markdown": "## Answer\nSee the provisions below.",
-            "cited_laws": ["IPC Section 302", "ipc sec 302", "Article 21"],
-        })
-        + '\n```'
+        "```json\n"
+        + json.dumps(
+            {
+                "answer_markdown": "## Answer\nSee the provisions below.",
+                "cited_laws": ["IPC Section 302", "ipc sec 302", "Article 21"],
+            }
+        )
+        + "\n```"
     )
 
     result = await synthesize_answers_structured("q", RESEARCH)
@@ -107,10 +113,14 @@ async def test_strips_fence_and_normalizes_and_dedupes(mock_create):
 @pytest.mark.asyncio
 @patch("synthesizer.client.chat.completions.create", new_callable=AsyncMock)
 async def test_backfills_cited_laws_from_markdown_when_empty(mock_create):
-    mock_create.return_value = _mock_response(json.dumps({
-        "answer_markdown": "Negligent driving is covered by Section 304A IPC.",
-        "cited_laws": [],
-    }))
+    mock_create.return_value = _mock_response(
+        json.dumps(
+            {
+                "answer_markdown": "Negligent driving is covered by Section 304A IPC.",
+                "cited_laws": [],
+            }
+        )
+    )
 
     result = await synthesize_answers_structured("q", RESEARCH)
 

@@ -4,7 +4,6 @@ Combines all sub-answers into one structured, clean final legal answer.
 Includes relevant IPC / BNS / MVA section references.
 """
 
-import asyncio
 import json
 import re
 from groq import AsyncGroq
@@ -14,7 +13,9 @@ from models.schemas import SynthesisResult
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
-STRUCTURED_SYNTHESIS_PROMPT = """You are a senior Indian legal expert writing a final comprehensive legal opinion.
+_MAX_TOKENS = 2048
+
+STRUCTURED_SYNTHESIS_PROMPT = """You are a senior Indian legal expert writing a final comprehensive legal opinion.  # noqa: E501
 
 You have received research results from multiple focused legal sub-queries.
 Synthesize these into a single, clear, well-structured answer for an Indian citizen.
@@ -24,17 +25,17 @@ Research Results:
 
 Original User Question: {original_query}
 
-Return ONLY a valid JSON object (no markdown fences, no commentary) with EXACTLY these two keys:
+Return ONLY a valid JSON object (no markdown fences, no commentary) with EXACTLY these two keys:  # noqa: E501
   "answer_markdown": a string containing the full answer in clean markdown. It must:
       1. Start with a clear, direct answer to the main question (2-3 sentences)
-      2. Provide key legal provisions with exact section numbers (IPC/BNS/CPC/CrPC/MVA as applicable)
+      2. Provide key legal provisions with exact section numbers (IPC/BNS/CPC/CrPC/MVA as applicable)  # noqa: E501
       3. Outline practical steps the user can take
       4. Mention any important deadlines or limitations
-      5. Include a brief disclaimer that this is AI-generated legal information and a lawyer should be consulted
-      Use ## headers and - bullets where appropriate. Write in simple, accessible English.
-  "cited_laws": an array of strings listing every distinct statutory provision you cited,
+      5. Include a brief disclaimer that this is AI-generated legal information and a lawyer should be consulted  # noqa: E501
+      Use ## headers and - bullets where appropriate. Write in simple, accessible English.  # noqa: E501
+  "cited_laws": an array of strings listing every distinct statutory provision you cited,  # noqa: E501
       each in the form "<ACT> Sec <NUMBER>" or "Article <NUMBER>"
-      (e.g. ["IPC Sec 302", "CrPC Sec 144", "Article 21"]). Use an empty array [] if none.
+      (e.g. ["IPC Sec 302", "CrPC Sec 144", "Article 21"]). Use an empty array [] if none.  # noqa: E501
 
 Example:
 {{"answer_markdown": "## Answer\\n...", "cited_laws": ["IPC Sec 304A", "MVA Sec 166"]}}
@@ -50,9 +51,9 @@ _ACT_DISPLAY = {
     "Article": "Article",
 }
 
-SYNTHESIS_PROMPT = """You are a senior Indian legal expert writing a final comprehensive legal opinion.
+SYNTHESIS_PROMPT = """You are a senior Indian legal expert writing a final comprehensive legal opinion.  # noqa: E501
 
-You have received research results from multiple focused legal sub-queries. 
+You have received research results from multiple focused legal sub-queries.
 Synthesize these into a single, clear, well-structured answer for an Indian citizen.
 
 Research Results:
@@ -62,14 +63,15 @@ Original User Question: {original_query}
 
 Your synthesis must:
 1. Start with a clear, direct answer to the main question (2-3 sentences)
-2. Provide key legal provisions with exact section numbers (IPC/BNS/CPC/MVA as applicable)
+2. Provide key legal provisions with exact section numbers (IPC/BNS/CPC/MVA as applicable)  # noqa: E501
 3. Outline practical steps the user can take
 4. Mention any important deadlines or limitations
-5. Include a brief disclaimer that this is AI-generated legal information and a lawyer should be consulted for specific cases
+5. Include a brief disclaimer that this is AI-generated legal information and a lawyer should be consulted for specific cases  # noqa: E501
 
-Format your response in clear markdown with headers (##) and bullet points (-) where appropriate.
+Format your response in clear markdown with headers (##) and bullet points (-) where appropriate.  # noqa: E501
 Write in simple, accessible English. Avoid heavy legal jargon.
 """
+
 
 def format_research_for_synthesis(research_results: list[dict]) -> str:
     """Format the research results into a readable block for the synthesis prompt."""
@@ -83,13 +85,14 @@ def format_research_for_synthesis(research_results: list[dict]) -> str:
             )
     return "\n---\n".join(formatted)
 
+
 async def synthesize_answers(original_query: str, research_results: list[dict]) -> str:
     """
     Synthesize multiple sub-answers into one final structured legal response.
     """
     try:
         formatted_research = format_research_for_synthesis(research_results)
-        
+
         response = await client.chat.completions.create(
             model=GROQ_MODEL_FAST,
             messages=[
@@ -97,20 +100,25 @@ async def synthesize_answers(original_query: str, research_results: list[dict]) 
                     "role": "user",
                     "content": SYNTHESIS_PROMPT.format(
                         research_results=formatted_research,
-                        original_query=original_query
-                    )
+                        original_query=original_query,
+                    ),
                 }
             ],
             temperature=0.3,
-            max_tokens=2048
+            max_tokens=_MAX_TOKENS,
         )
-        
+
         return response.choices[0].message.content.strip()
-    
+
     except Exception as e:
         print(f"[Synthesizer] Error: {e}")
-        parts = [f"**{r['question']}**\n{r['answer']}" for r in research_results if r.get("answer")]
+        parts = [
+            f"**{r['question']}**\n{r['answer']}"
+            for r in research_results
+            if r.get("answer")
+        ]
         return "\n\n".join(parts)
+
 
 async def stream_synthesize_answers(query, research_results):
     """
@@ -118,14 +126,11 @@ async def stream_synthesize_answers(query, research_results):
     Fixed the AsyncAPIResponse iteration bug.
     """
     messages = [
-        {
-            "role": "system",
-            "content": "You are a legal synthesis assistant."
-        },
+        {"role": "system", "content": "You are a legal synthesis assistant."},
         {
             "role": "user",
-            "content": f"Query: {query}\n\nResearch Results:\n{research_results}"
-        }
+            "content": f"Query: {query}\n\nResearch Results:\n{research_results}",
+        },
     ]
 
     try:
@@ -134,7 +139,7 @@ async def stream_synthesize_answers(query, research_results):
             messages=messages,
             temperature=0.3,
             max_tokens=1024,
-            stream=True
+            stream=True,
         )
 
         async for chunk in stream:
@@ -145,6 +150,7 @@ async def stream_synthesize_answers(query, research_results):
     except Exception as e:
         print(f"[Stream Synthesizer] Standard stream failed: {e}")
 
+
 # ─── Structured synthesis with explicit cited-law extraction (issue #851) ─────
 _CITED_LAW_RE = re.compile(r"^[A-Za-z]")
 
@@ -152,6 +158,7 @@ _FENCE_MARKER = "`" * 3
 
 _JSON_FENCE_START_RE = re.compile(r"^" + _FENCE_MARKER + r"(?:json)?\s*", re.IGNORECASE)
 _JSON_FENCE_END_RE = re.compile(r"\s*" + _FENCE_MARKER + r"$")
+
 
 def _strip_json_fence(raw: str) -> str:
     """Remove a leading/trailing markdown fence if the model added one."""
@@ -161,6 +168,7 @@ def _strip_json_fence(raw: str) -> str:
         text = _JSON_FENCE_START_RE.sub("", text)
         text = _JSON_FENCE_END_RE.sub("", text)
     return text.strip()
+
 
 def _normalize_cited_law(item: str) -> str:
     if not item or not isinstance(item, str):
@@ -174,6 +182,7 @@ def _normalize_cited_law(item: str) -> str:
         return f"{act} Sec {c['section']}"
     return item.strip()
 
+
 def _dedupe_cited_laws(items: list) -> list[str]:
     seen: set[str] = set()
     out: list[str] = []
@@ -185,13 +194,19 @@ def _dedupe_cited_laws(items: list) -> list[str]:
             out.append(normalized)
     return out
 
+
 def extract_cited_laws_from_markdown(markdown: str) -> list[str]:
     citations = extract_legal_citations(markdown or "")
     formatted = []
     for c in citations:
         act = _ACT_DISPLAY.get(c["act"], c["act"])
-        formatted.append(f"Article {c['section']}" if act == "Article" else f"{act} Sec {c['section']}")
+        formatted.append(
+            f"Article {c['section']}"
+            if act == "Article"
+            else f"{act} Sec {c['section']}"
+        )
     return _dedupe_cited_laws(formatted)
+
 
 async def synthesize_answers_structured(
     original_query: str,
@@ -212,7 +227,7 @@ async def synthesize_answers_structured(
                 }
             ],
             temperature=0.3,
-            max_tokens=2048,
+            max_tokens=_MAX_TOKENS,
         )
         raw = response.choices[0].message.content.strip()
         payload = json.loads(_strip_json_fence(raw), strict=False)
@@ -242,9 +257,12 @@ async def synthesize_answers_structured(
             cited_laws=extract_cited_laws_from_markdown(markdown),
         )
 
-async def stream_synthesize_answers_structured(original_query: str, research_results: list):
+
+async def stream_synthesize_answers_structured(
+    original_query: str, research_results: list
+):
     """
-    Streams the synthesis answer text token-by-token while parsing out 
+    Streams the synthesis answer text token-by-token while parsing out
     the structured JSON formatting on the fly, emitting citations at the end.
     """
     formatted_research = format_research_for_synthesis(research_results)
@@ -258,7 +276,7 @@ async def stream_synthesize_answers_structured(original_query: str, research_res
             model=GROQ_MODEL_FAST,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
-            max_tokens=2048,
+            max_tokens=_MAX_TOKENS,
             stream=True,
         )
     except Exception as e:
@@ -281,7 +299,7 @@ async def stream_synthesize_answers_structured(original_query: str, research_res
             match = re.search(r'"answer_markdown"\s*:\s*"', buffer)
             if match:
                 in_markdown = True
-                buffer = buffer[match.end():]
+                buffer = buffer[match.end() :]
 
         # STATE 2: Actively streaming markdown content
         elif in_markdown:
@@ -289,20 +307,30 @@ async def stream_synthesize_answers_structured(original_query: str, research_res
             if end_match:
                 in_markdown = False
                 markdown_done = True
-                text_payload = buffer[:end_match.start()]
+                text_payload = buffer[: end_match.start()]
                 if text_payload:
-                    yield {"text": text_payload.replace('\\n', '\n').replace('\\t', '\t').replace('\\"', '"'), "citations": []}
-                buffer = buffer[end_match.end():]
+                    yield {
+                        "text": text_payload.replace("\\n", "\n")
+                        .replace("\\t", "\t")
+                        .replace('\\"', '"'),
+                        "citations": [],
+                    }
+                buffer = buffer[end_match.end() :]
             else:
-                if buffer.endswith('\\'):
+                if buffer.endswith("\\"):
                     text_to_send = buffer[:-1]
-                    buffer = '\\'
+                    buffer = "\\"
                 else:
                     text_to_send = buffer
                     buffer = ""
 
                 if text_to_send:
-                    yield {"text": text_to_send.replace('\\n', '\n').replace('\\t', '\t').replace('\\"', '"'), "citations": []}
+                    yield {
+                        "text": text_to_send.replace("\\n", "\n")
+                        .replace("\\t", "\t")
+                        .replace('\\"', '"'),
+                        "citations": [],
+                    }
 
         # STATE 3: Markdown finished, gather remaining tokens for the citations array
         elif markdown_done:

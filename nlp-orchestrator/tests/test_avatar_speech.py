@@ -39,6 +39,7 @@ with patch.dict(os.environ, {"GROQ_API_KEY": "test-key-for-ci"}):
 
 # ── Prompt contract: register-tuning regression guards ───────────────────────
 
+
 class TestHinglishPromptRegister:
     """The tuned prompt must actively steer away from formal Hindi (Issue #849)."""
 
@@ -77,11 +78,11 @@ class TestHinglishPromptRegister:
     def test_prompt_preserves_original_constraints(self):
         lowered = HINGLISH_CONVERSION_PROMPT.lower()
         # Existing behavioural rules must survive the tuning.
-        assert "aap" in lowered                 # respectful pronoun
-        assert "tum" in lowered                 # explicitly disallowed
-        assert "markdown" in lowered            # plain-text / TTS rule
+        assert "aap" in lowered  # respectful pronoun
+        assert "tum" in lowered  # explicitly disallowed
+        assert "markdown" in lowered  # plain-text / TTS rule
         assert "4-6" in HINGLISH_CONVERSION_PROMPT  # length guidance
-        assert "nyay saarthi" in lowered        # avatar persona retained
+        assert "nyay saarthi" in lowered  # avatar persona retained
 
     def test_prompt_keeps_legal_accuracy_requirement(self):
         lowered = HINGLISH_CONVERSION_PROMPT.lower()
@@ -89,6 +90,7 @@ class TestHinglishPromptRegister:
 
 
 # ── convert_to_hinglish: behaviour with a mocked Groq client ─────────────────
+
 
 class TestConvertToHinglish:
     @pytest.mark.asyncio
@@ -132,6 +134,7 @@ class TestConvertToHinglish:
 
 
 # ── Unchanged helpers: light coverage so the module stays green ──────────────
+
 
 class TestDomainHelpers:
     def test_detect_domain_matches_keywords(self):

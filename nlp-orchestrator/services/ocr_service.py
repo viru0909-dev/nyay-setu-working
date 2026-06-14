@@ -39,6 +39,7 @@ def _extract_from_image(file_bytes: bytes) -> str:
 def _extract_from_pdf(file_bytes: bytes) -> str:
     from pdf2image import convert_from_bytes
     from services.deskew_service import deskew_images
+
     pages = convert_from_bytes(file_bytes, dpi=300)
     if not pages:
         raise ValueError("Could not convert PDF pages to images.")

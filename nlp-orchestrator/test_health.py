@@ -1,12 +1,15 @@
+from main import app
 import os
 from starlette.testclient import TestClient
 
 os.environ.setdefault("GROQ_API_KEY", "test")
 os.environ.setdefault("GOOGLE_GEMINI_API_KEY", "test")
 
-from main import app
 
 client = TestClient(app)
+
+
+EXPECTED_PORT = 8001
 
 
 def test_health_endpoint():
@@ -16,5 +19,5 @@ def test_health_endpoint():
     assert response.json() == {
         "status": "ok",
         "service": "nlp-orchestrator",
-        "port": 8001
+        "port": EXPECTED_PORT,
     }
