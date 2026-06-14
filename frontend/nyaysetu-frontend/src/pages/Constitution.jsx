@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import useDebounce from '../hooks/useDebounce';
 import { useTheme } from '../contexts/ThemeContext';
 import {
     Search, BookOpen, Globe, Download, Bookmark, MessageCircle, Share2, X, BookmarkPlus, Loader2, Map,
@@ -26,6 +27,7 @@ export default function Constitution() {
 
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
+    const debouncedSearchQuery = useDebounce(searchQuery, 400);
     const [selectedPartId, setSelectedPartId] = useState(null);
     const [selectedArticleNumber, setSelectedArticleNumber] = useState(null);
     const [showAIChat, setShowAIChat] = useState(false);
@@ -86,16 +88,16 @@ useEffect(() => {
     }, [selectedPart, selectedArticleNumber]);
 
     const filteredParts = parts.filter(part =>
-        part.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        part.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        part.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        part.description?.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
         part.articles.some(article =>
-            article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            article.content.toLowerCase().includes(searchQuery.toLowerCase())
+            article.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+            article.content.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
         )
     );
 
     const searchMatches = useMemo(() => {
-        const q = searchQuery.trim().toLowerCase();
+        const q = debouncedSearchQuery.trim().toLowerCase();
         if (!q) return [];
 
         const matches = [];
@@ -116,7 +118,7 @@ useEffect(() => {
             });
         });
         return matches;
-    }, [parts, searchQuery]);
+    }, [parts, debouncedSearchQuery]);
 
     useEffect(() => {
         if (isGuest) {
