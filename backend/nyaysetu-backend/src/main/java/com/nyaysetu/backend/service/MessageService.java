@@ -2,10 +2,10 @@ package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.SendMessageRequest;
 import com.nyaysetu.backend.entity.CaseMessage;
-import com.nyaysetu.backend.entity.LegalCase;
+import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.CaseMessageRepository;
-import com.nyaysetu.backend.repository.LegalCaseRepository;
+import com.nyaysetu.backend.repository.CaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +17,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MessageService {
 
-    private final LegalCaseRepository legalCaseRepository;
+    private final CaseRepository caseRepository;
     private final CaseMessageRepository messageRepository;
     private final CaseTimelineService timelineService;
 
     public CaseMessage sendMessage(UUID caseId, SendMessageRequest dto) {
 
-        LegalCase lc = legalCaseRepository.findById(caseId)
+        CaseEntity caseEntity = caseRepository.findById(caseId)
                 .orElseThrow(() -> new NotFoundException("Case not found: " + caseId));
 
         CaseMessage msg = CaseMessage.builder()
@@ -40,8 +40,8 @@ public class MessageService {
         timelineService.addEvent(caseId, "Message sent");
 
         // Update case timestamp so it bubbles up in chat list
-        lc.setUpdatedAt(LocalDateTime.now());
-        legalCaseRepository.save(lc);
+        caseEntity.setUpdatedAt(LocalDateTime.now());
+        caseRepository.save(caseEntity);
 
         return msg;
     }
