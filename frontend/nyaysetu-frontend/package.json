@@ -19,6 +19,7 @@
     "dexie-react-hooks": "^4.2.0",
     "face-api.js": "^0.22.2",
     "framer-motion": "^12.23.25",
+    "gsap": "^3.15.0",
     "i18next": "^25.8.10",
     "i18next-browser-languagedetector": "^8.2.1",
     "i18next-http-backend": "^3.0.2",

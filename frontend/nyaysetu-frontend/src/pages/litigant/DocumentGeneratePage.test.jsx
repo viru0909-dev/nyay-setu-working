@@ -83,7 +83,7 @@ describe('DocumentGeneratePage', () => {
 
   it('copies generated content and calls DOCX export actions', async () => {
     const writeText = vi.fn(() => Promise.resolve());
-    Object.assign(navigator, { clipboard: { writeText } });
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
     lawgpt.preview.mockResolvedValueOnce({ data: { title: 'AFFIDAVIT', content: 'My generated document', generatedAt: new Date().toISOString(), sources: [] } });
 
     renderPage();
@@ -108,13 +108,13 @@ describe('DocumentGeneratePage', () => {
     expect(screen.getByText(/Copied to clipboard/i)).toBeInTheDocument();
 
     lawgpt.downloadDocx.mockResolvedValueOnce({ data: new Blob(['docx']) });
-    const createObjectURL = vi.spyOn(window.URL, 'createObjectURL').mockReturnValue('blob:dummy');
+    window.URL.createObjectURL = vi.fn().mockReturnValue('blob:dummy');
+    window.URL.revokeObjectURL = vi.fn();
     const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
     fireEvent.click(screen.getByRole('button', { name: /Download DOCX/i }));
     await waitFor(() => expect(lawgpt.downloadDocx).toHaveBeenCalled());
 
-    createObjectURL.mockRestore();
     anchorClick.mockRestore();
   });
 
@@ -123,7 +123,8 @@ describe('DocumentGeneratePage', () => {
     lawgpt.preview.mockResolvedValueOnce({ data: { title: 'AFFIDAVIT', content: 'PDF content', generatedAt: new Date().toISOString(), sources: [] } });
     lawgpt.download.mockResolvedValueOnce({ data: new Blob(['%PDF-1.4']) });
 
-    const createObjectURL = vi.spyOn(window.URL, 'createObjectURL').mockReturnValue('blob:pdfdummy');
+    window.URL.createObjectURL = vi.fn().mockReturnValue('blob:pdfdummy');
+    window.URL.revokeObjectURL = vi.fn();
     let appendedEl = null;
     const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
@@ -149,15 +150,16 @@ describe('DocumentGeneratePage', () => {
 
     // Click Download PDF and assert flows
     const appendSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((el) => { appendedEl = el; return el; });
+    const removeSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => {});
     fireEvent.click(screen.getByRole('button', { name: /Download PDF/i }));
     await waitFor(() => expect(lawgpt.download).toHaveBeenCalled());
-    expect(createObjectURL).toHaveBeenCalled();
+    expect(window.URL.createObjectURL).toHaveBeenCalled();
     expect(appendedEl).not.toBeNull();
     // download name should match pattern: <type>_<Petitioner_Name_with_underscores>.pdf
     expect(appendedEl.download).toBe('affidavit_John_Doe.pdf');
 
     // Restore spies
-    createObjectURL.mockRestore();
+    removeSpy.mockRestore();
     appendSpy.mockRestore();
     anchorClick.mockRestore();
   });
