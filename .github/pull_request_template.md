@@ -24,8 +24,6 @@ Closes # (issue)
 
 ### Before
 ![Modi Script OCR 404 Error](assets/ocr_before.png)
-*(Direct link: [ocr_before.png](file:///c:/Users/Kritika%20S%20Narayan/OneDrive/文档/College%20sem%202/GSSOC%202026%20CONTRIBUTION/nyay-setu-working-kritka/assets/ocr_before.png))*
 
 ### After
 ![Successful Modi Script OCR Transcription](assets/ocr_after.png)
-*(Direct link: [ocr_after.png](file:///c:/Users/Kritika%20S%20Narayan/OneDrive/文档/College%20sem%202/GSSOC%202026%20CONTRIBUTION/nyay-setu-working-kritka/assets/ocr_after.png))*
