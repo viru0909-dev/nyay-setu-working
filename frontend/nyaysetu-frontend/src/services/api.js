@@ -303,6 +303,8 @@ export const policeAPI = {
     startInvestigation: (id) => api.post(`/api/v1/police/investigation/${id}/start`),
     submitInvestigation: (id, findings) => api.post(`/api/v1/police/investigation/${id}/submit`, { findings }),
     getInvestigations: () => api.get('/api/v1/police/investigation/list'),
+    getPendingSummons: () => api.get('/api/v1/police/summons/pending'),
+    completeSummons: (caseId) => api.post(`/api/v1/police/summons/${caseId}/complete`, {}),
 
     // New methods for Enhanced Investigation
     uploadEvidence: (id, formData) => api.post(`/api/v1/police/investigation/${id}/evidence`, formData),
