@@ -29,5 +29,5 @@ public class Meeting {
     private MeetingStatus status;
 
     @ElementCollection
-    private List<UUID> participants;
+    private List<Long> participants;
 }

@@ -1,5 +1,7 @@
 const { Server } = require('socket.io');
 
+const DEFAULT_BACKEND_URL = 'http://localhost:8080';
+
 // Create Socket.IO server on port 3001
 const io = new Server(3001, {
     cors: {
@@ -18,8 +20,30 @@ io.on('connection', (socket) => {
     console.log(`✅ Client connected: ${socket.id}`);
 
     // Join a hearing room
-    socket.on('join-room', (roomId, userId, userName) => {
+    socket.on('join-room', async (roomId) => {
+        const userId = socket.user?.sub || socket.user?.id || 'unknown';
+        const userName = socket.user?.name || socket.user?.preferred_username || userId;
+
         console.log(`👤 User ${userName} (${userId}) joining room ${roomId}`);
+
+        // Validate room access via backend API
+        try {
+            const response = await fetch(`${process.env.BACKEND_URL || DEFAULT_BACKEND_URL}/meetings/validate-room-access`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${socket.handshake.auth?.token || socket.handshake.query?.token}`
+                },
+                body: JSON.stringify({ roomId, userId })
+            });
+            if (!response.ok) {
+                socket.emit('error', 'Not authorized to join this room');
+                return;
+            }
+        } catch (err) {
+            socket.emit('error', 'Authorization check failed');
+            return;
+        }
 
         socket.join(roomId);
 
