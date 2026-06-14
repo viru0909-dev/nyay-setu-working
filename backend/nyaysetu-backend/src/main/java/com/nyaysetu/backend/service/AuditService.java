@@ -44,9 +44,6 @@ public class AuditService {
         // Let's assume repo has it or I add it.
         // Actually, I'll use Example matcher or just filter for now to avoid compilation error if repo doesn't have it.
         // "Fetch from a central AuditLog table".
-        return repository.findAll().stream()
-            .filter(log -> caseId.equals(log.getCaseId()))
-            .sorted(java.util.Comparator.comparing(AuditLog::getTimestamp)) // chronological
-            .collect(java.util.stream.Collectors.toList());
+        return repository.findByCaseIdOrderByTimestampAsc(caseId);
     }
 }
