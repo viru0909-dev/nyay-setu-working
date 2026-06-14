@@ -9,7 +9,7 @@ import ScrollToTop from './ScrollToTop';
 import BackToTop from './components/BackToTop';
 import './styles/accessibility.css';
 import ScrollProgressBar from './components/ScrollProgressBar';
-
+import ContactUs from './pages/ContactUs';
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
 import UpdateNotification from './components/UpdateNotification';
@@ -230,9 +230,11 @@ function App({ swRegistration }) {
                                 <Route path="/" element={<Landing />} />
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/signup" element={<Signup />} />
+                                <Route path="/contact-us" element={<ContactUs />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                                 <Route path="/constitution" element={<Constitution />} />
                                 <Route path="/about" element={<About />} />
+                              
                                 <Route path="/privacy" element={<PrivacyPolicy />} />
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
