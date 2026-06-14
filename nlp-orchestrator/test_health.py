@@ -9,6 +9,9 @@ os.environ.setdefault("GOOGLE_GEMINI_API_KEY", "test")
 client = TestClient(app)
 
 
+EXPECTED_PORT = 8001
+
+
 def test_health_endpoint():
     response = client.get("/health")
 
@@ -16,5 +19,5 @@ def test_health_endpoint():
     assert response.json() == {
         "status": "ok",
         "service": "nlp-orchestrator",
-        "port": 8001,
+        "port": EXPECTED_PORT,
     }

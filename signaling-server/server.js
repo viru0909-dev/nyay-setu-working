@@ -33,7 +33,7 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    console.log(`✅ Client connected: ${socket.id} (user: ${socket.user?.sub || socket.user?.id || 'unknown'})`);
+    // Client connected
 
     // Join a hearing room
     socket.on('join-room', (roomId, userId, userName) => {

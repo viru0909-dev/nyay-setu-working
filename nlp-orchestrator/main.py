@@ -452,6 +452,9 @@ Format in Markdown. Be precise and professional."""
 
 
 @async_retry(max_attempts=3)
+_MAX_TOKENS_GROQ = 2048
+
+
 async def call_groq_with_retry(grounded_prompt, query):
 
     response = await groq_client.chat.completions.create(
@@ -461,7 +464,7 @@ async def call_groq_with_retry(grounded_prompt, query):
             {"role": "user", "content": query},
         ],
         temperature=0.2,
-        max_tokens=2048,
+        max_tokens=_MAX_TOKENS_GROQ,
     )
 
     return response
