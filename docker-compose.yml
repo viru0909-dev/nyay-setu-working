@@ -38,8 +38,10 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - GROQ_API_KEY=${GROQ_API_KEY:?Please set GROQ_API_KEY in your .env file}
       - JWT_SECRET=${JWT_SECRET:?Please set JWT_SECRET in your .env file}
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+      # Comma-separated origins allowed to call the Spring Boot backend.
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      # Full frontend URL used for redirects (e.g. password reset links).
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
       - JAVA_TOOL_OPTIONS=-Xmx512m -Xms256m
     mem_limit: 768M
     restart: always
@@ -56,8 +58,9 @@ services:
       - ENV=production
       - GROQ_API_KEY=${GROQ_API_KEY:?Please set GROQ_API_KEY in your .env file}
       - GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY}
-      # Keep this aligned with FRONTEND_URL; set both explicitly in .env when needed.
-      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-http://localhost}
+      # Origin allowed to call this Python NLP service — consumed by FastAPI's CORSMiddleware.
+      # Defaults to the Vite dev server. Update to your frontend URL in production.
+      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-http://localhost:5173}
     mem_limit: 256M
     restart: always
 
