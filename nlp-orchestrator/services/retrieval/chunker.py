@@ -106,6 +106,7 @@ def _split_long_sentence(
 
     return chunks
 
+
 def split_legal_sections(text: str) -> list[str]:
     """
     Split `text` into section-aligned blocks at legal-section headings.
@@ -135,6 +136,7 @@ def split_legal_sections(text: str) -> list[str]:
         if block:
             blocks.append(block)
     return blocks
+
 
 def chunk_text(
     text: str,

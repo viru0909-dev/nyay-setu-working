@@ -154,6 +154,7 @@ except ImportError:
     logger.warning("Skipping modi_ocr router due to missing dependencies.")
 try:
     from routers.ocr import router as ocr_router
+
     app.include_router(ocr_router)
     logger.info("Loaded ocr router.")
 except ImportError:
@@ -166,7 +167,6 @@ try:
     logger.info("Loaded contradictions router.")
 except Exception as e:
     logger.warning("Skipping contradictions router: %s", e)
-
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
@@ -465,11 +465,10 @@ Structure your response with:
 
 Format in Markdown. Be precise and professional."""
 
-
-@async_retry(max_attempts=3)
 _MAX_TOKENS_GROQ = 2048
 
 
+@async_retry(max_attempts=3)
 async def call_groq_with_retry(grounded_prompt, query):
 
     response = await groq_client.chat.completions.create(
@@ -565,6 +564,7 @@ async def deep_research_pipeline(query: str, language: str):
 
         # Compute complexity score for display
         from router import COMPLEX_KEYWORDS
+
         lower_q = query.lower()
         complex_score = sum(1 for kw in COMPLEX_KEYWORDS if kw in lower_q)
         word_count = len(query.split())
