@@ -56,6 +56,14 @@ const Terms = retryLazy(() => import('./pages/Terms'));
 const Disclaimer = retryLazy(() => import('./pages/Disclaimer'));
 const UpcomingFeatures = retryLazy(() => import('./pages/UpcomingFeatures'));
 
+// ============================================================
+// CHANGE 4 — NEW IMPORT: SelectRole page
+// WHY: The /select-role route needs a page component to render.
+// Lazy loaded like all other pages in this file for consistency
+// and to keep the initial bundle size small.
+// ============================================================
+const SelectRole = lazy(() => import('./pages/SelectRole'));
+
 // Dashboard Layout
 const DashboardLayout = retryLazy(() => import('./layouts/DashboardLayout'));
 
@@ -64,17 +72,31 @@ const AdminDashboard = retryLazy(() => import('./pages/dashboards/AdminDashboard
 const LawyerDashboard = retryLazy(() => import('./pages/dashboards/LawyerDashboard'));
 
 // Litigant Pages
-const LitigantDashboard = retryLazy(() => import('./pages/litigant/LitigantDashboard'));
-const FileUnifiedPage = retryLazy(() => import('./pages/litigant/FileUnifiedPage'));
-const VakilFriendPage = retryLazy(() => import('./pages/litigant/VakilFriendPage'));
-const CaseDiaryPage = retryLazy(() => import('./pages/litigant/CaseDiaryPage'));
-const CaseDetailPage = retryLazy(() => import('./pages/litigant/CaseDetailPage'));
-const HearingsPage = retryLazy(() => import('./pages/litigant/HearingsPage'));
-const LawyerChatPage = retryLazy(() => import('./pages/litigant/LawyerChatPage'));
-const ProfilePage = retryLazy(() => import('./pages/litigant/ProfilePage'));
-const DocumentGeneratePage = retryLazy(() => import('./pages/litigant/DocumentGeneratePage'));
-const FindLawyerPage = retryLazy(() => import('./pages/litigant/FindLawyerPage'));
-const LawyerFeedbackPage = retryLazy(() => import('./pages/litigant/LawyerFeedbackPage'));
+const LitigantDashboard = lazy(() => import('./pages/litigant/LitigantDashboard'));
+const FileUnifiedPage = lazy(() => import('./pages/litigant/FileUnifiedPage'));
+const VakilFriendPage = lazy(() => import('./pages/litigant/VakilFriendPage'));
+const CaseDiaryPage = lazy(() => import('./pages/litigant/CaseDiaryPage'));
+const CaseDetailPage = lazy(() => import('./pages/litigant/CaseDetailPage'));
+const HearingsPage = lazy(() => import('./pages/litigant/HearingsPage'));
+const LawyerChatPage = lazy(() => import('./pages/litigant/LawyerChatPage'));
+const ProfilePage = lazy(() => import('./pages/litigant/ProfilePage'));
+const ForensicsPage = lazy(() => import('./pages/litigant/ForensicsPage'));
+const DocumentGeneratePage = lazy(() => import('./pages/litigant/DocumentGeneratePage'));
+const FindLawyerPage = lazy(() => import('./pages/litigant/FindLawyerPage'));
+const LawyerFeedbackPage = lazy(() =>
+  import('./pages/litigant/LawyerFeedbackPage'));
+
+
+// Judge Pages (keep only those still used)
+const ConductHearingPage = lazy(() => import('./pages/judge/ConductHearingPage'));
+const CourtAnalyticsPage = lazy(() => import('./pages/judge/CourtAnalyticsPage'));
+// New Unified Workspace Pages
+const MyDocket = lazy(() => import('./pages/judge/MyDocket'));
+const JudgeCaseWorkspace = lazy(() => import('./pages/judge/JudgeCaseWorkspace'));
+const JudicialOverview = lazy(() => import('./pages/judge/JudicialOverview'));
+const UnassignedPool = lazy(() => import('./pages/judge/UnassignedPool'));
+const LiveHearing = lazy(() => import('./pages/judge/LiveHearing'));
+const JudgeHearingsPage = lazy(() => import('./pages/judge/JudgeHearingsPage'));
 
 // Judge Pages
 const ConductHearingPage = retryLazy(() => import('./pages/judge/ConductHearingPage'));
@@ -238,12 +260,28 @@ function App({ swRegistration }) {
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
 
-                                {/* Litigant Functional Core */}
-                                <Route path="/litigant/*" element={
-                                    <ProtectedWorkspace allowedRoles={['LITIGANT']} message="Loading Litigant Workspace...">
-                                        <DashboardLayout />
-                                    </ProtectedWorkspace>
-                                }>
+                                
+                                  
+                                
+                               <Route
+    path="/select-role"
+    element={
+        <ProtectedRoute>
+            <SelectRole />
+        </ProtectedRoute>
+    }
+/>
+{/* Litigant Functional Core */}
+<Route
+    path="/litigant/*"
+    element={
+        <ProtectedWorkspace allowedRoles={['LITIGANT']} message="Loading Litigant Workspace...">
+            <DashboardLayout />
+        </ProtectedWorkspace>
+    }
+>
+
+
                                     <Route index element={<LitigantDashboard />} />
                                     <Route path="vakil-friend" element={<VakilFriendPage />} />
                                     <Route path="file" element={<FileUnifiedPage />} />

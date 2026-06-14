@@ -224,6 +224,13 @@ export const useAuthStore = create((set, get) => ({
             set({ user: null, token: null, isAuthenticated: false, isGuest: false });
         }
     },
+
+
+    updateRole: (newUser, newToken) => {
+        localStorage.setItem('token', newToken);
+        localStorage.setItem('user', JSON.stringify(newUser));
+        set({ user: newUser, token: newToken });
+    },
 }));
 
 export default useAuthStore;

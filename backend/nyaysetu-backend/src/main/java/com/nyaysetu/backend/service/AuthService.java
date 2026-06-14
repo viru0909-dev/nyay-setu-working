@@ -51,4 +51,13 @@ public class AuthService implements UserDetailsService {
     public void updateUser(User user) {
         userRepository.save(user);
     }
+
+    // switch role methis
+    public User switchRole(String email, Role newRole) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setRole(newRole);
+        userRepository.save(user);
+        return user;
+    }
 }

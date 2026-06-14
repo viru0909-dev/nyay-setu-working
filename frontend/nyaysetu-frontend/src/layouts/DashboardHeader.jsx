@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ChevronDown, User, Menu, Globe } from 'lucide-react';
+
+import { LogOut, ChevronDown, User, Menu, Globe, Repeat } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/authStore';
 import NotificationBell from '../components/NotificationBell';
@@ -73,8 +74,8 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
 
                 {/* Page Title */}
                 <div style={{ minWidth: 0 }}>
-                    <div 
-                        role="heading" 
+                    <div
+                        role="heading"
                         aria-level="1"
                         style={{
                             fontSize: isMobile ? '1.15rem' : '1.5rem',
@@ -193,6 +194,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             boxShadow: '0 10px 25px rgba(30, 42, 68, 0.1)',
                             zIndex: 200
                         }}>
+                            {/* View Profile */}
                             <button
                                 onClick={() => {
                                     setShowProfileMenu(false);
@@ -226,6 +228,42 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             >
                                 <User size={16} />
                                 {t('common.viewProfile', 'View Profile')}
+                            </button>
+
+
+                            <button
+                                onClick={() => {
+                                    setShowProfileMenu(false);
+                                    navigate('/select-role');
+                                }}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem 1rem',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    color: 'var(--color-primary)',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '600',
+                                    textAlign: 'left',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    transition: 'all 0.2s',
+                                    marginBottom: '0.25rem'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.background = 'var(--bg-hover)';
+                                    e.currentTarget.style.color = 'var(--color-secondary)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.color = 'var(--color-primary)';
+                                }}
+                            >
+                                <Repeat size={16} />
+                                {t('common.switchRole', 'Switch Role')}
                             </button>
 
                             {/* Language Selector */}

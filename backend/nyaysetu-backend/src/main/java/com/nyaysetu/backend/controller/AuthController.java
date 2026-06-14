@@ -56,12 +56,12 @@ public class AuthController {
                     req.getPassword(),
                     Role.LITIGANT // public registration always creates LITIGANT — role is not caller-controlled
             );
-            
+
             // Auto-login after registration
             UserDetails userDetails = userDetailsService.loadUserByUsername(req.getEmail());
             String token = jwtService.generateToken(new HashMap<>(), userDetails);
             var user = authService.findByEmail(req.getEmail());
-            
+
             return ResponseEntity.ok(Map.of(
                     "token", token,
                     "user", Map.of(
@@ -106,10 +106,10 @@ public class AuthController {
             response.put("accessToken", token);
             response.put("refreshToken", refreshToken);
             response.put("user", Map.of(
-                "id", user.getId(),
-                "name", user.getName(),
-                "email", user.getEmail(),
-                "role", user.getRole().name()
+                    "id", user.getId(),
+                    "name", user.getName(),
+                    "email", user.getEmail(),
+                    "role", user.getRole().name()
             ));
 
             return ResponseEntity.ok(response);
@@ -158,8 +158,8 @@ public class AuthController {
         try {
             emailService.sendPasswordResetEmail(req.getEmail());
             return ResponseEntity.ok(Map.of(
-                "message", "Password reset email sent successfully",
-                "email", req.getEmail()
+                    "message", "Password reset email sent successfully",
+                    "email", req.getEmail()
             ));
         } catch (MessagingException e) {
             log.error("Failed to send password reset email", e);
@@ -247,10 +247,10 @@ public class AuthController {
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("user", Map.of(
-                "id", user.getId(),
-                "name", user.getName(),
-                "email", user.getEmail(),
-                "role", user.getRole().name()
+                    "id", user.getId(),
+                    "name", user.getName(),
+                    "email", user.getEmail(),
+                    "role", user.getRole().name()
             ));
 
             log.info("Face login successful for user: {}", user.getEmail());
@@ -279,6 +279,45 @@ public class AuthController {
             boolean enrolled = faceRecognitionService.hasFaceEnrolled(user.getId());
             return ResponseEntity.ok(Map.of("enrolled", enrolled));
         } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    //switch role mappin
+    @PutMapping("/switch-role")
+    public ResponseEntity<?> switchRole(
+            @RequestBody SwitchRoleRequest req,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+
+            String token = authHeader.substring(7);
+            String email = jwtService.extractUsername(token);
+
+
+            Role newRole;
+            try {
+                newRole = Role.valueOf(req.getRole().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Invalid role: " + req.getRole()));
+            }
+
+
+            User user = authService.switchRole(email, newRole);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            String newToken = jwtService.generateToken(new HashMap<>(), userDetails);
+
+            return ResponseEntity.ok(Map.of(
+                    "token", newToken,
+                    "user", Map.of(
+                            "id", user.getId(),
+                            "email", user.getEmail(),
+                            "name", user.getName(),
+                            "role", user.getRole().name()
+                    )
+            ));
+        } catch (Exception e) {
+            log.error("Switch role failed", e);
             return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
         }
     }
