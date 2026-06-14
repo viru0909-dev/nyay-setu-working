@@ -34,8 +34,9 @@ describe('authStore', () => {
         it('should set authenticated state and persist user/token to localStorage', () => {
             const user = { id: 1, name: 'Kriti', email: 'kriti@example.com' };
             const token = 'valid-token';
+            const refreshToken = 'refresh-123';
 
-            useAuthStore.getState().setAuth(user, token);
+            useAuthStore.getState().setAuth(user, token, refreshToken);
 
             const state = useAuthStore.getState();
 
@@ -46,6 +47,7 @@ describe('authStore', () => {
 
             expect(ls.getItem('token')).toBe(token);
             expect(ls.getItem('user')).toBe(JSON.stringify(user));
+            expect(ls.getItem('refreshToken')).toBe(refreshToken);
         });
 
         it('should clear guest storage when logging in as authenticated user', () => {
@@ -54,7 +56,8 @@ describe('authStore', () => {
 
             const user = { id: 1, name: 'Kriti' };
             const token = 'valid-token';
-            useAuthStore.getState().setAuth(user, token);
+            const refreshToken = 'refresh-456';
+            useAuthStore.getState().setAuth(user, token, refreshToken);
 
             const state = useAuthStore.getState();
 
@@ -72,8 +75,9 @@ describe('authStore', () => {
         it('should clear all state and localStorage', () => {
             const user = { id: 1, name: 'Kriti' };
             const token = 'valid-token';
+            const refreshToken = 'refresh-789';
 
-            useAuthStore.getState().setAuth(user, token);
+            useAuthStore.getState().setAuth(user, token, refreshToken);
             useAuthStore.getState().logout();
 
             const state = useAuthStore.getState();
@@ -85,11 +89,32 @@ describe('authStore', () => {
 
             expect(ls.getItem('token')).toBeNull();
             expect(ls.getItem('user')).toBeNull();
+            expect(ls.getItem('refreshToken')).toBeNull();
         });
 
         it('should clear guest storage when logging out', () => {
+            // Simulate an authenticated user and refresh token, then switch to guest
+            const user = { id: 1, name: 'Kriti' };
+            const token = 'valid-token';
+            const refreshToken = 'refresh-guest-1';
+
+            ls.setItem('token', token);
+            ls.setItem('user', JSON.stringify(user));
+            ls.setItem('refreshToken', refreshToken);
+
             useAuthStore.getState().setGuest();
 
+            // Auth items should be cleared when a guest session is created
+            expect(ls.getItem('token')).toBeNull();
+            expect(ls.getItem('user')).toBeNull();
+            expect(ls.getItem('refreshToken')).toBeNull();
+
+            // Guest storage remains
+            expect(ls.getItem('guest_session_id')).not.toBeNull();
+            expect(ls.getItem('guest_user')).not.toBeNull();
+            expect(ls.getItem('guest_created_at')).not.toBeNull();
+
+            // Now call logout to ensure logout still clears guest storage
             ls.setItem('guest_modal_shown', 'true');
             ls.setItem('guest_post_auth_intent', JSON.stringify({ path: '/file-case' }));
 
@@ -143,8 +168,9 @@ describe('authStore', () => {
         it('should not mutate application state', () => {
             const user = { id: 1, name: 'Kriti' };
             const token = 'valid-token';
+            const refreshToken = 'refresh-000';
 
-            useAuthStore.getState().setAuth(user, token);
+            useAuthStore.getState().setAuth(user, token, refreshToken);
 
             const prevUser = useAuthStore.getState().user;
             const prevToken = useAuthStore.getState().token;
