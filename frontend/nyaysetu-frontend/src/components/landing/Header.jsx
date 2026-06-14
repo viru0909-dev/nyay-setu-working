@@ -103,13 +103,6 @@ export default function Header({ hideAuthButtons = false }) {
     });
 
     const renderNavItem = (item) => {
-        const baseStyle = navLinkStyle(item.href);
-
-        const displayLabel =
-            t(item.labelKey) === item.labelKey
-                ? item.labelKey
-                : t(item.labelKey);
-
         const underline = (
             <span
                 style={{
@@ -134,7 +127,6 @@ export default function Header({ hideAuthButtons = false }) {
         );
 
         const sharedProps = {
-            style: baseStyle,
             onMouseEnter: e => {
                 e.currentTarget.style.color = 'var(--color-primary)';
                 const underline =

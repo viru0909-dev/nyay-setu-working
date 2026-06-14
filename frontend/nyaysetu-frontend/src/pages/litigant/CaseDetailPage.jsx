@@ -1241,8 +1241,9 @@ const getEventIcon = (eventType) => {
 };
 
 function TimelineTab({ caseData }) {
-    const { t,i18n } = useTranslation('litigant');
+    const { t, i18n } = useTranslation('litigant');
     const [timeline, setTimeline] = useState([]);
+    const [activityEvents, setActivityEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [prepKitOpen, setPrepKitOpen] = useState(false);
     const [selectedStage, setSelectedStage] = useState(null);
@@ -1331,9 +1332,143 @@ function TimelineTab({ caseData }) {
         ]
     };
 
+    const statusDetails = {
+        completed: {
+            label: 'Completed',
+            color: '#10b981',
+            bg: 'rgba(16, 185, 129, 0.1)',
+            border: 'rgba(16, 185, 129, 0.3)',
+            icon: CheckCircle2
+        },
+        pending: {
+            label: 'Pending',
+            color: '#f59e0b',
+            bg: 'rgba(245, 158, 11, 0.12)',
+            border: 'rgba(245, 158, 11, 0.35)',
+            icon: Clock
+        },
+        upcoming: {
+            label: 'Upcoming',
+            color: 'var(--text-secondary)',
+            bg: 'var(--bg-glass)',
+            border: 'var(--border-glass)',
+            icon: Calendar
+        }
+    };
+
+    const getLifecycle = () => standardStages[caseData.caseType] || standardStages['CIVIL'];
+
+    const getStageIndexFromCase = (lifecycle) => {
+        const closedStatuses = ['COMPLETED', 'CLOSED'];
+        if (closedStatuses.includes(caseData.status)) {
+            return lifecycle.length;
+        }
+
+        const judicialStage = Number(caseData.currentJudicialStage);
+        if (!Number.isNaN(judicialStage) && judicialStage > 0) {
+            const indexFromJudicialStage = Math.min(judicialStage - 1, lifecycle.length - 1);
+            return Math.max(indexFromJudicialStage, 0);
+        }
+
+        const civilStatusMap = {
+            PENDING: 0,
+            DRAFT_REVIEW: 0,
+            DRAFT_PENDING_CLIENT: 0,
+            AWAITING_DOCUMENTS: 0,
+            OPEN: 0,
+            READY_FOR_COURT: 0,
+            APPROVED: 0,
+            IN_ADMISSION: 1,
+            COGNIZANCE_PERIOD: 1,
+            SUMMONS_SERVED: 2,
+            IN_PROGRESS: 3,
+            TRIAL_READY: 4,
+            UNDER_REVIEW: 4,
+            JUDGMENT_PENDING: 6
+        };
+
+        const criminalStatusMap = {
+            PENDING: 0,
+            FIR_FILED: 0,
+            READY_FOR_COURT: 0,
+            PENDING_COGNIZANCE: 1,
+            COGNIZANCE_PERIOD: 1,
+            SUMMONS_SERVED: 2,
+            IN_PROGRESS: 2,
+            TRIAL_READY: 4,
+            UNDER_REVIEW: 4,
+            JUDGMENT_PENDING: 7
+        };
+
+        const statusMap = caseData.caseType === 'CRIMINAL' ? criminalStatusMap : civilStatusMap;
+        return Math.min(statusMap[caseData.status] ?? 0, lifecycle.length - 1);
+    };
+
+    const normalizeActivityEvents = (legacyEvents, caseEvents) => {
+        const normalizedLegacy = legacyEvents.map(event => ({
+            date: event.timestamp || event.date || event.createdAt,
+            title: event.event || event.title || t('caseDetail.timeline.caseUpdate'),
+            subtitle: event.description || event.subtitle || t('caseDetail.completed'),
+            type: 'completed',
+            icon: CheckCircle2,
+            eventType: event.eventType || event.type || ''
+        }));
+
+        const normalizedCaseEvents = caseEvents.map(event => ({
+            date: event.timestamp || event.createdAt,
+            title: event.summary || event.eventType?.replace(/_/g, ' ') || t('caseDetail.timeline.caseUpdate'),
+            subtitle: `${event.actorRole || t('caseDetail.system')}: ${event.actorName || t('caseDetail.system')}`,
+            type: 'completed',
+            icon: getEventIcon(event.eventType),
+            eventType: event.eventType || '',
+            actorRole: event.actorRole
+        }));
+
+        const seen = new Set();
+        return [...normalizedLegacy, ...normalizedCaseEvents]
+            .filter(event => event.title)
+            .filter(event => {
+                const key = `${event.date || 'no-date'}-${event.title}-${event.subtitle}`;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            })
+            .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+    };
+
+    const buildStageCards = (events) => {
+        const lifecycle = getLifecycle();
+        const activeIndex = getStageIndexFromCase(lifecycle);
+        const allStagesComplete = ['COMPLETED', 'CLOSED'].includes(caseData.status);
+
+        return lifecycle.map((stage, index) => {
+            const matchingEvent = events.find(event => {
+                const haystack = `${event.title} ${event.subtitle} ${event.eventType}`.toUpperCase();
+                return haystack.includes(stage.id) || haystack.includes(stage.label.toUpperCase());
+            });
+
+            const filedDate = index === 0 ? caseData.filedDate || caseData.createdAt : null;
+            const isCompleted = allStagesComplete || index < activeIndex || Boolean(matchingEvent);
+            const isPending = !isCompleted && index === activeIndex;
+            const status = isCompleted ? 'completed' : isPending ? 'pending' : 'upcoming';
+            const eta = isPending && caseData.nextHearing ? caseData.nextHearing : null;
+
+            return {
+                ...stage,
+                date: matchingEvent?.date || filedDate,
+                status,
+                type: status === 'pending' ? 'active' : status === 'completed' ? 'completed' : 'future',
+                icon: statusDetails[status].icon,
+                latestUpdate: matchingEvent?.subtitle,
+                eta,
+                description: `${t('caseDetail.step')} ${index + 1}: ${stage.desc}`
+            };
+        });
+    };
+
     useEffect(() => {
         fetchTimeline();
-    }, [caseData.id]);
+    }, [caseData.id, caseData.status, caseData.nextHearing]);
 
     const fetchTimeline = async () => {
         try {
@@ -1349,141 +1484,25 @@ function TimelineTab({ caseData }) {
                 })
             ]);
 
-            // Merge both sources of events
             const legacyEvents = timelineRes.status === 'fulfilled' ? (timelineRes.value.data || []) : [];
             const caseEvents = eventsRes.status === 'fulfilled' ? (eventsRes.value.data || []) : [];
+            const actualEvents = normalizeActivityEvents(legacyEvents, caseEvents);
 
-            // Map CaseEvents to timeline format
-            const mappedCaseEvents = caseEvents.map(e => ({
-                date: e.timestamp,
-                title: e.summary || e.eventType.replace(/_/g, ' '),
-                subtitle: `${e.actorRole}: ${e.actorName || t('caseDetail.system')}`,
-                type: 'completed',
-                icon: getEventIcon(e.eventType),
-                eventType: e.eventType,
-                actorRole: e.actorRole
-            }));
-
-            // Combine and deduplicate
-            const actualEvents = [...legacyEvents.map(e => ({
-                date: e.timestamp,
-                title: e.event,
-                subtitle: e.description || t('caseDetail.completed'),
-                type: 'completed',
-                icon: CheckCircle2
-            })), ...mappedCaseEvents];
-
-            // Sort by date
-            actualEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            // Determine lifecycle
-            const lifecycle = standardStages[caseData.caseType] || standardStages['CIVIL'];
-
-            // This is a simplification; in production, backend should return 'currentStageIndex'
-            let currentStageIndex = 0;
-            if (caseData.status === 'FIR_FILED') currentStageIndex = 1;
-            else if (caseData.status === 'PENDING_COGNIZANCE') currentStageIndex = 1;
-            else if (caseData.status === 'IN_PROGRESS') currentStageIndex = 2; // Appearance
-            // ... logic to map status to stage ...
-
-            const finalTimeline = [];
-
-            {/* 1. Add Actual Past Events */ }
-            actualEvents.forEach(e => {
-                finalTimeline.push({
-                    date: e.timestamp,
-                    title: e.event,
-                    subtitle: e.description || t('caseDetail.completed'),
-                    type: 'completed',
-                    icon: CheckCircle2
-                });
-            });
-
-            // 2. Add Future Stages Logic (Roadmap Sync)
-            // We map the caseData.status to an index in the standardStages array.
-            // If status is specific (e.g. SUMMONS_SERVED), we know we are past that stage.
-
-            let passedStageIndex = -1;
-
-            // Map statuses to stages (Simple State Machine Mapper)
-            if (caseData.status === 'FIR_FILED') passedStageIndex = 0;
-            else if (caseData.status === 'PENDING_COGNIZANCE') passedStageIndex = 0;
-            else if (caseData.status === 'SUMMONS_SERVED') passedStageIndex = 2; // Past Summons (Index 2 in Civil, check below)
-            else if (caseData.status === 'READY_FOR_COURT') passedStageIndex = 0;
-            else if (caseData.status === 'IN_PROGRESS') passedStageIndex = 1;
-
-            // Adjust for Case Type specific mapping
-            // CIVIL: Filing(0) -> Summons(1) -> Written Statement(2)...
-            // CRIMINAL: FIR(0) -> Cognizance(1) -> Appearance(2)...
-
-            // Dynamic check: Iterate standard stages and check if we have a matching 'completed' event
-            lifecycle.forEach((stage, index) => {
-                // Check if this stage is already covered by an actual event
-                const isCompleted = finalTimeline.some(e =>
-                    e.title.toUpperCase() === stage.label.toUpperCase() ||
-                    e.title.includes(stage.id) ||
-                    (stage.id === 'FILING' && caseData.filedDate) ||
-                    (stage.id === 'COGNIZANCE' && caseData.status !== 'PENDING' && caseData.status !== 'FIR_FILED')
-                );
-
-                if (!isCompleted) {
-                    finalTimeline.push({
-                        date: null,
-                        title: stage.label,
-                        subtitle: stage.desc,
-                        type: index === passedStageIndex + 1 ? 'active' : 'future', // Highlight next immediate step
-                        icon: Clock,
-                        stageId: stage.id,
-                        description: `${t('caseDetail.step')} ${index + 1}: ${stage.desc}`
-                    });
-                }
-            });
-
-            setTimeline(finalTimeline);
+            setActivityEvents(actualEvents);
+            setTimeline(buildStageCards(actualEvents));
         } catch (error) {
             console.error('Error fetching timeline:', error);
-            // ... fallback logic remains ...
-
-            // (Existing fallback logic preserved but omitted for brevity in replacement)
-            const lifecycle = standardStages[caseData.caseType] || standardStages['CIVIL'];
-            const mockEvents = [];
-
-            // 1. Generate Past Events
-            mockEvents.push({
-                date: caseData.filedDate || new Date(Date.now() - 86400000 * 10).toISOString(),
+            const fallbackEvents = caseData.filedDate ? [{
+                date: caseData.filedDate,
                 title: t('caseDetail.timeline.caseFiled'),
                 subtitle: t('caseDetail.timeline.initialFilingCompleted'),
                 type: 'completed',
-                icon: FileText
-            });
+                icon: FileText,
+                eventType: 'CASE_CREATED'
+            }] : [];
 
-            // If Judge has taken cognizance (status is not just PENDING or FIR_FILED)
-            if (['IN_PROGRESS', 'SUMMONS_SERVED', 'PENDING_COGNIZANCE'].includes(caseData.status)) {
-                mockEvents.push({
-                    date: new Date(Date.now() - 86400000 * 5).toISOString(),
-                    title: caseData.caseType === 'CRIMINAL' ? t('caseDetail.timeline.cognizanceTaken'): t('caseDetail.timeline.caseAdmitted'),
-                    subtitle: t('caseDetail.timeline.courtAcceptedCase'),
-                    type: 'completed',
-                    icon: Gavel
-                });
-            }
-
-            // 2. Future Stages
-            lifecycle.forEach((stage, i) => {
-                // Skip if it looks like we already added it as past
-                if (i === 0) return; // Alien assumption that filing determines 0
-                if (i === 1 && mockEvents.length > 1) return; // Cognizance done
-
-                mockEvents.push({
-                    date: null,
-                    title: stage.label,
-                    subtitle: stage.desc,
-                    type: 'future',
-                    icon: Clock,
-                    stageId: stage.id
-                });
-            });
-            setTimeline(mockEvents);
+            setActivityEvents(fallbackEvents);
+            setTimeline(buildStageCards(fallbackEvents));
         } finally {
             setLoading(false);
         }
@@ -1496,6 +1515,77 @@ function TimelineTab({ caseData }) {
         }
     };
 
+    const downloadTimelinePdf = () => {
+        const PDF_MARGIN = '32px';
+        const PDF_BODY_COLOR = '#111827';
+        const PDF_FONT_FAMILY = 'Arial, sans-serif';
+        const safe = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[char]));
+
+        const rows = timeline.map((stage, index) => `
+            <tr>
+                <td>${index + 1}</td>
+                <td><strong>${safe(stage.title || stage.label)}</strong><br/><span>${safe(stage.subtitle || stage.desc)}</span></td>
+                <td>${safe(statusDetails[stage.status]?.label)}</td>
+                <td>${safe(stage.date ? formatDate(stage.date, i18n.language) : '-')}</td>
+                <td>${safe(stage.eta ? formatDate(stage.eta, i18n.language) : '-')}</td>
+            </tr>
+        `).join('');
+
+        const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700');
+        if (!printWindow) {
+            alert('Please allow pop-ups to download the timeline PDF.');
+            return;
+        }
+
+        printWindow.document.write(`
+            <!doctype html>
+            <html>
+                <head>
+                    <title>Case Timeline - ${safe(caseData.id)}</title>
+                    <style>
+                        body { font-family: ${PDF_FONT_FAMILY}; color: ${PDF_BODY_COLOR}; margin: ${PDF_MARGIN}; }
+                        h1 { margin: 0 0 8px; font-size: 24px; }
+                        p { margin: 4px 0; color: #4b5563; }
+                        .meta { margin: 18px 0 24px; padding: 14px; border: 1px solid #d1d5db; border-radius: 8px; }
+                        table { border-collapse: collapse; width: 100%; }
+                        th, td { border: 1px solid #d1d5db; padding: 10px; text-align: left; vertical-align: top; }
+                        th { background: #f3f4f6; }
+                        span { color: #6b7280; font-size: 12px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${safe(caseData.title)}</h1>
+                    <p>Case ID: ${safe(caseData.id)}</p>
+                    <div class="meta">
+                        <p>Status: ${safe(caseData.status?.replace(/_/g, ' '))}</p>
+                        <p>Estimated next hearing: ${safe(caseData.nextHearing ? formatDate(caseData.nextHearing, i18n.language) : 'To be announced')}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Stage</th>
+                                <th>Status</th>
+                                <th>Completed On</th>
+                                <th>Next Hearing</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+    };
+
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
@@ -1505,65 +1595,234 @@ function TimelineTab({ caseData }) {
     }
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '2rem' }}>{t('caseDetail.timeline.liveCaseRoadmap')}</h3>
-
-            <div style={{ position: 'relative', borderLeft: '2px solid var(--border-glass)', paddingLeft: '2rem', marginLeft: '1rem' }}>
-                {timeline.map((event, i) => (
-                    <div key={i} style={{ marginBottom: '2rem', position: 'relative' }}>
-                        {/* Icon Node */}
-                        <div
-                            onClick={() => handleNodeClick(event)}
-                            style={{
-                                position: 'absolute', left: '-2.6rem', top: '0',
-                                width: '2rem', height: '2rem', borderRadius: '50%',
-                                background: event.type === 'completed' ? '#10b981' : (event.type === 'active' ? '#f59e0b' : 'var(--bg-glass)'),
-                                border: `2px solid ${event.type === 'completed' ? '#10b981' : (event.type === 'active' ? '#f59e0b' : 'var(--text-secondary)')}`,
-                                color: event.type === 'future' ? 'var(--text-secondary)' : 'white',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1,
-                                cursor: 'pointer', boxShadow: event.type === 'active' ? '0 0 10px rgba(245, 158, 11, 0.5)' : 'none'
-                            }}
-                        >
-                            <event.icon size={16} />
-                        </div>
-
-                        {/* Event Content */}
-                        <div style={{
-                            opacity: event.type === 'future' ? 0.7 : 1,
-                            transform: event.type === 'active' ? 'scale(1.02)' : 'scale(1)',
-                            transition: 'all 0.3s'
-                        }}>
-                            <h4 style={{ fontSize: '1.1rem', fontWeight: '700', color: event.type === 'future' ? 'var(--text-secondary)' : 'var(--text-main)', margin: 0 }}>
-                                {event.title}
-                                {event.type === 'active' && <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', background: '#f59e0b', color: 'white', padding: '0.1rem 0.5rem', borderRadius: '4px' }}>{t('caseDetail.timeline.currentStage')}</span>}
-                            </h4>
-                            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>
-                                {event.subtitle}
-                            </p>
-                            {event.date && (
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>
-                                    {formatDate(event.date,i18n.language)}
-                                </p>
-                            )}
-
-                            {/* Prep Kit Trigger for Future/Active Events */}
-                            {(event.type === 'future' || event.type === 'active') && (
-                                <button
-                                    onClick={() => handleNodeClick(event)}
-                                    style={{
-                                        marginTop: '0.5rem',
-                                        fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-accent)',
-                                        background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                                        display: 'flex', alignItems: 'center', gap: '0.25rem'
-                                    }}
-                                >
-                                    <Sparkles size={12} /> {t('caseDetail.timeline.viewPreparationKit')}
-                                </button>
-                            )}
+        <div className="case-progress-timeline" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+            <div className="timeline-hero" style={{
+                background: 'var(--bg-glass-strong)',
+                border: 'var(--border-glass-strong)',
+                borderRadius: '1.5rem',
+                padding: '1.5rem',
+                marginBottom: '1.5rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: '1rem',
+                alignItems: 'center'
+            }}>
+                <div>
+                    <h3 style={{ fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
+                        {t('caseDetail.timeline.liveCaseRoadmap')}
+                    </h3>
+                    <p style={{ color: 'var(--text-secondary)', margin: '0.35rem 0 0 0', fontSize: '0.95rem' }}>
+                        Filing to resolution progress for {caseData.caseType?.toLowerCase() || 'this'} case
+                    </p>
+                </div>
+                <div className="timeline-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <div style={{
+                        padding: '0.75rem 1rem',
+                        borderRadius: '0.75rem',
+                        background: caseData.nextHearing ? 'rgba(239, 68, 68, 0.08)' : 'var(--bg-glass)',
+                        border: caseData.nextHearing ? '1px solid rgba(239, 68, 68, 0.2)' : 'var(--border-glass)'
+                    }}>
+                        <p style={{ margin: '0 0 0.25rem 0', fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                            Estimated next hearing
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontWeight: '800' }}>
+                            <Calendar size={16} color={caseData.nextHearing ? '#ef4444' : 'var(--text-secondary)'} />
+                            {caseData.nextHearing ? formatDate(caseData.nextHearing, i18n.language) : t('caseDetail.toBeAnnounced')}
                         </div>
                     </div>
-                ))}
+                    <button
+                        onClick={downloadTimelinePdf}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.75rem 1rem',
+                            background: 'var(--color-primary)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '0.75rem',
+                            fontWeight: '800',
+                            cursor: 'pointer',
+                            boxShadow: 'var(--shadow-glass)'
+                        }}
+                    >
+                        <Download size={16} /> Download PDF
+                    </button>
+                </div>
             </div>
+
+            <div className="timeline-status-strip" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                {Object.entries(statusDetails).map(([key, detail]) => {
+                    const Icon = detail.icon;
+                    const count = timeline.filter(stage => stage.status === key).length;
+                    return (
+                        <div key={key} style={{
+                            background: detail.bg,
+                            border: `1px solid ${detail.border}`,
+                            borderRadius: '1rem',
+                            padding: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem'
+                        }}>
+                            <Icon size={20} color={detail.color} />
+                            <div>
+                                <div style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '800' }}>{count}</div>
+                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: '700' }}>{detail.label}</div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            <div className="timeline-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1rem' }}>
+                {timeline.map((event, i) => {
+                    const detail = statusDetails[event.status];
+                    const Icon = event.icon || detail.icon;
+
+                    return (
+                        <button
+                            key={`${event.id}-${i}`}
+                            type="button"
+                            onClick={() => handleNodeClick(event)}
+                            style={{
+                                textAlign: 'left',
+                                background: event.status === 'pending' ? 'rgba(245, 158, 11, 0.08)' : 'var(--bg-glass-strong)',
+                                border: `1px solid ${event.status === 'pending' ? 'rgba(245, 158, 11, 0.35)' : 'var(--border-glass)'}`,
+                                borderRadius: '1rem',
+                                padding: '1.2rem',
+                                cursor: event.type === 'completed' ? 'default' : 'pointer',
+                                boxShadow: event.status === 'pending' ? '0 12px 30px rgba(245, 158, 11, 0.12)' : 'var(--shadow-glass)',
+                                minHeight: '190px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '1rem'
+                            }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <div style={{
+                                        width: '42px',
+                                        height: '42px',
+                                        borderRadius: '0.85rem',
+                                        background: detail.bg,
+                                        border: `1px solid ${detail.border}`,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        <Icon size={20} color={detail.color} />
+                                    </div>
+                                    <div>
+                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800' }}>Stage {i + 1}</div>
+                                        <h4 style={{ color: 'var(--text-main)', margin: '0.15rem 0 0 0', fontSize: '1rem', fontWeight: '800' }}>
+                                            {event.label || event.title}
+                                        </h4>
+                                    </div>
+                                </div>
+                                <span style={{
+                                    color: detail.color,
+                                    background: detail.bg,
+                                    border: `1px solid ${detail.border}`,
+                                    borderRadius: '999px',
+                                    padding: '0.25rem 0.6rem',
+                                    fontSize: '0.72rem',
+                                    fontWeight: '800',
+                                    whiteSpace: 'nowrap'
+                                }}>
+                                    {detail.label}
+                                </span>
+                            </div>
+
+                            <p style={{ color: 'var(--text-secondary)', margin: 0, lineHeight: 1.55, fontSize: '0.92rem' }}>
+                                {event.desc || event.subtitle}
+                            </p>
+
+                            <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: event.eta ? '1fr 1fr' : '1fr', gap: '0.75rem' }}>
+                                <div style={{ borderTop: 'var(--border-glass)', paddingTop: '0.75rem' }}>
+                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: '800', textTransform: 'uppercase' }}>
+                                        {event.status === 'completed' ? 'Completed on' : 'Expected'}
+                                    </div>
+                                    <div style={{ color: 'var(--text-main)', fontSize: '0.88rem', fontWeight: '700', marginTop: '0.2rem' }}>
+                                        {event.date ? formatDate(event.date, i18n.language) : event.status === 'upcoming' ? 'After current stage' : 'In progress'}
+                                    </div>
+                                </div>
+                                {event.eta && (
+                                    <div style={{ borderTop: '1px solid rgba(239, 68, 68, 0.2)', paddingTop: '0.75rem' }}>
+                                        <div style={{ color: '#ef4444', fontSize: '0.72rem', fontWeight: '800', textTransform: 'uppercase' }}>
+                                            Next hearing
+                                        </div>
+                                        <div style={{ color: 'var(--text-main)', fontSize: '0.88rem', fontWeight: '700', marginTop: '0.2rem' }}>
+                                            {formatDate(event.eta, i18n.language)}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {event.latestUpdate && (
+                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', borderTop: 'var(--border-glass)', paddingTop: '0.75rem' }}>
+                                    {event.latestUpdate}
+                                </div>
+                            )}
+
+                            {(event.type === 'future' || event.type === 'active') && (
+                                <span style={{
+                                    color: 'var(--color-accent)',
+                                    fontSize: '0.82rem',
+                                    fontWeight: '800',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem'
+                                }}>
+                                    <Sparkles size={13} /> {t('caseDetail.timeline.viewPreparationKit')}
+                                </span>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {activityEvents.length > 0 && (
+                <div style={{ marginTop: '1.5rem', background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)', borderRadius: '1rem', padding: '1.25rem' }}>
+                    <h4 style={{ color: 'var(--text-main)', margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: '800' }}>Recent timeline activity</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {activityEvents.slice(-4).reverse().map((event, index) => {
+                            const Icon = event.icon || Clock;
+                            return (
+                                <div key={`${event.title}-${index}`} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                                    <Icon size={16} color="#10b981" style={{ marginTop: '0.15rem', flexShrink: 0 }} />
+                                    <div>
+                                        <div style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '0.9rem' }}>{event.title}</div>
+                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                                            {event.subtitle} {event.date ? `- ${formatDate(event.date, i18n.language)}` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                @media (max-width: 820px) {
+                    .case-progress-timeline .timeline-hero {
+                        align-items: stretch !important;
+                        flex-direction: column !important;
+                    }
+                    .case-progress-timeline .timeline-actions {
+                        justify-content: stretch !important;
+                    }
+                    .case-progress-timeline .timeline-actions > * {
+                        flex: 1 1 100% !important;
+                    }
+                    .case-progress-timeline .timeline-status-strip,
+                    .case-progress-timeline .timeline-card-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+            `}</style>
 
             {/* Preparation Kit Modal */}
             {prepKitOpen && selectedStage && (
@@ -1832,6 +2091,4 @@ function ProceduralHealthTab({ caseData }) {
         </div>
     );
 }
-
-
 
