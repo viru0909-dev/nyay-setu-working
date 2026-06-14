@@ -12,7 +12,7 @@
 │  └─ WebSocket: ws://localhost:3001 (Hearing video)             │
 │                                                                 │
 │  Backend Services:                                              │
-│  ├─ Spring Boot (8080)      ← Main API hub                    │
+│  ├─ Spring Boot (8080)      ← Main API hub (/api/v1/*)        │
 │  ├─ LawGPT (8000)           ← RAG + Doc generation            │
 │  ├─ NLP Orchestrator (8001) ← Legal reasoning, Forensics, OCR │
 │  └─ Signaling Server (3001) ← WebRTC for video calls          │
@@ -20,131 +20,133 @@
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+> **Routing note:** All Spring Boot (`localhost:8080`) endpoints are globally prefixed with `/api/v1` via `WebMvcConfig`. LawGPT and NLP Orchestrator are standalone Python/FastAPI services and are **not** affected by this prefix.
+
 ## Quick Endpoint Reference by Role
 
 ### 👨‍⚖️ LITIGANT (Client/Petitioner)
 
 ```bash
 # Case Management
-POST   /cases                        → Create case
-GET    /cases                        → Get my cases
-GET    /cases/{id}                   → Get case details
-PUT    /cases/{id}                   → Update case
+POST   /api/v1/cases                        → Create case
+GET    /api/v1/cases                        → Get my cases
+GET    /api/v1/cases/{id}                   → Get case details
+PUT    /api/v1/cases/{id}                   → Update case
 
 # Documents
-POST   /documents/upload             → Upload document
-GET    /documents                    → Get my documents
-POST   /documents/{id}/analyze       → Trigger AI analysis
-GET    /documents/{id}/analysis      → Get analysis results
+POST   /api/v1/documents/upload             → Upload document
+GET    /api/v1/documents                    → Get my documents
+POST   /api/v1/documents/{id}/analyze       → Trigger AI analysis
+GET    /api/v1/documents/{id}/analysis      → Get analysis results
 
 # Evidence
-POST   /evidence/upload              → Upload evidence (blockchain)
-GET    /evidence/case/{caseId}       → View evidence for case
+POST   /api/v1/evidence/upload              → Upload evidence (blockchain)
+GET    /api/v1/evidence/case/{caseId}       → View evidence for case
 
 # Hearings
-GET    /hearings/my                  → Get my scheduled hearings
-POST   /hearings/{hearingId}/join    → Join hearing
-POST   /hearings/{hearingId}/leave   → Leave hearing
+GET    /api/v1/hearings/my                  → Get my scheduled hearings
+POST   /api/v1/hearings/{hearingId}/join    → Join hearing
+POST   /api/v1/hearings/{hearingId}/leave   → Leave hearing
 
 # Messages
-GET    /cases/{caseId}/messages      → Read case messages
-POST   /cases/{caseId}/messages      → Send message to lawyer
+GET    /api/v1/cases/{caseId}/messages      → Read case messages
+POST   /api/v1/cases/{caseId}/messages      → Send message to lawyer
 
 # Profile
-POST   /profile/create-or-update     → Update profile
-POST   /profile/{userId}/upload-picture → Profile picture
+POST   /api/v1/profile/create-or-update     → Update profile
+POST   /api/v1/profile/{userId}/upload-picture → Profile picture
 
 # Lawyer Proposal
-POST   /cases/{caseId}/respond-proposal → Accept/reject lawyer
+POST   /api/v1/cases/{caseId}/respond-proposal → Accept/reject lawyer
 ```
 
 ### 👨‍⚖️ LAWYER
 
 ```bash
 # Client Cases
-GET    /lawyer/cases                 → Get my client cases
-GET    /lawyer/clients               → Get my clients list
-GET    /lawyer/stats                 → Get my statistics
+GET    /api/v1/lawyer/cases                 → Get my client cases
+GET    /api/v1/lawyer/clients               → Get my clients list
+GET    /api/v1/lawyer/stats                 → Get my statistics
 
 # Draft Management
-POST   /lawyer/draft                 → Generate draft from template
-POST   /lawyer/draft/save            → Save draft (no submission)
+POST   /api/v1/lawyer/draft                 → Generate draft from template
+POST   /api/v1/lawyer/draft/save            → Save draft (no submission)
 
 # Case Workflow
-POST   /cases/{id}/submit-draft      → Submit draft for approval
-GET    /cases                        → Get assigned cases
-POST   /cases/{id}/file-in-court     → File case in court (after approval)
+POST   /api/v1/cases/{id}/submit-draft      → Submit draft for approval
+GET    /api/v1/cases                        → Get assigned cases
+POST   /api/v1/cases/{id}/file-in-court     → File case in court (after approval)
 
 # Documents
-GET    /documents/user/cases         → Get my case summaries
-GET    /documents/case/{caseId}      → Get case documents
+GET    /api/v1/documents/user/cases         → Get my case summaries
+GET    /api/v1/documents/case/{caseId}      → Get case documents
 
 # Hearings
-POST   /hearings/schedule            → Schedule hearing
-GET    /hearings/{hearingId}         → View hearing details
-POST   /hearings/{hearingId}/join    → Join hearing
+POST   /api/v1/hearings/schedule            → Schedule hearing
+GET    /api/v1/hearings/{hearingId}         → View hearing details
+POST   /api/v1/hearings/{hearingId}/join    → Join hearing
 
 # Messages
-POST   /cases/{caseId}/messages      → Message with client
+POST   /api/v1/cases/{caseId}/messages      → Message with client
 ```
 
 ### ⚖️ JUDGE
 
 ```bash
 # Case Assignment
-GET    /judge/cases                  → Get my assigned cases
-GET    /judge/unassigned             → Get cases available to claim
-POST   /judge/cases/{id}/claim       → Take case from pool
+GET    /api/v1/judge/cases                  → Get my assigned cases
+GET    /api/v1/judge/unassigned             → Get cases available to claim
+POST   /api/v1/judge/cases/{id}/claim       → Take case from pool
 
 # Summons & Orders
-POST   /judge/cases/{id}/issue-summons → Issue digital summons
-GET    /orders/case/{caseId}         → Get case orders
-POST   /orders                       → Create court order
-PUT    /orders/{orderId}             → Update order
-GET    /orders/my-orders             → Get my issued orders
+POST   /api/v1/judge/cases/{id}/issue-summons → Issue digital summons
+GET    /api/v1/orders/case/{caseId}         → Get case orders
+POST   /api/v1/orders                       → Create court order
+PUT    /api/v1/orders/{orderId}             → Update order
+GET    /api/v1/orders/my-orders             → Get my issued orders
 
 # Hearings
-POST   /hearings/schedule            → Schedule hearing
-POST   /hearings/{hearingId}/participants → Add participant
-PUT    /hearings/{hearingId}/complete → Complete hearing
-POST   /hearings/{hearingId}/outcome → Record hearing outcome
+POST   /api/v1/hearings/schedule            → Schedule hearing
+POST   /api/v1/hearings/{hearingId}/participants → Add participant
+PUT    /api/v1/hearings/{hearingId}/complete → Complete hearing
+POST   /api/v1/hearings/{hearingId}/outcome → Record hearing outcome
 
 # Case Transitions
-POST   /cases/transition/{id}/take-cognizance → Take cognizance
-POST   /cases/{id}/start-hearings    → Start hearing phase
-POST   /cases/{id}/deliver-verdict   → Deliver verdict
+POST   /api/v1/cases/transition/{id}/take-cognizance → Take cognizance
+POST   /api/v1/cases/{id}/start-hearings    → Start hearing phase
+POST   /api/v1/cases/{id}/deliver-verdict   → Deliver verdict
 
 # Documents
-GET    /documents/case/{caseId}      → View case documents
-GET    /documents/{id}/analysis      → View AI analysis
+GET    /api/v1/documents/case/{caseId}      → View case documents
+GET    /api/v1/documents/{id}/analysis      → View AI analysis
 
 # Analytics
-GET    /judge/analytics              → Judge dashboard stats
+GET    /api/v1/judge/analytics              → Judge dashboard stats
 ```
 
 ### 🚔 POLICE
 
 ```bash
 # FIR Management
-POST   /police/fir/upload            → Upload FIR with SHA-256 stamp
-GET    /police/fir/list              → My FIRs
-GET    /police/fir/pending           → FIRs pending review
-PUT    /police/fir/{id}/status       → Approve/Reject FIR
-POST   /police/fir/{id}/verify       → Verify FIR integrity
+POST   /api/v1/police/fir/upload            → Upload FIR with SHA-256 stamp
+GET    /api/v1/police/fir/list              → My FIRs
+GET    /api/v1/police/fir/pending           → FIRs pending review
+PUT    /api/v1/police/fir/{id}/status       → Approve/Reject FIR
+POST   /api/v1/police/fir/{id}/verify       → Verify FIR integrity
 
 # Summons Delivery
-GET    /police/summons/pending       → Pending delivery tasks
-POST   /police/summons/{caseId}/complete → Mark summons served
+GET    /api/v1/police/summons/pending       → Pending delivery tasks
+POST   /api/v1/police/summons/{caseId}/complete → Mark summons served
 
 # Investigation
-POST   /police/investigation/{id}/start    → Start investigation
-POST   /police/investigation/{id}/evidence → Add evidence
-POST   /police/investigation/{id}/submit   → Submit findings
-GET    /police/investigation/list          → All investigations
+POST   /api/v1/police/investigation/{id}/start    → Start investigation
+POST   /api/v1/police/investigation/{id}/evidence → Add evidence
+POST   /api/v1/police/investigation/{id}/submit   → Submit findings
+GET    /api/v1/police/investigation/list          → All investigations
 
 # Statistics
-GET    /police/stats                 → Police dashboard stats
-GET    /police/health                → Service health check
+GET    /api/v1/police/stats                 → Police dashboard stats
+GET    /api/v1/police/health                → Service health check
 ```
 
 ---
@@ -152,23 +154,23 @@ GET    /police/health                → Service health check
 ## Authentication Flow
 
 ```
-1. REGISTER → POST /auth/register
+1. REGISTER → POST /api/v1/auth/register
    Response: JWT + Refresh Token + User Info
    
-2. LOGIN → POST /auth/login  
+2. LOGIN → POST /api/v1/auth/login
    Response: JWT (short-lived, ~15 min) + Refresh Token (long-lived)
    
 3. PROTECTED REQUESTS → Header: Authorization: Bearer {JWT}
    
-4. TOKEN EXPIRED? → POST /auth/refresh
+4. TOKEN EXPIRED? → POST /api/v1/auth/refresh
    Body: {refreshToken}
    Response: New JWT
    
 5. PASSWORD RESET:
-   a. POST /auth/forgot-password {email}
+   a. POST /api/v1/auth/forgot-password {email}
    b. Check email for reset link with token
-   c. GET /auth/verify-reset-token?token={token}
-   d. POST /auth/reset-password {token, newPassword}
+   c. GET /api/v1/auth/verify-reset-token?token={token}
+   d. POST /api/v1/auth/reset-password {token, newPassword}
 ```
 
 ---
@@ -176,14 +178,14 @@ GET    /police/health                → Service health check
 ## Document Generation (LawGPT)
 
 ```bash
-# RAG Retrieval (Java calls Python)
+# RAG Retrieval (Java calls Python — LawGPT service, port 8000)
 POST http://localhost:8000/context
 {
   "question": "What is Section 498A?",
   "max_results": 3
 }
 
-# Document Generation
+# Document Generation (LawGPT service, port 8000)
 POST http://localhost:8000/generate
 {
   "doc_type": "affidavit|rti|complaint|notice",
@@ -208,6 +210,7 @@ Response: Generated legal document text + sources
 ### Real-time Streaming (Production)
 
 ```bash
+# NLP Orchestrator service, port 8001
 POST http://localhost:8001/api/legal/analyze-stream
 
 Body: {
@@ -248,7 +251,7 @@ Output: Markdown + Hinglish + Citation validation
 
 ```bash
 # Upload with blockchain hash
-POST /evidence/upload
+POST /api/v1/evidence/upload
 {
   "file": <binary>,
   "caseId": "uuid",
@@ -264,7 +267,7 @@ Response: {
 }
 
 # Verify integrity
-GET /evidence/{evidenceId}/verify
+GET /api/v1/evidence/{evidenceId}/verify
 → {
     "isVerified": true,
     "blockHash": "sha256...",
@@ -272,7 +275,7 @@ GET /evidence/{evidenceId}/verify
   }
 
 # Verify entire chain
-GET /evidence/case/{caseId}/verify-chain
+GET /api/v1/evidence/case/{caseId}/verify-chain
 → {
     "chainValid": true,
     "hashes": ["hash1", "hash2", ...],
@@ -346,28 +349,28 @@ socket.on('user-disconnected', (socketId) => {
                                     ↓
          ┌──────────────────────────────────────────────┐
          │  CLIENT APPROVES DRAFT                       │
-         │  POST /cases/{id}/approve-draft {approved}   │
+         │  POST /api/v1/cases/{id}/approve-draft       │
          └──────────────────────────────────────────────┘
                                     ↓
                             [SUBMITTED]
                                     ↓
          ┌──────────────────────────────────────────────┐
          │  JUDGE TAKES COGNIZANCE                      │
-         │  POST /judge/cases/{id}/claim                │
+         │  POST /api/v1/judge/cases/{id}/claim         │
          └──────────────────────────────────────────────┘
                                     ↓
                       [COGNIZANCE_PERIOD]
                                     ↓
          ┌──────────────────────────────────────────────┐
          │  JUDGE ISSUES SUMMONS                        │
-         │  POST /judge/cases/{id}/issue-summons        │
+         │  POST /api/v1/judge/cases/{id}/issue-summons │
          └──────────────────────────────────────────────┘
                                     ↓
                         [SUMMONS_SERVED]
                                     ↓
                     ┌───────────────────────────┐
                     │  HEARINGS BEGIN           │
-                    │  /hearings/schedule       │
+                    │  /api/v1/hearings/schedule│
                     └───────────────────────────┘
                                     ↓
                           [IN_PROGRESS]
@@ -375,7 +378,7 @@ socket.on('user-disconnected', (socketId) => {
                                     ↓
          ┌──────────────────────────────────────────────┐
          │  JUDGE DELIVERS VERDICT                      │
-         │  POST /cases/{id}/deliver-verdict            │
+         │  POST /api/v1/cases/{id}/deliver-verdict     │
          └──────────────────────────────────────────────┘
                                     ↓
                           [COMPLETED]
@@ -433,9 +436,9 @@ socket.on('user-disconnected', (socketId) => {
 - [ ] Download certificate
 
 ### Legal AI
-- [ ] Call /api/legal/analyze-stream (SSE)
+- [ ] Call `/api/legal/analyze-stream` on NLP Orchestrator (SSE)
 - [ ] Verify SSE events stream properly
-- [ ] Generate legal documents
+- [ ] Generate legal documents via LawGPT
 - [ ] Verify Hindi/Hinglish output
 
 ### WebRTC Hearings
@@ -455,7 +458,7 @@ socket.on('user-disconnected', (socketId) => {
 | 401 Unauthorized | Check JWT token in Authorization header. Refresh if expired. |
 | 403 Forbidden | Check user role. Ensure correct role for operation. |
 | Case not found | Verify case UUID format and ownership. |
-| Document analysis pending | Call GET `/documents/{id}/has-analysis` to check status. |
+| Document analysis pending | Call GET `/api/v1/documents/{id}/has-analysis` to check status. |
 | Ollama not available | Ensure Ollama service running on port 11434. `ollama serve` |
 | Signaling server connection fails | Check WebSocket URL and CORS in server.js |
 | Evidence hash mismatch | File corrupted. Re-upload and verify hash. |
@@ -465,7 +468,7 @@ socket.on('user-disconnected', (socketId) => {
 
 ## Integration Tips
 
-1. **Polling Analysis Results:** After `/documents/{id}/analyze`, poll `/documents/{id}/has-analysis` every 2-3 seconds
+1. **Polling Analysis Results:** After `/api/v1/documents/{id}/analyze`, poll `/api/v1/documents/{id}/has-analysis` every 2-3 seconds
 2. **SSE Handling:** Use `EventSource` or `fetch` with `ReadableStream` for streaming endpoints
 3. **WebRTC Signals:** Ensure all signal payloads are JSON-serializable
 4. **Role-Based UI:** Check user role before rendering admin/judge panels
@@ -475,4 +478,3 @@ socket.on('user-disconnected', (socketId) => {
 ---
 
 **Generated:** June 2, 2026 | Version: 1.0 | For Production Use
-
