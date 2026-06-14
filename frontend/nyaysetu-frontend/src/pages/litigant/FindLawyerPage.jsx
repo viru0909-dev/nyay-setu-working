@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import useDebounce from '../../hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
 import { Search, Star, MapPin, Briefcase, ArrowLeft } from 'lucide-react';
 
@@ -68,13 +69,14 @@ const specializations = [
 export default function FindLawyerPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+    const debouncedSearch = useDebounce(search, 400);
   const [filter, setFilter] = useState('All');
   const [requested, setRequested] = useState([]);
 
   const filtered = lawyers.filter(l => {
     const matchSearch =
-      l.name.toLowerCase().includes(search.toLowerCase()) ||
-      l.location.toLowerCase().includes(search.toLowerCase());
+      l.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      l.location.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchFilter =
       filter === 'All' || l.specialization === filter;
     return matchSearch && matchFilter;
