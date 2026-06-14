@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -46,8 +48,8 @@ public class FileStorageService {
             Path targetLocation = categoryPath.resolve(fileName).normalize();
             
             // Security Check: Prevent Path Traversal
-            if (!targetLocation.startsWith(this.fileStorageLocation)) {
-                throw new SecurityException("Path traversal attack detected! Invalid category.");
+            if (!targetLocation.toAbsolutePath().normalize().startsWith(this.fileStorageLocation)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid file path");
             }
 
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
@@ -63,8 +65,8 @@ public class FileStorageService {
             Path file = this.fileStorageLocation.resolve(filePath).normalize();
             
             // Security Check: Prevent Path Traversal
-            if (!file.startsWith(this.fileStorageLocation)) {
-                throw new SecurityException("Path traversal attack detected!");
+            if (!file.toAbsolutePath().normalize().startsWith(this.fileStorageLocation)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid file path");
             }
             
             Resource resource = new UrlResource(file.toUri());
@@ -83,8 +85,8 @@ public class FileStorageService {
             Path file = this.fileStorageLocation.resolve(filePath).normalize();
             
             // Security Check: Prevent Path Traversal
-            if (!file.startsWith(this.fileStorageLocation)) {
-                throw new SecurityException("Path traversal attack detected!");
+            if (!file.toAbsolutePath().normalize().startsWith(this.fileStorageLocation)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid file path");
             }
             
             Files.deleteIfExists(file);
@@ -100,8 +102,8 @@ public class FileStorageService {
         Path file = this.fileStorageLocation.resolve(filePath).normalize();
         
         // Security Check: Prevent Path Traversal
-        if (!file.startsWith(this.fileStorageLocation)) {
-            throw new SecurityException("Path traversal attack detected!");
+        if (!file.toAbsolutePath().normalize().startsWith(this.fileStorageLocation)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid file path");
         }
         
         if (!Files.exists(file)) {
