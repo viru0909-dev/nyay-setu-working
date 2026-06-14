@@ -187,7 +187,11 @@ public class SecurityConfig {
                                 "/api/v1/police/health",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/actuator/health",
+                                "/actuator/health/**",
+                                "/ai/ollama/status",
+                                "/ai/ollama/models"
                         ).permitAll()
 
                         // ── WebSocket endpoints ───────────────────────────────────────────
@@ -257,9 +261,11 @@ public class SecurityConfig {
                                 "/api/v1/cases/pending-assignment",
                                 "/api/v1/cases/judge-workload",
                                 "/verify/admin/**",
-                                "/api/v1/audit/log",
-                                "/actuator/**"
+                                "/api/v1/audit/log"
                         ).hasAnyRole("ADMIN", "SUPER_JUDGE", "TECH_ADMIN")
+
+                        // ── Actuator/Ops ──────────────────────────────────────────────────
+                        .requestMatchers("/actuator/**").hasRole("TECH_ADMIN")
 
                         // ── Summons & transition (police + judge + admin) ──────────────────
                         .requestMatchers(
