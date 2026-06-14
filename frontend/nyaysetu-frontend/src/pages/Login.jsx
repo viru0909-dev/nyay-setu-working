@@ -128,7 +128,12 @@ export default function Login() {
                 }}>
                     {/* Left Side - Welcome (hidden on mobile) */}
                     {!isMobile && (
-                        <div style={{ color: 'var(--text-main)' }}>
+    <div
+        style={{
+            color: 'var(--text-main)',
+            transform: 'translateY(-40px)'
+        }}
+    >
                             <div style={{ marginBottom: '2rem' }}>
                                 <h1 style={{
                                     fontSize: '2.8rem',

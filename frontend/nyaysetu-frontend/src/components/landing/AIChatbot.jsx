@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { MessageCircle, X, Send, Mic, StopCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { brainAPI } from "../../services/api";
@@ -6,6 +6,20 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ScrollTopButton from "./ScrollTopButton";
 
+const copyToClipboard = async (text) => {
+  if (!text || !text.trim()) {
+    alert("Nothing to copy");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("Response copied!");
+  } catch (err) {
+    console.error("Copy failed:", err);
+    alert("Failed to copy response");
+  }
+};
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -20,42 +34,7 @@ export default function AIChatbot() {
   const [sessionId, setSessionId] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef(null);
-  const [language, setLanguage] = useState("en-IN");
-  useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
-      console.error("Speech recognition not supported");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = "en-US";
-
-    recognition.onstart = () => {
-      setIsRecording(true);
-    };
-
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
-
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setInput(transcript); // fills the input box
-    };
-
-    recognition.onerror = (event) => {
-      console.error(event.error);
-      setIsRecording(false);
-    };
-
-    recognitionRef.current = recognition;
-  }, []);
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -73,11 +52,6 @@ export default function AIChatbot() {
           "I apologize, but I encountered an error. Please try again.",
       };
       setMessages((prev) => [...prev, aiResponse]);
-      const utterance = new SpeechSynthesisUtterance(aiResponse.content);
-
-      utterance.lang = language;
-
-      window.speechSynthesis.speak(utterance);
       if (response.data.sessionId) setSessionId(response.data.sessionId);
     } catch (error) {
       console.error("Chat error:", error);
@@ -87,23 +61,57 @@ export default function AIChatbot() {
           "I understand your question. As an AI legal assistant, I can help you with general legal information about Indian law, the Constitution, case filing procedures, and more. For specific legal advice, please consult with a qualified lawyer. What would you like to know?",
       };
       setMessages((prev) => [...prev, errorResponse]);
-      window.speechSynthesis.speak(
-        new SpeechSynthesisUtterance(errorResponse.content),
-      );
     } finally {
       setIsTyping(false);
     }
   };
 
   const startRecording = () => {
-    if (!recognitionRef.current) {
+    if (
+      !("webkitSpeechRecognition" in window) &&
+      !("SpeechRecognition" in window)
+    ) {
       alert("Speech recognition is not supported in this browser.");
       return;
     }
 
-    recognitionRef.current.lang = language;
-    recognitionRef.current.start();
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "en-IN";
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput((prev) => prev + " " + transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
   };
+
+  const stopRecording = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+  };
+
   return (
     <>
       {/* Floating Button */}
@@ -263,6 +271,22 @@ export default function AIChatbot() {
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {msg.content}
                     </ReactMarkdown>
+
+                    {msg.role === "assistant" && (
+                      <button
+                        onClick={() => copyToClipboard(msg.content)}
+                        style={{
+                          marginTop: "8px",
+                          padding: "6px 12px",
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          fontSize: "0.8rem",
+                        }}
+                      >
+                        Copy Response
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -303,41 +327,12 @@ export default function AIChatbot() {
                 background: "var(--bg-glass-strong)",
               }}
             >
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                style={{
-                  marginBottom: "0.75rem",
-                  padding: "0.5rem",
-                  borderRadius: "0.5rem",
-                  border: "1px solid #ddd",
-                  width: "100%",
-                }}
-              >
-                <option value="en-IN">English</option>
-                <option value="hi-IN">Hindi</option>
-              </select>
-              {isRecording && (
-                <div
-                  style={{
-                    color: "#8b5cf6",
-                    fontWeight: "600",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  🎤 Listening...
-                </div>
-              )}
               <div style={{ display: "flex", gap: "0.75rem" }}>
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSend();
-                    }
-                  }}
+                  onKeyPress={(e) => e.key === "Enter" && handleSend()}
                   placeholder="Ask me about law, cases, or the Constitution..."
                   style={{
                     flex: 1,

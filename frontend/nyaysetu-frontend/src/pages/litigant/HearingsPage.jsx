@@ -1,3 +1,4 @@
+import { scheduleHearingReminder } from '../../utils/HearingReminder';
 import { useState, useEffect } from 'react';
 import {
     Video,
@@ -22,6 +23,9 @@ export default function HearingsPage() {
     const [hearings, setHearings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeCall, setActiveCall] = useState(null);
+    const [reminders, setReminders] = useState(() => {
+    return JSON.parse(localStorage.getItem('hearingReminders') || '{}');
+});
     const { t } = useTranslation('litigant');
 
     useEffect(() => {
@@ -77,6 +81,22 @@ export default function HearingsPage() {
     const endCall = () => {
         setActiveCall(null);
     };
+
+const handleReminder = async (hearing) => {
+    await scheduleHearingReminder(hearing);
+
+    const updated = {
+        ...reminders,
+        [hearing.id]: true
+    };
+
+    setReminders(updated);
+
+    localStorage.setItem(
+        'hearingReminders',
+        JSON.stringify(updated)
+    );
+};
 
     // Calendar & filtering logic
     const today = new Date();
@@ -263,6 +283,30 @@ export default function HearingsPage() {
                                                 color: 'var(--text-secondary)', fontWeight: '600', fontSize: '0.9rem'
                                             }}>
                                                 {hearing.isUpcoming ? t('hearings.upcoming') : t('hearings.completed')}
+
+                                            {hearing.isUpcoming && (
+                                         <button
+                                          onClick={() => handleReminder(hearing)}
+                                              style={{
+                                               background: reminders[hearing.id]
+                                               ? 'var(--color-primary)'
+                                               : 'var(--bg-glass-strong)',
+                                               border: 'var(--border-glass-strong)',
+                                               color: reminders[hearing.id]
+                                               ? 'white'
+                                               : 'var(--text-main)',
+                                               borderRadius: '0.75rem',
+                                               padding: '0.75rem 1rem',
+                                               cursor: 'pointer',
+                                               marginTop: '0.5rem'
+                     }}
+                 >
+                {reminders[hearing.id]
+                 ? '✅ Reminder Set'
+                 : '🔔 Set Reminder'}
+                                 </button>
+                )} 
+
                                             </div>
                                         )}
                                     </div>

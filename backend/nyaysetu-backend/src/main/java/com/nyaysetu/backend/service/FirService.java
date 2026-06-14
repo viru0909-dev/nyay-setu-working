@@ -3,9 +3,9 @@ package com.nyaysetu.backend.service;
 import com.nyaysetu.backend.dto.ClientFirRequest;
 import com.nyaysetu.backend.dto.FirUploadRequest;
 import com.nyaysetu.backend.dto.FirUploadResponse;
+import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.FirRecord;
 import com.nyaysetu.backend.entity.User;
-import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.CaseStatus;
 import com.nyaysetu.backend.repository.FirRecordRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,7 +54,9 @@ public class FirService {
             }
 
             // Generate unique filename
-            String originalFilename = file.getOriginalFilename();
+            String originalFilename = file.getOriginalFilename() != null
+    ? Paths.get(file.getOriginalFilename()).getFileName().toString()
+    : "file";
             String extension = originalFilename != null && originalFilename.contains(".") 
                 ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
                 : "";
@@ -201,7 +202,9 @@ public class FirService {
                     Files.createDirectories(uploadDir);
                 }
 
-                String originalFilename = file.getOriginalFilename();
+                String originalFilename = file.getOriginalFilename() != null
+    ? Paths.get(file.getOriginalFilename()).getFileName().toString()
+    : "file";
                 String extension = originalFilename != null && originalFilename.contains(".") 
                     ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
                     : "";
@@ -225,7 +228,7 @@ public class FirService {
                     .description(request.getDescription())
                     .incidentDate(request.getIncidentDate())
                     .incidentLocation(request.getIncidentLocation())
-                    .aiGenerated(request.getAiGenerated() != null ? request.getAiGenerated() : false)
+                    .aiGenerated(Boolean.TRUE.equals(request.getAiGenerated()))
                     .aiSessionId(request.getAiSessionId())
                     .fileHash(fileHash)
                     .filePath(filePath)
@@ -376,7 +379,9 @@ public class FirService {
             }
 
             // Generate unique filename
-            String originalFilename = file.getOriginalFilename();
+            String originalFilename = file.getOriginalFilename() != null
+    ? Paths.get(file.getOriginalFilename()).getFileName().toString()
+    : "file";
             String extension = originalFilename != null && originalFilename.contains(".") 
                 ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
                 : "";

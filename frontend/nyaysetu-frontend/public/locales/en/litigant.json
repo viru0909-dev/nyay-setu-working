@@ -355,55 +355,6 @@
   "backToDashboard": "Back to Dashboard"
 },
 
-  "forensics": {
-    "title": "Accident Forensic Analysis",
-    "subtitle": "Video Crime Scene Reconstruction",
-    "noVideo": "No Video Uploaded",
-    "uploadTitle": "Upload Accident Footage",
-    "uploadDescription": "MP4, MOV or AVI files up to 500MB",
-    "engineStatus": "Forensic Engine Status",
-    "processing": "Processing...",
-    "timeline": "RECONSTRUCTED TIMELINE",
-    "waitingAnalysis": "Waiting for frame analysis...",
-    "legalImplications": "LEGAL IMPLICATIONS",
-    "analyzingViolations": "Analyzing violations...",
-    "logs": "FORENSIC_ENGINE_LOGS",
-    "reportReady": "Liability Assessment Ready",
-    "primaryLiable": "Primary Liable Party detected:",
-    "viewReport": "View Case Report",
-
-    "events": {
-      "startExtraction": "AI: Starting Forensic Frame Extraction...",
-      "timelineExtraction": "Gemini: Extracting timeline from video frames...",
-      "legalLookup": "Groq: Looking up relevant legal sections (MVA, IPC)...",
-      "reportGenerated": "Success: Liability Report Generated"
-    },
-
-    "avatar": {
-      "analysisStart": "I am analyzing the video footage. I can see a collision at the intersection where vehicle B failed to yield.",
-      "legalSections": "Based on my analysis, sections IPC 279 and MVA 184 are applicable here due to rash driving and signal violation.",
-      "finalReport": "The final liability report is ready. Vehicle B is primarily liable for the accident."
-    },
-    "timelineEvents": {
-      "vehicleA": "Vehicle A entering intersection at 45km/h",
-      "vehicleB": "Vehicle B fails to stop at red light",
-      "impact": "Point of Impact at Center-Left lane"
-    },
-
-    "legalSections": {
-      "dangerousDriving": "Dangerous Driving",
-      "rashDriving": "Rash Driving on a Public Way",
-      "mvaPenalty": "Imprisonment up to 6 months or fine",
-      "ipcPenalty": "Standard legal penalty applies"
-    },
-
-    "report": {
-      "vehicleB": "Vehicle B (White SUV)",
-      "signalViolation": "Signal violation",
-      "overspeeding": "Overspeeding"
-    }
-  },
-
   "hearings": {
     "title": "Hearings",
     "subtitle": "Your scheduled virtual court sessions",
@@ -517,6 +468,7 @@
   "vakilFriend": {
     "welcome": "🙏 Namaste! I am Nyay Saarthi, your AI legal assistant. How can I help you today?",
     "offlineMessage": "🙏 Namaste! I am Nyay Saarthi (offline mode). The backend server is not responding. Please start the backend and refresh.",
+    "connectError": "Unable to connect to Nyay Saarthi. Please check your internet and try again.",
     "deepResearchError": "Deep research failed.",
     "speechNotSupported": "Your browser does not support speech recognition. Please use Chrome or Edge.",
     "noSession": "⚠️ No active session. Please refresh the page.",

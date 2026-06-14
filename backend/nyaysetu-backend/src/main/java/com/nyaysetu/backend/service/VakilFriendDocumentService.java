@@ -411,32 +411,37 @@ public class VakilFriendDocumentService {
             DocumentAnalysisResponse analysis,
             Long uploaderId
     ) {
-        CaseEvidence evidence = CaseEvidence.builder()
-                .legalCaseId(caseId)
-                .fileName(file.getOriginalFilename())
-                .fileUrl("/api/documents/download?path=" + savedFilePath)
-                .uploadedBy(uploaderId)
-                .sha256Hash(sha256Hash)
-                .originalHash(sha256Hash)
-                .hashVerified(true)
-                .hashVerifiedAt(LocalDateTime.now())
-                .aiAnalysisSummary(analysis.getSummary())
-                .documentType(analysis.getDocumentType())
-                .validityStatus(analysis.getValidityStatus())
-                .validityNotes(analysis.getValidityReason())
-                .importance(analysis.getUsefulnessLevel())
-                .category(analysis.getSuggestedCategory())
-                .aiAnalyzed(true)
-                .analyzedAt(LocalDateTime.now())
-                .storedInVault(true)
-                .vaultStoredAt(LocalDateTime.now())
-                .uploadedAt(LocalDateTime.now())
-                .fileSize(file.getSize())
-                .mimeType(file.getContentType())
-                .build();
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() ->
+                        new RuntimeException("Case not found: " + caseId)
+            );
 
-        return evidenceRepository.save(evidence);
-    }
+        CaseEvidence evidence = CaseEvidence.builder()
+            .caseEntity(caseEntity)
+            .fileName(file.getOriginalFilename())
+            .fileUrl("/api/documents/download?path=" + savedFilePath)
+            .uploadedBy(uploaderId)
+            .sha256Hash(sha256Hash)
+            .originalHash(sha256Hash)
+            .hashVerified(true)
+            .hashVerifiedAt(LocalDateTime.now())
+            .aiAnalysisSummary(analysis.getSummary())
+            .documentType(analysis.getDocumentType())
+            .validityStatus(analysis.getValidityStatus())
+            .validityNotes(analysis.getValidityReason())
+            .importance(analysis.getUsefulnessLevel())
+            .category(analysis.getSuggestedCategory())
+            .aiAnalyzed(true)
+            .analyzedAt(LocalDateTime.now())
+            .storedInVault(true)
+            .vaultStoredAt(LocalDateTime.now())
+            .uploadedAt(LocalDateTime.now())
+            .fileSize(file.getSize())
+            .mimeType(file.getContentType())
+            .build();
+
+    return evidenceRepository.save(evidence);
+}
     
     private DocumentEntity saveTempDocument(
             UUID caseId,
@@ -590,6 +595,11 @@ public class VakilFriendDocumentService {
      */
     @Transactional
     public void transferDocumentsToCase(UUID sessionId, UUID caseId) {
+        CaseEntity caseEntity = caseRepository.findById(caseId)
+                .orElseThrow(() ->
+                        new RuntimeException("Case not found: " + caseId)
+                );
+
         log.info("Transferring documents for session {} to case {}", sessionId, caseId);
         
         var docs = documentRepository.findByCategoryAndDescriptionContaining(
@@ -607,7 +617,7 @@ public class VakilFriendDocumentService {
             // Also mirror to CaseEvidence table (Vault)
             try {
                 CaseEvidence evidence = CaseEvidence.builder()
-                        .legalCaseId(caseId)
+                        .caseEntity(caseEntity)
                         .fileName(doc.getFileName())
                         .fileUrl(doc.getFileUrl())
                         .uploadedBy(doc.getUploadedBy())

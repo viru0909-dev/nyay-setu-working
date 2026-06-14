@@ -4,6 +4,7 @@ import com.nyaysetu.backend.config.FileStorageConfig;
 import com.nyaysetu.backend.dto.UploadDocumentResponse;
 import com.nyaysetu.backend.entity.DocumentEntity;
 import com.nyaysetu.backend.entity.DocumentStorageType;
+import com.nyaysetu.backend.entity.VisibilityLevel;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -97,34 +98,13 @@ public class DocumentService {
      * Check if user has access to a document based on visibility level
      */
     private boolean hasAccess(DocumentEntity doc, Long userId, String userRole) {
-        String visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : "PUBLIC";
+        VisibilityLevel visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : VisibilityLevel.PUBLIC;
         
-        switch (visibility) {
-            case "PUBLIC":
-                // Everyone can see public documents (court orders, judgments, etc.)
-                return true;
-                
-            case "RESTRICTED":
-                // Only uploader, their lawyer, and judge can see
-                // If user is judge, allow access
-                if ("JUDGE".equals(userRole)) {
-                    return true;
-                }
-                // If user uploaded it, allow access
-                if (userId.equals(doc.getUploadedBy())) {
-                    return true;
-                }
-                // TODO: Add lawyer check when we have lawyer-client relationship
-                return false;
-                
-            case "SEALED":
-                // Only judge can see sealed documents
-                return "JUDGE".equals(userRole);
-                
-            default:
-                // Default to restricting access if unknown visibility level
-                return false;
-        }
+        return switch (visibility) {
+            case PUBLIC -> true;
+            case RESTRICTED -> "JUDGE".equals(userRole) || userId.equals(doc.getUploadedBy());
+            case SEALED -> "JUDGE".equals(userRole);
+        };
     }
 
     public DocumentEntity getDocument(UUID id) {
