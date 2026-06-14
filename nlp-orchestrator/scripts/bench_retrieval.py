@@ -68,7 +68,9 @@ async def run_one(query: str) -> dict:
     """Run both paths for a single query and return a stats dict."""
     # Force legacy path.
     config.RETRIEVAL_ENABLED = False
-    legacy_ctx, legacy_meta = await kanoon_search.build_kanoon_context(query, max_results=3)
+    legacy_ctx, legacy_meta = await kanoon_search.build_kanoon_context(
+        query, max_results=3
+    )
 
     # Force new path.
     config.RETRIEVAL_ENABLED = True
