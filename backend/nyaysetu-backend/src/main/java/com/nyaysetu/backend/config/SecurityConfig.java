@@ -144,7 +144,7 @@ public class SecurityConfig {
             HttpSecurity http,
             JwtAuthFilter jwtAuthFilter,
             XssSanitizationFilter xssSanitizationFilter,
-            RestAccessDeniedHandler restAccessDeniedHandler) throws Exception {
+            RestAccessDeniedHandler restAccessDeniedHandler) throws IllegalStateException {
 
         http
                 // 1. CORS fix (Restricting to specific origins instead of all)

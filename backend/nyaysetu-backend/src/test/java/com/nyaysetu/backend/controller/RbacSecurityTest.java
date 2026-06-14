@@ -43,7 +43,7 @@ public class RbacSecurityTest {
 
     @Test
     @WithMockUser(username = "litigant@example.com", roles = {"LITIGANT"})
-    public void shouldReturnStandardErrorEnvelopeOnForbidden() throws Exception {
+    public void shouldReturnStandardErrorEnvelopeOnForbidden() throws ServletException {
         mockMvc.perform(get("/api/v1/judge/cases"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value(403))
@@ -53,7 +53,7 @@ public class RbacSecurityTest {
     }
 
     @Test
-    public void shouldReturnStandardErrorEnvelopeOnUnauthorized() throws Exception {
+    public void shouldReturnStandardErrorEnvelopeOnUnauthorized() throws ServletException {
         mockMvc.perform(get("/api/v1/judge/cases"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401))
