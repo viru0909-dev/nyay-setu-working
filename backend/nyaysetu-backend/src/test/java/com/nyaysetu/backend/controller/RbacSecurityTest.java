@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -32,10 +33,32 @@ public class RbacSecurityTest {
         mockMvc.perform(get("/api/v1/cases/pending-assignment"))
                 .andExpect(status().isForbidden());
     }
+
     @Test
     @WithMockUser(username = "litigant@example.com", roles = {"LITIGANT"})
     public void shouldAllowLitigantAccessToOwnCases() throws Exception {
         mockMvc.perform(get("/api/v1/cases"))
                 .andExpect(status().isOk());
-}
+    }
+
+    @Test
+    @WithMockUser(username = "litigant@example.com", roles = {"LITIGANT"})
+    public void shouldReturnStandardErrorEnvelopeOnForbidden() throws ServletException {
+        mockMvc.perform(get("/api/v1/judge/cases"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.error").value("Forbidden"))
+                .andExpect(jsonPath("$.path").value("/api/v1/judge/cases"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    public void shouldReturnStandardErrorEnvelopeOnUnauthorized() throws ServletException {
+        mockMvc.perform(get("/api/v1/judge/cases"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.path").value("/api/v1/judge/cases"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
 }
