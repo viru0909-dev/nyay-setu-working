@@ -25,12 +25,19 @@ public class User {
 
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
+    @Column(unique = true)
+    private String providerId;
     @org.springframework.data.annotation.CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
