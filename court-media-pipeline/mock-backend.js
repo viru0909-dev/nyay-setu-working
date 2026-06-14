@@ -16,6 +16,7 @@ const server = http.createServer((req, res) => {
             console.log(`📋 Case ID:      ${data.caseId}`);
             console.log(`⚡ New Status:   \x1b[32m${data.status}\x1b[0m`);
             console.log(`💾 File Path:   ${data.storagePath}`);
+            console.log(`🔒 SHA-256 Hash: \x1b[36m${data.sha256Hash || 'N/A'}\x1b[0m`);
             console.log(`⏰ Timestamp:   ${data.updatedAt}`);
             console.log(`----------------------------------------`);
 
