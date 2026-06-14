@@ -26,7 +26,7 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
     const [sessionId, setSessionId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isStarting, setIsStarting] = useState(false);
-
+    const [copiedMessageId, setCopiedMessageId] = useState(null);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -134,13 +134,23 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
         }
     };
 
-    const copyToClipboard = async (text) => {
-        try {
-            await navigator.clipboard.writeText(text);
-        } catch (err) {
-            console.error("Copy failed:", err);
-        }
-    };
+const copyToClipboard = async (text, messageId) => {
+    try {
+
+        await navigator.clipboard.writeText(text);
+
+        setCopiedMessageId(messageId);
+
+        setTimeout(() => {
+            setCopiedMessageId(null);
+        }, 2000);
+
+    } catch (err) {
+
+        console.error("Copy failed:", err);
+    }
+};
+       
 
     const handleKeyPress = (e) => {
 
@@ -150,48 +160,10 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
         }
     };
 
-    if (!isOpen) {
+   
 
-        return (
-            <button
-                onClick={handleToggle}
-                style={{
-                    position: 'fixed',
-                    bottom: '2rem',
-                    right: '2rem',
-                    padding: '1rem',
-                    borderRadius: '50%',
-                    background: 'var(--color-primary)',
-                    color: 'white',
-                    border: 'none',
-
-    
-                    boxShadow: '0 4px 20px rgba(30, 42, 68, 0.4)',
-
-                    cursor: 'pointer',
-                    zIndex: 9999,
-
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'transform 0.2s'
-                }}
-
-                onMouseOver={(e) =>
-                    e.currentTarget.style.transform = 'scale(1.1)'
-                }
-
-                onMouseOut={(e) =>
-                    e.currentTarget.style.transform = 'scale(1)'
-                }
-
-                title="Ask Nyay Saarthi about this case"
-            >
-                <Sparkles size={28} />
-            </button>
-        );
-    }
-
+       
+           
     return (
         <div
             style={{
@@ -402,10 +374,9 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                                     {msg.role === 'assistant' && (
 
                                         <button
-                                            onClick={() =>
-                                                copyToClipboard(msg.content)
-                                            }
-
+                                           onClick={() =>
+    copyToClipboard(msg.content, idx)
+}
                                             style={{
                                                 position: 'absolute',
                                                 top: '8px',
@@ -423,7 +394,10 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
 
                                             title="Copy to clipboard"
                                         >
-                                            <Copy size={14} />
+                                          <>
+    <Copy size={14} />
+    {copiedMessageId === idx && "Copied!"}
+</>
                                         </button>
                                     )}
                                 </div>
