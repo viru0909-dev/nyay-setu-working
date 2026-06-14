@@ -1,8 +1,13 @@
+const MAX_TITLE_LENGTH = 120;
+const MAX_DESCRIPTION_LENGTH = 2000;
+const MAX_PARTY_NAME_LENGTH = 120;
+const MAX_LOCATION_LENGTH = 160;
+
 export const CASE_FIELD_LIMITS = {
-    title: 120,
-    description: 2000,
-    partyName: 120,
-    location: 160,
+    title: MAX_TITLE_LENGTH,
+    description: MAX_DESCRIPTION_LENGTH,
+    partyName: MAX_PARTY_NAME_LENGTH,
+    location: MAX_LOCATION_LENGTH,
 };
 
 const VALID_CASE_TYPES = ['civil', 'criminal', 'family', 'property', 'commercial'];

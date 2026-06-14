@@ -76,7 +76,6 @@ export default function useFormDraft(storageKey, excludeFields = [], debounceMs 
           setDraftTimestamp(envelope._savedAt);
         } catch (err) {
           // LocalStorage full or other write error — fail silently
-          console.warn('[useFormDraft] Failed to save draft:', err);
         }
       }, debounceMs);
     },

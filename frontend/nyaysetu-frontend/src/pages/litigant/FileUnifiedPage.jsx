@@ -72,6 +72,8 @@ const caseTypes = [
     }
 ];
 
+const MS_PER_MINUTE = 60000;
+const CASE_SUBMIT_GRADIENT = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
 const CASE_DRAFT_STORAGE_KEY = 'nyay-setu:file-unified-draft:v1';
 const EMPTY_CASE_FORM = {
     caseType: '',
@@ -242,7 +244,7 @@ export default function FileUnifiedPage() {
     const formatDraftTime = () => {
         if (!draftTimestamp) return 'recently';
 
-        const minutes = Math.max(0, Math.round((Date.now() - draftTimestamp) / 60000));
+        const minutes = Math.max(0, Math.round((Date.now() - draftTimestamp) / MS_PER_MINUTE));
         if (minutes < 1) return 'just now';
         if (minutes === 1) return '1 minute ago';
         return `${minutes} minutes ago`;
@@ -898,7 +900,7 @@ export default function FileUnifiedPage() {
                                 {t('fileUnified.next')} <ChevronRight size={20} />
                             </button>
                         ) : (
-                            <button onClick={handleSubmitCase} disabled={uploading || !canProceed()} style={{ padding: '1rem 2rem', background: canProceed() ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'var(--bg-glass)', border: 'none', borderRadius: '0.75rem', color: canProceed() ? 'white' : 'var(--text-secondary)', fontWeight: '700', cursor: uploading || !canProceed() ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <button onClick={handleSubmitCase} disabled={uploading || !canProceed()} style={{ padding: '1rem 2rem', background: canProceed() ? CASE_SUBMIT_GRADIENT : 'var(--bg-glass)', border: 'none', borderRadius: '0.75rem', color: canProceed() ? 'white' : 'var(--text-secondary)', fontWeight: '700', cursor: uploading || !canProceed() ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <CheckCircle2 size={20} /> {uploading ? t('fileUnified.submitting'): t('fileUnified.submitCase')}
                             </button>
                         )}
