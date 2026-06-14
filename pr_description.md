@@ -1,4 +1,4 @@
-fix: resolve N+1 query performance issues using EntityGraph
+# Pull Request
 
 ## Description
 This PR resolves N+1 query performance issues in the backend service. Specifically, it updates CaseRepository and DocumentRepository to use JPA Entity Graphs (@EntityGraph), which allows fetching cases and their associated documents in a single query rather than executing N+1 queries. It also updates the corresponding test cases (CaseDocumentEntityGraphTest) to flush and clear the entity manager before fetching to guarantee that entities are loaded correctly from the database.
