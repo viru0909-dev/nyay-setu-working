@@ -25,10 +25,7 @@ while True:
 
     timestamp = frame_number / fps
 
-    frame_filename = os.path.join(
-        output_folder,
-        f"frame_{frame_number:04d}.jpg"
-    )
+    frame_filename = os.path.join(output_folder, f"frame_{frame_number:04d}.jpg")
 
     cv2.imwrite(frame_filename, frame)
 
@@ -76,7 +73,4 @@ def extract_frames(video_path, output_folder):
     print(f"Extracted {count} frames successfully")
 
 
-extract_frames(
-    "sample.mp4",
-    "output_frames"
-)
+extract_frames("sample.mp4", "output_frames")

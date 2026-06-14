@@ -12,6 +12,7 @@ BLOCKED_NETWORKS = [
     ipaddress.ip_network("fc00::/7"),
 ]
 
+
 def validate_url_for_ssrf(url: str) -> None:
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https"):
@@ -27,6 +28,7 @@ def validate_url_for_ssrf(url: str) -> None:
     for blocked in BLOCKED_NETWORKS:
         if ip_obj in blocked:
             raise ValueError(f"URL resolves to blocked IP: {resolved_ip}")
+
 
 import cv2
 import os
@@ -45,6 +47,7 @@ async def download_video(url: str, job_id: str) -> str:
         validate_url_for_ssrf(url)
     except ValueError as e:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=400, detail=f"Unsafe URL rejected: {e}")
     """Download video from URL (which will be a MinIO/Spring Boot endpoint) to a local temp file."""
     # If the URL is already a local path (for testing), just return it
