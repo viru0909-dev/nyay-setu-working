@@ -41,8 +41,9 @@ public class EmailService {
         tokenRepository.deleteByUser(user);
 
         String token = UUID.randomUUID().toString();
+        // Set token expiry
         LocalDateTime expiryDate = LocalDateTime.now()
-                .plusSeconds(tokenValidityMs / 1000);
+                .plusSeconds(Duration.ofMillis(tokenValidityMs));
 
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .token(token)
