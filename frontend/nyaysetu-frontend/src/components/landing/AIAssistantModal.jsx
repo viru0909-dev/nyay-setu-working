@@ -76,7 +76,6 @@ const sendMessage = async (text, { appendUserMessage = true } = {}) => {
             setMessages(prev => [...prev, aiMessage]);
             if (response.data.sessionId) setSessionId(response.data.sessionId);
         } catch (error) {
-            console.error('AI Chat Error:', error);
             const isNetworkError = !error.response;
             const errorMessage = {
                 role: 'ai',
