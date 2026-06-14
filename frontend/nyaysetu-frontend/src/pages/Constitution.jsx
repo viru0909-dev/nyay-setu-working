@@ -1,4 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect, useRef ,useMemo } from 'react';
+
+
 import { useTheme } from '../contexts/ThemeContext';
 import {
     Search, BookOpen, Globe, Download, Bookmark, MessageCircle, Share2, X, BookmarkPlus, Loader2, Map,
@@ -20,6 +22,26 @@ import useGuest from '../hooks/useGuest';
 import useAuthStore from '../store/authStore';
 import GuestBlurredResults from '../components/guest/GuestBlurredResults';
 
+const Z_INDEX = {
+  FLOATING_PANEL: 1000,
+  FLOATING_PANEL_OVERLAY: 1001,
+};
+
+// ── Reactive mobile breakpoint hook ──────────────────────────────────────────
+function useIsMobile(breakpoint = 768) {
+    const [isMobile, setIsMobile] = useState(
+        () => typeof window !== 'undefined' ? window.innerWidth < breakpoint : false
+    );
+    useEffect(() => {
+        const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+        const handler = (e) => setIsMobile(e.matches);
+        mq.addEventListener('change', handler);
+        setIsMobile(mq.matches);
+        return () => mq.removeEventListener('change', handler);
+    }, [breakpoint]);
+    return isMobile;
+}
+
 export default function Constitution() {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation('constitution');
@@ -29,6 +51,7 @@ export default function Constitution() {
     const [selectedPartId, setSelectedPartId] = useState(null);
     const [selectedArticleNumber, setSelectedArticleNumber] = useState(null);
     const [showAIChat, setShowAIChat] = useState(false);
+    const [isPanelMinimized, setIsPanelMinimized] = useState(false);
     const [bookmarks, setBookmarks] = useState([]);
     const [isPlaying, setIsPlaying] = useState(false);
     const [systemVoices, setSystemVoices] = useState([]);
@@ -54,6 +77,14 @@ useEffect(() => {
     const { isGuest } = useGuest();
     const updateGuestPrefs = useAuthStore((s) => s.updateGuestPrefs);
     const setGuestIntent = useAuthStore((s) => s.setGuestIntent);
+
+    // Responsive
+    const isMobile = useIsMobile();
+
+    // Swipe-to-dismiss state for mobile bottom sheet
+    const dragStartY = useRef(null);
+    const [sheetDragOffset, setSheetDragOffset] = useState(0);
+    const responseEndRef = useRef(null);
 
     // Enhanced Constitution Data with more articles
     const partIcons = {
@@ -257,10 +288,13 @@ useEffect(() => {
         if (!aiQuery.trim()) return;
 
         setIsAiLoading(true);
+        setAiQuery('');
         try {
             const response = await brainAPI.chat(aiQuery, sessionId);
             setAiResponse(response.data.message);
             if (response.data.sessionId) setSessionId(response.data.sessionId);
+            // Scroll to bottom of response area after answer arrives
+            setTimeout(() => responseEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 80);
         } catch (error) {
             console.error('AI Chat Error:', error);
             setAiResponse(t('aiError'));
@@ -748,87 +782,500 @@ useEffect(() => {
                         )}
                     </div>
 
-                    {/* AI Assistant Side Draw Panel */}
+                    {/* === FLOATING AI LEGAL ASSISTANT === */}
+
+                    {/* FAB — shown when panel is closed */}
+                    <AnimatePresence>
+                        {!showAIChat && (
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.7, y: 16 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.7, y: 16 }}
+                                transition={{ duration: 0.22, ease: [0.34, 1.56, 0.64, 1] }}
+                                onClick={() => { setShowAIChat(true); setSheetDragOffset(0); }}
+                                style={{
+                                    position: 'fixed',
+                                    bottom: isMobile ? '24px' : '28px',
+                                    right: isMobile ? '20px' : '28px',
+                                    zIndex: Z_INDEX.FLOATING_PANEL,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '50px',
+                                    padding: isMobile ? '14px 18px' : '14px 22px',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 24px rgba(79,70,229,0.5), 0 2px 8px rgba(0,0,0,0.3)',
+                                    fontWeight: '700',
+                                    fontSize: '14px',
+                                    overflow: 'visible',
+                                }}
+                                whileHover={{ y: -3, scale: 1.05, boxShadow: '0 8px 32px rgba(79,70,229,0.6)' }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <MessageCircle size={18} />
+                                {language === 'en' ? 'Legal AI' : 'कानूनी AI'}
+                                {/* Pulse ring */}
+                                <span style={{
+                                    position: 'absolute',
+                                    inset: '-4px',
+                                    borderRadius: '50px',
+                                    border: '2px solid rgba(79,70,229,0.45)',
+                                    animation: 'al-pulse-ring 2.2s ease-out infinite',
+                                    pointerEvents: 'none',
+                                }} />
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
+
+                    {/* ── Mobile: dim backdrop ─────────────────────────────── */}
+                    <AnimatePresence>
+                        {showAIChat && isMobile && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                onClick={() => setShowAIChat(false)}
+                                style={{
+                                    position: 'fixed', inset: 0,
+                                    background: 'rgba(0,0,0,0.6)',
+                                    zIndex: Z_INDEX.FLOATING_PANEL,
+                                    backdropFilter: 'blur(3px)',
+                                    WebkitBackdropFilter: 'blur(3px)',
+                                }}
+                            />
+                        )}
+                    </AnimatePresence>
+
+                    {/* ── Floating Panel (desktop) / Bottom Sheet (mobile) ── */}
                     <AnimatePresence>
                         {showAIChat && (
                             <motion.div
-                                initial={{ opacity: 0, x: 50 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 50 }}
+                                key="ai-panel"
+                                /* Desktop: pop up from bottom-right; Mobile: slide up from bottom */
+                                initial={isMobile
+                                    ? { y: '100%' }
+                                    : { opacity: 0, y: 24, scale: 0.96 }}
+                                animate={isMobile
+                                    ? { y: sheetDragOffset > 0 ? sheetDragOffset : 0 }
+                                    : { opacity: 1, y: 0, scale: 1 }}
+                                exit={isMobile
+                                    ? { y: '100%' }
+                                    : { opacity: 0, y: 24, scale: 0.96 }}
+                                transition={{ duration: isMobile ? 0.35 : 0.26, ease: isMobile ? [0.32, 0.72, 0, 1] : [0.34, 1.56, 0.64, 1] }}
                                 style={{
-                                    background: 'var(--bg-surface)',
-                                    borderRadius: '1.5rem',
-                                    border: '1px solid var(--border-light)',
-                                    padding: '1.5rem',
-                                    boxShadow: 'var(--shadow-glass)',
-                                    position: 'sticky',
-                                    top: '6rem',
-                                    height: 'calc(100vh - 10rem)',
+                                    position: 'fixed',
+                                    zIndex: Z_INDEX.FLOATING_PANEL_OVERLAY,
                                     display: 'flex',
-                                    flexDirection: 'column'
+                                    flexDirection: 'column',
+                                    background: 'var(--bg-surface)',
+                                    overflow: 'hidden',
+                                    ...(isMobile ? {
+                                        /* Bottom sheet */
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: '82vh',
+                                        borderRadius: '22px 22px 0 0',
+                                        boxShadow: '0 -8px 40px rgba(0,0,0,0.45)',
+                                        border: '1px solid rgba(79,70,229,0.2)',
+                                        borderBottom: 'none',
+                                    } : {
+                                        /* Floating panel — anchored top+bottom so it never hides under navbar or clips the right edge */
+                                        top: isPanelMinimized ? 'auto' : '80px',   /* clears ~72px navbar */
+                                        bottom: '24px',
+                                        right: '24px',
+                                        width: '360px',
+                                        maxHeight: isPanelMinimized ? 'none' : 'calc(100vh - 104px)', /* 80px top + 24px bottom */
+                                        height: isPanelMinimized ? 'auto' : undefined,
+                                        borderRadius: '18px',
+                                        border: '1px solid rgba(79,70,229,0.28)',
+                                        boxShadow: '0 24px 64px rgba(0,0,0,0.45), 0 0 0 1px rgba(79,70,229,0.08)',
+                                    })
+                                }}
+                                /* Touch swipe-to-dismiss for mobile */
+                                onTouchStart={(e) => {
+                                    if (isMobile) dragStartY.current = e.touches[0].clientY;
+                                }}
+                                onTouchMove={(e) => {
+                                    if (!isMobile || dragStartY.current === null) return;
+                                    const delta = e.touches[0].clientY - dragStartY.current;
+                                    if (delta > 0) setSheetDragOffset(delta);
+                                }}
+                                onTouchEnd={() => {
+                                    if (!isMobile) return;
+                                    if (sheetDragOffset > 100) {
+                                        setShowAIChat(false);
+                                        setSheetDragOffset(0);
+                                    } else {
+                                        setSheetDragOffset(0);
+                                    }
+                                    dragStartY.current = null;
                                 }}
                             >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                    <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--color-primary)', margin: 0 }}>
-                                        Constitution AI
-                                    </h3>
-                                    <button onClick={() => setShowAIChat(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-                                        <X size={20} />
-                                    </button>
-                                </div>
-
-                                <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1rem', background: 'var(--bg-main)', borderRadius: '1rem', padding: '1rem' }}>
-                                    {aiResponse ? (
-                                        <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: '1.6', margin: 0 }}>
-                                            {aiResponse}
-                                        </p>
-                                    ) : (
-                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textAlign: 'center', margin: '2rem 0' }}>
-                                            Ask anything about parts, contextual clauses, or legal language mutations.
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <input
-                                        type="text"
-                                        value={aiQuery}
-                                        onChange={(e) => setAiQuery(e.target.value)}
-                                        placeholder="Ask AI assistant..."
-                                        style={{
-                                            flex: 1,
-                                            padding: '0.75rem 1rem',
-                                            borderRadius: '0.75rem',
-                                            border: '1px solid var(--border-light)',
-                                            background: 'var(--bg-input)',
-                                            color: 'var(--text-main)',
-                                            outline: 'none'
-                                        }}
-                                    />
-                                    <button
-                                        onClick={handleAIChat}
-                                        disabled={isAiLoading}
-                                        style={{
-                                            padding: '0.75rem 1.25rem',
-                                            background: 'var(--color-primary)',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '0.75rem',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center'
-                                        }}
+                                {/* ── Mobile drag handle ─────────────────────── */}
+                                {isMobile && (
+                                    <div
+                                        style={{ padding: '12px 0 4px', display: 'flex', justifyContent: 'center', flexShrink: 0, cursor: 'grab' }}
                                     >
-                                        {isAiLoading ? <Loader2 size={18} className="animate-spin" /> : 'Send'}
-                                    </button>
+                                        <div style={{ width: '40px', height: '4px', background: 'rgba(255,255,255,0.25)', borderRadius: '2px' }} />
+                                    </div>
+                                )}
+
+                                {/* ── Panel header ───────────────────────────── */}
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        padding: isMobile ? '14px 20px 14px' : '13px 16px',
+                                        background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                                        flexShrink: 0,
+                                        cursor: isPanelMinimized ? 'pointer' : 'default',
+                                    }}
+                                    onClick={() => isPanelMinimized && setIsPanelMinimized(false)}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div style={{
+                                            width: '34px', height: '34px',
+                                            background: 'rgba(255,255,255,0.18)',
+                                            borderRadius: '10px',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            flexShrink: 0,
+                                        }}>
+                                            <MessageCircle size={17} color="#fff" />
+                                        </div>
+                                        <div>
+                                            <div style={{ color: '#fff', fontWeight: '700', fontSize: isMobile ? '15px' : '13px', lineHeight: 1.2 }}>
+                                                {language === 'en' ? 'AI Legal Assistant' : 'AI कानूनी सहायक'}
+                                            </div>
+                                            {!isPanelMinimized && (
+                                                <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: isMobile ? '12px' : '11px', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                    <span style={{ width: '6px', height: '6px', background: '#4ade80', borderRadius: '50%', display: 'inline-block' }} />
+                                                    NyaySetu Brain · Groq
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        {/* Minimize toggle — desktop only */}
+                                        {!isMobile && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setIsPanelMinimized(!isPanelMinimized); }}
+                                                style={{
+                                                    width: '28px', height: '28px',
+                                                    background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '8px',
+                                                    color: '#fff', cursor: 'pointer',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '13px', lineHeight: 1,
+                                                    transition: 'background 0.15s',
+                                                }}
+                                                title={isPanelMinimized ? 'Expand' : 'Minimize'}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.28)'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                                            >
+                                                {isPanelMinimized ? '▲' : '▬'}
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => { setShowAIChat(false); setIsPanelMinimized(false); setSheetDragOffset(0); }}
+                                            style={{
+                                                width: '28px', height: '28px',
+                                                background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '8px',
+                                                color: '#fff', cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                transition: 'background 0.15s',
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.28)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                                        >
+                                            <X size={15} />
+                                        </button>
+                                    </div>
                                 </div>
+
+                                {/* ── Panel body — hidden when minimized (desktop) ── */}
+                                {!isPanelMinimized && (
+                                    <>
+                                        {/* Scrollable response area */}
+                                        <div style={{
+                                            flex: 1,
+                                            overflowY: 'auto',
+                                            padding: isMobile ? '20px 20px 12px' : '16px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '12px',
+                                            scrollbarWidth: 'thin',
+                                            scrollbarColor: 'rgba(79,70,229,0.3) transparent',
+                                            minHeight: 0, /* critical for flex+overflow to work */
+                                        }}>
+                                            {/* Empty / hint state */}
+                                            {!aiResponse && !isAiLoading && (
+                                                <div style={{ textAlign: 'center', padding: isMobile ? '24px 8px' : '16px 8px' }}>
+                                                    <div style={{
+                                                        width: '52px', height: '52px', margin: '0 auto 14px',
+                                                        background: 'linear-gradient(135deg, rgba(79,70,229,0.18), rgba(124,58,237,0.18))',
+                                                        borderRadius: '16px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    }}>
+                                                        <MessageCircle size={26} color="#818cf8" />
+                                                    </div>
+                                                    <p style={{ color: '#94a3b8', fontSize: isMobile ? '14px' : '13px', lineHeight: 1.6, margin: '0 0 18px' }}>
+                                                        {language === 'en'
+                                                            ? 'Ask me about law, cases, or the Constitution'
+                                                            : 'कानून, मामले, या संविधान के बारे में पूछें'}
+                                                    </p>
+                                                    {/* Suggestion chips */}
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                        {[
+                                                            language === 'en' ? 'What are Fundamental Rights?' : 'मौलिक अधिकार क्या हैं?',
+                                                            language === 'en' ? 'Explain Article 21' : 'अनुच्छेद 21 समझाएं',
+                                                            language === 'en' ? 'What is the Preamble?' : 'प्रस्तावना क्या है?',
+                                                        ].map((s) => (
+                                                            <button
+                                                                key={s}
+                                                                onClick={() => setAiQuery(s)}
+                                                                style={{
+                                                                    background: 'rgba(79,70,229,0.08)',
+                                                                    border: '1px solid rgba(79,70,229,0.22)',
+                                                                    color: '#a5b4fc',
+                                                                    borderRadius: '10px',
+                                                                    padding: isMobile ? '11px 14px' : '8px 12px',
+                                                                    fontSize: isMobile ? '13px' : '12px',
+                                                                    cursor: 'pointer',
+                                                                    textAlign: 'left',
+                                                                    transition: 'all 0.15s',
+                                                                    fontFamily: 'inherit',
+                                                                }}
+                                                                onMouseEnter={(e) => {
+                                                                    e.currentTarget.style.background = 'rgba(79,70,229,0.18)';
+                                                                    e.currentTarget.style.transform = 'translateX(4px)';
+                                                                }}
+                                                                onMouseLeave={(e) => {
+                                                                    e.currentTarget.style.background = 'rgba(79,70,229,0.08)';
+                                                                    e.currentTarget.style.transform = 'translateX(0)';
+                                                                }}
+                                                            >
+                                                                ✦ {s}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                
+                                                
+                                            )}
+
+                                            {/* Loading dots */}
+{isAiLoading && (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '28px 20px' }}>
+        <div style={{ display: 'flex', gap: '6px' }}>
+            {[0, 1, 2].map((i) => (
+                <span key={i} style={{
+                    width: '9px', height: '9px',
+                    background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                    animation: `al-bounce-dot 1.2s ease-in-out ${i * 0.2}s infinite`,
+                }} />
+            ))}
+        </div>
+        <p style={{ color: '#94a3b8', fontSize: '13px', margin: 0 }}>
+            {language === 'en' ? 'Consulting legal knowledge…' : 'कानूनी ज्ञान खोज रहा हूँ…'}
+        </p>       
+    </div>         
+)}                 
+
+
+                                {/* Bookmarks */}
+{bookmarks.length > 0 && (
+    <div style={{
+        marginTop: '1.5rem',
+        padding: '1.5rem',
+        background: 'var(--bg-glass)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '1.5rem',
+        border: '1px solid var(--border-light)'
+    }}>
+        <h4 style={{ color: 'var(--color-primary)', fontSize: '1.25rem', fontWeight: '800', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Bookmark size={20} fill="var(--color-primary)" color="var(--color-primary)" />
+            {t('bookmarks')}
+        </h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {bookmarks.map((bookmark, idx) => (
+                <div
+                    key={idx}
+                    onClick={() => setSelectedArticleNumber(bookmark.number)}
+                    style={{
+                        padding: '0.75rem',
+                        background: 'rgba(30, 42, 68, 0.05)',
+                        borderRadius: '0.75rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = 'rgba(30, 42, 68, 0.1)'}
+                    onMouseLeave={(e) => e.target.style.background = 'rgba(30, 42, 68, 0.05)'}
+                >
+                    <p style={{ color: 'var(--color-primary)', fontSize: '0.85rem', fontWeight: '700', margin: '0 0 0.25rem 0' }}>
+                        {t('article')} {bookmark.number}
+                    </p>
+                </div>
+            ))}            
+        </div>             
+    </div>                 
+)}                         
+
+                                            
+
+                                            {/* Response bubble */}
+                                            {aiResponse && !isAiLoading && (
+                                                <div style={{
+                                                    background: 'rgba(79,70,229,0.07)',
+                                                    border: '1px solid rgba(79,70,229,0.18)',
+                                                    borderRadius: '14px',
+                                                    padding: isMobile ? '18px' : '14px',
+                                                }}>
+                                                    <div style={{
+                                                        color: '#818cf8', fontSize: '11px', fontWeight: '700',
+                                                        marginBottom: '10px', letterSpacing: '0.6px',
+                                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                                    }}>
+                                                        ⚖️ {language === 'en' ? 'AI Response' : 'AI उत्तर'}
+                                                    </div>
+                                                    <p style={{
+                                                        color: 'var(--text-main)',
+                                                        fontSize: isMobile ? '15px' : '13px',
+                                                        lineHeight: '1.7',
+                                                        margin: 0,
+                                                        whiteSpace: 'pre-wrap',
+                                                    }}>
+                                                        {aiResponse}
+                                                    </p>
+                                                    {/* Ask another button */}
+                                                    <button
+                                                        onClick={() => setAiResponse('')}
+                                                        style={{
+                                                            marginTop: '14px',
+                                                            background: 'rgba(79,70,229,0.12)',
+                                                            border: '1px solid rgba(79,70,229,0.25)',
+                                                            borderRadius: '8px',
+                                                            color: '#a5b4fc',
+                                                            padding: '7px 14px',
+                                                            fontSize: '12px',
+                                                            cursor: 'pointer',
+                                                            fontFamily: 'inherit',
+                                                            transition: 'all 0.15s',
+                                                        }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(79,70,229,0.22)'}
+                                                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(79,70,229,0.12)'}
+                                                    >
+                                                        {language === 'en' ? '↩ Ask another question' : '↩ दूसरा प्रश्न पूछें'}
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {/* Scroll anchor */}
+                                            <div ref={responseEndRef} />
+                                        </div>
+
+                                        {/* ── Input row ────────────────────────── */}
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'flex-end',
+                                            gap: '10px',
+                                            padding: isMobile ? '14px 20px 28px' : '12px 14px',
+                                            borderTop: '1px solid rgba(255,255,255,0.07)',
+                                            flexShrink: 0,
+                                            background: 'var(--bg-surface)',
+                                        }}>
+                                            <textarea
+                                                value={aiQuery}
+                                                onChange={(e) => setAiQuery(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                        e.preventDefault();
+                                                        handleAIChat();
+                                                    }
+                                                }}
+                                                placeholder={language === 'en' ? 'Ask about law or the Constitution…' : 'कानून या संविधान के बारे में पूछें…'}
+                                                rows={isMobile ? 2 : 2}
+                                                style={{
+                                                    flex: 1,
+                                                    background: 'var(--bg-input)',
+                                                    border: '1px solid rgba(255,255,255,0.12)',
+                                                    borderRadius: '12px',
+                                                    color: 'var(--text-main)',
+                                                    fontSize: isMobile ? '15px' : '13px',
+                                                    padding: '10px 14px',
+                                                    resize: 'none',
+                                                    outline: 'none',
+                                                    fontFamily: 'inherit',
+                                                    lineHeight: 1.5,
+                                                    transition: 'border-color 0.15s',
+                                                }}
+                                                onFocus={(e) => e.target.style.borderColor = 'rgba(79,70,229,0.55)'}
+                                                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
+                                            />
+                                            <button
+                                                onClick={handleAIChat}
+                                                disabled={isAiLoading || !aiQuery.trim()}
+                                                style={{
+                                                    width: isMobile ? '46px' : '40px',
+                                                    height: isMobile ? '46px' : '40px',
+                                                    flexShrink: 0,
+                                                    background: isAiLoading || !aiQuery.trim()
+                                                        ? 'rgba(79,70,229,0.28)'
+                                                        : 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                                                    border: 'none', borderRadius: '12px',
+                                                    color: '#fff',
+                                                    cursor: isAiLoading || !aiQuery.trim() ? 'not-allowed' : 'pointer',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    boxShadow: isAiLoading || !aiQuery.trim() ? 'none' : '0 2px 10px rgba(79,70,229,0.45)',
+                                                    transition: 'all 0.2s',
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!isAiLoading && aiQuery.trim()) {
+                                                        e.currentTarget.style.transform = 'scale(1.08)';
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                                            >
+                                                {isAiLoading
+                                                    ? <Loader2 size={17} style={{ animation: 'spin 1s linear infinite' }} />
+                                                    : <MessageCircle size={17} />
+                                                }
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </motion.div>
                         )}
                     </AnimatePresence>
+                    {/* === END FLOATING AI LEGAL ASSISTANT === */}
                 </div>
             </div>
 
             <Footer />
-        </div>
+
+            <style>{`
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes al-pulse-ring {
+                    0%   { opacity: 1; transform: scale(1); }
+                    70%  { opacity: 0; transform: scale(1.4); }
+                    100% { opacity: 0; }
+                }
+                @keyframes al-bounce-dot {
+                    0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+                    40%           { transform: scale(1.1); opacity: 1; }
+                }
+            `}</style>
+        </div >
     );
 }
