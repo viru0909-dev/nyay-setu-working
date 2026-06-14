@@ -6,9 +6,13 @@ import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.service.CaseManagementService;
 import com.nyaysetu.backend.service.CaseStateTransitionService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -42,16 +46,19 @@ public class CaseManagementController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CaseDTO>> getMyCases(Authentication authentication) {
+    public ResponseEntity<Page<CaseDTO>> getMyCases(
+            Authentication authentication,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
         try {
             log.info("Getting cases for user: {}", authentication.getName());
             User user = authService.findByEmail(authentication.getName());
-            List<CaseDTO> cases = caseManagementService.getCasesByUser(user);
-            log.info("Found {} cases for user {}", cases.size(), authentication.getName());
+            Page<CaseDTO> cases = caseManagementService.getCasesByUser(user, pageable);
+            log.info("Found {} cases for user {}", cases.getTotalElements(), authentication.getName());
             return ResponseEntity.ok(cases);
         } catch (Exception e) {
             log.error("Error fetching cases for user {}: {}", authentication.getName(), e.getMessage());
-            return ResponseEntity.ok(Collections.emptyList()); // Return empty list instead of error
+            return ResponseEntity.ok(Page.empty()); // Return empty page instead of error
         }
     }
 

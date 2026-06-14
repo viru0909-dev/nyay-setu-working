@@ -1,13 +1,19 @@
 """
-Token-aware chunking for legal documents.
+Token-aware, section-aware chunking for legal documents.
 
 Strategy:
-  1. Split into paragraphs on double-newlines.
+  0. Split the document into *legal sections* first. A new "Section 103",
+     "Sec. 304A", "Article 21" or "§ 144" heading starts a new section block,
+     even when it is not separated from the previous text by a blank line.
+     Keeping a statutory section intact (and never letting one chunk straddle
+     two sections) is what makes retrieval land on the right provision.
+  1. Within each section block, split into paragraphs on double-newlines.
   2. Greedy-pack paragraphs up to `max_tokens` per chunk.
   3. If a single paragraph exceeds `max_tokens`, fall back to sentence splitting.
-  4. Maintain ~`overlap_tokens` of trailing context between adjacent chunks so
-     that a section number or party name introduced at the end of one chunk
-     is still visible at the start of the next.
+  4. Maintain ~`overlap_tokens` of trailing context between adjacent chunks of
+     the *same* section so that a section number or party name introduced at
+     the end of one chunk is still visible at the start of the next. Overlap is
+     never carried across a section boundary.
 
 Token counting uses tiktoken's `cl100k_base`, which is close enough to the
 tokenizers used by Llama-3.x and Gemini for budgeting purposes (we don't need
@@ -37,6 +43,35 @@ _PARAGRAPH_RE = re.compile(r"\n\s*\n")
 # Conservative sentence boundary: period/!/? followed by whitespace and a capital.
 # Avoids splitting on "Sec. 304A" or "v." citations.
 _SENTENCE_RE = re.compile(r"(?<=[.!?])\s+(?=[A-Z(])")
+
+# Legal-section heading detector.
+#
+# Matches the *start* of a statutory unit so we can break a long document into
+# section-aligned blocks. Designed to fire on real headings while avoiding
+# in-prose references like "...as held in Section 9 of that judgment".
+#
+# Recognised forms (case-insensitive on the keyword):
+#   "Section 103", "Section 304A", "Sec. 144", "S. 302"
+#   "Article 21", "Art. 14"
+#   "§ 302", "§302"
+#   "Order VII Rule 11", "Rule 11"   (CPC-style)
+#
+# A heading qualifies only when it sits at the beginning of a line (optionally
+# after whitespace). The number may carry an alphabetic suffix (304A) and an
+# optional sub-clause like "(1)" or "(2)(a)".
+_SECTION_HEADING_RE = re.compile(
+    r"""
+    (?m)                                  # multiline: ^ matches each line start
+    ^\s*
+    (?:
+        (?:Section|Sec\.?|S\.)\s*\d{1,4}[A-Za-z]?    |   # Section / Sec. / S.
+        (?:Article|Art\.?)\s*\d{1,4}[A-Za-z]?        |   # Article / Art.
+        §\s*\d{1,4}[A-Za-z]?                          |   # § symbol
+        (?:Order\s+[IVXLC]+\s+)?Rule\s+\d{1,4}[A-Za-z]?  # (Order N) Rule N
+    )
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
 
 
 def split_paragraphs(text: str) -> list[str]:
@@ -69,6 +104,35 @@ def _split_long_sentence(
 
     return chunks
 
+def split_legal_sections(text: str) -> list[str]:
+    """
+    Split `text` into section-aligned blocks at legal-section headings.
+
+    Each returned block begins with its heading (e.g. "Section 304A ...") and
+    runs up to — but not including — the next heading. Any preamble before the
+    first heading is returned as its own leading block so no content is lost.
+
+    If the text contains no recognisable headings, a single-element list with
+    the whole (stripped) text is returned, which makes this a safe no-op for
+    free-form prose.
+    """
+    if not text or not text.strip():
+        return []
+
+    starts = [m.start() for m in _SECTION_HEADING_RE.finditer(text)]
+    if not starts:
+        return [text.strip()]
+
+    # Ensure the preamble (anything before the first heading) is preserved.
+    boundaries = starts if starts[0] == 0 else [0, *starts]
+
+    blocks: list[str] = []
+    for idx, start in enumerate(boundaries):
+        end = boundaries[idx + 1] if idx + 1 < len(boundaries) else len(text)
+        block = text[start:end].strip()
+        if block:
+            blocks.append(block)
+    return blocks
 
 def chunk_text(
     text: str,
@@ -76,13 +140,44 @@ def chunk_text(
     overlap_tokens: int = 64,
 ) -> list[str]:
     """
-    Split `text` into overlapping chunks, each at most ~max_tokens tokens.
+    Split `text` into section-aligned blocks at legal-section headings.
 
-    Returns an empty list for empty input.
+    Each returned block begins with its heading (e.g. "Section 304A ...") and
+    runs up to — but not including — the next heading. Any preamble before the
+    first heading is returned as its own leading block so no content is lost.
+
+    If the text contains no recognisable headings, a single-element list with
+    the whole (stripped) text is returned, which makes this a safe no-op for
+    free-form prose.
     """
     if not text or not text.strip():
         return []
 
+    starts = [m.start() for m in _SECTION_HEADING_RE.finditer(text)]
+    if not starts:
+        return [text.strip()]
+
+    # Ensure the preamble (anything before the first heading) is preserved.
+    boundaries = starts if starts[0] == 0 else [0, *starts]
+
+    blocks: list[str] = []
+    for idx, start in enumerate(boundaries):
+        end = boundaries[idx + 1] if idx + 1 < len(boundaries) else len(text)
+        block = text[start:end].strip()
+        if block:
+            blocks.append(block)
+    return blocks
+
+
+def _chunk_block(
+    text: str,
+    max_tokens: int,
+    overlap_tokens: int,
+) -> list[str]:
+    """
+    Paragraph/sentence packing for a single section block (no section logic).
+    This is the original token-aware packing strategy.
+    """
     paragraphs = split_paragraphs(text)
     if not paragraphs:
         return []
@@ -137,6 +232,36 @@ def chunk_text(
     if buffer:
         chunks.append("\n\n".join(buffer))
 
+    return chunks
+
+
+def chunk_text(
+    text: str,
+    max_tokens: int = 512,
+    overlap_tokens: int = 64,
+    respect_sections: bool = True,
+) -> list[str]:
+    """
+    Split `text` into overlapping chunks, each at most ~max_tokens tokens.
+
+    When `respect_sections` is True (default), the document is first split on
+    legal-section headings so that no chunk spans two sections and every chunk
+    is anchored to the section it belongs to. Set it to False to fall back to
+    pure paragraph/sentence packing (the previous behaviour).
+
+    Returns an empty list for empty input.
+    """
+    if not text or not text.strip():
+        return []
+
+    if not respect_sections:
+        return _chunk_block(text, max_tokens, overlap_tokens)
+
+    chunks: list[str] = []
+    for block in split_legal_sections(text):
+        # Each section is chunked independently; overlap never crosses a
+        # section boundary, which keeps provisions cleanly separated.
+        chunks.extend(_chunk_block(block, max_tokens, overlap_tokens))
     return chunks
 
 

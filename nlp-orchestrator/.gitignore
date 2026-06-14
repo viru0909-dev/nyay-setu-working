@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 *.mp4
 output_frames/
+
 .env
 .env.local
 .env.*.local

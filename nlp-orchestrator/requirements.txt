@@ -1,11 +1,11 @@
 accelerate
 aiohttp==3.13.5
 datasets
-fastapi==0.136.1
-google-genai==2.3.0
-groq==1.2.0
+fastapi==0.136.3
+google-genai==2.8.0
+groq==1.4.0
 httpx==0.28.1
-numpy==2.2.6
+numpy==2.4.6
 opencv-python-headless>=4.8.0
 pdf2image>=1.16.3
 Pillow==12.2.0
@@ -15,10 +15,10 @@ pytest==9.0.3
 pytest-asyncio>0.23.5
 pytest-mock==3.15.1
 python-dotenv==1.2.2
-python-multipart==0.0.28
+python-multipart==0.0.32
 sentencepiece
 sqlalchemy==2.0.26
-sse-starlette==2.0.0
+sse-starlette==3.4.4
 tenacity==9.1.4
 torch
 torchvision
@@ -26,8 +26,8 @@ uvicorn[standard]==0.27.1
  
 # ─── RAG retrieval (new in this PR) ───────────────────────────────────────────
 sentence-transformers>=2.7.0   # bi-encoder embeddings + cross-encoder rerank
-chromadb>=0.5.0                # persistent vector store (file-backed)
-tiktoken>=0.7.0                # token-aware chunking
+chromadb>=1.5.9                # persistent vector store (file-backed)
+tiktoken>=0.13.0                # token-aware chunking
 opencv-python-headless>=4.8.0
 numpy>=1.24.0
 pdf2image>=1.16.3
