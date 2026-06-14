@@ -175,7 +175,6 @@ export default function Header({ hideAuthButtons = false }) {
         }
         // -------------------------------------------------------------
 
-        const baseStyle = navLinkStyle(isActive);
         // Fallback to labelKey directly if translation returns the exact key
 
         const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
@@ -189,7 +188,7 @@ export default function Header({ hideAuthButtons = false }) {
                     className="header-nav-link"
                     data-active={isActive ? 'true' : undefined}
                     style={baseStyle}
-                >
+                >   {/* <--- ADD THIS CLOSING BRACKET */}
                     {displayLabel}
                     {underline}
                 </button>
