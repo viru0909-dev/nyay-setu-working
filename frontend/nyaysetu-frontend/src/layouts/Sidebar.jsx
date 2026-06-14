@@ -24,6 +24,11 @@ const getRoleMenuItems = (t) => ({
     ],
     LAWYER: [
         { icon: Home, label: t('dashboard:sidebar.lawyer.dashboard'), path: '/lawyer' },
+        {
+            icon: FileText,
+            label: 'Document Compare',
+            path: '/lawyer/document-compare'
+        },
         { icon: Users, label: t('dashboard:sidebar.lawyer.litigantDirectory'), path: '/lawyer/clients' },
         { icon: Briefcase, label: t('dashboard:sidebar.lawyer.activeCases'), path: '/lawyer/cases' },
         { icon: Brain, label: t('dashboard:sidebar.lawyer.aiLegalAssistant'), path: '/lawyer/ai-assistant' },

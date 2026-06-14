@@ -97,6 +97,9 @@ const LawyerAnalyticsPage = retryLazy(() => import('./pages/lawyer/AnalyticsPage
 const LawyerCaseDetailsPage = retryLazy(() => import('./pages/lawyer/LawyerCaseDetailsPage'));
 const ClientChatPage = retryLazy(() => import('./pages/lawyer/ClientChatPage'));
 const LawyerProfilePage = retryLazy(() => import('./pages/lawyer/LawyerProfilePage'));
+const DocumentComparisonPage = retryLazy(() =>
+    import('./pages/lawyer/DocumentComparisonPage')
+);
 const CaseWorkspace = retryLazy(() => import('./pages/lawyer/CaseWorkspace'));
 const OfflineDraftsPage = retryLazy(() => import('./pages/lawyer/OfflineDraftsPage'));
 
@@ -268,6 +271,10 @@ function App({ swRegistration }) {
                                     <Route path="cases" element={<LawyerCasesPage />} />
                                     <Route path="case/:caseId" element={<LawyerCaseDetailsPage />} />
                                     <Route path="case/:caseId/workspace" element={<CaseWorkspace />} />
+                                    <Route
+                                        path="document-compare"
+                                        element={<DocumentComparisonPage />}
+                                    />
                                     <Route path="clients" element={<MyClientsPage />} />
                                     <Route path="preparation" element={<CasePreparationPage />} />
                                     <Route path="evidence" element={<EvidenceVaultPage />} />
