@@ -11,7 +11,7 @@ import asyncio
 logger = logging.getLogger("nlp-cache")
 
 CACHE_TTL = 300  # 5 minutes
-MAX_CACHE_SIZE = 10000
+MAX_CACHE_SIZE = 10000  # Max entries in cache store
 
 try:
     from cachetools import TTLCache

@@ -2,6 +2,7 @@ from groq import AsyncGroq
 import logging
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
 
+_MAX_TOKENS = 1024
 logger = logging.getLogger("groq-router")
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
@@ -40,7 +41,7 @@ async def legal_section_lookup(citizen_description: str, job_id: str) -> str:
                 }
             ],
             temperature=0.1,
-            max_tokens=1024,
+            max_tokens=_MAX_TOKENS,
         )
 
         result = response.choices[0].message.content.strip()

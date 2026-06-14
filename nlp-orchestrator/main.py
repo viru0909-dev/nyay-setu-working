@@ -448,6 +448,9 @@ Structure your response with:
 Format in Markdown. Be precise and professional."""
 
 
+_MAX_TOKENS = 2048
+
+
 @async_retry(max_attempts=3)
 async def call_groq_with_retry(grounded_prompt, query):
 
@@ -458,7 +461,7 @@ async def call_groq_with_retry(grounded_prompt, query):
             {"role": "user", "content": query},
         ],
         temperature=0.2,
-        max_tokens=2048,
+        max_tokens=_MAX_TOKENS,
     )
 
     return response

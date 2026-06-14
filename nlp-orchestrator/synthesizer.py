@@ -14,6 +14,8 @@ from models.schemas import SynthesisResult
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
+_MAX_TOKENS = 2048
+
 STRUCTURED_SYNTHESIS_PROMPT = """You are a senior Indian legal expert writing a final comprehensive legal opinion.
 
 You have received research results from multiple focused legal sub-queries.
@@ -104,7 +106,7 @@ async def synthesize_answers(original_query: str, research_results: list[dict]) 
                 }
             ],
             temperature=0.3,
-            max_tokens=2048,
+            max_tokens=_MAX_TOKENS,
         )
 
         return response.choices[0].message.content.strip()
@@ -226,7 +228,7 @@ async def synthesize_answers_structured(
                 }
             ],
             temperature=0.3,
-            max_tokens=2048,
+            max_tokens=_MAX_TOKENS,
         )
         raw = response.choices[0].message.content.strip()
         payload = json.loads(_strip_json_fence(raw), strict=False)
@@ -275,7 +277,7 @@ async def stream_synthesize_answers_structured(
             model=GROQ_MODEL_FAST,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
-            max_tokens=2048,
+            max_tokens=_MAX_TOKENS,
             stream=True,
         )
     except Exception as e:
