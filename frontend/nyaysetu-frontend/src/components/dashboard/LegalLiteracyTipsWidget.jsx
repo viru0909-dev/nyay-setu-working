@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
+export const TIP_ROTATION_INTERVAL_MS = 6000;
+
+const TIP_TITLE_COLOR = '#111827';
+const TIP_MESSAGE_COLOR = '#374151';
+
 const tips = [
     {
         title: 'Right to Counsel',
@@ -34,7 +39,7 @@ export default function LegalLiteracyTipsWidget() {
     useEffect(() => {
         const timer = window.setInterval(() => {
             setActiveTipIndex((current) => (current + 1) % tips.length);
-        }, 6000);
+        }, TIP_ROTATION_INTERVAL_MS);
 
         return () => window.clearInterval(timer);
     }, []);
@@ -93,13 +98,13 @@ export default function LegalLiteracyTipsWidget() {
                             margin: '0.25rem 0 0.5rem',
                             fontSize: '1.1rem',
                             fontWeight: 800,
-                            color: '#111827'
+                            color: TIP_TITLE_COLOR
                         }}>
                             {activeTip.title}
                         </h3>
                         <p style={{
                             margin: 0,
-                            color: '#374151',
+                            color: TIP_MESSAGE_COLOR,
                             lineHeight: 1.6,
                             fontSize: '0.98rem',
                             maxWidth: '60ch'

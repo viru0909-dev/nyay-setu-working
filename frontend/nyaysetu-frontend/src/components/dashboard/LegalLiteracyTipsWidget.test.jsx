@@ -2,7 +2,9 @@ import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import LegalLiteracyTipsWidget from './LegalLiteracyTipsWidget';
+import LegalLiteracyTipsWidget, {
+    TIP_ROTATION_INTERVAL_MS,
+} from './LegalLiteracyTipsWidget';
 
 describe('LegalLiteracyTipsWidget', () => {
     afterEach(() => {
@@ -53,7 +55,7 @@ describe('LegalLiteracyTipsWidget', () => {
         render(<LegalLiteracyTipsWidget />);
 
         act(() => {
-            vi.advanceTimersByTime(6000);
+            vi.advanceTimersByTime(TIP_ROTATION_INTERVAL_MS);
         });
 
         expect(screen.getByText('FIR Copy')).toBeInTheDocument();
