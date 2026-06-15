@@ -15,7 +15,7 @@ public class MeetingResponse {
     private UUID id;
     private String meetingCode;
     private MeetingStatus status;
-    private List<Long> participants;
+    private List<UUID> participants;
     private UUID caseId;
     private LocalDateTime scheduledAt;
 }

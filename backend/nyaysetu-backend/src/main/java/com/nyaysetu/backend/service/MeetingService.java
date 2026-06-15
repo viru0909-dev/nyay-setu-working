@@ -1,11 +1,10 @@
 package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.CreateMeetingRequest;
+import com.nyaysetu.backend.dto.JoinMeetingRequest;
 import com.nyaysetu.backend.dto.MeetingResponse;
 import com.nyaysetu.backend.entity.Meeting;
 import com.nyaysetu.backend.entity.MeetingStatus;
-import com.nyaysetu.backend.entity.User;
-import com.nyaysetu.backend.exception.AccessDeniedException;
 import com.nyaysetu.backend.repository.MeetingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,15 +17,13 @@ import java.util.*;
 public class MeetingService {
 
     private final MeetingRepository repository;
-    private final CaseAccessService caseAccessService;
-    private final AuthService authService;
 
     public MeetingResponse createMeeting(CreateMeetingRequest dto) {
 
         String meetingCode = generateCode();
 
         // If participants list is null
-        List<Long> participants = dto.getParticipants() != null
+        List<UUID> participants = dto.getParticipants() != null
                 ? new ArrayList<>(dto.getParticipants())
                 : new ArrayList<>();
 
@@ -43,18 +40,13 @@ public class MeetingService {
         return toResponse(meeting);
     }
 
-    public MeetingResponse joinMeeting(String meetingCode, User user) {
+    public MeetingResponse joinMeeting(JoinMeetingRequest dto) {
 
-        Meeting meeting = repository.findByMeetingCode(meetingCode)
+        Meeting meeting = repository.findByMeetingCode(dto.getMeetingCode())
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
 
-        Long callerId = user.getId();
-
-        // Validate user has access to the case this meeting belongs to
-        caseAccessService.requireCaseAccess(meeting.getCaseId(), user);
-
-        if (!meeting.getParticipants().contains(callerId)) {
-            meeting.getParticipants().add(callerId);
+        if (!meeting.getParticipants().contains(dto.getUserId())) {
+            meeting.getParticipants().add(dto.getUserId());
         }
 
         meeting.setStatus(MeetingStatus.ACTIVE);
@@ -74,12 +66,6 @@ public class MeetingService {
         repository.save(meeting);
 
         return toResponse(meeting);
-    }
-
-    public void validateRoomAccess(String meetingCode, User user) {
-        Meeting meeting = repository.findByMeetingCode(meetingCode)
-                .orElseThrow(() -> new RuntimeException("Meeting not found"));
-        caseAccessService.requireCaseAccess(meeting.getCaseId(), user);
     }
 
     public List<MeetingResponse> getMeetingsByCase(UUID caseId) {
