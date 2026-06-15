@@ -71,6 +71,8 @@ public class DocumentManagementService {
         DocumentEntity saved = documentRepository.save(document);
         return convertToDto(saved);
     }
+    
+    
 
     public Page<DocumentDto> getUserDocuments(Long userId, Pageable pageable) {
         return documentRepository.findByUploadedBy(userId, pageable)
@@ -219,6 +221,16 @@ public class DocumentManagementService {
                 .warn("Hash verification skipped for doc {} (file may be missing): {}", id, e.getMessage());
             return false;
         }
+    }
+
+    public Page<DocumentDto> searchDocuments(
+            String query,
+            Long userId,
+            Pageable pageable
+    ) {
+        return documentRepository
+                .searchDocuments(query, userId, pageable)
+                .map(this::convertToDto);
     }
 
     private DocumentDto convertToDto(DocumentEntity entity) {

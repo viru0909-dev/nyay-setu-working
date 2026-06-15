@@ -227,6 +227,24 @@ public class DocumentManagementController {
         return ResponseEntity.ok(document);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<DocumentDto>> searchDocuments(
+            @RequestParam String query,
+            Authentication authentication,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+
+        User user = authService.findByEmail(authentication.getName());
+
+        return ResponseEntity.ok(
+                documentManagementService.searchDocuments(
+                        query,
+                        user.getId(),
+                        pageable
+                )
+        );
+    }
+
     @GetMapping("/{id}/download")
     public ResponseEntity<?> downloadDocument(
             @PathVariable UUID id,
