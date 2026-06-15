@@ -32,7 +32,7 @@ public class FirController {
      * Get pending summons delivery tasks for police
      */
     @GetMapping("/summons/pending")
-    public ResponseEntity<?> getSummonsTasks(Authentication auth) {
+    public ResponseEntity<?> getSummonsTasks() {
         try {
             // Find cases where summons status is IN_TRANSIT
             List<com.nyaysetu.backend.entity.CaseEntity> cases = caseRepository.findAll().stream()

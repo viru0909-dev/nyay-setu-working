@@ -3,6 +3,8 @@ package com.nyaysetu.backend.controller;
 import com.nyaysetu.backend.entity.Hearing;
 import com.nyaysetu.backend.entity.HearingParticipant;
 import com.nyaysetu.backend.entity.ParticipantRole;
+import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.service.AuthService;
 import com.nyaysetu.backend.service.HearingService;
 import com.nyaysetu.backend.notification.service.NotificationService;
 import com.nyaysetu.backend.notification.entity.Notification;
@@ -116,7 +118,7 @@ public class HearingController {
             @PathVariable UUID hearingId,
             Authentication authentication
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getCurrentUserId(authentication);
         
         if (!hearingService.canUserJoinHearing(hearingId, userId)) {
             return ResponseEntity.status(403).body(Map.of("error", "Not authorized"));
@@ -137,9 +139,14 @@ public class HearingController {
             @PathVariable UUID hearingId,
             Authentication authentication
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getCurrentUserId(authentication);
         hearingService.leaveHearing(hearingId, userId);
         return ResponseEntity.ok().build();
+    }
+
+    private Long getCurrentUserId(Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        return user.getId();
     }
     
     @PutMapping("/{hearingId}/complete")

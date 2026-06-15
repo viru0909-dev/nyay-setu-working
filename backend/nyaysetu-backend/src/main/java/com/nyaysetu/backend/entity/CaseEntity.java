@@ -47,11 +47,6 @@ public class CaseEntity {
     private String assignedJudge;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_judge_id")
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private User assignedJudgeRef;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User client;
