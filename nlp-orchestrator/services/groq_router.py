@@ -2,7 +2,6 @@ from groq import AsyncGroq
 import logging
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
 
-_MAX_TOKENS = 1024
 logger = logging.getLogger("groq-router")
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
@@ -20,14 +19,11 @@ For each section explain in 1 plain-language sentence what it means for this cit
 Keep the output highly structured and formatted in Markdown. Do not hallucinate laws.
 """
 
-
 async def legal_section_lookup(citizen_description: str, job_id: str) -> str:
     """Extract applicable legal sections based on the citizen's description of the event."""
     if not citizen_description:
-        return (
-            "No description provided by the citizen to lookup specific legal sections."
-        )
-
+        return "No description provided by the citizen to lookup specific legal sections."
+        
     try:
         logger.info(f"[{job_id}] Sending legal lookup to Groq based on description...")
         response = await client.chat.completions.create(
@@ -35,19 +31,17 @@ async def legal_section_lookup(citizen_description: str, job_id: str) -> str:
             messages=[
                 {
                     "role": "user",
-                    "content": LEGAL_LOOKUP_PROMPT.format(
-                        timeline_summary=citizen_description
-                    ),
+                    "content": LEGAL_LOOKUP_PROMPT.format(timeline_summary=citizen_description)
                 }
             ],
             temperature=0.1,
-            max_tokens=_MAX_TOKENS,
+            max_tokens=1024
         )
-
+        
         result = response.choices[0].message.content.strip()
         logger.info(f"[{job_id}] Received legal sections from Groq.")
         return result
-
+        
     except Exception as e:
         logger.error(f"[{job_id}] Error in Groq legal lookup: {e}")
         return f"Error retrieving legal sections: {str(e)}"

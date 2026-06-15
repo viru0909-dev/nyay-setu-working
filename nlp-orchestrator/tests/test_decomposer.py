@@ -13,9 +13,13 @@ async def test_returns_list_of_strings(mock_create):
             (),
             {
                 "message": type(
-                    "obj", (), {"content": '["What is IPC?", "What is BNS?"]'}
+                    "obj",
+                    (),
+                    {
+                        "content": '["What is IPC?", "What is BNS?"]'
+                    }
                 )()
-            },
+            }
         )
     ]
 
@@ -34,9 +38,13 @@ async def test_maximum_five_subquestions(mock_create):
             (),
             {
                 "message": type(
-                    "obj", (), {"content": '["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"]'}
+                    "obj",
+                    (),
+                    {
+                        "content": '["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"]'
+                    }
                 )()
-            },
+            }
         )
     ]
 
@@ -49,7 +57,19 @@ async def test_maximum_five_subquestions(mock_create):
 @patch("decomposer.client.chat.completions.create", new_callable=AsyncMock)
 async def test_json_parsing_failure_returns_original_query(mock_create):
     mock_create.return_value.choices = [
-        type("obj", (), {"message": type("obj", (), {"content": "INVALID JSON"})()})
+        type(
+            "obj",
+            (),
+            {
+                "message": type(
+                    "obj",
+                    (),
+                    {
+                        "content": "INVALID JSON"
+                    }
+                )()
+            }
+        )
     ]
 
     query = "What happens in a road accident case?"
@@ -69,3 +89,4 @@ async def test_api_failure_returns_original_query(mock_create):
     result = await decompose_query(query)
 
     assert result == [query]
+

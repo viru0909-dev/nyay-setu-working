@@ -44,28 +44,10 @@ Convert to Hinglish dialogue:"""
 
 # Formal / Sanskritised words the issue is about. Lower-case, romanised.
 FORMAL_WORDS = [
-    "nyayalaya",
-    "vidhik",
-    "vaidhanik",
-    "adhiniyam",
-    "praavdhaan",
-    "pravdhaan",
-    "prakriya",
-    "kshatipoorti",
-    "abhiyukt",
-    "yachika",
-    "aavedan",
-    "vivaran",
-    "upalabdh",
-    "sambandhit",
-    "tatpashchaat",
-    "kripya",
-    "pradaan",
-    "prapt",
-    "anurodh",
-    "shighra",
-    "sandarbh",
-    "vidhaan",
+    "nyayalaya", "vidhik", "vaidhanik", "adhiniyam", "praavdhaan", "pravdhaan",
+    "prakriya", "kshatipoorti", "abhiyukt", "yachika", "aavedan", "vivaran",
+    "upalabdh", "sambandhit", "tatpashchaat", "kripya", "pradaan", "prapt",
+    "anurodh", "shighra", "sandarbh", "vidhaan",
 ]
 
 # Representative synthesized answers (one per legal domain).
@@ -106,9 +88,7 @@ def count_formal_words(text: str) -> list[str]:
 async def run_prompt(client, model: str, prompt_template: str, answer: str) -> str:
     resp = await client.chat.completions.create(
         model=model,
-        messages=[
-            {"role": "user", "content": prompt_template.format(markdown_answer=answer)}
-        ],
+        messages=[{"role": "user", "content": prompt_template.format(markdown_answer=answer)}],
         temperature=0.6,
         max_tokens=512,
     )
@@ -158,7 +138,6 @@ def dry_run() -> int:
     print(f"  hits : {count_formal_words(sample)}")
     print("\nNew prompt avoid-list mentions found in shipped prompt:")
     from avatar_speech import HINGLISH_CONVERSION_PROMPT
-
     present = [w for w in FORMAL_WORDS if w in HINGLISH_CONVERSION_PROMPT.lower()]
     print(f"  {present}")
     return 0

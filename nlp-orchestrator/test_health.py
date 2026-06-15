@@ -9,9 +9,6 @@ from main import app
 client = TestClient(app)
 
 
-EXPECTED_PORT = 8001
-
-
 def test_health_endpoint():
     response = client.get("/health")
 
@@ -19,5 +16,5 @@ def test_health_endpoint():
     assert response.json() == {
         "status": "ok",
         "service": "nlp-orchestrator",
-        "port": EXPECTED_PORT,
+        "port": 8001
     }
