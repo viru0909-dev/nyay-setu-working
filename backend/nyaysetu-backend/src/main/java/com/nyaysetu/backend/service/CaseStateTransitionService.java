@@ -7,6 +7,7 @@ import com.nyaysetu.backend.repository.CaseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +50,10 @@ public class CaseStateTransitionService {
      * Broadcasts to: Judge's unassigned pool
      */
     @Transactional
-    public CaseEntity policeSubmitToCourt(UUID caseId, String officerId, String officerName) {
+    public CaseEntity policeSubmitToCourt(UUID caseId, String officerId, String officerName, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Authentication required");
+        }
         CaseEntity caseEntity = getCaseOrThrow(caseId);
         CaseStatus previousStatus = caseEntity.getStatus();
 
@@ -86,7 +90,10 @@ public class CaseStateTransitionService {
      * Broadcasts action required to litigant.
      */
     @Transactional
-    public CaseEntity lawyerSaveDraft(UUID caseId, String lawyerId, String lawyerName, String draftContent) {
+    public CaseEntity lawyerSaveDraft(UUID caseId, String lawyerId, String lawyerName, String draftContent, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Authentication required");
+        }
         CaseEntity caseEntity = getCaseOrThrow(caseId);
 
         // Update draft and approval status
@@ -122,7 +129,10 @@ public class CaseStateTransitionService {
      * Enables court submission.
      */
     @Transactional
-    public CaseEntity litigantApproveDraft(UUID caseId, String litigantId, String litigantName) {
+    public CaseEntity litigantApproveDraft(UUID caseId, String litigantId, String litigantName, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Authentication required");
+        }
         CaseEntity caseEntity = getCaseOrThrow(caseId);
 
         // Validate
@@ -161,7 +171,10 @@ public class CaseStateTransitionService {
      * LITIGANT: Reject draft petition.
      */
     @Transactional
-    public CaseEntity litigantRejectDraft(UUID caseId, String litigantId, String litigantName, String reason) {
+    public CaseEntity litigantRejectDraft(UUID caseId, String litigantId, String litigantName, String reason, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Authentication required");
+        }
         CaseEntity caseEntity = getCaseOrThrow(caseId);
 
         caseEntity.setDraftApprovalStatus("REJECTED");
@@ -195,7 +208,10 @@ public class CaseStateTransitionService {
      * Advances to Stage 1 (Cognizance).
      */
     @Transactional
-    public CaseEntity judgeTakeCognizance(UUID caseId, Long judgeId, String judgeName) {
+    public CaseEntity judgeTakeCognizance(UUID caseId, Long judgeId, String judgeName, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Authentication required");
+        }
         CaseEntity caseEntity = getCaseOrThrow(caseId);
         CaseStatus previousStatus = caseEntity.getStatus();
 
@@ -236,7 +252,10 @@ public class CaseStateTransitionService {
      * JUDGE: Advance case stage.
      */
     @Transactional
-    public CaseEntity judgeAdvanceStage(UUID caseId, Long judgeId, String judgeName) {
+    public CaseEntity judgeAdvanceStage(UUID caseId, Long judgeId, String judgeName, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Authentication required");
+        }
         CaseEntity caseEntity = getCaseOrThrow(caseId);
         Integer currentStage = caseEntity.getCurrentJudicialStage();
         
@@ -288,7 +307,10 @@ public class CaseStateTransitionService {
      * SYSTEM: Mark summons as served.
      */
     @Transactional
-    public CaseEntity markSummonsServed(UUID caseId) {
+    public CaseEntity markSummonsServed(UUID caseId, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("Authentication required");
+        }
         CaseEntity caseEntity = getCaseOrThrow(caseId);
         
         caseEntity.setSummonsDelivered(true);
