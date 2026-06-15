@@ -17,7 +17,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
-
 class AuthServiceTest {
 
     private AuthService authService;
@@ -103,5 +102,4 @@ class AuthServiceTest {
         // Verify if the user is saved.
         verify(userRepository).save(user);
     }
-
 }
