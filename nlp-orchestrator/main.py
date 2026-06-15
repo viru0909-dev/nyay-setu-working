@@ -17,7 +17,7 @@ import json
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 import time
 import uuid
 from starlette.middleware.base import BaseHTTPMiddleware
