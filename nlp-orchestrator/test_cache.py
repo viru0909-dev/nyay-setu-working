@@ -5,36 +5,22 @@ from cache import (
     get_cached_response,
     set_cached_response,
     get_cache_stats,
-    clear_expired_cache
+    clear_expired_cache,
 )
 
 
 def test_cache():
 
-    key1 = generate_cache_key(
-        "groq",
-        "What is IPC section 420?",
-        "llama3-8b"
-    )
+    key1 = generate_cache_key("groq", "What is IPC section 420?", "llama3-8b")
 
-    key2 = generate_cache_key(
-        "groq",
-        "What is IPC section 420?",
-        "llama3-8b"
-    )
+    key2 = generate_cache_key("groq", "What is IPC section 420?", "llama3-8b")
 
-    key3 = generate_cache_key(
-        "groq",
-        "What is IPC section 421?",
-        "llama3-8b"
-    )
+    key3 = generate_cache_key("groq", "What is IPC section 421?", "llama3-8b")
 
     assert key1 == key2
     assert key1 != key3
 
-    test_response = (
-        "IPC Section 420 deals with cheating and dishonesty."
-    )
+    test_response = "IPC Section 420 deals with cheating and dishonesty."
 
     set_cached_response(key1, test_response)
 
@@ -52,17 +38,9 @@ def test_cache():
 
     clear_expired_cache()
 
-    key_ttl = generate_cache_key(
-        "groq",
-        "TTL test question",
-        "llama3-8b"
-    )
+    key_ttl = generate_cache_key("groq", "TTL test question", "llama3-8b")
 
-    set_cached_response(
-        key_ttl,
-        "This cache entry should expire",
-        ttl=2
-    )
+    set_cached_response(key_ttl, "This cache entry should expire", ttl=2)
 
     cached_immediate = get_cached_response(key_ttl)
 
