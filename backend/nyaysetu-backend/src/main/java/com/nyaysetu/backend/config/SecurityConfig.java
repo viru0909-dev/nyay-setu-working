@@ -79,8 +79,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -169,6 +168,9 @@ public class SecurityConfig {
                                 ))
                                 .referrerPolicy(rp -> rp.policy(
                                     org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
+                                ))
+                                .permissionsPolicyHeader(pp -> pp.policy(
+                                    "geolocation=(), microphone=(), camera=(), payment=()"
                                 ))
                 )
                 .authorizeHttpRequests(auth -> auth

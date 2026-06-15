@@ -3,13 +3,13 @@ package com.nyaysetu.backend.service;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.CaseRepository;
+import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.repository.HearingRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -41,7 +41,7 @@ public class CaseManagementServiceTest {
 
     @BeforeEach
     public void setup() {
-        service = new CaseManagementService(caseRepository, hearingRepository, notificationService, timelineService,documentRepository);
+        service = new CaseManagementService(caseRepository, hearingRepository, notificationService, timelineService, documentRepository);
     }
 
     @Test
