@@ -10,8 +10,7 @@
   },
   "dependencies": {
     "socket.io": "^4.7.2",
-    "cors": "^2.8.5",
-    "jsonwebtoken": "^9.0.2"
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "jest": "^29.7.0",

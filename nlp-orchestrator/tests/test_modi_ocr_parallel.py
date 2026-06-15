@@ -8,20 +8,21 @@ ordering, batch completeness, concurrency bounding, real parallelism, and
 per-page error isolation.
 """
 
-from services.modi_ocr import recognize_modi_pages, ModiOCRServiceError
-import services.modi_ocr as modi_ocr
-from unittest.mock import patch
-import time
-import asyncio
-import pytest
 import os
 
 os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
 
 # The OCR service imports cv2/Pillow at module load. Skip cleanly if absent.
-
+import pytest
 pytest.importorskip("cv2")
 pytest.importorskip("PIL")
+
+import asyncio
+import time
+from unittest.mock import patch
+
+import services.modi_ocr as modi_ocr
+from services.modi_ocr import recognize_modi_pages, ModiOCRServiceError
 
 
 @pytest.mark.asyncio
@@ -100,9 +101,7 @@ async def test_one_failing_page_does_not_sink_the_batch():
         results = await recognize_modi_pages(pages)
 
     assert results[0]["status"] == "success" and results[0]["predicted_text"] == "good1"
-    assert (
-        results[1]["status"] == "error" and "inference blew up" in results[1]["error"]
-    )
+    assert results[1]["status"] == "error" and "inference blew up" in results[1]["error"]
     assert results[2]["status"] == "success" and results[2]["predicted_text"] == "good2"
 
 

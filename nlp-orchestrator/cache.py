@@ -2,7 +2,6 @@
 Simple In-Memory TTL Cache for NLP Responses
 """
 
-from functools import wraps
 import time
 import hashlib
 import logging
@@ -14,7 +13,12 @@ CACHE_TTL = 300  # 5 minutes
 cache_store = {}
 
 
-def generate_cache_key(provider: str, prompt: str, model: str = "", **kwargs) -> str:
+def generate_cache_key(
+    provider: str,
+    prompt: str,
+    model: str = "",
+    **kwargs
+) -> str:
 
     normalized_prompt = prompt.strip().lower()
 
@@ -26,7 +30,9 @@ def generate_cache_key(provider: str, prompt: str, model: str = "", **kwargs) ->
 
     key_string = "|".join(key_parts)
 
-    return hashlib.md5(key_string.encode()).hexdigest()
+    return hashlib.md5(
+        key_string.encode()
+    ).hexdigest()
 
 
 def get_cached_response(cache_key: str) -> str | None:
@@ -48,12 +54,16 @@ def get_cached_response(cache_key: str) -> str | None:
     return data["response"]
 
 
-def set_cached_response(cache_key: str, response: str, ttl: int = CACHE_TTL) -> None:
+def set_cached_response(
+    cache_key: str,
+    response: str,
+    ttl: int = CACHE_TTL
+) -> None:
 
     cache_store[cache_key] = {
         "response": response,
         "expires_at": time.time() + ttl,
-        "created_at": time.time(),
+        "created_at": time.time()
     }
 
     logger.info(f"Cache STORED for key: {cache_key}")
@@ -64,7 +74,9 @@ def clear_expired_cache() -> int:
     current_time = time.time()
 
     expired_keys = [
-        key for key, data in cache_store.items() if current_time > data["expires_at"]
+        key
+        for key, data in cache_store.items()
+        if current_time > data["expires_at"]
     ]
 
     for key in expired_keys:
@@ -80,19 +92,22 @@ def get_cache_stats() -> dict:
     current_time = time.time()
 
     valid_entries = sum(
-        1 for data in cache_store.values() if current_time <= data["expires_at"]
+        1
+        for data in cache_store.values()
+        if current_time <= data["expires_at"]
     )
 
     return {
         "total_entries": total_entries,
         "valid_entries": valid_entries,
-        "expired_entries": total_entries - valid_entries,
+        "expired_entries": total_entries - valid_entries
     }
 
 
+from functools import wraps
+
 def cache_decorator(ttl: int = CACHE_TTL):
     """Decorator to cache asynchronous function results based on arguments."""
-
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -109,7 +124,5 @@ def cache_decorator(ttl: int = CACHE_TTL):
             result = await func(*args, **kwargs)
             set_cached_response(cache_key, result, ttl)
             return result
-
         return wrapper
-
     return decorator

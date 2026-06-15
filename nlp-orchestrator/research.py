@@ -71,7 +71,7 @@ LEGAL_SYSTEM_PROMPT = """You are an expert Indian legal advisor with deep knowle
 - Consumer Protection Act
 - Right to Information Act (RTI)
 
-Provide precise, accurate, legally grounded answers. Quote specific section numbers where relevant.  # noqa: E501
+Provide precise, accurate, legally grounded answers. Quote specific section numbers where relevant.
 Keep your answer focused, factual, and written for a common Indian citizen.
 """
 
@@ -82,10 +82,10 @@ Keep your answer focused, factual, and written for a common Indian citizen.
 # when retrieval misses, the model is supposed to say so out loud.
 KANOON_CONTEXT_PROMPT = """Use the INDIAN KANOON CONTEXT below as your primary source.
 
-- If the answer is fully covered there, quote the exact section number, article, or judgment.  # noqa: E501
-- If the context is partial or missing, you may fall back to your training knowledge, but you  # noqa: E501
-  MUST state plainly: "the retrieved context does not cover this directly..." before doing so.  # noqa: E501
-- Never silently invent section numbers, case names, or holdings not present in the context.  # noqa: E501
+- If the answer is fully covered there, quote the exact section number, article, or judgment.
+- If the context is partial or missing, you may fall back to your training knowledge, but you
+  MUST state plainly: "the retrieved context does not cover this directly..." before doing so.
+- Never silently invent section numbers, case names, or holdings not present in the context.
 """
 
 
@@ -106,7 +106,7 @@ def _fallback_response(question: str, source: str) -> dict:
     """Structured fallback when all retries are exhausted or the circuit is open."""
     return {
         "question": question,
-        "answer": "Our legal research service is temporarily unavailable. Please try again shortly.",  # noqa: E501
+        "answer": "Our legal research service is temporarily unavailable. Please try again shortly.",
         "source": source,
         "grounded": False,
         "error": "circuit_open",
@@ -189,7 +189,7 @@ async def execute_with_fallback(
 ) -> dict:
     """Coordinator: try primary provider with retries, then fallback to secondary providers.
 
-    Returns the first successful provider result or a unified fallback response when all fail.  # noqa: E501
+    Returns the first successful provider result or a unified fallback response when all fail.
     """
     providers = build_provider_queue(primary_provider)
     if not providers:
@@ -202,8 +202,7 @@ async def execute_with_fallback(
         for attempt in range(RETRY_MAX_ATTEMPTS + 1):
             try:
                 result = await _attempt_provider(provider, question, kanoon_context)
-                # If provider returns a fallback-shaped response, treat as failure and
-                # try next provider
+                # If provider returns a fallback-shaped response, treat as failure and try next provider
                 if result.get("is_fallback"):
                     last_error = result.get("error", "fallback")
                     break

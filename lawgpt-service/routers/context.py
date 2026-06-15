@@ -251,4 +251,16 @@ async def chat(request: ChatRequest) -> ChatResponse:
     )
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# GET /health — Service health check
+# ══════════════════════════════════════════════════════════════════════════════
 
+@router.get("/health", response_model=HealthResponse)
+async def health() -> HealthResponse:
+    """Return service status including index availability and LLM backend."""
+    return HealthResponse(
+        status="ok",
+        index_loaded=is_index_loaded(),
+        model=_resolve_llm_label(),
+        chunk_count=get_chunk_count(),
+    )

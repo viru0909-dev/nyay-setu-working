@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 def async_retry(max_attempts: int = 3, delay: float = 1.0):
     """Async retry decorator with exponential backoff."""
-
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -24,7 +23,5 @@ def async_retry(max_attempts: int = 3, delay: float = 1.0):
                     )
                     await asyncio.sleep(delay * attempt)
                     attempt += 1
-
         return wrapper
-
     return decorator

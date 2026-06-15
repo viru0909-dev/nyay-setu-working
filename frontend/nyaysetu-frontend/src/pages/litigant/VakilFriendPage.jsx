@@ -395,16 +395,12 @@ const startDeepResearch = async (query) => {
     setError(null);
 
     const nlpBaseUrl = import.meta.env.VITE_NLP_BASE_URL || 'http://localhost:8001';
-    const token = localStorage.getItem('token');
 
     await startResilientDeepResearch({
         request: ({ signal }) =>
             fetch(`${nlpBaseUrl}/research/deep`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token && token !== 'null' && token !== 'undefined' ? { 'Authorization': `Bearer ${token}` } : {})
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query, language }),
                 signal,
             }),

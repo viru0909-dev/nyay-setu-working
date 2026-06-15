@@ -29,13 +29,8 @@ export const useWebRTC = (roomId, userId, userName) => {
                 setLocalStream(stream);
                 localStreamRef.current = stream;
 
-                // Connect to signaling server with JWT auth
-                const token = localStorage.getItem('token');
-                socketRef.current = io(SIGNALING_SERVER, {
-                    auth: {
-                        token: token && token !== 'null' && token !== 'undefined' ? token : undefined
-                    }
-                });
+                // Connect to signaling server
+                socketRef.current = io(SIGNALING_SERVER);
 
                 socketRef.current.on('connect', () => {
                   //  console.log('Connected to signaling server');
