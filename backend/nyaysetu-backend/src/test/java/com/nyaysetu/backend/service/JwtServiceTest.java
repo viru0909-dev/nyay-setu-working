@@ -22,6 +22,8 @@ class JwtServiceTest {
 
     private JwtService jwtService;
     private static final String TEST_SECRET_KEY = "0123456789ABCDEF0123456789ABCDEF"; // 32 chars -> 256 bits
+    private static final String MALFORMED_TOKEN = "this.is.not.a.valid.jwt";
+    private static final long ONE_MINUTE_IN_MILLIS = 60_000L;
 
     @BeforeEach
     void setUp() {
@@ -46,8 +48,8 @@ class JwtServiceTest {
         Key key = Keys.hmacShaKeyFor(TEST_SECRET_KEY.getBytes());
         String expiredToken = Jwts.builder()
                 .setSubject("bob@example.com")
-                .setIssuedAt(new Date(System.currentTimeMillis() - 10000))
-                .setExpiration(new Date(System.currentTimeMillis() - 1000))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() - ONE_MINUTE_IN_MILLIS))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
@@ -56,8 +58,7 @@ class JwtServiceTest {
 
     @Test
     void malformedToken_shouldBeRejected() {
-        String malformedToken = "this.is.not.a.valid.jwt";
-        assertThrows(MalformedJwtException.class, () -> jwtService.extractUsername(malformedToken));
+        assertThrows(MalformedJwtException.class, () -> jwtService.extractUsername(MALFORMED_TOKEN));
     }
 
     @Test
@@ -96,7 +97,7 @@ class JwtServiceTest {
         String foreignToken = Jwts.builder()
                 .setSubject("different@example.com")
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 60000))
+                .setExpiration(new Date(System.currentTimeMillis() + ONE_MINUTE_IN_MILLIS))
                 .signWith(differentKey, SignatureAlgorithm.HS256)
                 .compact();
 
