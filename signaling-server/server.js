@@ -1,6 +1,7 @@
 const { Server } = require('socket.io');
 
-const DEFAULT_BACKEND_URL = 'http://localhost:8080';
+const DEFAULT_BACKEND_PORT = 8080;
+const DEFAULT_BACKEND_URL = `http://localhost:${DEFAULT_BACKEND_PORT}`;
 
 // Create Socket.IO server on port 3001
 const io = new Server(3001, {
