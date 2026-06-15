@@ -6,6 +6,7 @@ import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.notification.service.NotificationService;
 import com.nyaysetu.backend.service.AuthService;
+import com.nyaysetu.backend.service.CaseAccessService;
 import com.nyaysetu.backend.service.HearingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,8 @@ class HearingControllerTest {
         HearingController controller = new HearingController(
                 hearingService,
                 new FakeNotificationService(),
-                new FakeAuthService()
+                new FakeAuthService(),
+                new FakeCaseAccessService()
         );
 
         ResponseEntity<Map<String, Object>> response = controller.joinHearing(
@@ -45,7 +47,8 @@ class HearingControllerTest {
         HearingController controller = new HearingController(
                 hearingService,
                 new FakeNotificationService(),
-                new FakeAuthService()
+                new FakeAuthService(),
+                new FakeCaseAccessService()
         );
 
         ResponseEntity<Void> response = controller.leaveHearing(
@@ -113,6 +116,12 @@ class HearingControllerTest {
                     .name("Litigant User")
                     .role(Role.LITIGANT)
                     .build();
+        }
+    }
+
+    private static class FakeCaseAccessService extends CaseAccessService {
+        FakeCaseAccessService() {
+            super(null);
         }
     }
 }
