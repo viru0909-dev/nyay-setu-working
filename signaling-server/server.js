@@ -1,4 +1,8 @@
 const { Server } = require('socket.io');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || '';
+const JWT_ALGORITHM = 'HS256';
 
 // Create Socket.IO server on port 3001
 const io = new Server(3001, {
@@ -14,8 +18,22 @@ console.log('🚀 WebRTC Signaling Server started on port 3001');
 // Store active rooms and participants
 const rooms = new Map();
 
+io.use((socket, next) => {
+    const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+    if (!token) {
+        return next(new Error('Authentication required: no JWT token provided'));
+    }
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: [JWT_ALGORITHM] });
+        socket.user = decoded;
+        next();
+    } catch (err) {
+        return next(new Error('Invalid or expired JWT token'));
+    }
+});
+
 io.on('connection', (socket) => {
-    console.log(`✅ Client connected: ${socket.id}`);
+    // Client connected
 
     // Join a hearing room
     socket.on('join-room', (roomId, userId, userName) => {

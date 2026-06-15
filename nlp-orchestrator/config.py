@@ -13,15 +13,15 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
 # ─── API keys — loaded from environment variables only ────────────────────────
 GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
 GEMINI_API_KEY: str = os.getenv("GOOGLE_GEMINI_API_KEY", "")
 
 # Model names
-GROQ_MODEL_FAST: str = "llama-3.3-70b-versatile"   # Current recommended model
-GEMINI_MODEL: str = "gemini-1.5-flash"             # Fast + deep reasoning
+GROQ_MODEL_FAST: str = "llama-3.3-70b-versatile"  # Current recommended model
+GEMINI_MODEL: str = "gemini-1.5-flash"  # Fast + deep reasoning
 # Retry / fallback configuration
 RETRY_ENABLED: bool = True
 RETRY_MAX_ATTEMPTS: int = 2
@@ -47,13 +47,15 @@ INDIAN_KANOON_API_URL: str = os.getenv(
     "INDIAN_KANOON_API_URL", "https://api.indiankanoon.org"
 )
 
+# ─── JWT Authentication ────────────────────────────────────────────────────────
+JWT_SECRET: str = os.getenv("JWT_SECRET", "")
+JWT_ALGORITHM: str = "HS256"
+
 # ─── CORS ─────────────────────────────────────────────────────────────────────
 FRONTEND_ORIGIN: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 
 # ─── Retrieval / RAG settings ─────────────────────────────────────────────────
-EMBEDDING_MODEL: str = os.getenv(
-    "EMBEDDING_MODEL", "law-ai/InLegalBERT"
-)
+EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "law-ai/InLegalBERT")
 RERANKER_MODEL: str = os.getenv("RERANKER_MODEL", "BAAI/bge-reranker-base")
 CHROMA_PATH: str = os.getenv(
     "CHROMA_PATH", str(Path(__file__).parent / "data" / "chroma")
@@ -75,7 +77,12 @@ GROUND_RESEARCH: bool = _bool("GROUND_RESEARCH", True)
 
 # ─── Validate required keys ───────────────────────────────────────────────────
 if not GROQ_API_KEY:
-    print("[Config] ERROR: GROQ_API_KEY is not set. Please add it to .env (see .env.example)", file=sys.stderr)
-    sys.exit(1)
+    print(
+        "[Config] WARNING: GROQ_API_KEY is not set. Please add it to .env (see .env.example). "  # noqa: E501
+        "Groq calls will fail at runtime.",
+        file=sys.stderr,
+    )
 if not GEMINI_API_KEY:
-    print("[Config] WARNING: GOOGLE_GEMINI_API_KEY not set. Gemini calls will fall back to Groq.")
+    print(
+        "[Config] WARNING: GOOGLE_GEMINI_API_KEY not set. Gemini calls will fall back to Groq."  # noqa: E501
+    )
