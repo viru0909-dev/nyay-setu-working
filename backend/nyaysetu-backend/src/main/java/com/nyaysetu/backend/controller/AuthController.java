@@ -17,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import jakarta.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,12 +55,12 @@ public class AuthController {
                     req.getPassword(),
                     Role.LITIGANT // public registration always creates LITIGANT — role is not caller-controlled
             );
-            
+
             // Auto-login after registration
             UserDetails userDetails = userDetailsService.loadUserByUsername(req.getEmail());
             String token = jwtService.generateToken(new HashMap<>(), userDetails);
             var user = authService.findByEmail(req.getEmail());
-            
+
             return ResponseEntity.ok(Map.of(
                     "token", token,
                     "user", Map.of(
@@ -152,22 +151,21 @@ public class AuthController {
 
     // ==================== PASSWORD RESET ENDPOINTS ====================
 
+    private static final String PASSWORD_RESET_GENERIC_MESSAGE =
+        "If an account with that email exists, a password reset link has been sent.";
+
     @SecurityRequirements
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
         try {
             emailService.sendPasswordResetEmail(req.getEmail());
-            return ResponseEntity.ok(Map.of(
-                "message", "Password reset email sent successfully",
-                "email", req.getEmail()
-            ));
-        } catch (MessagingException e) {
-            log.error("Failed to send password reset email", e);
-            return ResponseEntity.status(500).body(Map.of("message", "Failed to send email"));
         } catch (Exception e) {
-            log.error("Error in forgot password", e);
-            return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
+        log.warn("Password reset request completed with generic response", e);
         }
+
+        return ResponseEntity.ok(Map.of(
+            "message", PASSWORD_RESET_GENERIC_MESSAGE
+        ));
     }
 
     @GetMapping("/verify-reset-token")

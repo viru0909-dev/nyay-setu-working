@@ -1,5 +1,8 @@
 package com.nyaysetu.backend.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -17,7 +20,7 @@ import org.springframework.web.client.RestTemplate;
  * Read timeout    : 30s — allow enough time for LLM inference (Groq p50 ~8s)
  */
 @Configuration
-public class RestTemplateConfig {
+public class BeanConfig {
 
     @Bean
     public RestTemplate restTemplate() {
@@ -26,4 +29,15 @@ public class RestTemplateConfig {
         factory.setReadTimeout(30_000);     // 30 seconds
         return new RestTemplate(factory);
     }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
+
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        return new RabbitAdmin(connectionFactory);
+    }
+
 }
