@@ -1,0 +1,116 @@
+{
+  "title": "Constitution of India",
+  "subtitle": "The Supreme Law of India",
+  "readHindi": "हिंदी में पढ़ें",
+  "readEnglish": "Read in English",
+  "downloadPDF": "Download PDF",
+  "askAI": "Ask AI",
+  "aiChatbotTitle": "Legal AI Assistant",
+  "searchArticles": "Search articles, rights, laws...",
+  "article": "Article",
+  "articles": "Articles",
+  "readMore": "Read More",
+  "back": "Back",
+  "backToParts": "Back to Parts",
+  "thinking": "Thinking...",
+  "aiResponse": "AI Response:",
+  "bookmarks": "Bookmarks",
+  "send": "Send",
+  "askQuestion": "Ask any constitutional question",
+  "typeMessage": "Type your message...",
+  "shareComingSoon": "Share feature coming soon!",
+  "pdfComingSoon": "PDF download feature coming soon! This will download the complete Constitution of India.",
+  "aiError": "Sorry, I encountered an error. Please try again.",
+  "tryAsking": "Try asking: \"What are fundamental rights?\" or \"Explain Article 21\"",
+  "parts": [
+                {
+                    "id": 1,
+                    "title": "Part I - The Union and its Territory",
+                    "description": "Articles defining the territory of India",
+                    "articles": [
+                        {
+                            "number": "1",
+                            "title": "Name and territory of the Union",
+                            "content": "India, that is Bharat, shall be a Union of States. The territory of India shall comprise: (a) the territories of the States; (b) the Union territories specified in the First Schedule; and (c) such other territories as may be acquired.",
+                            "keywords": ["name", "bharat", "territory", "union"]
+                        },
+                        {
+                            "number": "2",
+                            "title": "Admission or establishment of new States",
+                            "content": "Parliament may by law admit into the Union, or establish, new States on such terms and conditions as it thinks fit.",
+                            "keywords": ["parliament", "new states", "admission"]
+                        },
+                        {
+                            "number": "3",
+                            "title": "Formation of new States and alteration of areas",
+                            "content": "Parliament may by law: (a) form a new State; (b) increase or diminish the area of any State; (c) alter the boundaries of any State; (d) alter the name of any State.",
+                            "keywords": ["formation", "boundaries", "areas"]
+                        }
+                    ]
+                },
+                {
+                    "id": 3,
+                    "title": "Part III - Fundamental Rights",
+                    "description": "Basic human rights guaranteed to all citizens",
+                    "articles": [
+                        {
+                            "number": "14",
+                            "title": "Equality before law",
+                            "content": "The State shall not deny to any person equality before the law or the equal protection of the laws within the territory of India. Prohibition of discrimination on grounds of religion, race, caste, sex or place of birth.",
+                            "keywords": ["equality", "law", "discrimination"]
+                        },
+                        {
+                            "number": "19",
+                            "title": "Protection of certain rights regarding freedom of speech, etc.",
+                            "content": "All citizens shall have the right to: (a) freedom of speech and expression; (b) assemble peaceably and without arms; (c) form associations or unions; (d) move freely throughout the territory of India; (e) reside and settle in any part of the territory of India; (f) practice any profession, or to carry on any occupation, trade or business.",
+                            "keywords": ["freedom", "speech", "expression", "movement"]
+                        },
+                        {
+                            "number": "21",
+                            "title": "Protection of life and personal liberty",
+                            "content": "No person shall be deprived of his life or personal liberty except according to procedure established by law. The right to life includes the right to live with human dignity.",
+                            "keywords": ["life", "liberty", "dignity"]
+                        },
+                        {
+                            "number": "21A",
+                            "title": "Right to education",
+                            "content": "The State shall provide free and compulsory education to all children of the age of six to fourteen years in such manner as the State may, by law, determine.",
+                            "keywords": ["education", "children", "free education"]
+                        }
+                    ]
+                },
+                {
+                    "id": 4,
+                    "title": "Part IV - Directive Principles of State Policy",
+                    "description": "Guidelines for governance and policy-making",
+                    "articles": [
+                        {
+                            "number": "38",
+                            "title": "State to secure a social order for the promotion of welfare of the people",
+                            "content": "The State shall strive to promote the welfare of the people by securing and protecting as effectively as it may a social order in which justice, social, economic and political, shall inform all the institutions of the national life.",
+                            "keywords": ["welfare", "social order", "justice"]
+                        },
+                        {
+                            "number": "39",
+                            "title": "Certain principles of policy to be followed by the State",
+                            "content": "The State shall direct its policy towards securing: (a) that the citizens, men and women equally, have the right to an adequate means of livelihood; (b) that the ownership and control of material resources is distributed to subserve the common good; (c) that the operation of the economic system does not result in concentration of wealth.",
+                            "keywords": ["policy", "livelihood", "resources", "wealth"]
+                        }
+                    ]
+                },
+                {
+                    "id": 5,
+                    "title": "Part IVA - Fundamental Duties",
+                    "description": "Basic duties of every Indian citizen",
+                    "articles": [
+                        {
+                            "number": "51",
+                            "title": "Fundamental Duties",
+                            "content": "It shall be the duty of every citizen of India: (a) to abide by the Constitution; (b) to cherish and follow the noble ideals of the freedom struggle; (c) to uphold and protect the sovereignty, unity and integrity of India; (d) to defend the country; (e) to promote harmony and spirit of common brotherhood; (f) to value and preserve the rich heritage of our composite culture; (g) to protect natural environment; (h) to develop scientific temper; (i) to safeguard public property; (j) to strive towards excellence.",
+                            "keywords": ["duties", "citizens", "responsibility", "protection"]
+                        }
+                    ]
+                }
+            ]
+        
+}

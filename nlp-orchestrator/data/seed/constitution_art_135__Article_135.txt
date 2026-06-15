@@ -1,0 +1,5 @@
+# <b>Article</b> <b>135</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=137639
+# Fetch query: Constitution of India Article 135
+
+Article 135 in Constitution of India 135. Jurisdiction and powers of the Federal Court under existing law to be exercisable by the Supreme Court Until Parliament by law otherwise provides, the Supreme Court shall also have jurisdiction and powers with respect to any matter to which the provisions of article 133 or article 134 do not apply if jurisdiction and powers in relation to that matter were exercisable by the Federal Court immediately before the commencement of this Constitution under any existing law.

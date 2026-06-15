@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, CheckCheck, Loader2 } from 'lucide-react';
 import NotificationService from '../services/NotificationService';
 import useAuthStore from '../store/authStore';
+import { useTranslation } from 'react-i18next';
 
 export default function NotificationBell() {
     const { user } = useAuthStore();
+    const { t } = useTranslation('notifications');
     const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -83,16 +85,24 @@ export default function NotificationBell() {
 
     // Helper for time ago
     const timeAgo = (dateStr) => {
-        if (!dateStr) return 'Just now';
+        if (!dateStr) return t('notification.justNow');
         const date = new Date(dateStr);
         const now = new Date();
         const seconds = Math.floor((now - date) / 1000);
 
-        if (seconds < 60) return 'Just now';
+        if (seconds < 60) return t('notification.justNow');
         const minutes = Math.floor(seconds / 60);
-        if (minutes < 60) return `${minutes}m ago`;
+        if (minutes < 60) {
+            return t('notification.time.minutesAgo', {
+                count: minutes
+            });
+        }
         const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours}h ago`;
+        if (hours < 24) {
+            return t('notification.time.hoursAgo', {
+                count: hours
+            });
+        }
         return date.toLocaleDateString();
     };
 
@@ -101,6 +111,7 @@ export default function NotificationBell() {
             {/* Bell Icon */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
+                aria-label="Toggle notifications"
                 style={{
                     position: 'relative',
                     background: isOpen ? 'rgba(139, 92, 246, 0.2)' : 'var(--bg-glass-strong)',
@@ -178,7 +189,7 @@ export default function NotificationBell() {
                                 fontWeight: '700',
                                 margin: 0
                             }}>
-                                Notifications
+                                {t('notification.notifications')}
                             </h3>
                             {unreadCount > 0 && (
                                 <span style={{
@@ -189,7 +200,7 @@ export default function NotificationBell() {
                                     padding: '0.15rem 0.5rem',
                                     borderRadius: '9999px'
                                 }}>
-                                    {unreadCount} NEW
+                                    {unreadCount} {t('notification.newLabel')}
                                 </span>
                             )}
                         </div>
@@ -212,7 +223,7 @@ export default function NotificationBell() {
                                 onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
                             >
                                 <CheckCheck size={14} />
-                                Mark all read
+                                {t('notification.markAllRead')}
                             </button>
                         )}
                     </div>
@@ -227,7 +238,7 @@ export default function NotificationBell() {
                         {loading && notifications.length === 0 ? (
                             <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
                                 <Loader2 size={24} className="spin" style={{ margin: '0 auto 0.5rem' }} />
-                                <span style={{ fontSize: '0.85rem' }}>Syncing...</span>
+                                <span style={{ fontSize: '0.85rem' }}>{t('notification.syncing')}</span>
                                 <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .spin { animation: spin 1s linear infinite; }`}</style>
                             </div>
                         ) : notifications.length === 0 ? (
@@ -243,8 +254,8 @@ export default function NotificationBell() {
                                 }}>
                                     <Bell size={24} style={{ opacity: 0.4 }} />
                                 </div>
-                                <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.95rem', color: 'var(--text-main)' }}>All caught up!</h4>
-                                <p style={{ margin: 0, fontSize: '0.8rem' }}>No new notifications for now.</p>
+                                <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.95rem', color: 'var(--text-main)' }}>{t('notification.allCaughtUp')}</h4>
+                                <p style={{ margin: 0, fontSize: '0.8rem' }}>{t('notification.noNotifications')}</p>
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -314,6 +325,7 @@ export default function NotificationBell() {
                                                 e.stopPropagation();
                                                 clearNotification(notif.id);
                                             }}
+                                            aria-label="Dismiss notification"
                                             style={{
                                                 position: 'absolute',
                                                 top: '0.75rem',

@@ -1,6 +1,7 @@
 package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.ProfileRequest;
+import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.entity.UserProfile;
 import com.nyaysetu.backend.repository.UserProfileRepository;
 import com.nyaysetu.backend.repository.UserRepository;
@@ -43,5 +44,11 @@ public class ProfileService {
                 .orElseGet(() -> UserProfile.builder().userId(userId).build());
         profile.setProfilePicture(picture);
         profileRepository.save(profile);
+    }
+
+    public void deleteUserAccount(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        userRepository.delete(user);
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 @Tag(name = "Case Timeline", description = "Chronological timeline of events for a case")
 @RestController
-@RequestMapping("/api/timeline")
+@RequestMapping("/timeline")
 @RequiredArgsConstructor
 public class TimelineController {
 

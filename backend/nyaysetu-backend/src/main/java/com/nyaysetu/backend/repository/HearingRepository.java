@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.Optional;
 
 @Repository
 public interface HearingRepository extends JpaRepository<Hearing, UUID> {
@@ -30,4 +31,6 @@ public interface HearingRepository extends JpaRepository<Hearing, UUID> {
     Hearing findTopByCaseEntityIdAndScheduledDateAfterOrderByScheduledDateAsc(UUID caseId, LocalDateTime date);
 
     List<Hearing> findByCaseEntityInAndScheduledDateBetween(List<CaseEntity> caseEntities, LocalDateTime start, LocalDateTime end);
+
+    Optional<Hearing> findByVideoRoomId(String videoRoomId);
 }

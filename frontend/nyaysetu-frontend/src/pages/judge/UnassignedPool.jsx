@@ -16,7 +16,7 @@ export default function UnassignedPool() {
         try {
             // Use the dedicated unassigned endpoint instead of filtering client-side
             const response = await judgeAPI.getUnassignedCases();
-            console.log('Unassigned cases from API:', response.data);
+         //   console.log('Unassigned cases from API:', response.data);
             setCases(response.data || []);
         } catch (error) {
             console.error('Error fetching unassigned cases:', error);

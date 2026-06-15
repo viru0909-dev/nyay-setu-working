@@ -1,3 +1,12 @@
+.git
+.gitignore
+node_modules
+npm-debug.log
+build/
+dist/
+.env
+.env.*
+.DS_Store
 node_modules/
 dist/
 .git

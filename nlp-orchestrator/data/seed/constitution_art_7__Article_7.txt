@@ -1,0 +1,5 @@
+# <b>Article</b> <b>7</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=735354
+# Fetch query: Constitution of India Article 7
+
+Article 7 in Constitution of India 7. Rights of citizenship of certain migrants to Pakistan Notwithstanding anything in articles 5 and 6, a person who has after the first day of March, 1947, migrated from the territory of India to the territory now included in Pakistan shall not be deemed to be a citizen of India:Provided that nothing in this article shall apply to a person who, after having so migrated to the territory now included in Pakistan, has returned to the territory of India under a permit for resettlement or permanent return issued by or under the authority of any law and every such person shall for the purposes of clause (b) of article 6 be deemed to have migrated to the territory of India after the nineteenth day of July, 1948.

@@ -1,0 +1,38 @@
+{
+  "notification": {
+    "notifications": "నోటిఫికేషన్లు",
+    "markAllRead": "అన్నింటినీ చదివినట్లుగా గుర్తించండి",
+
+    "syncing": "సింక్ అవుతోంది...",
+
+    "allCaughtUp": "అన్నీ నవీకరించబడ్డాయి!",
+    "noNotifications": "ప్రస్తుతం కొత్త నోటిఫికేషన్లు లేవు.",
+
+    "justNow": "ఇప్పుడే",
+
+    "newLabel": "కొత్తది",
+
+    "failedLoad": "నోటిఫికేషన్లను లోడ్ చేయడంలో విఫలమైంది",
+
+    "time": {
+      "minutesAgo": "{{count}}ని క్రితం",
+      "hoursAgo": "{{count}}గం క్రితం"
+    },
+
+    "titles": {
+      "caseUpdate": "కేసు నవీకరణ",
+      "newMessage": "కొత్త సందేశం",
+      "hearingReminder": "విచారణ గుర్తుచూపు",
+      "documentUploaded": "పత్రం అప్లోడ్ చేయబడింది",
+      "lawyerAssigned": "న్యాయవాది నియమించబడ్డారు"
+    },
+
+    "messages": {
+      "caseAccepted": "మీ కేసు ఆమోదించబడింది.",
+      "newDocument": "కొత్త పత్రం అప్లోడ్ చేయబడింది.",
+      "hearingTomorrow": "మీ విచారణ రేపటికి షెడ్యూల్ చేయబడింది.",
+      "proposalReceived": "మీకు కొత్త ప్రతిపాదన వచ్చింది.",
+      "messageReceived": "మీకు కొత్త సందేశం వచ్చింది."
+    }
+  }
+}

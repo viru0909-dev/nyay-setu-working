@@ -1,16 +1,15 @@
 package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.dto.AddNoteRequest;
-import com.nyaysetu.backend.dto.CreateNoteRequest;
 import com.nyaysetu.backend.entity.CaseNote;
 import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.CaseNoteRepository;
 import com.nyaysetu.backend.service.CaseNoteService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.UUID;
 @Tag(name = "Case Notes", description = "Add and retrieve private notes on a case")
 @RestController
@@ -24,7 +23,7 @@ public class CaseNoteController {
     @PostMapping
     public CaseNote addNote(
             @PathVariable UUID caseId,
-            @RequestBody AddNoteRequest request
+           @Valid @RequestBody AddNoteRequest request
     ) {
         return caseNoteService.addNote(caseId, request);
     }

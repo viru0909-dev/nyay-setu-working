@@ -1,0 +1,25 @@
+name: PR Template Compliance Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  check-checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR Body
+        env:
+          PR_BODY: "${{ github.event.pull_request.body }}"
+        run: |
+          if [[ -z "$PR_BODY" ]]; then
+            echo "❌ Pull Request description is empty. Please fill out the template."
+            exit 1
+          fi
+
+          if echo "$PR_BODY" | grep -q "\- \[ \]"; then
+            echo "❌ Please complete all items in the pull request checklist before requesting review."
+            exit 1
+          fi
+
+          echo "✅ All template checklist items are completed!"

@@ -1,0 +1,5 @@
+# <b>Article</b> <b>99</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=813152
+# Fetch query: Constitution of India Article 99
+
+Article 99 in Constitution of India 99. Oath or affirmation by members Every member of either House of Parliament shall, before taking his seat, make and subscribe before the President, or some person appointed in that behalf by him, an oath or affirmation according to the form set out for the purpose in the Third Schedule.
