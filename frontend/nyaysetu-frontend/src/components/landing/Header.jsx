@@ -81,6 +81,7 @@ export default function Header({ hideAuthButtons = false }) {
         { labelKey: 'header.nav.constitution', href: '/constitution', isRoute: true },
         { labelKey: 'header.nav.aiAssistant', action: () => setShowAIModal(true) },
         { labelKey: 'header.nav.about', href: '/about', isRoute: true },
+        { labelKey: 'header.nav.faq', href: '/faq', isRoute: true },
     ];
 
     const isDark = theme === 'dark';
@@ -103,7 +104,17 @@ export default function Header({ hideAuthButtons = false }) {
     });
 
     const renderNavItem = (item) => {
-        const baseStyle = navLinkStyle(item.href);
+        const currentPathWithHash = location.pathname + location.hash;
+        let isActive = false;
+        if (item.href === '/') {
+            // Home is only active if we are on '/' AND there is no hash
+            isActive = location.pathname === '/' && !location.hash;
+        } else if (item.href) {
+            // Other tabs are active if they match the exact path+hash OR just the path
+            isActive = currentPathWithHash === item.href || location.pathname === item.href;
+        }
+
+        const baseStyle = navLinkStyle(isActive);
 
         const displayLabel =
             t(item.labelKey) === item.labelKey
@@ -164,21 +175,6 @@ export default function Header({ hideAuthButtons = false }) {
                 }
             },
         };
-        const currentPathWithHash = location.pathname + location.hash;
-        let isActive = false;
-        if (item.href === '/') {
-            // Home is only active if we are on '/' AND there is no hash
-            isActive = location.pathname === '/' && !location.hash;
-        } else if (item.href) {
-            // Other tabs are active if they match the exact path+hash OR just the path
-            isActive = currentPathWithHash === item.href || location.pathname === item.href;
-        }
-        // -------------------------------------------------------------
-
-        const baseStyle = navLinkStyle(isActive);
-        // Fallback to labelKey directly if translation returns the exact key
-
-        const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
         if (item.action) {
             return (

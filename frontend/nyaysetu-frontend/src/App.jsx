@@ -55,6 +55,7 @@ const PrivacyPolicy = retryLazy(() => import('./pages/PrivacyPolicy'));
 const Terms = retryLazy(() => import('./pages/Terms'));
 const Disclaimer = retryLazy(() => import('./pages/Disclaimer'));
 const UpcomingFeatures = retryLazy(() => import('./pages/UpcomingFeatures'));
+const FAQ = retryLazy(() => import('./pages/FAQ'));
 
 // Dashboard Layout
 const DashboardLayout = retryLazy(() => import('./layouts/DashboardLayout'));
@@ -237,6 +238,7 @@ function App({ swRegistration }) {
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
+                                <Route path="/faq" element={<FAQ />} />
 
                                 {/* Litigant Functional Core */}
                                 <Route path="/litigant/*" element={
