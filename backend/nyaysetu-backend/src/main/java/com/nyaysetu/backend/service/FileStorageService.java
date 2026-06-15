@@ -55,6 +55,9 @@ public class FileStorageService {
     public Resource loadFileAsResource(String filePath) {
         try {
             Path file = this.fileStorageLocation.resolve(filePath).normalize();
+            if (!file.startsWith(this.fileStorageLocation)) {
+                throw new RuntimeException("Invalid file path: " + filePath);
+            }
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists()) {
                 return resource;
@@ -69,6 +72,9 @@ public class FileStorageService {
     public void deleteFile(String filePath) {
         try {
             Path file = this.fileStorageLocation.resolve(filePath).normalize();
+            if (!file.startsWith(this.fileStorageLocation)) {
+                throw new RuntimeException("Invalid file path: " + filePath);
+            }
             Files.deleteIfExists(file);
         } catch (IOException ex) {
             throw new RuntimeException("Could not delete file: " + filePath, ex);
@@ -80,6 +86,9 @@ public class FileStorageService {
      */
     public java.io.File getFile(String filePath) {
         Path file = this.fileStorageLocation.resolve(filePath).normalize();
+        if (!file.startsWith(this.fileStorageLocation)) {
+            throw new RuntimeException("Invalid file path: " + filePath);
+        }
         if (!Files.exists(file)) {
             throw new RuntimeException("File not found: " + filePath);
         }

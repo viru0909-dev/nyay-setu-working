@@ -3,8 +3,6 @@ package com.nyaysetu.backend.controller;
 import com.nyaysetu.backend.entity.Hearing;
 import com.nyaysetu.backend.entity.HearingParticipant;
 import com.nyaysetu.backend.entity.ParticipantRole;
-import com.nyaysetu.backend.entity.User;
-import com.nyaysetu.backend.service.AuthService;
 import com.nyaysetu.backend.service.HearingService;
 import com.nyaysetu.backend.notification.service.NotificationService;
 import com.nyaysetu.backend.notification.entity.Notification;
@@ -143,7 +141,7 @@ public class HearingController {
         hearingService.leaveHearing(hearingId, userId);
         return ResponseEntity.ok().build();
     }
-
+    
     private Long getCurrentUserId(Authentication authentication) {
         User user = authService.findByEmail(authentication.getName());
         return user.getId();

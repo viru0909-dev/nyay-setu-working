@@ -15,5 +15,5 @@ public class CreateMeetingRequest {
     @NotNull(message = "Scheduled time is required")
     private LocalDateTime scheduledAt;
 
-    private List<UUID> participants; // optional
+    private List<Long> participants; // optional
 }
