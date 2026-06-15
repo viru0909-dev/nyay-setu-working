@@ -1,21 +1,33 @@
+feature/court-fee-calculator
+import { motion } from 'framer-motion';
+import { ArrowRight, BookOpen, Bot, CheckCircle, Cpu, Cuboid, FileText, ShieldCheck, Smartphone, Star, UserPlus, Users, Video, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
 import ScrollProgress from "../components/ScrollProgress";
 import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { UserPlus, FileText, Zap, ArrowRight, Users, Star, CheckCircle, Download, Bot, BookOpen, Video, ShieldCheck, Cpu, Cuboid } from 'lucide-react';
+ main
 import { useTranslation } from 'react-i18next';
-import Header from '../components/landing/Header';
-import Footer from '../components/landing/Footer';
+import { Link } from 'react-router-dom';
+import CourtFeeCalculator from "../components/CourtFeeCalculator";
 import AIChatbot from '../components/landing/AIChatbot';
 import AchievementsSection from '../components/landing/AchievementsSection';
+import Footer from '../components/landing/Footer';
+import Header from '../components/landing/Header';
 import HowItWorks from '../components/landing/HowItWorks';
 import TrustIndicators from '../components/landing/TrustIndicators';
+ feature/court-fee-calculator
+import { useTheme } from '../contexts/ThemeContext';
+
 import useProtectedFeature from '../hooks/useProtectedFeature';
 import useGuest from '../hooks/useGuest';
 import GuestAccessDeniedModal from '../components/guest/GuestAccessDeniedModal';
 import GuestInlineCTA from '../components/guest/GuestInlineCTA';
 import GuestLockedCard from '../components/guest/GuestLockedCard';
+ main
 
 export default function Landing() {
     const { t } = useTranslation('landing');
@@ -511,6 +523,10 @@ export default function Landing() {
                             })}
                         </div>
                     </div>
+                </section>
+
+                <section style={{ padding: '4rem 2rem' }}>
+                            <CourtFeeCalculator />
                 </section>
 
                 <TrustIndicators />
