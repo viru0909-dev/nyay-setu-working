@@ -13,3 +13,4 @@ ollama==0.3.3
 reportlab==4.2.2
 
 pytest-asyncio
+cachetools

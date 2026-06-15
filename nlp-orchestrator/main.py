@@ -12,13 +12,13 @@ import os
 from utils import async_retry
 import asyncio
 import json
+
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
 import time
 import uuid
-import os
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -34,9 +34,7 @@ from config import FRONTEND_ORIGIN, GROQ_API_KEY, GROQ_MODEL_FAST, GEMINI_API_KE
 from decomposer import decompose_query
 from router import route_questions
 from research import run_parallel_research, execute_with_fallback
-from synthesizer import synthesize_answers
-from research import run_parallel_research, stream_groq_chat
-from synthesizer import synthesize_answers, stream_synthesize_answers
+from synthesizer import synthesize_answers, stream_synthesize_answers, synthesize_answers_structured, stream_synthesize_answers_structured
 from validators.citation_validator import validate_citations_from_text
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
@@ -134,6 +132,21 @@ try:
     logger.info("Loaded modi_ocr router.")
 except ImportError:
     logger.warning("Skipping modi_ocr router due to missing dependencies.")
+try:
+    from routers.ocr import router as ocr_router
+    app.include_router(ocr_router)
+    logger.info("Loaded ocr router.")
+except ImportError:
+    logger.warning("Skipping ocr router due to missing dependencies.")
+
+try:
+    from routers.contradictions import router as contradictions_router
+
+    app.include_router(contradictions_router)
+    logger.info("Loaded contradictions router.")
+except Exception as e:
+    logger.warning("Skipping contradictions router: %s", e)
+
 
 
 # ─── Models ───────────────────────────────────────────────────────────────────
@@ -173,9 +186,6 @@ def sse_event(event_type: str, data: dict) -> str:
 async def legal_reasoning_pipeline(query: str, language: str):
     """
     Async generator that yields SSE events through the full 5-layer pipeline.
-
-    Fix: Removed inner async generator — research now runs as a background
-    asyncio.Task while interim messages are yielded from the outer generator.
     """
     kanoon_task = None
     research_task = None
@@ -235,13 +245,18 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("synthesis_start", {})
         yield sse_event("avatar_update", {"message": "Sab information mila di, ab aapke liye summary bana raha hoon..."})
 
-        logger.info("[Layer 4] Synthesizing with streaming...")
+        logger.info("[Layer 4] Synthesizing with structured streaming...")
         
         synthesized_md = ""
-        # Stream synthesis tokens directly
-        async for token in stream_synthesize_answers(safe_query, results):
-            synthesized_md += token
-            yield sse_event("synthesis_token", {"chunk": token})
+        cited_laws_from_stream = []
+        
+        # Stream synthesis tokens using the structured generator
+        async for chunk in stream_synthesize_answers_structured(safe_query, results):
+            if chunk.get("text"):
+                synthesized_md += chunk["text"]
+                yield sse_event("synthesis_token", {"chunk": chunk["text"]})
+            if chunk.get("citations"):
+                cited_laws_from_stream = chunk["citations"]
         
         logger.info("[Layer 4] Synthesis complete")
 
@@ -260,6 +275,7 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("final_answer", {
             "markdown": synthesized_md,
             "hinglish": hinglish_dialogue,
+            "cited_laws": cited_laws_from_stream,
             "citation_validation": validation_results
         })
 
@@ -353,7 +369,8 @@ async def analyze_sync(body: LegalQuery):
         logger.error("[Sync] Indian Kanoon fetch failed: %s", e)
         kanoon_context = ""
     results = await run_parallel_research(routed, kanoon_context=kanoon_context)
-    synthesized = await synthesize_answers(body.query, results)
+    synthesis = await synthesize_answers_structured(body.query, results)
+    synthesized = synthesis.answer_markdown
 
     try:
         validation_results = validate_citations_from_text(synthesized)
@@ -372,6 +389,7 @@ async def analyze_sync(body: LegalQuery):
         "final_answer": {
             "markdown": synthesized,
             "hinglish": hinglish,
+            "cited_laws": synthesis.cited_laws,
             "citation_validation": validation_results
         }
     })
@@ -477,10 +495,9 @@ async def deep_research_pipeline(query: str, language: str):
         logger.info("[Deep Research] Stage 3: Routing...")
         
         # Compute complexity score for display
-        from router import classify_question, COMPLEX_KEYWORDS, SIMPLE_KEYWORDS
+        from router import COMPLEX_KEYWORDS
         lower_q = query.lower()
         complex_score = sum(1 for kw in COMPLEX_KEYWORDS if kw in lower_q)
-        simple_score = sum(1 for kw in SIMPLE_KEYWORDS if kw in lower_q)
         word_count = len(query.split())
         
         # Normalized complexity 0-1
@@ -688,4 +705,3 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8001))
     uvicorn.run("main:app", host="0.0.0.0", port=port)
-
