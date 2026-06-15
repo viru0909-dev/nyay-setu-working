@@ -103,9 +103,9 @@ export default function Header({ hideAuthButtons = false }) {
     });
 
     const renderNavItem = (item) => {
-        const baseStyle = navLinkStyle(item.href);
+        let baseStyle = navLinkStyle(item.href);
 
-        const displayLabel =
+        let displayLabel =
             t(item.labelKey) === item.labelKey
                 ? item.labelKey
                 : t(item.labelKey);
@@ -175,10 +175,10 @@ export default function Header({ hideAuthButtons = false }) {
         }
         // -------------------------------------------------------------
 
-        const baseStyle = navLinkStyle(isActive);
+        baseStyle = navLinkStyle(isActive);
         // Fallback to labelKey directly if translation returns the exact key
 
-        const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
+        displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
         if (item.action) {
             return (
