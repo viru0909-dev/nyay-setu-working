@@ -4,10 +4,17 @@ const path = require('path');
 const crypto = require('crypto');
 const http = require('http');
 
+const stdoutLog = (msg) => process.stdout.write(msg + '\n');
+const stderrLog = (msg) => process.stderr.write(msg + '\n');
+
+const MOCK_CASE_ID = "2026-CR-0990";
+const MOCK_TIMESTAMP = "2026-06-05_20-30-00_UTC";
+const WEBHOOK_PORT_DEFAULT = 5000;
+
 // Mock data simulating what RabbitMQ would normally send
 const mockRabbitMQMessage = {
-    caseId: "2026-CR-0990",
-    timestamp: "2026-06-05_20-30-00_UTC",
+    caseId: MOCK_CASE_ID,
+    timestamp: MOCK_TIMESTAMP,
     fileName: "test_court.mp4"
 };
 
@@ -37,7 +44,7 @@ function sendWebhook(payload) {
         const data = JSON.stringify(payload);
         const options = {
             hostname: 'localhost',
-            port: 5000,
+            port: WEBHOOK_PORT_DEFAULT,
             path: '/api/media/webhook',
             method: 'POST',
             headers: {
@@ -75,12 +82,12 @@ function processCourtVideoMock(data) {
     }
 
     if (!fs.existsSync(inputPath)) {
-        console.error(`❌ Error: Put a sample video named '${data.fileName}' inside the 'source_videos' folder first!`);
+        stderrLog(`❌ Error: Put a sample video named '${data.fileName}' inside the 'source_videos' folder first!`);
         return;
     }
 
-    console.log(`🎬 [Pipeline Started] Processing Case: ${data.caseId}`);
-    console.log(`🎥 Optimizing streams & burning unalterable legal watermark...`);
+    stdoutLog(`🎬 [Pipeline Started] Processing Case: ${data.caseId}`);
+    stdoutLog(`🎥 Optimizing streams & burning unalterable legal watermark...`);
 
     ffmpeg(inputPath)
         .outputOptions([
@@ -93,16 +100,16 @@ function processCourtVideoMock(data) {
             '-b:a 128k'
         ])
         .on('progress', (progress) => {
-            console.log(`⏳ Processing: ${progress.percent ? progress.percent.toFixed(1) + '%' : 'In progress...'}`);
+            stdoutLog(`⏳ Processing: ${progress.percent ? progress.percent.toFixed(1) + '%' : 'In progress...'}`);
         })
         .on('end', async () => {
-            console.log(`\n✅ [Pipeline Success] Secure output generated at: ${outputPath}`);
-            console.log(`🎯 Acceptance Criteria Met: File compressed and watermarked successfully.`);
+            stdoutLog(`\n✅ [Pipeline Success] Secure output generated at: ${outputPath}`);
+            stdoutLog(`🎯 Acceptance Criteria Met: File compressed and watermarked successfully.`);
             
             try {
-                console.log(`🔒 Generating SHA-256 checksum for the processed file...`);
+                stdoutLog(`🔒 Generating SHA-256 checksum for the processed file...`);
                 const sha256Hash = await calculateSHA256(outputPath);
-                console.log(`🔑 Generated Hash: ${sha256Hash}`);
+                stdoutLog(`🔑 Generated Hash: ${sha256Hash}`);
 
                 const payload = {
                     caseId: data.caseId,
@@ -112,18 +119,18 @@ function processCourtVideoMock(data) {
                     updatedAt: new Date().toISOString()
                 };
 
-                console.log(`📡 Sending status and hash to the Evidence Vault webhook...`);
+                stdoutLog(`📡 Sending status and hash to the Evidence Vault webhook...`);
                 const response = await sendWebhook(payload);
-                console.log(`🎯 Webhook response received:`, response);
+                stdoutLog(`🎯 Webhook response received: ${response}`);
             } catch (err) {
-                console.error(`❌ Error during post-processing:`, err.message);
+                stderrLog(`❌ Error during post-processing: ${err.message}`);
             }
         })
         .on('error', (err) => {
-            console.error('❌ FFmpeg Processing Error: ', err.message);
+            stderrLog(`❌ FFmpeg Processing Error: ${err.message}`);
         })
         .save(outputPath);
 }
 
 // Run the mock pipeline execution directly
-processCourtVideoMock(mockRabbitMQMessage);
+processCourtVideoMock(mockRabbitMQMessage);

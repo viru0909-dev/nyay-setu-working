@@ -5,12 +5,19 @@ const path = require('path');
 const crypto = require('crypto');
 const http = require('http');
 
+const stdoutLog = (msg) => process.stdout.write(msg + '\n');
+const stderrLog = (msg) => process.stderr.write(msg + '\n');
+
+const DEFAULT_RABBITMQ_PORT = "5672";
+const DEFAULT_WEBHOOK_PORT = 5000;
+const RECONNECT_DELAY_MS = 5000;
+
 // Load configurations from environment variables or use defaults
-const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672';
+const RABBITMQ_URL = process.env.RABBITMQ_URL || `amqp://guest:guest@localhost:${DEFAULT_RABBITMQ_PORT}`;
 const QUEUE_NAME = 'court-media-queue';
 const DLQ_NAME = 'court-media-dlq';
 const WEBHOOK_HOST = process.env.WEBHOOK_HOST || 'localhost';
-const WEBHOOK_PORT = process.env.WEBHOOK_PORT || 5000;
+const WEBHOOK_PORT = process.env.WEBHOOK_PORT || DEFAULT_WEBHOOK_PORT;
 const WEBHOOK_PATH = process.env.WEBHOOK_PATH || '/api/media/webhook';
 
 // Streaming SHA-256 helper
@@ -60,7 +67,7 @@ function sendWebhook(payload) {
 
 async function startWorker() {
     try {
-        console.log(`🔌 Connecting to RabbitMQ at: ${RABBITMQ_URL}`);
+        stdoutLog(`🔌 Connecting to RabbitMQ at: ${RABBITMQ_URL}`);
         const connection = await amqp.connect(RABBITMQ_URL);
         const channel = await connection.createChannel();
 
@@ -82,7 +89,7 @@ async function startWorker() {
         });
         await channel.bindQueue(QUEUE_NAME, 'court-media-exchange', 'process');
 
-        console.log(`🚀 [Media Worker Started] Listening for tasks on queue: ${QUEUE_NAME}...`);
+        stdoutLog(`🚀 [Media Worker Started] Listening for tasks on queue: ${QUEUE_NAME}...`);
         
         channel.prefetch(1);
         
@@ -92,9 +99,9 @@ async function startWorker() {
             let data;
             try {
                 data = JSON.parse(msg.content.toString());
-                console.log(`\n🎬 [Processing Started] Case ID: ${data.caseId}`);
+                stdoutLog(`\n🎬 [Processing Started] Case ID: ${data.caseId}`);
             } catch (err) {
-                console.error('❌ Failed to parse task payload JSON:', err.message);
+                stderrLog(`❌ Failed to parse task payload JSON: ${err.message}`);
                 // Reject failed task immediately to the DLQ (no requeue)
                 channel.nack(msg, false, false);
                 return;
@@ -110,7 +117,7 @@ async function startWorker() {
             }
 
             if (!fs.existsSync(inputPath)) {
-                console.error(`❌ Error: Source video '${inputPath}' does not exist.`);
+                stderrLog(`❌ Error: Source video '${inputPath}' does not exist.`);
                 // Route to DLQ (no requeue)
                 channel.nack(msg, false, false);
                 return;
@@ -127,16 +134,16 @@ async function startWorker() {
                     '-b:a 128k'
                 ])
                 .on('progress', (progress) => {
-                    console.log(`⏳ Progress (Case ${data.caseId}): ${progress.percent ? progress.percent.toFixed(1) + '%' : 'Processing...'}`);
+                    stdoutLog(`⏳ Progress (Case ${data.caseId}): ${progress.percent ? progress.percent.toFixed(1) + '%' : 'Processing...'}`);
                 })
                 .on('end', async () => {
-                    console.log(`✅ [FFmpeg Complete] Output generated at: ${outputPath}`);
+                    stdoutLog(`✅ [FFmpeg Complete] Output generated at: ${outputPath}`);
                     
                     try {
                         // 1. Calculate SHA-256 hash using streams
-                        console.log(`🔒 Generating SHA-256 hash...`);
+                        stdoutLog(`🔒 Generating SHA-256 hash...`);
                         const sha256Hash = await calculateSHA256(outputPath);
-                        console.log(`🔑 SHA-256 Hash: ${sha256Hash}`);
+                        stdoutLog(`🔑 SHA-256 Hash: ${sha256Hash}`);
 
                         // 2. Build sync payload
                         const payload = {
@@ -148,21 +155,21 @@ async function startWorker() {
                         };
 
                         // 3. Dispatch to Evidence Vault
-                        console.log(`📡 Sending status to Evidence Vault Service webhook...`);
+                        stdoutLog(`📡 Sending status to Evidence Vault Service webhook...`);
                         await sendWebhook(payload);
-                        console.log(`🎯 State synchronized successfully.`);
+                        stdoutLog(`🎯 State synchronized successfully.`);
 
                         // 4. Acknowledge RabbitMQ message
                         channel.ack(msg);
-                        console.log(`📥 Message acknowledged successfully.`);
+                        stdoutLog(`📥 Message acknowledged successfully.`);
                     } catch (error) {
-                        console.error(`❌ Post-processing hook failed:`, error.message);
+                        stderrLog(`❌ Post-processing hook failed: ${error.message}`);
                         // Reject message to route it to DLQ (no requeue)
                         channel.nack(msg, false, false);
                     }
                 })
                 .on('error', (err) => {
-                    console.error(`❌ FFmpeg Error for Case ${data.caseId}:`, err.message);
+                    stderrLog(`❌ FFmpeg Error for Case ${data.caseId}: ${err.message}`);
                     // Reject message to route it to DLQ (no requeue)
                     channel.nack(msg, false, false);
                 })
@@ -170,9 +177,9 @@ async function startWorker() {
         }, { noAck: false });
 
     } catch (err) {
-        console.error('🛑 Fatal Media Worker Connection Error:', err.message);
-        console.log('🔄 Reconnecting in 5 seconds...');
-        setTimeout(startWorker, 5000);
+        stderrLog(`🛑 Fatal Media Worker Connection Error: ${err.message}`);
+        stdoutLog(`🔄 Reconnecting in ${RECONNECT_DELAY_MS} ms...`);
+        setTimeout(startWorker, RECONNECT_DELAY_MS);
     }
 }
 
