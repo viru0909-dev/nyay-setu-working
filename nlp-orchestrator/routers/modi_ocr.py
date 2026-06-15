@@ -2,9 +2,10 @@ import logging
 import time
 from typing import List, Optional
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
+from auth import require_auth
 from models.schemas import ModiOCRResponse
 from services.modi_ocr import (
     InvalidImageError,
@@ -25,6 +26,7 @@ ALLOWED_IMAGE_CONTENT_TYPES = {
     "image/tiff",
 }
 
+
 # Batch responses are shaped locally (rather than in models/schemas.py) to keep
 # this feature self-contained.
 class ModiOCRPageResult(BaseModel):
@@ -44,7 +46,9 @@ class ModiOCRBatchResponse(BaseModel):
 
 
 @router.post("/modi", response_model=ModiOCRResponse)
-async def ocr_modi_document(file: UploadFile = File(...)):
+async def ocr_modi_document(
+    file: UploadFile = File(...), _: str = Depends(require_auth)
+):
     """Run OCR and Devanagari cleanup on an uploaded Modi script document image."""
     if file.content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
         raise HTTPException(status_code=400, detail="Upload a valid image file.")

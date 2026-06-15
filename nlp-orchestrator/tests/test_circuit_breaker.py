@@ -2,6 +2,7 @@
 Unit tests for CircuitBreaker in utils.py
 """
 
+import pytest
 import time
 from utils import CircuitBreaker
 
