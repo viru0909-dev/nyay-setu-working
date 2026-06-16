@@ -19,6 +19,7 @@ import {
 import { messageAPI, caseAPI, vakilFriendAPI, documentAPI } from '../../services/api';
 // import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function LawyerChatPage() {
     const navigate = useNavigate();
@@ -35,6 +36,7 @@ export default function LawyerChatPage() {
     const [isRecording, setIsRecording] = useState(false);
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
+    const { t } = useTranslation('litigant');
 
     // Fetch client's cases on mount
     useEffect(() => {
@@ -93,8 +95,8 @@ export default function LawyerChatPage() {
                     lawyerMap.set(c.lawyerId, {
                         id: c.id,
                         caseId: c.id,
-                        name: c.lawyerName || 'Lawyer',
-                        subtitle: `Case: ${c.title}`,
+                        name: c.lawyerName || t('lawyerChat.defaultLawyer'),
+                        subtitle: `${t('lawyerChat.casePrefix')} ${c.title}`,
                         time: caseDate.toLocaleDateString(),
                         dateObj: caseDate,
                         status: 'online',
@@ -186,14 +188,14 @@ export default function LawyerChatPage() {
             const res = await documentAPI.upload(file, {
                 caseId: selectedCase.id,
                 category: 'EVIDENCE',
-                description: `Shared via chat by client`
+                description: t('lawyerChat.sharedViaChat')
             });
 
             // Assuming response has id
             const docId = res.data.id;
-            const downloadUrl = `/api/documents/${docId}/download`;
+            const downloadUrl = `/api/v1/documents/${docId}/download`;
 
-            const fileMsg = `Shared file: ${file.name}`;
+            const fileMsg = `${t('lawyerChat.sharedFile')} ${file.name}`;
             await handleSendMessage(fileMsg, 'FILE', downloadUrl);
 
             fetchMessages(selectedCase.id);
@@ -207,13 +209,13 @@ export default function LawyerChatPage() {
     const handleVideoCall = () => {
         const roomId = `nyaysetu-video-${selectedCase.id}-${Date.now()}`;
         const url = `https://meet.jit.si/${roomId}`;
-        handleSendMessage("📞 I would like to start a video call.", 'VIDEO_CALL', url);
+        handleSendMessage(`📞 ${t('lawyerChat.videoCallRequest')}`, 'VIDEO_CALL', url);
     };
 
     const handlePhoneCall = () => {
         const roomId = `nyaysetu-audio-${selectedCase.id}-${Date.now()}`;
         const url = `https://meet.jit.si/${roomId}#config.startWithVideoMuted=true`;
-        handleSendMessage("📞 I would like to have a phone call.", 'PHONE_CALL', url);
+        handleSendMessage(`📞 ${t('lawyerChat.phoneCallRequest')}`, 'PHONE_CALL', url);
     };
 
     const handleVoiceMessage = async () => {
@@ -242,7 +244,7 @@ export default function LawyerChatPage() {
             setIsRecording(true);
         } catch (err) {
             console.error("Error accessing microphone:", err);
-            alert("Could not access microphone.");
+            alert(t('lawyerChat.microphoneError'));
         }
     };
 
@@ -264,13 +266,13 @@ export default function LawyerChatPage() {
             const res = await documentAPI.upload(audioFile, {
                 caseId: selectedCase.id,
                 category: 'VOICE_NOTE',
-                description: `Voice message`
+                description: t('lawyerChat.voiceMessage')
             });
 
             const docId = res.data.id;
-            const downloadUrl = `/api/documents/${docId}/download`;
+            const downloadUrl = `/api/v1/documents/${docId}/download`;
 
-            await handleSendMessage("🎤 Voice Message", 'AUDIO', downloadUrl);
+            await handleSendMessage(`🎤 ${t('lawyerChat.voiceMessage')}`, 'AUDIO', downloadUrl);
         } catch (error) {
             console.error("Failed to upload voice message", error);
         } finally {
@@ -281,12 +283,12 @@ export default function LawyerChatPage() {
     // AI Helper specialized for client queries
     const handleAIHelp = async () => {
         if (!message) {
-            setMessage("Can you update me on the status of my case?");
+            setMessage(t('lawyerChat.defaultAiMessage'));
             return;
         }
 
         try {
-            const context = selectedCase ? ` regarding Case "${selectedCase.subtitle}"` : '';
+            const context = selectedCase? ` ${t('lawyerChat.regardingCase')} "${selectedCase.subtitle}"`: '';
             const response = await vakilFriendAPI.sendMessage('temp-session', `Refine this message to my lawyer${context} to be more professional: "${message}"`);
             setMessage(response.data.reply);
         } catch (error) {
@@ -299,7 +301,7 @@ export default function LawyerChatPage() {
             case 'AUDIO':
                 return (
                     <div>
-                        <div style={{ marginBottom: '5px' }}>🎤 Voice Message</div>
+                        <div style={{ marginBottom: '5px' }}>🎤 {t('lawyerChat.voiceMessage')}</div>
                         <audio controls src={msg.attachmentUrl || '#'} style={{ height: '30px', maxWidth: '200px' }} />
                     </div>
                 );
@@ -324,7 +326,7 @@ export default function LawyerChatPage() {
                                 fontSize: '0.85rem'
                             }}
                         >
-                            {msg.type === 'VIDEO_CALL' ? 'Join Video Call' : 'Join Audio Call'}
+                            {msg.type === 'VIDEO_CALL'? t('lawyerChat.joinVideoCall'): t('lawyerChat.joinAudioCall')}
                         </a>
                     </div>
                 );
@@ -332,7 +334,7 @@ export default function LawyerChatPage() {
                 return (
                     <div>
                         <div>{msg.text}</div>
-                        <a href={msg.attachmentUrl} download style={{ color: 'gold', textDecoration: 'underline' }}>Download File</a>
+                        <a href={msg.attachmentUrl} download style={{ color: 'gold', textDecoration: 'underline' }}>{t('lawyerChat.downloadFile')}</a>
                     </div>
                 );
             default:
@@ -359,7 +361,7 @@ export default function LawyerChatPage() {
                             <ArrowLeft size={24} />
                         </button>
                         <h2 style={{ color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <MessageSquare size={24} color="var(--color-primary)" /> My Lawyers
+                            <MessageSquare size={24} color="var(--color-primary)" /> {t('lawyerChat.myLawyers')}
                         </h2>
                     </div>
                 </div>
@@ -369,10 +371,31 @@ export default function LawyerChatPage() {
                         <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
                             <Loader2 className="animate-spin" color="var(--color-primary)" />
                         </div>
-                    ) : cases.length === 0 ? (
-                        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                            <p>No lawyers assigned to your cases yet.</p>
-                        </div>
+                    )  : cases.length === 0 ? (
+    <div style={{ 
+      padding: '2rem', 
+      textAlign: 'center', 
+      color: 'var(--text-secondary)' 
+    }}>
+        <p style={{ marginBottom: '1rem' }}>
+          {t('lawyerChat.noLawyers')}
+        </p>
+        <button
+          onClick={() => navigate('/litigant/find-lawyer')}
+          style={{
+            padding: '0.75rem 1.5rem',
+            background: 'var(--color-primary)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            fontSize: '0.95rem',
+            fontWeight: '600'
+          }}
+        >
+          {t('lawyerChat.findLawyer')}
+        </button>
+    </div>
                     ) : cases.map(c => (
                         <div
                             key={c.id}
@@ -411,8 +434,8 @@ export default function LawyerChatPage() {
                 {!selectedCase ? (
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem' }}>
                         <MessageSquare size={48} color="var(--color-primary)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                        <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>Select a Lawyer</h3>
-                        <p style={{ color: 'var(--text-secondary)' }}>Select a conversation to start chatting with your lawyer.</p>
+                        <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>{t('lawyerChat.selectLawyer')}</h3>
+                        <p style={{ color: 'var(--text-secondary)' }}>{t('lawyerChat.selectConversation')}</p>
                     </div>
                 ) : (
                     <>
@@ -448,7 +471,7 @@ export default function LawyerChatPage() {
                                                 }}
                                             >
                                                 {selectedCase.allCases.map(c => (
-                                                    <option key={c.id} value={c.id} style={{ color: 'black' }}>Case: {c.title.substring(0, 30)}...</option>
+                                                    <option key={c.id} value={c.id} style={{ color: 'black' }}>{t('lawyerChat.casePrefix')} {c.title.substring(0, 30)}...</option>
                                                 ))}
                                             </select>
                                             <ChevronDown size={12} color="var(--color-success)" style={{ position: 'absolute', right: 0, pointerEvents: 'none' }} />
@@ -459,7 +482,7 @@ export default function LawyerChatPage() {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button title="Request Meeting" style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Calendar size={20} /></button>
+                                <button title={t('lawyerChat.requestMeeting')} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Calendar size={20} /></button>
                                 <button onClick={handlePhoneCall} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Phone size={20} /></button>
                                 <button onClick={handleVideoCall} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><Video size={20} /></button>
                             </div>
@@ -529,7 +552,7 @@ export default function LawyerChatPage() {
                                 <div style={{ position: 'relative', flex: 1 }}>
                                     <input
                                         type="text"
-                                        placeholder={isRecording ? "Recording audio..." : "Type a message..."}
+                                        placeholder={isRecording ? t('lawyerChat.recordingAudio'): t('lawyerChat.typeMessage')}
                                         value={message}
                                         disabled={isRecording}
                                         onChange={e => setMessage(e.target.value)}
@@ -553,7 +576,7 @@ export default function LawyerChatPage() {
                                             fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer'
                                         }}
                                     >
-                                        <Sparkles size={14} /> AI HELP
+                                        <Sparkles size={14} /> {t('lawyerChat.aiHelp')}
                                     </button>
                                 </div>
                                 <button

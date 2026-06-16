@@ -75,3 +75,5 @@ def run_reconstruction(
             "feature_matching": False,
             "sparse_reconstruction": False,
         }
+def run_reconstruction():
+    print("Sparse reconstruction pipeline initialized")

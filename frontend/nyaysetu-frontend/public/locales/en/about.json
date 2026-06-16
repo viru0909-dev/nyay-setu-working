@@ -1,0 +1,69 @@
+{
+  "aboutHeroTag" : "India's First AI-Powered Judiciary Platform",
+   "heroTag": "Building India's Sovereign Legal-Tech Infrastructure",
+
+  "heroTitleStart": "Building India's",
+  "heroTitleHighlight": "Sovereign Legal-Tech",
+  "heroTitleEnd": "Infrastructure",
+
+  "heroDescription": "NyaySetu combines AI intelligence with blockchain integrity to modernize India's judicial system — aligned with the e-Courts Phase III mandate.",
+
+  "founderRole": "Founder & Lead Developer",
+
+  "founderDescription": "Passionate about democratizing access to justice through AI innovation and blockchain integrity.",
+
+  "visionTitle": "Our Vision",
+
+  "visionDescription": "To create a future where justice is not delayed, where legal rights are universally understood, and where technology empowers citizens to navigate the judicial system with confidence.",
+
+  "poweredBy": "Powered By",
+
+  "roadmapTitle": "Development Roadmap",
+
+  "roadmapSubtitle": "Our journey to building India's sovereign legal-tech platform",
+
+  "phase1": {
+    "name": "Phase 1",
+    "title": "Current Release",
+    "status": "✓ Live",
+
+    "item1": "Vakil-Friend AI Assistant (Groq LPU)",
+    "item2": "Blockchain Evidence Vault (SHA-256)",
+    "item3": "Virtual Courtroom & Hearings",
+    "item4": "Multi-role Dashboard"
+  },
+
+  "phase2": {
+    "name": "Phase 2",
+    "title": "Indigenous AI",
+    "status": "⏳In Progress",
+
+    "item1": "OpenNyAI Legal NER Integration",
+    "item2": "Bhashini Translation (22 Languages)",
+    "item3": "Voice Input for Rural Users",
+    "item4": "Section 63(4) Certificate Generator"
+  },
+
+  "phase3": {
+    "name": "Phase 3",
+    "title": "National Scale",
+    "status": "📅 Planned",
+
+    "item1": "Offline-First PWA Architecture",
+    "item2": "ISO 27037 Compliance",
+    "item3": "e-Courts Phase III Integration",
+    "item4": "MeghRaj Sovereign Cloud"
+  },
+
+  "openNyAiTitle": "Indigenous NLP Model - OpenNyAI",
+
+  "openNyAiDescription": "We're building a specialized legal language model trained on Indian case law, statutes, and multilingual legal documents.",
+
+  "viewGithub": "View on GitHub",
+
+  "ctaTitle": "Ready to Experience NyaySetu?",
+
+  "ctaDescription": "Join us in transforming India's judicial system",
+
+  "getStarted": "Get Started"
+}

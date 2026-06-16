@@ -1,0 +1,5 @@
+# <b>Article</b> <b>42</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=111604
+# Fetch query: Constitution of India Article 42
+
+Article 42 in Constitution of India 42. Provision for just and humane conditions of work and maternity relief The State shall make provision for securing just and humane conditions of work and for maternity relief.

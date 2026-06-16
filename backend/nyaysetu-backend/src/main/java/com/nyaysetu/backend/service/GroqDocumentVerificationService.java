@@ -33,7 +33,7 @@ public class GroqDocumentVerificationService {
     private String groqModel;
 
     private final ObjectMapper objectMapper;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate; // Injected bean with timeouts — see RestTemplateConfig
     
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 

@@ -1,0 +1,50 @@
+databases:
+  - name: nyaysetu-db
+    databaseName: nyaysetu
+    user: postgres
+    plan: free
+
+services:
+  - type: web
+    name: nyaysetu-backend
+    env: docker
+    dockerContext: backend/nyaysetu-backend
+    dockerfilePath: backend/nyaysetu-backend/Dockerfile
+    plan: free
+    envVars:
+      - key: DB_URL
+        value: jdbc:postgresql://${nyaysetu-db.internalConnectionString}
+      - key: DB_USERNAME
+        fromDatabase:
+          name: nyaysetu-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: nyaysetu-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://nyay-setu-frontend.vercel.app # Replace with actual Vercel URL
+      - key: FRONTEND_URL
+        value: https://nyay-setu-frontend.vercel.app
+
+  - type: web
+    name: nlp-orchestrator
+    env: docker
+    dockerContext: nlp-orchestrator
+    dockerfilePath: nlp-orchestrator/Dockerfile
+    plan: starter
+    envVars:
+      - key: FRONTEND_ORIGIN
+        value: https://nyaysetu-lovat.vercel.app
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GOOGLE_GEMINI_API_KEY
+        sync: false
+      - key: INDIAN_KANOON_TOKEN
+        sync: false
+      - key: INDIAN_KANOON_API_URL
+        value: https://api.indiankanoon.org

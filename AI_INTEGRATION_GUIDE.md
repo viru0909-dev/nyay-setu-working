@@ -78,6 +78,27 @@ llama-3.1-70b-versatile (optional, for complex cases)
 - Fallback if Groq API is down
 - Privacy-sensitive operations
 
+### 3. **Indian Kanoon API** (Legal Retrieval)
+
+**What is Indian Kanoon?**
+- A legal database of Indian judgments and statutes
+- Accessed via REST API using token authentication
+- Used to ground responses with real case law and section references
+
+**Where it is used**
+- NLP Orchestrator deep research pipeline
+- Main legal reasoning pipeline as RAG context
+
+**Endpoints used**
+- POST `/search/` with `formInput` and `pagenum`
+- POST `/doc/{doc_id}/` to fetch full text
+
+**Setup**
+```
+INDIAN_KANOON_TOKEN=your_indian_kanoon_token_here
+INDIAN_KANOON_API_URL=https://api.indiankanoon.org
+```
+
 ---
 
 ## AI Services Architecture
@@ -1269,7 +1290,7 @@ if (recomputedHash.equals(entry.getSha256Hash())) {
 | Metric | Without AI | With AI | Improvement |
 |--------|------------|---------|-------------|
 | **Case Filing Time** | 7-14 days | 30-45 min | **95% faster** |
-| **Case Filing Cost** | ₹15,000-₹30,000 | ₹0 | **100%savings** |
+| **Case Filing Cost** | ₹15,000-₹30,000 | ₹0 | **100% savings** |
 | **Judge Review Time** | 30-45 min/case | 5 min/case | **85% faster** |
 | **Document Verification** | Manual (2-3 hrs) | Auto (2 sec) | **99.9% faster** |
 | **Evidence Tampering** | Undetectable | Auto-detected | **100% security** |

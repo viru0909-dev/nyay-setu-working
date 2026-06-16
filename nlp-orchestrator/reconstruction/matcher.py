@@ -55,3 +55,5 @@ def match_features(
     except Exception as exc:
         logger.error("[Matcher] Unexpected error: %s", exc)
         return False
+def match_features():
+    print("COLMAP feature matching pipeline initialized")

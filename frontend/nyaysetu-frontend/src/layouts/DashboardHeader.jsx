@@ -4,18 +4,31 @@ import { LogOut, ChevronDown, User, Menu, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/authStore';
 import NotificationBell from '../components/NotificationBell';
+import useThemeStore from '../store/themeStore';
 
 export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const { logout } = useAuthStore();
     const navigate = useNavigate();
     const { t, i18n } = useTranslation('dashboard');
+    const { isDark, toggleTheme } = useThemeStore();
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
-
+    const languages = [
+    { code: 'en', label: 'English' },
+    { code: 'hi', label: 'हिंदी' },
+    { code: 'mr', label: 'मराठी' },
+    { code: 'ta', label: 'தமிழ்' },
+    { code: 'te', label: 'తెలుగు' },
+    { code: 'gu', label: 'ગુજરાતી' },
+    { code: 'kn', label: 'ಕನ್ನಡ' },
+    { code: 'bn', label: 'বাংলা' },
+    { code: 'ml', label: 'മലയാളം' },
+    { code: 'pa', label: 'ਪੰਜਾਬੀ' }
+];
     return (
         <header
             className="navbar"
@@ -30,8 +43,8 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                 justifyContent: 'space-between',
                 position: 'relative',
                 zIndex: 100,
-                background: '#FFFFFF',
-                borderBottom: '1px solid #E5E7EB',
+                background: 'var(--bg-nav)',
+                borderBottom: '1px solid var(--border-light)',
                 gap: '0.75rem'
             }}
         >
@@ -42,8 +55,8 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                     <button
                         onClick={onMobileMenuToggle}
                         style={{
-                            background: '#F8FAFC',
-                            border: '1px solid #E5E7EB',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-light)',
                             borderRadius: '10px',
                             padding: '0.625rem',
                             cursor: 'pointer',
@@ -60,18 +73,22 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
 
                 {/* Page Title */}
                 <div style={{ minWidth: 0 }}>
-                    <h1 style={{
-                        fontSize: isMobile ? '1.15rem' : '1.5rem',
-                        fontWeight: '800',
-                        color: 'var(--color-primary)',
-                        marginBottom: isMobile ? 0 : '0.1rem',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        letterSpacing: '-0.02em'
-                    }}>
+                    <div 
+                        role="heading" 
+                        aria-level="1"
+                        style={{
+                            fontSize: isMobile ? '1.15rem' : '1.5rem',
+                            fontWeight: '800',
+                            color: 'var(--color-primary)',
+                            marginBottom: isMobile ? 0 : '0.1rem',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            letterSpacing: '-0.02em'
+                        }}
+                    >
                         {isMobile ? t('common.dashboard', 'Dashboard') : `${user?.role?.replace('_', ' ')} ${t('common.dashboard', 'Dashboard')}`}
-                    </h1>
+                    </div>
                     {!isMobile && (
                         <p style={{
                             fontSize: '0.825rem',
@@ -93,6 +110,21 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
             }}>
                 {/* Notifications */}
                 <NotificationBell />
+                <button
+                onClick={toggleTheme}
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                style={{
+                  background: 'none',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '20px',
+                  padding: '6px 12px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  color: 'inherit'
+                }}
+              >
+                {isDark ? '🌙' : '☀️'}
+              </button>
 
                 {/* Profile Dropdown */}
                 <div style={{ position: 'relative' }}>
@@ -104,20 +136,20 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             gap: isMobile ? '0.5rem' : '0.75rem',
                             padding: isMobile ? '0.25rem' : '0.5rem 0.75rem',
                             borderRadius: '12px',
-                            background: '#F8FAFC',
-                            border: '1px solid #E5E7EB',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-light)',
                             color: 'var(--color-primary)',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
                             fontWeight: '700'
                         }}
                         onMouseOver={(e) => {
-                            e.currentTarget.style.background = '#F1F5F9';
-                            e.currentTarget.style.borderColor = '#CBD5E1';
+                            e.currentTarget.style.background = 'var(--bg-hover)';
+                            e.currentTarget.style.borderColor = 'var(--border-medium)';
                         }}
                         onMouseOut={(e) => {
-                            e.currentTarget.style.background = '#F8FAFC';
-                            e.currentTarget.style.borderColor = '#E5E7EB';
+                            e.currentTarget.style.background = 'var(--bg-surface)';
+                            e.currentTarget.style.borderColor = 'var(--border-light)';
                         }}
                     >
                         <div style={{
@@ -154,8 +186,8 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             top: '110%',
                             right: 0,
                             width: '220px',
-                            background: '#FFFFFF',
-                            border: '1px solid #E5E7EB',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-light)',
                             borderRadius: '12px',
                             padding: '0.5rem',
                             boxShadow: '0 10px 25px rgba(30, 42, 68, 0.1)',
@@ -184,7 +216,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                     marginBottom: '0.25rem'
                                 }}
                                 onMouseOver={(e) => {
-                                    e.currentTarget.style.background = '#F8FAFC';
+                                    e.currentTarget.style.background = 'var(--bg-hover)';
                                     e.currentTarget.style.color = 'var(--color-secondary)';
                                 }}
                                 onMouseOut={(e) => {
@@ -208,77 +240,43 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                 {t('common.language', 'Language')}
                             </div>
                             <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(2, 1fr)',
-                                gap: '0.5rem',
-                                padding: '0 0.5rem'
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(2, 1fr)',
+                                        gap: '0.5rem',
+                                        padding: '0 0.5rem',
+                                        maxHeight: '240px',
+                                        overflowY: 'auto'
                             }}>
+                                {languages.map((lang) => (
                                 <button
+                                    key={lang.code}
                                     onClick={() => {
-                                        i18n.changeLanguage('en');
+                                        i18n.changeLanguage(lang.code);
                                         setShowProfileMenu(false);
                                     }}
                                     style={{
                                         padding: '0.5rem',
-                                        background: i18n.language === 'en' ? 'rgba(63, 93, 204, 0.1)' : 'transparent',
-                                        border: i18n.language === 'en' ? '1px solid var(--color-secondary)' : '1px solid #E5E7EB',
+                                        background:
+                                            i18n.language === lang.code
+                                            ? 'rgba(63, 93, 204, 0.1)'
+                                            : 'transparent',
+                                        border:
+                                            i18n.language === lang.code
+                                            ? '1px solid var(--color-secondary)'
+                                            : '1px solid #E5E7EB',
                                         borderRadius: '6px',
-                                        color: i18n.language === 'en' ? 'var(--color-secondary)' : 'var(--color-primary)',
+                                        color:
+                                            i18n.language === lang.code
+                                            ? 'var(--color-secondary)'
+                                            : 'var(--color-primary)',
                                         fontSize: '0.8rem',
-                                        fontWeight: i18n.language === 'en' ? '700' : '600',
+                                        fontWeight:
+                                            i18n.language === lang.code ? '700' : '600',
                                         cursor: 'pointer',
-                                        transition: 'all 0.2s',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '0.25rem'
-                                    }}
-                                    onMouseOver={(e) => {
-                                        if (i18n.language !== 'en') {
-                                            e.currentTarget.style.background = '#F8FAFC';
-                                        }
-                                    }}
-                                    onMouseOut={(e) => {
-                                        if (i18n.language !== 'en') {
-                                            e.currentTarget.style.background = 'transparent';
-                                        }
-                                    }}
-                                >
-                                    EN
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        i18n.changeLanguage('hi');
-                                        setShowProfileMenu(false);
-                                    }}
-                                    style={{
-                                        padding: '0.5rem',
-                                        background: i18n.language === 'hi' ? 'rgba(63, 93, 204, 0.1)' : 'transparent',
-                                        border: i18n.language === 'hi' ? '1px solid var(--color-secondary)' : '1px solid #E5E7EB',
-                                        borderRadius: '6px',
-                                        color: i18n.language === 'hi' ? 'var(--color-secondary)' : 'var(--color-primary)',
-                                        fontSize: '0.8rem',
-                                        fontWeight: i18n.language === 'hi' ? '700' : '600',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '0.25rem'
-                                    }}
-                                    onMouseOver={(e) => {
-                                        if (i18n.language !== 'hi') {
-                                            e.currentTarget.style.background = '#F8FAFC';
-                                        }
-                                    }}
-                                    onMouseOut={(e) => {
-                                        if (i18n.language !== 'hi') {
-                                            e.currentTarget.style.background = 'transparent';
-                                        }
-                                    }}
-                                >
-                                    हिंदी
-                                </button>
+                                        transition: 'all 0.2s'
+                                }}>
+                                    {lang.label}
+                                </button>))}
                             </div>
 
                             <div style={{

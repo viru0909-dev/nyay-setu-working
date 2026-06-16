@@ -4,6 +4,7 @@ import com.nyaysetu.backend.entity.EvidenceRecord;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.BlockchainEvidenceService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,9 @@ import java.util.*;
 /**
  * Controller for blockchain-secured evidence management
  */
+@Tag(name = "Blockchain Evidence", description = "Upload and verify evidence secured with SHA-256 blockchain hashing")
 @RestController
-@RequestMapping("/api/evidence")
+@RequestMapping("/evidence")
 @RequiredArgsConstructor
 @Slf4j
 public class BlockchainEvidenceController {
@@ -26,6 +28,7 @@ public class BlockchainEvidenceController {
     private final BlockchainEvidenceService evidenceService;
     private final com.nyaysetu.backend.service.CertificateService certificateService;
     private final UserRepository userRepository;
+    private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
 
     /**
      * Upload evidence with blockchain hash
@@ -45,6 +48,7 @@ public class BlockchainEvidenceController {
                 return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
             }
 
+            caseAccessService.requireCaseAccess(caseId, currentUser);
             String uploadIp = getClientIp(request);
             EvidenceRecord evidence = evidenceService.uploadEvidence(
                     caseId, file, title, description, evidenceType, currentUser, uploadIp);
@@ -70,6 +74,10 @@ public class BlockchainEvidenceController {
     @GetMapping("/case/{caseId}")
     public ResponseEntity<?> getEvidenceByCase(@PathVariable UUID caseId) {
         try {
+            User currentUser = getCurrentUser();
+            if (currentUser != null) {
+                caseAccessService.requireCaseAccess(caseId, currentUser);
+            }
             List<EvidenceRecord> evidence = evidenceService.getEvidenceByCase(caseId);
             
             List<Map<String, Object>> response = evidence.stream().map(e -> {

@@ -46,7 +46,7 @@
 - **Framework:** React 18 + Vite
 - **Routing:** React Router v6
 - **State Management:** Zustand
-- **Styling:** Custom CSS (no Tailwind)
+- **Styling:** Tailwind CSS, Custom CSS Variables
 - **UI Libraries:** Framer Motion, Lucide Icons
 - **PWA:** vite-plugin-pwa, Workbox
 
@@ -384,7 +384,7 @@ Base URL: `http://localhost:8080/api`
 | GET | `/judge/unassigned` | Get unassigned cases | - | `List<CaseDTO>` |
 | POST | `/judge/assign/{caseId}` | Assign case to self | - | Updated `CaseDTO` |
 | POST | `/judge/orders/{caseId}` | Issue court order | `CourtOrderRequest` | `CourtOrder` |
-| { GET | `/judge/analytics` | Court analytics dashboard | - | Analytics data |
+| GET | `/judge/analytics` | Court analytics dashboard | - | Analytics data |
 | POST | `/judge/summons/{caseId}` | Order summons | - | Success message |
 
 ---

@@ -1,0 +1,5 @@
+# <b>Article</b> <b>113</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=10691
+# Fetch query: Constitution of India Article 113
+
+Article 113 in Constitution of India 113. Procedure in Parliament with respect to estimates (1)So much of the estimates as relates to expenditure charged upon the Consolidated Fund of India shall not be submitted to the vote of Parliament, but nothing in this clause shall be construed as preventing the discussion in either House of Parliament of any of those estimates.(2)So much of the said estimates as relates to other expenditure shall be submitted in the form of demands for grants to the House of the People, and the House of the People shall have power to assent, or to refuse to assent, to any demand, or to assent to any demand subject to a reduction of the amount specified therein.(3)No demand for a grant shall be made except on the recommendation of the President.

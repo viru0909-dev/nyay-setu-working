@@ -3,6 +3,8 @@ package com.nyaysetu.backend.controller;
 import com.nyaysetu.backend.dto.CreateVerificationRequest;
 import com.nyaysetu.backend.entity.VerificationRequest;
 import com.nyaysetu.backend.service.VerificationService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Verification", description = "Submit and approve identity verification requests")
 @RestController
 @RequestMapping("/verify")
 @RequiredArgsConstructor
@@ -18,7 +21,7 @@ public class VerificationController {
     private final VerificationService service;
 
     @PostMapping("/request")
-    public ResponseEntity<VerificationRequest> createRequest(@RequestBody CreateVerificationRequest dto) {
+    public ResponseEntity<VerificationRequest> createRequest(@Valid @RequestBody CreateVerificationRequest dto) {
         return ResponseEntity.ok(service.createRequest(dto));
     }
 

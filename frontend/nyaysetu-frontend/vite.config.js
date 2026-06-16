@@ -33,8 +33,24 @@ export default defineConfig({
         ]
       },
       workbox: {
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        navigateFallback: '/offline.html',
         runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'jsdelivr-cache',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
@@ -88,19 +104,26 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  
   server: {
-    port: 5173,
-    host: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        secure: false
-      }
+  port: 5173,
+  host: true,
+  proxy: {
+    '/api': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+      secure: false
     }
-  },
-  build: {
-    outDir: 'dist',
-    sourcemap: false
   }
+},
+
+test: {
+  environment: 'jsdom',
+  globals: true,
+},
+
+build: {
+  outDir: 'dist',
+  sourcemap: false
+}
 })

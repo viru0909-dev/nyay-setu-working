@@ -1,0 +1,5 @@
+# <b>Article</b> <b>1</b> in <b>Constitution</b> of <b>India</b>
+# Source: Indian Kanoon, doc_id=1406924
+# Fetch query: Constitution of India Article 1
+
+Article 1 in Constitution of India 1. Name and territory of the Union (1)India, that is Bharat, shall be a Union of States.(2)The States and the territories thereof shall be as specified in the First Schedule.(3)The territory of India shall comprise-(a)The territories of the States;(b)the Union territories specified in the First Schedule; and(c)such other territories as may be acquired.[Editorial comment-The Constitution (Seventh Amendment) Act, 1956, it amended Article 1 where the split of states based on Parts was eliminated as part of the revisions made. States were used in place of Parts A and B. States in Parts C and D were replaced by Union territories. There were added 14 states along with 5 union territories. Also Refer ]
