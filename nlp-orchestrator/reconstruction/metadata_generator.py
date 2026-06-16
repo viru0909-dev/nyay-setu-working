@@ -1,6 +1,7 @@
 import cv2
 import json
 
+
 def generate_metadata(video_path, output_json, camera_id):
 
     video = cv2.VideoCapture(video_path)
@@ -24,11 +25,13 @@ def generate_metadata(video_path, output_json, camera_id):
 
         timestamp = frame_id / fps
 
-        metadata.append({
-            "frame": f"frame_{frame_id}.jpg",
-            "timestamp": round(timestamp, 3),
-            "camera_id": camera_id
-        })
+        metadata.append(
+            {
+                "frame": f"frame_{frame_id}.jpg",
+                "timestamp": round(timestamp, 3),
+                "camera_id": camera_id,
+            }
+        )
 
         frame_id += 1
 
@@ -40,8 +43,4 @@ def generate_metadata(video_path, output_json, camera_id):
     print(f"Generated metadata for {frame_id} frames")
 
 
-generate_metadata(
-    "../input_videos/sample.mp4",
-    "metadata.json",
-    "cam_1"
-)
+generate_metadata("../input_videos/sample.mp4", "metadata.json", "cam_1")
