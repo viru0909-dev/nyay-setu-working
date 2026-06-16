@@ -11,6 +11,7 @@ import AIChatbot from '../components/landing/AIChatbot';
 import AchievementsSection from '../components/landing/AchievementsSection';
 import HowItWorks from '../components/landing/HowItWorks';
 import TrustIndicators from '../components/landing/TrustIndicators';
+import FAQSection from '../components/landing/FAQSection';
 import useProtectedFeature from '../hooks/useProtectedFeature';
 import useGuest from '../hooks/useGuest';
 import GuestAccessDeniedModal from '../components/guest/GuestAccessDeniedModal';
@@ -677,6 +678,8 @@ export default function Landing() {
                         </motion.div>
                     </div>
                 </section>
+
+                <FAQSection />
             </main>
 
             <Footer />

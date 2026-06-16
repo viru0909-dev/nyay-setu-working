@@ -14,6 +14,7 @@ os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
 
 # The OCR service imports cv2/Pillow at module load. Skip cleanly if absent.
 import pytest
+
 pytest.importorskip("cv2")
 pytest.importorskip("PIL")
 
@@ -101,7 +102,9 @@ async def test_one_failing_page_does_not_sink_the_batch():
         results = await recognize_modi_pages(pages)
 
     assert results[0]["status"] == "success" and results[0]["predicted_text"] == "good1"
-    assert results[1]["status"] == "error" and "inference blew up" in results[1]["error"]
+    assert (
+        results[1]["status"] == "error" and "inference blew up" in results[1]["error"]
+    )
     assert results[2]["status"] == "success" and results[2]["predicted_text"] == "good2"
 
 

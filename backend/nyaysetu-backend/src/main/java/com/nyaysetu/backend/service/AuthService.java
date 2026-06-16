@@ -29,7 +29,7 @@ public class AuthService implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(u.getEmail())
-                .password(u.getPassword())
+                .password(u.getPassword() != null ? u.getPassword() : "")
                 .roles(u.getRole().name())
                 .build();
     }

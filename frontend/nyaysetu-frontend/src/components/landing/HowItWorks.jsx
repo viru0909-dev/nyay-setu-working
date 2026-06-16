@@ -128,28 +128,12 @@ export default function HowItWorks() {
                                     borderRadius: '1.5rem',
                                     transition: 'all 0.3s ease',
                                     cursor: 'pointer',
-                                    background: 'rgba(255,255,255,0.02)',
-                                    border: '1px solid rgba(255,255,255,0.05)',
-                                    backdropFilter: 'blur(10px)'
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
+                                    backdropFilter: 'var(--glass-blur)',
+                                    boxShadow: 'var(--shadow-glass)'
                                 }}
                             >
-                                {/* Step Number Background */}
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '-20px',
-                                    left: '50%',
-                                    transform: 'translateX(-50%)',
-                                    fontSize: '6rem',
-                                    fontWeight: '900',
-                                    color: step.color,
-                                    opacity: 0.05,
-                                    zIndex: 0,
-                                    lineHeight: 1
-                                }}>
-                                    {step.number}
-                                </div>
-
-                                {/* Icon Container */}
                                 <motion.div
                                     whileHover={{ scale: 1.12, rotate: 4, y: -8 }}
                                     transition={{ type: "spring", stiffness: 300 }}
@@ -157,7 +141,7 @@ export default function HowItWorks() {
                                         width: '120px',
                                         height: '120px',
                                         margin: '0 auto 2rem',
-                                        background: 'var(--bg-glass-strong)', // Glass effect
+                                        background: 'var(--bg-glass-strong)',
                                         backdropFilter: 'var(--glass-blur)',
                                         border: `3px solid ${step.color}40`,
                                         borderRadius: '2rem',
