@@ -25,6 +25,7 @@ ALLOWED_IMAGE_CONTENT_TYPES = {
     "image/tiff",
 }
 
+
 # Batch responses are shaped locally (rather than in models/schemas.py) to keep
 # this feature self-contained.
 class ModiOCRPageResult(BaseModel):

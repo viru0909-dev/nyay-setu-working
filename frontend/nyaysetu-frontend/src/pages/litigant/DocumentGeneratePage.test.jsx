@@ -10,12 +10,21 @@ vi.mock('../../services/api', () => ({
   },
 }));
 
+if (typeof window.URL.createObjectURL !== 'function') {
+  window.URL.createObjectURL = vi.fn(() => 'blob:mock');
+}
+if (typeof window.URL.revokeObjectURL !== 'function') {
+  window.URL.revokeObjectURL = vi.fn();
+}
+
 import { documentGenerateAPI as lawgpt } from '../../services/api';
 import DocumentGeneratePage from './DocumentGeneratePage';
 
 describe('DocumentGeneratePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.URL.createObjectURL = vi.fn(() => 'blob:dummy');
+    window.URL.revokeObjectURL = vi.fn();
     lawgpt.preview.mockResolvedValue({ data: { title: 'AFFIDAVIT', content: 'dummy text', generatedAt: new Date().toISOString(), sources: [] } });
     lawgpt.downloadDocx.mockResolvedValue({ data: new Blob(['docx']) });
   });
