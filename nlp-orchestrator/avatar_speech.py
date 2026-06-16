@@ -55,13 +55,84 @@ INTERIM_TEMPLATES = {
 
 # Domain detection keywords
 DOMAIN_KEYWORDS = {
-    "accident": ["accident", "vehicle", "car", "bike", "road", "collision", "injury", "mva", "motor"],
-    "property": ["property", "land", "house", "flat", "rent", "tenant", "possession", "registration"],
-    "criminal": ["fir", "police", "arrest", "bail", "crime", "criminal", "murder", "theft", "fraud", "ipc", "bns"],
-    "consumer": ["consumer", "product", "defect", "refund", "company", "service", "complaint"],
-    "family": ["divorce", "marriage", "custody", "alimony", "maintenance", "wife", "husband", "child"],
-    "labour": ["job", "employment", "salary", "fired", "boss", "company", "labour", "worker", "wage"],
-    "legal": ["law", "court", "judge", "advocate", "lawyer", "justice", "legal", "section", "article", "constitution", "act", "rule"],
+    "accident": [
+        "accident",
+        "vehicle",
+        "car",
+        "bike",
+        "road",
+        "collision",
+        "injury",
+        "mva",
+        "motor",
+    ],
+    "property": [
+        "property",
+        "land",
+        "house",
+        "flat",
+        "rent",
+        "tenant",
+        "possession",
+        "registration",
+    ],
+    "criminal": [
+        "fir",
+        "police",
+        "arrest",
+        "bail",
+        "crime",
+        "criminal",
+        "murder",
+        "theft",
+        "fraud",
+        "ipc",
+        "bns",
+    ],
+    "consumer": [
+        "consumer",
+        "product",
+        "defect",
+        "refund",
+        "company",
+        "service",
+        "complaint",
+    ],
+    "family": [
+        "divorce",
+        "marriage",
+        "custody",
+        "alimony",
+        "maintenance",
+        "wife",
+        "husband",
+        "child",
+    ],
+    "labour": [
+        "job",
+        "employment",
+        "salary",
+        "fired",
+        "boss",
+        "company",
+        "labour",
+        "worker",
+        "wage",
+    ],
+    "legal": [
+        "law",
+        "court",
+        "judge",
+        "advocate",
+        "lawyer",
+        "justice",
+        "legal",
+        "section",
+        "article",
+        "constitution",
+        "act",
+        "rule",
+    ],
 }
 
 
@@ -82,11 +153,11 @@ def get_interim_messages(query: str, count: int = 3) -> list[str]:
     domain = detect_domain(query)
     domain_messages = INTERIM_TEMPLATES.get(domain, INTERIM_TEMPLATES["general"])
     general_messages = INTERIM_TEMPLATES["general"]
-    
+
     # Mix domain-specific and general messages
     combined = domain_messages + general_messages
     random.shuffle(combined)
-    
+
     # Deduplicate and cap
     seen = set()
     result = []
@@ -94,7 +165,7 @@ def get_interim_messages(query: str, count: int = 3) -> list[str]:
         if msg not in seen and len(result) < count:
             seen.add(msg)
             result.append(msg)
-    
+
     return result
 
 
@@ -161,14 +232,14 @@ async def convert_to_hinglish(markdown_answer: str) -> str:
                     "role": "user",
                     "content": HINGLISH_CONVERSION_PROMPT.format(
                         markdown_answer=markdown_answer
-                    )
+                    ),
                 }
             ],
             temperature=0.6,
-            max_tokens=512
+            max_tokens=512,
         )
         return response.choices[0].message.content.strip()
-    
+
     except Exception as e:
         print(f"[AvatarSpeech] Hinglish conversion error: {e}")
         # Fallback: extract first 3 sentences
