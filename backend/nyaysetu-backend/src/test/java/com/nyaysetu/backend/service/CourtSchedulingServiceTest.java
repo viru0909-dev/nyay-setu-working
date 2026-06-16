@@ -19,6 +19,29 @@ class CourtSchedulingServiceTest {
 
     private CourtSchedulingService service;
 
+    private static final int YEAR = 2026;
+    private static final int MONTH = 6;
+    private static final int SATURDAY_DAY = 20;
+    private static final int MONDAY_DAY = 22;
+    private static final int HOUR_9 = 9;
+    private static final int HOUR_10 = 10;
+    private static final int HOUR_11 = 11;
+    private static final int HOUR_12 = 12;
+    private static final int MINUTE_0 = 0;
+    private static final int MINUTE_30 = 30;
+
+    private static final LocalDateTime DATE_SAT_10AM = LocalDateTime.of(YEAR, MONTH, SATURDAY_DAY, HOUR_10, MINUTE_0);
+    private static final LocalDateTime DATE_SAT_11AM = LocalDateTime.of(YEAR, MONTH, SATURDAY_DAY, HOUR_11, MINUTE_0);
+    private static final LocalDateTime DATE_SAT_1030AM = LocalDateTime.of(YEAR, MONTH, SATURDAY_DAY, HOUR_10, MINUTE_30);
+    private static final LocalDateTime DATE_SAT_1130AM = LocalDateTime.of(YEAR, MONTH, SATURDAY_DAY, HOUR_11, MINUTE_30);
+
+    private static final LocalDateTime DATE_MON_9AM = LocalDateTime.of(YEAR, MONTH, MONDAY_DAY, HOUR_9, MINUTE_0);
+    private static final LocalDateTime DATE_MON_10AM = LocalDateTime.of(YEAR, MONTH, MONDAY_DAY, HOUR_10, MINUTE_0);
+    private static final LocalDateTime DATE_MON_11AM = LocalDateTime.of(YEAR, MONTH, MONDAY_DAY, HOUR_11, MINUTE_0);
+    private static final LocalDateTime DATE_MON_12PM = LocalDateTime.of(YEAR, MONTH, MONDAY_DAY, HOUR_12, MINUTE_0);
+
+    private static final String TEST_UUID = "12345678-1234-1234-1234-1234567890ab";
+
     @Mock private CourtScheduleRepository courtScheduleRepository;
     @Mock private CourtroomRepository courtroomRepository;
     @Mock private SchedulingConflictRepository schedulingConflictRepository;
@@ -45,8 +68,8 @@ class CourtSchedulingServiceTest {
     void detectConflictsNoConflictsWhenEmpty() {
         CourtSchedule schedule = CourtSchedule.builder()
                 .id(UUID.randomUUID())
-                .startTime(LocalDateTime.of(2026, 6, 20, 10, 0))
-                .endTime(LocalDateTime.of(2026, 6, 20, 11, 0))
+                .startTime(DATE_SAT_10AM)
+                .endTime(DATE_SAT_11AM)
                 .judge(User.builder().id(1L).name("Judge A").build())
                 .courtroom(Courtroom.builder().id(1).name("Courtroom A").build())
                 .caseEntity(CaseEntity.builder().id(UUID.randomUUID()).title("Case Title").build())
@@ -70,8 +93,8 @@ class CourtSchedulingServiceTest {
         
         CourtSchedule schedule1 = CourtSchedule.builder()
                 .id(UUID.randomUUID())
-                .startTime(LocalDateTime.of(2026, 6, 20, 10, 0))
-                .endTime(LocalDateTime.of(2026, 6, 20, 11, 0))
+                .startTime(DATE_SAT_10AM)
+                .endTime(DATE_SAT_11AM)
                 .judge(judge)
                 .caseEntity(case1)
                 .status("SCHEDULED")
@@ -79,8 +102,8 @@ class CourtSchedulingServiceTest {
 
         CourtSchedule conflictingSchedule = CourtSchedule.builder()
                 .id(UUID.randomUUID())
-                .startTime(LocalDateTime.of(2026, 6, 20, 10, 30))
-                .endTime(LocalDateTime.of(2026, 6, 20, 11, 30))
+                .startTime(DATE_SAT_1030AM)
+                .endTime(DATE_SAT_1130AM)
                 .judge(judge)
                 .caseEntity(case2)
                 .status("SCHEDULED")
@@ -102,8 +125,8 @@ class CourtSchedulingServiceTest {
         when(courtroomRepository.findByStatus("AVAILABLE")).thenReturn(List.of(room));
 
         // Start search Saturday morning (weekend), should move to Monday 9:00 AM
-        LocalDateTime searchFrom = LocalDateTime.of(2026, 6, 20, 10, 0); // Saturday
-        LocalDateTime expectedStart = LocalDateTime.of(2026, 6, 22, 9, 0); // Monday morning
+        LocalDateTime searchFrom = DATE_SAT_10AM; // Saturday
+        LocalDateTime expectedStart = DATE_MON_9AM; // Monday morning
 
         when(courtScheduleRepository.findOverlappingJudgeSchedules(anyLong(), any(), any())).thenReturn(Collections.emptyList());
         when(courtScheduleRepository.findOverlappingCourtroomSchedules(anyInt(), any(), any())).thenReturn(Collections.emptyList());
@@ -123,8 +146,8 @@ class CourtSchedulingServiceTest {
 
         CourtSchedule schedule = CourtSchedule.builder()
                 .id(UUID.randomUUID())
-                .startTime(LocalDateTime.of(2026, 6, 22, 10, 0)) // Monday
-                .endTime(LocalDateTime.of(2026, 6, 22, 11, 0))
+                .startTime(DATE_MON_10AM) // Monday
+                .endTime(DATE_MON_11AM)
                 .judge(judge)
                 .caseEntity(caseObj)
                 .courtroom(room)
@@ -136,8 +159,8 @@ class CourtSchedulingServiceTest {
         
         CourtSchedule busySchedule = CourtSchedule.builder()
                 .id(UUID.randomUUID())
-                .startTime(LocalDateTime.of(2026, 6, 22, 10, 0))
-                .endTime(LocalDateTime.of(2026, 6, 22, 11, 0))
+                .startTime(DATE_MON_10AM)
+                .endTime(DATE_MON_11AM)
                 .judge(judge)
                 .build();
 
@@ -145,7 +168,7 @@ class CourtSchedulingServiceTest {
                 .thenAnswer(invocation -> {
                     LocalDateTime start = invocation.getArgument(1);
                     LocalDateTime end = invocation.getArgument(2);
-                    if (start.isBefore(LocalDateTime.of(2026, 6, 22, 11, 0))) {
+                    if (start.isBefore(DATE_MON_11AM)) {
                         return List.of(busySchedule);
                     }
                     return Collections.emptyList();
@@ -155,8 +178,8 @@ class CourtSchedulingServiceTest {
 
         service.autoReschedule(schedule.getId());
 
-        assertEquals(LocalDateTime.of(2026, 6, 22, 11, 0), schedule.getStartTime());
-        assertEquals(LocalDateTime.of(2026, 6, 22, 12, 0), schedule.getEndTime());
+        assertEquals(DATE_MON_11AM, schedule.getStartTime());
+        assertEquals(DATE_MON_12PM, schedule.getEndTime());
         assertEquals("RESCHEDULED", schedule.getStatus());
         verify(courtScheduleRepository).save(schedule);
     }
@@ -164,9 +187,9 @@ class CourtSchedulingServiceTest {
     @Test
     void generateICalendarReturnsValidICSString() {
         CourtSchedule schedule = CourtSchedule.builder()
-                .id(UUID.fromString("12345678-1234-1234-1234-1234567890ab"))
-                .startTime(LocalDateTime.of(2026, 6, 22, 10, 0))
-                .endTime(LocalDateTime.of(2026, 6, 22, 11, 0))
+                .id(UUID.fromString(TEST_UUID))
+                .startTime(DATE_MON_10AM)
+                .endTime(DATE_MON_11AM)
                 .judge(User.builder().name("Judge A").build())
                 .lawyer(User.builder().name("Lawyer B").build())
                 .courtroom(Courtroom.builder().name("Courtroom A").roomNumber("101").build())

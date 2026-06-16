@@ -15,36 +15,28 @@ public interface CourtScheduleRepository extends JpaRepository<CourtSchedule, UU
 
     List<CourtSchedule> findByCaseEntityId(UUID caseId);
 
-    @Query("SELECT cs FROM CourtSchedule cs WHERE cs.courtroom.id = :courtroomId " +
-           "AND cs.status <> 'CANCELLED' " +
-           "AND cs.startTime < :endTime AND cs.endTime > :startTime")
+    @Query("SELECT cs FROM CourtSchedule cs WHERE cs.courtroom.id = :courtroomId AND cs.status <> 'CANCELLED' AND cs.startTime < :endTime AND cs.endTime > :startTime")
     List<CourtSchedule> findOverlappingCourtroomSchedules(
             @Param("courtroomId") Integer courtroomId,
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime
     );
 
-    @Query("SELECT cs FROM CourtSchedule cs WHERE cs.judge.id = :judgeId " +
-           "AND cs.status <> 'CANCELLED' " +
-           "AND cs.startTime < :endTime AND cs.endTime > :startTime")
+    @Query("SELECT cs FROM CourtSchedule cs WHERE cs.judge.id = :judgeId AND cs.status <> 'CANCELLED' AND cs.startTime < :endTime AND cs.endTime > :startTime")
     List<CourtSchedule> findOverlappingJudgeSchedules(
             @Param("judgeId") Long judgeId,
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime
     );
 
-    @Query("SELECT cs FROM CourtSchedule cs WHERE cs.lawyer.id = :lawyerId " +
-           "AND cs.status <> 'CANCELLED' " +
-           "AND cs.startTime < :endTime AND cs.endTime > :startTime")
+    @Query("SELECT cs FROM CourtSchedule cs WHERE cs.lawyer.id = :lawyerId AND cs.status <> 'CANCELLED' AND cs.startTime < :endTime AND cs.endTime > :startTime")
     List<CourtSchedule> findOverlappingLawyerSchedules(
             @Param("lawyerId") Long lawyerId,
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime
     );
 
-    @Query("SELECT cs FROM CourtSchedule cs WHERE cs.caseEntity.id = :caseId " +
-           "AND cs.status <> 'CANCELLED' " +
-           "AND cs.startTime < :endTime AND cs.endTime > :startTime")
+    @Query("SELECT cs FROM CourtSchedule cs WHERE cs.caseEntity.id = :caseId AND cs.status <> 'CANCELLED' AND cs.startTime < :endTime AND cs.endTime > :startTime")
     List<CourtSchedule> findOverlappingCaseSchedules(
             @Param("caseId") UUID caseId,
             @Param("startTime") LocalDateTime startTime,

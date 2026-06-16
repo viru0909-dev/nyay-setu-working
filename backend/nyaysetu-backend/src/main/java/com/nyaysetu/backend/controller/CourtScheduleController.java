@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class CourtScheduleController {
     private final CourtSchedulingService schedulingService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     public ResponseEntity<Map<String, Object>> createSchedule(@Valid @RequestBody CreateScheduleRequest request) {
         log.info("Request received to create schedule for case: {}", request.getCaseId());
         CourtSchedule schedule = schedulingService.createSchedule(
@@ -59,6 +61,7 @@ public class CourtScheduleController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     public ResponseEntity<Map<String, Object>> updateSchedule(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateScheduleRequest request
@@ -90,6 +93,7 @@ public class CourtScheduleController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     public ResponseEntity<Map<String, Object>> cancelSchedule(@PathVariable UUID id) {
         log.info("Request received to cancel schedule: {}", id);
         CourtSchedule schedule = schedulingService.cancelSchedule(id);
@@ -103,6 +107,7 @@ public class CourtScheduleController {
     }
 
     @GetMapping("/conflicts")
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     public ResponseEntity<List<SchedulingConflictResponse>> getConflicts() {
         log.info("Request received to list active scheduling conflicts");
         List<SchedulingConflict> conflicts = schedulingService.getActiveConflicts();
@@ -121,6 +126,7 @@ public class CourtScheduleController {
     }
 
     @PostMapping("/{id}/reschedule")
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     public ResponseEntity<Map<String, Object>> rescheduleSchedule(@PathVariable UUID id) {
         log.info("Request received to auto-reschedule schedule: {}", id);
         schedulingService.autoReschedule(id);
@@ -133,6 +139,7 @@ public class CourtScheduleController {
     }
 
     @PostMapping("/detect-conflicts")
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN', 'LAWYER')")
     public ResponseEntity<Map<String, Object>> detectConflicts(@Valid @RequestBody CreateScheduleRequest request) {
         log.info("Request received to preview/detect conflicts for potential schedule of case: {}", request.getCaseId());
         
@@ -169,6 +176,7 @@ public class CourtScheduleController {
     }
 
     @GetMapping("/{id}/ical")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> getICalendar(@PathVariable UUID id) {
         log.info("Request received to export iCal file for schedule: {}", id);
         String iCalData = schedulingService.generateICalendar(id);
