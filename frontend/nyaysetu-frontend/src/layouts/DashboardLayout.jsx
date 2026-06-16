@@ -99,11 +99,12 @@ export default function DashboardLayout() {
 
                 {/* Scrollable Content Area */}
                 <main style={{
-                    flex: 1,
-                    padding: isMobile ? '1rem' : '2rem',
-                    overflowY: 'auto',
-                    overflowX: 'hidden'
-                }}>
+                        flex: 1,
+                        padding: isMobile ? '1rem' : '2rem',
+                        overflowY: 'auto',
+                         overflowX: 'hidden'
+                        }}>
+
                     <Outlet />
                 </main>
 

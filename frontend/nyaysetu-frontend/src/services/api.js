@@ -178,6 +178,13 @@ export const hearingAPI = {
     getParticipants: (id) => api.get(`/api/v1/hearings/${id}/participants`)
 };
 
+// Hearing Reminder API
+export const hearingReminderAPI = {
+    list: () => api.get('/api/hearing-reminders'),
+    create: (reminderData) => api.post('/api/hearing-reminders', reminderData),
+    delete: (id) => api.delete(`/api/hearing-reminders/${id}`)
+};
+
 // Meeting API
 export const meetingAPI = {
     schedule: (meetingData) => api.post('/api/v1/meetings', meetingData),
