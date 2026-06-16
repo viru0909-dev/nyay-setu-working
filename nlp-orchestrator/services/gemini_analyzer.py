@@ -25,6 +25,7 @@ End with LIABILITY VERDICT:
 - Recommended legal action for the citizen
 """
 
+
 async def analyze_frames(frame_paths: list[str], job_id: str) -> str:
     """Upload frames to Gemini and request forensic timeline analysis."""
     if not client:
@@ -34,34 +35,36 @@ async def analyze_frames(frame_paths: list[str], job_id: str) -> str:
     try:
         # Note: For production with many frames, it's better to use Gemini File API to upload a video
         # But for this implementation we will upload the extracted frames directly
-        
+
         # Load the images
         from PIL import Image
+
         images = []
         for path in frame_paths:
             try:
                 images.append(Image.open(path))
             except Exception as e:
                 logger.error(f"Error loading frame {path}: {e}")
-        
+
         if not images:
             return "No valid frames extracted from the video."
 
         # Prepare request content
         contents = [TIMELINE_RECONSTRUCTION_PROMPT] + images
-        
-        logger.info(f"[{job_id}] Sending {len(images)} frames to Gemini for analysis...")
-        
+
+        logger.info(
+            f"[{job_id}] Sending {len(images)} frames to Gemini for analysis..."
+        )
+
         # Run in executor to not block async loop
         loop = asyncio.get_running_loop()
         response = await loop.run_in_executor(
             None,
             lambda: client.models.generate_content(
-                model=GEMINI_MODEL,
-                contents=contents
-            )
+                model=GEMINI_MODEL, contents=contents
+            ),
         )
-        
+
         analysis = response.text.strip()
         logger.info(f"[{job_id}] Received analysis from Gemini.")
         return analysis

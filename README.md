@@ -60,7 +60,7 @@ Nyay Setu is built to address this directly. The platform removes the three bigg
 
 <hr/>
 
-## Key Features
+# Key Features
 
 **AI Legal Assistant (Vakil Friend)**
 A conversational AI companion powered by Groq's Llama 3.1 that helps citizens understand their legal rights, navigate case filings, review documents, and get real-time answers in plain, accessible language.
@@ -372,7 +372,7 @@ For environment variables, copy `.env.example` to `.env` and fill in your values
 
 <hr/>
 
-## Documentation
+---
 
 ### Getting Started
 | Document | Description |
