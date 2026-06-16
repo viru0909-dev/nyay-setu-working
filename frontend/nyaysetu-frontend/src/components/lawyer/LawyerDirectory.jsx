@@ -1,124 +1,81 @@
-package com.nyaysetu.backend.service;
+import { useState, useEffect } from 'react';
 
-import com.nyaysetu.backend.dto.LawyerMatchDTO;
-import com.nyaysetu.backend.entity.CaseAssignmentRecord;
-import com.nyaysetu.backend.entity.LawyerProfile;
-import com.nyaysetu.backend.repository.CaseAssignmentRecordRepository;
-import com.nyaysetu.backend.repository.LawyerProfileRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+const LawyerDirectory = () => {
+  const [lawyers, setLawyers] = useState([]);
+  const [city, setCity] = useState('');
+  const [expertise, setExpertise] = useState('');
+  const [loading, setLoading] = useState(false);
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-@Service
-@RequiredArgsConstructor
-@Slf4j
-public class LawyerMatchingService {
-
-    private final LawyerProfileRepository lawyerProfileRepository;
-    private final CaseAssignmentRecordRepository caseAssignmentRecordRepository;
-
-    private static final int MAX_EXPERIENCE_YEARS = 20;
-    private static final int MAX_ACTIVE_CASES = 10;
-    private static final double MAX_RATING = 5.0;
-
-    /**
-     * Returns top-10 matched lawyers for a case based on required expertise tags.
-     * Scoring: expertise(45%) + rating(25%) + experience(15%) + workload(15%)
-     */
-    public List<LawyerMatchDTO> getTopMatches(UUID caseId, List<String> requiredTags) {
-        List<LawyerProfile> allAvailable = lawyerProfileRepository.findByAvailableTrue();
-
-        List<LawyerMatchDTO> ranked = allAvailable.stream()
-                .map(lawyer -> {
-                    double score = calculateScore(lawyer, requiredTags);
-                    return LawyerMatchDTO.builder()
-                            .lawyerProfileId(lawyer.getId())
-                            .userId(lawyer.getUser().getId())
-                            .name(lawyer.getUser().getName())
-                            .email(lawyer.getUser().getEmail())
-                            .barCouncilNumber(lawyer.getBarCouncilNumber())
-                            .expertiseTags(lawyer.getExpertiseTags())
-                            .city(lawyer.getCity())
-                            .rating(lawyer.getRating())
-                            .experienceYears(lawyer.getExperienceYears())
-                            .activeCaseCount(lawyer.getActiveCaseCount())
-                            .matchScore(Math.round(score * 10000.0) / 100.0) // percentage, 2 decimals
-                            .build();
-                })
-                .sorted(Comparator.comparingDouble(LawyerMatchDTO::getMatchScore).reversed())
-                .limit(10)
-                .collect(Collectors.toList());
-
-        // Persist match records for audit
-        ranked.forEach(match -> {
-            LawyerProfile profile = lawyerProfileRepository.findById(match.getLawyerProfileId()).orElseThrow();
-            CaseAssignmentRecord record = CaseAssignmentRecord.builder()
-                    .caseId(caseId)
-                    .lawyerProfile(profile)
-                    .matchScore(match.getMatchScore())
-                    .build();
-            caseAssignmentRecordRepository.save(record);
-        });
-
-        log.info("Top {} matches found for case {}", ranked.size(), caseId);
-        return ranked;
+  const fetchLawyers = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (city) params.append('city', city);
+      if (expertise) params.append('expertise', expertise);
+      const res = await fetch(`/api/cases/lawyers/directory?${params}`);
+      const data = await res.json();
+      setLawyers(data);
+    } catch (err) {
+      console.error('Failed to fetch lawyers', err);
+      // Mock data for preview
+      setLawyers([
+        { lawyerProfileId: 1, name: 'Aditi Sharma', city: 'Delhi', expertiseTags: ['Criminal', 'Family'], rating: 4.8, experienceYears: 12, activeCaseCount: 3, barCouncilNumber: 'DL/1234/2012' },
+        { lawyerProfileId: 2, name: 'Ravi Menon', city: 'Mumbai', expertiseTags: ['Civil', 'Property'], rating: 4.5, experienceYears: 8, activeCaseCount: 5, barCouncilNumber: 'MH/5678/2016' },
+        { lawyerProfileId: 3, name: 'Priya Nair', city: 'Hyderabad', expertiseTags: ['Corporate', 'Tax'], rating: 4.9, experienceYears: 15, activeCaseCount: 2, barCouncilNumber: 'TG/9012/2009' },
+      ]);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    private double calculateScore(LawyerProfile lawyer, List<String> requiredTags) {
-        // Expertise overlap (45%)
-        double expertiseScore = 0.0;
-        if (requiredTags != null && !requiredTags.isEmpty() &&
-                lawyer.getExpertiseTags() != null && !lawyer.getExpertiseTags().isEmpty()) {
-            long matched = lawyer.getExpertiseTags().stream()
-                    .map(String::toLowerCase)
-                    .filter(tag -> requiredTags.stream()
-                            .map(String::toLowerCase)
-                            .anyMatch(tag::equals))
-                    .count();
-            expertiseScore = (double) matched / requiredTags.size();
-        }
+  useEffect(() => { fetchLawyers(); }, []);
 
-        // Rating (25%)
-        double ratingScore = lawyer.getRating() / MAX_RATING;
+  return (
+    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <h2 style={{ marginBottom: '1rem' }}>Lawyer Directory</h2>
 
-        // Experience (15%)
-        double expScore = Math.min(lawyer.getExperienceYears(), MAX_EXPERIENCE_YEARS)
-                / (double) MAX_EXPERIENCE_YEARS;
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <input
+          placeholder="Filter by city"
+          value={city}
+          onChange={e => setCity(e.target.value)}
+          style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #ccc', fontSize: '14px' }}
+        />
+        <input
+          placeholder="Filter by expertise"
+          value={expertise}
+          onChange={e => setExpertise(e.target.value)}
+          style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #ccc', fontSize: '14px' }}
+        />
+        <button
+          onClick={fetchLawyers}
+          style={{ padding: '0.5rem 1.5rem', background: '#1a56db', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}
+        >
+          Search
+        </button>
+      </div>
 
-        // Workload penalty (15%) — fewer active cases = better
-        double workloadScore = 1.0 - Math.min(lawyer.getActiveCaseCount(), MAX_ACTIVE_CASES)
-                / (double) MAX_ACTIVE_CASES;
+      {loading && <p>Loading...</p>}
 
-        return (expertiseScore * 0.45) + (ratingScore * 0.25)
-                + (expScore * 0.15) + (workloadScore * 0.15);
-    }
-    public List<LawyerMatchDTO> getDirectory(String city, String expertise) {
-        List<LawyerProfile> profiles = (city != null && !city.isBlank())
-                ? lawyerProfileRepository.findByCityIgnoreCase(city)
-                : lawyerProfileRepository.findAll();
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+        {lawyers.map(lawyer => (
+          <div key={lawyer.lawyerProfileId} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1.2rem', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+            <h3 style={{ margin: '0 0 0.4rem' }}>{lawyer.name}</h3>
+            <p style={{ margin: '0 0 0.3rem', color: '#555', fontSize: '13px' }}>📍 {lawyer.city}</p>
+            <p style={{ margin: '0 0 0.3rem', color: '#555', fontSize: '13px' }}>⚖️ {lawyer.barCouncilNumber}</p>
+            <p style={{ margin: '0 0 0.3rem', fontSize: '13px' }}>⭐ {lawyer.rating} &nbsp;|&nbsp; {lawyer.experienceYears} yrs exp &nbsp;|&nbsp; {lawyer.activeCaseCount} active cases</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.6rem' }}>
+              {lawyer.expertiseTags?.map(tag => (
+                <span key={tag} style={{ background: '#ebf5ff', color: '#1a56db', borderRadius: '20px', padding: '2px 10px', fontSize: '12px' }}>{tag}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
 
-        return profiles.stream()
-                .filter(lp -> expertise == null || expertise.isBlank() ||
-                        (lp.getExpertiseTags() != null && lp.getExpertiseTags().stream()
-                                .anyMatch(t -> t.equalsIgnoreCase(expertise))))
-                .map(lp -> LawyerMatchDTO.builder()
-                        .lawyerProfileId(lp.getId())
-                        .userId(lp.getUser().getId())
-                        .name(lp.getUser().getName())
-                        .email(lp.getUser().getEmail())
-                        .barCouncilNumber(lp.getBarCouncilNumber())
-                        .expertiseTags(lp.getExpertiseTags())
-                        .city(lp.getCity())
-                        .rating(lp.getRating())
-                        .experienceYears(lp.getExperienceYears())
-                        .activeCaseCount(lp.getActiveCaseCount())
-                        .matchScore(null)
-                        .build())
-                .collect(java.util.stream.Collectors.toList());
-    }
-}
+      {!loading && lawyers.length === 0 && <p>No lawyers found.</p>}
+    </div>
+  );
+};
+
+export default LawyerDirectory;
