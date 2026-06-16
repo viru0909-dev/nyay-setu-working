@@ -56,6 +56,19 @@ const Terms = retryLazy(() => import('./pages/Terms'));
 const Disclaimer = retryLazy(() => import('./pages/Disclaimer'));
 const UpcomingFeatures = retryLazy(() => import('./pages/UpcomingFeatures'));
 const FAQ = retryLazy(() => import('./pages/FAQ'));
+import OAuthSuccess from './pages/OAuthSuccess';
+
+// Lazy load pages for better performance
+const Landing = lazy(() => import('./pages/Landing'));
+const Constitution = lazy(() => import('./pages/Constitution'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const About = lazy(() => import('./pages/About'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Disclaimer = lazy(() => import('./pages/Disclaimer'));
+const UpcomingFeatures = lazy(() => import('./pages/UpcomingFeatures'));
 
 // Dashboard Layout
 const DashboardLayout = retryLazy(() => import('./layouts/DashboardLayout'));
@@ -230,6 +243,7 @@ function App({ swRegistration }) {
                                 {/* Base Application Portals */}
                                 <Route path="/" element={<Landing />} />
                                 <Route path="/login" element={<Login />} />
+                                <Route path="/oauth-success" element={<OAuthSuccess />} />
                                 <Route path="/signup" element={<Signup />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                                 <Route path="/constitution" element={<Constitution />} />

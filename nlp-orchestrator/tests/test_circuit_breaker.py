@@ -1,3 +1,5 @@
+import pytest
+
 """
 Unit tests for CircuitBreaker in utils.py
 """

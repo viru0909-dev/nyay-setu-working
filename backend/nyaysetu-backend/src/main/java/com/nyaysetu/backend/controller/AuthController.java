@@ -1,10 +1,12 @@
 package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.dto.*;
+import com.nyaysetu.backend.entity.AuthProvider;
 import com.nyaysetu.backend.entity.PasswordResetToken;
 import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.PasswordResetTokenRepository;
+import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,7 @@ public class AuthController {
     private final FaceRecognitionService faceRecognitionService;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     @SecurityRequirements
     @PostMapping("/register")
@@ -90,6 +93,15 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         log.debug("Login endpoint reached for email: {}", req.getEmail());
         try {
+            User user1 = userRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+            if (user1.getAuthProvider() == AuthProvider.GOOGLE) {
+                return ResponseEntity.status(400)
+                    .body(Map.of(
+                            "message",
+                            "This account uses Google Sign-In. Please login with Google."
+                        ));
+            }
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
             );

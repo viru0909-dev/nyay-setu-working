@@ -5,7 +5,7 @@ fastapi==0.136.3
 google-genai==2.8.0
 groq==1.4.0
 httpx==0.28.1
-numpy==2.4.6
+numpy==2.2.6
 opencv-python-headless>=4.8.0
 pdf2image>=1.16.3
 Pillow==12.2.0
