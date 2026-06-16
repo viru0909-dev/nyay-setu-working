@@ -1,20 +1,8 @@
 package com.nyaysetu.backend.controller;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -25,27 +13,38 @@ import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.service.AuthService;
 import com.nyaysetu.backend.service.DocumentGenerationService;
-
-import org.springframework.security.core.userdetails.UserDetailsService;
 import com.nyaysetu.backend.service.JwtService;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(DocumentGenerationController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class DocumentGenerationControllerTest {
 
-    @MockBean
+    @MockitoBean
     private JwtService jwtService;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private AuthService authService;
 
-    @MockBean
+    @MockitoBean
     private DocumentGenerationService documentGenerationService;
 
     @Test
@@ -62,7 +61,7 @@ class DocumentGenerationControllerTest {
                 "docType", "affidavit",
                 "title", "Draft Affidavit",
                 "content", "This is a preview",
-                "sources", java.util.List.of("Section 1"),
+                "sources", List.of("Section 1"),
                 "generatedAt", "2026-06-02T12:00:00Z"
         ));
 

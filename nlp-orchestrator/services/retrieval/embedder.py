@@ -42,7 +42,9 @@ def _load_model(model_name: str):
                 import torch.nn.functional as F
                 from transformers import AutoModel, AutoTokenizer
 
-                logger.info("Using HuggingFace AutoModel with mean pooling for InLegalBERT")
+                logger.info(
+                    "Using HuggingFace AutoModel with mean pooling for InLegalBERT"
+                )
                 tokenizer = AutoTokenizer.from_pretrained(model_name)
                 hf_model = AutoModel.from_pretrained(model_name)
                 hf_model.eval()
