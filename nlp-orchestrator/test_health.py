@@ -16,5 +16,5 @@ def test_health_endpoint():
     assert response.json() == {
         "status": "ok",
         "service": "nlp-orchestrator",
-        "port": 8001
+        "port": 8001,
     }

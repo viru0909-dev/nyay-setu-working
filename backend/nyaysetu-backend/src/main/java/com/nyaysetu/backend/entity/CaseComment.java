@@ -22,5 +22,5 @@ public class CaseComment {
 
     @ManyToOne
     @JoinColumn(name = "case_id")
-    private LegalCase legalCase;
+    private CaseEntity caseEntity;
 }

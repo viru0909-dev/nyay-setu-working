@@ -178,7 +178,7 @@ class NotificationService {
     async fetchNotifications(userId) {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${this.API_BASE_URL}/api/notifications/user/${userId}`, {
+            const response = await axios.get(`${this.API_BASE_URL}/api/v1/notifications/user/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             return response.data;
@@ -190,7 +190,7 @@ class NotificationService {
     async markRead(id) {
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`${this.API_BASE_URL}/api/notifications/${id}/read`, {}, {
+            await axios.post(`${this.API_BASE_URL}/api/v1/notifications/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch (error) {

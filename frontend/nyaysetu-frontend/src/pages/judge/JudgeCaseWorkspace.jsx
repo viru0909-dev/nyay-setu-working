@@ -848,8 +848,8 @@ function EvidenceTab({ caseId }) {
         setCertLoading(true);
         try {
             const url = item.source === 'blockchain'
-                ? `${API_BASE_URL}/api/evidence/${item.id}/certificate`
-                : `${API_BASE_URL}/api/documents/${item.id}/certificate`;
+                ? `${API_BASE_URL}/api/v1/evidence/${item.id}/certificate`
+                : `${API_BASE_URL}/api/v1/documents/${item.id}/certificate`;
 
             const token = localStorage.getItem('token');
             const response = await axios.get(url, {

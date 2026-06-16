@@ -54,7 +54,9 @@ public class FirService {
             }
 
             // Generate unique filename
-            String originalFilename = file.getOriginalFilename();
+            String originalFilename = file.getOriginalFilename() != null
+    ? Paths.get(file.getOriginalFilename()).getFileName().toString()
+    : "file";
             String extension = originalFilename != null && originalFilename.contains(".") 
                 ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
                 : "";
@@ -200,7 +202,9 @@ public class FirService {
                     Files.createDirectories(uploadDir);
                 }
 
-                String originalFilename = file.getOriginalFilename();
+                String originalFilename = file.getOriginalFilename() != null
+    ? Paths.get(file.getOriginalFilename()).getFileName().toString()
+    : "file";
                 String extension = originalFilename != null && originalFilename.contains(".") 
                     ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
                     : "";
@@ -375,7 +379,9 @@ public class FirService {
             }
 
             // Generate unique filename
-            String originalFilename = file.getOriginalFilename();
+            String originalFilename = file.getOriginalFilename() != null
+    ? Paths.get(file.getOriginalFilename()).getFileName().toString()
+    : "file";
             String extension = originalFilename != null && originalFilename.contains(".") 
                 ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
                 : "";

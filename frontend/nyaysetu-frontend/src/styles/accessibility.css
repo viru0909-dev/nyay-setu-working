@@ -1,0 +1,20 @@
+/* Premium accessibility styles for keyboard users */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid #6c63ff !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.4) !important;
+}
+
+/* Hide default outlines when using mouse */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+  outline: none !important;
+}
