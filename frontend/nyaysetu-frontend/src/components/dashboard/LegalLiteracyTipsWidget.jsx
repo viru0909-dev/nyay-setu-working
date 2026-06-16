@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
-export const TIP_ROTATION_INTERVAL_MS = 6000;
+const MILLISECONDS_PER_SECOND = 1000;
+const TIP_ROTATION_INTERVAL_SECONDS = 6;
 
-const TIP_TITLE_COLOR = '#111827';
-const TIP_MESSAGE_COLOR = '#374151';
+export const TIP_ROTATION_INTERVAL_MS = TIP_ROTATION_INTERVAL_SECONDS * MILLISECONDS_PER_SECOND;
+
+const TIP_TITLE_COLOR = 'var(--color-gray-900, rgb(17 24 39))';
+const TIP_MESSAGE_COLOR = 'var(--color-gray-700, rgb(55 65 81))';
 
 const tips = [
     {
