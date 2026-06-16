@@ -3,10 +3,13 @@ package com.nyaysetu.backend.controller;
 import com.nyaysetu.backend.entity.Hearing;
 import com.nyaysetu.backend.entity.HearingParticipant;
 import com.nyaysetu.backend.entity.ParticipantRole;
+import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.service.AuthService;
 import com.nyaysetu.backend.service.HearingService;
 import com.nyaysetu.backend.notification.service.NotificationService;
 import com.nyaysetu.backend.notification.entity.Notification;
 import com.nyaysetu.backend.entity.CaseEntity;
+import com.nyaysetu.backend.entity.User;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,8 @@ public class HearingController {
     
     private final HearingService hearingService;
     private final NotificationService notificationService;
+    private final com.nyaysetu.backend.service.AuthService authService;
+    private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
     
     @PostMapping("/schedule")
     public ResponseEntity<Map<String, Object>> scheduleHearing(
@@ -113,7 +118,7 @@ public class HearingController {
             @PathVariable UUID hearingId,
             Authentication authentication
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getCurrentUserId(authentication);
         
         if (!hearingService.canUserJoinHearing(hearingId, userId)) {
             return ResponseEntity.status(403).body(Map.of("error", "Not authorized"));
@@ -134,9 +139,14 @@ public class HearingController {
             @PathVariable UUID hearingId,
             Authentication authentication
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = getCurrentUserId(authentication);
         hearingService.leaveHearing(hearingId, userId);
         return ResponseEntity.ok().build();
+    }
+
+    private Long getCurrentUserId(Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        return user.getId();
     }
     
     @PutMapping("/{hearingId}/complete")
@@ -179,7 +189,11 @@ public class HearingController {
     }
     
     @GetMapping("/case/{caseId}")
-    public ResponseEntity<List<Map<String, Object>>> getCaseHearings(@PathVariable UUID caseId) {
+    public ResponseEntity<List<Map<String, Object>>> getCaseHearings(
+            @PathVariable UUID caseId,
+            Authentication authentication) {
+        User user = authService.findByEmail(authentication.getName());
+        caseAccessService.requireCaseAccess(caseId, user);
         List<Hearing> hearings = hearingService.getCaseHearings(caseId);
         List<Map<String, Object>> response = hearings.stream().map(h -> {
             Map<String, Object> dto = new HashMap<>();

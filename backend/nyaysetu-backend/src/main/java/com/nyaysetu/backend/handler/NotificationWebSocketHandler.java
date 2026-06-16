@@ -18,8 +18,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 
 @Slf4j
@@ -36,7 +35,8 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final Map<Long, WebSocketSession> sessionsByUserId = new ConcurrentHashMap<>();
+    // 🔥 UPDATED: MULTI-SESSION SUPPORT
+    private final Map<Long, List<WebSocketSession>> sessionsByUserId = new ConcurrentHashMap<>();
     private final Map<String, Long> userIdBySessionId = new ConcurrentHashMap<>();
     private final Map<String, ScheduledFuture<?>> authTimeouts = new ConcurrentHashMap<>();
 
@@ -45,16 +45,14 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        log.info("Notification WebSocket opened: {}", session.getId());
+        log.info("WebSocket opened: {}", session.getId());
 
         ScheduledFuture<?> timeout = authTimeoutExecutor.schedule(() -> {
             if (session.isOpen() && !userIdBySessionId.containsKey(session.getId())) {
                 try {
-                    log.warn("Closing unauthenticated WebSocket session: {}", session.getId());
+                    log.warn("Closing unauthenticated session: {}", session.getId());
                     session.close(AUTH_REQUIRED);
-                } catch (IOException e) {
-                    log.warn("Failed to close unauthenticated WebSocket session: {}", session.getId());
-                }
+                } catch (IOException ignored) {}
             }
         }, 15, TimeUnit.SECONDS);
 
@@ -113,7 +111,11 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
 
             cancelAuthTimeout(session);
 
-            sessionsByUserId.put(user.getId(), session);
+            // 🔥 ADD SESSION TO LIST (MULTI-SESSION)
+            sessionsByUserId
+                    .computeIfAbsent(user.getId(), k -> new CopyOnWriteArrayList<>())
+                    .add(session);
+
             userIdBySessionId.put(session.getId(), user.getId());
 
             sendJson(session, Map.of("type", "AUTH_SUCCESS"));
@@ -126,9 +128,10 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
                     "read", false
             ));
 
-            log.info("Notification WebSocket authenticated for user: {}", user.getId());
+            log.info("User {} authenticated with session {}", user.getId(), session.getId());
+
         } catch (Exception e) {
-            log.warn("Notification WebSocket authentication failed: {}", e.getMessage());
+            log.warn("Authentication failed: {}", e.getMessage());
             sendJson(session, Map.of("type", "AUTH_ERROR", "message", "Authentication failed"));
             session.close(AUTH_REQUIRED);
         }
@@ -139,42 +142,38 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         cancelAuthTimeout(session);
 
         Long userId = userIdBySessionId.remove(session.getId());
+
         if (userId != null) {
-            sessionsByUserId.remove(userId, session);
-            log.info("Notification WebSocket closed for user: {}", userId);
-        } else {
-            log.info("Unauthenticated notification WebSocket closed: {}", session.getId());
+            List<WebSocketSession> sessions = sessionsByUserId.get(userId);
+
+            if (sessions != null) {
+                sessions.remove(session);
+
+                if (sessions.isEmpty()) {
+                    sessionsByUserId.remove(userId);
+                }
+            }
+
+            log.info("Session {} closed for user {}", session.getId(), userId);
         }
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
         if (exception instanceof ClosedChannelException) {
-            log.debug("Notification WebSocket closed during transport: {}", session.getId());
+            log.debug("Socket closed: {}", session.getId());
         } else {
-            log.error("Notification WebSocket error for session {}: {}", session.getId(), exception.getMessage());
+            log.error("Error in session {}: {}", session.getId(), exception.getMessage());
         }
     }
 
+    // 🔥 UPDATED: SEND TO ALL SESSIONS
     public void sendNotification(Long userId, Map<String, Object> notification) {
-        WebSocketSession session = sessionsByUserId.get(userId);
+        List<WebSocketSession> sessions = sessionsByUserId.get(userId);
 
-        if (session == null || !session.isOpen()) {
-            return;
-        }
+        if (sessions == null) return;
 
-        try {
-            sendJson(session, Map.of(
-                    "type", "NOTIFICATION",
-                    "payload", notification
-            ));
-        } catch (IOException e) {
-            log.error("Failed to send notification to user {}: {}", userId, e.getMessage());
-        }
-    }
-
-    public void broadcastNotification(Map<String, Object> notification) {
-        sessionsByUserId.forEach((userId, session) -> {
+        for (WebSocketSession session : sessions) {
             if (session.isOpen()) {
                 try {
                     sendJson(session, Map.of(
@@ -182,7 +181,24 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
                             "payload", notification
                     ));
                 } catch (IOException e) {
-                    log.error("Failed to broadcast notification to user {}: {}", userId, e.getMessage());
+                    log.error("Failed to send notification to user {}: {}", userId, e.getMessage());
+                }
+            }
+        }
+    }
+
+    public void broadcastNotification(Map<String, Object> notification) {
+        sessionsByUserId.forEach((userId, sessions) -> {
+            for (WebSocketSession session : sessions) {
+                if (session.isOpen()) {
+                    try {
+                        sendJson(session, Map.of(
+                                "type", "NOTIFICATION",
+                                "payload", notification
+                        ));
+                    } catch (IOException e) {
+                        log.error("Broadcast failed for user {}: {}", userId, e.getMessage());
+                    }
                 }
             }
         });

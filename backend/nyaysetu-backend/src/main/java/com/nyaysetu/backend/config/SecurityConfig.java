@@ -1,22 +1,28 @@
 package com.nyaysetu.backend.config;
 
 import com.nyaysetu.backend.filter.JwtAuthFilter;
+
 import com.nyaysetu.backend.filter.RateLimitFilter;
+import com.nyaysetu.backend.service.CustomOAuth2UserService;
 import com.nyaysetu.backend.filter.XssSanitizationFilter;
 import jakarta.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,8 +33,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -40,6 +44,9 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final RateLimitFilter rateLimitFilter;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final Environment environment;
 
     @Value("${cors.allowed.origins}")
@@ -50,7 +57,7 @@ public class SecurityConfig {
 
     @PostConstruct
     public void validateJwtSecretConfiguration() {
-        boolean isDev = java.util.Arrays.stream(environment.getActiveProfiles())
+        boolean isDev = Arrays.stream(environment.getActiveProfiles())
                 .anyMatch(profile -> profile.equalsIgnoreCase("dev") || profile.equalsIgnoreCase("test"));
         String jwtSecretEnv = System.getenv("JWT_SECRET");
         boolean isJwtSecretEnvMissing = jwtSecretEnv == null || jwtSecretEnv.trim().isEmpty();
@@ -74,8 +81,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -86,61 +92,53 @@ public class SecurityConfig {
     }
 
     @Bean
-    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
-        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        
-        // Use origins from application.properties / Env Var
-        if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
-            java.util.List<String> origins = java.util.Arrays.stream(allowedOrigins.split(","))
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // SAFE DEFAULT (Localhost fallback)
+        List<String> defaultOrigins = Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "http://localhost"
+        );
+
+        if (allowedOrigins != null && !allowedOrigins.trim().isEmpty()) {
+            List<String> origins = Arrays.stream(allowedOrigins.split(","))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
 
-            if (origins.isEmpty()) {
-                // SAFE DEFAULT: Allow local development origins only
-                configuration.setAllowedOrigins(java.util.Arrays.asList(
-                    "http://localhost:5173",
-                    "http://localhost:3000",
-                    "http://localhost"
-                ));
-                configuration.setAllowCredentials(true);
+            if (origins.contains("*")) {
+                // SECURITY: Reject bare "*" when credentials are true
+                logger.warn("CORS_ALLOWED_ORIGINS contains bare '*'. This is unsafe with credentials. Falling back to localhost defaults.");
+                configuration.setAllowedOrigins(defaultOrigins);
+            } else if (origins.stream().anyMatch(o -> o.contains("*"))) {
+                // Specific patterns like https://*.example.com are safe
+                configuration.setAllowedOriginPatterns(origins);
             } else {
-                // Security: reject bare "*" — it allows any origin to make credentialed requests
-                boolean hasBareWildcard = origins.stream().anyMatch(o -> o.trim().equals("*"));
-                if (hasBareWildcard) {
-                    java.util.logging.Logger.getLogger("SecurityConfig")
-                        .warning("CORS_ALLOWED_ORIGINS contains bare '*'. "
-                            + "This is unsafe with credentials. Falling back to localhost defaults.");
-                    configuration.setAllowedOrigins(java.util.Arrays.asList(
-                        "http://localhost:5173",
-                        "http://localhost:3000",
-                        "http://localhost"
-                    ));
-                } else {
-                    boolean hasPattern = origins.stream().anyMatch(o -> o.contains("*"));
-                    if (hasPattern) {
-                        // Specific patterns like https://*.example.com are safe with credentials
-                        configuration.setAllowedOriginPatterns(origins);
-                    } else {
-                        configuration.setAllowedOrigins(origins);
-                    }
-                }
-                configuration.setAllowCredentials(true);
+                // Exact valid domains
+                configuration.setAllowedOrigins(origins);
             }
         } else {
-            // SAFE DEFAULT: Allow local development origins only
-            configuration.setAllowedOrigins(java.util.Arrays.asList(
-                "http://localhost:5173", 
-                "http://localhost:3000", 
-                "http://localhost"
-            ));
-            configuration.setAllowCredentials(true);
+            // Fallback if environment variable is missing
+            configuration.setAllowedOrigins(defaultOrigins);
         }
-        
-        configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
-        
-        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+
+        // SECURITY IMPROVEMENTS:
+        // 1. Always allow credentials for the resolved safe origins
+        configuration.setAllowCredentials(true);
+
+        // 2. Add "PATCH" to allowed methods
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
+        // 3. Restrict headers instead of using wildcard "*" for better security
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin",
+                "X-Requested-With"
+        ));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
@@ -152,41 +150,44 @@ public class SecurityConfig {
             XssSanitizationFilter xssSanitizationFilter) throws Exception {
 
         http
+                // 1. CORS fix (Restricting to specific origins instead of all)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.deny())
                         .contentSecurityPolicy(csp -> csp
-                                // Strict CSP for API responses. Mirrors the
-                                // frontend nginx.conf policy so that any
-                                // HTML/error page Spring serves (e.g. the
-                                // default whitelabel error pages) is also
-                                // protected. Adjust directives here when you
-                                // adjust them in nginx.conf.
                                 .policyDirectives(
                                     "default-src 'self'; " +
-                                    "script-src 'self'; " +
-                                    "style-src 'self' 'unsafe-inline'; " +
+                                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
+                                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
                                     "img-src 'self' data: https:; " +
                                     "font-src 'self' https://fonts.gstatic.com; " +
-                                    "connect-src 'self' wss:; " +
+                                    "connect-src 'self' wss: https://cdn.jsdelivr.net https://nyaysetubackend.onrender.com; " +
                                     "frame-ancestors 'none'; " +
                                     "object-src 'none'; " +
                                     "base-uri 'self'; " +
                                     "form-action 'self'; " +
                                     "upgrade-insecure-requests"
                                 ))
-                        .referrerPolicy(rp -> rp.policy(
-                            org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
-                        .permissionsPolicy(pp -> pp.policy(
-                            "geolocation=(), microphone=(), camera=(), payment=()"))
+                                .referrerPolicy(rp -> rp.policy(
+                                    org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
+                                ))
+                                .permissionsPolicyHeader(pp -> pp.policy(
+                                    "geolocation=(), microphone=(), camera=(), payment=()"
+                                ))
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // ── OAuth2 ─────────────────────────────────────────────────────────
+                        .requestMatchers(
+                                "/oauth2/**",
+                                "/login/oauth2/**"
+                        ).permitAll()
 
                         // ── Public endpoints ──────────────────────────────────────────────
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
+                                "/api/v1/auth/refresh",
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/verify-reset-token",
                                 "/api/v1/auth/reset-password",
@@ -194,7 +195,11 @@ public class SecurityConfig {
                                 "/api/v1/auth/ping",
                                 "/api/v1/auth/test",
                                 "/api/v1/health",
-                                "/api/v1/police/health"
+                                "/api/v1/police/health",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/actuator/**"
                         ).permitAll()
 
                         // ── WebSocket endpoints ───────────────────────────────────────────
@@ -267,6 +272,7 @@ public class SecurityConfig {
 
                         // ── Admin/oversight-only endpoints ────────────────────────────────
                         .requestMatchers(
+                                "/api/admin/**",
                                 "/api/v1/cases/pending-assignment",
                                 "/api/v1/cases/judge-workload",
                                 "/verify/admin/**",
@@ -284,6 +290,13 @@ public class SecurityConfig {
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .oauth2Login(oauth -> oauth
+                        .userInfoEndpoint(userInfo ->
+                                userInfo.userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
+                )
                 .addFilterBefore(xssSanitizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

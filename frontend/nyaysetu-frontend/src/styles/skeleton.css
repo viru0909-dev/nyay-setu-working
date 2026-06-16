@@ -1,37 +1,18 @@
-/* Extends .loading-skeleton with shimmer animation - theme-aware */
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
-/* Light mode shimmer */
-.loading-skeleton {
-    min-height: 200px;
-    background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-hover, #f0f0f0) 50%, var(--bg-surface) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 12px;
-}
-.skeleton-card {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-.skeleton-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--border-light);
-}
-.skeleton-title {
-    width: 60%;
-    height: 14px;
-    border-radius: 6px;
-    background: var(--border-light);
-}
-.skeleton-value {
-    width: 40%;
-    height: 24px;
-    border-radius: 6px;
-    background: var(--border-light);
+
+.skeleton-loading {
+  display: inline-block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite linear;
+  border-radius: 6px;
 }

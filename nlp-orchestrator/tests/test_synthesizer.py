@@ -20,6 +20,7 @@ with patch.dict(os.environ, {"GROQ_API_KEY": "test-key-for-ci"}):
 
 # ── Test 1: Correct numbered formatting ──────────────────────────────────────
 
+
 def test_correct_numbered_formatting():
     """Verify numbering, source uppercasing, answer inclusion, and separator."""
     results = [
@@ -61,6 +62,7 @@ def test_correct_numbered_formatting():
 
 # ── Test 2: Ignore empty answers ─────────────────────────────────────────────
 
+
 def test_ignores_empty_answers():
     """Entries with empty string or None answers should be excluded."""
     results = [
@@ -97,6 +99,7 @@ def test_ignores_empty_answers():
 
 # ── Test 3: Handle empty input list ──────────────────────────────────────────
 
+
 def test_empty_input_list():
     """An empty list should return an empty string."""
     output = format_research_for_synthesis([])
@@ -105,6 +108,7 @@ def test_empty_input_list():
 
 
 # ── Test 4: Single result (edge case) ────────────────────────────────────────
+
 
 def test_single_result():
     """A single valid result should produce output with no separator."""
@@ -128,6 +132,7 @@ def test_single_result():
 
 
 # ── Test 5: Preserves original numbering ─────────────────────────────────────
+
 
 def test_preserves_original_numbering():
     """

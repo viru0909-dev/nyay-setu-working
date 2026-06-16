@@ -7,6 +7,7 @@ This guide covers the technical setup required to get Nyay Saarthi running local
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Environment Variables](#environment-variables)
+- [Google OAuth Setup](#google-oauth-setup)
 - [Option A: Docker Deployment (Recommended)](#option-a-docker-deployment-recommended)
 - [Option B: Manual Local Setup](#option-b-manual-local-setup)
 - [Database Structure](#database-structure)
@@ -48,6 +49,16 @@ DB_PASSWORD=your_secure_password
 JWT_SECRET=replace_with_a_long_random_256_bit_secret
 GROQ_API_KEY=your_groq_api_key_here
 FRONTEND_URL=http://localhost:5173
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost
+
+# ── Google OAuth2 Configuration ──────────────
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# ── Frontend Environment Variables ──────────────
+VITE_API_BASE_URL=http://localhost:8080
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+
 CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4174,http://localhost:3000
 ```
 
@@ -56,6 +67,33 @@ Optional providers can be left blank unless you are using those features. Do not
 > **Production requirement:** When running with `SPRING_PROFILES_ACTIVE=prod`, you **must** set `JWT_SECRET` as an environment variable. The backend now fails fast at startup in production if `JWT_SECRET` is missing or falls back to the default development secret.
 
 <hr/>
+
+## Google OAuth Setup
+
+1. Open Google Cloud Console
+
+2. Create OAuth Client ID
+
+3. Add Redirect URI
+
+```
+http://localhost:8080/login/oauth2/code/google
+```
+
+4. Add Frontend Origin
+
+```
+http://localhost:5173
+```
+
+5. Add credentials in `.env`
+
+```
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+VITE_GOOGLE_CLIENT_ID=
+```
+
 
 ## Option A: Docker Deployment (Recommended)
 
@@ -147,3 +185,4 @@ If you have the development `DataLoader` enabled, these test accounts are seeded
 | **JWT Signature Exception** | Your `JWT_SECRET` is too short or changed. It must be at least 256 bits. |
 | **CORS Errors on Login** | Ensure `CORS_ALLOWED_ORIGINS` in your `.env` matches your exact frontend URL (including the port). |
 | **AI Features Not Working** | Verify `GROQ_API_KEY` is valid and the NLP Orchestrator is running on port 8001. |
+
