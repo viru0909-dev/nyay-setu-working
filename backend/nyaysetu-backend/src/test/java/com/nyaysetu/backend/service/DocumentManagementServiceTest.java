@@ -3,6 +3,7 @@ package com.nyaysetu.backend.service;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.DocumentEntity;
 import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.entity.VisibilityLevel;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.repository.UserRepository;
@@ -61,7 +62,7 @@ class DocumentManagementServiceTest {
                 .id(documentId)
                 .caseId(caseId)
                 .uploadedBy(456L)
-                .visibilityLevel("RESTRICTED")
+                .visibilityLevel(VisibilityLevel.RESTRICTED)
                 .build();
 
         User assignedLawyer = User.builder().id(lawyerId).build();
@@ -86,7 +87,7 @@ class DocumentManagementServiceTest {
                 .id(documentId)
                 .caseId(caseId)
                 .uploadedBy(456L)
-                .visibilityLevel("RESTRICTED")
+                .visibilityLevel(VisibilityLevel.RESTRICTED)
                 .build();
 
         when(documentRepository.findByCaseId(caseId)).thenReturn(List.of(restrictedDocument));
@@ -107,7 +108,7 @@ class DocumentManagementServiceTest {
                 .id(documentId)
                 .caseId(caseId)
                 .uploadedBy(456L)
-                .visibilityLevel("RESTRICTED")
+                .visibilityLevel(VisibilityLevel.RESTRICTED)
                 .build();
 
         User otherLawyer = User.builder().id(999L).build();

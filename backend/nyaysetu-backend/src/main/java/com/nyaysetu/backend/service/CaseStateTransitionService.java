@@ -272,7 +272,7 @@ public class CaseStateTransitionService {
         // Broadcast stage update
         messagingTemplate.convertAndSend(
                 "/topic/case/" + caseId + "/stage",
-                Map.of(
+                (Object) Map.of(
                         "caseId", caseId,
                         "previousStage", currentStage,
                         "newStage", newStage,
@@ -424,7 +424,7 @@ public class CaseStateTransitionService {
     private void broadcastToJudgePool(CaseEntity caseEntity) {
         messagingTemplate.convertAndSend(
                 "/topic/judge/unassigned",
-                Map.of(
+                (Object) Map.of(
                         "caseId", caseEntity.getId(),
                         "title", caseEntity.getTitle(),
                         "caseType", caseEntity.getCaseType(),
@@ -437,7 +437,7 @@ public class CaseStateTransitionService {
     private void broadcastToLitigant(Long litigantId, CaseEntity caseEntity, String message) {
         messagingTemplate.convertAndSend(
                 "/topic/litigant/" + litigantId + "/actions",
-                Map.of(
+                (Object) Map.of(
                         "caseId", caseEntity.getId(),
                         "title", caseEntity.getTitle(),
                         "actionRequired", true,
@@ -449,7 +449,7 @@ public class CaseStateTransitionService {
     private void broadcastToLawyer(Long lawyerId, CaseEntity caseEntity, String message) {
         messagingTemplate.convertAndSend(
                 "/topic/lawyer/" + lawyerId + "/approvals",
-                Map.of(
+                (Object) Map.of(
                         "caseId", caseEntity.getId(),
                         "title", caseEntity.getTitle(),
                         "message", message
@@ -460,7 +460,7 @@ public class CaseStateTransitionService {
     private void broadcastCaseUpdate(CaseEntity caseEntity, String message) {
         messagingTemplate.convertAndSend(
                 "/topic/case/" + caseEntity.getId() + "/status",
-                Map.of(
+                (Object) Map.of(
                         "caseId", caseEntity.getId(),
                         "status", caseEntity.getStatus(),
                         "stage", caseEntity.getCurrentJudicialStage(),

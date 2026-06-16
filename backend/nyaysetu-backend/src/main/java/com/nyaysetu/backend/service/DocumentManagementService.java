@@ -11,6 +11,8 @@ import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,13 +72,9 @@ public class DocumentManagementService {
         return convertToDto(saved);
     }
 
-    public List<DocumentDto> getUserDocuments(Long userId) {
-        List<DocumentEntity> documents = documentRepository.findAll().stream()
-                .filter(doc -> doc.getUploadedBy().equals(userId))
-                .collect(Collectors.toList());
-        return documents.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public Page<DocumentDto> getUserDocuments(Long userId, Pageable pageable) {
+        return documentRepository.findByUploadedBy(userId, pageable)
+                .map(this::convertToDto);
     }
 
     public List<DocumentDto> getCaseDocuments(UUID caseId) {

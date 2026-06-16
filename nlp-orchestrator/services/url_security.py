@@ -5,7 +5,6 @@ import socket
 from typing import Set, Union
 from urllib.parse import urlparse
 
-
 BLOCKED_HOSTNAMES = {"localhost", "localhost.localdomain"}
 ALLOWED_SCHEMES = {"http", "https"}
 
@@ -37,7 +36,9 @@ def validate_public_video_url(url: str) -> str:
 
     for address in _resolve_host_addresses(hostname):
         if _is_blocked_address(address):
-            raise UnsafeVideoUrlError("Video URL resolves to a private or reserved address.")
+            raise UnsafeVideoUrlError(
+                "Video URL resolves to a private or reserved address."
+            )
 
     return candidate
 
@@ -65,7 +66,9 @@ def _resolve_host_addresses(hostname: str) -> Set[IPAddress]:
         addresses.add(ipaddress.ip_address(sockaddr[0]))
 
     if not addresses:
-        raise UnsafeVideoUrlError("Video URL hostname did not resolve to an IP address.")
+        raise UnsafeVideoUrlError(
+            "Video URL hostname did not resolve to an IP address."
+        )
 
     return addresses
 
