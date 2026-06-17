@@ -120,6 +120,7 @@ export const caseAPI = {
     startArguments: (id) => api.post(`/api/v1/cases/${id}/start-arguments`),
     startJudgment: (id) => api.post(`/api/v1/cases/${id}/start-judgment`),
     deliverVerdict: (id, verdictDetails) => api.post(`/api/v1/cases/${id}/deliver-verdict`, { verdictDetails }),
+    orderNotice: (id) => api.post(`/api/v1/cases/${id}/order-notice`),
 };
 
 // Document API
