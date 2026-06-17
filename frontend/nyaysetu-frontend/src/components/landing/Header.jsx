@@ -175,10 +175,7 @@ export default function Header({ hideAuthButtons = false }) {
         }
         // -------------------------------------------------------------
 
-        const baseStyle = navLinkStyle(isActive);
-        // Fallback to labelKey directly if translation returns the exact key
-
-        const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
+        const activeStyle = navLinkStyle(isActive);
 
         if (item.action) {
             return (
@@ -188,7 +185,7 @@ export default function Header({ hideAuthButtons = false }) {
                     {...sharedProps}
                     className="header-nav-link"
                     data-active={isActive ? 'true' : undefined}
-                    style={baseStyle}
+                    style={activeStyle}
                 >
                     {displayLabel}
                     {underline}
@@ -204,7 +201,7 @@ export default function Header({ hideAuthButtons = false }) {
                     {...sharedProps}
                     className="header-nav-link"
                     data-active={isActive ? 'true' : undefined}
-                    style={baseStyle}
+                    style={activeStyle}
                 >
                     {displayLabel}
                     {underline}
@@ -219,7 +216,7 @@ export default function Header({ hideAuthButtons = false }) {
                 {...sharedProps}
                 className="header-nav-link"
                 data-active={isActive ? 'true' : undefined}
-                style={baseStyle}
+                style={activeStyle}
             >
                 {displayLabel}
                 {underline}
