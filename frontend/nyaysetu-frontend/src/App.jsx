@@ -29,6 +29,7 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Disclaimer = lazy(() => import('./pages/Disclaimer'));
 const UpcomingFeatures = lazy(() => import('./pages/UpcomingFeatures'));
+const LegalRightsHub = lazy(() => import('./pages/LegalRightsHub'));
 
 // Dashboard Layout
 const DashboardLayout = retryLazy(() => import('./layouts/DashboardLayout'));
@@ -101,7 +102,7 @@ const GuestAuthRedirect = ({ location }) => {
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const location = useLocation();
-    
+
     // Atomic Zustand Selectors prevent localized updates from re-rendering the outer core app
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     const isGuest = useAuthStore((s) => s.isGuest);
@@ -197,7 +198,7 @@ function App({ swRegistration }) {
                         <GuestOnboardingHint />
                         <ScrollToTop />
                         <BackToTop />
-                        
+
                         <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
                             <Routes>
                                 {/* Base Application Portals */}
@@ -212,6 +213,8 @@ function App({ swRegistration }) {
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
+                                <Route path="/legal-rights" element={<LegalRightsHub />} />
+                                <Route path="/legal-rights/:categoryId" element={<LegalRightsHub />} />
 
                                 {/* Litigant Functional Core */}
                                 <Route path="/litigant/*" element={
@@ -297,7 +300,7 @@ function App({ swRegistration }) {
                                     <Route path="profile" element={<ProfilePage />} />
                                     <Route path="*" element={<Navigate to="/police" replace />} />
                                 </Route>
-                                
+
                                 {/* Core Catch-All Directives */}
                                 <Route path="/unauthorized" element={<UnauthorizedView />} />
                                 <Route path="*" element={<NotFoundView />} />

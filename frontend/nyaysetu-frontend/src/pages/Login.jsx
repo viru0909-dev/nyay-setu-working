@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link,useSearchParams} from 'react-router-dom';
 import { useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authAPI } from '../services/api';
@@ -30,7 +29,7 @@ export default function Login() {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const oauthError = params.get("error");
-    
+
         if (oauthError) {
             setError(oauthError);
         }
@@ -49,10 +48,10 @@ export default function Login() {
         if (oauthError) {
             setError(oauthError);
         }
-    
+
     }, [oauthError]);
 
-           
+
 
 
     const roles = [
@@ -75,7 +74,7 @@ export default function Login() {
                 role: selectedRole || 'LITIGANT' // Default to LITIGANT if no role selected
             };
 
-            
+
             const response = await authAPI.login(loginPayload);
             const { token, user } = response.data;
 
@@ -149,12 +148,12 @@ export default function Login() {
                 }}>
                     {/* Left Side - Welcome (hidden on mobile) */}
                     {!isMobile && (
-    <div
-        style={{
-            color: 'var(--text-main)',
-            transform: 'translateY(-40px)'
-        }}
-    >
+                        <div
+                            style={{
+                                color: 'var(--text-main)',
+                                transform: 'translateY(-40px)'
+                            }}
+                        >
                             <div style={{ marginBottom: '2rem' }}>
                                 <h1 style={{
                                     fontSize: '2.8rem',
@@ -472,7 +471,7 @@ export default function Login() {
                                 {loading ? t('auth:login.signingIn') : t('auth:login.signIn')}
                             </button>
 
-                             {/* Divider */}
+                            {/* Divider */}
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -484,7 +483,7 @@ export default function Login() {
                                     height: '1px',
                                     background: 'rgba(0,0,0,0.1)'
                                 }} />
-                                
+
                                 <span style={{
                                     padding: '0 1rem',
                                     fontSize: '0.875rem'
@@ -499,7 +498,7 @@ export default function Login() {
                                 }} />
                             </div>
 
-                            
+
                             {/* Google Login */}
                             <button
                                 type="button"
