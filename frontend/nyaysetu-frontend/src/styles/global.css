@@ -432,3 +432,11 @@ a:hover { color: var(--color-primary); }
 .dark-mode .card, .dark-mode .navbar, .dark-mode header, .dark-mode nav {
   background-color: #
 
+.back-to-top-btn:hover {
+  transform: scale(1.1);
+}
+
+.back-to-top-btn:focus-visible {
+  outline: 2px solid var(--primary-blue, #2563EB);
+  outline-offset: 3px;
+}

@@ -13,16 +13,14 @@ min_frames = min(len(cam1_frames), len(cam2_frames))
 
 for i in range(min_frames):
 
-    aligned_frames[i] = {
-        "cam1": cam1_frames[i],
-        "cam2": cam2_frames[i]
-    }
+    aligned_frames[i] = {"cam1": cam1_frames[i], "cam2": cam2_frames[i]}
 
 with open(r"reconstruction\aligned_frames.json", "w") as file:
     json.dump(aligned_frames, file, indent=4)
 
 print("Frame synchronization completed")
 import json
+
 
 def synchronize_frames(metadata_file):
 
@@ -33,11 +31,13 @@ def synchronize_frames(metadata_file):
 
     for item in metadata:
 
-        synced_frames.append({
-            "frame": item["frame"],
-            "timestamp": item["timestamp"],
-            "camera_id": item["camera_id"]
-        })
+        synced_frames.append(
+            {
+                "frame": item["frame"],
+                "timestamp": item["timestamp"],
+                "camera_id": item["camera_id"],
+            }
+        )
 
     print(f"Synchronized {len(synced_frames)} frames")
 

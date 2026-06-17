@@ -156,6 +156,42 @@
         "cta": "Get Started"
     }
     },
+    "faq": {
+        "badge": "FAQ",
+        "title": "Frequently Asked",
+        "titleHighlight": "Questions",
+        "subtitle": "Quick answers to common questions about NyaySetu and how the platform works.",
+        "items": {
+            "whatIs": {
+                "question": "What is Nyay Setu?",
+                "answer": "NyaySetu is India's first AI-powered virtual judiciary platform. It helps citizens file cases, attend virtual hearings, track case progress, and access legal assistance through a secure, transparent digital portal."
+            },
+            "isFree": {
+                "question": "Is Nyay Setu free to use?",
+                "answer": "Yes. Creating an account and accessing core platform features is free. NyaySetu is built to make legal services more accessible to every citizen."
+            },
+            "whoCanUse": {
+                "question": "Who can use the platform?",
+                "answer": "NyaySetu supports role-based access for litigants, lawyers, judges, and police officers. Each role gets a dedicated dashboard tailored to their responsibilities in the legal process."
+            },
+            "aiReplacement": {
+                "question": "Is the AI legal assistant a replacement for a lawyer?",
+                "answer": "No. The AI assistant provides guidance and information only. It does not constitute legal advice and is not a substitute for a qualified lawyer."
+            },
+            "forgotPassword": {
+                "question": "What should I do if I forget my password?",
+                "answerBefore": "Go to the ",
+                "answerLink": "Login page",
+                "answerAfter": " and click \"Forgot Password\" to receive reset instructions via email."
+            },
+            "reportIssue": {
+                "question": "How can I report a technical issue?",
+                "answerBefore": "You can report bugs or technical problems by opening an issue on our ",
+                "answerLink": "GitHub repository",
+                "answerAfter": ", or contact us through the email listed in the footer."
+            }
+        }
+    },
     "footer": {
         "tagline": "India's first AI-powered virtual judiciary platform, making justice accessible to every citizen.",
         "quickLinks": "Quick Links",

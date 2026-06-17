@@ -1,0 +1,2 @@
+ALTER TABLE ny_user
+ALTER COLUMN password DROP NOT NULL;

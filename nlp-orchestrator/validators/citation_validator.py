@@ -10,7 +10,7 @@ from legal_utils.citation_extractor import extract_legal_citations
 DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "legal_sections.json"
 
 
-@lru_cache(maxsize=1)  
+@lru_cache(maxsize=1)
 def _load_legal_sections() -> dict[str, Any]:
     with open(DATA_PATH, "r", encoding="utf-8") as handle:
         return json.load(handle)
@@ -18,8 +18,7 @@ def _load_legal_sections() -> dict[str, Any]:
 
 def _parse_numeric_section(section: str) -> tuple[int, str] | None:
     match = re.match(
-        r"^(?P<number>\d{1,4})(?P<suffix>[A-Za-z]{1,2})?$",
-        section.strip()
+        r"^(?P<number>\d{1,4})(?P<suffix>[A-Za-z]{1,2})?$", section.strip()
     )
 
     if not match:
@@ -31,11 +30,7 @@ def _parse_numeric_section(section: str) -> tuple[int, str] | None:
     return number, suffix
 
 
-def validate_citation(
-    act: str,
-    section: str,
-    raw: str | None = None
-) -> dict[str, Any]:
+def validate_citation(act: str, section: str, raw: str | None = None) -> dict[str, Any]:
 
     raw_citation = raw or f"{act} Section {section}"
 
@@ -48,7 +43,7 @@ def validate_citation(
             "act": act,
             "section": section,
             "valid": False,
-            "message": "Malformed citation: missing act or section"
+            "message": "Malformed citation: missing act or section",
         }
 
     metadata = _load_legal_sections().get("acts", {})
@@ -59,7 +54,7 @@ def validate_citation(
             "act": act,
             "section": section,
             "valid": False,
-            "message": "Unsupported or unrecognized legal act"
+            "message": "Unsupported or unrecognized legal act",
         }
 
     parsed = _parse_numeric_section(section)
@@ -70,7 +65,7 @@ def validate_citation(
             "act": act,
             "section": section,
             "valid": False,
-            "message": "Malformed citation: invalid section format"
+            "message": "Malformed citation: invalid section format",
         }
 
     number, _ = parsed
@@ -88,7 +83,7 @@ def validate_citation(
             "Valid legal citation"
             if is_valid
             else "Invalid or unverifiable legal citation"
-        )
+        ),
     }
 
 
@@ -96,10 +91,6 @@ def validate_citations_from_text(text: str) -> list[dict[str, Any]]:
     citations = extract_legal_citations(text)
 
     return [
-        validate_citation(
-            citation["act"],
-            citation["section"],
-            citation["raw"]
-        )
+        validate_citation(citation["act"], citation["section"], citation["raw"])
         for citation in citations
     ]
