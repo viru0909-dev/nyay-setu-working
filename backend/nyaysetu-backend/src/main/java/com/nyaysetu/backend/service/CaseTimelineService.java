@@ -14,13 +14,47 @@ import java.util.UUID;
 public class CaseTimelineService {
 
     private final CaseTimelineRepository repo;
-
+    
     public void addEvent(UUID caseId, String event) {
         repo.save(CaseTimeline.builder()
-                .legalCaseId(caseId)        // builder field assumed 'legalCaseId'
+                .legalCaseId(caseId)
                 .event(event)
                 .timestamp(LocalDateTime.now())
                 .build());
+    }
+
+    public void addEvent(UUID caseId, String type, String description) {
+        repo.save(CaseTimeline.builder()
+                .legalCaseId(caseId)
+                .event(type)
+                .eventType(type)
+                .description(description)
+                .timestamp(LocalDateTime.now())
+                .build());
+    }
+
+    public void logAppealFiled(UUID caseId) {
+        addEvent(
+                caseId,
+                "APPEAL_FILED",
+                "Appeal has been filed"
+        );
+    }
+
+    public void logVerdictUploaded(UUID caseId) {
+        addEvent(
+                caseId,
+                "VERDICT_UPLOADED",
+                "Verdict document uploaded"
+        );
+    }
+
+    public void logVerdictArchived(UUID caseId) {
+        addEvent(
+                caseId,
+                "VERDICT_ARCHIVED",
+                "Verdict archived successfully"
+        );
     }
 
     public List<CaseTimeline> getTimeline(UUID caseId) {
@@ -39,12 +73,4 @@ public class CaseTimelineService {
         addEvent(caseId, "Hearing scheduled for " + date.toLocalDate());
     }
 
-    public void addEvent(UUID caseId, String type, String description) {
-        // Combine type and description into single event field
-        repo.save(CaseTimeline.builder()
-                .legalCaseId(caseId)
-                .event(type + ": " + description)
-                .timestamp(LocalDateTime.now())
-                .build());
-    }
 }

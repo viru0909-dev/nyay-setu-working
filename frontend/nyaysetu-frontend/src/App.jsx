@@ -16,6 +16,46 @@ import UpdateNotification from './components/UpdateNotification';
 import GuestWelcomeToast from './components/guest/GuestWelcomeToast';
 import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
 
+import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
+import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
+
+// Imported Feature Component
+
+// ==========================================
+// VITE CHUNK BREAKAGE MITIGATION WRAPPER
+// ==========================================
+const retryLazy = (componentImport) => lazy(async () => {
+    const pageHasAlreadyBeenForceRefreshed = JSON.parse(
+        window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
+    );
+    try {
+        const component = await componentImport();
+        window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
+        return component;
+    } catch (error) {
+        if (!pageHasAlreadyBeenForceRefreshed) {
+            window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+            window.location.reload();
+            return { default: () => <LoadingSpinner fullScreen message="Syncing workspace patches..." /> };
+        }
+        throw error;
+    }
+});
+
+// ==========================================
+// OPTIMIZED LAZY-LOAD ENTRIES
+// ==========================================
+const Landing = retryLazy(() => import('./pages/Landing'));
+const Constitution = retryLazy(() => import('./pages/Constitution'));
+const Login = retryLazy(() => import('./pages/Login'));
+const Signup = retryLazy(() => import('./pages/Signup'));
+const ResetPassword = retryLazy(() => import('./pages/ResetPassword'));
+const About = retryLazy(() => import('./pages/About'));
+const PrivacyPolicy = retryLazy(() => import('./pages/PrivacyPolicy'));
+const Terms = retryLazy(() => import('./pages/Terms'));
+const Disclaimer = retryLazy(() => import('./pages/Disclaimer'));
+const UpcomingFeatures = retryLazy(() => import('./pages/UpcomingFeatures'));
+const FAQ = retryLazy(() => import('./pages/FAQ'));
 import OAuthSuccess from './pages/OAuthSuccess';
 
 // Lazy load pages for better performance
@@ -213,8 +253,12 @@ function App({ swRegistration }) {
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
+
                                 <Route path="/legal-rights" element={<LegalRightsHub />} />
                                 <Route path="/legal-rights/:categoryId" element={<LegalRightsHub />} />
+
+                                <Route path="/faq" element={<FAQ />} />
+
 
                                 {/* Litigant Functional Core */}
                                 <Route path="/litigant/*" element={

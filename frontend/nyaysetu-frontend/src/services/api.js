@@ -120,6 +120,7 @@ export const caseAPI = {
     startArguments: (id) => api.post(`/api/v1/cases/${id}/start-arguments`),
     startJudgment: (id) => api.post(`/api/v1/cases/${id}/start-judgment`),
     deliverVerdict: (id, verdictDetails) => api.post(`/api/v1/cases/${id}/deliver-verdict`, { verdictDetails }),
+    orderNotice: (id) => api.post(`/api/v1/cases/${id}/order-notice`),
 };
 
 // Document API
@@ -303,6 +304,8 @@ export const policeAPI = {
     startInvestigation: (id) => api.post(`/api/v1/police/investigation/${id}/start`),
     submitInvestigation: (id, findings) => api.post(`/api/v1/police/investigation/${id}/submit`, { findings }),
     getInvestigations: () => api.get('/api/v1/police/investigation/list'),
+    getPendingSummons: () => api.get('/api/v1/police/summons/pending'),
+    completeSummons: (id) => api.post(`/api/v1/police/summons/${id}/complete`),
 
     // New methods for Enhanced Investigation
     uploadEvidence: (id, formData) => api.post(`/api/v1/police/investigation/${id}/evidence`, formData),

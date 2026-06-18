@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.service;
 
+import com.nyaysetu.backend.exception.UserAlreadyExistsException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -35,11 +36,19 @@ public class AuthService implements UserDetailsService {
     }
 
     public void register(String email, String name, String password, Role role) {
+
+        if (userRepository.existsByEmail(email)) {
+            throw new UserAlreadyExistsException(
+                    "User already exists with email: " + email
+            );
+        }
+
         User u = new User();
         u.setEmail(email);
         u.setName(name);
         u.setPassword(passwordEncoder.encode(password));
         u.setRole(role);
+
         userRepository.save(u);
     }
 

@@ -33,7 +33,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
@@ -286,7 +285,7 @@ public class SecurityConfig {
                         ).hasAnyRole("POLICE", "JUDGE", "SUPER_JUDGE", "ADMIN")
 
                         // ── Everything else requires authentication ────────────────────────
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated();
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

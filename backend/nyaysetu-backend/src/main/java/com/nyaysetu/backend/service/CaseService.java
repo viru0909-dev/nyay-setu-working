@@ -1,5 +1,7 @@
 package com.nyaysetu.backend.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.exception.NotFoundException;
@@ -70,4 +72,56 @@ public class CaseService {
         timelineService.addEvent(caseId, "Case status updated to " + status);
         return lc;
     }
+
+    @Transactional
+    public CaseEntity createAppeal(UUID parentCaseId, String reason) {
+
+        CaseEntity parentCase = getCase(parentCaseId);
+
+        CaseEntity appeal = CaseEntity.builder()
+                .title("Appeal - " + parentCase.getTitle())
+                .description(parentCase.getDescription())
+                .caseType(parentCase.getCaseType())
+                .status(CaseStatus.OPEN)
+                .isAppeal(true)
+                .parentCaseId(parentCaseId)
+                .appealReason(reason)
+                .appealStatus("PENDING")
+                .appealLevel(1)
+                .appealFiledDate(LocalDateTime.now())
+                .build();
+
+        CaseEntity savedAppeal = caseRepository.save(appeal);
+
+        timelineService.addEvent(
+                savedAppeal.getId(),
+                "APPEAL_FILED",
+                "Appeal filed against case " + parentCaseId
+        );
+
+        return savedAppeal;
+    }
+
+    public List<CaseEntity> getAppeals(UUID parentCaseId) {
+        return caseRepository.findByParentCaseId(parentCaseId);
+    }
+
+    @Transactional
+    public CaseEntity updateAppealStatus(UUID appealId, String status) {
+
+        CaseEntity appeal = getCase(appealId);
+
+        appeal.setAppealStatus(status);
+
+        CaseEntity updatedAppeal = caseRepository.save(appeal);
+
+        timelineService.addEvent(
+                appealId,
+                "APPEAL_STATUS_UPDATED",
+                "Appeal status changed to " + status
+        );
+
+        return updatedAppeal;
+    }
+
 }

@@ -82,6 +82,7 @@ export default function Header({ hideAuthButtons = false }) {
         { labelKey: 'Legal Rights', href: '/legal-rights', isRoute: true },
         { labelKey: 'header.nav.aiAssistant', action: () => setShowAIModal(true) },
         { labelKey: 'header.nav.about', href: '/about', isRoute: true },
+        { labelKey: 'FAQ', href: '/faq', isRoute: true },
     ];
 
     const isDark = theme === 'dark';
@@ -105,8 +106,30 @@ export default function Header({ hideAuthButtons = false }) {
 
     const renderNavItem = (item) => {
 
+
+        const currentPathWithHash = location.pathname + location.hash;
+
+        let isActive = false;
+
+        if (item.href === '/') {
+            isActive = location.pathname === '/' && !location.hash;
+        } else if (item.href) {
+            isActive =
+                currentPathWithHash === item.href ||
+                location.pathname === item.href;
+        }
+
+        const baseStyle = navLinkStyle(isActive);
+
+        const displayLabel =
+            t(item.labelKey) === item.labelKey
+                ? item.labelKey
+                : t(item.labelKey);
+
+
         const underline = (
             <span
+                className="nav-underline"
                 style={{
                     position: 'absolute',
                     left: '50%',
@@ -116,15 +139,20 @@ export default function Header({ hideAuthButtons = false }) {
                     borderRadius: '999px',
                     background: 'var(--color-primary)',
 
+
                     transform:
                         location.pathname === item.href
                             ? 'translateX(-50%) scaleX(1)'
                             : 'translateX(-50%) scaleX(0)',
 
+
+                    transform: isActive
+                        ? 'translateX(-50%) scaleX(1)'
+                        : 'translateX(-50%) scaleX(0)',
+
                     transformOrigin: 'center',
                     transition: 'transform 0.3s ease',
                 }}
-                className="nav-underline"
             />
         );
 
@@ -175,6 +203,18 @@ export default function Header({ hideAuthButtons = false }) {
                 }
             },
         };
+
+        const currentPathWithHash = location.pathname + location.hash;
+        let isActive = false;
+        if (item.href === '/') {
+            // Home is only active if we are on '/' AND there is no hash
+            isActive = location.pathname === '/' && !location.hash;
+        } else if (item.href) {
+            // Other tabs are active if they match the exact path+hash OR just the path
+            isActive = currentPathWithHash === item.href || location.pathname === item.href;
+        }
+        // -------------------------------------------------------------
+
 
         if (item.action) {
             return (
@@ -614,8 +654,6 @@ export default function Header({ hideAuthButtons = false }) {
                                         cursor: 'pointer',
                                         fontFamily: 'inherit',
                                     };
-
-                                    const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
                                     if (item.action) {
                                         return (
