@@ -316,7 +316,7 @@ function App({ swRegistration }) {
 
                                 {/* Administrative Core */}
                                 <Route path="/admin/*" element={
-                                    <ProtectedWorkspace allowedRoles={['ADMIN']} message="Loading Admin Panel...">
+                                    <ProtectedWorkspace allowedRoles={['ADMIN', 'TECH_ADMIN', 'TECHNICAL_TEAM', 'SUPER_JUDGE']} message="Loading Admin Panel...">
                                         <DashboardLayout />
                                     </ProtectedWorkspace>
                                 }>
