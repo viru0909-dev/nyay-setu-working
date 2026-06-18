@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 export default function LawyerChatPage() {
+    
     const navigate = useNavigate();
     const [selectedCase, setSelectedCase] = useState(null);
     const [message, setMessage] = useState('');
