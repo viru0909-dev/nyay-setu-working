@@ -177,7 +177,6 @@ export default function Header({ hideAuthButtons = false }) {
 
         // Fallback to labelKey directly if translation returns the exact key
 
-        const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
         if (item.action) {
             return (

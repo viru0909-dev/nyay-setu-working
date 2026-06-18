@@ -440,7 +440,7 @@ export default function Footer() {
                                     textDecoration: 'none',
                                     fontSize: '0.95rem',
                                     transition: 'all 0.3s ease',
-                                    display: 'inline-block',
+
                                     position: 'relative',
                                     display: 'flex',
                                     alignItems: 'center',

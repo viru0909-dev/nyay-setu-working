@@ -101,9 +101,10 @@ git checkout -b feat/your-feature-name
 ## Project Setup
 
 ### Prerequisites
-- **Node.js** v14+ and npm
-- **Java** JDK 11 or higher
-- **Python** 3.8+
+
+- **Node.js** v20+ and npm
+- **Java** JDK 17
+- **Python** 3.12+
 - **Docker** & **Docker Compose** (recommended for easy setup)
 - **PostgreSQL** (if running locally without Docker)
 - **Git**
@@ -861,7 +862,7 @@ When I test with cURL, I get:
   {"error": "Invalid refresh token"}
 I've verified the token is being saved correctly.
 My environment:
-- Java 11
+- Java 17
 - Spring Boot 2.7
 - PostgreSQL 12
 
