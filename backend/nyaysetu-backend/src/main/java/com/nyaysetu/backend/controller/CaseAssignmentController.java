@@ -1,9 +1,11 @@
 package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.dto.LawyerDTO;
+import com.nyaysetu.backend.dto.LawyerMatchDTO;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.service.CaseAssignmentService;
+import com.nyaysetu.backend.service.LawyerMatchingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Controller for case assignment operations
- */
 @Tag(name = "Case Assignment", description = "Assign judges and lawyers to cases automatically or manually")
 @RestController
 @RequestMapping("/cases")
@@ -26,22 +25,18 @@ import java.util.UUID;
 public class CaseAssignmentController {
 
     private final CaseAssignmentService caseAssignmentService;
+    private final LawyerMatchingService lawyerMatchingService;
 
-    /**
-     * Auto-assign a judge to a case
-     */
     @PostMapping("/{caseId}/assign-judge")
     public ResponseEntity<Map<String, Object>> autoAssignJudge(@PathVariable UUID caseId) {
         try {
             User assignedJudge = caseAssignmentService.autoAssignJudge(caseId);
-            
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Judge assigned successfully");
             response.put("judgeId", assignedJudge.getId());
             response.put("judgeName", assignedJudge.getName());
             response.put("judgeEmail", assignedJudge.getEmail());
-            
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Failed to assign judge to case {}", caseId, e);
@@ -52,18 +47,12 @@ public class CaseAssignmentController {
         }
     }
 
-    /**
-     * Get list of available lawyers for client selection
-     */
     @GetMapping("/lawyers/available")
     public ResponseEntity<List<LawyerDTO>> getAvailableLawyers() {
         List<LawyerDTO> lawyers = caseAssignmentService.getAvailableLawyers();
         return ResponseEntity.ok(lawyers);
     }
 
-    /**
-     * Propose a lawyer for a case
-     */
     @PostMapping("/{caseId}/propose-lawyer")
     public ResponseEntity<Map<String, Object>> proposeLawyer(
             @PathVariable UUID caseId,
@@ -72,11 +61,9 @@ public class CaseAssignmentController {
         try {
             Long lawyerId = Long.parseLong(request.get("lawyerId").toString());
             caseAssignmentService.proposeLawyerToCase(caseId, lawyerId);
-            
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Proposal sent to lawyer successfully");
-            
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Failed to propose lawyer for case {}", caseId, e);
@@ -87,9 +74,6 @@ public class CaseAssignmentController {
         }
     }
 
-    /**
-     * Respond to a lawyer proposal
-     */
     @PostMapping("/{caseId}/respond-proposal")
     public ResponseEntity<Map<String, Object>> respondProposal(
             @PathVariable UUID caseId,
@@ -98,11 +82,9 @@ public class CaseAssignmentController {
         try {
             String status = request.get("status").toString();
             caseAssignmentService.respondToLawyerProposal(caseId, status);
-            
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Response recorded successfully");
-            
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Failed to respond to proposal for case {}", caseId, e);
@@ -113,18 +95,12 @@ public class CaseAssignmentController {
         }
     }
 
-    /**
-     * Get cases pending judge assignment (for admin)
-     */
     @GetMapping("/pending-assignment")
     public ResponseEntity<List<CaseEntity>> getPendingCases() {
         List<CaseEntity> cases = caseAssignmentService.getPendingAssignmentCases();
         return ResponseEntity.ok(cases);
     }
 
-    /**
-     * Get judge workload (for admin dashboard)
-     */
     @GetMapping("/judge-workload")
     public ResponseEntity<List<Map<String, Object>>> getJudgeWorkload() {
         List<Map<String, Object>> workload = caseAssignmentService.getJudgeWorkload();
@@ -139,11 +115,9 @@ public class CaseAssignmentController {
         try {
             Long judgeId = Long.parseLong(request.get("judgeId").toString());
             caseAssignmentService.takeCognizance(caseId, judgeId);
-
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Cognizance taken successfully. Case moved to Docket.");
-
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Failed to take cognizance for case {}", caseId, e);
@@ -153,7 +127,6 @@ public class CaseAssignmentController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-
 
     @PostMapping("/{caseId}/update-summons")
     public ResponseEntity<Map<String, Object>> updateSummons(
@@ -176,12 +149,43 @@ public class CaseAssignmentController {
     ) {
         try {
             String statusStr = request.get("status");
-            // Assuming DocumentStatus enum is available or imported
-            com.nyaysetu.backend.entity.DocumentStatus status = com.nyaysetu.backend.entity.DocumentStatus.valueOf(statusStr);
+            com.nyaysetu.backend.entity.DocumentStatus status =
+                    com.nyaysetu.backend.entity.DocumentStatus.valueOf(statusStr);
             caseAssignmentService.updateDocumentStatus(caseId, status);
             return ResponseEntity.ok(Map.of("success", true, "message", "Document status updated"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
+    }
+
+    /**
+     * Get top-10 matched lawyers for a case based on expertise tags
+     */
+    @PostMapping("/{caseId}/match-lawyers")
+    public ResponseEntity<List<LawyerMatchDTO>> matchLawyers(
+            @PathVariable UUID caseId,
+            @RequestBody Map<String, Object> request
+    ) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<String> requiredTags = (List<String>) request.get("requiredTags");
+            List<LawyerMatchDTO> matches = lawyerMatchingService.getTopMatches(caseId, requiredTags);
+            return ResponseEntity.ok(matches);
+        } catch (Exception e) {
+            log.error("Failed to match lawyers for case {}", caseId, e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Get lawyer directory with optional city/expertise filters
+     */
+    @GetMapping("/lawyers/directory")
+    public ResponseEntity<List<LawyerMatchDTO>> getLawyerDirectory(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String expertise
+    ) {
+        List<LawyerMatchDTO> result = lawyerMatchingService.getDirectory(city, expertise);
+        return ResponseEntity.ok(result);
     }
 }

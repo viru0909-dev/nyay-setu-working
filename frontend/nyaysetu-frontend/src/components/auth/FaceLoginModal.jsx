@@ -11,15 +11,24 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }) {
     const [message, setMessage] = useState('');
     const [faceDetected, setFaceDetected] = useState(false);
     const webcamRef = useRef(null);
+    const timeoutRef = useRef(null);      // stores the 45s timeout ID
+    const scanActiveRef = useRef(false);  // tracks if scan session is still live
     const { modelsLoaded, detectFace, loginWithFace } = useFaceRecognition();
 
     useEffect(() => {
         let interval;
         if (step === 'scanning' && modelsLoaded) {
+            scanActiveRef.current = true;
             interval = startFaceDetection();
         }
         return () => {
             if (interval) clearInterval(interval);
+            // Cancel timeout when step changes or component unmounts
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
+            scanActiveRef.current = false;
         };
     }, [step, modelsLoaded]);
 
@@ -45,18 +54,27 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }) {
             }
         }, 800);
 
-        setTimeout(() => {
-            if (interval) clearInterval(interval);
-            if (step === 'scanning' && !faceDetected) {
-                setStep('error');
-                setMessage('Biometric timeout. Signal not acquired.');
-            }
+        // FIX: store timeout in ref so it can be cancelled from handleFaceLogin
+        // FIX: use scanActiveRef instead of stale state values (step, faceDetected)
+        timeoutRef.current = setTimeout(() => {
+            if (!scanActiveRef.current) return; // scan already succeeded — do nothing
+            clearInterval(interval);
+            scanActiveRef.current = false;
+            setStep('error');
+            setMessage('Biometric timeout. Signal not acquired.');
         }, 45000);
 
         return interval;
     };
 
     const handleFaceLogin = async (descriptor) => {
+        // FIX: cancel the timeout immediately — face is confirmed, don't let it fire an error
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+        }
+        scanActiveRef.current = false;
+
         try {
             setMessage('Verifying biometric signature...');
             const response = await loginWithFace(email, descriptor);
