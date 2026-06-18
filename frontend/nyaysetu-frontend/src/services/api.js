@@ -120,6 +120,7 @@ export const caseAPI = {
     startArguments: (id) => api.post(`/api/v1/cases/${id}/start-arguments`),
     startJudgment: (id) => api.post(`/api/v1/cases/${id}/start-judgment`),
     deliverVerdict: (id, verdictDetails) => api.post(`/api/v1/cases/${id}/deliver-verdict`, { verdictDetails }),
+    orderNotice: (id) => api.post(`/api/v1/cases/${id}/order-notice`),
 };
 
 // Document API
@@ -161,8 +162,9 @@ export const documentAPI = {
 
 // Document Generation API (AI-powered legal document drafting)
 export const documentGenerateAPI = {
-    preview: (data) => api.post('/api/documents/generate/preview', data),
-    download: (data) => api.post('/api/documents/generate/download', data, { responseType: 'blob' }),
+    preview: (data) => api.post('/api/v1/documents/generate/preview', data),
+    download: (data) => api.post('/api/v1/documents/generate/download', data, { responseType: 'blob' }),
+    downloadDocx: (data) => api.post('/api/v1/documents/generate/download/docx', data, { responseType: 'blob' }),
 };
 
 // Hearing API
@@ -302,6 +304,8 @@ export const policeAPI = {
     startInvestigation: (id) => api.post(`/api/v1/police/investigation/${id}/start`),
     submitInvestigation: (id, findings) => api.post(`/api/v1/police/investigation/${id}/submit`, { findings }),
     getInvestigations: () => api.get('/api/v1/police/investigation/list'),
+    getPendingSummons: () => api.get('/api/v1/police/summons/pending'),
+    completeSummons: (id) => api.post(`/api/v1/police/summons/${id}/complete`),
 
     // New methods for Enhanced Investigation
     uploadEvidence: (id, formData) => api.post(`/api/v1/police/investigation/${id}/evidence`, formData),

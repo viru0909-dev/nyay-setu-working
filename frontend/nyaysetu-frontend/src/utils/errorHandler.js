@@ -1,4 +1,10 @@
 export const getErrorMessage = (error) => {
+    // Axios timeout error
+    if (error.code === "ECONNABORTED") {
+        return "Request timed out. The server took too long to respond. Please try again.";
+    }
+
+    // Genuine network error
     if (!error.response) {
         return "Network error. Please check your internet connection.";
     }

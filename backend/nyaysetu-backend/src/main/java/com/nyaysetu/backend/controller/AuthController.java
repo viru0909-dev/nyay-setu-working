@@ -1,10 +1,13 @@
 package com.nyaysetu.backend.controller;
 
+import com.nyaysetu.backend.exception.UserAlreadyExistsException;
 import com.nyaysetu.backend.dto.*;
+import com.nyaysetu.backend.entity.AuthProvider;
 import com.nyaysetu.backend.entity.PasswordResetToken;
 import com.nyaysetu.backend.entity.Role;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.PasswordResetTokenRepository;
+import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import jakarta.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +42,7 @@ public class AuthController {
     private final FaceRecognitionService faceRecognitionService;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     @SecurityRequirements
     @PostMapping("/register")
@@ -54,14 +57,14 @@ public class AuthController {
                     req.getEmail(),
                     req.getName(),
                     req.getPassword(),
-                    req.getRole() != null ? req.getRole() : Role.LITIGANT // default to LITIGANT
+                    Role.LITIGANT // public registration always creates LITIGANT — role is not caller-controlled
             );
-            
+
             // Auto-login after registration
             UserDetails userDetails = userDetailsService.loadUserByUsername(req.getEmail());
             String token = jwtService.generateToken(new HashMap<>(), userDetails);
             var user = authService.findByEmail(req.getEmail());
-            
+
             return ResponseEntity.ok(Map.of(
                     "token", token,
                     "user", Map.of(
@@ -71,10 +74,11 @@ public class AuthController {
                             "role", user.getRole().name()
                     )
             ));
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Email already exists. Please use a different email or login."));
-        } catch (Exception e) {
+        }    
+        catch (UserAlreadyExistsException e) {
+            throw e;
+        }
+        catch (Exception e) {
             log.error("Registration error", e);
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "Registration failed: " + e.getMessage()));
@@ -91,6 +95,15 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         log.debug("Login endpoint reached for email: {}", req.getEmail());
         try {
+            User user1 = userRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+            if (user1.getAuthProvider() == AuthProvider.GOOGLE) {
+                return ResponseEntity.status(400)
+                    .body(Map.of(
+                            "message",
+                            "This account uses Google Sign-In. Please login with Google."
+                        ));
+            }
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
             );
@@ -152,22 +165,21 @@ public class AuthController {
 
     // ==================== PASSWORD RESET ENDPOINTS ====================
 
+    private static final String PASSWORD_RESET_GENERIC_MESSAGE =
+        "If an account with that email exists, a password reset link has been sent.";
+
     @SecurityRequirements
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
         try {
             emailService.sendPasswordResetEmail(req.getEmail());
-            return ResponseEntity.ok(Map.of(
-                "message", "Password reset email sent successfully",
-                "email", req.getEmail()
-            ));
-        } catch (MessagingException e) {
-            log.error("Failed to send password reset email", e);
-            return ResponseEntity.status(500).body(Map.of("message", "Failed to send email"));
         } catch (Exception e) {
-            log.error("Error in forgot password", e);
-            return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
+        log.warn("Password reset request completed with generic response", e);
         }
+
+        return ResponseEntity.ok(Map.of(
+            "message", PASSWORD_RESET_GENERIC_MESSAGE
+        ));
     }
 
     @GetMapping("/verify-reset-token")

@@ -227,7 +227,7 @@ export default function LitigantDashboard() {
                                 <div style={{ display: 'flex', gap: '1rem' }}>
                                     <button
                                         onClick={() => {
-                                            navigate(`/litigant/cases/${draft.id}`);
+                                            navigate(`/litigant/case-diary/${draft.caseId || draft.id}`);
                                         }}
                                         style={{
                                             padding: '0.6rem 1.2rem', background: 'white', border: '1px solid #e5e7eb',

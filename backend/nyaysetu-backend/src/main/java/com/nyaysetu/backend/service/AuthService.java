@@ -1,10 +1,6 @@
 package com.nyaysetu.backend.service;
 
-import com.nyaysetu.backend.entity.Role;
-import com.nyaysetu.backend.entity.User;
-import com.nyaysetu.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nyaysetu.backend.exception.UserAlreadyExistsException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,11 +8,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.nyaysetu.backend.entity.Role;
+import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.repository.UserRepository;
+
 @Service
 public class AuthService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthService(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -30,17 +30,25 @@ public class AuthService implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(u.getEmail())
-                .password(u.getPassword())
+                .password(u.getPassword() != null ? u.getPassword() : "")
                 .roles(u.getRole().name())
                 .build();
     }
 
     public void register(String email, String name, String password, Role role) {
+
+        if (userRepository.existsByEmail(email)) {
+            throw new UserAlreadyExistsException(
+                    "User already exists with email: " + email
+            );
+        }
+
         User u = new User();
         u.setEmail(email);
         u.setName(name);
         u.setPassword(passwordEncoder.encode(password));
         u.setRole(role);
+
         userRepository.save(u);
     }
 

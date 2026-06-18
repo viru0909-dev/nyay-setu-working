@@ -1,7 +1,6 @@
 package com.nyaysetu.backend.filter;
 
 import com.nyaysetu.backend.service.JwtService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

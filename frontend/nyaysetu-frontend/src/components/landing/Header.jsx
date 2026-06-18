@@ -81,6 +81,7 @@ export default function Header({ hideAuthButtons = false }) {
         { labelKey: 'header.nav.constitution', href: '/constitution', isRoute: true },
         { labelKey: 'header.nav.aiAssistant', action: () => setShowAIModal(true) },
         { labelKey: 'header.nav.about', href: '/about', isRoute: true },
+        { labelKey: 'FAQ', href: '/faq', isRoute: true },
     ];
 
     const isDark = theme === 'dark';
@@ -95,49 +96,138 @@ export default function Header({ hideAuthButtons = false }) {
         background: 'none',
         border: 'none',
         fontFamily: 'inherit',
+        transition: 'color 0.3s ease',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        lineHeight: '1',
     });
 
     const renderNavItem = (item) => {
-        const isActive = Boolean(item.href && location.pathname === item.href);
+        const currentPathWithHash = location.pathname + location.hash;
+
+        let isActive = false;
+
+        if (item.href === '/') {
+            isActive = location.pathname === '/' && !location.hash;
+        } else if (item.href) {
+            isActive =
+                currentPathWithHash === item.href ||
+                location.pathname === item.href;
+        }
+
         const baseStyle = navLinkStyle(isActive);
-        // Fallback to labelKey directly if translation returns the exact key
-        const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
+
+        const displayLabel =
+            t(item.labelKey) === item.labelKey
+                ? item.labelKey
+                : t(item.labelKey);
+
+        const underline = (
+            <span
+                className="nav-underline"
+                style={{
+                    position: 'absolute',
+                    left: '50%',
+                    bottom: '-4px',
+                    width: '72%',
+                    height: '3px',
+                    borderRadius: '999px',
+                    background: 'var(--color-primary)',
+                    transform: isActive
+                        ? 'translateX(-50%) scaleX(1)'
+                        : 'translateX(-50%) scaleX(0)',
+                    transformOrigin: 'center',
+                    transition: 'transform 0.3s ease',
+                }}
+            />
+        );
+
+        const sharedProps = {
+            style: baseStyle,
+            onMouseEnter: e => {
+                e.currentTarget.style.color = 'var(--color-primary)';
+                const underline =
+                    e.currentTarget.querySelector('.nav-underline');
+
+                if (underline) {
+                    underline.style.transform =
+                        'translateX(-50%) scaleX(1)';
+                }
+            },
+
+            onMouseLeave: e => {
+                e.currentTarget.style.color =
+                    location.pathname === item.href
+                        ? 'var(--color-primary)'
+                        : 'var(--text-secondary)';
+
+                const underline =
+                    e.currentTarget.querySelector('.nav-underline');
+
+                if (
+                    underline &&
+                    location.pathname !== item.href
+                ) {
+                    underline.style.transform =
+                        'translateX(-50%) scaleX(0)';
+                }
+            },
+        };
+        const currentPathWithHash = location.pathname + location.hash;
+        let isActive = false;
+        if (item.href === '/') {
+            // Home is only active if we are on '/' AND there is no hash
+            isActive = location.pathname === '/' && !location.hash;
+        } else if (item.href) {
+            // Other tabs are active if they match the exact path+hash OR just the path
+            isActive = currentPathWithHash === item.href || location.pathname === item.href;
+        }
+        // -------------------------------------------------------------
 
         if (item.action) {
             return (
                 <button
                     key={item.labelKey}
                     onClick={item.action}
+                    {...sharedProps}
                     className="header-nav-link"
                     data-active={isActive ? 'true' : undefined}
                     style={baseStyle}
                 >
                     {displayLabel}
+                    {underline}
                 </button>
             );
         }
+
         if (item.isRoute) {
             return (
                 <Link
                     key={item.labelKey}
                     to={item.href}
+                    {...sharedProps}
                     className="header-nav-link"
                     data-active={isActive ? 'true' : undefined}
                     style={baseStyle}
                 >
                     {displayLabel}
+                    {underline}
                 </Link>
             );
         }
+
         return (
             <a
                 key={item.labelKey}
                 href={item.href}
+                {...sharedProps}
                 className="header-nav-link"
                 data-active={isActive ? 'true' : undefined}
                 style={baseStyle}
             >
                 {displayLabel}
+                {underline}
             </a>
         );
     };
@@ -464,7 +554,7 @@ export default function Header({ hideAuthButtons = false }) {
                                     onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary-hover)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                                     onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                                 >
-                                    {t('header.cta.getStarted')}
+                                    {t('header.cta.signup')}
                                 </Link>
                             </>
                         )}
@@ -533,8 +623,6 @@ export default function Header({ hideAuthButtons = false }) {
                                         cursor: 'pointer',
                                         fontFamily: 'inherit',
                                     };
-
-                                    const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
                                     if (item.action) {
                                         return (
@@ -699,7 +787,7 @@ export default function Header({ hideAuthButtons = false }) {
                                             {t('header.cta.login')}
                                         </Link>
                                         <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '0.75rem', textAlign: 'center', background: 'var(--color-primary)', color: 'white', textDecoration: 'none', borderRadius: '10px', fontWeight: '600' }}>
-                                            {t('header.cta.getStarted')}
+                                            {t('header.cta.signup')}
                                         </Link>
                                     </>
                                 )}
