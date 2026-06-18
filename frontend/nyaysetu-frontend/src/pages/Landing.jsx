@@ -451,9 +451,70 @@ export default function Landing() {
                                             borderColor: 'var(--border-light)',
                                             borderRadius: '16px',
                                             cursor: 'default',
+
+                                            transition: 'border-color 0.25s ease, box-shadow 0.25s ease, transform 0.3s ease',
+
                                             '--card-glow-color': f.color,
+
                                         }}
                                     >
+
+                                        <motion.div
+                                             whileHover={{ scale: 1.15, rotate: 6 }}
+                                             transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                                             style={{
+                                                  width: '52px', height: '52px', borderRadius: '14px',
+                                                  background: f.color + '12',
+                                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                  marginBottom: '1.1rem',
+                                                  border: `1px solid ${f.color}25`,
+                                                  transition: 'background 0.3s ease',
+                                               }}
+                                         >
+                                             <FeatureIcon size={26} style={{ color: f.color }} />
+                                        </motion.div>
+    <div
+    style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '0.75rem',
+        marginBottom: '0.65rem',
+    }}
+>
+    <h3
+        style={{
+            fontSize: '1.1rem',
+            fontWeight: '700',
+            color: 'var(--text-main)',
+            margin: 0,
+        }}
+    >
+        {f.title}
+    </h3>
+
+    {isGuest && (
+        f.title === t('features.fileCases.title') ||
+        f.title === t('features.virtualHearings.title')
+    ) && (
+        <span
+            style={{
+                padding: '0.28rem 0.55rem',
+                borderRadius: '999px',
+                fontSize: '0.68rem',
+                fontWeight: '700',
+                background: 'rgba(245,158,11,0.10)',
+                border: '1px solid rgba(245,158,11,0.18)',
+                color: '#f59e0b',
+                letterSpacing: '0.02em',
+                whiteSpace: 'nowrap',
+            }}
+        >
+            Account Required
+        </span>
+    )}
+</div>
+
                                         <div
                                             className="feature-icon-wrapper"
                                             style={{
@@ -506,6 +567,7 @@ export default function Landing() {
                                                     </span>
                                                 )}
                                         </div>
+
                                         <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.7', margin: 0 }}>{f.desc}</p>
                                     </motion.div>
                                 );
