@@ -25,6 +25,10 @@ public class UserProfile {
     private String state;
     private String country;
 
+    @Column(name = "theme_preference")
+    @Builder.Default
+    private String themePreference = "system";
+
     // store face embedding id or a flag that face is registered
     @Builder.Default
     private Boolean faceRegistered = false;
