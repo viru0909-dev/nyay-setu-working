@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "AI Services", description = "Text summarization and AI chat via Groq and Ollama")
 @RestController
-@RequestMapping("/api/ai")
+@RequestMapping("/ai")
 @RequiredArgsConstructor
 public class AiController {
 
