@@ -6,7 +6,7 @@ google-genai==2.8.0
 groq==1.4.0
 httpx==0.28.1
 numpy==2.2.6
-opencv-python-headless>=4.8.0
+opencv-python-headless>=4.13.0.92
 pdf2image>=1.16.3
 Pillow==12.2.0
 protobuf<=3.20.3
@@ -28,7 +28,7 @@ uvicorn[standard]==0.27.1
 sentence-transformers>=2.7.0   # bi-encoder embeddings + cross-encoder rerank
 chromadb>=1.5.9                # persistent vector store (file-backed)
 tiktoken>=0.13.0                # token-aware chunking
-opencv-python-headless>=4.8.0
+opencv-python-headless>=4.13.0.92
 numpy>=1.24.0
 pdf2image>=1.16.3
 Pillow>=10.0.0
