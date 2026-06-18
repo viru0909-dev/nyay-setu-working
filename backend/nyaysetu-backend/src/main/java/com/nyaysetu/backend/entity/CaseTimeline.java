@@ -9,7 +9,11 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "case_timeline")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CaseTimeline {
 
     @Id
@@ -21,5 +25,26 @@ public class CaseTimeline {
 
     private String event;
 
+    private String eventType;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    private String performedBy;
+
     private LocalDateTime timestamp;
+
+    @Builder.Default
+    private Boolean visibleToLitigant = true;
+
+    @PrePersist
+    protected void onCreate() {
+        if (timestamp == null) {
+            timestamp = LocalDateTime.now();
+        }
+
+        if (visibleToLitigant == null) {
+            visibleToLitigant = true;
+        }
+    }
 }

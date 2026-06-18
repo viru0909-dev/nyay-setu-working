@@ -9,10 +9,11 @@ Endpoints:
   GET  /health                      — Health check
 """
 
+import os
+from utils import async_retry
 import asyncio
 import json
 import logging
-import os
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -40,10 +41,23 @@ from router import route_questions
 from sanitizer import sanitize_prompt_input, sanitize_user_input
 from services.kanoon_search import build_kanoon_context
 from sse_starlette.sse import EventSourceResponse
-from starlette.middleware.base import BaseHTTPMiddleware
+
+from cache import generate_cache_key, get_cached_response, set_cached_response
+from config import (
+    FRONTEND_ORIGIN,
+    GROQ_API_KEY,
+    GROQ_MODEL_FAST,
+    GEMINI_API_KEY,
+    GEMINI_MODEL,
+)
+from decomposer import decompose_query
+from router import route_questions
+from research import run_parallel_research, execute_with_fallback
 from synthesizer import (
-    stream_synthesize_answers_structured,
+    synthesize_answers,
+    stream_synthesize_answers,
     synthesize_answers_structured,
+    stream_synthesize_answers_structured,
 )
 from validators.citation_validator import validate_citations_from_text
 

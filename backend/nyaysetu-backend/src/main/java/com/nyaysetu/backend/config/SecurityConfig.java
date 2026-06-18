@@ -3,6 +3,7 @@ package com.nyaysetu.backend.config;
 import com.nyaysetu.backend.filter.JwtAuthFilter;
 
 import com.nyaysetu.backend.filter.RateLimitFilter;
+import com.nyaysetu.backend.service.CustomOAuth2UserService;
 import com.nyaysetu.backend.filter.XssSanitizationFilter;
 import jakarta.annotation.PostConstruct;
 import java.util.Arrays;
@@ -30,7 +31,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 
 @Configuration
 @EnableMethodSecurity
@@ -42,6 +42,9 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final RateLimitFilter rateLimitFilter;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final Environment environment;
 
     @Value("${cors.allowed.origins}")
@@ -140,6 +143,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -174,10 +178,17 @@ public class SecurityConfig {
                                 ))
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // ── OAuth2 ─────────────────────────────────────────────────────────
+                        .requestMatchers(
+                                "/oauth2/**",
+                                "/login/oauth2/**"
+                        ).permitAll()
+
                         // ── Public endpoints ──────────────────────────────────────────────
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
+                                "/api/v1/auth/refresh",
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/verify-reset-token",
                                 "/api/v1/auth/reset-password",
@@ -276,10 +287,17 @@ public class SecurityConfig {
                         ).hasAnyRole("POLICE", "JUDGE", "SUPER_JUDGE", "ADMIN")
 
                         // ── Everything else requires authentication ────────────────────────
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated();
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .oauth2Login(oauth -> oauth
+                        .userInfoEndpoint(userInfo ->
+                                userInfo.userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
+                )
                 .addFilterBefore(xssSanitizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

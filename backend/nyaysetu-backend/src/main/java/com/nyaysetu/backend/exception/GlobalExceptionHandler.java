@@ -68,6 +68,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(
+            UserAlreadyExistsException e) {
+
+        ErrorResponse error = new ErrorResponse(
+                "Conflict",
+                e.getMessage(),
+                409
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
     public static class ErrorResponse {
         private String error;
         private String message;

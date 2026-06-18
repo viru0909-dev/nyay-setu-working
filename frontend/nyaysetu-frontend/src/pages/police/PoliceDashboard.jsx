@@ -30,9 +30,7 @@ export default function PoliceDashboard() {
                 policeAPI.getStats(),
                 policeAPI.getPendingFirs(),
                 policeAPI.getInvestigations(),
-                axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/police/summons/pending`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                })
+                policeAPI.getPendingSummons()
             ]);
             setStats(statsRes.data);
             setPendingFirs(pendingRes.data);
@@ -48,10 +46,7 @@ export default function PoliceDashboard() {
 
     const handleCompleteSummons = async (caseId) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/police/summons/${caseId}/complete`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await policeAPI.completeSummons(caseId);
             alert('Success: Summons marked as SERVED');
             fetchDashboardData();
         } catch (error) {

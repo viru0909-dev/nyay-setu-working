@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.repository;
 
+import java.util.Optional;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.Hearing;
 import com.nyaysetu.backend.entity.HearingStatus;
@@ -33,4 +34,14 @@ public interface HearingRepository extends JpaRepository<Hearing, UUID> {
     List<Hearing> findByCaseEntityInAndScheduledDateBetween(List<CaseEntity> caseEntities, LocalDateTime start, LocalDateTime end);
 
     Optional<Hearing> findByVideoRoomId(String videoRoomId);
+
+    List<Hearing> findByAppealHearingTrue();
+
+    List<Hearing> findByCaseEntityIdAndAppealHearingTrue(UUID caseId);
+
+    List<Hearing> findByAppealHearingTrueAndStatus(HearingStatus status);
+
+    Optional<Hearing> findTopByCaseEntityIdAndAppealHearingTrueOrderByScheduledDateDesc(
+            UUID caseId
+    );
 }

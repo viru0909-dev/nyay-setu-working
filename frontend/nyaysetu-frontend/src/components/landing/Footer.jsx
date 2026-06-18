@@ -46,7 +46,8 @@ export default function Footer() {
         { label: t('common:header.nav.upcomingFeatures'), href: '/upcoming-features', isRoute: true },
         { label: t('common:header.nav.constitution'), href: '/constitution', isRoute: true },
         { label: t('common:header.nav.aiAssistant'), action: () => setShowAIModal(true) },
-        { label: t('common:header.nav.about'), href: '/about', isRoute: true }
+        { label: t('common:header.nav.about'), href: '/about', isRoute: true },
+        { label: 'FAQ', href: '/faq', isRoute: true }
     ];
 
     const legalLinks = [
@@ -440,7 +441,7 @@ export default function Footer() {
                                     textDecoration: 'none',
                                     fontSize: '0.95rem',
                                     transition: 'all 0.3s ease',
-                                    display: 'inline-block',
+
                                     position: 'relative',
                                     display: 'flex',
                                     alignItems: 'center',
