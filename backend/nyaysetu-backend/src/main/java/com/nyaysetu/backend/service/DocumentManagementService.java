@@ -2,6 +2,7 @@ package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.DocumentDto;
 import com.nyaysetu.backend.dto.UploadDocumentRequest;
+import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.DocumentEntity;
 import com.nyaysetu.backend.entity.DocumentStorageType;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -35,23 +37,19 @@ public class DocumentManagementService {
 
     @Transactional
     public DocumentDto uploadDocument(MultipartFile file, UploadDocumentRequest request, User uploader, String uploadIp) {
-        // Store file
+
         String category = request.getCategory() != null ? request.getCategory() : "OTHER";
         String filePath = fileStorageService.storeFile(file, category);
 
-        // Calculate SHA-256 hash for data integrity (Section 63(4) compliance)
         String fileHash = null;
         try {
             java.io.File physicalFile = fileStorageService.getFile(filePath);
             fileHash = blockchainService.calculateFileHash(physicalFile);
-            org.slf4j.LoggerFactory.getLogger(DocumentManagementService.class)
-                .info("Document SHA-256 hash calculated: {}", fileHash);
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(DocumentManagementService.class)
-                .warn("Failed to calculate file hash: {}", e.getMessage());
+                    .warn("Failed to calculate file hash: {}", e.getMessage());
         }
 
-        // Create document entity
         DocumentEntity document = DocumentEntity.builder()
                 .fileName(file.getOriginalFilename())
                 .fileUrl(filePath)
@@ -65,24 +63,53 @@ public class DocumentManagementService {
                 .fileHash(fileHash)
                 .uploadIp(uploadIp)
                 .isVerified(fileHash != null)
+                .visibilityLevel("RESTRICTED")
                 .visibilityLevel(VisibilityLevel.RESTRICTED) // Default: only uploader, their lawyer, and judge can see
                 .build();
 
         DocumentEntity saved = documentRepository.save(document);
+
+        // =========================
+        // VERSION INIT (IMPORTANT)
+        // =========================
+        saved.setVersions(
+                new java.util.ArrayList<>()
+        );
+
+        saved.getVersions().add(
+                DocumentVersion.builder()
+                        .fileUrl(saved.getFileUrl())
+                        .timestamp(LocalDateTime.now())
+                        .build()
+        );
+
+        documentRepository.save(saved);
+
         return convertToDto(saved);
     }
 
+    public List<DocumentDto> getUserDocuments(Long userId) {
+        return documentRepository.findAll().stream()
+                .filter(doc -> doc.getUploadedBy().equals(userId))
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     public Page<DocumentDto> getUserDocuments(Long userId, Pageable pageable) {
         return documentRepository.findByUploadedBy(userId, pageable)
                 .map(this::convertToDto);
     }
 
     public List<DocumentDto> getCaseDocuments(UUID caseId) {
-        List<DocumentEntity> documents = documentRepository.findByCaseId(caseId);
-        return documents.stream()
+        return documentRepository.findByCaseId(caseId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+
+    public List<DocumentDto> getCaseDocumentsWithAccessControl(UUID caseId, Long userId, String userRole) {
+    return documentRepository.findByCaseId(caseId).stream()
+            .filter(doc -> hasDocumentAccess(doc, userId, userRole))
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
+}
     
     /**
      * Get case documents with access control based on user's role
@@ -111,11 +138,28 @@ public class DocumentManagementService {
             throw new RuntimeException("Unauthorized to access this document");
         }
     }
+
+    private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole) {
+    return hasDocumentAccess(doc, userId, userRole, false);
+}
+
+
     
     /**
      * Check if user has access to a document
      */
     private boolean hasDocumentAccess(DocumentEntity doc, Long userId, String userRole, boolean isCaseLawyer) {
+        String visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : "PUBLIC";
+
+       return switch (visibility) {
+    case "PUBLIC" -> true;
+    case "RESTRICTED" ->
+            "JUDGE".equals(userRole)
+                    || (userId != null && userId.equals(doc.getUploadedBy()))
+                    || isCaseLawyer;
+    case "SEALED" -> "JUDGE".equals(userRole);
+    default -> false;
+};
         VisibilityLevel visibility = doc.getVisibilityLevel() != null ? doc.getVisibilityLevel() : VisibilityLevel.PUBLIC;
         
         return switch (visibility) {
@@ -128,10 +172,11 @@ public class DocumentManagementService {
     }
 
     public DocumentDto getDocumentById(UUID id) {
-        DocumentEntity document = documentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Document not found"));
-        return convertToDto(document);
-    }
+        return convertToDto(
+            documentRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Document not found"))
+    );
+}
 
     public DocumentDto getDocumentById(UUID id, User user) {
         DocumentEntity document = documentRepository.findById(id)
@@ -145,6 +190,7 @@ public class DocumentManagementService {
     public Resource downloadDocument(UUID id) {
         DocumentEntity document = documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
+
         return fileStorageService.loadFileAsResource(document.getFileUrl());
     }
 
@@ -153,29 +199,19 @@ public class DocumentManagementService {
         DocumentEntity document = documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
 
-        // Check ownership
         if (!document.getUploadedBy().equals(userId)) {
             throw new RuntimeException("Unauthorized to delete this document");
         }
 
-        // Delete file from storage
         fileStorageService.deleteFile(document.getFileUrl());
-
-        // Delete from database
         documentRepository.delete(document);
     }
 
-    /**
-     * Trigger AI analysis for a document
-     */
     public void triggerAnalysis(UUID documentId) {
         DocumentEntity document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
-                
-        // Get the actual file from storage
+
         java.io.File file = fileStorageService.getFile(document.getFileUrl());
-        
-        // Trigger async analysis
         documentAnalysisService.analyzeDocumentAsync(document, file);
     }
 
@@ -208,15 +244,13 @@ public class DocumentManagementService {
     public boolean verifyDocumentHash(UUID id) {
         DocumentEntity document = documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
-        
+
         if (document.getFileHash() == null) return false;
-        
+
         try {
             java.io.File file = fileStorageService.getFile(document.getFileUrl());
             return blockchainService.verifyFileIntegrity(file, document.getFileHash());
         } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(DocumentManagementService.class)
-                .warn("Hash verification skipped for doc {} (file may be missing): {}", id, e.getMessage());
             return false;
         }
     }
@@ -237,16 +271,14 @@ public class DocumentManagementService {
                 .isVerified(entity.getIsVerified())
                 .build();
 
-        // Get case title if available
         if (entity.getCaseId() != null) {
             caseRepository.findById(entity.getCaseId())
-                    .ifPresent(caseEntity -> dto.setCaseTitle(caseEntity.getTitle()));
+                    .ifPresent(c -> dto.setCaseTitle(c.getTitle()));
         }
 
-        // Get uploader name if available
         if (entity.getUploadedBy() != null) {
             userRepository.findById(entity.getUploadedBy())
-                    .ifPresent(user -> dto.setUploaderName(user.getName()));
+                    .ifPresent(u -> dto.setUploaderName(u.getName()));
         }
 
         return dto;
