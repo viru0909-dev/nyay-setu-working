@@ -77,7 +77,7 @@ export default function Login() {
 
             
             const response = await authAPI.login(loginPayload);
-            const { token, user } = response.data;
+            const { token, user, refreshToken } = response.data;
 
             if (selectedRole && user.role !== selectedRole) {
                 setError(`Invalid credentials for ${roles.find(r => r.value === selectedRole)?.label}`);
@@ -85,7 +85,7 @@ export default function Login() {
                 return;
             }
 
-            setAuth(user, token);
+            setAuth(user, token, refreshToken);
 
             navigate(resolvePostAuthPath(user.role, location.state));
         } catch (err) {

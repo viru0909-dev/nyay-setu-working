@@ -102,8 +102,13 @@ export const authAPI = {
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        // Clear refresh token when logging out
+        localStorage.removeItem('refreshToken');
     },
 };
+
+// Refresh token endpoint helper
+authAPI.refresh = (refreshToken) => api.post('/api/v1/auth/refresh', { refreshToken });
 
 // Case API
 export const caseAPI = {
