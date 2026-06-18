@@ -3,9 +3,11 @@
 import { motion } from 'framer-motion';
 import { UserPlus, FileSearch, Gavel, CheckCircle, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 export default function HowItWorks() {
     const { t } = useTranslation('landing');
+    const navigate = useNavigate();
 
     const steps = [
         {
@@ -256,7 +258,7 @@ export default function HowItWorks() {
                             alignItems: 'center',
                             gap: '0.75rem'
                         }}
-                        onClick={() => window.location.href = '/signup'}
+                        onClick={() => navigate('/signup')}
                     >
                         {t('landing:howItWorks.ctaButton')}
                         <ArrowRight size={20} />
