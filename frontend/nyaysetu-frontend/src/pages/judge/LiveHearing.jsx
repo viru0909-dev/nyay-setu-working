@@ -105,9 +105,13 @@ export default function LiveHearing() {
 
     const isUpcoming = (date) => {
         const now = new Date();
+        // Calculate the difference in milliseconds, then convert to hours
+        const diffMs = date - now;
+        const diffHours = diffMs / (1000 * 60 * 60);
+        
         return diffHours > 0 && diffHours <= 24;
     };
-
+    
     const isLive = (date, duration) => {
         const now = new Date();
         const end = new Date(date.getTime() + duration * 60000);
