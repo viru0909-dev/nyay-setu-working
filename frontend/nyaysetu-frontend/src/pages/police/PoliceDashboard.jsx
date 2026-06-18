@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import {
     FileText, Upload, Shield, CheckCircle2,
@@ -30,7 +31,7 @@ export default function PoliceDashboard() {
                 policeAPI.getStats(),
                 policeAPI.getPendingFirs(),
                 policeAPI.getInvestigations(),
-                axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/police/summons/pending`, {
+                axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/v1/police/summons/pending`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 })
             ]);
@@ -49,7 +50,7 @@ export default function PoliceDashboard() {
     const handleCompleteSummons = async (caseId) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/police/summons/${caseId}/complete`, {}, {
+            await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/v1/police/summons/${caseId}/complete`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('Success: Summons marked as SERVED');
