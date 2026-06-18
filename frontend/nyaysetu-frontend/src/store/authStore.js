@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { GUEST_SESSION_MAX_AGE_MS, GUEST_STORAGE_KEYS } from '../lib/guest';
 
+let storage = typeof window !== 'undefined' ? window.localStorage : {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+};
+
+export const configureStorage = (customStorage) => {
+    storage = customStorage;
+};
+
 const {
     user: GUEST_USER_KEY,
     sessionId: GUEST_SESSION_ID_KEY,
@@ -14,11 +24,8 @@ const {
 const isTokenExpired = (token) => {
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-
         if (!payload.exp) return true;
-
         const currentTime = Date.now() / 1000;
-
         return payload.exp < currentTime;
     } catch (error) {
         return true;
@@ -27,7 +34,7 @@ const isTokenExpired = (token) => {
 
 const createGuestSessionId = () => `guest_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
-const readJson = (storage, key, fallback) => {
+const readJson = (key, fallback) => {
     try {
         const raw = storage.getItem(key);
         if (!raw || raw === 'null' || raw === 'undefined') return fallback;
@@ -37,11 +44,11 @@ const readJson = (storage, key, fallback) => {
     }
 };
 
-const writeJson = (storage, key, value) => {
+const writeJson = (key, value) => {
     storage.setItem(key, JSON.stringify(value));
 };
 
-const clearGuestStorage = (storage) => {
+const clearGuestStorage = () => {
     storage.removeItem(GUEST_USER_KEY);
     storage.removeItem(GUEST_SESSION_ID_KEY);
     storage.removeItem(GUEST_CREATED_AT_KEY);
@@ -50,17 +57,7 @@ const clearGuestStorage = (storage) => {
     storage.removeItem(GUEST_ONBOARDING_KEY);
 };
 
-let storage = typeof window !== 'undefined' ? window.localStorage : {
-    getItem: () => null,
-    setItem: () => {},
-    removeItem: () => {},
-};
-
-export const configureStorage = (customStorage) => {
-    storage = customStorage;
-};
-
-export const useAuthStore = create((set, get) => ({
+const useAuthStore = create((set, get) => ({
     user: null,
     token: null,
     isAuthenticated: false,
@@ -69,7 +66,7 @@ export const useAuthStore = create((set, get) => ({
     setAuth: (user, token) => {
         storage.setItem('token', token);
         storage.setItem('user', JSON.stringify(user));
-        clearGuestStorage(storage);
+        clearGuestStorage();
         storage.removeItem(GUEST_INTENT_KEY);
         set({ user, token, isAuthenticated: true, isGuest: false });
     },
@@ -93,7 +90,7 @@ export const useAuthStore = create((set, get) => ({
         storage.removeItem(GUEST_MODAL_SHOWN_KEY);
 
         if (!storage.getItem(GUEST_PREFS_KEY)) {
-            writeJson(storage, GUEST_PREFS_KEY, { theme: null, language: null, visitedConstitution: false });
+            writeJson(GUEST_PREFS_KEY, { theme: null, language: null, visitedConstitution: false });
         }
 
         set({ user: guestUser, token: null, isAuthenticated: false, isGuest: true });
@@ -107,7 +104,7 @@ export const useAuthStore = create((set, get) => ({
     logout: () => {
         storage.removeItem('token');
         storage.removeItem('user');
-        clearGuestStorage(storage);
+        clearGuestStorage();
         storage.removeItem(GUEST_INTENT_KEY);
         set({ user: null, token: null, isAuthenticated: false, isGuest: false });
     },
@@ -124,7 +121,7 @@ export const useAuthStore = create((set, get) => ({
 
     setGuestIntent: (intent) => {
         if (!intent?.path) return;
-        writeJson(storage, GUEST_INTENT_KEY, {
+        writeJson(GUEST_INTENT_KEY, {
             path: intent.path,
             label: intent.label || null,
             feature: intent.feature || null,
@@ -132,17 +129,17 @@ export const useAuthStore = create((set, get) => ({
         });
     },
 
-    getGuestIntent: () => readJson(storage, GUEST_INTENT_KEY, null),
+    getGuestIntent: () => readJson(GUEST_INTENT_KEY, null),
 
     clearGuestIntent: () => {
         storage.removeItem(GUEST_INTENT_KEY);
     },
 
-    getGuestPrefs: () => readJson(storage, GUEST_PREFS_KEY, {}),
+    getGuestPrefs: () => readJson(GUEST_PREFS_KEY, {}),
 
     updateGuestPrefs: (patch) => {
         const next = { ...get().getGuestPrefs(), ...patch };
-        writeJson(storage, GUEST_PREFS_KEY, next);
+        writeJson(GUEST_PREFS_KEY, next);
         return next;
     },
 
@@ -161,13 +158,7 @@ export const useAuthStore = create((set, get) => ({
                 if (isTokenExpired(token)) {
                     storage.removeItem('token');
                     storage.removeItem('user');
-
-                    set({
-                        token: null,
-                        user: null,
-                        isAuthenticated: false
-                    });
-
+                    set({ token: null, user: null, isAuthenticated: false });
                     return;
                 }
                 const user = JSON.parse(userStr);
@@ -191,7 +182,7 @@ export const useAuthStore = create((set, get) => ({
                     const sessionAge = Number.isFinite(createdAtMs) ? Date.now() - createdAtMs : Infinity;
 
                     if (sessionAge > GUEST_SESSION_MAX_AGE_MS) {
-                        clearGuestStorage(storage);
+                        clearGuestStorage();
                         storage.removeItem(GUEST_INTENT_KEY);
                         try {
                             window.dispatchEvent(new CustomEvent('guest:session-expired'));
@@ -202,7 +193,7 @@ export const useAuthStore = create((set, get) => ({
                         return;
                     }
                 } else {
-                    clearGuestStorage(storage);
+                    clearGuestStorage();
                     set({ user: null, token: null, isAuthenticated: false, isGuest: false });
                     return;
                 }
@@ -216,11 +207,10 @@ export const useAuthStore = create((set, get) => ({
                 }
             } catch (error) {
                 console.error('Failed to parse guest user from localStorage:', error);
-                clearGuestStorage(storage);
+                clearGuestStorage();
                 set({ user: null, token: null, isAuthenticated: false, isGuest: false });
             }
         } else {
-            // No guest session and no auth token
             set({ user: null, token: null, isAuthenticated: false, isGuest: false });
         }
     },

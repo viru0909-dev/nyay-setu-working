@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import useAuthStore, { configureStorage } from './authStore';
+let _storage = localStorage;
+
+export const configureStorage = (storage) => {
+    _storage = storage;
+};
 
 const createMemoryStorage = () => {
     const store = {};
