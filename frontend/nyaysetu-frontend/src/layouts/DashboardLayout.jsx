@@ -44,11 +44,11 @@ export default function DashboardLayout() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    useEffect(() => {
-        if (!token || !user) {
-            navigate('/login');
-        }
-    }, [token, user, navigate]);
+    // useEffect(() => {
+    //     if (!token || !user) {
+    //         navigate('/login');
+    //     }
+    // }, [token, user, navigate]);
 
     const handleMobileMenuToggle = () => {
         setIsMobileSidebarOpen(!isMobileSidebarOpen);

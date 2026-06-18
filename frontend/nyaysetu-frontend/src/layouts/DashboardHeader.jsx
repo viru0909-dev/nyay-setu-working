@@ -11,6 +11,18 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
     const { logout } = useAuthStore();
     const navigate = useNavigate();
     const { t, i18n } = useTranslation('dashboard');
+    const dashboardTitle =
+        user?.role === 'LAWYER'
+            ? 'Lawyer Dashboard'
+            : user?.role === 'JUDGE'
+                ? 'Judge Dashboard'
+                : user?.role === 'LITIGANT'
+                    ? 'Litigant Dashboard'
+                    : user?.role === 'POLICE'
+                        ? 'Police Dashboard'
+                        : user?.role === 'ADMIN'
+                            ? 'Admin Dashboard'
+                            : 'NyaySetu Dashboard';
     const { isDark, toggleTheme } = useThemeStore();
 
     const handleLogout = () => {
@@ -18,17 +30,17 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
         navigate('/login');
     };
     const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'hi', label: 'हिंदी' },
-    { code: 'mr', label: 'मराठी' },
-    { code: 'ta', label: 'தமிழ்' },
-    { code: 'te', label: 'తెలుగు' },
-    { code: 'gu', label: 'ગુજરાતી' },
-    { code: 'kn', label: 'ಕನ್ನಡ' },
-    { code: 'bn', label: 'বাংলা' },
-    { code: 'ml', label: 'മലയാളം' },
-    { code: 'pa', label: 'ਪੰਜਾਬੀ' }
-];
+        { code: 'en', label: 'English' },
+        { code: 'hi', label: 'हिंदी' },
+        { code: 'mr', label: 'मराठी' },
+        { code: 'ta', label: 'தமிழ்' },
+        { code: 'te', label: 'తెలుగు' },
+        { code: 'gu', label: 'ગુજરાતી' },
+        { code: 'kn', label: 'ಕನ್ನಡ' },
+        { code: 'bn', label: 'বাংলা' },
+        { code: 'ml', label: 'മലയാളം' },
+        { code: 'pa', label: 'ਪੰਜਾਬੀ' }
+    ];
     return (
         <header
             className="navbar"
@@ -73,8 +85,8 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
 
                 {/* Page Title */}
                 <div style={{ minWidth: 0 }}>
-                    <div 
-                        role="heading" 
+                    <div
+                        role="heading"
                         aria-level="1"
                         style={{
                             fontSize: isMobile ? '1.15rem' : '1.5rem',
@@ -87,7 +99,9 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             letterSpacing: '-0.02em'
                         }}
                     >
-                        {isMobile ? t('common.dashboard', 'Dashboard') : `${user?.role?.replace('_', ' ')} ${t('common.dashboard', 'Dashboard')}`}
+                        {isMobile
+                            ? t('common.dashboard', 'Dashboard')
+                            : dashboardTitle}
                     </div>
                     {!isMobile && (
                         <p style={{
@@ -240,43 +254,43 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                 {t('common.language', 'Language')}
                             </div>
                             <div style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(2, 1fr)',
-                                        gap: '0.5rem',
-                                        padding: '0 0.5rem',
-                                        maxHeight: '240px',
-                                        overflowY: 'auto'
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(2, 1fr)',
+                                gap: '0.5rem',
+                                padding: '0 0.5rem',
+                                maxHeight: '240px',
+                                overflowY: 'auto'
                             }}>
                                 {languages.map((lang) => (
-                                <button
-                                    key={lang.code}
-                                    onClick={() => {
-                                        i18n.changeLanguage(lang.code);
-                                        setShowProfileMenu(false);
-                                    }}
-                                    style={{
-                                        padding: '0.5rem',
-                                        background:
-                                            i18n.language === lang.code
-                                            ? 'rgba(63, 93, 204, 0.1)'
-                                            : 'transparent',
-                                        border:
-                                            i18n.language === lang.code
-                                            ? '1px solid var(--color-secondary)'
-                                            : '1px solid #E5E7EB',
-                                        borderRadius: '6px',
-                                        color:
-                                            i18n.language === lang.code
-                                            ? 'var(--color-secondary)'
-                                            : 'var(--color-primary)',
-                                        fontSize: '0.8rem',
-                                        fontWeight:
-                                            i18n.language === lang.code ? '700' : '600',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s'
-                                }}>
-                                    {lang.label}
-                                </button>))}
+                                    <button
+                                        key={lang.code}
+                                        onClick={() => {
+                                            i18n.changeLanguage(lang.code);
+                                            setShowProfileMenu(false);
+                                        }}
+                                        style={{
+                                            padding: '0.5rem',
+                                            background:
+                                                i18n.language === lang.code
+                                                    ? 'rgba(63, 93, 204, 0.1)'
+                                                    : 'transparent',
+                                            border:
+                                                i18n.language === lang.code
+                                                    ? '1px solid var(--color-secondary)'
+                                                    : '1px solid #E5E7EB',
+                                            borderRadius: '6px',
+                                            color:
+                                                i18n.language === lang.code
+                                                    ? 'var(--color-secondary)'
+                                                    : 'var(--color-primary)',
+                                            fontSize: '0.8rem',
+                                            fontWeight:
+                                                i18n.language === lang.code ? '700' : '600',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}>
+                                        {lang.label}
+                                    </button>))}
                             </div>
 
                             <div style={{

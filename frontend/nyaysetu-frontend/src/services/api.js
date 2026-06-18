@@ -17,9 +17,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
     import.meta.env.VITE_API_URL ||
     (isLocalhost ? 'http://localhost:8080' : PROD_BACKEND);
 
-if (import.meta.env.DEV) {
-    console.log('[api.js] Using API_BASE_URL:', API_BASE_URL);
-}
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -43,14 +40,6 @@ api.interceptors.request.use((config) => {
         delete config.headers['Content-Type'];
     }
 
-    if (import.meta.env.DEV) {
-        console.log('API Request:', {
-            method: config.method,
-            url: config.url,
-            hasAuth: !!config.headers.Authorization,
-            contentType: config.headers['Content-Type']
-        });
-    }
 
     return config;
 });
@@ -140,13 +129,6 @@ export const documentAPI = {
             formData.append('caseId', metadata.caseId);
         }
 
-        if (import.meta.env.DEV) {
-            console.log('Uploading with FormData:', {
-                file: file.name,
-                category: metadata.category,
-                description: metadata.description
-            });
-        }
         // CRITICAL: Don't set Content-Type header - let browser set it with boundary
         return api.post('/api/v1/documents/upload', formData);
     },
