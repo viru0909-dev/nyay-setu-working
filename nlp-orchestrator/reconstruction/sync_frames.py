@@ -21,7 +21,6 @@ with open(r"reconstruction\aligned_frames.json", "w") as file:
 print("Frame synchronization completed")
 
 
-
 def synchronize_frames(metadata_file):
 
     with open(metadata_file, "r") as f:

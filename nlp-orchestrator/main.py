@@ -9,15 +9,24 @@ Endpoints:
   GET  /health                      — Health check
 """
 
-import os
-from utils import async_retry
 import asyncio
 import json
 import logging
+import os
 import time
 import uuid
 from contextlib import asynccontextmanager
 
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from google import genai
+from groq import AsyncGroq
+from pydantic import BaseModel, field_validator
+from sse_starlette.sse import EventSourceResponse
+
+# Local modules
 from avatar_speech import convert_to_hinglish, detect_domain, get_interim_messages
 from cache import generate_cache_key, get_cached_response, set_cached_response
 from config import (
@@ -28,41 +37,16 @@ from config import (
     GROQ_MODEL_FAST,
 )
 from decomposer import decompose_query
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from google import genai
-
-# Initialize clients for deep research pipeline
-from groq import AsyncGroq
-from pydantic import BaseModel, field_validator
-from research import execute_with_fallback, run_parallel_research
-from router import route_questions
-from sanitizer import sanitize_prompt_input, sanitize_user_input
-from services.kanoon_search import build_kanoon_context
-from sse_starlette.sse import EventSourceResponse
-
-from cache import generate_cache_key, get_cached_response, set_cached_response
-from config import (
-    FRONTEND_ORIGIN,
-    GROQ_API_KEY,
-    GROQ_MODEL_FAST,
-    GEMINI_API_KEY,
-    GEMINI_MODEL,
-)
-from decomposer import decompose_query
 from router import route_questions
 from research import run_parallel_research, execute_with_fallback
+from sanitizer import sanitize_prompt_input, sanitize_user_input
+from services.kanoon_search import build_kanoon_context
 from synthesizer import (
-    synthesize_answers,
-    stream_synthesize_answers,
     synthesize_answers_structured,
     stream_synthesize_answers_structured,
 )
 from validators.citation_validator import validate_citations_from_text
-
 from utils import async_retry
-
 groq_client = AsyncGroq(api_key=GROQ_API_KEY)
 gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 

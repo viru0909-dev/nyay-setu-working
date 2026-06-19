@@ -72,20 +72,20 @@ async def test_result_is_list_of_strings(mock_create):
 
 
 @pytest.mark.asyncio
-@patch("decomposer.client.chat.completions.create", new_callable=AsyncMock)
+@patch(PATCH_TARGET, new_callable=AsyncMock)
 async def test_maximum_five_subquestions(mock_create):
-    mock_create.return_value.choices = [
-        type(
-            "obj",
-            (),
-            {
-                "message": type(
-                    "obj", (), {"content": '["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"]'}
-                )()
-            },
-        )
-    ]
-    assert result and all(isinstance(q, str) for q in result)
+    # 1. Setup: Mock the AI to return 6 questions
+    mock_create.return_value = _mock_completion(
+        '["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"]'
+    )
+    
+    # 2. Action: Call the function
+    result = await decompose_query("Some legal query")
+    
+    # 3. Assert: Verify it is a list, contains strings, and is capped at 5
+    assert isinstance(result, list)
+    assert len(result) <= 5
+    assert result == ["Q1", "Q2", "Q3", "Q4", "Q5"]
 
 
 @pytest.mark.asyncio
