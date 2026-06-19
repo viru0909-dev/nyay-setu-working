@@ -23,9 +23,7 @@ MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 def _preprocess(image: Image.Image) -> np.ndarray:
     """Convert PIL image to grayscale + Otsu threshold for better OCR accuracy."""  # noqa
     cv_img = cv2.cvtColor(np.array(image.convert("RGB")), cv2.COLOR_RGB2GRAY)
-    _, thresh = cv2.threshold(
-        cv_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
-    )
+    _, thresh = cv2.threshold(cv_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return thresh
 
 

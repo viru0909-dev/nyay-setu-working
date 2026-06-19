@@ -32,9 +32,7 @@ async def extract_text(file: UploadFile = File(...)):
     try:
         file_bytes = await file.read()
         if not file_bytes:
-            raise HTTPException(
-                status_code=400, detail="Uploaded file is empty."
-            )
+            raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
         result = run_ocr(
             file_bytes=file_bytes,
@@ -43,9 +41,7 @@ async def extract_text(file: UploadFile = File(...)):
         )
         result["processing_time"] = f"{time.perf_counter() - start:.2f}s"
 
-        return JSONResponse(
-            status_code=200, content={"success": True, "data": result}
-        )
+        return JSONResponse(status_code=200, content={"success": True, "data": result})
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -55,6 +51,4 @@ async def extract_text(file: UploadFile = File(...)):
         raise
     except Exception as e:
         logger.error("OCR endpoint error: %s", e)
-        raise HTTPException(
-            status_code=500, detail=f"OCR processing failed: {e}"
-        )
+        raise HTTPException(status_code=500, detail=f"OCR processing failed: {e}")

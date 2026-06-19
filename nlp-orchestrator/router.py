@@ -105,6 +105,4 @@ def route_questions(sub_questions: list[str]) -> list[dict]:
     Route each sub-question to the best model.
     Returns: list of {question, model}
     """
-    return [
-        {"question": q, "model": classify_question(q)} for q in sub_questions
-    ]
+    return [{"question": q, "model": classify_question(q)} for q in sub_questions]

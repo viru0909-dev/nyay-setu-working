@@ -25,9 +25,7 @@ def validate_public_video_url(url: str) -> str:
     parsed = urlparse(candidate)
 
     if parsed.scheme.lower() not in ALLOWED_SCHEMES:
-        raise UnsafeVideoUrlError(
-            "Only http and https video URLs are supported."
-        )
+        raise UnsafeVideoUrlError("Only http and https video URLs are supported.")
 
     if not parsed.hostname:
         raise UnsafeVideoUrlError("Video URL must include a hostname.")
@@ -60,9 +58,7 @@ def _resolve_host_addresses(hostname: str) -> Set[IPAddress]:
     try:
         results = socket.getaddrinfo(hostname, None, type=socket.SOCK_STREAM)
     except socket.gaierror as exc:
-        raise UnsafeVideoUrlError(
-            "Video URL hostname could not be resolved."
-        ) from exc
+        raise UnsafeVideoUrlError("Video URL hostname could not be resolved.") from exc
 
     for family, *_rest, sockaddr in results:
         if family not in (socket.AF_INET, socket.AF_INET6):

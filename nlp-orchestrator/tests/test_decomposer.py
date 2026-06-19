@@ -63,9 +63,7 @@ async def test_returns_parsed_sub_questions(mock_create):
 @pytest.mark.asyncio
 @patch(PATCH_TARGET, new_callable=AsyncMock)
 async def test_result_is_list_of_strings(mock_create):
-    mock_create.return_value = _mock_completion(
-        '["What is IPC?", "What is BNS?"]'
-    )
+    mock_create.return_value = _mock_completion('["What is IPC?", "What is BNS?"]')
 
     result = await decompose_query("Explain IPC and BNS")
 
@@ -76,9 +74,7 @@ async def test_result_is_list_of_strings(mock_create):
 @pytest.mark.asyncio
 @patch(PATCH_TARGET, new_callable=AsyncMock)
 async def test_single_sub_question_preserved(mock_create):
-    mock_create.return_value = _mock_completion(
-        '["Only one focused question?"]'
-    )
+    mock_create.return_value = _mock_completion('["Only one focused question?"]')
 
     result = await decompose_query("A narrow question")
 
@@ -113,9 +109,7 @@ async def test_caps_at_five_sub_questions(mock_create):
 @pytest.mark.asyncio
 @patch(PATCH_TARGET, new_callable=AsyncMock)
 async def test_exactly_five_sub_questions_unchanged(mock_create):
-    mock_create.return_value = _mock_completion(
-        '["Q1", "Q2", "Q3", "Q4", "Q5"]'
-    )
+    mock_create.return_value = _mock_completion('["Q1", "Q2", "Q3", "Q4", "Q5"]')
 
     result = await decompose_query("Query yielding exactly five")
 

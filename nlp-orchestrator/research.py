@@ -52,9 +52,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize clients
 groq_client = AsyncGroq(api_key=GROQ_API_KEY)
-gemini_client = (
-    genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
-)
+gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 # Module-level circuit breakers for persistent state across requests.
 groq_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
@@ -120,9 +118,7 @@ def build_provider_queue(primary_provider: str) -> list[str]:
     """Return ordered, deduplicated provider list with primary first."""
     ordered = [p for p in PROVIDER_ORDER if p in {"gemini", "groq", "ollama"}]
     if primary_provider in ordered:
-        ordered = [primary_provider] + [
-            p for p in ordered if p != primary_provider
-        ]
+        ordered = [primary_provider] + [p for p in ordered if p != primary_provider]
 
     # If gemini is not configured, remove it
     if "gemini" in ordered and not gemini_client:
@@ -207,9 +203,7 @@ async def execute_with_fallback(
     for provider in providers:
         for attempt in range(RETRY_MAX_ATTEMPTS + 1):
             try:
-                result = await _attempt_provider(
-                    provider, question, kanoon_context
-                )
+                result = await _attempt_provider(provider, question, kanoon_context)
                 # If provider returns a fallback-shaped response, treat as failure and try next provider  # noqa
                 if result.get("is_fallback"):
                     last_error = result.get("error", "fallback")
@@ -239,15 +233,11 @@ async def execute_with_fallback(
             f"[Research] Provider {provider} exhausted, trying next provider if available"  # noqa
         )
 
-    logger.error(
-        f"[Research] All providers exhausted. Last error: {last_error}"
-    )
+    logger.error(f"[Research] All providers exhausted. Last error: {last_error}")
     return _fallback_response(question, "all_providers_failed")
 
 
-async def _call_groq_once(
-    question: str, kanoon_context: str | None = None
-) -> dict:
+async def _call_groq_once(question: str, kanoon_context: str | None = None) -> dict:
     """Single attempt to call Groq LPU (no retry decorator)."""
     user_prompt = _build_user_prompt(question, kanoon_context)
     response = await groq_client.chat.completions.create(
@@ -327,9 +317,7 @@ _call_groq_with_retry = retry_transient(_call_groq_once)
 _call_gemini_with_retry = retry_transient(_call_gemini_once)
 
 
-async def _call_ollama_once(
-    question: str, kanoon_context: str | None = None
-) -> dict:
+async def _call_ollama_once(question: str, kanoon_context: str | None = None) -> dict:
     """Single attempt to call local Ollama model."""
     user_prompt = _build_user_prompt(question, kanoon_context)
     full_prompt = (
@@ -385,9 +373,7 @@ async def call_groq_async(
         return result
     except Exception as e:
         await groq_breaker.call_failed()
-        logger.error(
-            f"[Research/Groq] failed after retries: {type(e).__name__}: {e}"
-        )
+        logger.error(f"[Research/Groq] failed after retries: {type(e).__name__}: {e}")
         return _fallback_response(question, "groq")
 
 
@@ -410,9 +396,7 @@ async def call_gemini_async(
         return result
     except Exception as e:
         await gemini_breaker.call_failed()
-        logger.error(
-            f"[Research/Gemini] failed after retries: {type(e).__name__}: {e}"
-        )
+        logger.error(f"[Research/Gemini] failed after retries: {type(e).__name__}: {e}")
         return await call_groq_async(question, kanoon_context)
 
 
@@ -440,9 +424,7 @@ async def run_parallel_research(
 
         # Use unified coordinator to handle retries and fallback ordering
         tasks.append(
-            execute_with_fallback(
-                question, kanoon_context, primary_provider=model
-            )
+            execute_with_fallback(question, kanoon_context, primary_provider=model)
         )
 
     results = await asyncio.gather(*tasks, return_exceptions=False)

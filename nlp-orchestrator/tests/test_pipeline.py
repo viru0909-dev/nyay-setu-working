@@ -22,9 +22,7 @@ async def test_deep_research_pipeline_flow(
 
     mock_decompose.return_value = ["What is FIR?", "How to file FIR?"]
 
-    mock_research.return_value = [
-        {"answer": "FIR means First Information Report"}
-    ]
+    mock_research.return_value = [{"answer": "FIR means First Information Report"}]
 
     mock_synthesize.return_value = "Final synthesized response"
 
@@ -35,9 +33,7 @@ async def test_deep_research_pipeline_flow(
 
     events = []
 
-    async for event in deep_research_pipeline(
-        "Explain FIR process", "english"
-    ):
+    async for event in deep_research_pipeline("Explain FIR process", "english"):
         events.append(event)
 
     assert len(events) > 0

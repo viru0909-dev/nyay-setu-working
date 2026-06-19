@@ -61,9 +61,7 @@ async def test_download_video_preserves_existing_local_test_path(tmp_path):
     local_video = tmp_path / "sample.mp4"
     local_video.write_bytes(b"video")
 
-    assert await download_video(str(local_video), "job-local") == str(
-        local_video
-    )
+    assert await download_video(str(local_video), "job-local") == str(local_video)
 
 
 @pytest.mark.asyncio
@@ -87,9 +85,7 @@ async def test_forensics_pipeline_sanitizes_description_before_legal_lookup(
 
     monkeypatch.setitem(sys.modules, "services.gemini_analyzer", gemini_module)
     monkeypatch.setitem(sys.modules, "services.groq_router", groq_module)
-    monkeypatch.setitem(
-        sys.modules, "services.report_generator", report_module
-    )
+    monkeypatch.setitem(sys.modules, "services.report_generator", report_module)
     monkeypatch.setitem(sys.modules, "sse_starlette", sse_module)
     monkeypatch.setitem(sys.modules, "sse_starlette.sse", sse_submodule)
 
@@ -114,12 +110,8 @@ async def test_forensics_pipeline_sanitizes_description_before_legal_lookup(
     monkeypatch.setattr(forensics, "extract_frames", fake_extract)
     monkeypatch.setattr(forensics, "analyze_frames", fake_analyze)
     monkeypatch.setattr(forensics, "legal_section_lookup", fake_lookup)
-    monkeypatch.setattr(
-        forensics, "generate_report", lambda *_args: {"ok": True}
-    )
-    monkeypatch.setattr(
-        forensics, "generate_avatar_script", lambda *_args: "ready"
-    )
+    monkeypatch.setattr(forensics, "generate_report", lambda *_args: {"ok": True})
+    monkeypatch.setattr(forensics, "generate_avatar_script", lambda *_args: "ready")
     monkeypatch.setattr(forensics, "cleanup_job", lambda *_args: None)
     monkeypatch.setattr(
         forensics.asyncio,

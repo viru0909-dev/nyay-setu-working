@@ -151,9 +151,7 @@ def get_interim_messages(query: str, count: int = 3) -> list[str]:
     These will be streamed every 2-3 seconds while research runs.
     """
     domain = detect_domain(query)
-    domain_messages = INTERIM_TEMPLATES.get(
-        domain, INTERIM_TEMPLATES["general"]
-    )
+    domain_messages = INTERIM_TEMPLATES.get(domain, INTERIM_TEMPLATES["general"])
     general_messages = INTERIM_TEMPLATES["general"]
 
     # Mix domain-specific and general messages

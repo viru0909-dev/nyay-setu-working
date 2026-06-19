@@ -26,6 +26,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 from sse_starlette.sse import EventSourceResponse
 
+from synthesizer import synthesize_answers, stream_synthesize_answers  # noqa: F401
+
 from cache import generate_cache_key, get_cached_response, set_cached_response
 from config import (
     FRONTEND_ORIGIN,
@@ -55,9 +57,7 @@ from groq import AsyncGroq
 from google import genai
 
 groq_client = AsyncGroq(api_key=GROQ_API_KEY)
-gemini_client = (
-    genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
-)
+gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nlp-orchestrator")
@@ -226,9 +226,7 @@ async def legal_reasoning_pipeline(query: str, language: str):
             {"message": "Aapka sawaal samajh raha hoon, thoda wait karein..."},
         )
 
-        kanoon_task = asyncio.create_task(
-            build_kanoon_context(query, max_results=3)
-        )
+        kanoon_task = asyncio.create_task(build_kanoon_context(query, max_results=3))
 
         sub_questions = await decompose_query(safe_query)
         logger.info(f"[Layer 1] Got {len(sub_questions)} sub-questions")
@@ -294,9 +292,7 @@ async def legal_reasoning_pipeline(query: str, language: str):
         cited_laws_from_stream = []
 
         # Stream synthesis tokens using the structured generator
-        async for chunk in stream_synthesize_answers_structured(
-            safe_query, results
-        ):
+        async for chunk in stream_synthesize_answers_structured(safe_query, results):
             if chunk.get("text"):
                 synthesized_md += chunk["text"]
                 yield sse_event("synthesis_token", {"chunk": chunk["text"]})
@@ -313,9 +309,7 @@ async def legal_reasoning_pipeline(query: str, language: str):
                     validation_results,
                 )
         except Exception as e:
-            logger.warning(
-                "[Layer 4] Citation validation failed (non-blocking): %s", e
-            )
+            logger.warning("[Layer 4] Citation validation failed (non-blocking): %s", e)
             validation_results = []
 
         # ── Layer 5b: Hinglish Conversion ────────────────────────
@@ -441,28 +435,20 @@ async def analyze_sync(body: LegalQuery):
     sub_questions = await decompose_query(body.query)
     routed = route_questions(sub_questions)
     try:
-        kanoon_context, _ = await build_kanoon_context(
-            body.query, max_results=3
-        )
+        kanoon_context, _ = await build_kanoon_context(body.query, max_results=3)
     except Exception as e:
         logger.error("[Sync] Indian Kanoon fetch failed: %s", e)
         kanoon_context = ""
-    results = await run_parallel_research(
-        routed, kanoon_context=kanoon_context
-    )
+    results = await run_parallel_research(routed, kanoon_context=kanoon_context)
     synthesis = await synthesize_answers_structured(body.query, results)
     synthesized = synthesis.answer_markdown
 
     try:
         validation_results = validate_citations_from_text(synthesized)
         if validation_results:
-            logger.info(
-                "[Sync] Citation validation results: %s", validation_results
-            )
+            logger.info("[Sync] Citation validation results: %s", validation_results)
     except Exception as e:
-        logger.warning(
-            "[Sync] Citation validation failed (non-blocking): %s", e
-        )
+        logger.warning("[Sync] Citation validation failed (non-blocking): %s", e)
         validation_results = []
 
     hinglish = await convert_to_hinglish(synthesized)
@@ -539,9 +525,7 @@ async def deep_research_pipeline(query: str, language: str):
         )
 
         domain = detect_domain(query)
-        domain_label = (
-            domain.upper() if domain != "general" else "GENERAL LEGAL"
-        )
+        domain_label = domain.upper() if domain != "general" else "GENERAL LEGAL"
 
         yield sse_event(
             "stage",
@@ -697,8 +681,7 @@ async def deep_research_pipeline(query: str, language: str):
                 cached = True
 
         if not cached and (
-            model_choice == "groq"
-            or (model_choice == "gemini" and not gemini_client)
+            model_choice == "groq" or (model_choice == "gemini" and not gemini_client)
         ):
             cache_key = generate_cache_key(
                 "groq", grounded_prompt, GROQ_MODEL_FAST, user_query=query
@@ -771,9 +754,7 @@ async def deep_research_pipeline(query: str, language: str):
             validate_citations_from_text(ai_answer) if ai_answer else []
         )
         if citation_validation:
-            logger.info(
-                "[Deep Research] Citation validation: %s", citation_validation
-            )
+            logger.info("[Deep Research] Citation validation: %s", citation_validation)
 
         # Convert to Hinglish for avatar speech
         hinglish_verdict = await convert_to_hinglish(

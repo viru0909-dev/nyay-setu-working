@@ -48,9 +48,7 @@ class ModiOCRBatchResponse(BaseModel):
 async def ocr_modi_document(file: UploadFile = File(...)):
     """Run OCR and Devanagari cleanup on an uploaded Modi script document image."""  # noqa
     if file.content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
-        raise HTTPException(
-            status_code=400, detail="Upload a valid image file."
-        )
+        raise HTTPException(status_code=400, detail="Upload a valid image file.")
 
     image_bytes = await file.read()
     if not image_bytes:
@@ -75,9 +73,7 @@ async def ocr_modi_document(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     except Exception as exc:
         logger.error("Unexpected Modi OCR endpoint error: %s", exc)
-        raise HTTPException(
-            status_code=500, detail="OCR inference failed."
-        ) from exc
+        raise HTTPException(status_code=500, detail="OCR inference failed.") from exc
 
 
 @router.post("/modi/batch", response_model=ModiOCRBatchResponse)
@@ -90,9 +86,7 @@ async def ocr_modi_documents(files: List[UploadFile] = File(...)):
     reported in `results` without failing the whole request.
     """
     if not files:
-        raise HTTPException(
-            status_code=400, detail="Upload at least one image file."
-        )
+        raise HTTPException(status_code=400, detail="Upload at least one image file.")
 
     pages: list[bytes] = []
     for file in files:

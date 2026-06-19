@@ -110,9 +110,7 @@ def upsert_chunks(
         if existing_ids:
             col.delete(ids=existing_ids)
     except Exception as e:
-        logger.warning(
-            f"upsert_chunks: cleanup for {doc_id} failed (continuing): {e}"
-        )
+        logger.warning(f"upsert_chunks: cleanup for {doc_id} failed (continuing): {e}")
 
     ids = [f"{doc_id}::chunk::{i}" for i in range(len(chunks))]
     metadatas = [

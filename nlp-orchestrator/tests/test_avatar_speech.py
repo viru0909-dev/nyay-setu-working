@@ -50,9 +50,7 @@ class TestHinglishPromptRegister:
         assert HINGLISH_CONVERSION_PROMPT.count("}") == 1
 
     def test_prompt_formats_without_keyerror(self):
-        rendered = HINGLISH_CONVERSION_PROMPT.format(
-            markdown_answer="SAMPLE ANSWER"
-        )
+        rendered = HINGLISH_CONVERSION_PROMPT.format(markdown_answer="SAMPLE ANSWER")
         assert "SAMPLE ANSWER" in rendered
         assert "{markdown_answer}" not in rendered
 
@@ -88,9 +86,7 @@ class TestHinglishPromptRegister:
 
     def test_prompt_keeps_legal_accuracy_requirement(self):
         lowered = HINGLISH_CONVERSION_PROMPT.lower()
-        assert (
-            "section" in lowered
-        )  # section numbers / law names stay accurate
+        assert "section" in lowered  # section numbers / law names stay accurate
 
 
 # ── convert_to_hinglish: behaviour with a mocked Groq client ─────────────────
@@ -109,9 +105,7 @@ class TestConvertToHinglish:
             "create",
             new=AsyncMock(return_value=fake_response),
         ) as mock_create:
-            result = await convert_to_hinglish(
-                "The petitioner may claim compensation."
-            )
+            result = await convert_to_hinglish("The petitioner may claim compensation.")
 
         assert result == "Dekhiye, aapka case strong hai."
         # The tuned prompt (with the user's answer) must be what we send.
@@ -144,17 +138,9 @@ class TestConvertToHinglish:
 
 class TestDomainHelpers:
     def test_detect_domain_matches_keywords(self):
-        assert (
-            detect_domain("My car had an accident on the road") == "accident"
-        )
-        assert (
-            detect_domain("I need to file an FIR with the police")
-            == "criminal"
-        )
-        assert (
-            detect_domain("question about my rented flat possession")
-            == "property"
-        )
+        assert detect_domain("My car had an accident on the road") == "accident"
+        assert detect_domain("I need to file an FIR with the police") == "criminal"
+        assert detect_domain("question about my rented flat possession") == "property"
 
     def test_detect_domain_defaults_to_general(self):
         assert detect_domain("hello there, random question") == "general"

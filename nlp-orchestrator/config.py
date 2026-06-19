@@ -37,9 +37,7 @@ GROQ_MODEL_FAST: str = "llama-3.3-70b-versatile"
 GEMINI_MODEL: str = "gemini-1.5-flash"
 
 # ─── OCR (viru's additions) ───────────────────────────────────────────────────  # noqa
-TROCR_MODEL_NAME: str = os.getenv(
-    "TROCR_MODEL_NAME", "Piyush3142/trocr-sanskrit-ocr"
-)
+TROCR_MODEL_NAME: str = os.getenv("TROCR_MODEL_NAME", "Piyush3142/trocr-sanskrit-ocr")
 TROCR_DEVICE: str = os.getenv("TROCR_DEVICE", "")
 HF_TOKEN: str = os.getenv("HF_TOKEN", "")
 

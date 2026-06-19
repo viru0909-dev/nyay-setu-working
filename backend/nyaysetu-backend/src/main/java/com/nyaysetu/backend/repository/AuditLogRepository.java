@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.repository;
 
+import java.util.List;
 import com.nyaysetu.backend.entity.AuditLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 

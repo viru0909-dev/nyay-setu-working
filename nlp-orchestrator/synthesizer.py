@@ -84,9 +84,7 @@ def format_research_for_synthesis(research_results: list[dict]) -> str:
     return "\n---\n".join(formatted)
 
 
-async def synthesize_answers(
-    original_query: str, research_results: list[dict]
-) -> str:
+async def synthesize_answers(original_query: str, research_results: list[dict]) -> str:
     """
     Synthesize multiple sub-answers into one final structured legal response.
     """
@@ -156,9 +154,7 @@ _CITED_LAW_RE = re.compile(r"^[A-Za-z]")
 
 _FENCE_MARKER = "`" * 3
 
-_JSON_FENCE_START_RE = re.compile(
-    r"^" + _FENCE_MARKER + r"(?:json)?\s*", re.IGNORECASE
-)
+_JSON_FENCE_START_RE = re.compile(r"^" + _FENCE_MARKER + r"(?:json)?\s*", re.IGNORECASE)
 _JSON_FENCE_END_RE = re.compile(r"\s*" + _FENCE_MARKER + r"$")
 
 
@@ -235,15 +231,11 @@ async def synthesize_answers_structured(
         payload = json.loads(_strip_json_fence(raw), strict=False)
 
         if not isinstance(payload, dict):
-            raise ValueError(
-                "structured synthesis did not return a JSON object"
-            )
+            raise ValueError("structured synthesis did not return a JSON object")
 
         markdown = (payload.get("answer_markdown") or "").strip()
         if not markdown:
-            raise ValueError(
-                "structured synthesis returned empty answer_markdown"
-            )
+            raise ValueError("structured synthesis returned empty answer_markdown")
 
         cited = payload.get("cited_laws", [])
         if not isinstance(cited, list):
@@ -289,9 +281,7 @@ async def stream_synthesize_answers_structured(
         print(
             f"[Stream Synthesizer] Structured API call failed, falling back: {e}"  # noqa
         )
-        async for chunk in stream_synthesize_answers(
-            original_query, research_results
-        ):
+        async for chunk in stream_synthesize_answers(original_query, research_results):
             yield {"text": chunk, "citations": []}
         return
 
@@ -349,9 +339,7 @@ async def stream_synthesize_answers_structured(
     # POST-STREAM processing: Extract citations from the tail buffer
     try:
         combined_tail = buffer + citations_buffer
-        array_match = re.search(
-            r'"cited_laws"\s*:\s*(\[[^\]]*\])', combined_tail
-        )
+        array_match = re.search(r'"cited_laws"\s*:\s*(\[[^\]]*\])', combined_tail)
         if array_match:
             cited = json.loads(array_match.group(1))
             if isinstance(cited, list):

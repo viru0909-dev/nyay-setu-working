@@ -25,9 +25,7 @@ def split_sentences(text: str) -> list[str]:
     if not cleaned:
         return []
     return [
-        item.strip()
-        for item in re.split(r"(?<=[.!?])\s+", cleaned)
-        if item.strip()
+        item.strip() for item in re.split(r"(?<=[.!?])\s+", cleaned) if item.strip()
     ]
 
 
@@ -187,12 +185,8 @@ def detect_contradictions(
                 seen.add(contradiction["id"])
 
     severity_counts = {
-        "High": sum(
-            1 for item in contradictions if item["severity"] == "High"
-        ),
-        "Medium": sum(
-            1 for item in contradictions if item["severity"] == "Medium"
-        ),
+        "High": sum(1 for item in contradictions if item["severity"] == "High"),
+        "Medium": sum(1 for item in contradictions if item["severity"] == "Medium"),
         "Low": sum(1 for item in contradictions if item["severity"] == "Low"),
     }
 

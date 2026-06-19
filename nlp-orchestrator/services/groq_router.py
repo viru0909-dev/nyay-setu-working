@@ -26,9 +26,7 @@ async def legal_section_lookup(citizen_description: str, job_id: str) -> str:
         return "No description provided by the citizen to lookup specific legal sections."  # noqa
 
     try:
-        logger.info(
-            f"[{job_id}] Sending legal lookup to Groq based on description..."
-        )
+        logger.info(f"[{job_id}] Sending legal lookup to Groq based on description...")
         response = await client.chat.completions.create(
             model=GROQ_MODEL_FAST,
             messages=[

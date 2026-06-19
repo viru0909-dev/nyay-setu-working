@@ -126,14 +126,9 @@ class CircuitBreaker:
             if self.state == "CLOSED":
                 return True
             if self.state == "OPEN":
-                if (
-                    time.time() - self.last_failure_time
-                    >= self.recovery_timeout
-                ):
+                if time.time() - self.last_failure_time >= self.recovery_timeout:
                     self.state = "HALF_OPEN"
-                    logger.info(
-                        "[CircuitBreaker] State → HALF_OPEN, sending probe"
-                    )
+                    logger.info("[CircuitBreaker] State → HALF_OPEN, sending probe")
                     return True
                 return False
             if self.state == "HALF_OPEN":

@@ -1,6 +1,4 @@
-def generate_report(
-    job_id: str, gemini_timeline: str, groq_legal: str
-) -> dict:
+def generate_report(job_id: str, gemini_timeline: str, groq_legal: str) -> dict:
     """
     Takes the unstructured Markdown text from Gemini and Groq
     and merges them into a structured dict for the JSON response.
@@ -12,9 +10,7 @@ def generate_report(
     report = {
         "jobId": job_id,
         "liabilityVerdict": "Analysis complete. See details below.",
-        "timelineEvents": [
-            {"time": "VIDEO_ANALYSIS", "description": gemini_timeline}
-        ],
+        "timelineEvents": [{"time": "VIDEO_ANALYSIS", "description": gemini_timeline}],
         "applicableSections": [
             {"law": "Applicable IPC/MVA Sections", "implication": groq_legal}
         ],

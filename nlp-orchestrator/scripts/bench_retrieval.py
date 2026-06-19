@@ -32,9 +32,7 @@ import config  # noqa: E402
 from services import kanoon_search  # noqa: E402
 from services.retrieval import chunker  # noqa: E402
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
 logger = logging.getLogger("bench")
 
 # Silence HF Hub's chatty download progress; we want to see retrieval logs only.  # noqa
@@ -63,9 +61,7 @@ def load_queries(path: str | None) -> list[str]:
     p = Path(path)
     if not p.exists():
         raise FileNotFoundError(p)
-    return [
-        line.strip() for line in p.read_text().splitlines() if line.strip()
-    ]
+    return [line.strip() for line in p.read_text().splitlines() if line.strip()]
 
 
 async def run_one(query: str) -> dict:
@@ -78,9 +74,7 @@ async def run_one(query: str) -> dict:
 
     # Force new path.
     config.RETRIEVAL_ENABLED = True
-    new_ctx, new_meta = await kanoon_search.build_kanoon_context(
-        query, max_results=3
-    )
+    new_ctx, new_meta = await kanoon_search.build_kanoon_context(query, max_results=3)
 
     legacy_ids = {m["doc_id"] for m in legacy_meta}
     new_ids = {m["doc_id"] for m in new_meta}
@@ -101,11 +95,7 @@ async def run_one(query: str) -> dict:
 
 
 def fmt_row(s: dict) -> str:
-    score = (
-        f"{s['new_top1_score']:.3f}"
-        if s["new_top1_score"] is not None
-        else "  —  "
-    )
+    score = f"{s['new_top1_score']:.3f}" if s["new_top1_score"] is not None else "  —  "
     return (
         f"  Q: {s['query'][:78]!r}\n"
         f"    legacy: {s['legacy_n']} docs, {s['legacy_chars']:>6} chars, "

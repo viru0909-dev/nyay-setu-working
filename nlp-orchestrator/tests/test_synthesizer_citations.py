@@ -59,14 +59,14 @@ def test_normalize_cited_law_canonical_forms():
 
 
 def test_dedupe_cited_laws_is_order_preserving_and_case_insensitive():
-    out = _dedupe_cited_laws(
-        ["IPC Sec 302", "ipc section 302", "CrPC Sec 144", ""]
-    )
+    out = _dedupe_cited_laws(["IPC Sec 302", "ipc section 302", "CrPC Sec 144", ""])
     assert out == ["IPC Sec 302", "CrPC Sec 144"]
 
 
 def test_extract_cited_laws_from_markdown():
-    md = "Under Section 304A IPC and MVA Section 166 you may claim compensation."  # noqa
+    md = (
+        "Under Section 304A IPC and MVA Section 166 you may claim compensation."  # noqa
+    )
     laws = extract_cited_laws_from_markdown(md)
     assert "IPC Sec 304A" in laws
     assert "MVA Sec 166" in laws
@@ -87,9 +87,7 @@ async def test_parses_json_object_with_cited_laws(mock_create):
         )
     )
 
-    result = await synthesize_answers_structured(
-        "punishment for murder?", RESEARCH
-    )
+    result = await synthesize_answers_structured("punishment for murder?", RESEARCH)
 
     assert isinstance(result, SynthesisResult)
     assert "Murder is punishable" in result.answer_markdown
@@ -138,13 +136,9 @@ async def test_backfills_cited_laws_from_markdown_when_empty(mock_create):
 @pytest.mark.asyncio
 @patch("synthesizer.synthesize_answers", new_callable=AsyncMock)
 @patch("synthesizer.client.chat.completions.create", new_callable=AsyncMock)
-async def test_malformed_json_falls_back_to_plain_synthesis(
-    mock_create, mock_plain
-):
+async def test_malformed_json_falls_back_to_plain_synthesis(mock_create, mock_plain):
     mock_create.return_value = _mock_response("this is not json")
-    mock_plain.return_value = (
-        "## Answer\nRefer to Section 420 IPC for cheating."
-    )
+    mock_plain.return_value = "## Answer\nRefer to Section 420 IPC for cheating."
 
     result = await synthesize_answers_structured("q", RESEARCH)
 

@@ -5,9 +5,7 @@ from pydantic import BaseModel, Field
 
 from services.contradiction_detector import detect_contradictions
 
-router = APIRouter(
-    prefix="/api/contradictions", tags=["Contradiction Detection"]
-)
+router = APIRouter(prefix="/api/contradictions", tags=["Contradiction Detection"])
 
 REPORT_STORE: dict[str, dict] = {}
 
@@ -44,9 +42,7 @@ async def get_contradiction_report(report_id: str):
     report = REPORT_STORE.get(report_id)
 
     if not report:
-        raise HTTPException(
-            status_code=404, detail="Contradiction report not found"
-        )
+        raise HTTPException(status_code=404, detail="Contradiction report not found")
 
     return report
 
@@ -60,9 +56,7 @@ async def update_contradiction_status(
     report = REPORT_STORE.get(report_id)
 
     if not report:
-        raise HTTPException(
-            status_code=404, detail="Contradiction report not found"
-        )
+        raise HTTPException(status_code=404, detail="Contradiction report not found")
 
     for contradiction in report["contradictions"]:
         if contradiction["id"] == contradiction_id:

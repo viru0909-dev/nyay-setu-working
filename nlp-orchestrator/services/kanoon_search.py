@@ -210,9 +210,7 @@ async def get_kanoon_doc(
         if session is not None:
             result = await _fetch_doc(session, url, headers, max_chars)
         else:
-            async with aiohttp.ClientSession(
-                timeout=DOC_TIMEOUT
-            ) as new_session:
+            async with aiohttp.ClientSession(timeout=DOC_TIMEOUT) as new_session:
                 result = await _fetch_doc(new_session, url, headers, max_chars)
         await kanoon_breaker.call_succeeded()
         return result
@@ -330,9 +328,7 @@ async def build_kanoon_context(
         persist_dir=CHROMA_PATH,
     )
     if not candidates:
-        logger.info(
-            "Vector store returned no candidates; using legacy fallback"
-        )
+        logger.info("Vector store returned no candidates; using legacy fallback")
         return await _legacy_context(live_results), live_results[:max_results]
 
     # Step 5: optional cross-encoder rerank.
@@ -383,13 +379,9 @@ def _format_context(candidates: list[dict]) -> str:
         doc_id = meta.get("doc_id", "")
 
         seen[title] = seen.get(title, 0) + 1
-        marker = (
-            title if seen[title] == 1 else f"{title} (excerpt {seen[title]})"
-        )
+        marker = title if seen[title] == 1 else f"{title} (excerpt {seen[title]})"
 
-        parts.append(
-            f"=== {marker} [doc_id={doc_id}] ===\n{cand.get('chunk', '')}\n"
-        )
+        parts.append(f"=== {marker} [doc_id={doc_id}] ===\n{cand.get('chunk', '')}\n")
 
     return "\n".join(parts)
 
@@ -430,9 +422,7 @@ def _enrich_results(
     if not best_per_doc:
         return live_results[:max_results]
 
-    ordered = sorted(
-        best_per_doc.values(), key=lambda d: d["score"], reverse=True
-    )
+    ordered = sorted(best_per_doc.values(), key=lambda d: d["score"], reverse=True)
     return ordered[:max_results]
 
 

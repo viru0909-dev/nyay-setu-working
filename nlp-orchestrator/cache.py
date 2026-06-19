@@ -13,9 +13,7 @@ CACHE_TTL = 300  # 5 minutes
 cache_store = {}
 
 
-def generate_cache_key(
-    provider: str, prompt: str, model: str = "", **kwargs
-) -> str:
+def generate_cache_key(provider: str, prompt: str, model: str = "", **kwargs) -> str:
 
     normalized_prompt = prompt.strip().lower()
 
@@ -49,9 +47,7 @@ def get_cached_response(cache_key: str) -> str | None:
     return data["response"]
 
 
-def set_cached_response(
-    cache_key: str, response: str, ttl: int = CACHE_TTL
-) -> None:
+def set_cached_response(cache_key: str, response: str, ttl: int = CACHE_TTL) -> None:
 
     cache_store[cache_key] = {
         "response": response,
@@ -67,9 +63,7 @@ def clear_expired_cache() -> int:
     current_time = time.time()
 
     expired_keys = [
-        key
-        for key, data in cache_store.items()
-        if current_time > data["expires_at"]
+        key for key, data in cache_store.items() if current_time > data["expires_at"]
     ]
 
     for key in expired_keys:
@@ -85,9 +79,7 @@ def get_cache_stats() -> dict:
     current_time = time.time()
 
     valid_entries = sum(
-        1
-        for data in cache_store.values()
-        if current_time <= data["expires_at"]
+        1 for data in cache_store.values() if current_time <= data["expires_at"]
     )
 
     return {
@@ -108,9 +100,7 @@ def cache_decorator(ttl: int = CACHE_TTL):
         async def wrapper(*args, **kwargs):
             # Create a cache key from function name and arguments
             arg_str = "-".join([str(arg) for arg in args])
-            kwarg_str = "-".join(
-                [f"{k}:{v}" for k, v in sorted(kwargs.items())]
-            )
+            kwarg_str = "-".join([f"{k}:{v}" for k, v in sorted(kwargs.items())])
             raw_key = f"{func.__name__}-{arg_str}-{kwarg_str}"
             cache_key = hashlib.md5(raw_key.encode()).hexdigest()
 

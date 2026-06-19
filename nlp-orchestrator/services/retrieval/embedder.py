@@ -101,9 +101,9 @@ def _load_model(model_name: str):
                 _model = SentenceTransformer(model_name)
 
             _model_name = model_name
-            dim_fn = getattr(
-                _model, "get_embedding_dimension", None
-            ) or getattr(_model, "get_sentence_embedding_dimension", None)
+            dim_fn = getattr(_model, "get_embedding_dimension", None) or getattr(
+                _model, "get_sentence_embedding_dimension", None
+            )
             dim = dim_fn() if dim_fn else "?"
             logger.info(f"Embedding model ready ({dim}-dim)")
         except Exception as e:
@@ -112,9 +112,7 @@ def _load_model(model_name: str):
         return _model
 
 
-def embed_sync(
-    texts: list[str], model_name: str
-) -> Optional[list[list[float]]]:
+def embed_sync(texts: list[str], model_name: str) -> Optional[list[list[float]]]:
     """Encode `texts` synchronously. Returns None if the model is unavailable."""  # noqa
     if not texts:
         return []

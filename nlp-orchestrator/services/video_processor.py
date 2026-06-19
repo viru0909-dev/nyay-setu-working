@@ -54,9 +54,7 @@ async def download_video(url: str, job_id: str) -> str:
     except ValueError as e:
         from fastapi import HTTPException
 
-        raise HTTPException(
-            status_code=400, detail=f"Unsafe URL rejected: {e}"
-        )
+        raise HTTPException(status_code=400, detail=f"Unsafe URL rejected: {e}")
 
     safe_url = validate_public_video_url(url)
 

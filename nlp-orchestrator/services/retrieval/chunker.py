@@ -34,9 +34,7 @@ try:
         return len(_ENCODING.encode(text))
 
 except ImportError:
-    logger.warning(
-        "tiktoken not installed; falling back to whitespace token counting"
-    )
+    logger.warning("tiktoken not installed; falling back to whitespace token counting")
 
     def count_tokens(text: str) -> int:
         # Rough approximation: ~0.75 tokens per word for English/legal prose.
@@ -208,14 +206,10 @@ def _chunk_block(
                 if s_tokens > max_tokens:
                     if sent_buf:
                         chunks.append(" ".join(sent_buf))
-                        sent_buf, sent_tokens = _tail_overlap(
-                            sent_buf, overlap_tokens
-                        )
+                        sent_buf, sent_tokens = _tail_overlap(sent_buf, overlap_tokens)
 
                     chunks.extend(
-                        _split_long_sentence(
-                            sentence, max_tokens, overlap_tokens
-                        )
+                        _split_long_sentence(sentence, max_tokens, overlap_tokens)
                     )
                     sent_buf = []
                     sent_tokens = 0
@@ -223,9 +217,7 @@ def _chunk_block(
 
                 if sent_tokens + s_tokens > max_tokens and sent_buf:
                     chunks.append(" ".join(sent_buf))
-                    sent_buf, sent_tokens = _tail_overlap(
-                        sent_buf, overlap_tokens
-                    )
+                    sent_buf, sent_tokens = _tail_overlap(sent_buf, overlap_tokens)
                 sent_buf.append(sentence)
                 sent_tokens += s_tokens
             if sent_buf:
@@ -279,9 +271,7 @@ def chunk_text(  # noqa
     return chunks
 
 
-def _tail_overlap(
-    items: list[str], overlap_tokens: int
-) -> tuple[list[str], int]:
+def _tail_overlap(items: list[str], overlap_tokens: int) -> tuple[list[str], int]:
     """
     Return the trailing items of `items` whose combined token count is in the
     range [overlap_tokens, 2*overlap_tokens], along with that token count.

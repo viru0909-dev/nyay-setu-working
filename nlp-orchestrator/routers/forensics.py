@@ -63,9 +63,7 @@ async def forensic_analysis_pipeline(request_data: ForensicsRequest):
         )
 
         logger.info(f"[{job_id}] Extracting frames from {local_video_path}...")
-        frames = await extract_frames(
-            local_video_path, job_id, frame_interval=30
-        )
+        frames = await extract_frames(local_video_path, job_id, frame_interval=30)
 
         if not frames:
             yield sse_event(
@@ -89,9 +87,7 @@ async def forensic_analysis_pipeline(request_data: ForensicsRequest):
 
         # Fire both Gemini (video frames) and Groq (legal lookup) simultaneously  # noqa
         gemini_task = asyncio.create_task(analyze_frames(frames, job_id))
-        groq_task = asyncio.create_task(
-            legal_section_lookup(citizen_desc, job_id)
-        )
+        groq_task = asyncio.create_task(legal_section_lookup(citizen_desc, job_id))
 
         # Yield an interim message while waiting for the heavy AI to finish
         await asyncio.sleep(4)
@@ -150,9 +146,7 @@ async def forensic_analysis_pipeline(request_data: ForensicsRequest):
 
 
 @router.post("/analyze-stream")
-async def analyze_forensics_stream(
-    request_data: ForensicsRequest, request: Request
-):
+async def analyze_forensics_stream(request_data: ForensicsRequest, request: Request):
     """SSE endpoint for streaming the 5-stage accident forensic analysis."""
 
     async def event_generator():

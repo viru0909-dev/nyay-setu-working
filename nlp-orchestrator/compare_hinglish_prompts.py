@@ -103,9 +103,7 @@ def count_formal_words(text: str) -> list[str]:
     return hits
 
 
-async def run_prompt(
-    client, model: str, prompt_template: str, answer: str
-) -> str:
+async def run_prompt(client, model: str, prompt_template: str, answer: str) -> str:
     resp = await client.chat.completions.create(
         model=model,
         messages=[
@@ -148,9 +146,7 @@ async def main_async(new_prompt: str, model: str) -> int:
 
     print("=" * 72)
     print(f"TOTAL formal-word hits  ->  OLD: {old_total}   NEW: {new_total}")
-    print(
-        "Expected: NEW <= OLD (fewer formal words). Also eyeball readability."
-    )
+    print("Expected: NEW <= OLD (fewer formal words). Also eyeball readability.")
     print("=" * 72)
     # Non-zero exit if the new prompt did not improve, so this can gate CI later.  # noqa
     return 0 if new_total <= old_total else 1
@@ -168,18 +164,14 @@ def dry_run() -> int:
     print("\nNew prompt avoid-list mentions found in shipped prompt:")
     from avatar_speech import HINGLISH_CONVERSION_PROMPT
 
-    present = [
-        w for w in FORMAL_WORDS if w in HINGLISH_CONVERSION_PROMPT.lower()
-    ]
+    present = [w for w in FORMAL_WORDS if w in HINGLISH_CONVERSION_PROMPT.lower()]
     print(f"  {present}")
     return 0
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--dry-run", action="store_true", help="offline word-scan only"
-    )
+    parser.add_argument("--dry-run", action="store_true", help="offline word-scan only")
     parser.add_argument("--model", default="llama-3.3-70b-versatile")
     args = parser.parse_args()
 

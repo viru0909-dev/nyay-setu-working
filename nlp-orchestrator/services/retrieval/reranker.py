@@ -40,9 +40,7 @@ def _load_model(model_name: str):
         try:
             from sentence_transformers import CrossEncoder
         except ImportError:
-            logger.warning(
-                "sentence-transformers not installed; reranker disabled"
-            )
+            logger.warning("sentence-transformers not installed; reranker disabled")
             _model = None
             return None
 
