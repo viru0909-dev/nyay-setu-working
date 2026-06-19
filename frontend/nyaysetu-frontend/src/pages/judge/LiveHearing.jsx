@@ -80,6 +80,7 @@ export default function LiveHearing() {
                 const date = new Date(h.scheduledDate);
                 return {
                     ...h,
+                    fullDate: date,
                     caseTitle: h.caseEntity?.title || 'Untitled Case',
                     caseId: h.caseEntity?.id || h.id,
                     time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
