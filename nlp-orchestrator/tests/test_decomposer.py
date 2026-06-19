@@ -171,7 +171,7 @@ async def test_markdown_fenced_json_falls_back(mock_create):
 
     result = await decompose_query(query)
 
-    assert result == ["Q1","Q2"]
+    assert result == ["Q1", "Q2"]
 
 
 @pytest.mark.asyncio
