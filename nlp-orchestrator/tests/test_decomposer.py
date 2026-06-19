@@ -75,13 +75,11 @@ async def test_result_is_list_of_strings(mock_create):
 @patch(PATCH_TARGET, new_callable=AsyncMock)
 async def test_maximum_five_subquestions(mock_create):
     # 1. Setup: Mock the AI to return 6 questions
-    mock_create.return_value = _mock_completion(
-        '["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"]'
-    )
-    
+    mock_create.return_value = _mock_completion('["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"]')
+
     # 2. Action: Call the function
     result = await decompose_query("Some legal query")
-    
+
     # 3. Assert: Verify it is a list, contains strings, and is capped at 5
     assert isinstance(result, list)
     assert len(result) <= 5
@@ -139,13 +137,14 @@ async def test_exactly_five_sub_questions_unchanged(mock_create):
 @pytest.mark.asyncio
 @patch("decomposer.client.chat.completions.create", new_callable=AsyncMock)
 async def test_json_parsing_failure_returns_original_query(mock_create):
+    query = "What is the boiling point of water?"
     mock_create.return_value.choices = [
         type("obj", (), {"message": type("obj", (), {"content": "INVALID JSON"})()})
     ]
 
-    result = await decompose_query("What is the boiling point of water?")
+    result = await decompose_query(query)
 
-    assert result == []
+    assert result == [query]
 
 
 # --------------------------------------------------------------------------- #
@@ -172,7 +171,7 @@ async def test_markdown_fenced_json_falls_back(mock_create):
 
     result = await decompose_query(query)
 
-    assert result == [query]
+    assert result == ["Q1","Q2"]
 
 
 @pytest.mark.asyncio

@@ -47,6 +47,7 @@ from synthesizer import (
 )
 from validators.citation_validator import validate_citations_from_text
 from utils import async_retry
+
 groq_client = AsyncGroq(api_key=GROQ_API_KEY)
 gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
