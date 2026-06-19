@@ -10,7 +10,7 @@ import AIAssistantModal from './AIAssistantModal';
 
 // role links for the portal dropdown
 const ROLES = [
-    { id: 'litigant', label:'header.nav.roles.litigant', href: '/litigant' },
+    { id: 'litigant', label: 'header.nav.roles.litigant', href: '/litigant' },
     { id: 'lawyer', label: 'header.nav.roles.lawyer', href: '/lawyer' },
     { id: 'judge', label: 'header.nav.roles.judge', href: '/judge' },
 ];
@@ -79,6 +79,7 @@ export default function Header({ hideAuthButtons = false }) {
         { labelKey: 'header.nav.features', href: '/#features' },
         { labelKey: 'header.nav.upcomingFeatures', href: '/upcoming-features', isRoute: true },
         { labelKey: 'header.nav.constitution', href: '/constitution', isRoute: true },
+        { labelKey: 'Legal Rights', href: '/legal-rights', isRoute: true },
         { labelKey: 'header.nav.aiAssistant', action: () => setShowAIModal(true) },
         { labelKey: 'header.nav.about', href: '/about', isRoute: true },
         { labelKey: 'FAQ', href: '/faq', isRoute: true },
@@ -104,6 +105,8 @@ export default function Header({ hideAuthButtons = false }) {
     });
 
     const renderNavItem = (item) => {
+
+
         const currentPathWithHash = location.pathname + location.hash;
 
         let isActive = false;
@@ -123,6 +126,7 @@ export default function Header({ hideAuthButtons = false }) {
                 ? item.labelKey
                 : t(item.labelKey);
 
+
         const underline = (
             <span
                 className="nav-underline"
@@ -134,14 +138,39 @@ export default function Header({ hideAuthButtons = false }) {
                     height: '3px',
                     borderRadius: '999px',
                     background: 'var(--color-primary)',
+
+
+                    transform:
+                        location.pathname === item.href
+                            ? 'translateX(-50%) scaleX(1)'
+                            : 'translateX(-50%) scaleX(0)',
+
+
                     transform: isActive
                         ? 'translateX(-50%) scaleX(1)'
                         : 'translateX(-50%) scaleX(0)',
+
                     transformOrigin: 'center',
                     transition: 'transform 0.3s ease',
                 }}
             />
         );
+
+        const currentPathWithHash = location.pathname + location.hash;
+        let isActive = false;
+        if (item.href === '/') {
+            // Home is only active if we are on '/' AND there is no hash
+            isActive = location.pathname === '/' && !location.hash;
+        } else if (item.href) {
+            // Other tabs are active if they match the exact path+hash OR just the path
+            isActive = currentPathWithHash === item.href || location.pathname === item.href;
+        }
+        // -------------------------------------------------------------
+
+        const baseStyle = navLinkStyle(isActive);
+        // Fallback to labelKey directly if translation returns the exact key
+
+        const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
         const sharedProps = {
             style: baseStyle,
@@ -174,6 +203,7 @@ export default function Header({ hideAuthButtons = false }) {
                 }
             },
         };
+
         const currentPathWithHash = location.pathname + location.hash;
         let isActive = false;
         if (item.href === '/') {
@@ -184,6 +214,7 @@ export default function Header({ hideAuthButtons = false }) {
             isActive = currentPathWithHash === item.href || location.pathname === item.href;
         }
         // -------------------------------------------------------------
+
 
         if (item.action) {
             return (
@@ -368,43 +399,43 @@ export default function Header({ hideAuthButtons = false }) {
                         </div>
 
                         {isGuest && (
-    <motion.div
-        initial={{ opacity: 0, y: -4 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.45rem',
-            padding: '0.42rem 0.75rem',
-            borderRadius: '999px',
-            background: isDark
-                ? 'rgba(245, 158, 11, 0.08)'
-                : 'rgba(245, 158, 11, 0.12)',
-            border: '1px solid rgba(245, 158, 11, 0.18)',
-            color: 'var(--text-main)',
-            fontSize: '0.78rem',
-            fontWeight: '600',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-        }}
-    >
-        <span
-            style={{
-                width: '7px',
-                height: '7px',
-                borderRadius: '50%',
-                background: '#f59e0b',
-                boxShadow: '0 0 10px rgba(245, 158, 11, 0.45)',
-                flexShrink: 0,
-            }}
-        />
+                            <motion.div
+                                initial={{ opacity: 0, y: -4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2 }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.45rem',
+                                    padding: '0.42rem 0.75rem',
+                                    borderRadius: '999px',
+                                    background: isDark
+                                        ? 'rgba(245, 158, 11, 0.08)'
+                                        : 'rgba(245, 158, 11, 0.12)',
+                                    border: '1px solid rgba(245, 158, 11, 0.18)',
+                                    color: 'var(--text-main)',
+                                    fontSize: '0.78rem',
+                                    fontWeight: '600',
+                                    backdropFilter: 'blur(8px)',
+                                    WebkitBackdropFilter: 'blur(8px)',
+                                }}
+                            >
+                                <span
+                                    style={{
+                                        width: '7px',
+                                        height: '7px',
+                                        borderRadius: '50%',
+                                        background: '#f59e0b',
+                                        boxShadow: '0 0 10px rgba(245, 158, 11, 0.45)',
+                                        flexShrink: 0,
+                                    }}
+                                />
 
-        <span style={{ letterSpacing: '0.01em' }}>
-            Guest Session
-        </span>
-    </motion.div>
-)}
+                                <span style={{ letterSpacing: '0.01em' }}>
+                                    Guest Session
+                                </span>
+                            </motion.div>
+                        )}
 
                         {/* Language Toggle */}
                         <div style={{ position: 'relative' }} id="lang-selector">
@@ -647,55 +678,55 @@ export default function Header({ hideAuthButtons = false }) {
                             </nav>
 
                             {isGuest && (
-    <div
-        style={{
-            marginBottom: '1rem',
-            padding: '0.8rem 1rem',
-            borderRadius: '12px',
-            background: isDark
-                ? 'rgba(245, 158, 11, 0.08)'
-                : 'rgba(245, 158, 11, 0.12)',
-            border: '1px solid rgba(245, 158, 11, 0.15)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.6rem',
-        }}
-    >
-        <div
-            style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: '#f59e0b',
-                boxShadow: '0 0 8px rgba(245, 158, 11, 0.45)',
-                flexShrink: 0,
-            }}
-        />
+                                <div
+                                    style={{
+                                        marginBottom: '1rem',
+                                        padding: '0.8rem 1rem',
+                                        borderRadius: '12px',
+                                        background: isDark
+                                            ? 'rgba(245, 158, 11, 0.08)'
+                                            : 'rgba(245, 158, 11, 0.12)',
+                                        border: '1px solid rgba(245, 158, 11, 0.15)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.6rem',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            width: '8px',
+                                            height: '8px',
+                                            borderRadius: '50%',
+                                            background: '#f59e0b',
+                                            boxShadow: '0 0 8px rgba(245, 158, 11, 0.45)',
+                                            flexShrink: 0,
+                                        }}
+                                    />
 
-        <div>
-            <p
-                style={{
-                    margin: 0,
-                    fontSize: '0.86rem',
-                    fontWeight: '700',
-                    color: 'var(--text-main)',
-                }}
-            >
-                Guest Mode
-            </p>
+                                    <div>
+                                        <p
+                                            style={{
+                                                margin: 0,
+                                                fontSize: '0.86rem',
+                                                fontWeight: '700',
+                                                color: 'var(--text-main)',
+                                            }}
+                                        >
+                                            Guest Mode
+                                        </p>
 
-            <p
-                style={{
-                    margin: 0,
-                    fontSize: '0.72rem',
-                    color: 'var(--text-muted)',
-                }}
-            >
-                Some features require an account
-            </p>
-        </div>
-    </div>
-)}
+                                        <p
+                                            style={{
+                                                margin: 0,
+                                                fontSize: '0.72rem',
+                                                color: 'var(--text-muted)',
+                                            }}
+                                        >
+                                            Some features require an account
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Role links mobile */}
                             <div style={{ marginBottom: '1rem' }}>
