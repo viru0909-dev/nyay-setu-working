@@ -198,23 +198,16 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/actuator/**"
+                                "/actuator/health",
+                                "/actuator/health/**",
+                                "/ai/ollama/status",
+                                "/ai/ollama/models"
                         ).permitAll()
 
                         // ── WebSocket endpoints ───────────────────────────────────────────
                         .requestMatchers("/api/ws/**").permitAll()
 
-                        // ── AI endpoints (open for now; restrict if misuse detected) ──────
-                        .requestMatchers(
-                                "/ai/summarize",
-                                "/ai/chat",
-                                "/ai/chat/ollama",
-                                "/ai/constitution/qa",
-                                "/ai/ollama/status",
-                                "/ai/ollama/models",
-                                "/api/v1/brain/analyze-case",
-                                "/api/v1/brain/suggest-documents"
-                        ).permitAll()
+
 
                         // ── Auth-only: any authenticated user ─────────────────────────────
                         .requestMatchers(
@@ -229,7 +222,10 @@ public class SecurityConfig {
                         ).authenticated()
 
                         // ── Brain / AI (authenticated) ────────────────────────────────────
-                        .requestMatchers("/api/v1/brain/**").authenticated()
+                        .requestMatchers(
+                                "/api/v1/brain/**",
+                                "/ai/**"
+                        ).authenticated()
 
                         // ── Judge-only endpoints ──────────────────────────────────────────
                         .requestMatchers(
@@ -277,6 +273,9 @@ public class SecurityConfig {
                                 "/verify/admin/**",
                                 "/api/v1/audit/log"
                         ).hasAnyRole("ADMIN", "SUPER_JUDGE", "TECH_ADMIN")
+
+                        // ── Actuator/Ops ──────────────────────────────────────────────────
+                        .requestMatchers("/actuator/**").hasRole("TECH_ADMIN")
 
                         // ── Summons & transition (police + judge + admin) ──────────────────
                         .requestMatchers(
