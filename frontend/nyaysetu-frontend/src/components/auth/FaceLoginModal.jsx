@@ -13,48 +13,70 @@ export default function FaceLoginModal({ isOpen, onClose, onSuccess }) {
     const webcamRef = useRef(null);
     const { modelsLoaded, detectFace, loginWithFace } = useFaceRecognition();
 
+    // Stores the next scheduled face detection cycle.
+    const detectionTimeoutRef = useRef(null);
+
+    // Controls whether biometric scanning should continue.
+    const activeScanningRef = useRef(false);
+
     useEffect(() => {
-        let interval;
         if (step === 'scanning' && modelsLoaded) {
-            interval = startFaceDetection();
+            startFaceDetection();
         }
         return () => {
-            if (interval) clearInterval(interval);
+            activeScanningRef.current = false;
+            
+            if (detectionTimeoutRef.current) { 
+                clearTimeout(detectionTimeoutRef.current);
+                detectionTimeoutRef.current = null;
+            }
         };
     }, [step, modelsLoaded]);
 
     const startFaceDetection = () => {
-        const interval = setInterval(async () => {
-            if (webcamRef.current?.video) {
-                try {
-                    const result = await detectFace(webcamRef.current.video, 0.75); // High threshold for login
-                    if (result && result.isCentered) {
-                        setFaceDetected(true);
-                        clearInterval(interval);
-                        await handleFaceLogin(result.descriptor);
-                    } else if (result) {
-                        setFaceDetected(false);
-                        setMessage('CENTER FACE: Move closer to the HUD grid');
-                    } else {
-                        setFaceDetected(false);
-                        setMessage('SCANNING: No valid biometric signature found');
-                    }
-                } catch (err) {
-                    console.error('Face detection error:', err);
-                }
-            }
-        }, 800);
+        activeScanningRef.current = true;
+
+        // Begin sequential face detection polling.
+        void runFaceDetection();
 
         setTimeout(() => {
-            if (interval) clearInterval(interval);
+            activeScanningRef.current = false;
+
             if (step === 'scanning' && !faceDetected) {
                 setStep('error');
                 setMessage('Biometric timeout. Signal not acquired.');
             }
         }, 45000);
-
-        return interval;
     };
+
+    const runFaceDetection = async () => {
+        if (!activeScanningRef.current) return;
+
+        if (webcamRef.current?.video) {
+            try {
+                const result = await detectFace(webcamRef.current.video, 0.75); // High threshold for login
+                
+                if (result && result.isCentered) {
+                    setFaceDetected(true);
+                    activeScanningRef.current = false;
+                    await handleFaceLogin(result.descriptor);
+                } else if (result) {
+                    setFaceDetected(false);
+                    setMessage('CENTER FACE: Move closer to the HUD grid');
+                } else {
+                    setFaceDetected(false);
+                    setMessage('SCANNING: No valid biometric signature found');
+                }
+            } catch (err) {
+                console.error('Face detection error:', err);
+            }
+        }
+
+        //Schedule next detection only if biometric scanning is still active.
+        if (activeScanningRef.current) {
+            detectionTimeoutRef.current = setTimeout(runFaceDetection, 800);
+        }
+    }
 
     const handleFaceLogin = async (descriptor) => {
         try {

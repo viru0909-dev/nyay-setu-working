@@ -528,6 +528,8 @@ export default function Signup() {
                                         </div>
                                     </div>
 
+                                    
+
                                     {/* Create Account Button */}
                                     <button
                                         type="submit"
@@ -550,6 +552,74 @@ export default function Signup() {
                                         }}
                                     >
                                         {loading ? t('auth:signup.signingUp') : t('auth:signup.signUp')}
+                                    </button>
+
+                                {/* Divider */}
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        margin: '1.5rem 0',
+                                        color: 'var(--text-secondary)'
+                                    }}>
+                                        <div style={{
+                                            flex: 1,
+                                            height: '1px',
+                                            background: 'rgba(0,0,0,0.1)'
+                                        }} />
+
+                                        <span style={{
+                                            padding: '0 1rem',
+                                            fontSize: '0.875rem',
+                                            fontWeight: '500'
+                                        }}>
+                                            OR
+                                        </span>
+
+                                        <div style={{
+                                            flex: 1,
+                                            height: '1px',
+                                            background: 'rgba(0,0,0,0.1)'
+                                        }} />
+                                    </div>
+
+                                    {/* Google Signup Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/google`;
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.9rem',
+
+                                            background: 'white',
+                                            border: '1px solid rgba(0,0,0,0.12)',
+                                            borderRadius: '0.75rem',
+
+                                            color: '#111827',
+                                            fontSize: '0.95rem',
+                                            fontWeight: '600',
+
+                                            cursor: 'pointer',
+
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '0.75rem',
+
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                    >
+                                        <img
+                                            src="https://www.svgrepo.com/show/475656/google-color.svg"
+                                            alt="Google"
+                                            style={{
+                                                width: '20px',
+                                                height: '20px'
+                                            }}
+                                        />
+
+                                        Continue with Google
                                     </button>
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1rem 0 0.5rem' }}>

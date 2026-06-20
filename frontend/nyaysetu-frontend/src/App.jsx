@@ -230,6 +230,7 @@ function App({ swRegistration }) {
                                 {/* Base Application Portals */}
                                 <Route path="/" element={<Landing />} />
                                 <Route path="/login" element={<Login />} />
+                                <Route path="/oauth-success" element={<OAuthSuccess />} />
                                 <Route path="/signup" element={<Signup />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                                 <Route path="/constitution" element={<Constitution />} />

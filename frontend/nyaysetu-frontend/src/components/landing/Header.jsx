@@ -123,6 +123,7 @@ export default function Header({ hideAuthButtons = false }) {
 
         const underline = (
             <span
+                className="nav-underline"
                 style={{
                     position: 'absolute',
                     left: '50%',
@@ -130,17 +131,13 @@ export default function Header({ hideAuthButtons = false }) {
                     width: '72%',
                     height: '3px',
                     borderRadius: '999px',
-                    background:'var(--color-primary)',
-
-                    transform:
-                        location.pathname === item.href
-                            ? 'translateX(-50%) scaleX(1)'
-                            : 'translateX(-50%) scaleX(0)',
-
+                    background: 'var(--color-primary)',
+                    transform: isActive
+                        ? 'translateX(-50%) scaleX(1)'
+                        : 'translateX(-50%) scaleX(0)',
                     transformOrigin: 'center',
                     transition: 'transform 0.3s ease',
                 }}
-                className="nav-underline"
             />
         );
 
@@ -614,8 +611,6 @@ export default function Header({ hideAuthButtons = false }) {
                                         cursor: 'pointer',
                                         fontFamily: 'inherit',
                                     };
-
-                                    const displayLabel = t(item.labelKey) === item.labelKey ? item.labelKey : t(item.labelKey);
 
                                     if (item.action) {
                                         return (

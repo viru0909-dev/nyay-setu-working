@@ -40,4 +40,25 @@ public class CourtOrder {
     private LocalDateTime updatedAt;
 
     private LocalDateTime issuedAt;
+
+    // ===== VERDICT DOCUMENTATION =====
+
+    private String verdictType;
+
+    @Column(columnDefinition = "TEXT")
+    private String verdictSummary;
+
+    private LocalDateTime verdictDate;
+
+    @Builder.Default
+    private Boolean archived = false;
+
+    private String documentUrl;
+
+    private String verdictReferenceNumber;
+
+    private String approvedBy;
+
+    @Builder.Default
+    private Boolean digitallySigned = false;
 }

@@ -150,7 +150,7 @@ export default function About() {
                     }}>
                         {t('about:heroTitleStart')}{' '}
                         <span style={{
-                            background:'linear-gradient(135deg, #7C5CFF 0%, #3F5DCC 100%)',
+                            background: 'linear-gradient(135deg, #7C5CFF 0%, #3F5DCC 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             backgroundClip: 'text'
@@ -378,6 +378,7 @@ export default function About() {
             <section style={{ padding: '6rem 2rem', background: 'var(--bg-surface)', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <motion.div
+
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -407,14 +408,38 @@ export default function About() {
                                 key={index}
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
+                                animate="rest"
+                                whileHover="hover"
+                                variants={{
+                                    rest: {
+                                        y: 0,
+                                        scale: 1,
+                                        boxShadow: 'var(--shadow-glass)', transition: {
+                                            duration: 0.1
+                                        }
+                                    },
+                                    hover: {
+                                        y: -8,
+                                        scale: 1.015,
+                                        boxShadow: `0 20px 40px ${phase.color}25`,
+                                        transition: {
+                                            duration: 0.15
+                                        }
+                                    }
+                                }}
+
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.15 }}
+
                                 style={{
                                     background: 'var(--bg-glass)',
-                                    border: 'var(--border-glass)',
+
+                                    border: `1px solid ${phase.color}20`,
                                     borderRadius: '1.5rem',
                                     padding: '2rem',
-                                    boxShadow: 'var(--shadow-glass)'
+                                    boxShadow: 'var(--shadow-glass)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease'
                                 }}
                             >
                                 <div style={{
@@ -423,21 +448,29 @@ export default function About() {
                                     alignItems: 'center',
                                     marginBottom: '1rem'
                                 }}>
-                                    <span style={{
-                                        padding: '0.25rem 0.75rem',
-                                        background: `${phase.color}15`,
-                                        borderRadius: '0.5rem',
-                                        color: phase.color,
-                                        fontWeight: '700',
-                                        fontSize: '0.85rem'
-                                    }}>
-                                        {t(phase.phase)}
-                                    </span>
+                                    <motion.span
+                                        variants={{
+                                            hover: {
+                                                scale: 1.03,
+                                                boxShadow: `0 0 8px ${phase.color}60`
+                                            }
+                                        }}
+                                        style={{
+                                            padding: '0.25rem 0.75rem',
+                                            background: `${phase.color}15`,
+                                            borderRadius: '0.5rem',
+                                            color: phase.color,
+                                            fontWeight: '700',
+                                            fontSize: '0.85rem'
+                                        }}
+                                    >                      {t(phase.phase)}
+                                    </motion.span>
+
                                     <span style={{
                                         fontSize: '0.75rem',
                                         fontWeight: '700',
                                         textTransform: 'uppercase',
-                                        color: phase.color
+                                        color: phase.color, transition: 'all 0.2s ease', textShadow: `0 0 6px ${phase.color}40`
                                     }}>
                                         {/* {t(phase.status) === 'live' ? '✓ Live' :
                                             t(phase.status) === 'in-progress' ? '⏳ In Progress' : '📅 Planned'} */}
@@ -449,7 +482,8 @@ export default function About() {
                                     fontSize: '1.5rem',
                                     fontWeight: '800',
                                     color: 'var(--text-main)',
-                                    marginBottom: '1.5rem'
+                                    marginBottom: '1.5rem', transition: 'color 0.2s ease'
+
                                 }}>
                                     {t(phase.title)}
                                 </h3>
