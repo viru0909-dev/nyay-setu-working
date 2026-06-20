@@ -174,16 +174,6 @@ export default function Header({ hideAuthButtons = false }) {
                 }
             },
         };
-        const currentPathWithHash = location.pathname + location.hash;
-        let isActive = false;
-        if (item.href === '/') {
-            // Home is only active if we are on '/' AND there is no hash
-            isActive = location.pathname === '/' && !location.hash;
-        } else if (item.href) {
-            // Other tabs are active if they match the exact path+hash OR just the path
-            isActive = currentPathWithHash === item.href || location.pathname === item.href;
-        }
-        // -------------------------------------------------------------
 
         if (item.action) {
             return (
