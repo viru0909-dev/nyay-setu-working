@@ -18,12 +18,14 @@
     "dexie": "^4.4.3",
     "dexie-react-hooks": "^4.2.0",
     "face-api.js": "^0.22.2",
-    "framer-motion": "^12.23.25",
+    "framer-motion": "12.0.0",
     "i18next": "^25.8.10",
     "i18next-browser-languagedetector": "^8.2.1",
     "i18next-http-backend": "^3.0.2",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.294.0",
+    "motion-dom": "12.0.0",
+    "motion-utils": "12.0.0",
     "react": "^18.2.0",
     "react-canvas-confetti": "^2.0.7",
     "react-dom": "^18.2.0",
@@ -38,7 +40,8 @@
     "socket.io-client": "^4.8.1",
     "three": "^0.184.0",
     "vite-plugin-pwa": "^1.2.0",
-    "zustand": "^5.0.14"
+    "workbox-window": "^7.3.0",
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -49,5 +52,9 @@
     "jsdom": "^29.1.1",
     "vite": "^5.0.8",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "motion-utils": "12.0.0",
+    "motion-dom": "12.0.0"
   }
 }
