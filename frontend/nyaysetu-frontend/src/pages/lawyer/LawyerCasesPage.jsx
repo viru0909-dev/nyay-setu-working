@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { caseAPI, lawyerAPI, caseAssignmentAPI } from '../../services/api';
+import AdvancedCaseSearch from "../../components/dashboard/AdvancedCaseSearch";
 import {
     Search,
     Filter,
@@ -29,6 +30,10 @@ export default function LawyerCasesPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('ALL');
+    const [caseTypeFilter, setCaseTypeFilter] = useState('ALL');
+    const [dateFilter, setDateFilter] = useState('');
+    const [recentSearches, setRecentSearches] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'proposals'
     const [showAllSearchResults, setShowAllSearchResults] = useState(false);
     const navigate = useNavigate();
@@ -96,19 +101,48 @@ export default function LawyerCasesPage() {
     const displayCases = activeTab === 'active' ? activeCases : proposals;
 
     const filteredCases = displayCases.filter(c => {
-        const matchesSearch = (c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.description?.toLowerCase().includes(searchTerm.toLowerCase()));
-        const matchesFilter = filterStatus === 'ALL' || c.status === filterStatus;
-        return matchesSearch && matchesFilter;
-    });
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch =
+        c.title?.toLowerCase().includes(search) ||
+        c.description?.toLowerCase().includes(search) ||
+        c.id?.toLowerCase().includes(search) ||
+        c.caseType?.toLowerCase().includes(search) ||
+        c.petitioner?.toLowerCase().includes(search);
+
+    const matchesStatus =
+        filterStatus === 'ALL' || c.status === filterStatus;
+
+    const matchesType =
+        caseTypeFilter === 'ALL' || c.caseType === caseTypeFilter;
+
+    const matchesDate =
+        !dateFilter ||
+        new Date(c.filedDate || c.createdAt)
+            .toISOString()
+            .split('T')[0] === dateFilter;
+
+    return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesType &&
+        matchesDate
+    );
+});
 
     const previewLimit = 4;
     const visibleCases = showAllSearchResults ? filteredCases : filteredCases.slice(0, previewLimit);
     const hiddenCases = showAllSearchResults ? [] : filteredCases.slice(previewLimit);
 
     useEffect(() => {
-        setShowAllSearchResults(false);
-    }, [searchTerm, filterStatus, activeTab]);
+    setShowAllSearchResults(false);
+}, [
+    searchTerm,
+    filterStatus,
+    caseTypeFilter,
+    dateFilter,
+    activeTab
+]);
 
     const glassStyle = {
         background: 'var(--bg-glass-strong)',
@@ -118,6 +152,18 @@ export default function LawyerCasesPage() {
         padding: '1.5rem',
         boxShadow: 'var(--shadow-glass-strong)'
     };
+
+    useEffect(() => {
+    if (
+        searchTerm.trim() &&
+        !recentSearches.includes(searchTerm)
+    ) {
+        setRecentSearches(prev => [
+            searchTerm,
+            ...prev
+        ].slice(0, 5));
+    }
+}, [searchTerm, recentSearches]);
 
     if (loading) {
         return (
@@ -244,6 +290,10 @@ export default function LawyerCasesPage() {
                         placeholder={`Search ${activeTab === 'active' ? 'active portfolio' : 'proposals'}...`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
+                        onFocus={() => setShowSuggestions(true)}
+                        onBlur={() =>
+                            setTimeout(() => setShowSuggestions(false), 200)
+                        }
                         style={{
                             width: '100%',
                             background: 'var(--bg-glass)',
@@ -255,6 +305,54 @@ export default function LawyerCasesPage() {
                             fontSize: '0.95rem'
                         }}
                     />
+                    {
+    showSuggestions &&
+    recentSearches.length > 0 && (
+        <div
+            style={{
+                position: "absolute",
+                top: "110%",
+                left: 0,
+                right: 0,
+                background: "var(--bg-glass-strong)",
+                border: "var(--border-glass)",
+                borderRadius: "0.75rem",
+                padding: "0.5rem",
+                zIndex: 1000,
+                boxShadow: "var(--shadow-glass)"
+            }}
+        >
+            <p
+                style={{
+                    margin: "0.5rem",
+                    color: "var(--text-secondary)",
+                    fontSize: "0.8rem"
+                }}
+            >
+                Recent Searches
+            </p>
+
+            {
+                recentSearches.map(item => (
+                    <div
+                        key={item}
+                        onClick={() => {
+                            setSearchTerm(item);
+                            setShowSuggestions(false);
+                        }}
+                        style={{
+                            padding: "0.7rem",
+                            cursor: "pointer",
+                            borderRadius: "0.5rem"
+                        }}
+                    >
+                        🔍 {item}
+                    </div>
+                ))
+            }
+        </div>
+    )
+}
                 </div>
                 {activeTab === 'active' && (
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
@@ -279,6 +377,52 @@ export default function LawyerCasesPage() {
                             <option value="IN_PROGRESS">In Progress</option>
                             <option value="CLOSED">Closed/Resolved</option>
                         </select>
+                        <select
+    value={caseTypeFilter}
+    onChange={(e) => setCaseTypeFilter(e.target.value)}
+    style={{
+        background: 'var(--bg-glass)',
+        border: 'var(--border-glass)',
+        borderRadius: '0.75rem',
+        padding: '0.8rem 1rem',
+        color: 'var(--text-main)',
+        outline: 'none',
+        cursor: 'pointer'
+    }}
+>
+    <option value="ALL">
+        All Case Types
+    </option>
+
+    <option value="CIVIL">
+        Civil
+    </option>
+
+    <option value="CRIMINAL">
+        Criminal
+    </option>
+
+    <option value="PROPERTY">
+        Property
+    </option>
+
+    <option value="FAMILY">
+        Family
+    </option>
+</select>
+<input
+    type="date"
+    value={dateFilter}
+    onChange={(e) => setDateFilter(e.target.value)}
+    style={{
+        background: 'var(--bg-glass)',
+        border: 'var(--border-glass)',
+        borderRadius: '0.75rem',
+        padding: '0.8rem',
+        color: 'var(--text-main)',
+        outline: 'none'
+    }}
+/>
                     </div>
                 )}
             </div>
