@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { judgeAPI } from '../../services/api';
 import ParticipantStatusPanel from '../../components/ParticipantStatusPanel';
+import SmartNotificationPanel from "../../components/SmartNotificationPanel";
+import NotificationPreferences from "../../components/NotificationPreferences";
 
 export default function LiveHearing() {
     const navigate = useNavigate();
