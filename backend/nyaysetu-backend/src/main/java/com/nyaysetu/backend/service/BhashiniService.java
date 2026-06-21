@@ -6,12 +6,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Base64;
 
 /**
  * Service for Bhashini (National Language Translation Mission) Integration.
@@ -31,10 +30,9 @@ public class BhashiniService {
     @Value("${bhashini.url:https://dhruva-api.bhashini.gov.in/services/inference/pipeline}")
     private String apiUrl;
 
-    @Value("${bhashini.pipeline.id:}") // User needs to configure this based on their Bhashini account
+    @Value("${bhashini.pipeline.id:}")
     private String pipelineId;
     
-    // Groq API configuration for fallback translation
     @Value("${groq.api.key:}")
     private String groqApiKey;
     
@@ -45,6 +43,7 @@ public class BhashiniService {
 
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate; // Injected bean with timeouts — see RestTemplateConfig
+    private final PiiSanitizer piiSanitizer;
 
     /**
      * Translate text from source language to target language
@@ -53,15 +52,12 @@ public class BhashiniService {
         if (text == null || text.trim().isEmpty()) return "";
         if (sourceLang.equalsIgnoreCase(targetLang)) return text;
 
-        // Skip Bhashini if API key is not configured - will use Groq fallback
         if (apiKey == null || apiKey.isEmpty()) {
             log.info("⚠️ Bhashini API Key not configured, will use Groq AI fallback");
         }
 
-        // Try Bhashini first (only if API key is configured)
         if (apiKey != null && !apiKey.isEmpty()) {
             try {
-                // Construct Bhashini Payload
                 ObjectNode requestBody = objectMapper.createObjectNode();
                 
                 ObjectNode pipelineTasks = objectMapper.createObjectNode();
@@ -111,8 +107,6 @@ public class BhashiniService {
             }
         }
         
-        
-        // Try Groq AI fallback
         try {
             log.info("📡 Attempting Groq AI fallback for translation: {} → {}", sourceLang, targetLang);
             String groqTranslation = translateViaGroq(text, sourceLang, targetLang);
@@ -124,16 +118,12 @@ public class BhashiniService {
             log.error("❌ Groq translation also failed: {}", groqError.getMessage());
         }
         
-        // Final fallback: return original text to avoid blocking flow
         log.warn("⚠️ All translation methods failed, returning original text");
         return text;
     }
 
     /**
      * Convert Speech to Text (ASR)
-     * @param audioBase64 Base64 encoded audio string
-     * @param sourceLang The language code of the speech (e.g., "hi", "mr")
-     * @return Transcribed text
      */
     public String speechToText(String audioBase64, String sourceLang) {
         if (audioBase64 == null || audioBase64.isEmpty()) return "";
@@ -174,81 +164,73 @@ public class BhashiniService {
             
             JsonNode root = objectMapper.readTree(response.getBody());
              return root.path("pipelineResponse")
-                    .path(0)
-                    .path("output")
-                    .path(0)
-                    .path("source")
-                    .asText();
-                    
+                        .path(0)
+                        .path("output")
+                        .path(0)
+                        .path("source")
+                        .asText();
+                        
         } catch (Exception e) {
-            log.error("Failed to perform ASR via Bhashini", e);
-            return ""; 
+            log.error("Failed to perform ASR via Bhashini: {}", e.getMessage());
+            return "Error: Unable to transcribe audio at this time."; 
         }
     }
     
     /**
      * Translate text using Groq AI (fallback when Bhashini is unavailable)
-     * @param text Text to translate
-     * @param sourceLang Source language code (e.g., "en", "hi")
-     * @param targetLang Target language code (e.g., "en", "hi")
-     * @return Translated text
      */
     private String translateViaGroq(String text, String sourceLang, String targetLang) throws Exception {
         if (groqApiKey == null || groqApiKey.trim().isEmpty()) {
             throw new Exception("Groq API key not configured");
         }
         
-        // Language name mapping for better prompts
         String sourceLangName = getLanguageName(sourceLang);
         String targetLangName = getLanguageName(targetLang);
         
-        // Build translation request
         ArrayNode messagesArray = objectMapper.createArrayNode();
         
-        // System message
         ObjectNode systemMsg = objectMapper.createObjectNode();
         systemMsg.put("role", "system");
         systemMsg.put("content", "You are a professional translator. Translate text accurately while preserving the meaning and tone. Return ONLY the translated text, nothing else.");
         messagesArray.add(systemMsg);
         
-        // User message with translation request
         ObjectNode userMsg = objectMapper.createObjectNode();
         userMsg.put("role", "user");
         userMsg.put("content", String.format(
             "Translate the following text from %s to %s. Return ONLY the translation:\n\n%s",
-            sourceLangName, targetLangName, text
+            sourceLangName, targetLangName, piiSanitizer.sanitizeForGroq(text)
         ));
         messagesArray.add(userMsg);
         
-        // Build request body
         ObjectNode requestBody = objectMapper.createObjectNode();
         requestBody.put("model", groqModel);
         requestBody.set("messages", messagesArray);
-        requestBody.put("temperature", 0.3); // Lower temperature for more consistent translation
+        requestBody.put("temperature", 0.3);
         requestBody.put("max_tokens", 2048);
         
-        // Make API call
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(groqApiKey);
         
         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(requestBody), headers);
         
-        ResponseEntity<String> response = restTemplate.exchange(
-            GROQ_API_URL,
-            HttpMethod.POST,
-            entity,
-            String.class
-        );
-        
-        // Parse response
-        JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-        String translatedText = jsonResponse
-                .path("choices").path(0)
-                .path("message").path("content")
-                .asText();
-        
-        return translatedText.trim();
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                GROQ_API_URL,
+                HttpMethod.POST,
+                entity,
+                String.class
+            );
+            
+            JsonNode jsonResponse = objectMapper.readTree(response.getBody());
+            return jsonResponse
+                    .path("choices").path(0)
+                    .path("message").path("content")
+                    .asText().trim();
+        } catch (Exception e) {
+            log.error("Groq API call failed: {}", e.getMessage());
+            throw e;
+        }
     }
     
     /**

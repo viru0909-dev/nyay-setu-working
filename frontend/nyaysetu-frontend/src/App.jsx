@@ -16,25 +16,54 @@ import UpdateNotification from './components/UpdateNotification';
 import GuestWelcomeToast from './components/guest/GuestWelcomeToast';
 import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
 
-import OAuthSuccess from './pages/OAuthSuccess';
+import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
+import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
 
-// Lazy load pages for better performance
-const Landing = lazy(() => import('./pages/Landing'));
-const Constitution = lazy(() => import('./pages/Constitution'));
-const Login = lazy(() => import('./pages/Login'));
-const Signup = lazy(() => import('./pages/Signup'));
-const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const About = lazy(() => import('./pages/About'));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
-const Terms = lazy(() => import('./pages/Terms'));
-const Disclaimer = lazy(() => import('./pages/Disclaimer'));
-const UpcomingFeatures = lazy(() => import('./pages/UpcomingFeatures'));
+// Imported Feature Component
+
+// ==========================================
+// VITE CHUNK BREAKAGE MITIGATION WRAPPER
+// ==========================================
+const retryLazy = (componentImport) => lazy(async () => {
+    const pageHasAlreadyBeenForceRefreshed = JSON.parse(
+        window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
+    );
+    try {
+        const component = await componentImport();
+        window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
+        return component;
+    } catch (error) {
+        if (!pageHasAlreadyBeenForceRefreshed) {
+            window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+            window.location.reload();
+            return { default: () => <LoadingSpinner fullScreen message="Syncing workspace patches..." /> };
+        }
+        throw error;
+    }
+});
+
+// ==========================================
+// OPTIMIZED LAZY-LOAD ENTRIES
+// ==========================================
+const Landing = retryLazy(() => import('./pages/Landing'));
+const Constitution = retryLazy(() => import('./pages/Constitution'));
+const Login = retryLazy(() => import('./pages/Login'));
+const Signup = retryLazy(() => import('./pages/Signup'));
+const ResetPassword = retryLazy(() => import('./pages/ResetPassword'));
+const About = retryLazy(() => import('./pages/About'));
+const PrivacyPolicy = retryLazy(() => import('./pages/PrivacyPolicy'));
+const Terms = retryLazy(() => import('./pages/Terms'));
+const Disclaimer = retryLazy(() => import('./pages/Disclaimer'));
+const UpcomingFeatures = retryLazy(() => import('./pages/UpcomingFeatures'));
+const FAQ = retryLazy(() => import('./pages/FAQ'));
+import OAuthSuccess from './pages/OAuthSuccess';
 
 // Dashboard Layout
 const DashboardLayout = retryLazy(() => import('./layouts/DashboardLayout'));
 
 // Dashboard Pages
 const AdminDashboard = retryLazy(() => import('./pages/dashboards/AdminDashboard'));
+const AdminFeedbackPage = retryLazy(() => import('./pages/dashboards/AdminFeedbackPage'));
 const LawyerDashboard = retryLazy(() => import('./pages/dashboards/LawyerDashboard'));
 
 // Litigant Pages
@@ -212,6 +241,7 @@ function App({ swRegistration }) {
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
+                                <Route path="/faq" element={<FAQ />} />
 
                                 {/* Litigant Functional Core */}
                                 <Route path="/litigant/*" element={
@@ -275,11 +305,12 @@ function App({ swRegistration }) {
 
                                 {/* Administrative Core */}
                                 <Route path="/admin/*" element={
-                                    <ProtectedWorkspace allowedRoles={['ADMIN']} message="Loading Admin Panel...">
+                                    <ProtectedWorkspace allowedRoles={['ADMIN', 'TECH_ADMIN', 'TECHNICAL_TEAM', 'SUPER_JUDGE']} message="Loading Admin Panel...">
                                         <DashboardLayout />
                                     </ProtectedWorkspace>
                                 }>
                                     <Route index element={<AdminDashboard />} />
+                                        <Route path="feedback" element={<AdminFeedbackPage />} />
                                     <Route path="*" element={<Navigate to="/admin" replace />} />
                                 </Route>
 

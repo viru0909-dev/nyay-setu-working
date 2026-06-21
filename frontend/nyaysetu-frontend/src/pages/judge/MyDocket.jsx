@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { judgeAPI } from '../../services/api';
 import {
-    Scale, Calendar, User, Users, Loader2, ChevronRight, AlertTriangle, Briefcase
+    Scale, Calendar, User, Users, ChevronRight, Briefcase
 } from 'lucide-react';
+import { useApi } from '../../hooks/useApi';
+import ApiStateWrapper from '../../components/common/ApiStateWrapper';
 
 const statusColors = {
     'PENDING': { bg: '#f5930020', border: '#f59e0b', text: '#f59e0b' },
@@ -22,42 +24,27 @@ const urgencyColors = {
 
 export default function MyDocket() {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('active'); // 'active', 'pending_judgment', 'closed'
-    const [cases, setCases] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('active');
 
-    useEffect(() => {
-        fetchCases();
-    }, [activeTab]);
+    // Fetch all cases once; filter client-side per tab to avoid redundant API calls.
+    const { data: allCases, loading, error, refetch } = useApi(
+        () => judgeAPI.getCases(),
+        []
+    );
 
-    const fetchCases = async () => {
-        setLoading(true);
-        try {
-            const response = await judgeAPI.getCases();
-            let filteredCases = response.data || [];
-
-            // Filter based on active tab
-            if (activeTab === 'active') {
-                filteredCases = filteredCases.filter(c =>
-                    c.status !== 'CLOSED' && c.status !== 'COMPLETED'
-                );
-            } else if (activeTab === 'pending_judgment') {
-                filteredCases = filteredCases.filter(c =>
-                    c.status === 'UNDER_REVIEW' || c.status === 'PENDING'
-                );
-            } else if (activeTab === 'closed') {
-                filteredCases = filteredCases.filter(c =>
-                    c.status === 'CLOSED' || c.status === 'COMPLETED'
-                );
-            }
-
-            setCases(filteredCases);
-        } catch (error) {
-            console.error('Error fetching cases:', error);
-        } finally {
-            setLoading(false);
+    const cases = useMemo(() => {
+        const all = allCases || [];
+        if (activeTab === 'active') {
+            return all.filter(c => c.status !== 'CLOSED' && c.status !== 'COMPLETED');
         }
-    };
+        if (activeTab === 'pending_judgment') {
+            return all.filter(c => c.status === 'UNDER_REVIEW' || c.status === 'PENDING');
+        }
+        if (activeTab === 'closed') {
+            return all.filter(c => c.status === 'CLOSED' || c.status === 'COMPLETED');
+        }
+        return all;
+    }, [allCases, activeTab]);
 
     const formatDate = (dateString) => {
         if (!dateString) return 'TBA';
@@ -74,6 +61,12 @@ export default function MyDocket() {
         padding: '1.5rem',
         boxShadow: 'var(--shadow-glass)'
     };
+
+    const tabLabel = activeTab === 'active'
+        ? 'active'
+        : activeTab === 'pending_judgment'
+            ? 'pending judgment'
+            : 'closed';
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '2rem' }}>
@@ -101,9 +94,9 @@ export default function MyDocket() {
                 {/* Tabs */}
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
                     {[
-                        { id: 'active', label: 'Active Cases', count: null },
-                        { id: 'pending_judgment', label: 'Pending Judgment', count: null },
-                        { id: 'closed', label: 'Closed', count: null }
+                        { id: 'active', label: 'Active Cases' },
+                        { id: 'pending_judgment', label: 'Pending Judgment' },
+                        { id: 'closed', label: 'Closed' }
                     ].map(tab => (
                         <button
                             key={tab.id}
@@ -128,22 +121,19 @@ export default function MyDocket() {
             </div>
 
             {/* Cases List */}
-            {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                    <Loader2 size={48} className="spin" style={{ color: 'var(--color-accent)' }} />
-                    <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .spin { animation: spin 1s linear infinite; }`}</style>
-                </div>
-            ) : cases.length === 0 ? (
-                <div style={{ ...glassStyle, textAlign: 'center', padding: '5rem 2rem' }}>
-                    <Scale size={64} color="#475569" style={{ margin: '0 auto 1.5rem' }} />
-                    <h3 style={{ color: 'var(--text-main)', fontSize: '1.25rem', margin: '0 0 0.5rem 0' }}>
-                        No {activeTab === 'active' ? 'active' : activeTab === 'pending_judgment' ? 'pending judgment' : 'closed'} cases
-                    </h3>
-                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                        {activeTab === 'active' ? 'New cases will appear here once assigned' : 'No cases in this category yet'}
-                    </p>
-                </div>
-            ) : (
+            <ApiStateWrapper
+                loading={loading}
+                error={error}
+                data={cases}
+                onRetry={refetch}
+                emptyTitle={`No ${tabLabel} cases`}
+                emptyDescription={
+                    activeTab === 'active'
+                        ? 'New cases will appear here once assigned to your bench'
+                        : 'No cases in this category yet'
+                }
+                emptyIcon={Scale}
+            >
                 <div style={{ display: 'grid', gap: '1.5rem' }}>
                     {cases.map(caseItem => {
                         const statusStyle = statusColors[caseItem.status] || statusColors['PENDING'];
@@ -297,7 +287,7 @@ export default function MyDocket() {
                         );
                     })}
                 </div>
-            )}
+            </ApiStateWrapper>
         </div>
     );
 }

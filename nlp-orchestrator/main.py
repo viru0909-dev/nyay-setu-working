@@ -47,6 +47,7 @@ from validators.citation_validator import validate_citations_from_text
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
 from sanitizer import sanitize_user_input, sanitize_prompt_input
+from pii_ner import router as pii_ner_router
 
 # Initialize clients for deep research pipeline
 from groq import AsyncGroq
@@ -135,6 +136,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(pii_ner_router)
 
 try:
     from routers.forensics import router as forensics_router
