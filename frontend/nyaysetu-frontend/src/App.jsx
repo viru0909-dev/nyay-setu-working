@@ -63,6 +63,7 @@ const DashboardLayout = retryLazy(() => import('./layouts/DashboardLayout'));
 
 // Dashboard Pages
 const AdminDashboard = retryLazy(() => import('./pages/dashboards/AdminDashboard'));
+const AdminFeedbackPage = retryLazy(() => import('./pages/dashboards/AdminFeedbackPage'));
 const LawyerDashboard = retryLazy(() => import('./pages/dashboards/LawyerDashboard'));
 
 // Litigant Pages
@@ -309,6 +310,7 @@ function App({ swRegistration }) {
                                     </ProtectedWorkspace>
                                 }>
                                     <Route index element={<AdminDashboard />} />
+                                        <Route path="feedback" element={<AdminFeedbackPage />} />
                                     <Route path="*" element={<Navigate to="/admin" replace />} />
                                 </Route>
 
