@@ -1,7 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Video, Calendar, Clock, Loader2, ExternalLink, Shield, Phone, MapPin, User, Activity, ArrowUpRight, Search, ArrowLeft } from 'lucide-react';
+import {
+    Video,
+    Calendar,
+    Clock,
+    Loader2,
+    Shield,
+    Phone,
+    MapPin,
+    User,
+    Activity,
+    ArrowUpRight,
+    Search,
+    ArrowLeft,
+    Wifi,
+    Mic,
+    MicOff,
+    Camera,
+    CameraOff
+} from 'lucide-react';
 import { judgeAPI } from '../../services/api';
+import ParticipantStatusPanel from '../../components/ParticipantStatusPanel';
 
 export default function LiveHearing() {
     const navigate = useNavigate();
@@ -10,6 +29,35 @@ export default function LiveHearing() {
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
     const [activeHearing, setActiveHearing] = useState(null);
+    const [participants, setParticipants] = useState([
+    {
+        id: 1,
+        name: "Judge",
+        online: true,
+        microphone: true,
+        camera: true,
+        speaking: true,
+        connection: "Excellent"
+    },
+    {
+        id: 2,
+        name: "Lawyer",
+        online: true,
+        microphone: false,
+        camera: true,
+        speaking: false,
+        connection: "Good"
+    },
+    {
+        id: 3,
+        name: "Litigant",
+        online: true,
+        microphone: true,
+        camera: false,
+        speaking: false,
+        connection: "Weak"
+    }
+]);
 
     useEffect(() => {
         fetchUpcomingHearings();
