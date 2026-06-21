@@ -11,20 +11,29 @@ import ContinueAsGuestButton from '../components/guest/ContinueAsGuestButton';
 import { resolvePostAuthPath } from '../utils/authRedirect';
 
 export default function Login() {
-    const [searchParams] = useSearchParams();
-    const isSessionExpired = searchParams.get('reason') === 'session_expired';
     const { t } = useTranslation('auth');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [selectedRole, setSelectedRole] = useState('');
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showFaceLogin, setShowFaceLogin] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const navigate = useNavigate();
+    const [oauthHandled, setOauthHandled] = useState(false);
     const location = useLocation();
     const { setAuth } = useAuthStore();
+    const [searchParams] = useSearchParams();
+    const oauthError = searchParams.get('error');
+    const [error, setError] = useState('');
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const oauthError = params.get("error");
+    
+        if (oauthError) {
+            setError(oauthError);
+        }
+    }, []);
 
     // Mobile detection
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -33,6 +42,17 @@ export default function Login() {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    useEffect(() => {
+
+        if (oauthError) {
+            setError(oauthError);
+        }
+    
+    }, [oauthError]);
+
+           
+
 
     const roles = [
         { value: '', label: t('auth:login.roles.allRoles'), icon: <User size={18} />, color: '#64748b' },
@@ -54,7 +74,7 @@ export default function Login() {
                 role: selectedRole || 'LITIGANT' // Default to LITIGANT if no role selected
             };
 
-          //  console.log('Sending login request:', loginPayload);
+            
             const response = await authAPI.login(loginPayload);
             const { token, user } = response.data;
 
@@ -207,20 +227,7 @@ export default function Login() {
                                 {t('auth:login.subtitle')}
                             </p>
                         </div>
-                        {isSessionExpired && (
-                            <div style={{
-                                backgroundColor: '#fff3cd',
-                                color: '#856404',
-                                padding: '12px 16px',
-                                borderRadius: '6px',
-                                marginBottom: '20px',
-                                border: '1px solid #ffeeba',
-                                fontSize: '14px',
-                                textAlign: 'center'
-                            }}>
-                                Your session expired for your security. Please log in again to continue.
-                            </div>
-                        )}
+
                         {error && (
                             <div style={{
                                 padding: '1rem',
@@ -462,6 +469,83 @@ export default function Login() {
                                 }}
                             >
                                 {loading ? t('auth:login.signingIn') : t('auth:login.signIn')}
+                            </button>
+
+                             {/* Divider */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                margin: '1rem 0',
+                                color: 'var(--text-secondary)'
+                            }}>
+                                <div style={{
+                                    flex: 1,
+                                    height: '1px',
+                                    background: 'rgba(0,0,0,0.1)'
+                                }} />
+                                
+                                <span style={{
+                                    padding: '0 1rem',
+                                    fontSize: '0.875rem'
+                                }}>
+                                    OR
+                                </span>
+
+                                <div style={{
+                                    flex: 1,
+                                    height: '1px',
+                                    background: 'rgba(0,0,0,0.1)'
+                                }} />
+                            </div>
+
+                            
+                            {/* Google Login */}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/google`;
+                                }}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    marginBottom: '0.85rem', // spacing before Face Login button
+
+                                    background: 'rgba(30, 42, 68, 0.08)',
+                                    border: '1px solid rgba(30, 42, 68, 0.2)',
+                                    borderRadius: '0.75rem',
+
+                                    color: 'var(--text-main)',
+                                    fontSize: '0.95rem',
+                                    fontWeight: '600',
+
+                                    cursor: 'pointer',
+
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.75rem',
+
+                                    transition: 'all 0.3s'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.background = 'rgba(30, 42, 68, 0.15)';
+                                    e.currentTarget.style.borderColor = 'rgba(30, 42, 68, 0.3)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.background = 'rgba(30, 42, 68, 0.08)';
+                                    e.currentTarget.style.borderColor = 'rgba(30, 42, 68, 0.2)';
+                                }}
+                            >
+                                <img
+                                    src="https://www.svgrepo.com/show/475656/google-color.svg"
+                                    alt="Google"
+                                    style={{
+                                        width: '20px',
+                                        height: '20px'
+                                    }}
+                                />
+
+                                Continue with Google
                             </button>
 
                             {/* Face Login */}

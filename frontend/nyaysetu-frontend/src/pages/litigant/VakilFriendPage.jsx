@@ -4,7 +4,7 @@ import { useResilientStream } from '../../hooks/useResilientStream';
 import StreamFallbackBanner from '../../components/stream/StreamFallbackBanner';
 import { downloadPartialStreamContent } from '../../utils/streamResilience';
 import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, Scan, FileText, X, Mic, StopCircle, Volume2, Shield, AlertTriangle, CheckCircle2, Eye, UserCircle2 } from 'lucide-react';
-import { vakilFriendAPI } from '../../services/api';
+import { vakilFriendAPI, documentAPI } from '../../services/api';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -860,16 +860,9 @@ const startDeepResearch = async (query) => {
 
             } else {
                 // Fallback to simple upload if no session
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('category', 'EVIDENCE');
-                formData.append('description', `Uploaded during case filing via Nyay Saarthi chat`);
-
-                const token = localStorage.getItem('token');
-                const response = await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                const response = await documentAPI.upload(file, {
+                    category: 'EVIDENCE',
+                    description: 'Uploaded during case filing via Nyay Saarthi chat'
                 });
 
                 setAttachedFiles(prev => prev.map(f =>
