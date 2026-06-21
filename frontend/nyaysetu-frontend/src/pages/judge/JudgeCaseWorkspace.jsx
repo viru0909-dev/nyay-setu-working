@@ -137,10 +137,7 @@ export default function JudgeCaseWorkspace() {
         if (!confirm('Are you sure you want to issue a formal notice to the Respondent? This will trigger an official email notification.')) return;
 
         try {
-            // Using a specific endpoint for ordering notice
-            await axios.post(`${API_BASE_URL}/api/cases/${caseId}/order-notice`, {}, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
+            await caseAPI.orderNotice(caseId);
             alert('✅ Notice Ordered Successfully! The respondent has been notified.');
             fetchCaseDetails(); // Refresh to show updated status or logs
         } catch (error) {

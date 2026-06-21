@@ -1,5 +1,7 @@
 package com.nyaysetu.backend.controller;
 
+import java.util.UUID;
+import java.util.List;
 import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.CaseStatus;
@@ -45,5 +47,31 @@ public class CaseController {
             @RequestParam CaseStatus status
     ) {
         return ResponseEntity.ok(caseService.updateStatus(id, status));
+    }
+
+    @PostMapping("/{caseId}/appeal")
+    public ResponseEntity<CaseEntity> createAppeal(
+            @PathVariable UUID caseId,
+            @RequestParam String reason
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(caseService.createAppeal(caseId, reason));
+    }
+
+    @GetMapping("/{caseId}/appeals")
+    public ResponseEntity<List<CaseEntity>> getAppeals(
+            @PathVariable UUID caseId
+    ) {
+        return ResponseEntity.ok(caseService.getAppeals(caseId));
+    }
+
+    @PutMapping("/appeals/{appealId}/status")
+    public ResponseEntity<CaseEntity> updateAppealStatus(
+            @PathVariable UUID appealId,
+            @RequestParam String status
+    ) {
+        return ResponseEntity.ok(
+                caseService.updateAppealStatus(appealId, status)
+        );
     }
 }
