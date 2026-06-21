@@ -10,6 +10,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,13 +23,21 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(RbacSecurityTest.DummyTestController.class)
+@Import(RbacSecurityTest.DummyTestConfig.class)
 class RbacSecurityTest {
 
     @Autowired
     private WebApplicationContext context;
 
     private MockMvc mockMvc;
+
+    @TestConfiguration
+    static class DummyTestConfig {
+        @Bean
+        public DummyTestController dummyTestController() {
+            return new DummyTestController();
+        }
+    }
 
     @RestController
     static class DummyTestController {
