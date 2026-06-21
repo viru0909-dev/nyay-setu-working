@@ -8,6 +8,7 @@ import {
     MoreVertical, Phone, Video, Loader2,
     Type, PenTool, Gavel, Briefcase, BookOpen
 } from 'lucide-react';
+import CaseTimelineSummary from '../../components/CaseTimelineSummary';
 import { caseAPI, lawyerAPI, documentAPI, messageAPI, vakilFriendAPI, brainAPI } from '../../services/api';
 
 export default function CaseWorkspace() {
@@ -172,57 +173,41 @@ function TabCaseBrief({ caseData }) {
                         </div>
                     </div>
                 </div>
+                <CaseTimelineSummary
+    aiSummary={`AI analysis of this case shows important milestones and pending legal actions.`}
+    timeline={[
+        {
+            type: "filed",
+            title: "Case Filed",
+            description: "Case officially submitted to the court.",
+            date: new Date(caseData.filedDate).toLocaleDateString()
+        },
+        {
+            type: "hearing",
+            title: "Upcoming Hearing",
+            description: "Prepare documents and arguments.",
+            date: caseData.nextHearing
+                ? new Date(caseData.nextHearing).toLocaleDateString()
+                : "Not Scheduled"
+        },
+        {
+            type: "judgment",
+            title: "Final Decision",
+            description: "Awaiting court judgment.",
+            date: "Pending"
+        }
+    ]}
+    upcomingDeadline={
+        caseData.nextHearing
+            ? `Prepare before ${new Date(caseData.nextHearing).toLocaleDateString()}`
+            : "No upcoming deadlines"
+    }
+/>
 
-                {/* Timeline */}
-                <div style={{ background: 'var(--bg-glass-strong)', padding: '2rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)' }}>
-                    <h3 style={{ color: 'var(--text-main)', marginTop: 0, marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <Clock size={20} color="var(--color-accent)" /> Case Timeline
-                    </h3>
-                    <div style={{ position: 'relative', paddingLeft: '1.5rem', marginTop: '1.5rem' }}>
-                        {/* Gradient Spine */}
-                        <div style={{ position: 'absolute', left: '7px', top: '10px', bottom: '20px', width: '2px', background: 'linear-gradient(to bottom, var(--color-accent), rgba(255,255,255,0.1))' }} />
+</div> {/* Close Left Column */}
 
-                        {[
-                            { date: caseData.nextHearing, title: 'Upcoming Hearing', type: 'hearing', future: true },
-                            { date: new Date().toISOString(), title: 'Strategy Update', type: 'internal', future: false },
-                            { date: new Date(Date.now() - 86400000).toISOString(), title: 'Drafting Started', type: 'internal', future: false },
-                            { date: caseData.lastHearing || '2023-10-15', title: 'Previous Hearing', type: 'hearing', future: false },
-                            { date: caseData.filedDate, title: 'Case Filed', type: 'hearing', future: false }
-                        ].sort((a, b) => new Date(b.date) - new Date(a.date)).map((event, i) => (
-                            <div key={i} style={{ marginBottom: '2.5rem', position: 'relative' }}>
-                                {/* Timeline Dot */}
-                                <div style={{
-                                    position: 'absolute', left: '-21px', top: '2px', width: '16px', height: '16px', borderRadius: '50%',
-                                    background: event.future ? 'var(--color-accent)' : '#1e293b',
-                                    border: `2px solid ${event.future ? 'white' : 'var(--text-secondary)'}`,
-                                    boxShadow: event.future ? '0 0 10px var(--color-accent)' : 'none',
-                                    zIndex: 2
-                                }} />
-
-                                <div style={{
-                                    background: event.future ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                                    padding: event.future ? '1rem' : '0', borderRadius: '1rem',
-                                    border: event.future ? '1px solid rgba(59, 130, 246, 0.2)' : 'none'
-                                }}>
-                                    <div style={{ fontSize: '0.8rem', color: event.future ? 'var(--color-accent)' : 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                        {event.date ? new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}
-                                    </div>
-                                    <div style={{ color: 'var(--text-main)', fontSize: '1rem', fontWeight: '700', marginTop: '0.3rem' }}>
-                                        {event.title}
-                                    </div>
-                                    {event.type === 'internal' && (
-                                        <div style={{ marginTop: '0.25rem', display: 'inline-block', fontSize: '0.7rem', background: '#334155', color: '#94a3b8', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: '600' }}>
-                                            PRIVATE ACTIVITY
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+<div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        
                 {/* Private Notes */}
                 <div style={{ background: 'var(--bg-glass-strong)', padding: '1.5rem', borderRadius: '1.5rem', border: 'var(--border-glass-strong)', flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
