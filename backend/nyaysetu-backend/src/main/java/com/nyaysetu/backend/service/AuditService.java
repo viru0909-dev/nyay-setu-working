@@ -5,6 +5,7 @@ import com.nyaysetu.backend.entity.AuditLog;
 import com.nyaysetu.backend.repository.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -14,6 +15,7 @@ import java.util.UUID;
 public class AuditService {
     private final AuditLogRepository repository;
 
+    @Async
     public AuditLog log(CreateAuditLogRequest request) {
         AuditLog log = new AuditLog();
         log.setAction(request.getAction());
@@ -23,6 +25,7 @@ public class AuditService {
         return repository.save(log);
     }
 
+    @Async
     public void logCaseAction(UUID caseId, Long userId, String role, String action, String description) {
         AuditLog log = AuditLog.builder()
                 .caseId(caseId)
@@ -44,9 +47,6 @@ public class AuditService {
         // Let's assume repo has it or I add it.
         // Actually, I'll use Example matcher or just filter for now to avoid compilation error if repo doesn't have it.
         // "Fetch from a central AuditLog table".
-        return repository.findAll().stream()
-            .filter(log -> caseId.equals(log.getCaseId()))
-            .sorted(java.util.Comparator.comparing(AuditLog::getTimestamp)) // chronological
-            .collect(java.util.stream.Collectors.toList());
+        return repository.findByCaseIdOrderByTimestampAsc(caseId);
     }
 }

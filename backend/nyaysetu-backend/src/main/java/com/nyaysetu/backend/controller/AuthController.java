@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.controller;
 
+import com.nyaysetu.backend.exception.UserAlreadyExistsException;
 import com.nyaysetu.backend.dto.*;
 import com.nyaysetu.backend.entity.AuthProvider;
 import com.nyaysetu.backend.entity.PasswordResetToken;
@@ -73,10 +74,11 @@ public class AuthController {
                             "role", user.getRole().name()
                     )
             ));
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Email already exists. Please use a different email or login."));
-        } catch (Exception e) {
+        }    
+        catch (UserAlreadyExistsException e) {
+            throw e;
+        }
+        catch (Exception e) {
             log.error("Registration error", e);
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "Registration failed: " + e.getMessage()));

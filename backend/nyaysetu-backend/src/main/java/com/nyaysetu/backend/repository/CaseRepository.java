@@ -48,8 +48,12 @@ public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
     // Find unassigned cases (both null and empty string)
     List<CaseEntity> findByAssignedJudgeIsNull();
     
-    @Query("SELECT c FROM CaseEntity c WHERE c.assignedJudge IS NULL OR c.assignedJudge = ''")
-    List<CaseEntity> findUnassignedCases();
+    @Query("""
+        SELECT c FROM CaseEntity c
+        WHERE c.parentCaseId = :caseId
+        OR c.id = :caseId
+    """)
+    List<CaseEntity> findCaseAndAppeals(UUID caseId);
     
     // Find cases by respondent email
     List<CaseEntity> findByRespondentEmail(String respondentEmail);
@@ -58,4 +62,13 @@ public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
     // it must be handled via DTO projections or by adding a @OneToMany mapping in CaseEntity.
     @Query("SELECT c FROM CaseEntity c")
     List<CaseEntity> findAllWithDocuments();
+
+    // Appeal tracking
+    List<CaseEntity> findByIsAppealTrue();
+
+    List<CaseEntity> findByParentCaseId(UUID parentCaseId);
+
+    List<CaseEntity> findByAppealStatus(String appealStatus);
+
+    List<CaseEntity> findByIsAppealTrueAndClient(User client);
 }

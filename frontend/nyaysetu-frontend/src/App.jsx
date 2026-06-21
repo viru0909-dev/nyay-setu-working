@@ -18,6 +18,9 @@ import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
 
+import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
+import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
+
 // Imported Feature Component
 
 // ==========================================
@@ -58,6 +61,7 @@ const FAQ = retryLazy(() => import('./pages/FAQ'));
 import OAuthSuccess from './pages/OAuthSuccess';
 
 // Lazy load pages for better performance
+const retryLazy = (fn) => lazy(() => fn().catch(() => fn()));
 const Landing = lazy(() => import('./pages/Landing'));
 const Constitution = lazy(() => import('./pages/Constitution'));
 const Login = lazy(() => import('./pages/Login'));

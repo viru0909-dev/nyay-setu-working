@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link,useSearchParams} from 'react-router-dom';
 import { useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authAPI } from '../services/api';
