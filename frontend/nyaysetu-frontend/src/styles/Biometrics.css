@@ -37,21 +37,29 @@
     height: 4px;
     background: linear-gradient(to right, transparent, var(--color-accent), transparent);
     box-shadow: 0 0 20px var(--color-accent);
-    animation: scan 3s ease-in-out infinite;
+    animation: scan 1.8s ease-in-out infinite alternate;
     opacity: 0.6;
 }
 
-@keyframes scan {
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes scan {
+        0% {
+            top: 10%;
+            opacity: 0.2;
+        }
 
-    0%,
-    100% {
-        top: 10%;
-        opacity: 0;
-    }
+        10% {
+            opacity: 1;
+        }
 
-    50% {
-        top: 90%;
-        opacity: 1;
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            top: 90%;
+            opacity: 0.2;
+        }
     }
 }
 

@@ -1,8 +1,7 @@
 import { scheduleHearingReminder } from "../../utils/HearingReminder";
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/apiConfig';
+import { hearingAPI } from '../../services/api';
 import {
     Calendar, Clock, Video, ChevronRight, Loader2, ArrowLeft,
     CheckCircle, AlertCircle, CalendarDays, Filter, Search
@@ -21,10 +20,7 @@ export default function JudgeHearingsPage() {
 
     const fetchAllHearings = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_BASE_URL}/api/hearings/my`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await hearingAPI.getMyHearings();
             setHearings(response.data || []);
         } catch (error) {
             console.error('Error fetching hearings:', error);
