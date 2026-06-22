@@ -2,7 +2,7 @@
 // fixed GitHub icon hover from #333 (invisible on dark) to a visible grey
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaLinkedin, FaTwitter, FaGithub, FaEnvelope, FaHeart } from 'react-icons/fa';
+import { FaLinkedin, FaTwitter, FaGithub, FaDiscord, FaEnvelope, FaHeart } from 'react-icons/fa';
 import { Scale } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +37,12 @@ export default function Footer() {
             href: 'https://github.com/viru0909-dev/nyay-setu-working',
             label: 'GitHub',
             color: '#8b949e'
+        },
+        {
+            icon: <FaDiscord size={20} />,
+            href: 'https://discord.gg/nyaysetu',
+            label: 'Discord',
+            color: '#5865F2'
         }
     ];
 
