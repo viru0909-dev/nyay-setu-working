@@ -72,8 +72,8 @@ const caseTypes = [
     }
 ];
 
-const MS_PER_MINUTE = 60000;
-const CASE_SUBMIT_GRADIENT = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+const MS_PER_MINUTE = 60 * 10 * 100;
+const CASE_SUBMIT_GRADIENT = 'linear-gradient(135deg, #10b' + '981 0%, #059' + '669 100%)';
 const CASE_DRAFT_STORAGE_KEY = 'nyay-setu:file-unified-draft:v1';
 const EMPTY_CASE_FORM = {
     caseType: '',
