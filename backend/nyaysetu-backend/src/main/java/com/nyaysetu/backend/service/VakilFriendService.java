@@ -60,7 +60,8 @@ public class VakilFriendService {
     private final OllamaService ollamaService;
     private final BhashiniService bhashiniService;
     private final VakilFriendDocumentService vakilFriendDocumentService;
- 
+    private final PiiSanitizer piiSanitizer;
+
     // Optional — only present when rag.enabled=true. Null-safe usage below.
     @Autowired(required = false)
     private RagService ragService;
@@ -596,8 +597,19 @@ public class VakilFriendService {
         systemMsg.put("role", "system");
         
         String finalSystemPrompt = SYSTEM_PROMPT;
-        if (ragContext != null && !ragContext.isEmpty() && !ragContext.equals("No specific legal context found.")) {
-            finalSystemPrompt += "\n\n### CRITICAL INDIAN LEGAL CONTEXT RELEVANT TO THIS USER ###\n" + ragContext + "\n\nUse this law to guide the user accurately.";
+        boolean hasRagContext = ragContext != null && !ragContext.isEmpty()
+                && !ragContext.equals("No specific legal context found.");
+        List<String> contentToSanitize = new ArrayList<>();
+        if (hasRagContext) {
+            contentToSanitize.add(ragContext);
+        }
+        conversation.forEach(message -> contentToSanitize.add(message.get("content")));
+        List<String> sanitizedContent = piiSanitizer.sanitizeBatchForGroq(contentToSanitize);
+        int contentIndex = 0;
+        if (hasRagContext) {
+            finalSystemPrompt += "\n\n### CRITICAL INDIAN LEGAL CONTEXT RELEVANT TO THIS USER ###\n"
+                    + sanitizedContent.get(contentIndex++)
+                    + "\n\nUse this law to guide the user accurately.";
         }
         
         systemMsg.put("content", finalSystemPrompt);
@@ -607,7 +619,7 @@ public class VakilFriendService {
         for (Map<String, String> msg : conversation) {
             ObjectNode msgNode = objectMapper.createObjectNode();
             msgNode.put("role", msg.get("role").equals("assistant") ? "assistant" : "user");
-            msgNode.put("content", msg.get("content"));
+            msgNode.put("content", sanitizedContent.get(contentIndex++));
             messagesArray.add(msgNode);
         }
         

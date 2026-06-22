@@ -40,7 +40,8 @@ const getRoleMenuItems = (t) => ({
         { icon: User, label: t('dashboard:sidebar.judge.profile'), path: '/judge/profile' }
     ],
     ADMIN: [
-        { icon: Home, label: t('dashboard:sidebar.admin.dashboard'), path: '/admin' }
+        { icon: Home, label: t('dashboard:sidebar.admin.dashboard'), path: '/admin' },
+        { icon: MessageSquare, label: 'Feedback', path: '/admin/feedback' }
     ],
     TECH_ADMIN: [
         { icon: Home, label: t('dashboard:sidebar.techAdmin.dashboard'), path: '/tech-admin' },

@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +37,7 @@ public class HearingController {
     private final com.nyaysetu.backend.service.AuthService authService;
     private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
     
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/schedule")
     public ResponseEntity<Map<String, Object>> scheduleHearing(
             @Valid @RequestBody ScheduleHearingRequest request,
@@ -92,6 +94,7 @@ public class HearingController {
         return ResponseEntity.ok(response);
     }
     
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{hearingId}/participants")
     public ResponseEntity<Map<String, Object>> addParticipant(
             @PathVariable UUID hearingId,
@@ -149,6 +152,7 @@ public class HearingController {
         return user.getId();
     }
     
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PutMapping("/{hearingId}/complete")
     public ResponseEntity<Hearing> completeHearing(
             @PathVariable UUID hearingId,
@@ -158,6 +162,7 @@ public class HearingController {
         return ResponseEntity.ok(hearing);
     }
     
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{hearingId}/outcome")
     public ResponseEntity<?> recordOutcome(
             @PathVariable UUID hearingId,

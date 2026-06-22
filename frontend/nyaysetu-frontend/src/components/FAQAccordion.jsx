@@ -1,51 +1,59 @@
 import { useState } from "react";
+import FAQItem from "./FAQItem";
 
-export default function FAQAccordion({ question, answer }) {
-  const [open, setOpen] = useState(false);
+export default function FAQAccordion({ category, faqs }) {
+  const [openIndex, setOpenIndex] = useState(null);
+
+  const toggle = (index) => {
+    setOpenIndex((prev) => (prev === index ? null : index));
+  };
+
+  const categorySlug = category.toLowerCase().replace(/\s+/g, "-");
 
   return (
-    <div
-      style={{
-        background: "var(--bg-surface)",
-        border: "1px solid var(--border-light)",
-        borderRadius: "12px",
-        marginBottom: "12px",
-        overflow: "hidden",
-      }}
+    <section
+      aria-label={category}
+      style={{ marginBottom: "2.5rem" }}
     >
-      <button
-        onClick={() => setOpen(!open)}
+      <h2
         style={{
-          width: "100%",
-          padding: "16px",
-          background: "transparent",
-          border: "none",
+          fontSize: "1.4rem",
+          fontWeight: "700",
+          marginBottom: "1rem",
           color: "var(--text-main)",
-          fontWeight: "600",
-          cursor: "pointer",
-          textAlign: "left",
+          fontFamily: "var(--font-heading)",
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
-          fontSize: "1rem",
+          gap: "10px",
         }}
       >
-        <span>{question}</span>
-        <span>{open ? "−" : "+"}</span>
-      </button>
-
-      {open && (
-        <div
+        <span
           style={{
-            padding: "16px",
-            borderTop: "1px solid var(--border-light)",
-            color: "var(--text-secondary)",
-            lineHeight: "1.6",
+            display: "inline-block",
+            width: "4px",
+            height: "1.4rem",
+            background: "var(--color-primary)",
+            borderRadius: "2px",
+            flexShrink: 0,
           }}
-        >
-          <p>{answer}</p>
-        </div>
-      )}
-    </div>
+          aria-hidden="true"
+        />
+        {category}
+      </h2>
+
+      <div role="list">
+        {faqs.map((faq, index) => (
+          <div key={index} role="listitem">
+            <FAQItem
+              itemId={`${categorySlug}-${index}`}
+              question={faq.question}
+              answer={faq.answer}
+              isOpen={openIndex === index}
+              onToggle={() => toggle(index)}
+            />
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

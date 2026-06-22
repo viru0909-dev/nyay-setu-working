@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +57,7 @@ public class OrderController {
     /**
      * Create a new court order
      */
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping
     public ResponseEntity<?> createOrder(
             @RequestBody Map<String, Object> request,
@@ -93,6 +95,7 @@ public class OrderController {
     /**
      * Update an existing order
      */
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PutMapping("/{orderId}")
     public ResponseEntity<?> updateOrder(
             @PathVariable UUID orderId,
@@ -138,6 +141,7 @@ public class OrderController {
     /**
      * Delete an order (only drafts can be deleted)
      */
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteOrder(@PathVariable UUID orderId) {
         try {
@@ -162,6 +166,7 @@ public class OrderController {
     /**
      * Get all orders issued by the current judge
      */
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @GetMapping("/my-orders")
     public ResponseEntity<?> getMyOrders(Authentication authentication) {
         try {

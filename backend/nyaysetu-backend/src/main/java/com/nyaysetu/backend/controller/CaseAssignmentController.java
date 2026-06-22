@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class CaseAssignmentController {
     /**
      * Auto-assign a judge to a case
      */
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{caseId}/assign-judge")
     public ResponseEntity<Map<String, Object>> autoAssignJudge(@PathVariable UUID caseId) {
         try {
@@ -55,6 +57,7 @@ public class CaseAssignmentController {
     /**
      * Get list of available lawyers for client selection
      */
+    @PreAuthorize("hasAnyRole('LITIGANT', 'ADMIN')")
     @GetMapping("/lawyers/available")
     public ResponseEntity<List<LawyerDTO>> getAvailableLawyers() {
         List<LawyerDTO> lawyers = caseAssignmentService.getAvailableLawyers();
@@ -64,6 +67,7 @@ public class CaseAssignmentController {
     /**
      * Propose a lawyer for a case
      */
+    @PreAuthorize("hasAnyRole('LITIGANT', 'ADMIN')")
     @PostMapping("/{caseId}/propose-lawyer")
     public ResponseEntity<Map<String, Object>> proposeLawyer(
             @PathVariable UUID caseId,
@@ -90,6 +94,7 @@ public class CaseAssignmentController {
     /**
      * Respond to a lawyer proposal
      */
+    @PreAuthorize("hasAnyRole('LAWYER', 'ADMIN')")
     @PostMapping("/{caseId}/respond-proposal")
     public ResponseEntity<Map<String, Object>> respondProposal(
             @PathVariable UUID caseId,
@@ -116,6 +121,7 @@ public class CaseAssignmentController {
     /**
      * Get cases pending judge assignment (for admin)
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_JUDGE', 'TECH_ADMIN')")
     @GetMapping("/pending-assignment")
     public ResponseEntity<List<CaseEntity>> getPendingCases() {
         List<CaseEntity> cases = caseAssignmentService.getPendingAssignmentCases();
@@ -125,12 +131,14 @@ public class CaseAssignmentController {
     /**
      * Get judge workload (for admin dashboard)
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_JUDGE', 'TECH_ADMIN')")
     @GetMapping("/judge-workload")
     public ResponseEntity<List<Map<String, Object>>> getJudgeWorkload() {
         List<Map<String, Object>> workload = caseAssignmentService.getJudgeWorkload();
         return ResponseEntity.ok(workload);
     }
 
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{caseId}/take-cognizance")
     public ResponseEntity<Map<String, Object>> takeCognizance(
             @PathVariable UUID caseId,
@@ -155,6 +163,7 @@ public class CaseAssignmentController {
     }
 
 
+    @PreAuthorize("hasAnyRole('POLICE', 'JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{caseId}/update-summons")
     public ResponseEntity<Map<String, Object>> updateSummons(
             @PathVariable UUID caseId,
@@ -169,6 +178,7 @@ public class CaseAssignmentController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('JUDGE', 'LAWYER', 'ADMIN')")
     @PostMapping("/{caseId}/document-status")
     public ResponseEntity<Map<String, Object>> updateDocumentStatus(
             @PathVariable UUID caseId,

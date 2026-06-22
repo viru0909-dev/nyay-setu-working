@@ -123,6 +123,8 @@ chat.max.messages.per.session=100
 # Get your free API key at: https://console.groq.com
 groq.api.key=${GROQ_API_KEY:}
 groq.model=llama-3.1-8b-instant
+pii.sanitizer.strict-mode=true
+pii.sanitizer.ner-url=${PII_NER_URL:http://localhost:8001/internal/pii/entities}
 
 # ============================================
 # BHASHINI CONFIGURATION (National Language Translation Mission)
