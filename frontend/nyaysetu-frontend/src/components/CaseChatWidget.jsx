@@ -27,6 +27,9 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
     const [isLoading, setIsLoading] = useState(false);
     const [isStarting, setIsStarting] = useState(false);
     const [copiedMessageId, setCopiedMessageId] = useState(null);
+
+    const COPY_FEEDBACK_DURATION_MS = 2000;
+
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -141,14 +144,15 @@ const copyToClipboard = async (text, messageId) => {
 
         setCopiedMessageId(messageId);
 
-        setTimeout(() => {
-            setCopiedMessageId(null);
-        }, 2000);
+    
 
-    } catch (err) {
+setTimeout(() => {
+    setCopiedMessageId(null);
+}, COPY_FEEDBACK_DURATION_MS);
 
-        console.error("Copy failed:", err);
-    }
+   } catch (err) {
+    // Clipboard copy failed
+}
 };
        
 
@@ -394,9 +398,9 @@ const copyToClipboard = async (text, messageId) => {
 
                                             title="Copy to clipboard"
                                         >
-                                          <>
+                                        <>
     <Copy size={14} />
-    {copiedMessageId === idx && "Copied!"}
+    {copiedMessageId === idx && " Copied!"}
 </>
                                         </button>
                                     )}
