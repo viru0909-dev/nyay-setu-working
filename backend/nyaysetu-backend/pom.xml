@@ -230,7 +230,13 @@
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
 
-    </dependencies>
+            <!-- JSON Schema Validation Engine for Hardening LLM Output Structs -->
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.0.87</version>
+        </dependency>
+
 
     <build>
         <plugins>
