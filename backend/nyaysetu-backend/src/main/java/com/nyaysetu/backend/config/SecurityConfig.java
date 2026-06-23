@@ -203,7 +203,7 @@ public class SecurityConfig {
                                 "/ai/ollama/models",
                                 "/api/v1/brain/analyze-case",
                                 "/api/v1/brain/suggest-documents"
-                        ).permitAll()
+                        ).authenticated()
 
                         // ── Auth-only: any authenticated user ─────────────────────────────
                         .requestMatchers(
