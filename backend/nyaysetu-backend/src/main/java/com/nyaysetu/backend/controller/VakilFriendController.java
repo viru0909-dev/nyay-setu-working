@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 public class VakilFriendController {
 
     private final VakilFriendService vakilFriendService;
+    private final VakilFriendGroqValidatorService validatorService;
     private final VakilFriendDocumentService documentService;
     private final UserRepository userRepository;
     private final CaseRepository caseRepository;
@@ -242,6 +243,27 @@ public class VakilFriendController {
                 }
                 log.info("✅ Completed session {} and created CASE {}", sessionId, createdCase.getId());
             }
+
+        // HARDENED SECURITY PERIMETER: Enforce explicit structural JSON Schema compliance validation before response delivery
+        try {
+            String rawNarrative = response.containsKey("narrative") ? (String) response.get("narrative") : "";
+            String firId = response.containsKey("firId") ? (String) response.get("firId") : null;
+            String citizenId = user.getEmail();
+
+            // Execute the schema verification and recovery retry loop pipelines
+            Map<String, Object> validationCheck = validatorService.executeValidatedConsultation(citizenId, rawNarrative, firId);
+            
+            if (Boolean.TRUE.equals(validationCheck.get("requiresManualInput"))) {
+                log.warn("[VakilFriendAPI] AI response structurally non-compliant. Diverting to manual frontend fields.");
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(validationCheck);
+            }
+            
+            // Append validation success metrics to the outgoing response envelope metadata
+            response.put("schemaValidated", true);
+            response.put("validationStatus", validationCheck.get("status"));
+        } catch (Exception e) {
+            log.error("[VakilFriendAPI] Non-blocking schema evaluation intercept failure:", e);
+        }
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
