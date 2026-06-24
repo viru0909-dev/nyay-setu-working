@@ -12,6 +12,8 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useTranslation } from 'react-i18next';
+import ConversationHistory from '../ai/ConversationHistory';
+import BookmarkedResponses from '../ai/BookmarkedResponses';
 
 export default function AIAssistantModal({ isOpen, onClose }) {
 
@@ -19,6 +21,9 @@ export default function AIAssistantModal({ isOpen, onClose }) {
     const language = i18n.language;
     const [chatStarted, setChatStarted] = useState(false);
     const [messages, setMessages] = useState([]);
+    const [chatHistory, setChatHistory] = useState([]);
+    const [bookmarks, setBookmarks] = useState([]);
+    const [searchHistory, setSearchHistory] = useState('');
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [sessionId, setSessionId] = useState(null);
@@ -34,6 +39,34 @@ export default function AIAssistantModal({ isOpen, onClose }) {
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
+
+    useEffect(() => {
+    const savedChats = localStorage.getItem("vakil_chat_history");
+    const savedBookmarks = localStorage.getItem("vakil_bookmarks");
+
+    if (savedChats) {
+        setChatHistory(JSON.parse(savedChats));
+    }
+
+    if (savedBookmarks) {
+        setBookmarks(JSON.parse(savedBookmarks));
+    }
+}, []);
+
+useEffect(() => {
+    localStorage.setItem(
+        "vakil_chat_history",
+        JSON.stringify(chatHistory)
+    );
+}, [chatHistory]);
+
+
+useEffect(() => {
+    localStorage.setItem(
+        "vakil_bookmarks",
+        JSON.stringify(bookmarks)
+    );
+}, [bookmarks]);
 
     useEffect(() => { scrollToBottom(); }, [messages]);
 
@@ -100,6 +133,18 @@ const sendMessage = async (text, { appendUserMessage = true } = {}) => {
 
         const aiMessage = { role: 'ai', content: response.data.message };
         setMessages(prev => [...prev, aiMessage]);
+        setChatHistory(prev => [
+    {
+        id: Date.now(),
+        title: text.substring(0, 40) + "...",
+        date: new Date().toLocaleString(),
+        messages: [
+            { role: "user", content: text },
+            aiMessage
+        ]
+    },
+    ...prev
+]);
 
         if (response.data.sessionId) setSessionId(response.data.sessionId);
 
@@ -128,6 +173,23 @@ const sendMessage = async (text, { appendUserMessage = true } = {}) => {
     } finally {
         setIsLoading(false);
     }
+};
+
+const loadConversation = (chat) => {
+    setMessages(chat.messages);
+};
+
+
+const bookmarkResponse = (message) => {
+    setBookmarks(prev => [
+        {
+            id: Date.now(),
+            title: "Legal Advice",
+            preview: message.content.substring(0, 80),
+            content: message.content
+        },
+        ...prev
+    ]);
 };
 
     if (!isOpen) return null;
@@ -258,16 +320,39 @@ const sendMessage = async (text, { appendUserMessage = true } = {}) => {
                             </motion.button>
                         </div>
 
-                        {/* ── Chat Area ── */}
+                        {/* ── Chat Section ── */}
                         <div style={{
                             flex: 1,
-                            overflowY: 'auto',
-                            padding: '1.25rem 1.5rem',
-                            background: 'var(--bg-main)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0'
+                            display: "flex"
                         }}>
+
+                            <div
+    style={{
+        width: "280px",
+        padding: "1rem",
+        borderRight: "1px solid var(--border-light)",
+        overflowY: "auto"
+    }}
+>
+    <ConversationHistory
+        chats={chatHistory}
+        search={searchHistory}
+        setSearch={setSearchHistory}
+        onSelectChat={loadConversation}
+    />
+
+    <BookmarkedResponses
+        bookmarks={bookmarks}
+        onSelectBookmark={(item) =>
+            setMessages([
+                {
+                    role: "ai",
+                    content: item.content
+                }
+            ])
+        }
+    />
+</div>
 
                         <StreamFallbackBanner
     state={assistantNetworkState}
@@ -430,6 +515,18 @@ const sendMessage = async (text, { appendUserMessage = true } = {}) => {
                                             </ReactMarkdown>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={() => bookmarkResponse(msg)}
+                                        style={{
+                                            marginTop: "0.5rem",
+                                            border: "none",
+                                            background: "transparent",
+                                            color: "var(--color-accent)",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        🔖 Bookmark
+                                    </button>
                                 </motion.div>
                             ))}
 
