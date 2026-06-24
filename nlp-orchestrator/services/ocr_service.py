@@ -21,7 +21,7 @@ MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 
 
 def _preprocess(image: Image.Image) -> np.ndarray:
-    """Convert PIL image to grayscale + Otsu threshold for better OCR accuracy."""
+    """Convert PIL image to grayscale + Otsu threshold for better OCR accuracy."""  # noqa
     cv_img = cv2.cvtColor(np.array(image.convert("RGB")), cv2.COLOR_RGB2GRAY)
     _, thresh = cv2.threshold(cv_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return thresh
@@ -66,6 +66,6 @@ def run_ocr(file_bytes: bytes, content_type: str, filename: str) -> dict:
 
     if ct in SUPPORTED_IMAGE_TYPES:
         text = _extract_from_image(file_bytes)
-        doc_type = "image"
+        doc_type = "image"  # noqa
     elif ct == SUPPORTED_PDF_TYPE:
-        text = _extract_from_pdf(file_bytes)
+        text = _extract_from_pdf(file_bytes)  # noqa

@@ -71,7 +71,11 @@ class TestDeskewImages:
 
     def test_processes_multiple_pages(self):
         """deskew_images should handle a list of pages."""
-        pages = [_make_skewed_image(5), _make_skewed_image(10), _make_blank_image()]
+        pages = [
+            _make_skewed_image(5),
+            _make_skewed_image(10),
+            _make_blank_image(),
+        ]
         results = deskew_images(pages)
         assert len(results) == 3
         assert all(isinstance(r, Image.Image) for r in results)

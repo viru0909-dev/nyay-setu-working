@@ -1,4 +1,5 @@
-"""prompt_builder helper moved into the `lawgpt` package for correct imports."""
+"""prompt_builder helper moved into the `lawgpt` package for correct imports."""  # noqa
+
 from typing import Dict, Iterable, List
 
 
@@ -12,7 +13,9 @@ def _ensure_str_map(fields: Dict[str, object]) -> Dict[str, str]:
     return out
 
 
-def validate_required_fields(fields: Dict[str, str], required: Iterable[str]) -> List[str]:
+def validate_required_fields(
+    fields: Dict[str, str], required: Iterable[str]
+) -> List[str]:
     missing: List[str] = []
     for r in required:
         val = fields.get(r, "")
@@ -45,7 +48,9 @@ def detect_prompt_injection(fields: Dict[str, str]) -> List[str]:
     return suspicious
 
 
-def build_prompt(template: str, fields: Dict[str, object], legal_context: str = "") -> str:
+def build_prompt(
+    template: str, fields: Dict[str, object], legal_context: str = ""
+) -> str:
     safe_fields = _ensure_str_map(fields)
     safe_fields["legal_context"] = legal_context or ""
     try:

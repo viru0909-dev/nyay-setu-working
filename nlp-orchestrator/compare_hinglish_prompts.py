@@ -24,9 +24,9 @@ import os
 import re
 import sys
 
-# ─── The OLD prompt (pre-#849), pinned here purely for A/B comparison ─────────
-OLD_PROMPT = """You are converting a formal English legal answer into a friendly, \
-conversational Hinglish dialogue spoken by an AI legal assistant avatar named "Nyay Saarthi".
+# ─── The OLD prompt (pre-#849), pinned here purely for A/B comparison ─────────  # noqa
+OLD_PROMPT = """You are converting a formal English legal answer into a friendly, \  # noqa
+conversational Hinglish dialogue spoken by an AI legal assistant avatar named "Nyay Saarthi".  # noqa
 
 Rules:
 - Mix Hindi and English naturally, as a bilingual Indian would speak
@@ -71,30 +71,30 @@ FORMAL_WORDS = [
 # Representative synthesized answers (one per legal domain).
 SAMPLES = {
     "accident": (
-        "Under Section 166 of the Motor Vehicles Act, 1988, a victim of a road "
+        "Under Section 166 of the Motor Vehicles Act, 1988, a victim of a road "  # noqa
         "accident may file a claim for compensation before the Motor Accident "
-        "Claims Tribunal. The claimant should obtain a copy of the FIR and the "
-        "insurance details of the offending vehicle. Negligence on the part of "
+        "Claims Tribunal. The claimant should obtain a copy of the FIR and the "  # noqa
+        "insurance details of the offending vehicle. Negligence on the part of "  # noqa
         "the driver must be established to succeed in the claim."
     ),
     "criminal": (
-        "If you wish to report a cognizable offence, you may file an FIR under "
-        "Section 173 of the Bharatiya Nagarik Suraksha Sanhita, 2023. The police "
-        "are obligated to register the FIR. If they refuse, you may approach the "
+        "If you wish to report a cognizable offence, you may file an FIR under "  # noqa
+        "Section 173 of the Bharatiya Nagarik Suraksha Sanhita, 2023. The police "  # noqa
+        "are obligated to register the FIR. If they refuse, you may approach the "  # noqa
         "Superintendent of Police or file a complaint before the Magistrate."
     ),
     "consumer": (
         "Under the Consumer Protection Act, 2019, a consumer aggrieved by a "
-        "defective product or deficient service may file a complaint before the "
-        "District Consumer Disputes Redressal Commission. The complaint must be "
-        "filed within two years of the cause of action and may seek a refund or "
+        "defective product or deficient service may file a complaint before the "  # noqa
+        "District Consumer Disputes Redressal Commission. The complaint must be "  # noqa
+        "filed within two years of the cause of action and may seek a refund or "  # noqa
         "compensation."
     ),
 }
 
 
 def count_formal_words(text: str) -> list[str]:
-    """Return the formal words found in the text (word-boundary, case-insensitive)."""
+    """Return the formal words found in the text (word-boundary, case-insensitive)."""  # noqa
     lowered = text.lower()
     hits = []
     for w in FORMAL_WORDS:
@@ -107,7 +107,10 @@ async def run_prompt(client, model: str, prompt_template: str, answer: str) -> s
     resp = await client.chat.completions.create(
         model=model,
         messages=[
-            {"role": "user", "content": prompt_template.format(markdown_answer=answer)}
+            {
+                "role": "user",
+                "content": prompt_template.format(markdown_answer=answer),
+            }
         ],
         temperature=0.6,
         max_tokens=512,
@@ -116,7 +119,9 @@ async def run_prompt(client, model: str, prompt_template: str, answer: str) -> s
 
 
 async def main_async(new_prompt: str, model: str) -> int:
-    from groq import AsyncGroq  # imported here so --dry-run needs no groq install
+    from groq import (
+        AsyncGroq,
+    )  # imported here so --dry-run needs no groq install
 
     client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
     old_total, new_total = 0, 0
@@ -143,7 +148,7 @@ async def main_async(new_prompt: str, model: str) -> int:
     print(f"TOTAL formal-word hits  ->  OLD: {old_total}   NEW: {new_total}")
     print("Expected: NEW <= OLD (fewer formal words). Also eyeball readability.")
     print("=" * 72)
-    # Non-zero exit if the new prompt did not improve, so this can gate CI later.
+    # Non-zero exit if the new prompt did not improve, so this can gate CI later.  # noqa
     return 0 if new_total <= old_total else 1
 
 
@@ -174,7 +179,10 @@ if __name__ == "__main__":
         sys.exit(dry_run())
 
     if not os.environ.get("GROQ_API_KEY"):
-        print("ERROR: set GROQ_API_KEY in your environment first.", file=sys.stderr)
+        print(
+            "ERROR: set GROQ_API_KEY in your environment first.",
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     # Import the SHIPPED prompt so we always A/B against what's in the PR.

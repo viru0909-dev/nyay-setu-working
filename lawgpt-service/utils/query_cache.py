@@ -31,17 +31,25 @@ def set_cached_response(query: str, response):
     with _cache_lock:
         _query_cache[key] = response
 
+
 def is_static_query(query: str) -> bool:
     """
     Checks if a query is static and safe to cache.
     Avoids caching queries with personal pronouns or specific names.
     """
     normalized = f" {query.lower()} "
-    personal_pronouns = [" i ", " my ", " me ", " we ", " our ", " mine ", " ours "]
-    
+    personal_pronouns = [
+        " i ",
+        " my ",
+        " me ",
+        " we ",
+        " our ",
+        " mine ",
+        " ours ",
+    ]
+
     for pronoun in personal_pronouns:
         if pronoun in normalized:
             return False
-            
-    return True
 
+    return True

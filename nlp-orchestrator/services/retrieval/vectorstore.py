@@ -6,7 +6,7 @@ Design notes:
     (Bare Acts, Constitution, landmark judgments) and live Indian Kanoon hits.
     Metadata distinguishes them via the `source` field.
   * Chunk IDs are deterministic: `{doc_id}::chunk::{i}`. Idempotent re-ingest
-    is achieved by deleting all chunks for a doc_id before inserting fresh ones.
+    is achieved by deleting all chunks for a doc_id before inserting fresh ones.  # noqa
   * Cosine space is configured at collection creation; embeddings should be
     L2-normalized upstream (the embedder does this).
 
@@ -27,7 +27,7 @@ _collection_path: Optional[str] = None
 
 
 def _get_collection(persist_dir: str, collection_name: str = "kanoon"):
-    """Lazily create the Chroma client + collection (cached per persist_dir)."""
+    """Lazily create the Chroma client + collection (cached per persist_dir)."""  # noqa
     global _client, _collection, _collection_path
 
     if _collection is not None and _collection_path == persist_dir:

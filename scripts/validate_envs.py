@@ -8,7 +8,9 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # Env template configurations
 TEMPLATES = {
     "root": os.path.join(ROOT_DIR, ".env.example"),
-    "backend": os.path.join(ROOT_DIR, "backend", "nyaysetu-backend", ".env.example"),
+    "backend": os.path.join(
+        ROOT_DIR, "backend", "nyaysetu-backend", ".env.example"
+    ),
     "nlp": os.path.join(ROOT_DIR, "nlp-orchestrator", ".env.example"),
     "lawgpt": os.path.join(ROOT_DIR, "lawgpt-service", ".env.example"),
 }
@@ -17,7 +19,9 @@ TEMPLATES = {
 MODULES = [
     {
         "name": "Backend (Java)",
-        "scan_dirs": [os.path.join(ROOT_DIR, "backend", "nyaysetu-backend", "src")],
+        "scan_dirs": [
+            os.path.join(ROOT_DIR, "backend", "nyaysetu-backend", "src")
+        ],
         "file_patterns": [r".*\.java$", r".*\.properties$"],
         "regexes": [
             r"System\.getenv\(\s*[\"\']([A-Za-z0-9_]+)[\"\']",
@@ -51,7 +55,12 @@ MODULES = [
             os.path.join(ROOT_DIR, "frontend", "nyaysetu-frontend", "src"),
             os.path.join(ROOT_DIR, "frontend", "nyaysetu-frontend"),
         ],
-        "file_patterns": [r".*\.jsx?$", r".*\.tsx?$", r".*\.html$", r".*\.config\.js$"],
+        "file_patterns": [
+            r".*\.jsx?$",
+            r".*\.tsx?$",
+            r".*\.html$",
+            r".*\.config\.js$",
+        ],
         "regexes": [
             r"import\.meta\.env\.([A-Za-z0-9_]+)",
             r"process\.env\.([A-Za-z0-9_]+)",
@@ -63,8 +72,21 @@ MODULES = [
 # Standard env vars to ignore from scanning
 EXCLUDED_KEYS = {
     # System & Standard env vars
-    "PORT", "ENV", "MODE", "DEV", "PROD", "SSR", "BASE_URL", "PATH", "TEMP", "TMP",
-    "NODE_ENV", "USER", "HOME", "HOSTNAME", "SHELL",
+    "PORT",
+    "ENV",
+    "MODE",
+    "DEV",
+    "PROD",
+    "SSR",
+    "BASE_URL",
+    "PATH",
+    "TEMP",
+    "TMP",
+    "NODE_ENV",
+    "USER",
+    "HOME",
+    "HOSTNAME",
+    "SHELL",
     # Specific framework variables
     "VITE_USER_NODE_ENV",
 }
@@ -99,7 +121,16 @@ def scan_module_for_keys(module_config):
             continue
         for root, _, files in os.walk(scan_dir):
             # Skip node_modules, .git, venv, target, __pycache__, etc.
-            if any(p in root for p in ["node_modules", ".git", "venv", "target", "__pycache__"]):
+            if any(
+                p in root
+                for p in [
+                    "node_modules",
+                    ".git",
+                    "venv",
+                    "target",
+                    "__pycache__",
+                ]
+            ):
                 continue
             for file in files:
                 # Check if file matches pattern
@@ -107,7 +138,9 @@ def scan_module_for_keys(module_config):
                     continue
                 file_path = os.path.join(root, file)
                 try:
-                    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    with open(
+                        file_path, "r", encoding="utf-8", errors="ignore"
+                    ) as f:
                         for line in f:
                             for r in regex_compiled:
                                 matches = r.findall(line)
@@ -121,8 +154,10 @@ def scan_module_for_keys(module_config):
 
 def main():
     print("Parsing .env.example templates...")
-    templates_parsed = {name: parse_env_example(path) for name, path in TEMPLATES.items()}
-    
+    templates_parsed = {
+        name: parse_env_example(path) for name, path in TEMPLATES.items()
+    }
+
     for name, keys in templates_parsed.items():
         print(f"  * {name} ({TEMPLATES[name]}): {len(keys)} keys found")
 
@@ -132,7 +167,9 @@ def main():
     for mod in MODULES:
         print(f"\nScanning: {mod['name']}...")
         used_keys = scan_module_for_keys(mod)
-        print(f"  * Found {len(used_keys)} unique env keys referenced in code.")
+        print(
+            f"  * Found {len(used_keys)} unique env keys referenced in code."
+        )
 
         # Combine allowed templates for this module
         allowed_keys = set()
@@ -141,28 +178,42 @@ def main():
 
         # Find missing keys
         missing_keys = used_keys - allowed_keys
-        
+
         # Some custom project handling/exclusions:
-        # If GOOGLE_GEMINI_API_KEY is defined in template, allow GEMINI_API_KEY in code (alias)
-        if "GEMINI_API_KEY" in missing_keys and "GOOGLE_GEMINI_API_KEY" in allowed_keys:
+        # If GOOGLE_GEMINI_API_KEY is defined in template, allow GEMINI_API_KEY in code (alias)  # noqa
+        if (
+            "GEMINI_API_KEY" in missing_keys
+            and "GOOGLE_GEMINI_API_KEY" in allowed_keys
+        ):
             missing_keys.remove("GEMINI_API_KEY")
-        # If REACT_APP_API_URL or REACT_APP_API_BASE_URL are checked in code but VITE_API_URL exists
-        if "REACT_APP_API_URL" in missing_keys and "REACT_APP_API_BASE_URL" in allowed_keys:
+        # If REACT_APP_API_URL or REACT_APP_API_BASE_URL are checked in code but VITE_API_URL exists  # noqa
+        if (
+            "REACT_APP_API_URL" in missing_keys
+            and "REACT_APP_API_BASE_URL" in allowed_keys
+        ):
             missing_keys.remove("REACT_APP_API_URL")
 
         if missing_keys:
-            print(f"  [ERROR] Mismatches found! The following keys are used in code but missing from .env.example:")
+            print(
+                "  [ERROR] Mismatches found! The following keys are used in code but missing from .env.example:"  # noqa
+            )
             for key in sorted(missing_keys):
                 print(f"    - {key}")
             mismatch_found = True
         else:
-            print(f"  [OK] Validation passed! All code env keys are documented in templates.")
+            print(
+                "  [OK] Validation passed! All code env keys are documented in templates."  # noqa
+            )
 
     if mismatch_found:
-        print("\n[FAILED] Environment variable validation failed. Please update your .env.example files.")
+        print(
+            "\n[FAILED] Environment variable validation failed. Please update your .env.example files."  # noqa
+        )
         sys.exit(1)
     else:
-        print("\n[SUCCESS] Environment variable validation completed successfully!")
+        print(
+            "\n[SUCCESS] Environment variable validation completed successfully!"  # noqa
+        )
         sys.exit(0)
 
 

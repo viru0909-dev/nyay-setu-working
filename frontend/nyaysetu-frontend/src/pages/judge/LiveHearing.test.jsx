@@ -23,6 +23,11 @@ vi.mock('../../services/api', () => ({
     }
 }));
 
+// Clear mocks before each test to prevent state leakage between tests
+beforeEach(() => {
+    vi.clearAllMocks();
+});
+
 // Helper to render component wrapped inside Router context
 const renderComponent = () => {
     return render(

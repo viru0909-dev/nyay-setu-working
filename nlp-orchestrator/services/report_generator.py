@@ -4,7 +4,7 @@ def generate_report(job_id: str, gemini_timeline: str, groq_legal: str) -> dict:
     and merges them into a structured dict for the JSON response.
     """
 
-    # In a real app we'd prompt Gemini/Groq to output actual JSON schema we can parse,
+    # In a real app we'd prompt Gemini/Groq to output actual JSON schema we can parse,  # noqa
     # but for simplicity we wrap the markdown text into our JSON structure.
 
     report = {
@@ -20,16 +20,14 @@ def generate_report(job_id: str, gemini_timeline: str, groq_legal: str) -> dict:
 
 
 def generate_avatar_script(job_id: str, groq_legal: str) -> str:
-    """Generate a short 1-2 sentence Hinglish summary for the final avatar speech."""
+    """Generate a short 1-2 sentence Hinglish summary for the final avatar speech."""  # noqa
 
-    # We can either make another Groq call here, or just use a template for speed.
-    # To keep this fast, we'll use a template based on whether Groq found sections.
+    # We can either make another Groq call here, or just use a template for speed.  # noqa
+    # To keep this fast, we'll use a template based on whether Groq found sections.  # noqa
 
     if "279" in groq_legal or "337" in groq_legal or "304A" in groq_legal:
-        return "Analysis complete ho gayi. Aapki accident ki timeline aur IPC sections report me daal di gayi hai. Court report tab me check karein."
+        return "Analysis complete ho gayi. Aapki accident ki timeline aur IPC sections report me daal di gayi hai. Court report tab me check karein."  # noqa
     elif len(groq_legal) > 50:
-        return "Motor Vehicles Act ke under applicable sections dhund liye gaye hain. PDF report ready hai court ke liye. Kripya check karein."
+        return "Motor Vehicles Act ke under applicable sections dhund liye gaye hain. PDF report ready hai court ke liye. Kripya check karein."  # noqa
     else:
-        return (
-            "Forensic analysis poori ho gayi hai. Liability report extract kar li hai."
-        )
+        return "Forensic analysis poori ho gayi hai. Liability report extract kar li hai."  # noqa

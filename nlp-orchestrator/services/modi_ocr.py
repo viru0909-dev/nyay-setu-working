@@ -58,7 +58,7 @@ def _resolve_device(torch_module: Any) -> Any:
     if requested_device:
         if requested_device.startswith("cuda") and not torch_module.cuda.is_available():
             logger.warning(
-                "TROCR_DEVICE=%s requested but CUDA is unavailable. Falling back to CPU.",
+                "TROCR_DEVICE=%s requested but CUDA is unavailable. Falling back to CPU.",  # noqa
                 TROCR_DEVICE,
             )
             return torch_module.device("cpu")
@@ -90,7 +90,7 @@ def _load_model() -> tuple[Any, Any, Any]:
                 )
             except Exception as proc_exc:
                 logger.warning(
-                    "Fast tokenizer load failed for '%s' (%s); retrying with use_fast=False.",
+                    "Fast tokenizer load failed for '%s' (%s); retrying with use_fast=False.",  # noqa
                     TROCR_MODEL_NAME,
                     proc_exc,
                 )
@@ -177,7 +177,7 @@ def cleanup_transliterated_text(text: str) -> str:
 
 
 def apply_modi_to_devanagari_mapping(text: str) -> str:
-    # Most TrOCR checkpoints return Unicode text directly. This hook keeps future
+    # Most TrOCR checkpoints return Unicode text directly. This hook keeps future  # noqa
     # Modi-specific character mapping isolated from route and inference code.
     modi_to_devanagari = {
         "\U00011600": "\u0905",
@@ -288,9 +288,9 @@ async def recognize_modi_pages(
     max_concurrency: int | None = None,
 ) -> list[dict]:
     """
-    OCR many page images concurrently and return per-page results in input order.
+    OCR many page images concurrently and return per-page results in input order.  # noqa
 
-    Previously a multi-page document (e.g. a 50-page PDF rendered to images) was
+    Previously a multi-page document (e.g. a 50-page PDF rendered to images) was  # noqa
     processed one page at a time. Here each page is dispatched through
     `recognize_modi_image` (which offloads the blocking model inference to a
     worker thread) and run concurrently via `asyncio.gather`, bounded by a

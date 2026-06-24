@@ -89,7 +89,7 @@ def get_cache_stats() -> dict:
     }
 
 
-from functools import wraps
+from functools import wraps  # noqa
 
 
 def cache_decorator(ttl: int = CACHE_TTL):

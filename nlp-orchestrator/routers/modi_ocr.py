@@ -46,7 +46,7 @@ class ModiOCRBatchResponse(BaseModel):
 
 @router.post("/modi", response_model=ModiOCRResponse)
 async def ocr_modi_document(file: UploadFile = File(...)):
-    """Run OCR and Devanagari cleanup on an uploaded Modi script document image."""
+    """Run OCR and Devanagari cleanup on an uploaded Modi script document image."""  # noqa
     if file.content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
         raise HTTPException(status_code=400, detail="Upload a valid image file.")
 

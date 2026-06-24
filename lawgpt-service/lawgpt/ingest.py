@@ -9,22 +9,22 @@ Usage:
     python lawgpt/ingest.py
 """
 
-import os
 import sys
 from pathlib import Path
 from typing import List, Dict
 
 # pyrefly: ignore [missing-import]
 import fitz  # PyMuPDF
+
 # pyrefly: ignore [missing-import]
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
+
 # pyrefly: ignore [missing-import]
 from langchain.schema import Document
 
-
-# ── Paths ──────────────────────────────────────────────────────────────────────
+# ── Paths ──────────────────────────────────────────────────────────────────────  # noqa
 BASE_DIR: Path = Path(__file__).resolve().parent.parent
 CORPUS_DIR: Path = BASE_DIR / "legal_corpus"
 INDEX_DIR: Path = BASE_DIR / "vector_store" / "legal_index"
@@ -76,7 +76,9 @@ def ingest() -> None:
     pdf_files: List[Path] = sorted(CORPUS_DIR.glob("*.pdf"))
     if not pdf_files:
         print(f"⚠️  No PDF files found in {CORPUS_DIR}/")
-        print("   Drop your legal PDFs (e.g. IPC_1860.pdf) into that folder and re-run.")
+        print(
+            "   Drop your legal PDFs (e.g. IPC_1860.pdf) into that folder and re-run."  # noqa
+        )
         sys.exit(1)
 
     print(f"📂 Found {len(pdf_files)} PDF(s) in {CORPUS_DIR}/\n")
@@ -90,7 +92,9 @@ def ingest() -> None:
         chunks: List[Document] = build_chunks(page_docs)
         file_chunk_counts[pdf_path.name] = len(chunks)
         all_documents.extend(chunks)
-        print(f"  📄 {pdf_path.name}: {len(page_docs)} pages → {len(chunks)} chunks")
+        print(
+            f"  📄 {pdf_path.name}: {len(page_docs)} pages → {len(chunks)} chunks"  # noqa
+        )
 
     if not all_documents:
         print("\n❌ No text could be extracted from the PDFs.")

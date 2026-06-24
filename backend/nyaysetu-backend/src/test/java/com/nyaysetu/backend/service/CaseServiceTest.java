@@ -2,9 +2,9 @@ package com.nyaysetu.backend.service;
 
 import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.CaseStatus;
-import com.nyaysetu.backend.entity.LegalCase;
+import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.exception.NotFoundException;
-import com.nyaysetu.backend.repository.LegalCaseRepository;
+import com.nyaysetu.backend.repository.CaseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -25,13 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CaseServiceTest {
 
-    private LegalCaseRepository legalCaseRepository;
+    private CaseRepository legalCaseRepository;
     private CaseTimelineService caseTimelineService;
     private CaseService caseService;
 
     @BeforeEach
     void setUp() {
-        legalCaseRepository = Mockito.mock(LegalCaseRepository.class);
+        legalCaseRepository = Mockito.mock(CaseRepository.class);
         caseTimelineService = Mockito.mock(CaseTimelineService.class);
 
         caseService = new CaseService(legalCaseRepository, caseTimelineService);
@@ -43,21 +43,21 @@ class CaseServiceTest {
         caseRequest.setTitle("Test Case");
         caseRequest.setDescription("Test Case Description");
 
-        LegalCase savedCase = LegalCase.builder()
+        CaseEntity savedCase = CaseEntity.builder()
                 .id(UUID.randomUUID())
                 .title("Test Case")
                 .description("Test Case Description")
                 .status(CaseStatus.OPEN)
                 .build();
 
-        when(legalCaseRepository.save(any(LegalCase.class))).thenReturn(savedCase);
+        when(legalCaseRepository.save(any(CaseEntity.class))).thenReturn(savedCase);
 
-        LegalCase caseResult = caseService.createCase(caseRequest);
+        CaseEntity caseResult = caseService.createCase(caseRequest);
 
         assertNotNull(caseResult);
         assertEquals(CaseStatus.OPEN, caseResult.getStatus());
 
-        verify(legalCaseRepository).save(any(LegalCase.class));
+        verify(legalCaseRepository).save(any(CaseEntity.class));
         verify(caseTimelineService).addEvent(caseResult.getId(), "Case created");
     }
 
@@ -65,14 +65,14 @@ class CaseServiceTest {
     void getCase_shouldReturnCase_whenExists() {
         UUID id = UUID.randomUUID();
 
-        LegalCase legalCase = LegalCase.builder()
+        CaseEntity legalCase = CaseEntity.builder()
                 .id(id)
                 .title("Test Case")
                 .build();
 
         when(legalCaseRepository.findById(id)).thenReturn(Optional.of(legalCase));
 
-        LegalCase caseResult = caseService.getCase(id);
+        CaseEntity caseResult = caseService.getCase(id);
 
         assertEquals(id, caseResult.getId());
     }
@@ -88,15 +88,15 @@ class CaseServiceTest {
 
     @Test
     void updateCase_shouldReturnPaginationCases() {
-        LegalCase legalCase = LegalCase.builder()
+        CaseEntity legalCase = CaseEntity.builder()
                 .id(UUID.randomUUID())
                 .title("Test Case")
                 .build();
 
-        Page<LegalCase> page = new PageImpl<>(List.of(legalCase));
+        Page<CaseEntity> page = new PageImpl<>(List.of(legalCase));
         when(legalCaseRepository.findAll(PageRequest.of(0, 10))).thenReturn(page);
 
-        Page<LegalCase> caseResult = caseService.getAllCases(0, 10);
+        Page<CaseEntity> caseResult = caseService.getAllCases(0, 10);
 
         assertEquals(1, caseResult.getTotalElements());
         assertEquals("Test Case", caseResult.getContent().get(0).getTitle());
@@ -105,16 +105,16 @@ class CaseServiceTest {
     @Test
     void updateStatus_shouldUpdateCaseAndAddTimelineEvent() {
         UUID id = UUID.randomUUID();
-        LegalCase legalCase = LegalCase.builder()
+        CaseEntity legalCase = CaseEntity.builder()
                 .id(id)
                 .title("Test Case")
                 .status(CaseStatus.OPEN)
                 .build();
 
         when(legalCaseRepository.findById(id)).thenReturn(Optional.of(legalCase));
-        when(legalCaseRepository.save(any(LegalCase.class))).thenReturn(legalCase);
+        when(legalCaseRepository.save(any(CaseEntity.class))).thenReturn(legalCase);
 
-        LegalCase caseResult = caseService.updateStatus(id, CaseStatus.CLOSED);
+        CaseEntity caseResult = caseService.updateStatus(id, CaseStatus.CLOSED);
 
         assertEquals(CaseStatus.CLOSED, caseResult.getStatus());
 

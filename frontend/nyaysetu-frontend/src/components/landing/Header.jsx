@@ -190,6 +190,9 @@ export default function Header({ hideAuthButtons = false }) {
             },
         };
 
+        // Fallback to labelKey directly if translation returns the exact key
+
+
         if (item.action) {
             return (
                 <button
@@ -199,7 +202,7 @@ export default function Header({ hideAuthButtons = false }) {
                     className="header-nav-link"
                     data-active={isActive ? 'true' : undefined}
                     style={baseStyle}
-                >
+                >   {/* <--- ADD THIS CLOSING BRACKET */}
                     {displayLabel}
                     {underline}
                 </button>

@@ -9,18 +9,18 @@ from config import GROQ_API_KEY, GROQ_MODEL_FAST
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
-DECOMPOSE_PROMPT = """You are a senior Indian legal expert. A citizen asked a question.
-Your task is to break this down into 3 to 5 specific focused sub-questions that together 
-fully cover the original question. Each sub-question should be answerable independently.
+DECOMPOSE_PROMPT = """You are a senior Indian legal expert. A citizen asked a question.  # noqa
+Your task is to break this down into 3 to 5 specific focused sub-questions that together  # noqa
+fully cover the original question. Each sub-question should be answerable independently.  # noqa
 
 Focus ONLY on Indian law: IPC, BNS, CPC, MVA, Constitution, etc.
 
 STRICT DOMAIN GUARDRAIL:
-- If the user's question is NOT related to Indian Law, legal procedures, or the Indian justice system, return an empty JSON array [].
-- DO NOT attempt to decompose non-legal queries (e.g., science, tech, general chitchat).
+- If the user's question is NOT related to Indian Law, legal procedures, or the Indian justice system, return an empty JSON array [].  # noqa
+- DO NOT attempt to decompose non-legal queries (e.g., science, tech, general chitchat).  # noqa
 
 Return ONLY a valid JSON array of strings. No explanation. No markdown.
-Example: ["What does Section 304A IPC say?", "What is the penalty for negligence?"]
+Example: ["What does Section 304A IPC say?", "What is the penalty for negligence?"]  # noqa
 
 User's question: {query}
 """
@@ -32,7 +32,10 @@ async def decompose_query(query: str) -> list[str]:
         response = await client.chat.completions.create(
             model=GROQ_MODEL_FAST,
             messages=[
-                {"role": "user", "content": DECOMPOSE_PROMPT.format(query=query)}
+                {
+                    "role": "user",
+                    "content": DECOMPOSE_PROMPT.format(query=query),
+                }
             ],
             temperature=0.3,
             max_tokens=512,

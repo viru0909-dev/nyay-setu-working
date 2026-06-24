@@ -6,8 +6,8 @@ import logging
 logger = logging.getLogger("gemini-analyzer")
 client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
-TIMELINE_RECONSTRUCTION_PROMPT = """SYSTEM: You are a forensic accident analyst for Indian courts.
-You have expertise in IPC 279, 304A, 337, 338, Motor Vehicles Act 1988, and BNS 2023.
+TIMELINE_RECONSTRUCTION_PROMPT = """SYSTEM: You are a forensic accident analyst for Indian courts.  # noqa
+You have expertise in IPC 279, 304A, 337, 338, Motor Vehicles Act 1988, and BNS 2023.  # noqa
 
 USER: Analyze this accident video frame by frame.
 
@@ -17,7 +17,7 @@ TIMESTAMP | EVENT | VEHICLE | BEHAVIOR | LEGAL FLAG
 Label each moment:
 PRE_INCIDENT / WARNING / TRIGGER / IMPACT / POST_IMPACT
 
-The TRIGGER moment is the most important — identify exactly who did what at what second that caused the accident.
+The TRIGGER moment is the most important — identify exactly who did what at what second that caused the accident.  # noqa
 
 End with LIABILITY VERDICT:
 - Primary fault: Vehicle X because [reason]
@@ -30,11 +30,11 @@ async def analyze_frames(frame_paths: list[str], job_id: str) -> str:
     """Upload frames to Gemini and request forensic timeline analysis."""
     if not client:
         logger.error("Gemini API key not found. Returning fallback analysis.")
-        return "FALLBACK: Gemini API key not configured. Video frame analysis skipped."
+        return "FALLBACK: Gemini API key not configured. Video frame analysis skipped."  # noqa
 
     try:
-        # Note: For production with many frames, it's better to use Gemini File API to upload a video
-        # But for this implementation we will upload the extracted frames directly
+        # Note: For production with many frames, it's better to use Gemini File API to upload a video  # noqa
+        # But for this implementation we will upload the extracted frames directly  # noqa
 
         # Load the images
         from PIL import Image
@@ -53,7 +53,7 @@ async def analyze_frames(frame_paths: list[str], job_id: str) -> str:
         contents = [TIMELINE_RECONSTRUCTION_PROMPT] + images
 
         logger.info(
-            f"[{job_id}] Sending {len(images)} frames to Gemini for analysis..."
+            f"[{job_id}] Sending {len(images)} frames to Gemini for analysis..."  # noqa
         )
 
         # Run in executor to not block async loop

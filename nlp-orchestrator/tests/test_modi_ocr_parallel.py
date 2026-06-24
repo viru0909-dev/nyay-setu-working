@@ -13,17 +13,20 @@ import os
 os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
 
 # The OCR service imports cv2/Pillow at module load. Skip cleanly if absent.
-import pytest
+import pytest  # noqa: E402
 
 pytest.importorskip("cv2")
 pytest.importorskip("PIL")
 
-import asyncio
-import time
-from unittest.mock import patch
+import asyncio  # noqa: E402
+import time  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
-import services.modi_ocr as modi_ocr
-from services.modi_ocr import recognize_modi_pages, ModiOCRServiceError
+import services.modi_ocr as modi_ocr  # noqa: E402
+from services.modi_ocr import (  # noqa
+    recognize_modi_pages,
+    ModiOCRServiceError,
+)  # noqa: E402
 
 
 @pytest.mark.asyncio
@@ -85,7 +88,7 @@ async def test_pages_run_in_parallel_not_sequentially():
         await recognize_modi_pages(pages, max_concurrency=8)
         elapsed = time.perf_counter() - start
 
-    # Sequential would be ~8 * 0.05 = 0.4s; parallel (limit 8) should be ~0.05s.
+    # Sequential would be ~8 * 0.05 = 0.4s; parallel (limit 8) should be ~0.05s.  # noqa
     assert elapsed < per_page * len(pages) * 0.6
 
 

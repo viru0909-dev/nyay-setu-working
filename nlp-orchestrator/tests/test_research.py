@@ -1,4 +1,3 @@
-import asyncio
 import pytest
 from unittest.mock import AsyncMock, patch
 
@@ -52,7 +51,7 @@ async def test_retry_then_success(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_provider_skipped():
-    # Ensure that when the primary provider's circuit breaker is open, Gemini is skipped
+    # Ensure that when the primary provider's circuit breaker is open, Gemini is skipped  # noqa
     ok = {
         "question": "Q6",
         "answer": "ok",

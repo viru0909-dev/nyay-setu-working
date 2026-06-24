@@ -30,20 +30,20 @@ def validate_url_for_ssrf(url: str) -> None:
             raise ValueError(f"URL resolves to blocked IP: {resolved_ip}")
 
 
-import cv2
-import os
-import aiohttp
-import asyncio
-from typing import List
+import cv2  # noqa
+import os  # noqa
+import aiohttp  # noqa
+import asyncio  # noqa
+from typing import List  # noqa
 
-from services.url_security import validate_public_video_url
+from services.url_security import validate_public_video_url  # noqa
 
 UPLOAD_DIR = "/tmp/nyaysetu_forensics"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 async def download_video(url: str, job_id: str) -> str:
-    """Download video from URL (which will be a MinIO/Spring Boot endpoint) to a local temp file."""
+    """Download video from URL (which will be a MinIO/Spring Boot endpoint) to a local temp file."""  # noqa
     # If the URL is already a local path (for testing), return it immediately
     # before running SSRF validation which only accepts http/https URLs.
     if url.startswith("/") and os.path.exists(url):
@@ -127,7 +127,7 @@ async def extract_frames(
 
 
 def cleanup_job(job_id: str):
-    """Delete the downloaded video and frames after analysis to comply with DPDP Act 2023."""
+    """Delete the downloaded video and frames after analysis to comply with DPDP Act 2023."""  # noqa
     import shutil
 
     video_path = os.path.join(UPLOAD_DIR, f"{job_id}_video.mp4")

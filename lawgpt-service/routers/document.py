@@ -2,14 +2,13 @@
 routers/document.py — Legal document generation endpoints for Nyay Setu LawGPT.
 
 Provides:
-    POST /generate      — Generate legal document text (affidavit, RTI, complaint, notice)
+    POST /generate      — Generate legal document text (affidavit, RTI, complaint, notice)  # noqa
     POST /generate/pdf  — Generate legal document as downloadable PDF
 """
 
 import io
 import logging
 import os
-import tempfile
 from datetime import datetime
 from typing import Dict, List, Literal, Optional
 
@@ -19,7 +18,11 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from lawgpt.retriever import retrieve
-from lawgpt.prompt_builder import build_prompt, validate_required_fields, detect_prompt_injection
+from lawgpt.prompt_builder import (
+    build_prompt,
+    validate_required_fields,
+    detect_prompt_injection,
+)
 
 load_dotenv()
 logger = logging.getLogger("lawgpt")
@@ -27,7 +30,8 @@ logger = logging.getLogger("lawgpt")
 router = APIRouter()
 
 
-# ── Request / Response models ──────────────────────────────────────────────────
+# ── Request / Response models ──────────────────────────────────────────────────  # noqa
+
 
 class DocumentFields(BaseModel):
     petitioner_name: str
@@ -44,7 +48,9 @@ class DocumentFields(BaseModel):
 
 
 class GenerateRequest(BaseModel):
-    doc_type: Literal["affidavit", "rti", "complaint", "notice", "demand_letter"]
+    doc_type: Literal[
+        "affidavit", "rti", "complaint", "notice", "demand_letter"
+    ]
     fields: DocumentFields
     language: str = Field(default="en")
 
@@ -58,9 +64,9 @@ class GenerateResponse(BaseModel):
     generated_at: str
 
 
-# ── Prompt templates ───────────────────────────────────────────────────────────
+# ── Prompt templates ───────────────────────────────────────────────────────────  # noqa
 
-AFFIDAVIT_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal AFFIDAVIT.
+AFFIDAVIT_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal AFFIDAVIT.  # noqa
 Use this legal context for accuracy: {legal_context}
 
 Petitioner: {petitioner_name}, {petitioner_address}
@@ -73,9 +79,9 @@ Format EXACTLY as:
 AFFIDAVIT
 
 I, {petitioner_name}, son/daughter of _______, aged ___ years,
-residing at {petitioner_address}, do hereby solemnly affirm and state as follows:
+residing at {petitioner_address}, do hereby solemnly affirm and state as follows:  # noqa
 
-1. That I am the deponent herein and am fully conversant with the facts stated herein.
+1. That I am the deponent herein and am fully conversant with the facts stated herein.  # noqa
 2. [Facts of the case in numbered paragraphs]
 3. [Legal grounds]
 
@@ -89,7 +95,7 @@ That the contents of the above affidavit are true to the best of my knowledge.
 Deponent
 """
 
-RTI_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal RTI APPLICATION
+RTI_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal RTI APPLICATION  # noqa
 under the Right to Information Act, 2005.
 Use this legal context: {legal_context}
 
@@ -121,7 +127,7 @@ INFORMATION REQUESTED:
 I am willing to pay the prescribed fee. Please provide the information within
 30 days as mandated under Section 7(1) of the RTI Act, 2005.
 
-If the information is denied, please provide reasons under Section 8 of the Act.
+If the information is denied, please provide reasons under Section 8 of the Act.  # noqa
 
 Yours faithfully,
 {petitioner_name}
@@ -129,7 +135,7 @@ Yours faithfully,
 Date: {incident_date}
 """
 
-COMPLAINT_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL COMPLAINT.
+COMPLAINT_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL COMPLAINT.  # noqa
 Use this legal context for accurate section references: {legal_context}
 
 Complainant: {petitioner_name}, {petitioner_address}
@@ -176,7 +182,7 @@ Complainant
 {petitioner_name}
 """
 
-NOTICE_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL NOTICE in {language}.
+NOTICE_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL NOTICE in {language}.  # noqa
 Use this legal context: {legal_context}
 
 Sender: {petitioner_name}, {petitioner_address}
@@ -212,7 +218,7 @@ Advocate
 [Address]
 """
 
-DEMAND_LETTER_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal DEMAND LETTER in {language}.
+DEMAND_LETTER_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal DEMAND LETTER in {language}.  # noqa
 Use this legal context: {legal_context}
 
 Sender: {petitioner_name}, {petitioner_address}
@@ -237,7 +243,7 @@ This letter is served on behalf of {petitioner_name} of {petitioner_address}
 with reference to the above matter.
 
 1. That my client is [relationship/context].
-2. [Statement of facts in numbered paragraphs including the incident and loss suffered]
+2. [Statement of facts in numbered paragraphs including the incident and loss suffered]  # noqa
 3. [Legal grounds and applicable provisions cited from context]
 4. [Demanded relief and compensation]
 
@@ -268,14 +274,16 @@ TITLE_MAP: Dict[str, str] = {
 }
 
 
-# ── External templates loader (optional) ────────────────────────────────────────
-import json
-from pathlib import Path
+# ── External templates loader (optional) ────────────────────────────────────────  # noqa
+import json  # noqa
+from pathlib import Path  # noqa
 
 # Module-level templates dict (may be empty if no external JSON provided)
 _templates: Dict[str, dict] = {}
 
-_templates_path = Path(__file__).parent.parent / "templates" / "document_templates.json"
+_templates_path = (
+    Path(__file__).parent.parent / "templates" / "document_templates.json"
+)
 if _templates_path.exists():
     try:
         with _templates_path.open("r", encoding="utf-8") as fh:
@@ -288,12 +296,14 @@ if _templates_path.exists():
                 TITLE_MAP[k] = v["title"]
         logger.info("Loaded document templates from %s", _templates_path)
     except Exception:
-        logger.exception("Failed to load external document templates — using defaults")
+        logger.exception(
+            "Failed to load external document templates — using defaults"
+        )
 else:
     logger.debug("No external document templates found at %s", _templates_path)
 
 
-# ── LLM resolution (shared with context.py) ───────────────────────────────────
+# ── LLM resolution (shared with context.py) ───────────────────────────────────  # noqa
 
 _doc_llm = None
 _doc_llm_label: str = "none"
@@ -316,6 +326,7 @@ def _get_doc_llm():
     try:
         if groq_key:
             from langchain_groq import ChatGroq
+
             _doc_llm = ChatGroq(
                 model="llama-3.3-70b-versatile",
                 temperature=0.3,
@@ -326,6 +337,7 @@ def _get_doc_llm():
             logger.info("📝 Document LLM: Groq (llama-3.3-70b-versatile)")
         elif gemini_key:
             from langchain_google_genai import ChatGoogleGenerativeAI
+
             _doc_llm = ChatGoogleGenerativeAI(
                 model="gemini-1.5-pro",
                 temperature=0.3,
@@ -336,6 +348,7 @@ def _get_doc_llm():
             logger.info("📝 Document LLM: Google Gemini (gemini-1.5-pro)")
         else:
             from langchain_community.llms import Ollama
+
             _doc_llm = Ollama(
                 model="llama3",
                 base_url="http://localhost:11434",
@@ -349,22 +362,30 @@ def _get_doc_llm():
     except Exception as e:
         fake_llm_flag = os.getenv("LAWGPT_FAKE_LLM") == "1"
         if fake_llm_flag:
+
             class DummyLLM:
                 def invoke(self, prompt):
                     return {
-                        "content": f"DUMMY GENERATED DOCUMENT\n\n{prompt[:400]}"
+                        "content": f"DUMMY GENERATED DOCUMENT\n\n{prompt[:400]}"  # noqa
                     }
 
             _doc_llm = DummyLLM()
             _doc_llm_label = "dummy"
-            logger.warning("Using DummyLLM fallback because LLM integrations are not available: %s", e)
+            logger.warning(
+                "Using DummyLLM fallback because LLM integrations are not available: %s",  # noqa
+                e,
+            )
             return _doc_llm, _doc_llm_label
 
-        logger.error("No LLM integration available and LAWGPT_FAKE_LLM is not enabled: %s", e)
+        logger.error(
+            "No LLM integration available and LAWGPT_FAKE_LLM is not enabled: %s",  # noqa
+            e,
+        )
         raise
 
 
-# ── Core generation logic ─────────────────────────────────────────────────────
+# ── Core generation logic ─────────────────────────────────────────────────────  # noqa
+
 
 def _map_language_label(language: str) -> str:
     mapping = {
@@ -389,11 +410,13 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
     except FileNotFoundError:
         raise HTTPException(
             status_code=503,
-            detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.",
+            detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.",  # noqa
         )
     except ImportError:
-        # langchain/FAISS not available in this environment (tests/dev). Continue with empty context.
-        logger.warning("langchain_community not available; proceeding without legal context")
+        # langchain/FAISS not available in this environment (tests/dev). Continue with empty context.  # noqa
+        logger.warning(
+            "langchain_community not available; proceeding without legal context"  # noqa
+        )
         results = []
 
     # Build context and sources
@@ -407,7 +430,11 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
         if source_label not in sources:
             sources.append(source_label)
 
-    legal_context: str = "\n\n".join(context_parts) if context_parts else "No specific legal context available."
+    legal_context: str = (
+        "\n\n".join(context_parts)
+        if context_parts
+        else "No specific legal context available."
+    )
 
     # 2. Build prompt
     prompt_template: str = PROMPT_MAP[doc_type]
@@ -433,16 +460,24 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
         required = _templates[doc_type].get("required_fields", [])
 
     # Validate required fields early and return a clear error to the client
-    missing = validate_required_fields({k: v for k, v in field_map.items()}, required)
+    missing = validate_required_fields(
+        {k: v for k, v in field_map.items()}, required
+    )
     if missing:
-        raise HTTPException(status_code=422, detail={"missing_fields": missing})
+        raise HTTPException(
+            status_code=422, detail={"missing_fields": missing}
+        )
 
     # Check for obvious prompt-injection patterns in user inputs
     suspicious = detect_prompt_injection({k: v for k, v in field_map.items()})
     if suspicious:
-        raise HTTPException(status_code=400, detail={"prompt_injection_detected": suspicious})
+        raise HTTPException(
+            status_code=400, detail={"prompt_injection_detected": suspicious}
+        )
 
-    prompt: str = build_prompt(prompt_template, field_map, legal_context=legal_context)
+    prompt: str = build_prompt(
+        prompt_template, field_map, legal_context=legal_context
+    )
 
     # 3. Call LLM
     try:
@@ -469,9 +504,12 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
     )
 
 
-# ── PDF generation helper ─────────────────────────────────────────────────────
+# ── PDF generation helper ─────────────────────────────────────────────────────  # noqa
 
-def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
+
+def _create_pdf(
+    response: GenerateResponse, petitioner_name: str
+) -> io.BytesIO:
     """Convert generated document text to a styled A4 PDF using ReportLab."""
     try:
         from reportlab.lib.pagesizes import A4
@@ -481,13 +519,12 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
             SimpleDocTemplate,
             Paragraph,
             Spacer,
-            PageBreak,
         )
-        from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
     except ImportError:
         raise HTTPException(
             status_code=500,
-            detail="reportlab is not installed. Run: pip install reportlab==4.2.2",
+            detail="reportlab is not installed. Run: pip install reportlab==4.2.2",  # noqa
         )
 
     buffer = io.BytesIO()
@@ -548,7 +585,9 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
     story: list = []
 
     # Header
-    story.append(Paragraph("NYAY SETU — AI Generated Legal Document", header_style))
+    story.append(
+        Paragraph("NYAY SETU — AI Generated Legal Document", header_style)
+    )
     story.append(Spacer(1, 6))
 
     # Title
@@ -587,7 +626,7 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
     story.append(Spacer(1, 30))
     story.append(
         Paragraph(
-            "This document is AI-generated and should be reviewed by a qualified lawyer",
+            "This document is AI-generated and should be reviewed by a qualified lawyer",  # noqa
             footer_style,
         )
     )
@@ -597,15 +636,17 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
     return buffer
 
 
-def _create_docx(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
-    """Convert generated document text to a simple DOCX in-memory file using python-docx."""
+def _create_docx(
+    response: GenerateResponse, petitioner_name: str
+) -> io.BytesIO:
+    """Convert generated document text to a simple DOCX in-memory file using python-docx."""  # noqa
     try:
         from docx import Document as DocxDocument
         from docx.shared import Pt
     except ImportError:
         raise HTTPException(
             status_code=500,
-            detail="python-docx is not installed. Run: pip install python-docx",
+            detail="python-docx is not installed. Run: pip install python-docx",  # noqa
         )
 
     doc = DocxDocument()
@@ -634,7 +675,9 @@ def _create_docx(response: GenerateResponse, petitioner_name: str) -> io.BytesIO
         doc.add_paragraph(", ".join(response.sources))
 
     # Disclaimer footer
-    doc.add_paragraph("\nThis document is AI-generated and should be reviewed by a qualified lawyer")
+    doc.add_paragraph(
+        "\nThis document is AI-generated and should be reviewed by a qualified lawyer"  # noqa
+    )
 
     bio = io.BytesIO()
     doc.save(bio)
@@ -645,6 +688,7 @@ def _create_docx(response: GenerateResponse, petitioner_name: str) -> io.BytesIO
 # ══════════════════════════════════════════════════════════════════════════════
 # POST /generate — Generate legal document text
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @router.post("/generate", response_model=GenerateResponse)
 async def generate_document(request: GenerateRequest) -> GenerateResponse:
@@ -659,15 +703,20 @@ async def generate_document(request: GenerateRequest) -> GenerateResponse:
 # POST /generate/pdf — Generate legal document as PDF
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @router.post("/generate/pdf")
 async def generate_document_pdf(request: GenerateRequest):
     """
     Generate a legal document and return it as a downloadable PDF file.
     """
     response: GenerateResponse = _generate_document(request)
-    pdf_buffer: io.BytesIO = _create_pdf(response, request.fields.petitioner_name)
+    pdf_buffer: io.BytesIO = _create_pdf(
+        response, request.fields.petitioner_name
+    )
 
-    filename: str = f"{request.doc_type}_{request.fields.petitioner_name.replace(' ', '_')}.pdf"
+    filename: str = (
+        f"{request.doc_type}_{request.fields.petitioner_name.replace(' ', '_')}.pdf"  # noqa
+    )
 
     return StreamingResponse(
         pdf_buffer,
@@ -682,13 +731,17 @@ async def generate_document_pdf(request: GenerateRequest):
 async def generate_document_docx(request: GenerateRequest):
     """Generate a legal document and return it as a downloadable DOCX file."""
     response: GenerateResponse = _generate_document(request)
-    docx_buffer: io.BytesIO = _create_docx(response, request.fields.petitioner_name)
+    docx_buffer: io.BytesIO = _create_docx(
+        response, request.fields.petitioner_name
+    )
 
-    filename: str = f"{request.doc_type}_{request.fields.petitioner_name.replace(' ', '_')}.docx"
+    filename: str = (
+        f"{request.doc_type}_{request.fields.petitioner_name.replace(' ', '_')}.docx"  # noqa
+    )
 
     return StreamingResponse(
         docx_buffer,
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # noqa
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
         },

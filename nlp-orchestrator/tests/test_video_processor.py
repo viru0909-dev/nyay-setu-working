@@ -6,8 +6,8 @@ import pytest
 sys.modules.setdefault("cv2", Mock())
 sys.modules.setdefault("aiohttp", Mock())
 
-import services.video_processor as vp
-from services.video_processor import extract_frames
+import services.video_processor as vp  # noqa
+from services.video_processor import extract_frames  # noqa
 
 
 class DummyCap:

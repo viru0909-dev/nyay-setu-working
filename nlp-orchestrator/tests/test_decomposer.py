@@ -28,7 +28,7 @@ PATCH_TARGET = "decomposer.client.chat.completions.create"
 
 
 def _mock_completion(content):
-    """Build a fake Groq chat-completion whose first choice carries ``content``.
+    """Build a fake Groq chat-completion whose first choice carries ``content``.  # noqa
 
     Mirrors the real shape consumed by the decomposer:
     ``response.choices[0].message.content``.

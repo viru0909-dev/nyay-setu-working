@@ -26,6 +26,8 @@ public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
     
     // For auto-assignment - find cases without judge
     List<CaseEntity> findByJudgeIdIsNull();
+    @Query("SELECT c FROM CaseEntity c WHERE c.assignedJudge IS NULL OR c.judgeId IS NULL")
+    List<CaseEntity> findUnassignedCases();
     
     // Find cases by status
     List<CaseEntity> findByStatus(CaseStatus status);

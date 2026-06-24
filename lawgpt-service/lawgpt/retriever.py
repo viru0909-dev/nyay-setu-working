@@ -11,22 +11,24 @@ from typing import Optional
 try:
     from langchain_community.embeddings import HuggingFaceEmbeddings
     from langchain_community.vectorstores import FAISS
+
     # pyrefly: ignore [missing-import]
     from langchain.schema import Document
+
     _HAS_LANGCHAIN = True
 except Exception:
-    # Allow the module to be imported in environments without langchain for tests
+    # Allow the module to be imported in environments without langchain for tests  # noqa
     HuggingFaceEmbeddings = None  # type: ignore
     FAISS = None  # type: ignore
     Document = object
     _HAS_LANGCHAIN = False
 
 
-# ── Paths ──────────────────────────────────────────────────────────────────────
+# ── Paths ──────────────────────────────────────────────────────────────────────  # noqa
 BASE_DIR: Path = Path(__file__).resolve().parent.parent
 INDEX_DIR: Path = BASE_DIR / "vector_store" / "legal_index"
 
-# ── Cached state ───────────────────────────────────────────────────────────────
+# ── Cached state ───────────────────────────────────────────────────────────────  # noqa
 _vectorstore: Optional[FAISS] = None
 _embeddings: Optional[HuggingFaceEmbeddings] = None
 
@@ -35,7 +37,9 @@ def _get_embeddings() -> HuggingFaceEmbeddings:
     """Return the singleton embedding model instance."""
     global _embeddings
     if not _HAS_LANGCHAIN:
-        raise ImportError("langchain_community is not available in this environment")
+        raise ImportError(
+            "langchain_community is not available in this environment"
+        )
     if _embeddings is None:
         _embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-m3")
     return _embeddings
@@ -51,7 +55,9 @@ def load_vectorstore() -> FAISS:
     """
     global _vectorstore
     if not _HAS_LANGCHAIN:
-        raise ImportError("langchain_community is not available in this environment")
+        raise ImportError(
+            "langchain_community is not available in this environment"
+        )
     if _vectorstore is not None:
         return _vectorstore
 
@@ -79,9 +85,11 @@ def retrieve(query: str, k: int = 3) -> list[Document]:
     Returns:
         A list of LangChain Document objects with page_content and metadata.
     """
-    # If langchain is not available, callers in tests should monkeypatch this function.
+    # If langchain is not available, callers in tests should monkeypatch this function.  # noqa
     if not _HAS_LANGCHAIN:
-        raise ImportError("langchain_community is not available in this environment")
+        raise ImportError(
+            "langchain_community is not available in this environment"
+        )
     vs: FAISS = load_vectorstore()
     results: list[Document] = vs.similarity_search(query, k=k)
     return results

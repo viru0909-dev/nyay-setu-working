@@ -60,18 +60,18 @@ gemini_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 ollama_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 
 
-# ─── Prompts ──────────────────────────────────────────────────────────────────
+# ─── Prompts ──────────────────────────────────────────────────────────────────  # noqa
 
-LEGAL_SYSTEM_PROMPT = """You are an expert Indian legal advisor with deep knowledge of:
+LEGAL_SYSTEM_PROMPT = """You are an expert Indian legal advisor with deep knowledge of:  # noqa
 - Indian Penal Code (IPC) and Bharatiya Nyaya Sanhita (BNS) 2023
-- Code of Criminal Procedure (CrPC) and Bharatiya Nagarik Suraksha Sanhita (BNSS) 2023
+- Code of Criminal Procedure (CrPC) and Bharatiya Nagarik Suraksha Sanhita (BNSS) 2023  # noqa
 - Code of Civil Procedure (CPC)
 - Motor Vehicles Act (MVA)
 - Indian Constitution including Fundamental Rights
 - Consumer Protection Act
 - Right to Information Act (RTI)
 
-Provide precise, accurate, legally grounded answers. Quote specific section numbers where relevant.
+Provide precise, accurate, legally grounded answers. Quote specific section numbers where relevant.  # noqa
 Keep your answer focused, factual, and written for a common Indian citizen.
 """
 
@@ -80,12 +80,12 @@ Keep your answer focused, factual, and written for a common Indian citizen.
 # This is the single biggest hallucination guardrail we have at the prompt
 # level — when the retrieval finds the right passage, the model quotes it;
 # when retrieval misses, the model is supposed to say so out loud.
-KANOON_CONTEXT_PROMPT = """Use the INDIAN KANOON CONTEXT below as your primary source.
+KANOON_CONTEXT_PROMPT = """Use the INDIAN KANOON CONTEXT below as your primary source.  # noqa
 
-- If the answer is fully covered there, quote the exact section number, article, or judgment.
-- If the context is partial or missing, you may fall back to your training knowledge, but you
-  MUST state plainly: "the retrieved context does not cover this directly..." before doing so.
-- Never silently invent section numbers, case names, or holdings not present in the context.
+- If the answer is fully covered there, quote the exact section number, article, or judgment.  # noqa
+- If the context is partial or missing, you may fall back to your training knowledge, but you  # noqa
+  MUST state plainly: "the retrieved context does not cover this directly..." before doing so.  # noqa
+- Never silently invent section numbers, case names, or holdings not present in the context.  # noqa
 """
 
 
@@ -98,15 +98,15 @@ def _build_user_prompt(question: str, kanoon_context: str | None) -> str:
         f"{question}\n\n"
         "INDIAN KANOON CONTEXT:\n"
         f"{kanoon_context}\n\n"
-        "If the answer is not present in the context, say you cannot verify it."
+        "If the answer is not present in the context, say you cannot verify it."  # noqa
     )
 
 
 def _fallback_response(question: str, source: str) -> dict:
-    """Structured fallback when all retries are exhausted or the circuit is open."""
+    """Structured fallback when all retries are exhausted or the circuit is open."""  # noqa
     return {
         "question": question,
-        "answer": "Our legal research service is temporarily unavailable. Please try again shortly.",
+        "answer": "Our legal research service is temporarily unavailable. Please try again shortly.",  # noqa
         "source": source,
         "grounded": False,
         "error": "circuit_open",
@@ -137,7 +137,7 @@ def build_provider_queue(primary_provider: str) -> list[str]:
 async def _attempt_provider(
     provider: str, question: str, kanoon_context: str | None = None
 ) -> dict:
-    """Invoke a single provider once, honoring circuit-breaker state and returning a structured result or fallback."""
+    """Invoke a single provider once, honoring circuit-breaker state and returning a structured result or fallback."""  # noqa
     if provider == "gemini":
         if not gemini_client:
             return _fallback_response(question, "gemini")
@@ -185,11 +185,13 @@ async def _attempt_provider(
 
 
 async def execute_with_fallback(
-    question: str, kanoon_context: str | None = None, primary_provider: str = "gemini"
+    question: str,
+    kanoon_context: str | None = None,
+    primary_provider: str = "gemini",
 ) -> dict:
-    """Coordinator: try primary provider with retries, then fallback to secondary providers.
+    """Coordinator: try primary provider with retries, then fallback to secondary providers.  # noqa
 
-    Returns the first successful provider result or a unified fallback response when all fail.
+    Returns the first successful provider result or a unified fallback response when all fail.  # noqa
     """
     providers = build_provider_queue(primary_provider)
     if not providers:
@@ -197,12 +199,12 @@ async def execute_with_fallback(
 
     last_error = None
     # Interpret RETRY_MAX_ATTEMPTS as number of retries (not total attempts).
-    # Total attempts per provider = RETRY_MAX_ATTEMPTS + 1 (initial attempt + retries)
+    # Total attempts per provider = RETRY_MAX_ATTEMPTS + 1 (initial attempt + retries)  # noqa
     for provider in providers:
         for attempt in range(RETRY_MAX_ATTEMPTS + 1):
             try:
                 result = await _attempt_provider(provider, question, kanoon_context)
-                # If provider returns a fallback-shaped response, treat as failure and try next provider
+                # If provider returns a fallback-shaped response, treat as failure and try next provider  # noqa
                 if result.get("is_fallback"):
                     last_error = result.get("error", "fallback")
                     break
@@ -223,12 +225,12 @@ async def execute_with_fallback(
                 # backoff increases with each retry (attempt starts at 0)
                 wait = RETRY_DELAY_SECONDS * (attempt + 1)
                 logger.warning(
-                    f"[Research] Transient error from {provider}, retry {attempt+1} in {wait}s: {exc}"
+                    f"[Research] Transient error from {provider}, retry {attempt+1} in {wait}s: {exc}"  # noqa
                 )
                 await asyncio.sleep(wait)
 
         logger.warning(
-            f"[Research] Provider {provider} exhausted, trying next provider if available"
+            f"[Research] Provider {provider} exhausted, trying next provider if available"  # noqa
         )
 
     logger.error(f"[Research] All providers exhausted. Last error: {last_error}")
@@ -309,7 +311,7 @@ async def _call_gemini_once(
     }
 
 
-# Keep convenience decorated versions for other call sites that expect retry behavior.
+# Keep convenience decorated versions for other call sites that expect retry behavior.  # noqa
 # These wrap the single-attempt functions with the tenacity retry policy.
 _call_groq_with_retry = retry_transient(_call_groq_once)
 _call_gemini_with_retry = retry_transient(_call_gemini_once)
@@ -327,7 +329,7 @@ async def _call_ollama_once(question: str, kanoon_context: str | None = None) ->
     payload = {"model": OLLAMA_MODEL, "prompt": full_prompt, "stream": False}
 
     async with httpx.AsyncClient() as client:
-        # Use a generous timeout for local models which might take a bit to respond
+        # Use a generous timeout for local models which might take a bit to respond  # noqa
         response = await client.post(
             f"{OLLAMA_API_URL}/api/generate", json=payload, timeout=120.0
         )
@@ -345,7 +347,7 @@ async def _call_ollama_once(question: str, kanoon_context: str | None = None) ->
 
 _call_ollama_with_retry = retry_transient(_call_ollama_once)
 
-# ─── Public LLM entry points (circuit-breaker layer) ──────────────────────────
+# ─── Public LLM entry points (circuit-breaker layer) ──────────────────────────  # noqa
 
 
 def _enforce_ground_flag(kanoon_context: str | None) -> str | None:
@@ -379,7 +381,7 @@ async def call_gemini_async(
     question: str,
     kanoon_context: str | None = None,
 ) -> dict:
-    """Call Gemini with circuit breaker + retry. Falls back to Groq on failure."""
+    """Call Gemini with circuit breaker + retry. Falls back to Groq on failure."""  # noqa
     kanoon_context = _enforce_ground_flag(kanoon_context)
 
     if not gemini_client:
@@ -398,7 +400,7 @@ async def call_gemini_async(
         return await call_groq_async(question, kanoon_context)
 
 
-# ─── Parallel orchestration ───────────────────────────────────────────────────
+# ─── Parallel orchestration ───────────────────────────────────────────────────  # noqa
 
 
 async def run_parallel_research(

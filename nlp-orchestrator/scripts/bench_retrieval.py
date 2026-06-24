@@ -35,7 +35,7 @@ from services.retrieval import chunker  # noqa: E402
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
 logger = logging.getLogger("bench")
 
-# Silence HF Hub's chatty download progress; we want to see retrieval logs only.
+# Silence HF Hub's chatty download progress; we want to see retrieval logs only.  # noqa
 logging.getLogger("huggingface_hub").setLevel(logging.WARNING)
 logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -43,11 +43,11 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 DEFAULT_QUERIES = [
     "What is the punishment under BNS Section 103 for murder?",
-    "How do I claim compensation under the Motor Vehicles Act after an accident?",
+    "How do I claim compensation under the Motor Vehicles Act after an accident?",  # noqa
     "What does Article 21 of the Constitution protect?",
     "What is the procedure to file a writ petition in the Supreme Court?",
     "What are my rights if I am arrested without a warrant?",
-    "How do I recover a security deposit that my landlord is refusing to return?",
+    "How do I recover a security deposit that my landlord is refusing to return?",  # noqa
     "What is the limitation period for filing a consumer complaint?",
     "What is the difference between cognizable and non-cognizable offences?",
     "When can the right to free speech under Article 19 be restricted?",
@@ -101,7 +101,7 @@ def fmt_row(s: dict) -> str:
         f"    legacy: {s['legacy_n']} docs, {s['legacy_chars']:>6} chars, "
         f"~{s['legacy_tokens']:>5} tok   top1={s['legacy_top1'][:50]!r}\n"
         f"    new   : {s['new_n']} docs, {s['new_chars']:>6} chars, "
-        f"~{s['new_tokens']:>5} tok   top1={s['new_top1'][:50]!r} (score {score})\n"
+        f"~{s['new_tokens']:>5} tok   top1={s['new_top1'][:50]!r} (score {score})\n"  # noqa
         f"    overlap of top doc IDs: {s['id_overlap']}\n"
     )
 
@@ -129,7 +129,9 @@ async def main():
 
     print("─" * 80)
     print("Aggregate:")
-    print(f"  avg context tokens — legacy: ~{legacy_tok:.0f}   new: ~{new_tok:.0f}")
+    print(
+        f"  avg context tokens — legacy: ~{legacy_tok:.0f}   new: ~{new_tok:.0f}"  # noqa
+    )
     print(f"  avg top-doc overlap (out of 3): {overlap:.2f}")
     print(
         "  Lower context tokens with same/better top docs = "

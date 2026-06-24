@@ -25,7 +25,7 @@ def test_contradiction_analyze_endpoint_and_status_update():
                     "id": "witness-1",
                     "name": "Witness Statement",
                     "type": "Witness Statement",
-                    "text": "The incident occurred at 11:00 PM near City Mall.",
+                    "text": "The incident occurred at 11:00 PM near City Mall.",  # noqa
                 },
             ],
         },

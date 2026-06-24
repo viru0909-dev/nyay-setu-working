@@ -114,16 +114,14 @@ class TestSanitizePromptInput:
         assert "[FILTERED]" in result
 
     def test_preserves_legitimate_legal_query(self):
-        query = (
-            "What is Section 302 of the Indian Penal Code and what are the penalties?"
-        )
+        query = "What is Section 302 of the Indian Penal Code and what are the penalties?"  # noqa
         result = sanitize_prompt_input(query)
         assert "Section 302" in result
         assert "Indian Penal Code" in result
         assert "[FILTERED]" not in result
 
     def test_preserves_complex_legal_query(self):
-        query = "Can you explain the Supreme Court precedent on Article 21 fundamental rights?"
+        query = "Can you explain the Supreme Court precedent on Article 21 fundamental rights?"  # noqa
         result = sanitize_prompt_input(query)
         assert "Supreme Court" in result
         assert "Article 21" in result

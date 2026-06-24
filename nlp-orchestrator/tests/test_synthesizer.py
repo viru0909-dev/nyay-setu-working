@@ -22,11 +22,11 @@ with patch.dict(os.environ, {"GROQ_API_KEY": "test-key-for-ci"}):
 
 
 def test_correct_numbered_formatting():
-    """Verify numbering, source uppercasing, answer inclusion, and separator."""
+    """Verify numbering, source uppercasing, answer inclusion, and separator."""  # noqa
     results = [
         {
             "question": "What is IPC Section 420?",
-            "answer": "IPC 420 deals with cheating and dishonestly inducing delivery of property.",
+            "answer": "IPC 420 deals with cheating and dishonestly inducing delivery of property.",  # noqa
             "source": "groq",
             "error": None,
         },

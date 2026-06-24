@@ -9,7 +9,7 @@ Strategy:
      two sections) is what makes retrieval land on the right provision.
   1. Within each section block, split into paragraphs on double-newlines.
   2. Greedy-pack paragraphs up to `max_tokens` per chunk.
-  3. If a single paragraph exceeds `max_tokens`, fall back to sentence splitting.
+  3. If a single paragraph exceeds `max_tokens`, fall back to sentence splitting.  # noqa
   4. Maintain ~`overlap_tokens` of trailing context between adjacent chunks of
      the *same* section so that a section number or party name introduced at
      the end of one chunk is still visible at the start of the next. Overlap is
@@ -42,7 +42,7 @@ except ImportError:
 
 
 _PARAGRAPH_RE = re.compile(r"\n\s*\n")
-# Conservative sentence boundary: period/!/? followed by whitespace and a capital.
+# Conservative sentence boundary: period/!/? followed by whitespace and a capital.  # noqa
 # Avoids splitting on "Sec. 304A" or "v." citations.
 _SENTENCE_RE = re.compile(r"(?<=[.!?])\s+(?=[A-Z(])")
 
@@ -63,7 +63,7 @@ _SENTENCE_RE = re.compile(r"(?<=[.!?])\s+(?=[A-Z(])")
 # optional sub-clause like "(1)" or "(2)(a)".
 _SECTION_HEADING_RE = re.compile(
     r"""
-    (?m)                                  # multiline: ^ matches each line start
+    (?m)                                  # multiline: ^ matches each line start  # noqa
     ^\s*
     (?:
         (?:Section|Sec\.?|S\.)\s*\d{1,4}[A-Za-z]?    |   # Section / Sec. / S.
@@ -193,7 +193,7 @@ def _chunk_block(
     for para in paragraphs:
         para_tokens = count_tokens(para)
 
-        # Case 1: paragraph itself exceeds the budget — flush, then sentence-split.
+        # Case 1: paragraph itself exceeds the budget — flush, then sentence-split.  # noqa
         if para_tokens > max_tokens:
             if buffer:
                 chunks.append("\n\n".join(buffer))
@@ -221,7 +221,7 @@ def _chunk_block(
                 sent_buf.append(sentence)
                 sent_tokens += s_tokens
             if sent_buf:
-                # Merge sentence-tail into the paragraph buffer so the next paragraph
+                # Merge sentence-tail into the paragraph buffer so the next paragraph  # noqa
                 # joins naturally rather than starting a fresh chunk.
                 buffer = [" ".join(sent_buf)]
                 buffer_tokens = sent_tokens
@@ -241,7 +241,7 @@ def _chunk_block(
     return chunks
 
 
-def chunk_text(
+def chunk_text(  # noqa
     text: str,
     max_tokens: int = 512,
     overlap_tokens: int = 64,

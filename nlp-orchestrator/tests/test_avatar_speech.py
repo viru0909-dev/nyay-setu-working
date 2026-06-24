@@ -41,10 +41,10 @@ with patch.dict(os.environ, {"GROQ_API_KEY": "test-key-for-ci"}):
 
 
 class TestHinglishPromptRegister:
-    """The tuned prompt must actively steer away from formal Hindi (Issue #849)."""
+    """The tuned prompt must actively steer away from formal Hindi (Issue #849)."""  # noqa
 
     def test_prompt_still_accepts_the_answer_placeholder(self):
-        # The prompt must keep exactly one format placeholder, so .format() works.
+        # The prompt must keep exactly one format placeholder, so .format() works.  # noqa
         assert "{markdown_answer}" in HINGLISH_CONVERSION_PROMPT
         assert HINGLISH_CONVERSION_PROMPT.count("{") == 1
         assert HINGLISH_CONVERSION_PROMPT.count("}") == 1
@@ -65,7 +65,7 @@ class TestHinglishPromptRegister:
         ["nyayalaya", "adhiniyam", "praavdhaan", "kshatipoorti", "vidhik"],
     )
     def test_prompt_names_formal_words_to_avoid(self, formal_word):
-        # The avoid-list anchors the model away from these specific formal terms.
+        # The avoid-list anchors the model away from these specific formal terms.  # noqa
         assert formal_word in HINGLISH_CONVERSION_PROMPT.lower()
 
     @pytest.mark.parametrize(

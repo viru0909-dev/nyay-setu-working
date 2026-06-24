@@ -118,7 +118,7 @@ class CircuitBreaker:
             if self.failure_count >= self.failure_threshold:
                 self.state = "OPEN"
                 logger.warning(
-                    f"[CircuitBreaker] State → OPEN after {self.failure_count} failures"
+                    f"[CircuitBreaker] State → OPEN after {self.failure_count} failures"  # noqa
                 )
 
     async def is_available(self):

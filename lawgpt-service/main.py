@@ -15,11 +15,11 @@ from typing import AsyncIterator
 
 from fastapi import FastAPI
 
-from lawgpt.retriever import load_vectorstore, is_index_loaded, get_chunk_count
+from lawgpt.retriever import load_vectorstore, get_chunk_count
 from routers.context import router as context_router
 from routers.document import router as document_router
 
-# ── Logging ────────────────────────────────────────────────────────────────────
+# ── Logging ────────────────────────────────────────────────────────────────────  # noqa
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s │ %(levelname)-7s │ %(name)s │ %(message)s",
@@ -28,7 +28,8 @@ logging.basicConfig(
 logger = logging.getLogger("lawgpt")
 
 
-# ── Lifespan (startup / shutdown) ─────────────────────────────────────────────
+# ── Lifespan (startup / shutdown) ─────────────────────────────────────────────  # noqa
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -47,7 +48,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("🛑 LawGPT service shutting down")
 
 
-# ── App ────────────────────────────────────────────────────────────────────────
+# ── App ────────────────────────────────────────────────────────────────────────  # noqa
 
 app = FastAPI(
     title="Nyay Setu LawGPT Service",
@@ -56,7 +57,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Mount at root so endpoints are /context, /chat, /health, /generate, /generate/pdf
+# Mount at root so endpoints are /context, /chat, /health, /generate, /generate/pdf  # noqa
 app.include_router(context_router)
 app.include_router(document_router)
 

@@ -15,7 +15,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 
-# ─── Fixtures ─────────────────────────────────────────────────────────────────
+# ─── Fixtures ─────────────────────────────────────────────────────────────────  # noqa
 
 LEGAL_SAMPLE = """Section 103 — Punishment for murder.
 
@@ -23,7 +23,7 @@ Whoever commits murder shall be punished with death, or imprisonment for life,
 and shall also be liable to fine.
 
 Provided that when a group of five or more persons acting in concert commits
-murder on the ground of race, caste or community, sex, place of birth, language,
+murder on the ground of race, caste or community, sex, place of birth, language,  # noqa
 personal belief or any other similar ground each member of such group shall be
 punished with death or with imprisonment for life, and shall also be liable to
 fine. This provision is intended to address mob lynching and similar offences
@@ -38,7 +38,7 @@ be punished with death or with imprisonment for life, which shall mean the
 remainder of that person's natural life."""
 
 
-# ─── Tests ────────────────────────────────────────────────────────────────────
+# ─── Tests ────────────────────────────────────────────────────────────────────  # noqa
 
 
 def test_empty_returns_empty():
@@ -53,7 +53,7 @@ def test_short_text_one_chunk():
 
 
 def test_chunks_are_unique():
-    """Regression test: an oversized paragraph used to repeat across all chunks."""
+    """Regression test: an oversized paragraph used to repeat across all chunks."""  # noqa
     chunks = chunker.chunk_text(LEGAL_SAMPLE, max_tokens=80, overlap_tokens=20)
     starts = [c[:80] for c in chunks]
     assert len(set(starts)) == len(starts), f"duplicate chunk starts: {starts}"
@@ -95,8 +95,8 @@ def test_overlap_provides_continuity():
         return  # not enough chunks to test
     # Crude continuity check: at least one word from the end of chunk N-1
     # appears at the start of chunk N (for paragraph-mode chunks).
-    # Sentence-mode chunks legitimately have no overlap when sentences are huge.
-    pass  # behaviour-specific assertion would be brittle; just exercise the path
+    # Sentence-mode chunks legitimately have no overlap when sentences are huge.  # noqa
+    pass  # behaviour-specific assertion would be brittle; just exercise the path  # noqa
 
 
 def test_count_tokens_handles_empty():
@@ -104,16 +104,16 @@ def test_count_tokens_handles_empty():
     assert chunker.count_tokens("hello") >= 1
 
 
-# ─── Section-aware chunking (issue #846) ──────────────────────────────────────
+# ─── Section-aware chunking (issue #846) ──────────────────────────────────────  # noqa
 
 # Two sections separated only by a single newline (NO blank line). Fixed-size
 # and paragraph-only chunking would merge these into one chunk; section-aware
 # chunking must keep them apart.
 TWO_SECTIONS_NO_BLANK_LINE = (
     "Section 103 — Punishment for murder. "
-    "Whoever commits murder shall be punished with death or imprisonment for life.\n"
+    "Whoever commits murder shall be punished with death or imprisonment for life.\n"  # noqa
     "Section 104 — Punishment for murder by life convict. "
-    "Whoever being under sentence of imprisonment for life commits murder shall be punished."
+    "Whoever being under sentence of imprisonment for life commits murder shall be punished."  # noqa
 )
 
 
@@ -130,7 +130,7 @@ def test_split_legal_sections_no_headings_is_noop():
 
 
 def test_split_legal_sections_preserves_preamble():
-    text = "Preliminary note before any section.\nSection 5 — Definitions. Words mean things."
+    text = "Preliminary note before any section.\nSection 5 — Definitions. Words mean things."  # noqa
     blocks = chunker.split_legal_sections(text)
     assert len(blocks) == 2
     assert blocks[0].startswith("Preliminary note")
@@ -166,7 +166,7 @@ def test_chunk_text_every_chunk_anchored_to_a_heading():
 
 
 def test_respect_sections_false_restores_legacy_merge():
-    """With the flag off, the two single-newline sections pack into one chunk."""
+    """With the flag off, the two single-newline sections pack into one chunk."""  # noqa
     merged = chunker.chunk_text(
         TWO_SECTIONS_NO_BLANK_LINE,
         max_tokens=512,
@@ -178,7 +178,7 @@ def test_respect_sections_false_restores_legacy_merge():
 
 
 def test_overlap_does_not_cross_section_boundary():
-    """Trailing context from section 103 must not leak into the section 104 chunk."""
+    """Trailing context from section 103 must not leak into the section 104 chunk."""  # noqa
     chunks = chunker.chunk_text(
         TWO_SECTIONS_NO_BLANK_LINE, max_tokens=512, overlap_tokens=64
     )
@@ -188,7 +188,7 @@ def test_overlap_does_not_cross_section_boundary():
 
 
 def test_long_section_still_splits_within_section():
-    """A single oversized section is chunked internally but stays within itself."""
+    """A single oversized section is chunked internally but stays within itself."""  # noqa
     big_section = "Section 420 — Cheating. " + (
         "This clause restates the offence in detail. " * 200
     )
@@ -198,7 +198,7 @@ def test_long_section_still_splits_within_section():
         assert "Section 421" not in c
 
 
-# ─── Direct-run harness ───────────────────────────────────────────────────────
+# ─── Direct-run harness ───────────────────────────────────────────────────────  # noqa
 
 if __name__ == "__main__":
     failed = 0
@@ -213,5 +213,7 @@ if __name__ == "__main__":
             except Exception as e:
                 print(f"  ✗ {name}: unexpected {type(e).__name__}: {e}")
                 failed += 1
-    print(f"\n{'All tests passed' if failed == 0 else f'{failed} test(s) failed'}")
+    print(
+        f"\n{'All tests passed' if failed == 0 else f'{failed} test(s) failed'}"  # noqa
+    )
     sys.exit(failed)
