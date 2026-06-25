@@ -44,6 +44,7 @@ public class NyaySetuBrainService {
     private final OllamaService ollamaService;
     private final CaseRepository caseRepository;
     private final HearingRepository hearingRepository;
+    private final PiiSanitizer piiSanitizer;
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -233,8 +234,15 @@ public class NyaySetuBrainService {
         systemMsg.put("role", "system");
         
         String basePrompt = ROLE_PROMPTS.getOrDefault(role, "You are a helpful legal assistant for NyaySetu.");
+        List<String> contentToSanitize = new ArrayList<>();
         if (!context.isEmpty()) {
-            basePrompt += "\n\n" + context;
+            contentToSanitize.add(context);
+        }
+        conversation.forEach(message -> contentToSanitize.add(message.get("content")));
+        List<String> sanitizedContent = piiSanitizer.sanitizeBatchForGroq(contentToSanitize);
+        int contentIndex = 0;
+        if (!context.isEmpty()) {
+            basePrompt += "\n\n" + sanitizedContent.get(contentIndex++);
         }
         
         systemMsg.put("content", basePrompt);
@@ -244,7 +252,7 @@ public class NyaySetuBrainService {
         for (Map<String, String> msg : conversation) {
             ObjectNode msgNode = objectMapper.createObjectNode();
             msgNode.put("role", msg.get("role"));
-            msgNode.put("content", msg.get("content"));
+            msgNode.put("content", sanitizedContent.get(contentIndex++));
             messagesArray.add(msgNode);
         }
 
@@ -297,7 +305,7 @@ public class NyaySetuBrainService {
                 
                 ObjectNode userMsg = objectMapper.createObjectNode();
                 userMsg.put("role", "user");
-                userMsg.put("content", userQuery);
+                userMsg.put("content", piiSanitizer.sanitizeForGroq(userQuery));
                 messagesArray.add(userMsg);
 
                 ObjectNode requestBody = objectMapper.createObjectNode();
@@ -397,10 +405,13 @@ public class NyaySetuBrainService {
 
     private String callGroqAPI(List<Map<String, String>> messages) throws Exception {
         ArrayNode messagesArray = objectMapper.createArrayNode();
+        List<String> sanitizedContent = piiSanitizer.sanitizeBatchForGroq(
+                messages.stream().map(message -> message.get("content")).toList());
+        int contentIndex = 0;
         for (Map<String, String> msg : messages) {
             ObjectNode msgNode = objectMapper.createObjectNode();
             msgNode.put("role", msg.get("role"));
-            msgNode.put("content", msg.get("content"));
+            msgNode.put("content", sanitizedContent.get(contentIndex++));
             messagesArray.add(msgNode);
         }
 

@@ -14,6 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.mail.internet.MimeMessage;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -46,13 +50,15 @@ public class EmailService {
 
         tokenRepository.deleteByUser(user);
 
-        String token = UUID.randomUUID().toString();
-        // Set token expiry
+        // Generate raw token for email link and hash for DB storage
+        String rawToken = UUID.randomUUID().toString();
+        String hashedToken = hashToken(rawToken);
+
         LocalDateTime expiryDate = LocalDateTime.now()
                 .plus(Duration.ofMillis(tokenValidityMs));
 
         PasswordResetToken resetToken = PasswordResetToken.builder()
-                .token(token)
+                .token(hashedToken)
                 .user(user)
                 .expiryDate(expiryDate)
                 .used(false)
@@ -61,7 +67,7 @@ public class EmailService {
 
         tokenRepository.save(resetToken);
 
-        String resetLink = frontendUrl + "/reset-password/" + token;
+        String resetLink = frontendUrl + "/reset-password/" + rawToken;
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -76,13 +82,27 @@ public class EmailService {
             log.info("Password reset email sent successfully to: {}", email);
 
         } catch (Exception e) {
-
             log.error("CRITICAL: Failed to send email via SMTP. SMTP_USERNAME or SMTP_PASSWORD might be missing.");
-
             log.info("====================================================================");
             log.info("DEVELOPMENT FALLBACK - PASSWORD RESET LINK FOR {}:", email);
             log.info(resetLink);
             log.info("====================================================================");
+        }
+    }
+
+    private String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error hashing token: SHA-256 algorithm not found", e);
         }
     }
 

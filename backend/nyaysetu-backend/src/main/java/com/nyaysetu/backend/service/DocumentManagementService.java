@@ -78,10 +78,7 @@ public class DocumentManagementService {
     }
 
     public List<DocumentDto> getCaseDocuments(UUID caseId) {
-        List<DocumentEntity> documents = documentRepository.findByCaseId(caseId);
-        return documents.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        return documentRepository.findCaseDocumentsWithDetails(caseId);
     }
     
     /**

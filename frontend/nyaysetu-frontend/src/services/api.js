@@ -321,6 +321,12 @@ export const clientFirAPI = {
     getStats: () => api.get('/api/v1/client/fir/stats'),
 };
 
+export const feedbackAPI = {
+    submit: (formData) => api.post('/api/v1/feedback', formData),
+    getMy: () => api.get('/api/v1/feedback/my'),
+    getAll: () => api.get('/api/v1/feedback'),
+};
+
 // ===== NEW: Case Events API (Audit Trail / Timeline) =====
 export const caseEventAPI = {
     // Get timeline events for a case (chronological order)

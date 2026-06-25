@@ -50,6 +50,12 @@ export default function DashboardLayout() {
         }
     }, [token, user, navigate]);
 
+    useEffect(() => {
+        console.log('Current User:', user);
+        console.log('Current Role:', user?.role);
+    }, [user]);
+
+
     const handleMobileMenuToggle = () => {
         setIsMobileSidebarOpen(!isMobileSidebarOpen);
     };
@@ -74,10 +80,11 @@ export default function DashboardLayout() {
 
             {/* Sidebar - Fixed Height */}
             <Sidebar
-                userRole={user?.role}
+                userRole={user?.role || 'LITIGANT'}
                 isMobileOpen={isMobileSidebarOpen}
                 onMobileClose={handleMobileClose}
             />
+
 
             {/* Main Content Area */}
             <div style={{

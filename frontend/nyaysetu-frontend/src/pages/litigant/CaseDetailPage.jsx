@@ -17,6 +17,7 @@ import CaseChatWidget from '../../components/CaseChatWidget';
 import { useTranslation } from 'react-i18next';
 import CaseStepper from '../../components/common/CaseStepper';
 import { t } from 'i18next';
+import ApiStateWrapper from '../../components/common/ApiStateWrapper';
 
 // -----------------------------------------------------------------------------
 // HELPER CONSTANTS & FUNCTIONS
@@ -194,34 +195,33 @@ export default function CaseDetailPage() {
         document.body.removeChild(a);
     };
 
-    if (loading) {
-        return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-                <Loader2 size={48} style={{ color: '#8b5cf6', animation: 'spin 1s linear infinite' }} />
-                <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-            </div>
-        );
-    }
+    // Guard: derive styles only when caseData is present (ApiStateWrapper prevents
+    // children from rendering while loading/error/empty, but these vars are computed
+    // unconditionally so they must handle null caseData safely).
+    const statusStyle = caseData
+        ? (statusColors[caseData.status] || statusColors['PENDING'])
+        : statusColors['PENDING'];
+    const urgencyStyle = caseData
+        ? (urgencyColors[caseData.urgency] || urgencyColors['NORMAL'])
+        : urgencyColors['NORMAL'];
 
-    if (error || !caseData) {
-        return (
-            <div style={{ textAlign: 'center', padding: '4rem' }}>
-                <AlertCircle size={64} style={{ color: '#ef4444', marginBottom: '1rem' }} />
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{error || t('caseDiary.caseNotFound')}</h2>
+    return (
+        <ApiStateWrapper
+            loading={loading}
+            error={error}
+            isEmpty={!caseData}
+            onRetry={fetchCaseDetails}
+            emptyTitle={t('caseDiary.caseNotFound')}
+            emptyDescription="The case you're looking for could not be found or accessed."
+            emptyAction={
                 <button
                     onClick={() => navigate('/litigant/case-diary')}
-                    style={{ marginTop: '1rem', padding: '0.75rem 1.5rem', background: 'var(--color-primary)', border: 'none', borderRadius: '0.5rem', color: 'white', cursor: 'pointer' }}
+                    style={{ padding: '0.75rem 1.5rem', background: 'var(--color-primary)', border: 'none', borderRadius: '0.75rem', color: 'white', cursor: 'pointer', fontWeight: '600' }}
                 >
                     {t('caseDiary.backToCaseDiary')}
                 </button>
-            </div>
-        );
-    }
-
-    const statusStyle = statusColors[caseData.status] || statusColors['PENDING'];
-    const urgencyStyle = urgencyColors[caseData.urgency] || urgencyColors['NORMAL'];
-
-    return (
+            }
+        >
         <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
             {/* 1. Header Section */}
             <div style={{ marginBottom: '2rem' }}>
@@ -417,6 +417,7 @@ export default function CaseDetailPage() {
                 </div>
             )}
         </div>
+        </ApiStateWrapper>
     );
 }
 

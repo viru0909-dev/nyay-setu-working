@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -22,10 +23,13 @@ public class AiService {
     @Value("${groq.model:llama-3.1-8b-instant}")
     private String groqModel;
 
-    private final RestTemplate restTemplate; // Injected bean with timeouts — see RestTemplateConfig
+    @Autowired
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final PiiSanitizer piiSanitizer;
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+    private static final String FALLBACK_MESSAGE = "AI service is temporarily experiencing high congestion. Please try again shortly.";
 
     public String summarize(String text) {
         try {
@@ -66,7 +70,7 @@ public class AiService {
             // User message
             ObjectNode userMsg = messagesArray.addObject();
             userMsg.put("role", "user");
-            userMsg.put("content", message);
+            userMsg.put("content", piiSanitizer.sanitizeForGroq(message));
 
             requestBody.put("temperature", 0.7);
 
@@ -74,7 +78,7 @@ public class AiService {
             
             ResponseEntity<String> response = restTemplate.postForEntity(GROQ_API_URL, request, String.class);
             
-            if (response.getStatusCode() == HttpStatus.OK) {
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 JsonNode jsonResponse = objectMapper.readTree(response.getBody());
                 String aiResponse = jsonResponse.path("choices").get(0)
                     .path("message").path("content").asText();
@@ -83,11 +87,11 @@ public class AiService {
                 return aiResponse;
             }
             
-            return getFallbackResponse(message);
+            return FALLBACK_MESSAGE;
             
         } catch (Exception e) {
-            log.error("Groq API error: {}", e.getMessage());
-            return getFallbackResponse(message);
+            log.error("Groq API error/timeout: {}", e.getMessage());
+            return FALLBACK_MESSAGE;
         }
     }
 
