@@ -55,6 +55,7 @@ public class VakilFriendDocumentService {
     // Robust helper services from fix branch
     private final FileStorageService fileStorageService;
     private final PdfTextExtractorService pdfTextExtractorService;
+    private final PiiSanitizer piiSanitizer;
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -259,7 +260,7 @@ public class VakilFriendDocumentService {
 
             ObjectNode userMsg = objectMapper.createObjectNode();
             userMsg.put("role", "user");
-            userMsg.put("content", userPrompt);
+            userMsg.put("content", piiSanitizer.sanitizeForGroq(userPrompt));
             messagesArray.add(userMsg);
 
             // Build request

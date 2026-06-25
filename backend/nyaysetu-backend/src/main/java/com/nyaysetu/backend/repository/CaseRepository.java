@@ -5,6 +5,7 @@ import com.nyaysetu.backend.entity.CaseStatus;
 import com.nyaysetu.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -21,7 +22,10 @@ public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
     
     // Paginated queries
     Page<CaseEntity> findByClientOrRespondentEmail(User client, String respondentEmail, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"client", "lawyer"})
     Page<CaseEntity> findByLawyer(User lawyer, Pageable pageable);
+
     Page<CaseEntity> findByAssignedJudge(String judgeName, Pageable pageable);
     
     // For auto-assignment - find cases without judge
