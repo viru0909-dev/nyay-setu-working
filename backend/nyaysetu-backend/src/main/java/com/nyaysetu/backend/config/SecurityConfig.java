@@ -285,7 +285,7 @@ public class SecurityConfig {
                         ).hasAnyRole("POLICE", "JUDGE", "SUPER_JUDGE", "ADMIN")
 
                         // ── Everything else requires authentication ────────────────────────
-                        .anyRequest().authenticated();
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

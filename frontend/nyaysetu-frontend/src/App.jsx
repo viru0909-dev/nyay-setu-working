@@ -58,24 +58,12 @@ const UpcomingFeatures = retryLazy(() => import('./pages/UpcomingFeatures'));
 const FAQ = retryLazy(() => import('./pages/FAQ'));
 import OAuthSuccess from './pages/OAuthSuccess';
 
-// Lazy load pages for better performance
-const retryLazy = (fn) => lazy(() => fn().catch(() => fn()));
-const Landing = lazy(() => import('./pages/Landing'));
-const Constitution = lazy(() => import('./pages/Constitution'));
-const Login = lazy(() => import('./pages/Login'));
-const Signup = lazy(() => import('./pages/Signup'));
-const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const About = lazy(() => import('./pages/About'));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
-const Terms = lazy(() => import('./pages/Terms'));
-const Disclaimer = lazy(() => import('./pages/Disclaimer'));
-const UpcomingFeatures = lazy(() => import('./pages/UpcomingFeatures'));
-
 // Dashboard Layout
 const DashboardLayout = retryLazy(() => import('./layouts/DashboardLayout'));
 
 // Dashboard Pages
 const AdminDashboard = retryLazy(() => import('./pages/dashboards/AdminDashboard'));
+const AdminFeedbackPage = retryLazy(() => import('./pages/dashboards/AdminFeedbackPage'));
 const LawyerDashboard = retryLazy(() => import('./pages/dashboards/LawyerDashboard'));
 
 // Litigant Pages
@@ -317,11 +305,12 @@ function App({ swRegistration }) {
 
                                 {/* Administrative Core */}
                                 <Route path="/admin/*" element={
-                                    <ProtectedWorkspace allowedRoles={['ADMIN']} message="Loading Admin Panel...">
+                                    <ProtectedWorkspace allowedRoles={['ADMIN', 'TECH_ADMIN', 'TECHNICAL_TEAM', 'SUPER_JUDGE']} message="Loading Admin Panel...">
                                         <DashboardLayout />
                                     </ProtectedWorkspace>
                                 }>
                                     <Route index element={<AdminDashboard />} />
+                                        <Route path="feedback" element={<AdminFeedbackPage />} />
                                     <Route path="*" element={<Navigate to="/admin" replace />} />
                                 </Route>
 

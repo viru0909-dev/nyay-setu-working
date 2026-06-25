@@ -48,6 +48,8 @@ DB_USERNAME=postgres
 DB_PASSWORD=your_secure_password
 JWT_SECRET=replace_with_a_long_random_256_bit_secret
 GROQ_API_KEY=your_groq_api_key_here
+PII_NER_MODEL=ai4bharat/IndicNER
+PII_NER_URL=http://backend-python:8001/internal/pii/entities
 FRONTEND_URL=http://localhost:5173
 CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost
 
@@ -63,6 +65,10 @@ CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4174,http://localhos
 ```
 
 Optional providers can be left blank unless you are using those features. Do not commit a filled `.env` file.
+
+`PII_NER_MODEL` runs inside the NLP orchestrator and must be available before any
+Groq request is made. The backend defaults to strict sanitization: if the local NER
+service fails, the external Groq request is blocked rather than sent unsanitized.
 
 > **Production requirement:** When running with `SPRING_PROFILES_ACTIVE=prod`, you **must** set `JWT_SECRET` as an environment variable. The backend now fails fast at startup in production if `JWT_SECRET` is missing or falls back to the default development secret.
 
