@@ -614,6 +614,10 @@ Every PR must pass the following before it can be merged:
 - ✅ No merge conflicts with `main`
 - ✅ Branch is up-to-date with `main`
 
+> 💡 **GSSoC'26 Note:** Your PR will only be counted for points once it is
+> **merged** — not when it is opened. Make sure it meets all the checklist
+> items above to speed up the review process.
+
 <hr/>
 
 ## Best Practices for Contributors
