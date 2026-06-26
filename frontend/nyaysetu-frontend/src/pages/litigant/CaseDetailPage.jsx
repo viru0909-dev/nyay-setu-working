@@ -17,6 +17,7 @@ import CaseChatWidget from '../../components/CaseChatWidget';
 import { useTranslation } from 'react-i18next';
 import CaseStepper from '../../components/common/CaseStepper';
 import { t } from 'i18next';
+import ApiStateWrapper from '../../components/common/ApiStateWrapper';
 
 // -----------------------------------------------------------------------------
 // HELPER CONSTANTS & FUNCTIONS
@@ -194,34 +195,33 @@ export default function CaseDetailPage() {
         document.body.removeChild(a);
     };
 
-    if (loading) {
-        return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-                <Loader2 size={48} style={{ color: '#8b5cf6', animation: 'spin 1s linear infinite' }} />
-                <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-            </div>
-        );
-    }
+    // Guard: derive styles only when caseData is present (ApiStateWrapper prevents
+    // children from rendering while loading/error/empty, but these vars are computed
+    // unconditionally so they must handle null caseData safely).
+    const statusStyle = caseData
+        ? (statusColors[caseData.status] || statusColors['PENDING'])
+        : statusColors['PENDING'];
+    const urgencyStyle = caseData
+        ? (urgencyColors[caseData.urgency] || urgencyColors['NORMAL'])
+        : urgencyColors['NORMAL'];
 
-    if (error || !caseData) {
-        return (
-            <div style={{ textAlign: 'center', padding: '4rem' }}>
-                <AlertCircle size={64} style={{ color: '#ef4444', marginBottom: '1rem' }} />
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{error || t('caseDiary.caseNotFound')}</h2>
+    return (
+        <ApiStateWrapper
+            loading={loading}
+            error={error}
+            isEmpty={!caseData}
+            onRetry={fetchCaseDetails}
+            emptyTitle={t('caseDiary.caseNotFound')}
+            emptyDescription="The case you're looking for could not be found or accessed."
+            emptyAction={
                 <button
                     onClick={() => navigate('/litigant/case-diary')}
-                    style={{ marginTop: '1rem', padding: '0.75rem 1.5rem', background: 'var(--color-primary)', border: 'none', borderRadius: '0.5rem', color: 'white', cursor: 'pointer' }}
+                    style={{ padding: '0.75rem 1.5rem', background: 'var(--color-primary)', border: 'none', borderRadius: '0.75rem', color: 'white', cursor: 'pointer', fontWeight: '600' }}
                 >
                     {t('caseDiary.backToCaseDiary')}
                 </button>
-            </div>
-        );
-    }
-
-    const statusStyle = statusColors[caseData.status] || statusColors['PENDING'];
-    const urgencyStyle = urgencyColors[caseData.urgency] || urgencyColors['NORMAL'];
-
-    return (
+            }
+        >
         <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
             {/* 1. Header Section */}
             <div style={{ marginBottom: '2rem' }}>
@@ -417,6 +417,7 @@ export default function CaseDetailPage() {
                 </div>
             )}
         </div>
+        </ApiStateWrapper>
     );
 }
 
@@ -910,8 +911,8 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
         try {
             // Use different endpoint based on doc type
             const url = doc.source === 'evidence'
-                ? `${API_BASE_URL}/api/evidence/${doc.id}/certificate`
-                : `${API_BASE_URL}/api/documents/${doc.id}/certificate`;
+                ? `${API_BASE_URL}/api/v1/evidence/${doc.id}/certificate`
+                : `${API_BASE_URL}/api/v1/documents/${doc.id}/certificate`;
 
             const response = await axios.get(url, {
                 responseType: 'blob',
@@ -1341,10 +1342,10 @@ function TimelineTab({ caseData }) {
 
             // Fetch from BOTH legacy timeline AND new CaseEvents API
             const [timelineRes, eventsRes] = await Promise.allSettled([
-                axios.get(`${API_BASE_URL}/api/timeline/${caseData.id}`, {
+                axios.get(`${API_BASE_URL}/api/v1/timeline/${caseData.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
-                axios.get(`${API_BASE_URL}/api/cases/${caseData.id}/events`, {
+                axios.get(`${API_BASE_URL}/api/v1/cases/${caseData.id}/events`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ]);
@@ -1652,6 +1653,7 @@ function PrepKitModal({ isOpen, onClose, stage }) {
 
                 <button
                     onClick={onClose}
+                    aria-label="Close"
                     style={{ width: '100%', padding: '1rem', background: 'var(--color-accent)', color: 'white', border: 'none', borderRadius: '0.75rem', fontWeight: '700', fontSize: '1rem', cursor: 'pointer' }}>
                     {t('caseDetail.aiPrepKit.gotIt')}
                 </button>
@@ -1680,7 +1682,7 @@ function BSA634GeneratorModal({ isOpen, onClose }) {
     return (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, backdropFilter: 'blur(8px)' }} onClick={onClose}>
             <div style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '1.5rem', width: '90%', maxWidth: '500px', padding: '2.5rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', position: 'relative' }} onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><X size={24} /></button>
+                <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><X size={24} /></button>
 
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <Shield size={48} color={step === 'DONE' ? '#10b981' : '#3b82f6'} style={{ marginBottom: '1rem' }} />

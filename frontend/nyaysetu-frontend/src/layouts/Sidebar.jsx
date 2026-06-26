@@ -9,7 +9,7 @@ import {
     WifiOff, Sun, Moon
 } from 'lucide-react';
 
-import { useTheme } from '../contexts/ThemeContext';
+import useThemeStore from '../store/themeStore';
 
 const getRoleMenuItems = (t) => ({
     LITIGANT: [
@@ -19,7 +19,6 @@ const getRoleMenuItems = (t) => ({
         { icon: FolderOpen, label: t('dashboard:sidebar.litigant.caseDiary'), path: '/litigant/case-diary' },
         { icon: Video, label: t('dashboard:sidebar.litigant.hearings'), path: '/litigant/hearings' },
         { icon: MessageSquare, label: t('dashboard:sidebar.litigant.lawyerChat'), path: '/litigant/chat' },
-        { icon: Search, label: t('dashboard:sidebar.litigant.forensicAnalysis'), path: '/litigant/forensics' },
         { icon: FileText, label: t('dashboard:sidebar.litigant.generateDocument'), path: '/litigant/generate-document' },
         { icon: User, label: t('dashboard:sidebar.litigant.profile'), path: '/litigant/profile' }
     ],
@@ -42,12 +41,7 @@ const getRoleMenuItems = (t) => ({
     ],
     ADMIN: [
         { icon: Home, label: t('dashboard:sidebar.admin.dashboard'), path: '/admin' },
-        { icon: Users, label: t('dashboard:sidebar.admin.userManagement'), path: '/admin/users' },
-        { icon: Scale, label: t('dashboard:sidebar.admin.caseManagement'), path: '/admin/cases' },
-        { icon: Gavel, label: t('dashboard:sidebar.admin.judgeAssignment'), path: '/admin/judges' },
-        { icon: BarChart3, label: t('dashboard:sidebar.admin.reports'), path: '/admin/reports' },
-        { icon: Settings, label: t('dashboard:sidebar.admin.settings'), path: '/admin/settings' },
-        { icon: User, label: t('dashboard:sidebar.admin.profile'), path: '/admin/profile' }
+        { icon: MessageSquare, label: 'Feedback', path: '/admin/feedback' }
     ],
     TECH_ADMIN: [
         { icon: Home, label: t('dashboard:sidebar.techAdmin.dashboard'), path: '/tech-admin' },
@@ -68,7 +62,8 @@ const getRoleMenuItems = (t) => ({
 
 export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
     const { t } = useTranslation('dashboard');
-    const { theme, toggleTheme } = useTheme();
+    const { isDark, toggleTheme } = useThemeStore();
+
     const [isCollapsed, setIsCollapsed] = useState(() => {
         const saved = localStorage.getItem('sidebarCollapsed');
         return saved === 'true';
@@ -77,7 +72,16 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
 
     const location = useLocation();
     const roleMenuItems = getRoleMenuItems(t);
-    const menuItems = roleMenuItems[userRole] || roleMenuItems.LITIGANT;
+
+    const normalizedRole = userRole?.toUpperCase()?.trim();
+
+    const menuItems =
+        roleMenuItems[normalizedRole] || [];
+
+    console.log('User Role:', userRole);
+    console.log('Normalized Role:', normalizedRole);
+    console.log('Menu Items:', menuItems);
+
 
     // Listen for window resize to detect mobile/desktop
     useEffect(() => {
@@ -94,10 +98,11 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
 
     // Close mobile sidebar on navigation
     useEffect(() => {
-        if (isMobile && isMobileOpen) {
+        if (isMobile) {
             onMobileClose?.();
         }
     }, [location.pathname]);
+
 
     const sidebarWidth = isCollapsed ? '80px' : '280px';
 
@@ -199,8 +204,12 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                         return (
                             <Link
                                 key={index}
-                                to={item.path}
-                                onClick={isMobile ? onMobileClose : undefined}
+                                to={item.path || '#'}
+                                onClick={() => {
+                                    console.log('Navigating to:', item.path);
+                                    if (isMobile) onMobileClose?.();
+                                }}
+
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
@@ -269,8 +278,9 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                                 e.currentTarget.style.color = 'var(--text-secondary)';
                             }}
                         >
-                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                            {!isCollapsed && <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
+                            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                            {!isCollapsed && <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>}
+
                         </button>
                         <button
                             onClick={() => setIsCollapsed(!isCollapsed)}

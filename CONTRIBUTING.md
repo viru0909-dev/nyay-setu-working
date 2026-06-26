@@ -102,9 +102,9 @@ Do **not** open a public issue for security bugs. Follow the process in [SECURIT
    - Leave a comment on the issue you wish to work on asking to be assigned.
    - **Do not** start working or open a Pull Request for an issue assigned to someone else.
    - If an assignee shows no activity for **7 days**, the issue may be reassigned.
-   - **Activity** means: a comment on the issue, a linked PR, or a commit referencing the issue number.
-   - If you need more than 7 days, **comment on the issue** explaining your timeline — maintainers will accommodate reasonable requests.
-   - To request reassignment of a stale issue, comment: *"Hi, this issue seems stale. I'd like to work on it — can I be assigned?"*
+     - **Activity** means: a comment on the issue, a linked PR, or a commit referencing the issue number.
+     - If you need more than 7 days, **comment on the issue** explaining your timeline — maintainers will accommodate reasonable requests.
+     - To request reassignment of a stale issue, comment: *"Hi, this issue seems stale. I'd like to work on it — can I be assigned?"*
 
 ### GSSoC'26 Points Guide
 
@@ -151,9 +151,9 @@ git checkout -b feat/your-feature-name
 ## Project Setup
 
 ### Prerequisites
+
 - **Node.js** v20+ and npm
 - **Java** JDK 17
-- **Maven** 3.9+
 - **Python** 3.12+
 - **Docker** & **Docker Compose** (recommended for easy setup)
 - **PostgreSQL** 15+ (if running locally without Docker)
@@ -193,14 +193,17 @@ git checkout -b feat/your-feature-name
 
 Services will be available at:
 - Backend: `http://localhost:8080`
-- LawGPT: `http://localhost:8000`
 - NLP Orchestrator: `http://localhost:8001`
-- Signaling Server: `http://localhost:3001`
-- Frontend: `http://localhost:5173`
+- Frontend: `http://localhost:3000`
 
-> **Note:** `LawGPT` (port 8000) and `Signaling Server` (port 3001) must be started
-> manually if needed — they are not part of the Docker Compose setup. The backend
-> falls back gracefully if LawGPT is unavailable.
+> **Note:** `LawGPT` (port 8000) and `Signaling Server` (port 3001) are **not part of
+> the Docker Compose setup**. LawGPT must be started manually if needed:
+> ```bash
+> cd lawgpt-service
+> pip install -r requirements.txt
+> uvicorn main:app --port 8000
+> ```
+> The backend will fall back gracefully if LawGPT is unavailable.
 
 ### Manual Setup (Without Docker)
 
@@ -273,13 +276,16 @@ APP_ENV=development
 
 > ⚠️ **CRITICAL — Never Commit Credentials**
 >
-> **Never push real API keys, database passwords, or JWT secrets to GitHub.**
+> The repository contains a `.env` file in the root directory. **Never push
+> real API keys, database passwords, or JWT secrets** to GitHub.
 >
 > - Always use `.env.example` as your reference template
-> - Your actual `.env` is in `.gitignore` and must never be staged
+> - Your actual `.env` should be in `.gitignore` and never staged
 > - Before committing, run `git status` and confirm `.env` is not listed
 > - If you accidentally commit a secret, rotate it immediately and contact
->   the maintainer
+>   the maintainer at **gadekarvirendra4@gmail.com**
+>
+> Violating this rule can compromise real user data on the production platform.
 
 Refer to [Setup Guide](./docs/setup.md) for detailed configuration.
 
@@ -657,6 +663,10 @@ Every PR must pass the following before it can be merged:
 > **merged** — not when it is opened. Make sure it meets all the checklist
 > items above to speed up the review process.
 
+> 💡 **GSSoC'26 Note:** Your PR will only be counted for points once it is
+> **merged** — not when it is opened. Make sure it meets all the checklist
+> items above to speed up the review process.
+
 <hr/>
 
 ## Best Practices for Contributors
@@ -707,7 +717,7 @@ Every PR must pass the following before it can be merged:
 - **Validate inputs:** Always validate and sanitize user input on both frontend and backend
 - **Use HTTPS:** Never hardcode `http://` URLs for external services
 - **Least privilege:** Request only the permissions your feature needs
-- **Report vulnerabilities:** Follow [SECURITY.md](./SECURITY.md) — do not open a public issue
+- **Report vulnerabilities:** If you find a security issue, email **gadekarvirendra4@gmail.com** directly instead of opening a public issue
 
 ### 8. Before Requesting Review
 - [ ] All tests pass locally
@@ -941,8 +951,8 @@ When I test with cURL, I get:
 I've verified the token is being saved correctly.
 My environment:
 - Java 17
-- Spring Boot 3.2
-- PostgreSQL 15
+- Spring Boot 2.7
+- PostgreSQL 12
 
 Steps to reproduce:
 1. Login and get refresh token
@@ -1062,3 +1072,34 @@ This project and everyone participating in it is governed by the [Code of Conduc
 
 **Happy contributing! 🎉**
 
+We actively monitor the repository and are committed to helping you get your PR successfully merged.
+
+## Reporting Bugs
+
+If you encounter a bug, please create a new issue and include the following details:
+
+* **Title:** A clear and descriptive title
+* **Steps to Reproduce:** Step-by-step instructions to reproduce the issue
+* **Expected Behavior:** What you expected to happen
+* **Actual Behavior:** What actually happened
+* **Screenshots/Logs:** Attach screenshots or error logs if available
+* **Environment Details:** OS, browser, and version (if applicable)
+
+Providing detailed information helps maintainers resolve issues faster.
+
+## Pull Request Template
+
+When opening a Pull Request, please include:
+
+* **Description:** Brief summary of the changes
+* **Related Issue:** Link the issue (e.g., `Closes #123`)
+* **Type of Change:** (Bug fix / Feature / Documentation)
+* **Screenshots:** (If UI changes)
+* **Checklist:**
+
+  * [ ] Code follows project guidelines
+  * [ ] Tested locally
+  * [ ] No unnecessary files included
+  * [ ] No `.env` or credentials accidentally included
+
+This ensures faster review and approval of your PR.

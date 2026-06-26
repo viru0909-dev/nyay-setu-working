@@ -100,6 +100,21 @@ public class CaseEntity {
 
     private String lawyerProposalStatus; // PENDING, ACCEPTED, REJECTED
 
+    // ===== APPEAL TRACKING =====
+
+    private Boolean isAppeal;
+
+    private UUID parentCaseId;
+
+    private Integer appealLevel;
+
+    private LocalDateTime appealFiledDate;
+
+    private String appealStatus; // PENDING, UNDER_REVIEW, DECIDED
+
+    @Column(columnDefinition = "TEXT")
+    private String appealReason;
+
     // ===== JUDICIAL WORKFLOW FIELDS =====
     
     /**
@@ -187,11 +202,25 @@ public class CaseEntity {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+
         if (filedDate == null) {
             filedDate = LocalDateTime.now();
         }
+
         if (status == null) {
             status = CaseStatus.PENDING;
+        }
+
+        if (isAppeal == null) {
+            isAppeal = false;
+        }
+
+        if (appealStatus == null && Boolean.TRUE.equals(isAppeal)) {
+            appealStatus = "PENDING";
+        }
+
+        if (appealLevel == null && Boolean.TRUE.equals(isAppeal)) {
+            appealLevel = 1;
         }
     }
 

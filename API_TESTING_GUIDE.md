@@ -23,9 +23,9 @@ This guide provides comprehensive instructions for developers and contributors t
 
 ### Prerequisites
 
-- **Node.js** (v14+) for signaling server
-- **Java 11+** for backend
-- **Python 3.8+** for microservices
+- **Node.js** (v20+) for signaling server
+- **Java 17** for backend
+- **Python 3.12+** for microservices
 - **Docker & Docker Compose** (optional but recommended)
 - **Postman** (optional) for API testing
 - **cURL** or similar HTTP client
@@ -55,6 +55,7 @@ mvn spring-boot:run
 ```
 
 #### 2. LawGPT Service (Python)
+> **Note:** Depending on your branch, `lawgpt-service` may be integrated into `nlp-orchestrator/`. Check `docker-compose.yml` to confirm which services run separately before starting.
 ```bash
 cd lawgpt-service
 python -m venv venv
@@ -137,7 +138,7 @@ All API requests require authentication using JWT tokens.
 
 #### Step 1: Register a User
 ```bash
-curl -X POST http://localhost:8080/auth/register \
+curl -X POST http://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -151,7 +152,7 @@ curl -X POST http://localhost:8080/auth/register \
 
 #### Step 2: Login to Get Token
 ```bash
-curl -X POST http://localhost:8080/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -175,7 +176,7 @@ curl -X POST http://localhost:8080/auth/login \
 
 #### Step 3: Use Token in Requests
 ```bash
-curl -X GET http://localhost:8080/cases \
+curl -X GET http://localhost:8080/api/v1/cases \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -184,7 +185,7 @@ curl -X GET http://localhost:8080/cases \
 When a token expires (24 hours), use the refresh token:
 
 ```bash
-curl -X POST http://localhost:8080/auth/refresh \
+curl -X POST http://localhost:8080/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{
     "refreshToken": "YOUR_REFRESH_TOKEN"
@@ -296,7 +297,7 @@ newman run Nyay_Setu_API_Collection.postman_collection.json \
 
 ```bash
 # Login
-TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"SecurePassword123"}' \
   | jq -r '.token')
@@ -308,7 +309,7 @@ echo "Token: $TOKEN"
 
 #### 1. Create a Case
 ```bash
-curl -X POST http://localhost:8080/cases \
+curl -X POST http://localhost:8080/api/v1/cases \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -325,7 +326,7 @@ curl -X POST http://localhost:8080/cases \
 
 #### 2. List Cases
 ```bash
-curl -X GET "http://localhost:8080/cases?page=0&size=20&sort=createdAt,desc" \
+curl -X GET "http://localhost:8080/api/v1/cases?page=0&size=20&sort=createdAt,desc" \
   -H "Authorization: Bearer $TOKEN" | jq '.'
 ```
 
@@ -333,7 +334,7 @@ curl -X GET "http://localhost:8080/cases?page=0&size=20&sort=createdAt,desc" \
 ```bash
 CASE_ID="uuid-of-your-case"
 
-curl -X POST http://localhost:8080/documents/upload \
+curl -X POST http://localhost:8080/api/v1/documents/upload \
   -H "Authorization: Bearer $TOKEN" \
   -F "caseId=$CASE_ID" \
   -F "documentType=COMPLAINT" \
@@ -342,7 +343,7 @@ curl -X POST http://localhost:8080/documents/upload \
 
 #### 4. Generate Legal Document
 ```bash
-curl -X POST http://localhost:8000/lawgpt/generate \
+curl -X POST http://localhost:8000/api/v1/lawgpt/generate \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -359,7 +360,7 @@ curl -X POST http://localhost:8000/lawgpt/generate \
 
 #### 5. Analyze Case with NLP (Streaming)
 ```bash
-curl -X POST http://localhost:8001/nlp/analyze \
+curl -X POST http://localhost:8001/api/v1/nlp/analyze \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
@@ -370,6 +371,40 @@ curl -X POST http://localhost:8001/nlp/analyze \
   }' \
   --raw
 ```
+
+#### 6. Deep Legal Research (SSE via /research/deep)
+```bash
+curl -X POST http://localhost:8001/api/v1/research/deep \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "Accept: text/event-stream" \
+  -d '{
+    "query": "What are legal remedies for property dispute in India?",
+    "caseId": "'$CASE_ID'"
+  }' \
+  --no-buffer
+```
+
+JavaScript `EventSource` example:
+
+```
+const source = new EventSource(
+  `http://localhost:8001/api/v1/research/deep`
+);
+
+source.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log(`[${data.stage}]`, data.content);
+  if (data.stage === 'done') source.close();
+};
+
+source.onerror = (err) => {
+  console.error('SSE error:', err);
+  source.close();
+};
+```
+
+Stages returned: `understanding` → `sub_questions` → `kanoon_results` → `reasoning` → `final` → `done`
 
 ---
 
@@ -391,8 +426,9 @@ class NyaySetuClient:
     def login(self, email: str, password: str) -> bool:
         """Login and store token"""
         response = self.session.post(
-            f"{self.base_url}/auth/login",
-            json={"email": email, "password": password}
+        f"{self.base_url}/api/v1/auth/login",
+        json={"email": email, "password": password},
+        timeout=30,
         )
         if response.status_code == 200:
             data = response.json()
@@ -406,8 +442,9 @@ class NyaySetuClient:
     def create_case(self, case_data: Dict) -> Optional[Dict]:
         """Create a new case"""
         response = self.session.post(
-            f"{self.base_url}/cases",
-            json=case_data
+            f"{self.base_url}/api/v1/cases",
+            json=case_data,
+            timeout=30,
         )
         if response.status_code == 201:
             return response.json()
@@ -423,10 +460,11 @@ class NyaySetuClient:
                 'documentType': doc_type
             }
             response = self.session.post(
-                f"{self.base_url}/documents/upload",
+              f"{self.base_url}/api/v1/documents/upload",
                 files=files,
                 data=data
             )
+            
         if response.status_code == 201:
             return response.json()
         raise Exception(f"Error: {response.status_code} - {response.text}")
@@ -434,14 +472,15 @@ class NyaySetuClient:
     def list_cases(self, page: int = 0, size: int = 20) -> Dict:
         """List all cases"""
         response = self.session.get(
-            f"{self.base_url}/cases",
-            params={'page': page, 'size': size, 'sort': 'createdAt,desc'}
+        f"{self.base_url}/api/v1/cases",
+        params={'page': page, 'size': size, 'sort': 'createdAt,desc'},
+        timeout=30
         )
         return response.json()
     
     def get_case(self, case_id: str) -> Dict:
         """Get case details"""
-        response = self.session.get(f"{self.base_url}/cases/{case_id}")
+        response = self.session.get(f"{self.base_url}/api/v1/cases/{case_id}", timeout=30)
         if response.status_code == 200:
             return response.json()
         raise Exception(f"Case not found: {case_id}")
@@ -450,7 +489,7 @@ class NyaySetuClient:
                                context: Dict, language: str = "EN") -> Dict:
         """Generate AI-powered legal document"""
         response = self.session.post(
-            "http://localhost:8000/lawgpt/generate",
+          "http://localhost:8000/api/v1/lawgpt/generate",
             json={
                 "documentType": doc_type,
                 "caseId": case_id,
@@ -515,15 +554,15 @@ if __name__ == "__main__":
 const axios = require('axios');
 
 class NyaySetuClient {
-  constructor(baseUrl = 'http://localhost:8080') {
+    constructor(baseUrl = 'http://localhost:8080') {
     this.baseUrl = baseUrl;
     this.token = null;
-    this.client = axios.create();
+    this.client = axios.create({ timeout: 30000 });
   }
 
   async login(email, password) {
     try {
-      const response = await this.client.post(`${this.baseUrl}/auth/login`, {
+      const response = await this.client.post(`${this.baseUrl}/api/v1/auth/login`, {
         email,
         password
       });
@@ -538,7 +577,7 @@ class NyaySetuClient {
 
   async createCase(caseData) {
     try {
-      const response = await this.client.post(`${this.baseUrl}/cases`, caseData);
+      const response = await this.client.post(`${this.baseUrl}/api/v1/cases`, caseData);
       return response.data;
     } catch (error) {
       console.error('Case creation failed:', error.response?.data);
@@ -548,7 +587,7 @@ class NyaySetuClient {
 
   async listCases(page = 0, size = 20) {
     try {
-      const response = await this.client.get(`${this.baseUrl}/cases`, {
+      const response = await this.client.get(`${this.baseUrl}/api/v1/cases`, {
         params: { page, size, sort: 'createdAt,desc' }
       });
       return response.data;
@@ -560,7 +599,7 @@ class NyaySetuClient {
 
   async generateDocument(documentType, caseId, context, language = 'EN') {
     try {
-      const response = await axios.post(`http://localhost:8000/lawgpt/generate`, {
+      const response = await axios.post(`http://localhost:8000/api/v1/lawgpt/generate`, {
         documentType,
         caseId,
         context,
@@ -608,52 +647,53 @@ class NyaySetuClient {
 ## API Endpoint Categories
 
 ### 1. Authentication Endpoints
-- `POST /auth/register` - Register new user
-- `POST /auth/login` - Login user
-- `POST /auth/refresh` - Refresh token
-- `POST /auth/logout` - Logout
-- `POST /auth/forgot-password` - Password reset
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - Login user
+- `POST /api/v1/auth/refresh` - Refresh token
+- `POST /api/v1/auth/logout` - Logout
+- `POST /api/v1/auth/forgot-password` - Password reset
 
 ### 2. Case Management
-- `GET /cases` - List cases
-- `POST /cases` - Create case
-- `GET /cases/{caseId}` - Get case details
-- `PUT /cases/{caseId}` - Update case
-- `DELETE /cases/{caseId}` - Archive case
-- `POST /cases/{caseId}/status` - Change case status
+- `GET /api/v1/cases` - List cases
+- `POST /api/v1/cases` - Create case
+- `GET /api/v1/cases/{caseId}` - Get case details
+- `PUT /api/v1/cases/{caseId}` - Update case
+- `DELETE /api/v1/cases/{caseId}` - Archive case
+- `POST /api/v1/cases/{caseId}/status` - Change case status
 
 ### 3. Document Management
-- `POST /documents/upload` - Upload document
-- `GET /documents` - List documents
-- `GET /documents/{documentId}` - Get document details
-- `POST /documents/{documentId}/analyze` - AI analysis
-- `GET /documents/{documentId}/download` - Download document
+- `POST /api/v1/documents/upload` - Upload document
+- `GET /api/v1/documents` - List documents
+- `GET /api/v1/documents/{documentId}` - Get document details
+- `POST /api/v1/documents/{documentId}/analyze` - AI analysis
+- `GET /api/v1/documents/{documentId}/download` - Download document
 
 ### 4. Evidence Management
-- `POST /evidence` - Add evidence
-- `GET /evidence` - List evidence
-- `GET /evidence/{evidenceId}` - Get evidence details
-- `POST /evidence/{evidenceId}/verify` - Blockchain verification
+- `POST /api/v1/evidence` - Add evidence
+- `GET /api/v1/evidence` - List evidence
+- `GET /api/v1/evidence/{evidenceId}` - Get evidence details
+- `POST /api/v1/evidence/{evidenceId}/verify` - Blockchain verification
 
 ### 5. Hearings
-- `POST /hearings` - Schedule hearing
-- `GET /hearings` - List hearings
-- `PUT /hearings/{hearingId}` - Update hearing
-- `POST /hearings/{hearingId}/record` - Record hearing outcome
+- `POST /api/v1/hearings` - Schedule hearing
+- `GET /api/v1/hearings` - List hearings
+- `PUT /api/v1/hearings/{hearingId}` - Update hearing
+- `POST /api/v1/hearings/{hearingId}/record` - Record hearing outcome
 
 ### 6. Court Orders
-- `POST /orders` - Issue order
-- `GET /orders` - List orders
-- `PUT /orders/{orderId}` - Update order
+- `POST /api/v1/orders` - Issue order
+- `GET /api/v1/orders` - List orders
+- `PUT /api/v1/orders/{orderId}` - Update order
 
 ### 7. Legal Document Generation (LawGPT)
-- `POST /lawgpt/generate` - Generate document
-- `GET /lawgpt/templates` - List templates
+- `POST /api/v1/lawgpt/generate` - Generate document
+- `GET /api/v1/lawgpt/templates` - List templates
 
 ### 8. Legal Reasoning (NLP Orchestrator)
-- `POST /nlp/analyze` - Analyze case (with streaming)
-- `POST /forensics/analyze` - Forensic analysis
-- `POST /modi/ocr` - Modi script OCR
+- `POST /api/v1/nlp/analyze` - Analyze case (with streaming)
+- `POST /api/v1/research/deep` - Deep legal research (SSE streaming)
+- `POST /api/v1/forensics/analyze` - Forensic analysis
+- `POST /api/v1/modi/ocr` - Modi script OCR
 
 ---
 
@@ -663,13 +703,13 @@ class NyaySetuClient {
 
 ```bash
 # 1. Login
-TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"lawyer@example.com","password":"Pass123"}' \
   | jq -r '.token')
 
 # 2. Create case
-CASE=$(curl -s -X POST http://localhost:8080/cases \
+CASE=$(curl -s -X POST http://localhost:8080/api/v1/cases \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -685,14 +725,14 @@ CASE=$(curl -s -X POST http://localhost:8080/cases \
 CASE_ID=$(echo $CASE | jq -r '.id')
 
 # 3. Upload document
-curl -X POST http://localhost:8080/documents/upload \
+curl -X POST http://localhost:8080/api/v1/documents/upload \
   -H "Authorization: Bearer $TOKEN" \
   -F "caseId=$CASE_ID" \
   -F "documentType=COMPLAINT" \
   -F "file=@complaint.pdf"
 
 # 4. Schedule hearing
-curl -X POST http://localhost:8080/hearings \
+curl -X POST http://localhost:8080/api/v1/hearings \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -707,7 +747,7 @@ curl -X POST http://localhost:8080/hearings \
 
 ```bash
 # 1. Generate affidavit
-AFFIDAVIT=$(curl -s -X POST http://localhost:8000/lawgpt/generate \
+AFFIDAVIT=$(curl -s -X POST http://localhost:8000/api/v1/lawgpt/generate \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -722,7 +762,7 @@ AFFIDAVIT=$(curl -s -X POST http://localhost:8000/lawgpt/generate \
   }')
 
 # 2. Analyze case with legal reasoning
-curl -X POST http://localhost:8001/nlp/analyze \
+curl -X POST http://localhost:8001/api/v1/nlp/analyze \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
@@ -737,7 +777,7 @@ curl -X POST http://localhost:8001/nlp/analyze \
 
 ```bash
 # 1. Add evidence with chain of custody
-EVIDENCE=$(curl -s -X POST http://localhost:8080/evidence \
+EVIDENCE=$(curl -s -X POST http://localhost:8080/api/v1/evidence \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -758,7 +798,7 @@ HASH=$(echo $EVIDENCE | jq -r '.blockchainHash')
 echo "Evidence stored with blockchain hash: $HASH"
 
 # 2. Verify evidence integrity
-curl -X POST http://localhost:8080/evidence/$EVIDENCE_ID/verify \
+curl -X POST http://localhost:8080/api/v1/evidence/$EVIDENCE_ID/verify \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -776,13 +816,13 @@ curl -X POST http://localhost:8080/evidence/$EVIDENCE_ID/verify \
 ```bash
 # Check if token is expired
 # Solution 1: Re-login to get new token
-TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"Pass123"}' \
   | jq -r '.token')
 
 # Solution 2: Refresh token
-curl -X POST http://localhost:8080/auth/refresh \
+curl -X POST http://localhost:8080/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{"refreshToken":"YOUR_REFRESH_TOKEN"}'
 ```
@@ -819,7 +859,7 @@ netstat -an | grep 8080  # For backend
 **Solutions:**
 ```bash
 # Ensure Accept header is set
-curl -X POST http://localhost:8001/nlp/analyze \
+curl -X POST http://localhost:8001/api/v1/nlp/analyze \
   -H "Accept: text/event-stream" \
   ...
 ```

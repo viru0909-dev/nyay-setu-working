@@ -37,7 +37,10 @@ from config import (
     RETRY_MAX_ATTEMPTS,
     RETRY_DELAY_SECONDS,
     PROVIDER_ORDER,
+    OLLAMA_API_URL,
+    OLLAMA_MODEL,
 )
+import httpx
 
 from utils import (
     CircuitBreaker,
@@ -54,6 +57,7 @@ gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 # Module-level circuit breakers for persistent state across requests.
 groq_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 gemini_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
+ollama_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 
 
 # ─── Prompts ──────────────────────────────────────────────────────────────────
@@ -112,7 +116,7 @@ def _fallback_response(question: str, source: str) -> dict:
 
 def build_provider_queue(primary_provider: str) -> list[str]:
     """Return ordered, deduplicated provider list with primary first."""
-    ordered = [p for p in PROVIDER_ORDER if p in {"gemini", "groq"}]
+    ordered = [p for p in PROVIDER_ORDER if p in {"gemini", "groq", "ollama"}]
     if primary_provider in ordered:
         ordered = [primary_provider] + [p for p in ordered if p != primary_provider]
 
@@ -130,42 +134,59 @@ def build_provider_queue(primary_provider: str) -> list[str]:
     return result
 
 
-async def _attempt_provider(provider: str, question: str, kanoon_context: str | None = None) -> dict:
+async def _attempt_provider(
+    provider: str, question: str, kanoon_context: str | None = None
+) -> dict:
     """Invoke a single provider once, honoring circuit-breaker state and returning a structured result or fallback."""
     if provider == "gemini":
         if not gemini_client:
             return _fallback_response(question, "gemini")
-        if not gemini_breaker.is_available():
+        if not await gemini_breaker.is_available():
             logger.warning("[CircuitBreaker/Gemini] OPEN - skipping")
             return _fallback_response(question, "gemini")
         try:
             # Use single-attempt call here; coordinator owns retries
             res = await _call_gemini_once(question, kanoon_context)
-            gemini_breaker.call_succeeded()
+            await gemini_breaker.call_succeeded()
             return res
         except Exception as exc:
-            gemini_breaker.call_failed()
+            await gemini_breaker.call_failed()
             logger.error(f"[Research/Gemini] Provider attempt failed: {exc}")
             raise
 
     if provider == "groq":
-        if not groq_breaker.is_available():
+        if not await groq_breaker.is_available():
             logger.warning("[CircuitBreaker/Groq] OPEN - skipping")
             return _fallback_response(question, "groq")
         try:
             # Use single-attempt call here; coordinator owns retries
             res = await _call_groq_once(question, kanoon_context)
-            groq_breaker.call_succeeded()
+            await groq_breaker.call_succeeded()
             return res
         except Exception as exc:
-            groq_breaker.call_failed()
+            await groq_breaker.call_failed()
             logger.error(f"[Research/Groq] Provider attempt failed: {exc}")
+            raise
+
+    if provider == "ollama":
+        if not await ollama_breaker.is_available():
+            logger.warning("[CircuitBreaker/Ollama] OPEN - skipping")
+            return _fallback_response(question, "ollama")
+        try:
+            res = await _call_ollama_once(question, kanoon_context)
+            await ollama_breaker.call_succeeded()
+            return res
+        except Exception as exc:
+            await ollama_breaker.call_failed()
+            logger.error(f"[Research/Ollama] Provider attempt failed: {exc}")
             raise
 
     return _fallback_response(question, provider)
 
 
-async def execute_with_fallback(question: str, kanoon_context: str | None = None, primary_provider: str = "gemini") -> dict:
+async def execute_with_fallback(
+    question: str, kanoon_context: str | None = None, primary_provider: str = "gemini"
+) -> dict:
     """Coordinator: try primary provider with retries, then fallback to secondary providers.
 
     Returns the first successful provider result or a unified fallback response when all fail.
@@ -189,16 +210,26 @@ async def execute_with_fallback(question: str, kanoon_context: str | None = None
             except Exception as exc:
                 last_error = exc
                 # Decide whether to retry this exception
-                is_last_attempt = (attempt == RETRY_MAX_ATTEMPTS)
-                if (not RETRY_ENABLED) or (not is_retryable_exception(exc)) or is_last_attempt:
-                    logger.error(f"[Research] Provider {provider} terminal error: {exc}")
+                is_last_attempt = attempt == RETRY_MAX_ATTEMPTS
+                if (
+                    (not RETRY_ENABLED)
+                    or (not is_retryable_exception(exc))
+                    or is_last_attempt
+                ):
+                    logger.error(
+                        f"[Research] Provider {provider} terminal error: {exc}"
+                    )
                     break
                 # backoff increases with each retry (attempt starts at 0)
                 wait = RETRY_DELAY_SECONDS * (attempt + 1)
-                logger.warning(f"[Research] Transient error from {provider}, retry {attempt+1} in {wait}s: {exc}")
+                logger.warning(
+                    f"[Research] Transient error from {provider}, retry {attempt+1} in {wait}s: {exc}"
+                )
                 await asyncio.sleep(wait)
 
-        logger.warning(f"[Research] Provider {provider} exhausted, trying next provider if available")
+        logger.warning(
+            f"[Research] Provider {provider} exhausted, trying next provider if available"
+        )
 
     logger.error(f"[Research] All providers exhausted. Last error: {last_error}")
     return _fallback_response(question, "all_providers_failed")
@@ -210,8 +241,10 @@ async def _call_groq_once(question: str, kanoon_context: str | None = None) -> d
     response = await groq_client.chat.completions.create(
         model=GROQ_MODEL_FAST,
         messages=[
-            {"role": "system",
-             "content": f"{LEGAL_SYSTEM_PROMPT}\n\n{KANOON_CONTEXT_PROMPT}"},
+            {
+                "role": "system",
+                "content": f"{LEGAL_SYSTEM_PROMPT}\n\n{KANOON_CONTEXT_PROMPT}",
+            },
             {"role": "user", "content": user_prompt},
         ],
         temperature=0.2,
@@ -281,7 +314,39 @@ async def _call_gemini_once(
 _call_groq_with_retry = retry_transient(_call_groq_once)
 _call_gemini_with_retry = retry_transient(_call_gemini_once)
 
+
+async def _call_ollama_once(question: str, kanoon_context: str | None = None) -> dict:
+    """Single attempt to call local Ollama model."""
+    user_prompt = _build_user_prompt(question, kanoon_context)
+    full_prompt = (
+        f"{LEGAL_SYSTEM_PROMPT}\n\n"
+        f"{KANOON_CONTEXT_PROMPT}\n\n"
+        f"Question: {user_prompt}"
+    )
+
+    payload = {"model": OLLAMA_MODEL, "prompt": full_prompt, "stream": False}
+
+    async with httpx.AsyncClient() as client:
+        # Use a generous timeout for local models which might take a bit to respond
+        response = await client.post(
+            f"{OLLAMA_API_URL}/api/generate", json=payload, timeout=120.0
+        )
+        response.raise_for_status()
+        data = response.json()
+
+    return {
+        "question": question,
+        "answer": data.get("response", "").strip(),
+        "source": "ollama",
+        "grounded": bool(kanoon_context),
+        "error": None,
+    }
+
+
+_call_ollama_with_retry = retry_transient(_call_ollama_once)
+
 # ─── Public LLM entry points (circuit-breaker layer) ──────────────────────────
+
 
 def _enforce_ground_flag(kanoon_context: str | None) -> str | None:
     """Strip context if GROUND_RESEARCH=false, so we can A/B test grounding."""
@@ -296,16 +361,16 @@ async def call_groq_async(
 ) -> dict:
     """Call Groq with circuit breaker + retry + ground-flag enforcement."""
     kanoon_context = _enforce_ground_flag(kanoon_context)
-    if not groq_breaker.is_available():
+    if not await groq_breaker.is_available():
         logger.warning("[CircuitBreaker/Groq] OPEN — fast-failing")
         return _fallback_response(question, "groq")
 
     try:
         result = await _call_groq_with_retry(question, kanoon_context)
-        groq_breaker.call_succeeded()
+        await groq_breaker.call_succeeded()
         return result
     except Exception as e:
-        groq_breaker.call_failed()
+        await groq_breaker.call_failed()
         logger.error(f"[Research/Groq] failed after retries: {type(e).__name__}: {e}")
         return _fallback_response(question, "groq")
 
@@ -319,16 +384,16 @@ async def call_gemini_async(
 
     if not gemini_client:
         return await call_groq_async(question, kanoon_context)
-    if not gemini_breaker.is_available():
+    if not await gemini_breaker.is_available():
         logger.warning("[CircuitBreaker/Gemini] OPEN — falling back to Groq")
         return await call_groq_async(question, kanoon_context)
 
     try:
         result = await _call_gemini_with_retry(question, kanoon_context)
-        gemini_breaker.call_succeeded()
+        await gemini_breaker.call_succeeded()
         return result
     except Exception as e:
-        gemini_breaker.call_failed()
+        await gemini_breaker.call_failed()
         logger.error(f"[Research/Gemini] failed after retries: {type(e).__name__}: {e}")
         return await call_groq_async(question, kanoon_context)
 
@@ -356,7 +421,9 @@ async def run_parallel_research(
         model = item["model"]
 
         # Use unified coordinator to handle retries and fallback ordering
-        tasks.append(execute_with_fallback(question, kanoon_context, primary_provider=model))
+        tasks.append(
+            execute_with_fallback(question, kanoon_context, primary_provider=model)
+        )
 
     results = await asyncio.gather(*tasks, return_exceptions=False)
     return list(results)

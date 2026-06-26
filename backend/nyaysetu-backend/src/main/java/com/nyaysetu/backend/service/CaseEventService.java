@@ -219,7 +219,7 @@ public class CaseEventService {
             if (EVENT_STATUS_CHANGE.equals(event.getEventType())) {
                 messagingTemplate.convertAndSend(
                         "/topic/case/" + event.getCaseId() + "/status",
-                        Map.of(
+                        (Object) Map.of(
                                 "caseId", event.getCaseId(),
                                 "previousStatus", event.getPreviousStatus(),
                                 "newStatus", event.getNewStatus(),
@@ -232,7 +232,7 @@ public class CaseEventService {
             if (EVENT_STAGE_CHANGE.equals(event.getEventType())) {
                 messagingTemplate.convertAndSend(
                         "/topic/case/" + event.getCaseId() + "/stage",
-                        Map.of(
+                        (Object) Map.of(
                                 "caseId", event.getCaseId(),
                                 "previousStage", event.getPreviousStage(),
                                 "newStage", event.getNewStage(),
@@ -245,7 +245,7 @@ public class CaseEventService {
             if (EVENT_POLICE_SUBMIT.equals(event.getEventType())) {
                 messagingTemplate.convertAndSend(
                         "/topic/judge/unassigned",
-                        Map.of(
+                        (Object) Map.of(
                                 "caseId", event.getCaseId(),
                                 "summary", event.getSummary(),
                                 "timestamp", event.getTimestamp()

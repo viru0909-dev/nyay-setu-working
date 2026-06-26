@@ -21,6 +21,8 @@ import {
     Wifi,
     WifiOff
 } from 'lucide-react';
+import ApiStateWrapper from '../../components/common/ApiStateWrapper';
+import EmptyState from '../../components/common/EmptyState';
 import { db } from '../../db/offlineDB';
 import toast from 'react-hot-toast';
 
@@ -119,19 +121,15 @@ export default function LawyerCasesPage() {
         boxShadow: 'var(--shadow-glass-strong)'
     };
 
-    if (loading) {
-        return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                <Loader2 size={48} className="spin" style={{ color: 'var(--color-primary)' }} />
-                <style>{`
-                    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                    .spin { animation: spin 1s linear infinite; }
-                `}</style>
-            </div>
-        );
-    }
-
     return (
+        <ApiStateWrapper
+            loading={loading}
+            data={cases}
+            onRetry={fetchCases}
+            emptyTitle="No cases in your portfolio"
+            emptyDescription="Cases assigned to you will appear here. Check back after a client engages you."
+            emptyIcon={Briefcase}
+        >
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             {/* Header */}
             <div style={{ marginBottom: '2.5rem' }}>
@@ -286,15 +284,15 @@ export default function LawyerCasesPage() {
             {/* Cases List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {filteredCases.length === 0 ? (
-                    <div style={{ ...glassStyle, textAlign: 'center', padding: '5rem' }}>
-                        <Briefcase size={64} color="var(--text-secondary)" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
-                        <h3 style={{ color: 'var(--text-main)', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
-                            {activeTab === 'active' ? 'No Case Entries Found' : 'No New Proposals'}
-                        </h3>
-                        <p style={{ color: 'var(--text-secondary)' }}>
-                            {activeTab === 'active' ? 'Your active portfolio is currently clear.' : 'Client proposals will appear here for your review.'}
-                        </p>
-                    </div>
+                    <EmptyState
+                        icon={Briefcase}
+                        title={activeTab === 'active' ? 'No Case Entries Found' : 'No New Proposals'}
+                        description={
+                            activeTab === 'active'
+                                ? 'Your active portfolio is currently clear.'
+                                : 'Client proposals will appear here for your review.'
+                        }
+                    />
                 ) : (
                     <>
                         {visibleCases.map((caseItem) => (
@@ -537,5 +535,6 @@ export default function LawyerCasesPage() {
                 )}
             </div>
         </div>
+        </ApiStateWrapper>
     );
 }

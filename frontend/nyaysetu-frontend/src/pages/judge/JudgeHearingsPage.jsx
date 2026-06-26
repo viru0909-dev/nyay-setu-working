@@ -1,7 +1,7 @@
+import { scheduleHearingReminder } from "../../utils/HearingReminder";
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/apiConfig';
+import { hearingAPI } from '../../services/api';
 import {
     Calendar, Clock, Video, ChevronRight, Loader2, ArrowLeft,
     CheckCircle, AlertCircle, CalendarDays, Filter, Search
@@ -20,10 +20,7 @@ export default function JudgeHearingsPage() {
 
     const fetchAllHearings = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_BASE_URL}/api/hearings/my`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await hearingAPI.getMyHearings();
             setHearings(response.data || []);
         } catch (error) {
             console.error('Error fetching hearings:', error);
@@ -317,7 +314,18 @@ export default function JudgeHearingsPage() {
     );
 }
 
-function HearingCard({ hearing, getStatusColor, formatDateTime, joinHearing, navigate, isPast }) {
+function HearingCard({
+    hearing,
+    getStatusColor,
+    formatDateTime,
+    joinHearing,
+    navigate,
+    isPast = false
+}) {
+   
+      
+    
+   
     const statusColor = getStatusColor(hearing.status);
     const canJoin = hearing.status === 'SCHEDULED' && !isPast;
 
@@ -388,34 +396,38 @@ function HearingCard({ hearing, getStatusColor, formatDateTime, joinHearing, nav
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                {canJoin && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            joinHearing(hearing);
-                        }}
-                        style={{
-                            padding: '0.75rem 1.25rem',
-                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                            border: 'none',
-                            borderRadius: '0.75rem',
-                            color: 'white',
-                            fontWeight: '700',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                            transition: 'all 0.2s'
-                        }}
-                        onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                        onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
-                    >
-                        <Video size={18} /> Join Hearing
-                    </button>
-                )}
-                <ChevronRight size={20} color="var(--text-secondary)" />
-            </div>
-        </div>
+    {canJoin && (
+        <button
+            onClick={(e) => {
+                e.stopPropagation();
+                joinHearing(hearing);
+            }}
+            
+        >
+            <Video size={18} /> Join Hearing
+        </button>
+    )}
+
+    <button
+        onClick={(e) => {
+            e.stopPropagation();
+            scheduleHearingReminder(hearing);
+        }}
+        style={{
+            padding: '0.75rem 1rem',
+            background: 'var(--bg-glass-strong)',
+            border: 'var(--border-glass-strong)',
+            borderRadius: '0.75rem',
+            color: 'var(--text-main)',
+            fontWeight: '600',
+            cursor: 'pointer'
+        }}
+    >
+        Set Reminder
+    </button>
+
+    <ChevronRight size={20} color="var(--text-secondary)" />
+</div>
+</div>
     );
 }

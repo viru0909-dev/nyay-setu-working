@@ -1,50 +1,58 @@
 package com.nyaysetu.backend.config;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 import com.nyaysetu.backend.handler.NotificationWebSocketHandler;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @EnableWebSocket
-@EnableWebSocketMessageBroker
 @RequiredArgsConstructor
-public class WebSocketConfig implements WebSocketConfigurer, WebSocketMessageBrokerConfigurer {
+public class WebSocketConfig implements WebSocketConfigurer {
+
+    private static final List<String> DEFAULT_ORIGINS = Arrays.asList(
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://localhost"
+    );
 
     private final NotificationWebSocketHandler notificationHandler;
 
-    // Raw WebSocket handler for notifications
+    @Value("${cors.allowed.origins:}")
+    private String allowedOrigins;
+
+    private String[] resolveAllowedOrigins() {
+        if (allowedOrigins != null && !allowedOrigins.trim().isEmpty()) {
+            List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+
+            if (origins.contains("*")) {
+                log.warn("CORS_ALLOWED_ORIGINS contains bare '*'. Falling back to localhost defaults for WebSocket.");
+                return DEFAULT_ORIGINS.toArray(new String[0]);
+            }
+
+            return origins.toArray(new String[0]);
+        }
+
+        return DEFAULT_ORIGINS.toArray(new String[0]);
+    }
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(notificationHandler, "/api/ws/notifications")
-                .setAllowedOrigins("*");  // Configure appropriately for production
-    }
-
-    // STOMP message broker for SimpMessagingTemplate
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Enable simple in-memory broker for topics
-        config.enableSimpleBroker("/topic", "/queue");
-        // Prefix for messages FROM client TO server
-        config.setApplicationDestinationPrefixes("/app");
-    }
-
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // STOMP endpoint for SockJS fallback
-        registry.addEndpoint("/api/ws/stomp")
-                .setAllowedOrigins("*")
-                .withSockJS();
-        // Plain WebSocket STOMP endpoint
-        registry.addEndpoint("/api/ws/stomp")
-                .setAllowedOrigins("*");
+                .setAllowedOriginPatterns(resolveAllowedOrigins());
     }
 }

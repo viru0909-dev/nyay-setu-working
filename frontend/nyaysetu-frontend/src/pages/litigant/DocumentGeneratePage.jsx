@@ -7,8 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
-import lawgpt from '../../services/lawgptService';
+import { documentGenerateAPI } from '../../services/api';
 
 const DOC_TYPES = [
     {
@@ -36,10 +35,10 @@ const DOC_TYPES = [
         bgColor: 'rgba(245, 158, 11, 0.08)',
     },
     {
-        id: 'notice',
+        id: 'demand_letter',
         icon: Mail,
-        title: 'Legal Notice',
-        description: 'Send a formal legal notice to a party',
+        title: 'Demand Letter',
+        description: 'Create a pre-litigation demand notice for your dispute',
         color: '#EF4444',
         bgColor: 'rgba(239, 68, 68, 0.08)',
     },
@@ -67,6 +66,8 @@ const DocumentGeneratePage = () => {
         caseDescription: '',
         incidentDate: '',
         reliefSought: '',
+        noticePeriod: '15',
+        language: 'en',
         courtName: '',
         departmentName: '',
         pioName: '',
@@ -75,6 +76,17 @@ const DocumentGeneratePage = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const computeResponseDeadline = () => {
+        if (!selectedType || selectedType !== 'demand_letter' || !form.noticePeriod) {
+            return null;
+        }
+        const days = parseInt(form.noticePeriod, 10);
+        if (Number.isNaN(days) || days <= 0) return null;
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + days);
+        return deadline.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
     };
 
     const selectDocType = (typeId) => {
@@ -91,6 +103,9 @@ const DocumentGeneratePage = () => {
         if (selectedType === 'rti') {
             return !!form.departmentName;
         }
+        if (selectedType === 'demand_letter') {
+            return !!form.respondentName && !!form.respondentAddress && !!form.reliefSought && !!form.noticePeriod;
+        }
         if (selectedType !== 'rti') {
             return !!form.respondentName && !!form.respondentAddress && !!form.reliefSought;
         }
@@ -104,23 +119,22 @@ const DocumentGeneratePage = () => {
         setInjectionWarnings([]);
         try {
             const payload = {
-                doc_type: selectedType,
-                fields: {
-                    petitioner_name: form.petitionerName,
-                    petitioner_address: form.petitionerAddress,
-                    respondent_name: form.respondentName,
-                    respondent_address: form.respondentAddress,
-                    case_description: form.caseDescription,
-                    incident_date: form.incidentDate,
-                    relief_sought: form.reliefSought,
-                    court_name: form.courtName,
-                    department_name: form.departmentName,
-                    pio_name: form.pioName,
-                },
-                language: 'en',
+                docType: selectedType,
+                petitionerName: form.petitionerName,
+                petitionerAddress: form.petitionerAddress,
+                respondentName: form.respondentName,
+                respondentAddress: form.respondentAddress,
+                caseDescription: form.caseDescription,
+                incidentDate: form.incidentDate,
+                reliefSought: form.reliefSought,
+                noticePeriod: form.noticePeriod,
+                language: form.language,
+                courtName: form.courtName,
+                departmentName: form.departmentName,
+                pioName: form.pioName,
             };
 
-            const response = await lawgpt.generate(payload);
+            const response = await documentGenerateAPI.preview(payload);
             setGeneratedDoc(response.data);
             setStep(3);
         } catch (err) {
@@ -138,25 +152,23 @@ const DocumentGeneratePage = () => {
         setInjectionWarnings([]);
         try {
             const payload = {
-                doc_type: selectedType,
-                fields: {
-                    petitioner_name: form.petitionerName,
-                    petitioner_address: form.petitionerAddress,
-                    respondent_name: form.respondentName,
-                    respondent_address: form.respondentAddress,
-                    case_description: form.caseDescription,
-                    incident_date: form.incidentDate,
-                    relief_sought: form.reliefSought,
-                    court_name: form.courtName,
-                    department_name: form.departmentName,
-                    pio_name: form.pioName,
-                },
-                language: 'en',
+                docType: selectedType,
+                petitionerName: form.petitionerName,
+                petitionerAddress: form.petitionerAddress,
+                respondentName: form.respondentName,
+                respondentAddress: form.respondentAddress,
+                caseDescription: form.caseDescription,
+                incidentDate: form.incidentDate,
+                reliefSought: form.reliefSought,
+                noticePeriod: form.noticePeriod,
+                language: form.language,
+                courtName: form.courtName,
+                departmentName: form.departmentName,
+                pioName: form.pioName,
             };
 
-            const response = await lawgpt.generatePdf(payload);
+            const response = await documentGenerateAPI.download(payload);
 
-            // Create download link
             const blob = new Blob([response.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -181,23 +193,22 @@ const DocumentGeneratePage = () => {
         setInjectionWarnings([]);
         try {
             const payload = {
-                doc_type: selectedType,
-                fields: {
-                    petitioner_name: form.petitionerName,
-                    petitioner_address: form.petitionerAddress,
-                    respondent_name: form.respondentName,
-                    respondent_address: form.respondentAddress,
-                    case_description: form.caseDescription,
-                    incident_date: form.incidentDate,
-                    relief_sought: form.reliefSought,
-                    court_name: form.courtName,
-                    department_name: form.departmentName,
-                    pio_name: form.pioName,
-                },
-                language: 'en',
+                docType: selectedType,
+                petitionerName: form.petitionerName,
+                petitionerAddress: form.petitionerAddress,
+                respondentName: form.respondentName,
+                respondentAddress: form.respondentAddress,
+                caseDescription: form.caseDescription,
+                incidentDate: form.incidentDate,
+                reliefSought: form.reliefSought,
+                noticePeriod: form.noticePeriod,
+                language: form.language,
+                courtName: form.courtName,
+                departmentName: form.departmentName,
+                pioName: form.pioName,
             };
 
-            const response = await lawgpt.generateDocx(payload);
+            const response = await documentGenerateAPI.downloadDocx(payload);
             const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -493,10 +504,41 @@ const DocumentGeneratePage = () => {
                                     </div>
                                 </div>
 
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={labelStyle}>Language</label>
+                                        <select name="language" value={form.language} onChange={handleInputChange}
+                                            style={inputStyle}>
+                                            <option value="en">English</option>
+                                            <option value="hi">Hindi</option>
+                                            <option value="ta">Tamil</option>
+                                            <option value="mr">Marathi</option>
+                                            <option value="kn">Kannada</option>
+                                        </select>
+                                    </div>
+                                    {selectedType === 'demand_letter' && (
+                                        <div>
+                                            <label style={labelStyle}>Response Period (days) *</label>
+                                            <input name="noticePeriod" type="number" min="1" value={form.noticePeriod} onChange={handleInputChange}
+                                                style={inputStyle} placeholder="e.g. 30" />
+                                            {validationErrors.noticePeriod && (
+                                                <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                    {validationErrors.noticePeriod}
+                                                </div>
+                                            )}
+                                            {computeResponseDeadline() && (
+                                                <div style={{ color: '#4B5563', fontSize: '0.85rem', marginTop: '0.35rem' }}>
+                                                    Suggested response deadline: {computeResponseDeadline()}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div>
                                     <label style={labelStyle}>Petitioner Address *</label>
-                                    <input name="petitionerAddress" value={form.petitionerAddress} onChange={handleInputChange}
-                                        style={inputStyle} placeholder="Complete residential address" />
+                                    <textarea name="petitionerAddress" value={form.petitionerAddress} onChange={handleInputChange}
+                                        style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} placeholder="Complete residential address" />
                                     {validationErrors.petitionerAddress && (
                                         <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
                                             {validationErrors.petitionerAddress}
@@ -520,8 +562,8 @@ const DocumentGeneratePage = () => {
                                             </div>
                                             <div>
                                                 <label style={labelStyle}>Respondent Address *</label>
-                                                <input name="respondentAddress" value={form.respondentAddress} onChange={handleInputChange}
-                                                    style={inputStyle} placeholder="Respondent's address" />
+                                                <textarea name="respondentAddress" value={form.respondentAddress} onChange={handleInputChange}
+                                                    style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} placeholder="Respondent's address" />
                                                     {validationErrors.respondentAddress && (
                                                         <div style={{ color: '#DC2626', fontSize: '0.85rem', marginTop: '0.35rem' }}>
                                                             {validationErrors.respondentAddress}
