@@ -21,7 +21,7 @@ import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
 
 // Imported Feature Component
 
-// ==========================================
+import { FAQSection } from './components/FAQSection';
 // VITE CHUNK BREAKAGE MITIGATION WRAPPER
 // ==========================================
 const retryLazy = (componentImport) => lazy(async () => {
@@ -241,7 +241,7 @@ function App({ swRegistration }) {
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
-                                <Route path="/faq" element={<FAQ />} />
+                                <Route path="/faq" element={<FAQSection />} />
 
                                 {/* Litigant Functional Core */}
                                 <Route path="/litigant/*" element={
