@@ -85,11 +85,12 @@ git checkout -b feat/your-feature-name
 ## Project Setup
 
 ### Prerequisites
-- **Node.js** v14+ and npm
-- **Java** JDK 11 or higher
-- **Python** 3.8+
+- **Node.js** v20+ and npm
+- **Java** JDK 17
+- **Maven** 3.9+
+- **Python** 3.12+
 - **Docker** & **Docker Compose** (recommended for easy setup)
-- **PostgreSQL** (if running locally without Docker)
+- **PostgreSQL** 15+ (if running locally without Docker)
 - **Git**
 
 ### Quick Setup with Docker (Recommended)
@@ -120,7 +121,7 @@ Services will be available at:
 - LawGPT: `http://localhost:8000`
 - NLP Orchestrator: `http://localhost:8001`
 - Signaling Server: `http://localhost:3001`
-- Frontend: `http://localhost:3000`
+- Frontend: `http://localhost:5173`
 
 ### Manual Setup (Without Docker)
 
@@ -132,12 +133,12 @@ mvn spring-boot:run
 # Backend runs on http://localhost:8080
 ```
 
-#### Frontend Setup (React)
+#### Frontend Setup (React/Vite)
 ```bash
 cd frontend/nyaysetu-frontend
 npm install
 npm run dev
-# Frontend runs on http://localhost:3000
+# Frontend runs on http://localhost:5173
 ```
 
 #### LawGPT Service Setup (Python)
@@ -239,7 +240,7 @@ mvn test
 #### Run Frontend Tests
 ```bash
 cd frontend/nyaysetu-frontend
-npm test
+npx vitest run
 ```
 
 #### Run Python Tests
@@ -435,7 +436,7 @@ public class CaseServiceTest {
 }
 ```
 
-#### Frontend (Jest/React Testing Library)
+#### Frontend (Vitest/React Testing Library)
 ```javascript
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CaseList } from '../CaseList';
@@ -447,14 +448,14 @@ describe('CaseList Component', () => {
             { id: '2', title: 'Case 2' }
         ];
         
-        render(<CaseList cases={cases} onSelectCase={jest.fn()} />);
+        render(<CaseList cases={cases} onSelectCase={vi.fn()} />);
         
         expect(screen.getByText('Case 1')).toBeInTheDocument();
         expect(screen.getByText('Case 2')).toBeInTheDocument();
     });
     
     it('calls onSelectCase when item is clicked', () => {
-        const onSelectCase = jest.fn();
+        const onSelectCase = vi.fn();
         render(<CaseList cases={[{ id: '1', title: 'Case 1' }]} onSelectCase={onSelectCase} />);
         
         fireEvent.click(screen.getByText('Case 1'));
@@ -490,8 +491,8 @@ def test_get_case_by_id_not_found(case_service):
 # Backend
 cd backend/nyaysetu-backend && mvn test
 
-# Frontend
-cd frontend/nyaysetu-frontend && npm test
+# Frontend (single run, no watch mode)
+cd frontend/nyaysetu-frontend && npx vitest run
 
 # Python services
 cd nlp-orchestrator && python -m pytest
@@ -805,9 +806,9 @@ When I test with cURL, I get:
   {"error": "Invalid refresh token"}
 I've verified the token is being saved correctly.
 My environment:
-- Java 11
-- Spring Boot 2.7
-- PostgreSQL 12
+- Java 17
+- Spring Boot 3.2
+- PostgreSQL 15
 
 Steps to reproduce:
 1. Login and get refresh token
