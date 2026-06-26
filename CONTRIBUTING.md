@@ -102,6 +102,22 @@ Do **not** open a public issue for security bugs. Follow the process in [SECURIT
    - Leave a comment on the issue you wish to work on asking to be assigned.
    - **Do not** start working or open a Pull Request for an issue assigned to someone else.
    - If an assignee shows no activity for **7 days**, the issue may be reassigned.
+   - **Activity** means: a comment on the issue, a linked PR, or a commit referencing the issue number.
+   - If you need more than 7 days, **comment on the issue** explaining your timeline — maintainers will accommodate reasonable requests.
+   - To request reassignment of a stale issue, comment: *"Hi, this issue seems stale. I'd like to work on it — can I be assigned?"*
+
+### GSSoC'26 Points Guide
+
+Each issue is tagged with a difficulty level that maps to GSSoC points:
+
+| Label | Points | What it means |
+|-------|--------|---------------|
+| `level-1` | 10 pts | Documentation, typo fixes, minor UI tweaks |
+| `level-2` | 25 pts | Bug fixes, small features, test coverage |
+| `level-3` | 45 pts | New features, major UI work, backend logic |
+
+> **Tip:** Start with `level-1` or `good first issue` to get familiar with
+> the codebase before attempting higher-level tasks.
 
 <hr/>
 
@@ -143,6 +159,15 @@ git checkout -b feat/your-feature-name
 - **PostgreSQL** 15+ (if running locally without Docker)
 - **Git**
 
+> **Verify your versions before starting:**
+> ```bash
+> node --version    # v20+
+> java -version     # 17
+> mvn -version      # 3.9+
+> python --version  # 3.12+
+> docker --version
+> ```
+
 ### Quick Setup with Docker (Recommended)
 
 1. **Clone and enter the directory:**
@@ -172,6 +197,10 @@ Services will be available at:
 - NLP Orchestrator: `http://localhost:8001`
 - Signaling Server: `http://localhost:3001`
 - Frontend: `http://localhost:5173`
+
+> **Note:** `LawGPT` (port 8000) and `Signaling Server` (port 3001) must be started
+> manually if needed — they are not part of the Docker Compose setup. The backend
+> falls back gracefully if LawGPT is unavailable.
 
 ### Manual Setup (Without Docker)
 
@@ -241,6 +270,16 @@ KANOON_API_URL=https://api.kanoon.org
 # Application
 APP_ENV=development
 ```
+
+> ⚠️ **CRITICAL — Never Commit Credentials**
+>
+> **Never push real API keys, database passwords, or JWT secrets to GitHub.**
+>
+> - Always use `.env.example` as your reference template
+> - Your actual `.env` is in `.gitignore` and must never be staged
+> - Before committing, run `git status` and confirm `.env` is not listed
+> - If you accidentally commit a secret, rotate it immediately and contact
+>   the maintainer
 
 Refer to [Setup Guide](./docs/setup.md) for detailed configuration.
 
@@ -663,7 +702,14 @@ Every PR must pass the following before it can be merged:
 - **No blame:** Focus on solutions, not who caused issues
 - **Share knowledge:** Help team members learn
 
-### 7. Before Requesting Review
+### 7. Security
+- **Never commit secrets:** No API keys, passwords, or tokens in code
+- **Validate inputs:** Always validate and sanitize user input on both frontend and backend
+- **Use HTTPS:** Never hardcode `http://` URLs for external services
+- **Least privilege:** Request only the permissions your feature needs
+- **Report vulnerabilities:** Follow [SECURITY.md](./SECURITY.md) — do not open a public issue
+
+### 8. Before Requesting Review
 - [ ] All tests pass locally
 - [ ] Code formatted and linted
 - [ ] No console errors or warnings
@@ -671,6 +717,7 @@ Every PR must pass the following before it can be merged:
 - [ ] PR description is complete
 - [ ] Related issues are linked
 - [ ] Screenshots included (if applicable)
+- [ ] No `.env` or credentials accidentally staged
 
 <hr/>
 
@@ -807,6 +854,21 @@ git rebase upstream/main
 # If there are conflicts, resolve them
 # Then force push to your fork
 git push origin your-branch-name -f
+```
+
+#### Accidentally Staged `.env` or Credentials
+```bash
+# Unstage the file immediately
+git reset HEAD .env
+
+# Add to .gitignore if not already there
+echo ".env" >> .gitignore
+
+# If already committed, remove from history
+git rm --cached .env
+git commit -m "chore: remove accidentally committed .env file"
+
+# Rotate any exposed credentials immediately
 ```
 
 ### Getting Additional Help
