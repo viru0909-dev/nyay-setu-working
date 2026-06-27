@@ -241,7 +241,7 @@ function App({ swRegistration }) {
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
-                                <Route path="/faq" element={<FAQSection />} />
+                                <Route path="/faq" element={<FAQ />} />
 
                                 {/* Litigant Functional Core */}
                                 <Route path="/litigant/*" element={
