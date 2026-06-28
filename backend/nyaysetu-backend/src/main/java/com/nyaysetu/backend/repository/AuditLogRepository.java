@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
+    // Fetch audit logs for a specific case, ordered by timestamp
     List<AuditLog> findByCaseIdOrderByTimestampAsc(UUID caseId);
     /** Returns the most recently persisted entry — used to retrieve its hash for chaining. */
     Optional<AuditLog> findTopByOrderByTimestampDesc();
