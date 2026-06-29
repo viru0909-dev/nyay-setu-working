@@ -6,8 +6,10 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 import ScrollToTop from './ScrollToTop';
+import BackToTop from './components/BackToTop';
 import './styles/accessibility.css';
 import ScrollProgressBar from './components/ScrollProgressBar';
+import ScrollButtons from "./components/ScrollButtons";
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator';
@@ -54,12 +56,16 @@ const PrivacyPolicy = retryLazy(() => import('./pages/PrivacyPolicy'));
 const Terms = retryLazy(() => import('./pages/Terms'));
 const Disclaimer = retryLazy(() => import('./pages/Disclaimer'));
 const UpcomingFeatures = retryLazy(() => import('./pages/UpcomingFeatures'));
+const FAQ = retryLazy(() => import('./pages/FAQ'));
+const Contact = retryLazy(() => import('./pages/Contact'));
+import OAuthSuccess from './pages/OAuthSuccess';
 
 // Dashboard Layout
 const DashboardLayout = retryLazy(() => import('./layouts/DashboardLayout'));
 
 // Dashboard Pages
 const AdminDashboard = retryLazy(() => import('./pages/dashboards/AdminDashboard'));
+const AdminFeedbackPage = retryLazy(() => import('./pages/dashboards/AdminFeedbackPage'));
 const LawyerDashboard = retryLazy(() => import('./pages/dashboards/LawyerDashboard'));
 
 // Litigant Pages
@@ -221,12 +227,14 @@ function App({ swRegistration }) {
                         <GuestWelcomeToast />
                         <GuestOnboardingHint />
                         <ScrollToTop />
+                        <BackToTop />
                         
                         <Suspense fallback={<LoadingSpinner fullScreen message="Loading NyaySetu..." />}>
                             <Routes>
                                 {/* Base Application Portals */}
                                 <Route path="/" element={<Landing />} />
                                 <Route path="/login" element={<Login />} />
+                                <Route path="/oauth-success" element={<OAuthSuccess />} />
                                 <Route path="/signup" element={<Signup />} />
                                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                                 <Route path="/constitution" element={<Constitution />} />
@@ -235,6 +243,8 @@ function App({ swRegistration }) {
                                 <Route path="/terms" element={<Terms />} />
                                 <Route path="/disclaimer" element={<Disclaimer />} />
                                 <Route path="/upcoming-features" element={<UpcomingFeatures />} />
+                                <Route path="/faq" element={<FAQ />} />
+                                <Route path="/contact" element={<Contact />} />
 
                                 {/* Litigant Functional Core */}
                                 <Route path="/litigant/*" element={
@@ -298,11 +308,12 @@ function App({ swRegistration }) {
 
                                 {/* Administrative Core */}
                                 <Route path="/admin/*" element={
-                                    <ProtectedWorkspace allowedRoles={['ADMIN']} message="Loading Admin Panel...">
+                                    <ProtectedWorkspace allowedRoles={['ADMIN', 'TECH_ADMIN', 'TECHNICAL_TEAM', 'SUPER_JUDGE']} message="Loading Admin Panel...">
                                         <DashboardLayout />
                                     </ProtectedWorkspace>
                                 }>
                                     <Route index element={<AdminDashboard />} />
+                                        <Route path="feedback" element={<AdminFeedbackPage />} />
                                     <Route path="*" element={<Navigate to="/admin" replace />} />
                                 </Route>
 
@@ -329,7 +340,8 @@ function App({ swRegistration }) {
                     </BrowserRouter>
                 </LanguageProvider>
             </ErrorBoundary>
-        </ThemeProvider>
+        <ScrollButtons />
+    </ThemeProvider>
     );
 }
 

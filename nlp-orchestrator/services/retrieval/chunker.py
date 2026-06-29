@@ -27,10 +27,12 @@ logger = logging.getLogger("retrieval-chunker")
 
 try:
     import tiktoken
+
     _ENCODING = tiktoken.get_encoding("cl100k_base")
 
     def count_tokens(text: str) -> int:
         return len(_ENCODING.encode(text))
+
 except ImportError:
     logger.warning("tiktoken not installed; falling back to whitespace token counting")
 
@@ -104,41 +106,8 @@ def _split_long_sentence(
 
     return chunks
 
+
 def split_legal_sections(text: str) -> list[str]:
-    """
-    Split `text` into section-aligned blocks at legal-section headings.
-
-    Each returned block begins with its heading (e.g. "Section 304A ...") and
-    runs up to — but not including — the next heading. Any preamble before the
-    first heading is returned as its own leading block so no content is lost.
-
-    If the text contains no recognisable headings, a single-element list with
-    the whole (stripped) text is returned, which makes this a safe no-op for
-    free-form prose.
-    """
-    if not text or not text.strip():
-        return []
-
-    starts = [m.start() for m in _SECTION_HEADING_RE.finditer(text)]
-    if not starts:
-        return [text.strip()]
-
-    # Ensure the preamble (anything before the first heading) is preserved.
-    boundaries = starts if starts[0] == 0 else [0, *starts]
-
-    blocks: list[str] = []
-    for idx, start in enumerate(boundaries):
-        end = boundaries[idx + 1] if idx + 1 < len(boundaries) else len(text)
-        block = text[start:end].strip()
-        if block:
-            blocks.append(block)
-    return blocks
-
-def chunk_text(
-    text: str,
-    max_tokens: int = 512,
-    overlap_tokens: int = 64,
-) -> list[str]:
     """
     Split `text` into section-aligned blocks at legal-section headings.
 
@@ -204,7 +173,9 @@ def _chunk_block(
                         chunks.append(" ".join(sent_buf))
                         sent_buf, sent_tokens = _tail_overlap(sent_buf, overlap_tokens)
 
-                    chunks.extend(_split_long_sentence(sentence, max_tokens, overlap_tokens))
+                    chunks.extend(
+                        _split_long_sentence(sentence, max_tokens, overlap_tokens)
+                    )
                     sent_buf = []
                     sent_tokens = 0
                     continue

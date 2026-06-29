@@ -149,7 +149,7 @@ public class VakilFriendController {
             return ResponseEntity.status(401).build();
         }
 
-        validateSessionOwnership(vakilFriendService.getSession(sessionId), user);
+        validateSessionOwnership(vakilFriendService.getSession(sessionId, user), user);
         DocumentAnalysisResponse response = documentService.analyzeDocument(null, sessionId, file, user);
         return ResponseEntity.ok(response);
     }
@@ -168,7 +168,7 @@ public class VakilFriendController {
             return ResponseEntity.status(401).build();
         }
 
-        validateSessionOwnership(vakilFriendService.getSession(sessionId), user);
+        validateSessionOwnership(vakilFriendService.getSession(sessionId, user), user);
         Map<String, Object> response = vakilFriendService.chat(sessionId, request, user);
         
         log.info("Processed message in session {}", sessionId);

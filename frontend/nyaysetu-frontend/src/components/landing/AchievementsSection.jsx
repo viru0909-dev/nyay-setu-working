@@ -72,9 +72,9 @@ export default function AchievementsSection() {
                 {/* Achievements Grid */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
                     gap: '3rem',
-                    padding: '2rem 1rem',
+                    padding: '2rem 1rem 8rem 1rem',
                     maxWidth: '1200px',
                     margin: '0 auto'
                 }}>
@@ -168,7 +168,7 @@ export default function AchievementsSection() {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '0.75rem',
-                                                padding: '1rem 2rem',
+                                                padding: '1rem',
                                                 background: '#1E2A44',
                                                 color: '#FFD700',
                                                 borderRadius: '12px',
@@ -197,12 +197,12 @@ export default function AchievementsSection() {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '0.75rem',
-                                                padding: '1rem 2rem',
+                                                padding: '1rem',
                                                 background: '#1E2A44',
                                                 color: '#FFD700',
                                                 borderRadius: '12px',
                                                 border: '2px solid #1E2A44',
-                                                fontSize: '1.1rem',
+                                                fontSize: '1rem',
                                                 fontWeight: '700',
                                                 textDecoration: 'none',
                                                 width: '80%',
@@ -226,7 +226,7 @@ export default function AchievementsSection() {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '0.75rem',
-                                                padding: '1rem 2rem',
+                                                padding: '1rem',
                                                 background: '#1E2A44',
                                                 color: '#FFD700',
                                                 borderRadius: '12px',
@@ -354,7 +354,9 @@ export default function AchievementsSection() {
                                     fontSize: '1.75rem',
                                     fontWeight: '800',
                                     marginBottom: '0.5rem',
-                                    lineHeight: '1.3'
+                                    lineHeight: '1.3',
+                                    wordWrap: 'break-word',
+                                    hyphens: 'auto'
                                 }}>
                                     {achievement.title}
                                 </h3>

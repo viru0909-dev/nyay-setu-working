@@ -135,7 +135,7 @@
     }
 
     /* Flex layouts that should stack */
-    div[style*="display: flex"][style*="gap"] {
+    div[style*="display: flex"][style*="gap"]:not(.trust-track):not(.trust-scroll-mask) {
         flex-wrap: wrap !important;
     }
 
@@ -216,8 +216,7 @@
 
     /* Stack the 3-column layout vertically */
     div[class*="columns"],
-    div[class*="grid"][class*="case"],
-    div[style*="display: flex"][style*="gap"] {
+    div[class*="grid"][class*="case"] {
         flex-direction: column !important;
         gap: 16px !important;
     }

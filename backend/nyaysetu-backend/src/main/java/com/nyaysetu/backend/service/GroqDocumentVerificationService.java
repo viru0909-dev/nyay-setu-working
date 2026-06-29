@@ -34,6 +34,7 @@ public class GroqDocumentVerificationService {
 
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate; // Injected bean with timeouts — see RestTemplateConfig
+    private final PiiSanitizer piiSanitizer;
     
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -302,13 +303,14 @@ public class GroqDocumentVerificationService {
     }
 
     private String callGroqAPI(String prompt) throws Exception {
+        String sanitizedPrompt = piiSanitizer.sanitizeForGroq(prompt);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + groqApiKey);
 
         Map<String, Object> message = new HashMap<>();
         message.put("role", "user");
-        message.put("content", prompt);
+        message.put("content", sanitizedPrompt);
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", groqModel);

@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -161,16 +164,22 @@ public class DocumentManagementController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DocumentDto>> getUserDocuments(Authentication authentication) {
+    public ResponseEntity<Page<DocumentDto>> getUserDocuments(
+            Authentication authentication,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
         User user = authService.findByEmail(authentication.getName());
-        List<DocumentDto> documents = documentManagementService.getUserDocuments(user.getId());
+        Page<DocumentDto> documents = documentManagementService.getUserDocuments(user.getId(), pageable);
         return ResponseEntity.ok(documents);
     }
 
     @GetMapping("/user/cases")
-    public ResponseEntity<List<CaseSummaryDto>> getUserCases(Authentication authentication) {
+    public ResponseEntity<Page<CaseSummaryDto>> getUserCases(
+            Authentication authentication,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
         User user = authService.findByEmail(authentication.getName());
-        List<CaseSummaryDto> cases = caseManagementService.getUserCaseSummaries(user);
+        Page<CaseSummaryDto> cases = caseManagementService.getUserCaseSummaries(user, pageable);
         return ResponseEntity.ok(cases);
     }
 

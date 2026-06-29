@@ -48,6 +48,11 @@ public class Hearing {
     
     @Column(name = "judge_notes", columnDefinition = "TEXT")
     private String judgeNotes;
+
+    private Boolean appealHearing;
+
+    @Column(columnDefinition = "TEXT")
+    private String hearingSummary;
     
     @Column(name = "recording_url", length = 500)
     private String recordingUrl;
@@ -62,6 +67,10 @@ public class Hearing {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+
+        if (appealHearing == null) {
+            appealHearing = false;
+        }
     }
     
     @PreUpdate

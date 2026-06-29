@@ -101,9 +101,10 @@ git checkout -b feat/your-feature-name
 ## Project Setup
 
 ### Prerequisites
-- **Node.js** v14+ and npm
-- **Java** JDK 11 or higher
-- **Python** 3.8+
+
+- **Node.js** v20+ and npm
+- **Java** JDK 17
+- **Python** 3.12+
 - **Docker** & **Docker Compose** (recommended for easy setup)
 - **PostgreSQL** (if running locally without Docker)
 - **Git**
@@ -133,10 +134,17 @@ git checkout -b feat/your-feature-name
 
 Services will be available at:
 - Backend: `http://localhost:8080`
-- LawGPT: `http://localhost:8000`
 - NLP Orchestrator: `http://localhost:8001`
-- Signaling Server: `http://localhost:3001`
 - Frontend: `http://localhost:3000`
+
+> **Note:** `LawGPT` (port 8000) and `Signaling Server` (port 3001) are **not part of
+> the Docker Compose setup**. LawGPT must be started manually if needed:
+> ```bash
+> cd lawgpt-service
+> pip install -r requirements.txt
+> uvicorn main:app --port 8000
+> ```
+> The backend will fall back gracefully if LawGPT is unavailable.
 
 ### Manual Setup (Without Docker)
 
@@ -861,7 +869,7 @@ When I test with cURL, I get:
   {"error": "Invalid refresh token"}
 I've verified the token is being saved correctly.
 My environment:
-- Java 11
+- Java 17
 - Spring Boot 2.7
 - PostgreSQL 12
 

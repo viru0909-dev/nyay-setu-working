@@ -29,6 +29,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      backend-python:
+        condition: service_started
     ports:
       - "8080:8080"
     environment:
@@ -37,6 +39,7 @@ services:
       - DB_USERNAME=${DB_USERNAME:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - GROQ_API_KEY=${GROQ_API_KEY:?Please set GROQ_API_KEY in your .env file}
+      - PII_NER_URL=${PII_NER_URL:-http://backend-python:8001/internal/pii/entities}
       - JWT_SECRET=${JWT_SECRET:?Please set JWT_SECRET in your .env file}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
@@ -56,9 +59,10 @@ services:
       - ENV=production
       - GROQ_API_KEY=${GROQ_API_KEY:?Please set GROQ_API_KEY in your .env file}
       - GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY}
+      - PII_NER_MODEL=${PII_NER_MODEL:-ai4bharat/IndicNER}
       # Keep this aligned with FRONTEND_URL; set both explicitly in .env when needed.
       - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-http://localhost}
-    mem_limit: 256M
+    mem_limit: 2G
     restart: always
 
   # 4. Frontend (React + Nginx)

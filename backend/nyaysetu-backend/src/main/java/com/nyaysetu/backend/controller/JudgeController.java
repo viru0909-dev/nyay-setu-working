@@ -7,7 +7,11 @@ import com.nyaysetu.backend.service.GroqDocumentVerificationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +26,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/judge")
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
 public class JudgeController {
 
     private final CaseRepository caseRepository;
@@ -36,9 +41,12 @@ public class JudgeController {
      * Get all cases assigned to the logged-in judge
      */
     @GetMapping("/cases")
-    public ResponseEntity<?> getJudgeCases(Authentication authentication) {
+    public ResponseEntity<Page<CaseEntity>> getJudgeCases(
+            Authentication authentication,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
         User judge = authService.findByEmail(authentication.getName());
-        List<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName());
+        Page<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName(), pageable);
         return ResponseEntity.ok(judgeCases);
     }
 
@@ -122,7 +130,7 @@ public class JudgeController {
     }
     @GetMapping("/unassigned")
     public ResponseEntity<?> getUnassignedCases() {
-        return ResponseEntity.ok(caseRepository.findUnassignedCases());
+        return ResponseEntity.ok(caseRepository.findByAssignedJudgeIsNull());
     }
 
     @GetMapping("/analytics")
@@ -130,7 +138,7 @@ public class JudgeController {
         User judge = authService.findByEmail(authentication.getName());
         List<CaseEntity> myCases = caseRepository.findByAssignedJudge(judge.getName());
         long assignedCount = myCases.size();
-        long unassignedCount = caseRepository.findUnassignedCases().size();
+        long unassignedCount = caseRepository.findByJudgeIdIsNull().size();
         
         // Compute real stats from myCases
         long pending = myCases.stream().filter(c -> "NEW".equals(c.getStatus().toString())).count();

@@ -6,11 +6,16 @@ import com.nyaysetu.backend.entity.CaseEntity;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.service.CaseManagementService;
 import com.nyaysetu.backend.service.CaseStateTransitionService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +36,7 @@ public class CaseManagementController {
     private final com.nyaysetu.backend.service.AuthService authService;
     private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
 
+    @PreAuthorize("hasAnyRole('LAWYER', 'LITIGANT', 'ADMIN')")
     @PostMapping
     public ResponseEntity<CaseDTO> createCase(
             @Valid @RequestBody CreateCaseRequest request,
@@ -42,16 +48,19 @@ public class CaseManagementController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CaseDTO>> getMyCases(Authentication authentication) {
+    public ResponseEntity<Page<CaseDTO>> getMyCases(
+            Authentication authentication,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
         try {
             log.info("Getting cases for user: {}", authentication.getName());
             User user = authService.findByEmail(authentication.getName());
-            List<CaseDTO> cases = caseManagementService.getCasesByUser(user);
-            log.info("Found {} cases for user {}", cases.size(), authentication.getName());
+            Page<CaseDTO> cases = caseManagementService.getCasesByUser(user, pageable);
+            log.info("Found {} cases for user {}", cases.getTotalElements(), authentication.getName());
             return ResponseEntity.ok(cases);
         } catch (Exception e) {
             log.error("Error fetching cases for user {}: {}", authentication.getName(), e.getMessage());
-            return ResponseEntity.ok(Collections.emptyList()); // Return empty list instead of error
+            return ResponseEntity.ok(Page.empty()); // Return empty page instead of error
         }
     }
 
@@ -86,6 +95,7 @@ public class CaseManagementController {
     /**
      * Handover C: Lawyer submits draft
      */
+    @PreAuthorize("hasAnyRole('LAWYER', 'ADMIN')")
     @PostMapping("/{id}/submit-draft")
     public ResponseEntity<Map<String, Object>> submitDraft(
             @PathVariable UUID id,
@@ -102,6 +112,7 @@ public class CaseManagementController {
     /**
      * Handover C: Client reviews draft
      */
+    @PreAuthorize("hasAnyRole('LITIGANT', 'ADMIN')")
     @PostMapping("/{id}/review-draft")
     public ResponseEntity<Map<String, Object>> reviewDraft(
             @PathVariable UUID id,
@@ -121,6 +132,7 @@ public class CaseManagementController {
         ));
     }
 
+    @PreAuthorize("hasAnyRole('LITIGANT', 'ADMIN')")
     @PutMapping("/{id}/approve-draft")
     public ResponseEntity<Map<String, Object>> approveDraft(
             @PathVariable UUID id,
@@ -144,6 +156,7 @@ public class CaseManagementController {
      * Handover D: Lawyer files the approved petition in court
      * Routes through CaseStateTransitionService for audit trail and validation.
      */
+    @PreAuthorize("hasAnyRole('LAWYER', 'ADMIN')")
     @PostMapping("/{id}/file-in-court")
     public ResponseEntity<Map<String, Object>> fileInCourt(
             @PathVariable UUID id,
@@ -161,6 +174,7 @@ public class CaseManagementController {
         ));
     }
 
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{id}/order-notice")
     public ResponseEntity<Map<String, Object>> orderNotice(@PathVariable UUID id, Authentication authentication) {
         User user = authService.findByEmail(authentication.getName());
@@ -172,6 +186,7 @@ public class CaseManagementController {
         ));
     }
 
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{id}/start-hearings")
     public ResponseEntity<Map<String, Object>> startHearings(@PathVariable UUID id, Authentication authentication) {
         User user = authService.findByEmail(authentication.getName());
@@ -184,6 +199,7 @@ public class CaseManagementController {
         ));
     }
 
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{id}/start-evidence")
     public ResponseEntity<Map<String, Object>> startEvidence(@PathVariable UUID id, Authentication authentication) {
         User user = authService.findByEmail(authentication.getName());
@@ -195,6 +211,7 @@ public class CaseManagementController {
         ));
     }
 
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{id}/start-arguments")
     public ResponseEntity<Map<String, Object>> startArguments(@PathVariable UUID id, Authentication authentication) {
         User user = authService.findByEmail(authentication.getName());
@@ -206,6 +223,7 @@ public class CaseManagementController {
         ));
     }
 
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{id}/start-judgment")
     public ResponseEntity<Map<String, Object>> startJudgment(@PathVariable UUID id, Authentication authentication) {
         User user = authService.findByEmail(authentication.getName());
@@ -217,6 +235,7 @@ public class CaseManagementController {
         ));
     }
 
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/{id}/deliver-verdict")
     public ResponseEntity<Map<String, Object>> deliverVerdict(
             @PathVariable UUID id,

@@ -3,6 +3,7 @@ package com.nyaysetu.backend.config;
 import com.nyaysetu.backend.filter.JwtAuthFilter;
 
 import com.nyaysetu.backend.filter.RateLimitFilter;
+import com.nyaysetu.backend.service.CustomOAuth2UserService;
 import com.nyaysetu.backend.filter.XssSanitizationFilter;
 import jakarta.annotation.PostConstruct;
 import java.util.Arrays;
@@ -31,13 +32,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-<<<<<<< HEAD
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-=======
->>>>>>> origin/main
 
 @Configuration
 @EnableMethodSecurity
@@ -49,6 +43,9 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final RateLimitFilter rateLimitFilter;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final Environment environment;
 
     @Value("${cors.allowed.origins}")
@@ -83,8 +80,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -97,9 +93,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-<<<<<<< HEAD
-
-
         // SAFE DEFAULT (Localhost fallback)
         List<String> defaultOrigins = Arrays.asList(
                 "http://localhost:5173",
@@ -108,17 +101,11 @@ public class SecurityConfig {
         );
 
         if (allowedOrigins != null && !allowedOrigins.trim().isEmpty()) {
-=======
-        
-        // Use origins from application.properties / Env Var
-        if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
->>>>>>> origin/main
             List<String> origins = Arrays.stream(allowedOrigins.split(","))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
                     .collect(Collectors.toList());
 
-<<<<<<< HEAD
             if (origins.contains("*")) {
                 // SECURITY: Reject bare "*" when credentials are true
                 logger.warn("CORS_ALLOWED_ORIGINS contains bare '*'. This is unsafe with credentials. Falling back to localhost defaults.");
@@ -150,56 +137,11 @@ public class SecurityConfig {
                 "Origin",
                 "X-Requested-With"
         ));
-
-=======
-            if (origins.isEmpty()) {
-                // SAFE DEFAULT: Allow local development origins only
-                configuration.setAllowedOrigins(Arrays.asList(
-                    "http://localhost:5173",
-                    "http://localhost:3000",
-                    "http://localhost"
-                ));
-                configuration.setAllowCredentials(true);
-            } else {
-                // Security: reject bare "*" — it allows any origin to make credentialed requests
-                boolean hasBareWildcard = origins.stream().anyMatch(o -> o.trim().equals("*"));
-                if (hasBareWildcard) {
-                    logger.warn("CORS_ALLOWED_ORIGINS contains bare '*'. "
-                            + "This is unsafe with credentials. Falling back to localhost defaults.");
-                    configuration.setAllowedOrigins(Arrays.asList(
-                        "http://localhost:5173",
-                        "http://localhost:3000",
-                        "http://localhost"
-                    ));
-                } else {
-                    boolean hasPattern = origins.stream().anyMatch(o -> o.contains("*"));
-                    if (hasPattern) {
-                        // Specific patterns like https://*.example.com are safe with credentials
-                        configuration.setAllowedOriginPatterns(origins);
-                    } else {
-                        configuration.setAllowedOrigins(origins);
-                    }
-                }
-                configuration.setAllowCredentials(true);
-            }
-        } else {
-            // SAFE DEFAULT: Allow local development origins only
-            configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173", 
-                "http://localhost:3000", 
-                "http://localhost"
-            ));
-            configuration.setAllowCredentials(true);
-        }
-        
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        
->>>>>>> origin/main
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -229,27 +171,22 @@ public class SecurityConfig {
                                 .referrerPolicy(rp -> rp.policy(
                                     org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
                                 ))
-                                .permissionsPolicy(pp -> pp.policy(
+                                .permissionsPolicyHeader(pp -> pp.policy(
                                     "geolocation=(), microphone=(), camera=(), payment=()"
                                 ))
                 )
                 .authorizeHttpRequests(auth -> auth
-<<<<<<< HEAD
-                        // 2. Only strictly public endpoints allowed
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/forgot-password").permitAll()
-                        .requestMatchers("/api/health/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
+                        // ── OAuth2 ─────────────────────────────────────────────────────────
+                        .requestMatchers(
+                                "/oauth2/**",
+                                "/login/oauth2/**"
+                        ).permitAll()
 
-                        // 3. The exact fix for the bug: Everything else MUST be authenticated
-                        .anyRequest().authenticated()
-                )
-
-=======
                         // ── Public endpoints ──────────────────────────────────────────────
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
+                                "/api/v1/auth/refresh",
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/verify-reset-token",
                                 "/api/v1/auth/reset-password",
@@ -257,7 +194,11 @@ public class SecurityConfig {
                                 "/api/v1/auth/ping",
                                 "/api/v1/auth/test",
                                 "/api/v1/health",
-                                "/api/v1/police/health"
+                                "/api/v1/police/health",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/actuator/**"
                         ).permitAll()
 
                         // ── WebSocket endpoints ───────────────────────────────────────────
@@ -346,9 +287,15 @@ public class SecurityConfig {
                         // ── Everything else requires authentication ────────────────────────
                         .anyRequest().authenticated()
                 )
->>>>>>> origin/main
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .oauth2Login(oauth -> oauth
+                        .userInfoEndpoint(userInfo ->
+                                userInfo.userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
+                )
                 .addFilterBefore(xssSanitizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

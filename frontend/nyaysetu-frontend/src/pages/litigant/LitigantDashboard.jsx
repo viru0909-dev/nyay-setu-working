@@ -230,7 +230,7 @@ export default function LitigantDashboard() {
                                 <div style={{ display: 'flex', gap: '1rem' }}>
                                     <button
                                         onClick={() => {
-                                            navigate(`/litigant/cases/${draft.id}`);
+                                            navigate(`/litigant/case-diary/${draft.caseId || draft.id}`);
                                         }}
                                         style={{
                                             padding: '0.6rem 1.2rem', background: 'white', border: '1px solid #e5e7eb',
@@ -363,29 +363,28 @@ export default function LitigantDashboard() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {loading ? (
-                            <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                                <Loader2 size={24} style={{ color: 'var(--color-primary)', animation: 'spin 1s linear infinite' }} />
-                            </div>
+                            <LoadingState minHeight="120px" />
                         ) : recentCases.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
-                                <FolderOpen size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
-                                <p>{t('litigant.noCases')}</p>
-                                <button
-                                    onClick={() => navigate('/litigant/file')}
-                                    style={{
-                                        marginTop: '0.75rem',
-                                        padding: '0.5rem 1rem',
-                                        background: 'var(--color-primary)',
-                                        border: 'none',
-                                        borderRadius: '0.5rem',
-                                        color: 'white',
-                                        fontWeight: '600',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    {t('litigant.fileFirstCase')}
-                                </button>
-                            </div>
+                            <EmptyState
+                                icon={FolderOpen}
+                                title={t('litigant.noCases')}
+                                action={
+                                    <button
+                                        onClick={() => navigate('/litigant/file')}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            background: 'var(--color-primary)',
+                                            border: 'none',
+                                            borderRadius: '0.5rem',
+                                            color: 'white',
+                                            fontWeight: '600',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        {t('litigant.fileFirstCase')}
+                                    </button>
+                                }
+                            />
                         ) : (
                             recentCases.map((caseItem, index) => (
                                 <CaseCard
@@ -433,15 +432,13 @@ export default function LitigantDashboard() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {loading ? (
-                            <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                                <Loader2 size={24} style={{ color: 'var(--color-primary)', animation: 'spin 1s linear infinite' }} />
-                            </div>
+                            <LoadingState minHeight="120px" />
                         ) : upcomingHearings.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
-                                <Video size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
-                                <p>{t('litigant.noUpcomingHearings')}</p>
-                                <p style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>{t('litigant.hearingsAppearHere')}</p>
-                            </div>
+                            <EmptyState
+                                icon={Video}
+                                title={t('litigant.noUpcomingHearings')}
+                                description={t('litigant.hearingsAppearHere')}
+                            />
                         ) : (
                             upcomingHearings.map((hearing, index) => (
                                 <div

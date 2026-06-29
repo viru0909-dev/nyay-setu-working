@@ -432,3 +432,51 @@ a:hover { color: var(--color-primary); }
 .dark-mode .card, .dark-mode .navbar, .dark-mode header, .dark-mode nav {
   background-color: #
 
+.back-to-top-btn:hover {
+  transform: scale(1.1);
+}
+
+.back-to-top-btn:focus-visible {
+  outline: 2px solid var(--primary-blue, #2563EB);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   NYAYSETU MODERN UI/UX REVAMP - PHASE 1 DESIGN SYSTEM TOKENS
+   ========================================================================== */
+:root {
+  --primary-color: #1e3a8a;       /* Deep Trust Blue */
+  --secondary-color: #0f172a;     /* Slate Dark Neutral */
+  --accent-color: #f59e0b;        /* Amber Action Highlight */
+  --supporting-color: #10b981;    /* Success Emerald */
+  --bg-light: #f8fafc;            /* Clean breathing canvas surface */
+  --text-main: #334155;           /* Reduced contrast strain text */
+  --nav-negative-space: 1.5rem;   /* Balanced structural layout padding */
+}
+
+/* Reduced user strain & Consistent Global Negative Space Base Overrides */
+body {
+  background-color: var(--bg-light) !important;
+  color: var(--text-main) !important;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Navbar UX Restructuring & Spacing Fixes */
+.navbar, nav {
+  padding: 0.75rem var(--nav-negative-space) !important;
+  background-color: var(--secondary-color) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar-links, nav a {
+  margin-right: 1.25rem !important;
+  color: #f8fafc !important;
+}
+
+/* Mode Switch Button Placement Alignment Rule */
+.dark-mode-toggle, .theme-switcher {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  margin-left: auto !important;
+}

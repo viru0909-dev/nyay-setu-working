@@ -1,39 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     FileText, Shield, CheckCircle2, Clock,
-    Search, Eye, Loader2, ExternalLink
+    Search, Eye, ExternalLink, Upload
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { policeAPI } from '../../services/api';
+import { useApi } from '../../hooks/useApi';
+import ApiStateWrapper from '../../components/common/ApiStateWrapper';
 
 export default function MyFirsPage() {
     const navigate = useNavigate();
     const { t } = useLanguage();
-    const [firs, setFirs] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
-    useEffect(() => {
-        const fetchFirs = async () => {
-            try {
-                setLoading(true);
-                const response = await policeAPI.listFirs();
-                setFirs(response.data || []);
-            } catch (error) {
-                console.error('Error fetching FIRs:', error);
-                setFirs([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchFirs();
-    }, []);
-
-    const filteredFirs = firs.filter(fir =>
-        fir.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fir.firNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+    const { data: firs, loading, error, refetch } = useApi(
+        () => policeAPI.listFirs(),
+        []
     );
+
+    // Filter client-side so we don't re-fetch on every keystroke.
+    const filteredFirs = useMemo(() => {
+        const all = firs || [];
+        if (!searchTerm) return all;
+        const lower = searchTerm.toLowerCase();
+        return all.filter(
+            fir =>
+                fir.title?.toLowerCase().includes(lower) ||
+                fir.firNumber?.toLowerCase().includes(lower)
+        );
+    }, [firs, searchTerm]);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -68,6 +64,34 @@ export default function MyFirsPage() {
         if (!hash) return 'N/A';
         return `${hash.substring(0, 8)}...${hash.substring(hash.length - 8)}`;
     };
+
+    // Dynamic empty-state content depending on whether a search is active.
+    const emptyTitle = searchTerm
+        ? 'No FIRs found matching your search'
+        : 'No FIRs uploaded yet';
+    const emptyDescription = searchTerm
+        ? 'Try a different search term'
+        : 'Upload your first FIR to get started';
+    const emptyAction = !searchTerm ? (
+        <button
+            onClick={() => navigate('/police/upload')}
+            style={{
+                padding: '0.75rem 1.5rem',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                border: 'none',
+                borderRadius: '0.75rem',
+                color: 'white',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+            }}
+        >
+            <Upload size={16} />
+            Upload First FIR
+        </button>
+    ) : null;
 
     return (
         <div>
@@ -109,43 +133,16 @@ export default function MyFirsPage() {
             </div>
 
             {/* FIR List */}
-            {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
-                    <Loader2 size={32} style={{ color: 'var(--color-accent)', animation: 'spin 1s linear infinite' }} />
-                </div>
-            ) : filteredFirs.length === 0 ? (
-                <div style={{
-                    background: 'var(--bg-glass-strong)',
-                    border: 'var(--border-glass)',
-                    borderRadius: '1.5rem',
-                    padding: '3rem',
-                    textAlign: 'center'
-                }}>
-                    <FileText size={48} color="var(--text-secondary)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                    <h3 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-                        {searchTerm ? 'No FIRs found matching your search' : 'No FIRs uploaded yet'}
-                    </h3>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                        {searchTerm ? 'Try a different search term' : 'Upload your first FIR to get started'}
-                    </p>
-                    {!searchTerm && (
-                        <button
-                            onClick={() => navigate('/police/upload')}
-                            style={{
-                                padding: '0.75rem 1.5rem',
-                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                border: 'none',
-                                borderRadius: '0.75rem',
-                                color: 'white',
-                                fontWeight: '700',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Upload First FIR
-                        </button>
-                    )}
-                </div>
-            ) : (
+            <ApiStateWrapper
+                loading={loading}
+                error={error}
+                data={filteredFirs}
+                onRetry={refetch}
+                emptyTitle={emptyTitle}
+                emptyDescription={emptyDescription}
+                emptyIcon={FileText}
+                emptyAction={emptyAction}
+            >
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {filteredFirs.map((fir) => {
                         const StatusIcon = getStatusIcon(fir.status);
@@ -225,15 +222,7 @@ export default function MyFirsPage() {
                         );
                     })}
                 </div>
-            )}
-
-            {/* CSS for animations */}
-            <style>{`
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-            `}</style>
+            </ApiStateWrapper>
         </div>
     );
 }

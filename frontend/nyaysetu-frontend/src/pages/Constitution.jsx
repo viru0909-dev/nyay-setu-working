@@ -15,6 +15,7 @@ import Footer from '../components/landing/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
 import { brainAPI } from '../services/api';
 import { useTranslation } from 'react-i18next';
+import { downloadConstitutionPdf } from '../utils/downloadConstitutionPdf';
 
 import useGuest from '../hooks/useGuest';
 import useAuthStore from '../store/authStore';
@@ -49,6 +50,7 @@ useEffect(() => {
     const [aiQuery, setAiQuery] = useState('');
     const [aiResponse, setAiResponse] = useState('');
     const [isAiLoading, setIsAiLoading] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
     const [sessionId, setSessionId] = useState(null);
     const language = i18n.language;
     const { isGuest } = useGuest();
@@ -230,27 +232,14 @@ useEffect(() => {
     };
 }, [selectedArticleNumber]);
 
-    const handleDownloadPDF = () => {
-        const pdfByLanguage = {
-            en: {
-                href: '/documents/COI_MAY2024.pdf',
-                filename: 'Constitution_of_India_English.pdf',
-            },
-            hi: {
-                href: '/documents/COI_MAY2024_Hindi.pdf',
-                filename: 'Constitution_of_India_Hindi.pdf',
-            },
-        };
-    
-        // Use Hindi PDF when page is in Hindi, otherwise English
-        const pdf = language === 'hi' ? pdfByLanguage.hi : pdfByLanguage.en;
-    
-        const link = document.createElement('a');
-        link.href = pdf.href;
-        link.setAttribute('download', pdf.filename);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+    const handleDownloadPDF = async () => {
+        if (isDownloading) return; // guard against double-clicks (Hindi PDF is ~19 MB)
+        setIsDownloading(true);
+        try {
+            await downloadConstitutionPdf(language, t);
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     const handleAIChat = async () => {
@@ -271,6 +260,9 @@ useEffect(() => {
 
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+            {/* Spinner keyframes — `.animate-spin` is used in this file but is not
+                defined by any global stylesheet, so define it locally. */}
+            <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .animate-spin { animation: spin 1s linear infinite; }`}</style>
             <Header />
 
             {/* geometric grid pattern — same as Landing hero */}
@@ -345,13 +337,17 @@ useEffect(() => {
 
                             <button
                                 onClick={handleDownloadPDF}
+                                disabled={isDownloading}
+                                aria-busy={isDownloading}
+                                aria-label={t('downloadPdfAria')}
                                 style={{
                                     padding: '0.75rem 1.5rem',
                                     background: 'var(--color-primary)',
                                     border: 'none',
                                     borderRadius: '0.75rem',
                                     color: 'white',
-                                    cursor: 'pointer',
+                                    cursor: isDownloading ? 'wait' : 'pointer',
+                                    opacity: isDownloading ? 0.7 : 1,
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '0.5rem',
@@ -359,11 +355,15 @@ useEffect(() => {
                                     fontSize: '1rem',
                                     transition: 'transform 0.2s'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                onMouseEnter={(e) => { if (!isDownloading) e.currentTarget.style.transform = 'scale(1.05)'; }}
                                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                             >
-                                <Download size={20} />
-                                {t('constitution:downloadPDF')}
+                                {isDownloading
+                                    ? <Loader2 size={20} className="animate-spin" />
+                                    : <Download size={20} />}
+                                {isDownloading
+                                    ? t('downloadInProgress')
+                                    : t('constitution:downloadPDF')}
                             </button>
 
                             <button
