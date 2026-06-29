@@ -22,6 +22,7 @@ export default function Landing() {
     const { t } = useTranslation('landing');
     const { theme } = useTheme();
     const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const [isInstalled, setIsInstalled] = useState(false);
     const heroImage = theme === 'dark'
         ? {
             fallbackSrc: '/scales-dark-720.jpg',
@@ -43,17 +44,48 @@ export default function Landing() {
     } = useProtectedFeature('file a case', { intentPath: '/litigant/file' });
 
     useEffect(() => {
-        const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); window.deferredPrompt = e; };
-        window.addEventListener('beforeinstallprompt', handler);
-        return () => window.removeEventListener('beforeinstallprompt', handler);
-    }, []);
+    setIsInstalled(
+        window.matchMedia('(display-mode: standalone)').matches
+    );
+
+    const handler = (e) => {
+        e.preventDefault();
+        setDeferredPrompt(e);
+        window.deferredPrompt = e;
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    return () =>
+        window.removeEventListener('beforeinstallprompt', handler);
+}, []);
 
     const handleInstall = async () => {
-        if (import.meta.env.DEV) { alert('PWA install works on port 4174 (preview), not dev.'); return; }
-        const ev = window.deferredPrompt || deferredPrompt;
-        if (ev) { await ev.prompt(); window.deferredPrompt = null; setDeferredPrompt(null); }
-        else alert('Already installed, or use browser menu.');
-    };
+    if (import.meta.env.DEV) {
+        alert('PWA install works on port 4174 (preview), not dev.');
+        return;
+    }
+
+    const ev = window.deferredPrompt || deferredPrompt;
+
+    const installed = window.matchMedia(
+        '(display-mode: standalone)'
+    ).matches;
+
+    if (installed) {
+        alert('App is already installed.');
+        return;
+    }
+
+    if (ev) {
+        await ev.prompt();
+        window.deferredPrompt = null;
+        setDeferredPrompt(null);
+        return;
+    }
+
+    alert('Installation is currently unavailable. Please use the browser menu to install the app.');
+};
 
     const TRUST_STATS = [
         { value: '50K+', label: t('trustStats.activeUsers'), icon: Users },
@@ -211,27 +243,32 @@ export default function Landing() {
                                     {t('hero.getStartedFree')} <ArrowRight size={18} />
                                 </Link>
 
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleInstall}
-                                    title={t('hero.installApp')}
-                                    style={{
-                                        gap: '0.5rem', padding: '0.8rem 1rem',
-                                        borderRadius: '12px',
-                                        border: '1px solid var(--border-medium)',
-                                        background: 'var(--bg-surface)',
-                                        color: 'var(--text-secondary)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        cursor: 'pointer',
-                                        boxShadow: 'var(--shadow-sm)',
-                                        fontWeight: '600',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                >
-                                    <Download size={18} />
-                                    {t('hero.installApp')}
-                                </motion.button>
+                                {!isInstalled && (
+    <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handleInstall}
+        title={t('hero.installApp')}
+        style={{
+            gap: '0.5rem',
+            padding: '0.8rem 1rem',
+            borderRadius: '12px',
+            border: '1px solid var(--border-medium)',
+            background: 'var(--bg-surface)',
+            color: 'var(--text-secondary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-sm)',
+            fontWeight: '600',
+            whiteSpace: 'nowrap',
+        }}
+    >
+        <Download size={18} />
+        {t('hero.installApp')}
+    </motion.button>
+)}
                             </div>
 
                             {/* Trust stats */}

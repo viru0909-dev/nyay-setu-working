@@ -5,8 +5,8 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
+//import org.springframework.http.client.SimpleClientHttpRequestFactory;
+//import org.springframework.web.client.RestTemplate;
 
 /**
  * Provides a shared, configured RestTemplate bean with explicit timeouts.
@@ -22,13 +22,13 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class BeanConfig {
 
-    @Bean
-    public RestTemplate restTemplate() {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(5_000);   // 5 seconds
-        factory.setReadTimeout(30_000);     // 30 seconds
-        return new RestTemplate(factory);
-    }
+//    @Bean
+//    public RestTemplate restTemplate() {
+//        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+//        factory.setConnectTimeout(5_000);   // 5 seconds
+//        factory.setReadTimeout(30_000);     // 30 seconds
+//        return new RestTemplate(factory);
+//    }
 
     @Bean
     public ObjectMapper objectMapper() {

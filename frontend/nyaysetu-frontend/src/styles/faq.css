@@ -1,0 +1,40 @@
+/* ── FAQ Page ─────────────────────────────────────────────────────────── */
+
+.faq-search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 79, 70, 229), 0.15);
+  outline: none;
+}
+
+.faq-item-trigger:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* Remove default search "x" button in WebKit */
+.faq-search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+/* ── Responsive grid for category sections ────────────────────────────── */
+
+@media (max-width: 640px) {
+  .faq-hero-title {
+    font-size: 2rem !important;
+  }
+
+  .faq-hero-description {
+    font-size: 1rem !important;
+  }
+
+  .faq-item-trigger {
+    padding: 14px 16px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .faq-hero-title {
+    font-size: 1.65rem !important;
+  }
+}

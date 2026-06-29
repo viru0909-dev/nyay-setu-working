@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link,useSearchParams} from 'react-router-dom';
 import { useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authAPI } from '../services/api';
@@ -502,6 +501,7 @@ export default function Login() {
                             
                             {/* Google Login */}
                             <button
+                                id="google-oauth-btn"
                                 type="button"
                                 onClick={() => {
                                     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/google`;
@@ -546,7 +546,7 @@ export default function Login() {
                                     }}
                                 />
 
-                                Continue with Google
+                                {t('auth:login.continueWithGoogle')}
                             </button>
 
                             {/* Face Login */}

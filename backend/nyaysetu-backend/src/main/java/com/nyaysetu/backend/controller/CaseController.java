@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class CaseController {
 
     private final CaseService caseService;
 
+    @PreAuthorize("hasAnyRole('LAWYER', 'LITIGANT', 'ADMIN')")
     @PostMapping
     public ResponseEntity<CaseEntity> createCase(@RequestBody CreateCaseRequest dto) {
         return new ResponseEntity<>(caseService.createCase(dto), HttpStatus.CREATED);
@@ -40,7 +42,8 @@ public class CaseController {
         return ResponseEntity.ok(casesPage);
     }
 
-    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
+    @PutMapping("/{id}/status")
     public ResponseEntity<CaseEntity> updateStatus(
             @PathVariable UUID id,
             @RequestParam CaseStatus status
@@ -48,6 +51,7 @@ public class CaseController {
         return ResponseEntity.ok(caseService.updateStatus(id, status));
     }
 
+    @PreAuthorize("hasAnyRole('LITIGANT', 'ADMIN')")
     @PostMapping("/{caseId}/appeal")
     public ResponseEntity<CaseEntity> createAppeal(
             @PathVariable UUID caseId,
@@ -64,6 +68,7 @@ public class CaseController {
         return ResponseEntity.ok(caseService.getAppeals(caseId));
     }
 
+    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PutMapping("/appeals/{appealId}/status")
     public ResponseEntity<CaseEntity> updateAppealStatus(
             @PathVariable UUID appealId,
