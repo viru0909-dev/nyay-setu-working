@@ -21,7 +21,7 @@ import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
 
 // Imported Feature Component
 
-import { FAQSection } from './components/FAQSection';
+// ==========================================
 // VITE CHUNK BREAKAGE MITIGATION WRAPPER
 // ==========================================
 const retryLazy = (componentImport) => lazy(async () => {
