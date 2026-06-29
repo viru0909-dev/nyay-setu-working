@@ -94,17 +94,29 @@ public class HearingController {
         return ResponseEntity.ok(response);
     }
     
-    @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
-    @PostMapping("/{hearingId}/participants")
-    public ResponseEntity<Map<String, Object>> addParticipant(
-            @PathVariable UUID hearingId,
-            @RequestBody AddParticipantRequest request
-    ) {
-        HearingParticipant participant = hearingService.addParticipant(
-                hearingId,
-                request.getUserId(),
-                request.getRole()
-        );
+        @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
+        @PostMapping("/{hearingId}/participants")
+        public ResponseEntity<Map<String, Object>> addParticipant(
+                @PathVariable UUID hearingId,
+                @RequestBody AddParticipantRequest request,
+                Authentication authentication
+        ) {
+            User requestingUser = authService.findByEmail(authentication.getName());
+            Hearing hearing = hearingService.getHearing(hearingId);
+            if (hearing.getCaseEntity() != null &&
+                !requestingUser.getRole().name().equals("ADMIN") &&
+                !requestingUser.getRole().name().equals("SUPER_JUDGE")) {
+                Long assignedJudgeId = hearing.getCaseEntity().getJudgeId();
+                if (!requestingUser.getId().equals(assignedJudgeId)) {
+                    return ResponseEntity.status(403)
+                        .body(Map.of("error", "You are not the assigned judge for this hearing's case"));
+                }
+            }
+            HearingParticipant participant = hearingService.addParticipant(
+                    hearingId,
+                    request.getUserId(),
+                    request.getRole()
+            );
         
         Map<String, Object> response = new HashMap<>();
         response.put("id", participant.getId());
