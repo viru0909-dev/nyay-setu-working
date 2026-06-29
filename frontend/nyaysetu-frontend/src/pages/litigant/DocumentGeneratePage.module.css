@@ -1,0 +1,51 @@
+.container {
+  padding: 24px;
+}
+
+.label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  outline: none;
+}
+
+.button {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.errorText {
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+
+.successText {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #059669;
+}
+
+.warningIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.primaryButton {
+  background: #059669;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
