@@ -2,22 +2,24 @@ package com.nyaysetu.backend.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
 public class FileStorageService {
 
     private final Path fileStorageLocation;
+    private static final String ALGORITHM = "AES";
+    private static final byte[] KEY = "NyaySetuSecureMediaKey2026AES256".getBytes();
 
     public FileStorageService(@Value("${file.upload-dir:backend/uploads/documents}") String uploadDir) {
         this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
@@ -25,6 +27,28 @@ public class FileStorageService {
             Files.createDirectories(this.fileStorageLocation);
         } catch (Exception ex) {
             throw new RuntimeException("Could not create upload directory!", ex);
+        }
+    }
+
+    private byte[] encrypt(byte[] data) {
+        try {
+            SecretKeySpec secretKey = new SecretKeySpec(KEY, ALGORITHM);
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            return cipher.doFinal(data);
+        } catch (Exception e) {
+            throw new RuntimeException("Encryption failed", e);
+        }
+    }
+
+    private byte[] decrypt(byte[] data) {
+        try {
+            SecretKeySpec secretKey = new SecretKeySpec(KEY, ALGORITHM);
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            return cipher.doFinal(data);
+        } catch (Exception e) {
+            throw new RuntimeException("Decryption failed", e);
         }
     }
 
@@ -42,9 +66,11 @@ public class FileStorageService {
             Path categoryPath = this.fileStorageLocation.resolve(category);
             Files.createDirectories(categoryPath);
 
-            // Copy file to the target location
+            // Encrypt and write to target location
             Path targetLocation = categoryPath.resolve(fileName);
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+            byte[] fileBytes = file.getBytes();
+            byte[] encryptedBytes = encrypt(fileBytes);
+            Files.write(targetLocation, encryptedBytes);
 
             return category + "/" + fileName;
         } catch (IOException ex) {
@@ -55,14 +81,20 @@ public class FileStorageService {
     public Resource loadFileAsResource(String filePath) {
         try {
             Path file = this.fileStorageLocation.resolve(filePath).normalize();
-            Resource resource = new UrlResource(file.toUri());
-            if (resource.exists()) {
-                return resource;
+            if (Files.exists(file)) {
+                byte[] encryptedBytes = Files.readAllBytes(file);
+                byte[] decryptedBytes = decrypt(encryptedBytes);
+                return new ByteArrayResource(decryptedBytes) {
+                    @Override
+                    public String getFilename() {
+                        return file.getFileName().toString();
+                    }
+                };
             } else {
                 throw new RuntimeException("File not found: " + filePath);
             }
-        } catch (MalformedURLException ex) {
-            throw new RuntimeException("File not found: " + filePath, ex);
+        } catch (Exception ex) {
+            throw new RuntimeException("File not found or decryption failed: " + filePath, ex);
         }
     }
 
@@ -83,6 +115,15 @@ public class FileStorageService {
         if (!Files.exists(file)) {
             throw new RuntimeException("File not found: " + filePath);
         }
-        return file.toFile();
+        try {
+            byte[] encryptedBytes = Files.readAllBytes(file);
+            byte[] decryptedBytes = decrypt(encryptedBytes);
+            Path tempFile = Files.createTempFile("decrypted-", "-" + file.getFileName().toString());
+            Files.write(tempFile, decryptedBytes);
+            tempFile.toFile().deleteOnExit();
+            return tempFile.toFile();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to decrypt file for processing", e);
+        }
     }
 }
