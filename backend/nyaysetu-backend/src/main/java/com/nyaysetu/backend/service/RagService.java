@@ -58,6 +58,34 @@ public class RagService {
         return "No specific legal context found.";
     }
 
+    public java.util.List<java.util.Map<String, Object>> searchPrecedents(String query, int maxResults) {
+        log.info("🔍 Performing semantic search over legal precedents for: '{}'", query);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            java.util.Map<String, Object> body = java.util.Map.of(
+                "query", query,
+                "k", maxResults
+            );
+
+            HttpEntity<java.util.Map<String, Object>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<java.util.List> response = restTemplate.postForEntity(
+                lawgptUrl + "/search",
+                request,
+                java.util.List.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                log.info("✅ Semantic search results retrieved successfully from LawGPT");
+                return (java.util.List<java.util.Map<String, Object>>) response.getBody();
+            }
+        } catch (Exception e) {
+            log.warn("⚠️ LawGPT search endpoint failed: {}", e.getMessage());
+        }
+        return java.util.Collections.emptyList();
+    }
+
     public void ingestDocument(Path filePath) {
         log.info("ℹ️ Ingestion delegated to LawGPT Python service");
     }

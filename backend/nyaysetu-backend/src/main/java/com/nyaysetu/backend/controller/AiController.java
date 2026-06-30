@@ -17,6 +17,14 @@ public class AiController {
 
     private final AiService aiService;
     private final OllamaService ollamaService;
+    private final com.nyaysetu.backend.service.RagService ragService;
+
+    @GetMapping("/precedents/search")
+    public java.util.List<java.util.Map<String, Object>> searchPrecedents(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "5") int limit) {
+        return ragService.searchPrecedents(query, limit);
+    }
 
     @PostMapping("/summarize")
     public SummarizeResponse summarize(@Valid @RequestBody SummarizeRequest request) {

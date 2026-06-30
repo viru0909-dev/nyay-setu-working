@@ -27,6 +27,7 @@ const getRoleMenuItems = (t) => ({
         { icon: Users, label: t('dashboard:sidebar.lawyer.litigantDirectory'), path: '/lawyer/clients' },
         { icon: Briefcase, label: t('dashboard:sidebar.lawyer.activeCases'), path: '/lawyer/cases' },
         { icon: Brain, label: t('dashboard:sidebar.lawyer.aiLegalAssistant'), path: '/lawyer/ai-assistant' },
+        { icon: Search, label: 'Precedents Search', path: '/lawyer/precedents-search' },
         { icon: Video, label: t('dashboard:sidebar.lawyer.hearings'), path: '/lawyer/hearings' },
         { icon: BarChart3, label: t('dashboard:sidebar.lawyer.analytics'), path: '/lawyer/analytics' },
         { icon: User, label: t('dashboard:sidebar.lawyer.profile'), path: '/lawyer/profile' }

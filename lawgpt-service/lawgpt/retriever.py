@@ -87,6 +87,30 @@ def retrieve(query: str, k: int = 3) -> list[Document]:
     return results
 
 
+def retrieve_with_scores(query: str, k: int = 5) -> list[dict]:
+    """
+    Retrieve document chunks along with their relevance scores.
+    """
+    if not _HAS_LANGCHAIN:
+        raise ImportError("langchain_community is not available in this environment")
+    vs: FAISS = load_vectorstore()
+    results_with_scores = vs.similarity_search_with_score(query, k=k)
+    
+    formatted_results = []
+    for doc, score in results_with_scores:
+        # L2 distance: lower is better (usually 0.0 to 2.0). Map to 0-100% similarity
+        sim_score = max(0.0, min(1.0, 1.0 - (float(score) / 2.0)))
+        relevance = round(sim_score * 100, 1)
+        
+        formatted_results.append({
+            "page_content": doc.page_content,
+            "source": doc.metadata.get("source", "unknown"),
+            "page": doc.metadata.get("page", 0),
+            "relevance": relevance
+        })
+    return formatted_results
+
+
 def get_chunk_count() -> Optional[int]:
     """Return the number of vectors in the loaded FAISS index, or None."""
     try:
