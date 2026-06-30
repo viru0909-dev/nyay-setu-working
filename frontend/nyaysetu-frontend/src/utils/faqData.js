@@ -149,4 +149,34 @@ export const faqData = [
       },
     ],
   },
+  {
+    category: "Cyber Crime",
+    faqs: [
+      {
+        question: "How do I report cyber fraud?",
+        answer:
+          "You can report cyber fraud through the National Cyber Crime Reporting Portal or by visiting your nearest cyber crime police station. If money has been transferred fraudulently, contact your bank immediately and report the incident without delay."
+      },
+      {
+        question: "Can I report cyber crime online?",
+        answer:
+          "Yes. Most cyber crimes can be reported online through the National Cyber Crime Reporting Portal."
+      },
+      {
+        question: "What should I do if I receive a phishing email?",
+        answer:
+          "Do not click any suspicious links or attachments. Report the incident to your email provider and the National Cyber Crime Reporting Portal."
+      },
+      {
+        question: "What should I do if my bank account is hacked?",
+        answer:
+          "Immediately contact your bank, block your debit or credit card, change passwords, and report the incident to the cyber crime portal."
+      },
+      {
+        question: "Can I recover money lost in an online scam?",
+        answer:
+          "Recovery depends on how quickly the fraud is reported. Contact your bank immediately and file a complaint through the cyber crime portal."
+      }
+    ],
+  },
 ];
