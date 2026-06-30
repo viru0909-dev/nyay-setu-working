@@ -200,6 +200,22 @@ public class VakilFriendController {
             Object result = vakilFriendService.completeSession(sessionId, user);
             
             Map<String, Object> response = new HashMap<>();
+
+            // NEW: validator could not produce schema-valid data after repair attempts —
+            // VakilFriendService.completeSession() returns a plain Map in that case instead
+            // of a persisted CaseEntity/FirRecord, and nothing was written to the DB.
+            if (result instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> manual = (Map<String, Object>) result;
+                response.put("success", false);
+                response.put("requiresManualInput", true);
+                response.put("validationErrors", manual.get("validationErrors"));
+                response.put("partialData", manual.get("partialData"));
+                response.put("message", "We couldn't verify some details of your case automatically. Please review and correct the highlighted fields before filing.");
+                log.warn("⚠️ Session {} requires manual correction before filing", sessionId);
+                return ResponseEntity.ok(response);
+            }
+
             response.put("success", true);
 
             if (result instanceof com.nyaysetu.backend.entity.FirRecord) {
