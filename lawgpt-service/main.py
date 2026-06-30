@@ -18,6 +18,7 @@ from fastapi import FastAPI
 from lawgpt.retriever import load_vectorstore, is_index_loaded, get_chunk_count
 from routers.context import router as context_router
 from routers.document import router as document_router
+from routers.summarize import router as summarize_router
 
 # ── Logging ────────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -59,6 +60,7 @@ app = FastAPI(
 # Mount at root so endpoints are /context, /chat, /health, /generate, /generate/pdf
 app.include_router(context_router)
 app.include_router(document_router)
+app.include_router(summarize_router)
 
 
 if __name__ == "__main__":
