@@ -36,6 +36,7 @@ const getRoleMenuItems = (t) => ({
         { icon: Briefcase, label: t('dashboard:sidebar.judge.myDocket'), path: '/judge/docket' },
         { icon: FolderOpen, label: t('dashboard:sidebar.judge.unassignedPool'), path: '/judge/unassigned' },
         { icon: Video, label: t('dashboard:sidebar.judge.liveHearing'), path: '/judge/live-hearing' },
+        { icon: Scale, label: 'Redaction Review', path: '/judge/redaction-review' },
         { icon: BarChart3, label: t('dashboard:sidebar.judge.courtAnalytics'), path: '/judge/analytics' },
         { icon: User, label: t('dashboard:sidebar.judge.profile'), path: '/judge/profile' }
     ],
