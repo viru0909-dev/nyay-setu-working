@@ -1022,3 +1022,185 @@ When opening a Pull Request, please include:
   * [ ] No `.env` or credentials accidentally included
 
 This ensures faster review and approval of your PR.
+# Contributing Guide
+
+Thank you for your interest in contributing to this project! We appreciate every contribution, whether it is fixing bugs, improving documentation, adding new features, or enhancing the overall project.
+
+Please follow the guidelines below to ensure a smooth contribution process.
+
+---
+
+# 1. Prerequisites
+
+Before running the project, make sure the following software is installed on your system:
+
+| Tool | Version |
+|------|---------|
+| Java | 17 |
+| Spring Boot | 3.2.3 |
+| Maven | Latest Stable Version |
+| Node.js | Latest LTS Version |
+| Frontend | React with Vite |
+| Git | Latest Version |
+
+You can verify the installations using:
+
+```bash
+java -version
+mvn -version
+node -v
+npm -v
+git --version
+
+2. Local Project Setup
+Step 1: Fork the Repository
+
+Click the Fork button on GitHub to create your own copy of the repository.
+
+Step 2: Clone the Repository
+git clone https://github.com/<your-username>/nyay-setu-working.git
+
+Navigate into the project folder:
+cd nyay-setu-working
+
+
+Step 3: Backend Setup
+
+Navigate to the backend directory (if applicable).
+
+Install dependencies and build the project:
+mvn clean install
+
+Run the Spring Boot application:
+mvn spring-boot:run
+
+The backend server should start successfully.
+
+Step 4: Frontend Setup
+
+Navigate to the frontend directory:
+
+cd frontend
+
+Install dependencies:
+npm install
+
+Start the development server:
+npm run dev
+
+The frontend will start on the default Vite development server.
+
+3. Project Folder Structure
+A typical project structure is as follows:
+
+project-root/
+│
+├── backend/
+│   ├── src/
+│   ├── pom.xml
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   ├── vite.config.js
+│
+├── README.md
+├── CONTRIBUTING.md
+└── LICENSE
+
+backend/ – Spring Boot backend source code.
+frontend/ – React application built with Vite.
+README.md – Project overview and setup instructions.
+CONTRIBUTING.md – Contribution guidelines.
+LICENSE – Project license.
+
+4. Picking an Issue
+
+Before starting work:
+
+1.Browse the available Issues.
+2.Choose an issue that is open.
+3.Comment on the issue expressing your interest.
+4.Wait until the maintainers assign the issue to you.
+5.Start working only after assignment.
+
+This helps avoid duplicate work.
+
+5. Branch Naming Convention
+
+Always create a new branch before making changes.
+Recommended naming conventions:
+fix/navbar-bug
+fix/login-error
+feat/dark-mode
+feat/user-profile
+docs/contributing-guide
+docs/readme-update
+refactor/auth-module
+test/login-api
+
+Never commit directly to the main branch.
+
+Create a new branch using:
+git checkout -b feat/feature-name
+
+6. Code Style Guidelines
+
+Please follow these coding standards:
+
+1.Write clean and readable code.
+2.Use meaningful variable and function names.
+3.Follow consistent indentation and formatting.
+4.Remove unused imports and unused code.
+5.Keep functions small and modular.
+6.Write comments only when necessary.
+7.Ensure the project builds successfully before submitting.
+
+7. Running Tests
+
+Before submitting your contribution, verify that everything works correctly.
+
+Backend:
+mvn test
+
+Frontend (if tests are available):
+npm test
+
+Also ensure the application runs without errors.
+
+8. Commit Message Guidelines
+
+Write meaningful commit messages.
+
+Examples:
+
+fix: resolve login validation issue
+feat: add dark mode support
+docs: update contributing guide
+refactor: improve authentication flow
+test: add unit tests for login service
+
+Avoid commit messages like:
+update
+changes
+final
+abc
+
+9. Pull Request Checklist
+
+Before creating a Pull Request, ensure that:
+
+1.The project builds successfully.
+2.All tests pass.
+3.Your code follows the project's coding standards.
+4.You have tested your changes locally.
+5.Your branch is up to date with the latest main branch.
+6.The PR description clearly explains the changes made.
+7.Link the related Issue using:
+
+Closes #IssueNumber
+
+Example:
+
+Closes #1215
