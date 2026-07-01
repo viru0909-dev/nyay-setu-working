@@ -61,6 +61,7 @@ public class VakilFriendService {
     private final BhashiniService bhashiniService;
     private final VakilFriendDocumentService vakilFriendDocumentService;
     private final PiiSanitizer piiSanitizer;
+    private final VakilFriendGroqValidatorService vakilFriendGroqValidatorService; // NEW
 
     // Optional — only present when rag.enabled=true. Null-safe usage below.
     @Autowired(required = false)
@@ -408,6 +409,27 @@ public class VakilFriendService {
         // Removed artificial 10,000 character truncation.
         // The database TEXT column can safely handle large transcripts without data loss.
         String chatTranscript = session.getConversationData();
+
+        // --- NEW: schema-validate / self-repair before anything touches CaseEntity/FirRecord ---
+        String transcriptExcerpt = chatTranscript.length() > 3000
+                ? chatTranscript.substring(chatTranscript.length() - 3000)
+                : chatTranscript;
+
+        VakilFriendGroqValidatorService.ValidatedCaseData validated =
+                vakilFriendGroqValidatorService.validateAndRepair(caseData, transcriptExcerpt);
+
+        if (validated.isRequiresManualInput()) {
+            log.warn("⚠️ Case data for session {} could not be validated after repair attempts. Errors: {}",
+                    sessionId, validated.getValidationErrors());
+            Map<String, Object> manualCorrection = new HashMap<>();
+            manualCorrection.put("requiresManualInput", true);
+            manualCorrection.put("validationErrors", validated.getValidationErrors());
+            manualCorrection.put("partialData", validated.getData());
+            return manualCorrection; // session stays ACTIVE — nothing is persisted
+        }
+
+        caseData = validated.getData();
+        // --- end NEW ---
  
         Object resultEntity;
         String target = caseData.getOrDefault("target", "COURT");
@@ -819,6 +841,7 @@ public class VakilFriendService {
             caseData.putIfAbsent("respondent", "Respondent");
             caseData.putIfAbsent("caseType", "CIVIL");
             caseData.putIfAbsent("urgency", "NORMAL");
+            caseData.putIfAbsent("target", "COURT"); // NEW — required by schema
  
             // Safety truncation
             caseData.entrySet().forEach(entry -> {
@@ -941,9 +964,6 @@ public class VakilFriendService {
         }
     }
  
-    /**
-     * Generate a professional case title using AI
-     */
     /**
      * Generate a professional case title using AI with strict JSON enforcement
      */
