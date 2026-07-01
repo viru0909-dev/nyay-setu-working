@@ -16,6 +16,8 @@ import OfflineIndicator from './components/OfflineIndicator';
 import UpdateNotification from './components/UpdateNotification';
 import GuestWelcomeToast from './components/guest/GuestWelcomeToast';
 import GuestOnboardingHint from './components/guest/GuestOnboardingHint';
+import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
+import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';
 
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import KeyboardShortcutsModal from './components/common/KeyboardShortcutsModal';

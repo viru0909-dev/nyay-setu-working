@@ -430,7 +430,9 @@ a:hover { color: var(--color-primary); }
   border-color: #334155;
 }
 .dark-mode .card, .dark-mode .navbar, .dark-mode header, .dark-mode nav {
-  background-color: #
+  background-color: #1E293B !important;
+  color: #F1F5F9 !important;
+}
 
 .back-to-top-btn:hover {
   transform: scale(1.1);

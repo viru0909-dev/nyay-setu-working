@@ -16,7 +16,6 @@ import { API_BASE_URL } from '../../config/apiConfig';
 import CaseChatWidget from '../../components/CaseChatWidget';
 import { useTranslation } from 'react-i18next';
 import CaseStepper from '../../components/common/CaseStepper';
-import { t } from 'i18next';
 import ApiStateWrapper from '../../components/common/ApiStateWrapper';
 
 // -----------------------------------------------------------------------------
@@ -101,21 +100,26 @@ export default function CaseDetailPage() {
         fetchCaseDetails();
     }, [caseId]);
 
-    
+    const [isEditing, setIsEditing] = useState(false);
+
     const handleEditClick = () => {
-        setEditData({
-            title: caseData.title,
-            description: caseData.description,
-            urgency: caseData.urgency
-        });
+        if (!caseData) return;
+
+        setEditData({title: caseData.title,description: caseData.description,urgency: caseData.urgency});
         setIsEditing(true);
     };
 
     const handleSaveEdit = async () => {
         setSaving(true);
         try {
-            await caseAPI.update(caseId, editData);
-            setCaseData({ ...caseData, ...editData });
+            const response = await caseAPI.update(caseId, editData);
+            if (response?.data) {
+                setCaseData(response.data);
+                setEditData(response.data);
+            } else {
+                setCaseData(prev => ({ ...prev, ...editData }));
+                setEditData(editData);
+            }
             setIsEditing(false);
             alert(t('caseDetail.caseUpdatedSuccessfully'));
         } catch (e) {
@@ -245,19 +249,33 @@ export default function CaseDetailPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                            <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{caseData.title}</h1>
-                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', background: statusStyle.bg, border: `1px solid ${statusStyle.border}`, color: statusStyle.text, fontSize: '0.75rem', fontWeight: '700' }}>
-                                {caseData.status.replace(/_/g, ' ')}
+                            <h1 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
+                                {caseData?.title}
+                            </h1>
+
+                            <span
+                                style={{
+                                    padding: '0.25rem 0.75rem',
+                                    borderRadius: '9999px',
+                                    background: statusStyle.bg,
+                                    border: `1px solid ${statusStyle.border}`,
+                                    color: statusStyle.text,
+                                    fontSize: '0.75rem',                                        fontWeight: '700'
+                                }}
+                            >
+                                {caseData?.status?.replace(/_/g, ' ')}
                             </span>
                         </div>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('caseDetail.caseId')}: {caseData.id}</p>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                            {t('caseDetail.caseId')}: {caseData?.id}
+                        </p>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
                         <span style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', background: urgencyStyle.bg, color: urgencyStyle.text, fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            ⚡ {t(`caseDetail.priority.${caseData.urgency.toLowerCase()}`)}
+                            ⚡ {caseData?.urgency ? t(`caseDetail.priority.${caseData.urgency.toLowerCase()}`) : ""}
                         </span>
                         {/* Computed Status Heartbeat */}
-                        {caseData.summonsStatus === 'PENDING' && (
+                        {caseData?.summonsStatus === 'PENDING' && (
                             <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', padding: '0.25rem 0.5rem', borderRadius: '0.35rem', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
                                 {t('caseDiary.statusOverrideAdmission')}
                             </span>
@@ -298,19 +316,25 @@ export default function CaseDetailPage() {
             {/* 3. Tab Content */}
 
             {/* OVERVIEW TAB */}
-            {activeTab === 'overview' && <OverviewTab caseData={caseData} onHireLawyer={handleHireLawyer} onRefresh={fetchCaseDetails} />}
+            {activeTab === 'overview' && caseData && (<OverviewTab caseData={caseData} onHireLawyer={handleHireLawyer} onRefresh={fetchCaseDetails} />)}
 
             {/* CASE FILES TAB */}
-            {activeTab === 'files' && <CaseFilesTab caseId={caseId} caseType={caseData.caseType} caseDescription={caseData.description} />}
+            {activeTab === 'files' && caseData && (
+                <CaseFilesTab
+                    caseId={caseId}
+                    caseType={caseData.caseType}
+                    caseDescription={caseData.description}
+                />
+            )}
 
             {/* TIMELINE TAB */}
-            {activeTab === 'timeline' && <TimelineTab caseData={caseData} />}
+            {activeTab === 'timeline' && caseData && (<TimelineTab caseData={caseData} />)}
 
             {/* PROCEDURAL HEALTH TAB */}
-            {activeTab === 'health' && <ProceduralHealthTab caseData={caseData} />}
+            {activeTab === 'health' && caseData && (<ProceduralHealthTab caseData={caseData} />)}
 
             {/* Chat Widget always visible */}
-            <CaseChatWidget caseId={caseId} caseTitle={caseData.title} />
+            {caseData && (<CaseChatWidget caseId={caseId} caseTitle={caseData.title}/>)}
 
             {/* Hire Lawyer Modal */}
             {showHireModal && (
@@ -417,7 +441,7 @@ export default function CaseDetailPage() {
                 </div>
             )}
         </div>
-        </ApiStateWrapper>
+    </ApiStateWrapper>
     );
 }
 
@@ -696,7 +720,7 @@ function OverviewTab({ caseData, onHireLawyer, onRefresh }) {
                         </div>
                     </div>
                 </div>
-            </div >
+            </div>
         </div>
     );
 }
@@ -1333,8 +1357,10 @@ function TimelineTab({ caseData }) {
     };
 
     useEffect(() => {
-        fetchTimeline();
-    }, [caseData.id]);
+        if (caseData?.id) {
+            fetchTimeline();
+        }
+    }, [caseData?.id]);
 
     const fetchTimeline = async () => {
         try {
@@ -1389,14 +1415,14 @@ function TimelineTab({ caseData }) {
 
             const finalTimeline = [];
 
-            {/* 1. Add Actual Past Events */ }
+            // 1. Add Actual Past Events
             actualEvents.forEach(e => {
                 finalTimeline.push({
-                    date: e.timestamp,
-                    title: e.event,
-                    subtitle: e.description || t('caseDetail.completed'),
-                    type: 'completed',
-                    icon: CheckCircle2
+                    date: e.date,
+                    title: e.title,
+                    subtitle: e.subtitle,
+                    type: e.type,
+                    icon: e.icon
                 });
             });
 
@@ -1833,6 +1859,3 @@ function ProceduralHealthTab({ caseData }) {
         </div>
     );
 }
-
-
-
