@@ -24,6 +24,10 @@ public class DocumentAnalysisService {
     private final AiService aiService;
     private final DocumentAnalysisRepository analysisRepository;
     private final Gson gson = new Gson();
+    private final org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+
+    @org.springframework.beans.factory.annotation.Value("${lawgpt.service.url:http://localhost:8001}")
+    private String lawgptUrl;
     
     /**
      * Analyze document asynchronously
@@ -58,8 +62,31 @@ public class DocumentAnalysisService {
             // Get AI analysis
             String aiResponse = aiService.analyzeDocument(text, document.getFileName());
             
+            // Get Case summary from lawgpt-service
+            String summaryResponse = "{}";
+            try {
+                org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+                headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+                
+                JsonObject requestBody = new JsonObject();
+                requestBody.addProperty("text", text);
+                requestBody.addProperty("language", "en");
+                
+                org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(requestBody.toString(), headers);
+                org.springframework.http.ResponseEntity<String> response = restTemplate.postForEntity(
+                    lawgptUrl + "/summarize",
+                    entity,
+                    String.class
+                );
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    summaryResponse = response.getBody();
+                }
+            } catch (Exception e) {
+                log.warn("Failed to get case summary from lawgpt-service: {}", e.getMessage());
+            }
+            
             // Parse and save
-            DocumentAnalysis analysis = parseAndSaveAnalysis(document, aiResponse);
+            DocumentAnalysis analysis = parseAndSaveAnalysis(document, aiResponse, summaryResponse);
             
             log.info("Document {} analyzed successfully", document.getId());
             
@@ -87,7 +114,7 @@ public class DocumentAnalysisService {
     /**
      * Parse AI response and save to database
      */
-    private DocumentAnalysis parseAndSaveAnalysis(DocumentEntity doc, String jsonResponse) {
+    private DocumentAnalysis parseAndSaveAnalysis(DocumentEntity doc, String jsonResponse, String summaryResponse) {
         // Check again in case analysis was saved by another thread
         if (analysisRepository.existsByDocumentId(doc.getId())) {
             log.info("Analysis already exists for document {}, returning existing", doc.getId());
@@ -110,6 +137,18 @@ public class DocumentAnalysisService {
             
             JsonObject data = gson.fromJson(cleanJson, JsonObject.class);
             
+            // Merge summaryResponse if present
+            try {
+                JsonObject summaryData = gson.fromJson(summaryResponse, JsonObject.class);
+                if (summaryData != null && summaryData.has("case_context")) {
+                    data.add("case_summary", summaryData);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to parse/merge summaryResponse: {}", e.getMessage());
+            }
+            
+            String mergedJson = gson.toJson(data);
+            
             DocumentAnalysis analysis = DocumentAnalysis.builder()
                 .document(doc)
                 .summary(getJsonString(data, "summary"))
@@ -122,7 +161,7 @@ public class DocumentAnalysisService {
                 .riskAssessment(getJsonString(data, "riskAssessment"))
                 .score(getJsonInteger(data, "score"))
                 .complianceStatus(getJsonString(data, "complianceStatus"))
-                .fullAnalysisJson(cleanJson)
+                .fullAnalysisJson(mergedJson)
                 .analyzedAt(LocalDateTime.now())
                 .analysisSuccess(true)
                 .build();
