@@ -80,7 +80,7 @@ Keep your answer focused, factual, and written for a common Indian citizen.
 # This is the single biggest hallucination guardrail we have at the prompt
 # level — when the retrieval finds the right passage, the model quotes it;
 # when retrieval misses, the model is supposed to say so out loud.
-KANOON_CONTEXT_PROMPT = """Use the INDIAN KANOON CONTEXT below as your primary source.
+KANOON_CONTEXT_PROMPT = """Use the RETRIEVED LEGAL CONTEXT below as your primary source.
 
 - If the answer is fully covered there, quote the exact section number, article, or judgment.
 - If the context is partial or missing, you may fall back to your training knowledge, but you
@@ -96,7 +96,7 @@ def _build_user_prompt(question: str, kanoon_context: str | None) -> str:
 
     return (
         f"{question}\n\n"
-        "INDIAN KANOON CONTEXT:\n"
+        "RETRIEVED LEGAL CONTEXT:\n"
         f"{kanoon_context}\n\n"
         "If the answer is not present in the context, say you cannot verify it."
     )
