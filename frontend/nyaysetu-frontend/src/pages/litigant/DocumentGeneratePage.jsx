@@ -1,3 +1,4 @@
+import { SkeletonLoader } from '../../components/common/LoadingSpinner';
 import React, { useState } from 'react';
 import {
     FileText, ScrollText, Send, Download,
@@ -703,6 +704,18 @@ const DocumentGeneratePage = () => {
                             </div>
                         </motion.div>
                     )}
+
+                    {isGenerating && (
+    <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        style={{ maxWidth: '800px' }}
+    >
+        <div style={{ marginBottom: '1rem' }}>
+            <SkeletonLoader type="card" count={3} />
+        </div>
+    </motion.div>
+)}
 
                     {/* ─── Step 3: Preview & Download ─────────────────────── */}
                     {step === 3 && generatedDoc && (
