@@ -1022,3 +1022,24 @@ When opening a Pull Request, please include:
   * [ ] No `.env` or credentials accidentally included
 
 This ensures faster review and approval of your PR.
+### 🛠️ Local Environment Setup & Prerequisites
+
+Before you start running the project locally, please ensure you have the following installed on your system:
+
+#### ☕ Backend Prerequisites
+* **Java Version:** 17
+* **Framework:** Spring Boot 3.2.3
+* **Build Tool:** Maven
+
+#### 🌐 Frontend Prerequisites
+* **Runtime:** Node.js (Latest LTS)
+* **Framework/Tooling:** React with Vite
+
+---
+
+### 🚀 How to Run the Applications
+
+#### 🐳 Option 1: Using Docker (Recommended)
+If you have Docker installed, you can start all services together with:
+```bash
+docker-compose up -d
