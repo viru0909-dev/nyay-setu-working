@@ -125,28 +125,6 @@ async def search_kanoon(query: str, max_results: int = 3) -> list[dict]:
         logger.error(f"Indian Kanoon search error: {type(e).__name__}: {e}")
         return []
 
-    url = f"{INDIAN_KANOON_API_URL}/search/"
-    params = {"formInput": query, "pagenum": 0}
-    headers = {
-        "Authorization": f"Token {INDIAN_KANOON_TOKEN}",
-        "Accept": "application/json",
-    }
-
-    try:
-        result = await _search_kanoon_with_retry(
-            query,
-            url,
-            params,
-            headers,
-            max_results,
-        )
-        kanoon_breaker.call_succeeded()
-        return result
-    except Exception as e:
-        kanoon_breaker.call_failed()
-        logger.error(f"Indian Kanoon search error: {type(e).__name__}: {e}")
-        return []
-
 
 @retry_transient
 async def _fetch_doc(
