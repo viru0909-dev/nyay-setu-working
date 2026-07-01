@@ -90,6 +90,7 @@ const JudicialOverview = retryLazy(() => import('./pages/judge/JudicialOverview'
 const UnassignedPool = retryLazy(() => import('./pages/judge/UnassignedPool'));
 const LiveHearing = retryLazy(() => import('./pages/judge/LiveHearing'));
 const JudgeHearingsPage = retryLazy(() => import('./pages/judge/JudgeHearingsPage'));
+const RedactionReviewPage = retryLazy(() => import('./pages/judge/RedactionReviewPage'));
 
 // Lawyer Pages
 const LawyerCasesPage = retryLazy(() => import('./pages/lawyer/LawyerCasesPage'));
@@ -302,6 +303,7 @@ function App({ swRegistration }) {
                                     <Route path="case/:caseId" element={<JudgeCaseWorkspace />} />
                                     <Route path="conduct" element={<ConductHearingPage />} />
                                     <Route path="analytics" element={<CourtAnalyticsPage />} />
+                                    <Route path="redaction-review" element={<RedactionReviewPage />} />
                                     <Route path="profile" element={<ProfilePage />} />
                                     <Route path="*" element={<Navigate to="/judge" replace />} />
                                 </Route>
