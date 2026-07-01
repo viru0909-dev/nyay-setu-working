@@ -1,13 +1,16 @@
 package com.nyaysetu.backend.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
@@ -15,17 +18,15 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String secretKey;
-
-    // Access token: 15 minutes
     private static final long ACCESS_TOKEN_EXPIRY = 1000 * 60 * 15;
-
-    // Refresh token: 7 days
     private static final long REFRESH_TOKEN_EXPIRY = 1000 * 60 * 60 * 24 * 7;
 
-    private SecretKey getSignKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
+    private final JwtSigningKeyService jwtSigningKeyService;
+    private final ObjectMapper objectMapper;
+
+    public JwtService(JwtSigningKeyService jwtSigningKeyService, ObjectMapper objectMapper) {
+        this.jwtSigningKeyService = jwtSigningKeyService;
+        this.objectMapper = objectMapper;
     }
 
     public String extractUsername(String token) {
@@ -38,37 +39,92 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-            .verifyWith(getSignKey())
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
+        String keyId = extractKeyId(token);
+
+        if (keyId != null && !keyId.isBlank()) {
+            SecretKey verificationKey = jwtSigningKeyService.getVerificationKey(keyId)
+                    .orElseThrow(() -> new JwtException("Unknown JWT signing key id: " + keyId));
+
+            return parseClaims(token, verificationKey);
+        }
+
+        return parseLegacyTokenWithAvailableKeys(token);
     }
 
-    // Generate short-lived ACCESS token (15 min)
+    private Claims parseLegacyTokenWithAvailableKeys(String token) {
+        JwtException lastException = null;
+
+        for (SecretKey key : jwtSigningKeyService.getVerificationKeys().values()) {
+            try {
+                return parseClaims(token, key);
+            } catch (JwtException exception) {
+                lastException = exception;
+            }
+        }
+
+        if (lastException != null) {
+            throw lastException;
+        }
+
+        throw new JwtException("No JWT verification keys configured");
+    }
+
+    private Claims parseClaims(String token, SecretKey key) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    private String extractKeyId(String token) {
+        try {
+            String[] parts = token.split("\\.");
+
+            if (parts.length < 2) {
+                return null;
+            }
+
+            String headerJson = new String(
+                    Base64.getUrlDecoder().decode(parts[0]),
+                    StandardCharsets.UTF_8
+            );
+
+            JsonNode keyIdNode = objectMapper.readTree(headerJson).get("kid");
+            return keyIdNode == null ? null : keyIdNode.asText(null);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
-            .claims(extraClaims)
-            .subject(userDetails.getUsername())
-            .issuedAt(new Date(System.currentTimeMillis()))
-            .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
-            .signWith(getSignKey())
-            .compact();
+                .header()
+                .keyId(jwtSigningKeyService.getCurrentKeyId())
+                .and()
+                .claims(extraClaims)
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+                .signWith(jwtSigningKeyService.getCurrentSigningKey())
+                .compact();
     }
 
-    // Generate long-lived REFRESH token (7 days)
     public String generateRefreshToken(UserDetails userDetails) {
         return Jwts.builder()
-            .subject(userDetails.getUsername())
-            .issuedAt(new Date(System.currentTimeMillis()))
-            .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
-            .signWith(getSignKey())
-            .compact();
+                .header()
+                .keyId(jwtSigningKeyService.getCurrentKeyId())
+                .and()
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
+                .signWith(jwtSigningKeyService.getCurrentSigningKey())
+                .compact();
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

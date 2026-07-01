@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class JwtAuthFilterTest {
 
@@ -35,7 +36,7 @@ class JwtAuthFilterTest {
     void setUp() {
         SecurityContextHolder.clearContext();
 
-        jwtService = new JwtService();
+        jwtService = mock(JwtService.class);
         ReflectionTestUtils.setField(jwtService, "secretKey", TEST_SECRET_KEY);
 
         userDetailsService = Mockito.mock(UserDetailsService.class);
