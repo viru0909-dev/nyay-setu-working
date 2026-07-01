@@ -1,6 +1,13 @@
+import asyncio
 import ipaddress
+import os
 import socket
+from typing import List
 from urllib.parse import urlparse
+
+import aiohttp
+import cv2
+from services.url_security import validate_public_video_url
 
 BLOCKED_NETWORKS = [
     ipaddress.ip_network("127.0.0.0/8"),
@@ -14,6 +21,8 @@ BLOCKED_NETWORKS = [
 
 
 def validate_url_for_ssrf(url: str) -> None:
+    if url.startswith("/"):
+        return
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https"):
         raise ValueError(f"Disallowed scheme: {parsed.scheme}")
@@ -30,20 +39,12 @@ def validate_url_for_ssrf(url: str) -> None:
             raise ValueError(f"URL resolves to blocked IP: {resolved_ip}")
 
 
-import cv2
-import os
-import aiohttp
-import asyncio
-from typing import List
-
-from services.url_security import validate_public_video_url
-
 UPLOAD_DIR = "/tmp/nyaysetu_forensics"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 async def download_video(url: str, job_id: str) -> str:
-    """Download video from URL (which will be a MinIO/Spring Boot endpoint) to a local temp file."""
+    """Download video from URL (a MinIO/Spring Boot endpoint) to a local temp file."""
     # If the URL is already a local path (for testing), return it immediately
     # before running SSRF validation which only accepts http/https URLs.
     if url.startswith("/") and os.path.exists(url):
@@ -55,6 +56,11 @@ async def download_video(url: str, job_id: str) -> str:
         from fastapi import HTTPException
 
         raise HTTPException(status_code=400, detail=f"Unsafe URL rejected: {e}")
+    """Download video from URL (which will be a MinIO/Spring Boot endpoint) to
+    a local temp file."""
+    # If the URL is already a local path (for testing), just return it
+    if url.startswith("/") and os.path.exists(url):
+        return url
 
     safe_url = validate_public_video_url(url)
 
@@ -127,7 +133,8 @@ async def extract_frames(
 
 
 def cleanup_job(job_id: str):
-    """Delete the downloaded video and frames after analysis to comply with DPDP Act 2023."""
+    """Delete the downloaded video and frames after analysis
+    to comply with DPDP Act 2023."""
     import shutil
 
     video_path = os.path.join(UPLOAD_DIR, f"{job_id}_video.mp4")

@@ -7,6 +7,7 @@ Or directly: python tests/test_chunker.py
 
 import sys
 from pathlib import Path
+
 from services.retrieval import chunker
 
 # Allow direct execution from the project root.
@@ -113,7 +114,8 @@ TWO_SECTIONS_NO_BLANK_LINE = (
     "Section 103 — Punishment for murder. "
     "Whoever commits murder shall be punished with death or imprisonment for life.\n"
     "Section 104 — Punishment for murder by life convict. "
-    "Whoever being under sentence of imprisonment for life commits murder shall be punished."
+    "Whoever being under sentence of imprisonment for"
+    " life commits murder shall be punished."
 )
 
 
@@ -130,7 +132,10 @@ def test_split_legal_sections_no_headings_is_noop():
 
 
 def test_split_legal_sections_preserves_preamble():
-    text = "Preliminary note before any section.\nSection 5 — Definitions. Words mean things."
+    text = (
+        "Preliminary note before any section.\n"
+        "Section 5 — Definitions. Words mean things."
+    )
     blocks = chunker.split_legal_sections(text)
     assert len(blocks) == 2
     assert blocks[0].startswith("Preliminary note")

@@ -1,7 +1,6 @@
-import asyncio
-import pytest
 from unittest.mock import AsyncMock, patch
 
+import pytest
 from research import execute_with_fallback
 
 

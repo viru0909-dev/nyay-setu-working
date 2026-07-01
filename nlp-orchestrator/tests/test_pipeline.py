@@ -1,16 +1,16 @@
-import pytest
-import sys
 import os
+import sys
 from unittest.mock import AsyncMock, patch
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+import pytest
 from main import deep_research_pipeline
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 @pytest.mark.asyncio
 @patch("main.build_kanoon_context", new_callable=AsyncMock)
-@patch("main.synthesize_answers", new_callable=AsyncMock)
+@patch("main.synthesize_answers_structured", new_callable=AsyncMock)
 @patch("main.run_parallel_research", new_callable=AsyncMock)
 @patch("main.decompose_query", new_callable=AsyncMock)
 async def test_deep_research_pipeline_flow(
@@ -61,7 +61,10 @@ async def test_deep_research_pipeline_gemini_cache_hit(
     )
     mock_get_cached_response.return_value = "Cached analysis"
 
-    query = "This is a long enough complex query designed to trigger the Gemini model choice and hit cache"
+    query = (
+        "This is a long enough complex query designed to"
+        " trigger the Gemini model choice and hit cache"
+    )
     events = []
 
     with patch("main.gemini_client", True):

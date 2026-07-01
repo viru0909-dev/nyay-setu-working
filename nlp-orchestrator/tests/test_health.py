@@ -1,10 +1,10 @@
 import os
+
+from main import app
 from starlette.testclient import TestClient
 
 os.environ.setdefault("GROQ_API_KEY", "test")
 os.environ.setdefault("GOOGLE_GEMINI_API_KEY", "test")
-
-from main import app
 
 client = TestClient(app)
 

@@ -9,41 +9,44 @@ Endpoints:
   GET  /health                      — Health check
 """
 
-import os
-from utils import async_retry
 import asyncio
 import json
-
 import logging
+import os
+import time
+import uuid
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-import time
-import uuid
-from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from google import genai
+from groq import AsyncGroq
 from pydantic import BaseModel, field_validator
 from sse_starlette.sse import EventSourceResponse
 
+# Local modules
+from avatar_speech import convert_to_hinglish, detect_domain, get_interim_messages
 from cache import generate_cache_key, get_cached_response, set_cached_response
 from config import (
     FRONTEND_ORIGIN,
-    GROQ_API_KEY,
-    GROQ_MODEL_FAST,
     GEMINI_API_KEY,
     GEMINI_MODEL,
+    GROQ_API_KEY,
+    GROQ_MODEL_FAST,
 )
 from decomposer import decompose_query
 from router import route_questions
 from research import run_parallel_research, execute_with_fallback
+from sanitizer import sanitize_prompt_input, sanitize_user_input
+from services.kanoon_search import build_kanoon_context
 from synthesizer import (
-    synthesize_answers,
-    stream_synthesize_answers,
     synthesize_answers_structured,
     stream_synthesize_answers_structured,
 )
 from validators.citation_validator import validate_citations_from_text
+from utils import async_retry
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
 from sanitizer import sanitize_user_input, sanitize_prompt_input
@@ -118,7 +121,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Nyay Saarthi — NLP Orchestrator",
-    description="Legal Reasoning Pipeline: Decompose → Route → Research → Synthesize → Speak",
+    description=(
+        "Legal Reasoning Pipeline: " "Decompose → Route → Research → Synthesize → Speak"
+    ),
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -279,9 +284,7 @@ async def legal_reasoning_pipeline(query: str, language: str):
         yield sse_event("synthesis_start", {})
         yield sse_event(
             "avatar_update",
-            {
-                "message": "Sab information mila di, ab aapke liye summary bana raha hoon..."
-            },
+            {"message": "Sab information mila di,ab aapke liye summary bana raha hoon"},
         )
 
         logger.info("[Layer 4] Synthesizing with structured streaming...")
@@ -306,7 +309,7 @@ async def legal_reasoning_pipeline(query: str, language: str):
                     "[Layer 4] Citation validation results: %s", validation_results
                 )
         except Exception as e:
-            logger.warning("[Layer 4] Citation validation failed (non-blocking): %s", e)
+            logger.warning("[Layer 4]Citation validation failed (non-blocking): %s", e)
             validation_results = []
 
         # ── Layer 5b: Hinglish Conversion ────────────────────────
@@ -440,13 +443,19 @@ async def analyze_sync(body: LegalQuery):
 
 # ─── Deep Research Pipeline ──────────────────────────────────────────────────
 
-DEEP_RESEARCH_SYSTEM_PROMPT = """You are Nyay Saarthi, a specialized Indian Legal AI Assistant. 
-Your SOLE purpose is to provide legal information, analysis, and guidance based on Indian Law (IPC, BNS, MVA, Constitution, etc.).
+DEEP_RESEARCH_SYSTEM_PROMPT = """You are Nyay Saarthi,
+a specialized Indian Legal AI Assistant.
+Your SOLE purpose is to provide legal information, analysis, and guidance based on
+Indian Law (IPC, BNS, MVA, Constitution, etc.).
 
 STRICT MANDATE:
-- If the user query is NOT related to Indian Law, legal procedures, or the Indian justice system, you MUST politely refuse to answer.
-- State: "I am a specialized Legal AI Assistant. I can only assist with queries related to Indian Law and legal procedures. Your question seems to be outside my legal domain."
-- DO NOT answer questions about technology, science, general history, or other non-legal topics.
+- If the user query is NOT related to Indian Law, legal procedures,
+or the Indian justice system, you MUST politely refuse to answer.
+- State: "I am a specialized Legal AI Assistant.
+I can only assist with queries related to Indian Law and legal procedures.
+Your question seems to be outside my legal domain."
+- DO NOT answer questions about technology, science, general history,
+or other non-legal topics.
 - Answer ONLY using the provided Indian Kanoon legal context below when possible.
 
 CONTEXT FROM INDIAN KANOON:
@@ -454,7 +463,8 @@ CONTEXT FROM INDIAN KANOON:
 
 USER QUERY: {user_query}
 
-If the topic is legal but not found in the context, use your internal legal knowledge but cite relevant sections and add a disclaimer.
+If the topic is legal but not found in the context, use your internal legal knowledge
+but cite relevant sections and add a disclaimer.
 Structure your response with:
 1. Direct answer to the question
 2. Relevant legal sections with exact numbers
@@ -509,7 +519,8 @@ async def deep_research_pipeline(query: str, language: str):
         yield sse_event(
             "avatar_speak",
             {
-                "message": "Aapka sawaal samajh aa gaya. Legal domain identify ho raha hai..."
+                "message": "Aapka sawaal samajh aa gaya"
+                ".Legal domain identify ho raha hai"
             },
         )
         await asyncio.sleep(1)  # Brief pause for UX
@@ -569,7 +580,11 @@ async def deep_research_pipeline(query: str, language: str):
         # Normalized complexity 0-1
         complexity = min(1.0, (complex_score * 0.3 + word_count * 0.02))
         model_choice = "gemini" if complexity >= 0.5 else "groq"
-
+        model_text = (
+            "Gemini for deep analysis"
+            if model_choice == "gemini"
+            else "Groq for fast response"
+        )
         yield sse_event(
             "stage",
             {
@@ -577,7 +592,10 @@ async def deep_research_pipeline(query: str, language: str):
                 "status": "active",
                 "complexity": round(complexity, 2),
                 "model": model_choice,
-                "message": f"Complexity score: {round(complexity, 2)} — sending to {'Gemini for deep analysis' if model_choice == 'gemini' else 'Groq for fast response'}",
+                "message": (
+                    f"Complexity score: {round(complexity, 2)} "
+                    f"—sending to {model_text}"
+                ),
             },
         )
 
@@ -585,7 +603,8 @@ async def deep_research_pipeline(query: str, language: str):
             yield sse_event(
                 "avatar_speak",
                 {
-                    "message": "Yeh complex case hai, Gemini se deep analysis kar raha hoon..."
+                    "message": "Yeh complex case hai,"
+                    "Gemini se deep analysis kar raha hoon"
                 },
             )
         else:
@@ -627,7 +646,10 @@ async def deep_research_pipeline(query: str, language: str):
             kanoon_context=(
                 kanoon_context
                 if kanoon_context
-                else "No specific Indian Kanoon judgments found for this query. If the query is legal in nature, provide general legal guidance based on Indian statutes. If the query is non-legal, follow the refusal mandate in your system prompt."
+                else "No specific Indian Kanoon judgments found for this query."
+                "If the query is legal in nature, provide general legal guidance"
+                "based on Indian statutes. If the query is non-legal,"
+                "follow the refusal mandate in your system prompt."
             ),
             user_query=query,
         )

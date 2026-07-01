@@ -1,6 +1,8 @@
-import pytest
-
-from lawgpt.prompt_builder import build_prompt, validate_required_fields, detect_prompt_injection
+from lawgpt.prompt_builder import (
+    build_prompt,
+    detect_prompt_injection,
+    validate_required_fields,
+)
 
 
 def test_build_prompt_basic_replacement():

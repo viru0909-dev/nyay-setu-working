@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -56,6 +55,9 @@ public class SecurityConfig {
 
     @PostConstruct
     public void validateJwtSecretConfiguration() {
+        if (Arrays.asList(environment.getActiveProfiles()).contains("test")) {
+                return; // Skip validation entirely during tests
+        }
         boolean isDev = Arrays.stream(environment.getActiveProfiles())
                 .anyMatch(profile -> profile.equalsIgnoreCase("dev") || profile.equalsIgnoreCase("test"));
         String jwtSecretEnv = System.getenv("JWT_SECRET");

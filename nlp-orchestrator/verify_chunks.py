@@ -1,6 +1,7 @@
 import sys
-from config import CHROMA_PATH
+
 import chromadb
+from config import CHROMA_PATH
 
 doc_id = sys.argv[1]
 client = chromadb.PersistentClient(path=CHROMA_PATH)

@@ -7,6 +7,7 @@ import com.nyaysetu.backend.entity.VisibilityLevel;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.repository.UserRepository;
+import com.nyaysetu.backend.entity.VisibilityLevel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

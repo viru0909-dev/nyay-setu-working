@@ -11,23 +11,21 @@ synthesize_answers_structured:
 and that the pure helper functions behave correctly.
 """
 
-import os
-
-os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
-
 import json
-import pytest
+import os
 from unittest.mock import AsyncMock, patch
 
-import synthesizer
-from synthesizer import (
-    synthesize_answers_structured,
-    extract_cited_laws_from_markdown,
-    _normalize_cited_law,
-    _dedupe_cited_laws,
-    _strip_json_fence,
-)
+import pytest
 from models.schemas import SynthesisResult
+from synthesizer import (
+    _dedupe_cited_laws,
+    _normalize_cited_law,
+    _strip_json_fence,
+    extract_cited_laws_from_markdown,
+    synthesize_answers_structured,
+)
+
+os.environ.setdefault("GROQ_API_KEY", "test-key-not-used")
 
 RESEARCH = [
     {
@@ -80,7 +78,8 @@ async def test_parses_json_object_with_cited_laws(mock_create):
     mock_create.return_value = _mock_response(
         json.dumps(
             {
-                "answer_markdown": "## Answer\nMurder is punishable under Section 302 IPC.",
+                "answer_markdown": "## Answer\nMurder is punishable under"
+                " Section 302 IPC.",
                 "cited_laws": ["IPC Sec 302", "CrPC Sec 144"],
             }
         )

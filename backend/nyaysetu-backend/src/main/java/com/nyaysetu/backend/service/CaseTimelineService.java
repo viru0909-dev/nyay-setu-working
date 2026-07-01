@@ -58,7 +58,7 @@ public class CaseTimelineService {
     }
 
     public List<CaseTimeline> getTimeline(UUID caseId) {
-        return repo.findByLegalCaseIdOrderByTimestampAsc(caseId);
+        return repo.findByCaseEntityIdOrderByTimestampAsc(caseId);
     }
 
     public void logPoliceViewed(UUID caseId, String officerName) {

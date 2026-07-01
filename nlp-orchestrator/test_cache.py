@@ -1,11 +1,11 @@
 import time
 
 from cache import (
+    clear_expired_cache,
     generate_cache_key,
+    get_cache_stats,
     get_cached_response,
     set_cached_response,
-    get_cache_stats,
-    clear_expired_cache,
 )
 
 

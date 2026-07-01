@@ -26,7 +26,8 @@ import sys
 
 # ─── The OLD prompt (pre-#849), pinned here purely for A/B comparison ─────────
 OLD_PROMPT = """You are converting a formal English legal answer into a friendly, \
-conversational Hinglish dialogue spoken by an AI legal assistant avatar named "Nyay Saarthi".
+conversational Hinglish dialogue spoken by an AI legal assistant avatar named
+"Nyay Saarthi".
 
 Rules:
 - Mix Hindi and English naturally, as a bilingual Indian would speak

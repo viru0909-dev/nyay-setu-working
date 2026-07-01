@@ -27,7 +27,7 @@ public class MessageService {
                 .orElseThrow(() -> new NotFoundException("Case not found: " + caseId));
 
         CaseMessage msg = CaseMessage.builder()
-                .legalCaseId(caseId)
+                .CaseEntityId(caseId)
                 .senderId(dto.getSenderId())
                 .message(dto.getMessage())
                 .type(dto.getType() != null ? dto.getType() : "TEXT")
@@ -47,6 +47,6 @@ public class MessageService {
     }
 
     public List<CaseMessage> getMessages(UUID caseId) {
-        return messageRepository.findByLegalCaseIdOrderByTimestampAsc(caseId);
+        return messageRepository.findByCaseEntityIdOrderByTimestampAsc(caseId);
     }
 }

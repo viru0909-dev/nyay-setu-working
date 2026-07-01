@@ -11,7 +11,6 @@ import time
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
-
 from services.ocr_service import run_ocr
 
 logger = logging.getLogger("ocr-router")

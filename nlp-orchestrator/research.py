@@ -25,28 +25,24 @@ Architecture:
 import asyncio
 import logging
 
-from google import genai
-from groq import AsyncGroq
+import httpx
 from config import (
     GEMINI_API_KEY,
     GEMINI_MODEL,
     GROQ_API_KEY,
     GROQ_MODEL_FAST,
     GROUND_RESEARCH,
-    RETRY_ENABLED,
-    RETRY_MAX_ATTEMPTS,
-    RETRY_DELAY_SECONDS,
-    PROVIDER_ORDER,
     OLLAMA_API_URL,
     OLLAMA_MODEL,
+    PROVIDER_ORDER,
+    RETRY_DELAY_SECONDS,
+    RETRY_ENABLED,
+    RETRY_MAX_ATTEMPTS,
 )
-import httpx
+from google import genai
+from groq import AsyncGroq
 
-from utils import (
-    CircuitBreaker,
-    retry_transient,
-    is_retryable_exception,
-)
+from utils import CircuitBreaker, is_retryable_exception, retry_transient
 
 logger = logging.getLogger(__name__)
 
@@ -62,16 +58,19 @@ ollama_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 
 # ─── Prompts ──────────────────────────────────────────────────────────────────
 
-LEGAL_SYSTEM_PROMPT = """You are an expert Indian legal advisor with deep knowledge of:
+LEGAL_SYSTEM_PROMPT = """
+You are an expert Indian legal advisor with deep knowledge of:
 - Indian Penal Code (IPC) and Bharatiya Nyaya Sanhita (BNS) 2023
-- Code of Criminal Procedure (CrPC) and Bharatiya Nagarik Suraksha Sanhita (BNSS) 2023
+- Code of Criminal Procedure (CrPC) and
+Bharatiya Nagarik Suraksha Sanhita (BNSS) 2023
 - Code of Civil Procedure (CPC)
 - Motor Vehicles Act (MVA)
 - Indian Constitution including Fundamental Rights
 - Consumer Protection Act
 - Right to Information Act (RTI)
 
-Provide precise, accurate, legally grounded answers. Quote specific section numbers where relevant.
+Provide precise, accurate, legally grounded answers. Quote specific section numbers
+where relevant.
 Keep your answer focused, factual, and written for a common Indian citizen.
 """
 
@@ -82,10 +81,13 @@ Keep your answer focused, factual, and written for a common Indian citizen.
 # when retrieval misses, the model is supposed to say so out loud.
 KANOON_CONTEXT_PROMPT = """Use the INDIAN KANOON CONTEXT below as your primary source.
 
-- If the answer is fully covered there, quote the exact section number, article, or judgment.
-- If the context is partial or missing, you may fall back to your training knowledge, but you
-  MUST state plainly: "the retrieved context does not cover this directly..." before doing so.
-- Never silently invent section numbers, case names, or holdings not present in the context.
+- If the answer is fully covered there, quote the exact section number, article, or
+judgment.
+- If the context is partial or missing, you may fall back to your training knowledge,
+but you MUST state plainly: "the retrieved context does not cover this directly..."
+before doing so.
+- Never silently invent section numbers, case names, or holdings not present in the
+context.
 """
 
 
@@ -106,7 +108,8 @@ def _fallback_response(question: str, source: str) -> dict:
     """Structured fallback when all retries are exhausted or the circuit is open."""
     return {
         "question": question,
-        "answer": "Our legal research service is temporarily unavailable. Please try again shortly.",
+        "answer": "Our legal research service is temporarily unavailable. "
+        "Please try again shortly.",
         "source": source,
         "grounded": False,
         "error": "circuit_open",
@@ -137,7 +140,8 @@ def build_provider_queue(primary_provider: str) -> list[str]:
 async def _attempt_provider(
     provider: str, question: str, kanoon_context: str | None = None
 ) -> dict:
-    """Invoke a single provider once, honoring circuit-breaker state and returning a structured result or fallback."""
+    """Invoke a single provider once, honoring circuit-breaker state and
+    returning a structured result or fallback."""
     if provider == "gemini":
         if not gemini_client:
             return _fallback_response(question, "gemini")
@@ -187,9 +191,9 @@ async def _attempt_provider(
 async def execute_with_fallback(
     question: str, kanoon_context: str | None = None, primary_provider: str = "gemini"
 ) -> dict:
-    """Coordinator: try primary provider with retries, then fallback to secondary providers.
-
-    Returns the first successful provider result or a unified fallback response when all fail.
+    """Coordinator: try primary provider with retries,
+    then fallback to secondary providers.Returns the first successful provider result
+    or a unified fallback response when all fail.
     """
     providers = build_provider_queue(primary_provider)
     if not providers:
@@ -202,7 +206,6 @@ async def execute_with_fallback(
         for attempt in range(RETRY_MAX_ATTEMPTS + 1):
             try:
                 result = await _attempt_provider(provider, question, kanoon_context)
-                # If provider returns a fallback-shaped response, treat as failure and try next provider
                 if result.get("is_fallback"):
                     last_error = result.get("error", "fallback")
                     break
@@ -223,12 +226,14 @@ async def execute_with_fallback(
                 # backoff increases with each retry (attempt starts at 0)
                 wait = RETRY_DELAY_SECONDS * (attempt + 1)
                 logger.warning(
-                    f"[Research] Transient error from {provider}, retry {attempt+1} in {wait}s: {exc}"
+                    f"[Research] Transient error from {provider}, "
+                    f"retry {attempt+1} in {wait}s: {exc}"
                 )
                 await asyncio.sleep(wait)
 
         logger.warning(
-            f"[Research] Provider {provider} exhausted, trying next provider if available"
+            f"[Research] Provider {provider} exhausted, "
+            f"trying next provider if available"
         )
 
     logger.error(f"[Research] All providers exhausted. Last error: {last_error}")

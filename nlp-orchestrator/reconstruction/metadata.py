@@ -1,6 +1,7 @@
-import cv2
 import json
 import os
+
+import cv2
 
 video_path = r"input_videos\Sample.mp4"
 
