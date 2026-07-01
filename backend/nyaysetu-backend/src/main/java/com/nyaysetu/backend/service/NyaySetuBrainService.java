@@ -45,6 +45,7 @@ public class NyaySetuBrainService {
     private final CaseRepository caseRepository;
     private final HearingRepository hearingRepository;
     private final PiiSanitizer piiSanitizer;
+    private final SemanticLegalQueryCacheService semanticLegalQueryCacheService;
 
     private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -124,7 +125,26 @@ public class NyaySetuBrainService {
             dynamicContext = getLawyerContext(user);
         }
 
-        String aiResponse = getAIResponse(conversation, role, dynamicContext);
+        Optional<String> cachedResponse = semanticLegalQueryCacheService.findCachedResponse(
+            userMessage,
+            role,
+            dynamicContext,
+            conversation.size()
+        );
+
+        String aiResponse;
+        if (cachedResponse.isPresent()) {
+            aiResponse = cachedResponse.get();
+        } else {
+            aiResponse = getAIResponse(conversation, role, dynamicContext);
+            semanticLegalQueryCacheService.cacheResponse(
+                userMessage,
+                role,
+                dynamicContext,
+                conversation.size(),
+                aiResponse
+            );
+        }
 
         // Add assistant message
         Map<String, String> assistantMsg = new HashMap<>();
