@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LegalLiteracyTipsWidget from '../../components/dashboard/LegalLiteracyTipsWidget';
 import {
     FileText, Upload, Shield, CheckCircle2,
     Clock, TrendingUp, AlertTriangle, Loader2, Lock
@@ -187,6 +188,8 @@ export default function PoliceDashboard() {
                     {t('Upload FIR')}
                 </div>
             </div>
+
+            <LegalLiteracyTipsWidget />
 
             {/* Stats Grid (existing) */}
             <div style={{

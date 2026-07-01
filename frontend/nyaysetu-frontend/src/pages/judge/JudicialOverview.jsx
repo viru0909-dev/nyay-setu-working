@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { judgeAPI } from '../../services/api';
+import LegalLiteracyTipsWidget from '../../components/dashboard/LegalLiteracyTipsWidget';
 import {
     Gavel, Calendar, AlertTriangle, Clock, ChevronRight, Loader2, Scale, Users, CalendarDays, AlertOctagon
 } from 'lucide-react';
@@ -99,6 +100,8 @@ export default function JudicialOverview() {
                     </div>
                 </div>
             </div>
+
+            <LegalLiteracyTipsWidget />
 
             {/* Stats Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
