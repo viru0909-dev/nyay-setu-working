@@ -5,8 +5,9 @@ Layer 5: Avatar Speech Layer
 """
 
 import random
-from groq import AsyncGroq
+
 from config import GROQ_API_KEY, GROQ_MODEL_FAST
+from groq import AsyncGroq
 
 client = AsyncGroq(api_key=GROQ_API_KEY)
 
@@ -169,17 +170,18 @@ def get_interim_messages(query: str, count: int = 3) -> list[str]:
     return result
 
 
-HINGLISH_CONVERSION_PROMPT = """You are converting a formal English legal answer into a friendly,
-conversational Hinglish dialogue spoken by an AI legal assistant avatar named "Nyay Saarthi".
+HINGLISH_CONVERSION_PROMPT = """You are converting a formal English legal answer into a
+friendly,conversational Hinglish dialogue spoken by an AI legal assistant avatar named
+"Nyay Saarthi".
 
 TONE & REGISTER (most important):
-Speak the way an educated, bilingual Indian would explain things to a friend over chai —
+Speak the way an educated, bilingual Indian would explain things to a friend over chai—
 warm, simple and everyday. Do NOT sound like a government notice, a news anchor, or a
 court order. Use the EASY, COLLOQUIAL word, not the heavy "shuddh"/Sanskritised one.
 
 Use the common ENGLISH word whenever a normal Indian speaker would naturally say it in
 English. Keep these in English: court, judge, police, FIR, bail, case, lawyer, advocate,
-rights, complaint, refund, insurance, accident, property, rent, contract, notice, appeal,
+rights, complaint, refund, insurance, accident, property, rent, contract, notice,appeal,
 compensation, hearing, evidence. Forcing a formal Hindi translation for these makes the
 speech harder to understand, not easier.
 
@@ -208,7 +210,7 @@ OTHER RULES:
   Vehicles Act"), but explain what they mean in plain words.
 - Use "aap" (respectful), never "tum".
 - End with one short, encouraging line.
-- Plain text only, no markdown, no bullet points — it will be read aloud by text-to-speech.
+- Plain text only,no markdown,no bullet points—it will be read aloud by text-to-speech.
 
 STYLE EXAMPLE (match this register, do not copy the content):
 "Dekhiye, aapke case mein Motor Vehicles Act ka Section 166 lagta hai — iska matlab hai

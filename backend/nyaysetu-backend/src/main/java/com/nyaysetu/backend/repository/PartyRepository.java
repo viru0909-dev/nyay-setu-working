@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PartyRepository extends JpaRepository<Party, UUID> {
-    List<Party> findByLegalCaseId(UUID legalCaseId);
+    List<Party> findByCaseEntityId(UUID CaseEntityId);
 }

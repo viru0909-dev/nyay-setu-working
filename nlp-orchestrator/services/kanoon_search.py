@@ -23,7 +23,6 @@ import logging
 import re
 
 import aiohttp
-
 from config import (
     CHROMA_PATH,
     EMBEDDING_MODEL,
@@ -38,6 +37,7 @@ from config import (
 from services.retrieval import chunker, embedder
 from services.retrieval import reranker as rr
 from services.retrieval import vectorstore
+
 from utils import CircuitBreaker, retry_transient
 
 logger = logging.getLogger("kanoon-search")

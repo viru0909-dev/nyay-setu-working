@@ -3,9 +3,8 @@ import time
 from typing import List, Optional
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from pydantic import BaseModel
-
 from models.schemas import ModiOCRResponse
+from pydantic import BaseModel
 from services.modi_ocr import (
     InvalidImageError,
     ModiOCRServiceError,

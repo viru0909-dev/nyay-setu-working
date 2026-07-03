@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
 from routers.contradictions import router as contradictions_router
 
 app = FastAPI()

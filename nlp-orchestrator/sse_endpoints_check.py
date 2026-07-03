@@ -1,6 +1,7 @@
-import pytest
-import httpx
 import json
+
+import httpx
+import pytest
 
 API_BASE = "http://localhost:8001"
 

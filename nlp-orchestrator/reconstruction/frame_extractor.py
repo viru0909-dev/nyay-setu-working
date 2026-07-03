@@ -1,5 +1,6 @@
-import cv2
 import os
+
+import cv2
 
 video_path = r"input_videos\Sample2.mp4"
 output_folder = r"reconstruction\output_frames\cam2"

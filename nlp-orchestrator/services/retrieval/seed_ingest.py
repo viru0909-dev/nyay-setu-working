@@ -29,7 +29,7 @@ _ORCHESTRATOR_DIR = Path(__file__).resolve().parents[2]
 if str(_ORCHESTRATOR_DIR) not in sys.path:
     sys.path.insert(0, str(_ORCHESTRATOR_DIR))
 
-from config import EMBEDDING_MODEL, CHROMA_PATH  # noqa: E402
+from config import CHROMA_PATH, EMBEDDING_MODEL  # noqa: E402
 from services.retrieval import chunker, embedder, vectorstore  # noqa: E402
 
 logging.basicConfig(

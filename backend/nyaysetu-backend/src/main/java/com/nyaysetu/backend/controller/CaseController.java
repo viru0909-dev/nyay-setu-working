@@ -33,7 +33,6 @@ public class CaseController {
         return ResponseEntity.ok(caseService.getCase(id));
     }
 
-    // 🛠️ PAGINATED ENDPOINT FOR ISSUE #828
     @GetMapping
     public ResponseEntity<Page<CaseEntity>> getAllCases(
             @RequestParam(defaultValue = "0") int page,

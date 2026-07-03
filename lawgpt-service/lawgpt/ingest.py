@@ -9,20 +9,20 @@ Usage:
     python lawgpt/ingest.py
 """
 
-import os
 import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 # pyrefly: ignore [missing-import]
 import fitz  # PyMuPDF
+
+# pyrefly: ignore [missing-import]
+from langchain.schema import Document
+
 # pyrefly: ignore [missing-import]
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-# pyrefly: ignore [missing-import]
-from langchain.schema import Document
-
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 BASE_DIR: Path = Path(__file__).resolve().parent.parent
@@ -76,7 +76,9 @@ def ingest() -> None:
     pdf_files: List[Path] = sorted(CORPUS_DIR.glob("*.pdf"))
     if not pdf_files:
         print(f"⚠️  No PDF files found in {CORPUS_DIR}/")
-        print("   Drop your legal PDFs (e.g. IPC_1860.pdf) into that folder and re-run.")
+        print(
+            "   Drop your legal PDFs (e.g. IPC_1860.pdf) into that folder and re-run."
+        )
         sys.exit(1)
 
     print(f"📂 Found {len(pdf_files)} PDF(s) in {CORPUS_DIR}/\n")

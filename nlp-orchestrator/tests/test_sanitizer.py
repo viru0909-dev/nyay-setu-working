@@ -11,10 +11,10 @@ Covers:
 
 import pytest
 from sanitizer import (
-    strip_html_tags,
-    sanitize_user_input,
     sanitize_prompt_input,
     sanitize_url,
+    sanitize_user_input,
+    strip_html_tags,
 )
 
 # ─── strip_html_tags ─────────────────────────────────────────────────────────
@@ -123,7 +123,7 @@ class TestSanitizePromptInput:
         assert "[FILTERED]" not in result
 
     def test_preserves_complex_legal_query(self):
-        query = "Can you explain the Supreme Court precedent on Article 21 fundamental rights?"
+        query = "Explain the Supreme Court precedent on Article 21 fundamental rights?"
         result = sanitize_prompt_input(query)
         assert "Supreme Court" in result
         assert "Article 21" in result

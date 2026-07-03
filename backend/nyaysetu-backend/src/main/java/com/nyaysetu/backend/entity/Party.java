@@ -20,7 +20,7 @@ public class Party {
     @UuidGenerator
     private UUID id;
 
-    private UUID legalCaseId;
+    private UUID CaseEntityId;
 
     private String name;
 

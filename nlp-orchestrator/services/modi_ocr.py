@@ -8,10 +8,9 @@ from typing import Any
 
 import cv2
 import numpy as np
+from config import HF_TOKEN, TROCR_DEVICE, TROCR_MODEL_NAME
 from PIL import Image, UnidentifiedImageError
 from services.deskew_service import deskew_image
-
-from config import HF_TOKEN, TROCR_DEVICE, TROCR_MODEL_NAME
 
 logger = logging.getLogger("modi-ocr-service")
 
@@ -58,7 +57,7 @@ def _resolve_device(torch_module: Any) -> Any:
     if requested_device:
         if requested_device.startswith("cuda") and not torch_module.cuda.is_available():
             logger.warning(
-                "TROCR_DEVICE=%s requested but CUDA is unavailable. Falling back to CPU.",
+                "TROCR_DEVICE=%srequested but CUDA is unavailable.Falling back to CPU.",
                 TROCR_DEVICE,
             )
             return torch_module.device("cpu")
@@ -90,7 +89,8 @@ def _load_model() -> tuple[Any, Any, Any]:
                 )
             except Exception as proc_exc:
                 logger.warning(
-                    "Fast tokenizer load failed for '%s' (%s); retrying with use_fast=False.",
+                    "Fast tokenizer load failed for'%s'(%s);"
+                    "retrying with use_fast=False.",
                     TROCR_MODEL_NAME,
                     proc_exc,
                 )

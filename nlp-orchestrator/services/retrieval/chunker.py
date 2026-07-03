@@ -20,8 +20,8 @@ tokenizers used by Llama-3.x and Gemini for budgeting purposes (we don't need
 exact parity, just consistent sizing).
 """
 
-import re
 import logging
+import re
 
 logger = logging.getLogger("retrieval-chunker")
 

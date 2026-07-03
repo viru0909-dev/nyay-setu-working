@@ -26,7 +26,8 @@ def test_correct_numbered_formatting():
     results = [
         {
             "question": "What is IPC Section 420?",
-            "answer": "IPC 420 deals with cheating and dishonestly inducing delivery of property.",
+            "answer": "IPC 420 deals with cheating and dishonestly "
+            "inducing delivery of property.",
             "source": "groq",
             "error": None,
         },

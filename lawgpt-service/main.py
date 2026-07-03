@@ -14,8 +14,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 from fastapi import FastAPI
-
-from lawgpt.retriever import load_vectorstore, is_index_loaded, get_chunk_count
+from lawgpt.retriever import get_chunk_count, load_vectorstore
 from routers.context import router as context_router
 from routers.document import router as document_router
 from routers.summarize import router as summarize_router
@@ -30,6 +29,7 @@ logger = logging.getLogger("lawgpt")
 
 
 # ── Lifespan (startup / shutdown) ─────────────────────────────────────────────
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:

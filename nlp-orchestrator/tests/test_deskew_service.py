@@ -4,7 +4,6 @@ Tests for deskew_service.py
 
 import numpy as np
 from PIL import Image, ImageDraw
-
 from services.deskew_service import deskew_image, deskew_images
 
 

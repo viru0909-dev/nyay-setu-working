@@ -6,14 +6,15 @@ import com.nyaysetu.backend.dto.CreateCaseRequest;
 import com.nyaysetu.backend.entity.*;
 import com.nyaysetu.backend.exception.NotFoundException;
 import com.nyaysetu.backend.repository.CaseRepository;
+import com.nyaysetu.backend.event.CaseStatusChangedEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,34 +23,18 @@ public class CaseService {
 
     private final CaseRepository caseRepository;
     private final CaseTimelineService timelineService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public CaseEntity createCase(CreateCaseRequest dto) {
-
         CaseEntity caseEntity = CaseEntity.builder()
                 .title(dto.getTitle())
                 .description(dto.getDescription())
-                // judgeId and parties removed from CreateCaseRequest
-                .status(CaseStatus.OPEN)
+                .status(CaseStatus.PENDING)
                 .build();
 
         CaseEntity saved = caseRepository.save(caseEntity);
-
-        // Parties functionality removed from CreateCaseRequest
-        // if (dto.getParties() != null && !dto.getParties().isEmpty()) {
-        //     List<Party> parties = dto.getParties().stream()
-        //             .map(p -> Party.builder()
-        //                     .legalCaseId(saved.getId())
-        //                     .name(p.getName())
-        //                     .role(p.getRole())
-        //                     .build())
-        //             .collect(Collectors.toList());
-        //
-        //     partyRepository.saveAll(parties);
-        // }
-
         timelineService.addEvent(saved.getId(), "Case created");
-
         return saved;
     }
 
@@ -58,19 +43,23 @@ public class CaseService {
                 .orElseThrow(() -> new NotFoundException("Case not found " + id));
     }
 
-    // Returns paginated CaseEntity records.
     public Page<CaseEntity> getAllCases(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return caseRepository.findAll(pageable);
     }
 
+    @Transactional
     public CaseEntity updateStatus(UUID caseId, CaseStatus status) {
         CaseEntity lc = getCase(caseId);
         lc.setStatus(status);
-        caseRepository.save(lc);
+        CaseEntity saved = caseRepository.save(lc);
 
         timelineService.addEvent(caseId, "Case status updated to " + status);
-        return lc;
+        
+        // 🔥 Decoupled Real-time Event broadcast hook
+        eventPublisher.publishEvent(new CaseStatusChangedEvent(this, saved));
+        
+        return saved;
     }
 
     @Transactional

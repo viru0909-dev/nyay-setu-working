@@ -2,24 +2,28 @@
 routers/document.py — Legal document generation endpoints for Nyay Setu LawGPT.
 
 Provides:
-    POST /generate      — Generate legal document text (affidavit, RTI, complaint, notice)
-    POST /generate/pdf  — Generate legal document as downloadable PDF
+    POST /generate — Generate legal document text (affidavit, RTI, complaint, notice)
+    POST /generate/pdf — Generate legal document as downloadable PDF
 """
 
 import io
+import json
 import logging
 import os
-import tempfile
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Literal, Optional
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
-
+from lawgpt.prompt_builder import (
+    build_prompt,
+    detect_prompt_injection,
+    validate_required_fields,
+)
 from lawgpt.retriever import retrieve
-from lawgpt.prompt_builder import build_prompt, validate_required_fields, detect_prompt_injection
+from pydantic import BaseModel, Field
 
 load_dotenv()
 logger = logging.getLogger("lawgpt")
@@ -28,6 +32,7 @@ router = APIRouter()
 
 
 # ── Request / Response models ──────────────────────────────────────────────────
+
 
 class DocumentFields(BaseModel):
     petitioner_name: str
@@ -60,7 +65,8 @@ class GenerateResponse(BaseModel):
 
 # ── Prompt templates ───────────────────────────────────────────────────────────
 
-AFFIDAVIT_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal AFFIDAVIT.
+AFFIDAVIT_PROMPT: str = """You are an expert Indian legal drafter.
+Generate a formal AFFIDAVIT.
 Use this legal context for accuracy: {legal_context}
 
 Petitioner: {petitioner_name}, {petitioner_address}
@@ -89,7 +95,8 @@ That the contents of the above affidavit are true to the best of my knowledge.
 Deponent
 """
 
-RTI_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal RTI APPLICATION
+RTI_PROMPT: str = """You are an expert Indian legal drafter.
+Generate a formal RTI APPLICATION
 under the Right to Information Act, 2005.
 Use this legal context: {legal_context}
 
@@ -129,7 +136,8 @@ Yours faithfully,
 Date: {incident_date}
 """
 
-COMPLAINT_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL COMPLAINT.
+COMPLAINT_PROMPT: str = """You are an expert Indian legal drafter.
+Generate a formal LEGAL COMPLAINT.
 Use this legal context for accurate section references: {legal_context}
 
 Complainant: {petitioner_name}, {petitioner_address}
@@ -176,7 +184,8 @@ Complainant
 {petitioner_name}
 """
 
-NOTICE_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal LEGAL NOTICE in {language}.
+NOTICE_PROMPT: str = """You are an expert Indian legal drafter.
+Generate a formal LEGAL NOTICE in {language}.
 Use this legal context: {legal_context}
 
 Sender: {petitioner_name}, {petitioner_address}
@@ -212,7 +221,8 @@ Advocate
 [Address]
 """
 
-DEMAND_LETTER_PROMPT: str = """You are an expert Indian legal drafter. Generate a formal DEMAND LETTER in {language}.
+DEMAND_LETTER_PROMPT: str = """You are an expert Indian legal drafter.
+Generate a formal DEMAND LETTER in {language}.
 Use this legal context: {legal_context}
 
 Sender: {petitioner_name}, {petitioner_address}
@@ -269,8 +279,6 @@ TITLE_MAP: Dict[str, str] = {
 
 
 # ── External templates loader (optional) ────────────────────────────────────────
-import json
-from pathlib import Path
 
 # Module-level templates dict (may be empty if no external JSON provided)
 _templates: Dict[str, dict] = {}
@@ -316,6 +324,7 @@ def _get_doc_llm():
     try:
         if groq_key:
             from langchain_groq import ChatGroq
+
             _doc_llm = ChatGroq(
                 model="llama-3.3-70b-versatile",
                 temperature=0.3,
@@ -326,6 +335,7 @@ def _get_doc_llm():
             logger.info("📝 Document LLM: Groq (llama-3.3-70b-versatile)")
         elif gemini_key:
             from langchain_google_genai import ChatGoogleGenerativeAI
+
             _doc_llm = ChatGoogleGenerativeAI(
                 model="gemini-1.5-pro",
                 temperature=0.3,
@@ -336,6 +346,7 @@ def _get_doc_llm():
             logger.info("📝 Document LLM: Google Gemini (gemini-1.5-pro)")
         else:
             from langchain_community.llms import Ollama
+
             _doc_llm = Ollama(
                 model="llama3",
                 base_url="http://localhost:11434",
@@ -349,22 +360,27 @@ def _get_doc_llm():
     except Exception as e:
         fake_llm_flag = os.getenv("LAWGPT_FAKE_LLM") == "1"
         if fake_llm_flag:
+
             class DummyLLM:
                 def invoke(self, prompt):
-                    return {
-                        "content": f"DUMMY GENERATED DOCUMENT\n\n{prompt[:400]}"
-                    }
+                    return {"content": f"DUMMY GENERATED DOCUMENT\n\n{prompt[:400]}"}
 
             _doc_llm = DummyLLM()
             _doc_llm_label = "dummy"
-            logger.warning("Using DummyLLM fallback because LLM integrations are not available: %s", e)
+            logger.warning(
+                "Using DummyLLM fallback because LLM integrations are not available:%s",
+                e,
+            )
             return _doc_llm, _doc_llm_label
 
-        logger.error("No LLM integration available and LAWGPT_FAKE_LLM is not enabled: %s", e)
+        logger.error(
+            "No LLM integration available and LAWGPT_FAKE_LLM is not enabled: %s", e
+        )
         raise
 
 
 # ── Core generation logic ─────────────────────────────────────────────────────
+
 
 def _map_language_label(language: str) -> str:
     mapping = {
@@ -389,11 +405,13 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
     except FileNotFoundError:
         raise HTTPException(
             status_code=503,
-            detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.",
+            detail="Legal database not initialized.Run 'python lawgpt/ingest.py'first.",
         )
     except ImportError:
-        # langchain/FAISS not available in this environment (tests/dev). Continue with empty context.
-        logger.warning("langchain_community not available; proceeding without legal context")
+        # langchain/FAISS not available in this environment (tests/dev).
+        logger.warning(
+            "langchain_community not available; proceeding without legal context"
+        )
         results = []
 
     # Build context and sources
@@ -407,7 +425,11 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
         if source_label not in sources:
             sources.append(source_label)
 
-    legal_context: str = "\n\n".join(context_parts) if context_parts else "No specific legal context available."
+    legal_context: str = (
+        "\n\n".join(context_parts)
+        if context_parts
+        else "No specific legal context available."
+    )
 
     # 2. Build prompt
     prompt_template: str = PROMPT_MAP[doc_type]
@@ -440,7 +462,9 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
     # Check for obvious prompt-injection patterns in user inputs
     suspicious = detect_prompt_injection({k: v for k, v in field_map.items()})
     if suspicious:
-        raise HTTPException(status_code=400, detail={"prompt_injection_detected": suspicious})
+        raise HTTPException(
+            status_code=400, detail={"prompt_injection_detected": suspicious}
+        )
 
     prompt: str = build_prompt(prompt_template, field_map, legal_context=legal_context)
 
@@ -471,19 +495,15 @@ def _generate_document(request: GenerateRequest) -> GenerateResponse:
 
 # ── PDF generation helper ─────────────────────────────────────────────────────
 
+
 def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
     """Convert generated document text to a styled A4 PDF using ReportLab."""
     try:
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import inch
-        from reportlab.platypus import (
-            SimpleDocTemplate,
-            Paragraph,
-            Spacer,
-            PageBreak,
-        )
-        from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
     except ImportError:
         raise HTTPException(
             status_code=500,
@@ -564,9 +584,7 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
         else:
             # Escape XML special chars for ReportLab
             safe_line: str = (
-                stripped.replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
+                stripped.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             )
             story.append(Paragraph(safe_line, body_style))
 
@@ -587,7 +605,7 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
     story.append(Spacer(1, 30))
     story.append(
         Paragraph(
-            "This document is AI-generated and should be reviewed by a qualified lawyer",
+            "This document is AI-generated & should be reviewed by a qualified lawyer",
             footer_style,
         )
     )
@@ -598,7 +616,7 @@ def _create_pdf(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
 
 
 def _create_docx(response: GenerateResponse, petitioner_name: str) -> io.BytesIO:
-    """Convert generated document text to a simple DOCX in-memory file using python-docx."""
+    """Convert generated doc text to a simple DOCX in-memory file using python-docx."""
     try:
         from docx import Document as DocxDocument
         from docx.shared import Pt
@@ -634,7 +652,9 @@ def _create_docx(response: GenerateResponse, petitioner_name: str) -> io.BytesIO
         doc.add_paragraph(", ".join(response.sources))
 
     # Disclaimer footer
-    doc.add_paragraph("\nThis document is AI-generated and should be reviewed by a qualified lawyer")
+    doc.add_paragraph(
+        "\nThis document is AI-generated and should be reviewed by a qualified lawyer"
+    )
 
     bio = io.BytesIO()
     doc.save(bio)
@@ -645,6 +665,7 @@ def _create_docx(response: GenerateResponse, petitioner_name: str) -> io.BytesIO
 # ══════════════════════════════════════════════════════════════════════════════
 # POST /generate — Generate legal document text
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @router.post("/generate", response_model=GenerateResponse)
 async def generate_document(request: GenerateRequest) -> GenerateResponse:
@@ -659,6 +680,7 @@ async def generate_document(request: GenerateRequest) -> GenerateResponse:
 # POST /generate/pdf — Generate legal document as PDF
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @router.post("/generate/pdf")
 async def generate_document_pdf(request: GenerateRequest):
     """
@@ -667,7 +689,9 @@ async def generate_document_pdf(request: GenerateRequest):
     response: GenerateResponse = _generate_document(request)
     pdf_buffer: io.BytesIO = _create_pdf(response, request.fields.petitioner_name)
 
-    filename: str = f"{request.doc_type}_{request.fields.petitioner_name.replace(' ', '_')}.pdf"
+    filename: str = (
+        f"{request.doc_type}_{request.fields.petitioner_name.replace(' ', '_')}.pdf"
+    )
 
     return StreamingResponse(
         pdf_buffer,
@@ -684,11 +708,16 @@ async def generate_document_docx(request: GenerateRequest):
     response: GenerateResponse = _generate_document(request)
     docx_buffer: io.BytesIO = _create_docx(response, request.fields.petitioner_name)
 
-    filename: str = f"{request.doc_type}_{request.fields.petitioner_name.replace(' ', '_')}.docx"
+    filename: str = (
+        f"{request.doc_type}_{request.fields.petitioner_name.replace(' ', '_')}.docx"
+    )
 
+    DOCX_MEDIA_TYPE = (
+        "application/vnd.openxmlformats-officedocument." "wordprocessingml.document"
+    )
     return StreamingResponse(
         docx_buffer,
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        media_type=DOCX_MEDIA_TYPE,
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
         },

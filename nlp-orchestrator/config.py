@@ -74,11 +74,13 @@ GROUND_RESEARCH: bool = _bool("GROUND_RESEARCH", True)
 # ─── Validate required keys ───────────────────────────────────────────────────
 if not GROQ_API_KEY:
     print(
-        "[Config] ERROR: GROQ_API_KEY is not set. Please add it to .env (see .env.example)",
+        "[Config] ERROR: GROQ_API_KEY is not set.",
+        "Please add it to .env (see .env.example)",
         file=sys.stderr,
     )
     sys.exit(1)
 if not GEMINI_API_KEY:
     print(
-        "[Config] WARNING: GOOGLE_GEMINI_API_KEY not set. Gemini calls will fall back to Groq."
+        "[Config] WARNING: GOOGLE_GEMINI_API_KEY not set.",
+        "Gemini calls will fall back to Groq.",
     )

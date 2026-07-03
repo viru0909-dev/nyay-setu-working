@@ -1,5 +1,6 @@
-import cv2
 import json
+
+import cv2
 
 
 def generate_metadata(video_path, output_json, camera_id):

@@ -28,7 +28,7 @@ public class CaseNoteService {
                 .orElseThrow(() -> new NotFoundException("Case not found " + caseId));
 
         CaseNote note = CaseNote.builder()
-                .legalCaseId(caseId)
+                .CaseEntityId(caseId)
                 .content(dto.getContent())
                 .createdBy(dto.getAuthorId())
                 .createdAt(LocalDateTime.now())
@@ -42,6 +42,6 @@ public class CaseNoteService {
     }
 
     public List<CaseNote> getNote(UUID caseId) {
-        return caseNoteRepository.findByLegalCaseId(caseId);
+        return caseNoteRepository.findByCaseEntityId(caseId);
     }
 }
