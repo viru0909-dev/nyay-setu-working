@@ -46,6 +46,7 @@ from synthesizer import (
 from validators.citation_validator import validate_citations_from_text
 from avatar_speech import get_interim_messages, convert_to_hinglish, detect_domain
 from services.kanoon_search import build_kanoon_context
+from grounding import build_grounded_context, merge_contexts
 from sanitizer import sanitize_user_input, sanitize_prompt_input
 from pii_ner import router as pii_ner_router
 
@@ -225,6 +226,7 @@ async def legal_reasoning_pipeline(query: str, language: str):
         )
 
         kanoon_task = asyncio.create_task(build_kanoon_context(query, max_results=3))
+        grounding_task = asyncio.create_task(build_grounded_context(query))
 
         sub_questions = await decompose_query(safe_query)
         logger.info(f"[Layer 1] Got {len(sub_questions)} sub-questions")
@@ -241,6 +243,12 @@ async def legal_reasoning_pipeline(query: str, language: str):
         except Exception as e:
             logger.error("[Layer 2] Indian Kanoon fetch failed: %s", e)
             kanoon_context = ""
+        try:
+            local_context, _ = await grounding_task
+        except Exception as e:
+            logger.error("[Layer 2] Corpus grounding failed: %s", e)
+            local_context = ""
+        kanoon_context = merge_contexts(local_context, kanoon_context)
 
         # ── Layer 5a: Interim Avatar Messages (to stream while research runs) ──
         interim_messages = get_interim_messages(query, count=3)
@@ -409,7 +417,13 @@ async def analyze_sync(body: LegalQuery):
     except Exception as e:
         logger.error("[Sync] Indian Kanoon fetch failed: %s", e)
         kanoon_context = ""
-    results = await run_parallel_research(routed, kanoon_context=kanoon_context)
+    try:
+        local_context, _ = await build_grounded_context(body.query)
+    except Exception as e:
+        logger.error("[Sync] Corpus grounding failed: %s", e)
+        local_context = ""
+    grounded_context = merge_contexts(local_context, kanoon_context)
+    results = await run_parallel_research(routed, kanoon_context=grounded_context)
     synthesis = await synthesize_answers_structured(body.query, results)
     synthesized = synthesis.answer_markdown
 
