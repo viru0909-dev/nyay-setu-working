@@ -1,8 +1,7 @@
 import SkeletonCard from '../../components/common/SkeletonCard';
 import CaseCard from '../../components/dashboard/CaseCard';
 import CaseStepper from '../../components/common/CaseStepper';
-import LoadingState from '../../components/common/LoadingState';
-import EmptyState from '../../components/common/EmptyState';
+import LegalLiteracyTipsWidget from '../../components/dashboard/LegalLiteracyTipsWidget';
 import { useState, useEffect } from 'react';
 import { FolderOpen, Video, FileText, TrendingUp, Clock, Bot, MessageCircle, MessageSquare, Loader2, Scale, AlertCircle, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -185,6 +184,8 @@ export default function LitigantDashboard() {
                     {t('litigant.getStarted')}
                 </div>
             </div>
+
+            <LegalLiteracyTipsWidget />
 
             {/* Pending Action Items (Workflow) - Acceptance Loop */}
             {pendingDrafts.length > 0 && (

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
+import LegalLiteracyTipsWidget from '../../components/dashboard/LegalLiteracyTipsWidget';
 
 export default function AdminDashboard() {
     const { user, logout } = useAuthStore();
@@ -33,6 +34,8 @@ export default function AdminDashboard() {
             </div>
 
             <div className="container" style={{ padding: '2rem 0' }}>
+                <LegalLiteracyTipsWidget />
+
                 {/* Stats Cards */}
                 <div style={{
                     display: 'grid',

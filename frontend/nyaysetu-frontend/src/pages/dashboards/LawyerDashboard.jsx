@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import { caseAPI, lawyerAPI } from '../../services/api';
+import LegalLiteracyTipsWidget from '../../components/dashboard/LegalLiteracyTipsWidget';
 import {
     Briefcase,
     Users,
@@ -162,6 +163,8 @@ export default function LawyerDashboard() {
                     </button>
                 </div>
             </div>
+
+            <LegalLiteracyTipsWidget />
 
             {/* Stats Section */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>

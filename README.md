@@ -83,6 +83,8 @@ Native WebRTC-based video conferencing integrated directly into the case timelin
 **Secure Authentication**
 JWT-based stateless authentication with Spring Security, role-based access control, and multi-layer request filtering.
 
+**Legal Literacy Tips** 
+Rotating legal-rights and awareness tips displayed across role-based dashboards, with automatic rotation and manual navigation.
 <hr/>
 
 ## Tech Stack
