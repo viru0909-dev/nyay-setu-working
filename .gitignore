@@ -79,6 +79,9 @@ __pycache__/
 *.db
 *.sqlite
 
+# Vector stores (ChromaDB / FAISS)
+**/vector_store/
+
 # Uploads and Evidence
 **/uploads/
 **/evidence/
