@@ -160,7 +160,6 @@ export default function Header({ hideAuthButtons = false }) {
 
         
         const sharedProps = {
-            style: baseStyle,
             onMouseEnter: e => {
                 e.currentTarget.style.color = 'var(--color-primary)';
                 const underline =
