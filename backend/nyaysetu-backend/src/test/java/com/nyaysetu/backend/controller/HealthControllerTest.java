@@ -38,6 +38,7 @@ class HealthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"))
                 .andExpect(jsonPath("$.service").value("nyaysetu-backend"))
-                .andExpect(jsonPath("$.uptime").exists());
+                .andExpect(jsonPath("$.uptime").exists())
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 }

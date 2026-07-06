@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 
 @RestController
@@ -28,7 +29,8 @@ public class HealthController {
                 "service", "nyaysetu-backend",
                 "uptime", String.format("%dh %dm %ds", uptime.toHours(), uptime.toMinutesPart(), uptime.toSecondsPart()),
                 "version", version,
-                "java", javaVersion
+                "java", javaVersion,
+                "timestamp", Instant.now().toString()
         ));
     }
 }
