@@ -1022,3 +1022,39 @@ When opening a Pull Request, please include:
   * [ ] No `.env` or credentials accidentally included
 
 This ensures faster review and approval of your PR.
+
+
+---
+
+## 4. How to Report Bugs 🐛
+If you find a problem or something is broken, please check if an issue already exists. If not, open a new issue and include:
+* A clear and descriptive title.
+* Steps to reproduce the bug (how did you make it happen?).
+* What you expected to see versus what actually happened.
+* Screenshots if possible.
+
+---
+
+## 5. Commit Message Conventions 📝
+To keep our project history clean, please write clear commit messages. Use this simple format:
+* `feat: Description` — For adding a new feature.
+* `fix: Description` — For fixing a bug.
+* `docs: Description` — For changing documentation files (like this one!).
+* `style: Description` — For formatting or design changes that don't affect code logic.
+
+*Example:* `docs: add contributing guidelines file`
+
+---
+
+## 6. Pull Request (PR) Process 🚀
+When you are ready to submit your changes, follow these steps:
+1. **Fork the Repository:** Create your own copy of this project on GitHub.
+2. **Clone the Repo:** Download your copy to your computer.
+3. **Create a New Branch:** Always make your changes on a separate branch (e.g., `git checkout -b fix-issue-name`).
+4. **Make Changes & Commit:** Write your code or update text, then commit your changes using the commit rules above.
+5. **Push Code:** Push your branch to your GitHub repository (`git push origin fix-issue-name`).
+6. **Open a Pull Request:** Go to the original repository on GitHub, click "Compare & pull request", and fill out the PR description template.
+
+---
+
+Thank you for helping us build a better project! 🎉
