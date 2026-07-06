@@ -11,6 +11,7 @@ import com.nyaysetu.backend.repository.FirRecordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +42,8 @@ public class FirService {
 
     @Value("${app.upload.evidence-path:backend/uploads/evidence}")
     private String evidenceUploadPath;
+
+    private static final int MAX_FIR_NUMBER_RETRIES = 5;
 
     /**
      * Upload FIR document, calculate SHA-256 hash, and store record
@@ -89,8 +92,8 @@ public class FirService {
                     .status(request.getCaseId() != null ? "LINKED_TO_CASE" : "SEALED")
                     .build();
 
-            FirRecord saved = firRecordRepository.save(firRecord);
-            log.info("FIR {} sealed with hash {} by officer {}", firNumber, fileHash.substring(0, 16) + "...", uploadedBy.getName());
+            FirRecord saved = saveFirWithRetry(firRecord);
+            log.info("FIR {} sealed with hash {} by officer {}", saved.getFirNumber(), fileHash.substring(0, 16) + "...", uploadedBy.getName());
 
             return mapToResponse(saved);
 
@@ -241,8 +244,8 @@ public class FirService {
                     .status("PENDING_POLICE_REVIEW")
                     .build();
 
-            FirRecord saved = firRecordRepository.save(firRecord);
-            log.info("Client FIR {} filed by {} - Status: PENDING_POLICE_REVIEW", firNumber, filedBy.getName());
+            FirRecord saved = saveFirWithRetry(firRecord);
+            log.info("Client FIR {} filed by {} - Status: PENDING_POLICE_REVIEW", saved.getFirNumber(), filedBy.getName());
 
             return mapToResponse(saved);
 
@@ -506,6 +509,20 @@ public class FirService {
                 .registeredFirs(registered)
                 .rejectedFirs(rejected)
                 .build();
+    }
+
+    private FirRecord saveFirWithRetry(FirRecord firRecord) {
+        for (int attempt = 1; ; attempt++) {
+            try {
+                return firRecordRepository.save(firRecord);
+            } catch (DataIntegrityViolationException e) {
+                if (attempt >= MAX_FIR_NUMBER_RETRIES) {
+                    throw e;
+                }
+                log.warn("FIR number collision on attempt {}/{} – regenerating", attempt, MAX_FIR_NUMBER_RETRIES);
+                firRecord.setFirNumber(generateFirNumber());
+            }
+        }
     }
 
     private String generateFirNumber() {
