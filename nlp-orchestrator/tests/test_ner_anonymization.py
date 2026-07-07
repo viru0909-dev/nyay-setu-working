@@ -87,6 +87,31 @@ def test_anonymize_with_model_entities(mock_pipeline) -> None:
 
 
 @patch("pii_ner._get_ner_pipeline")
+def test_anonymize_offset_shift(mock_pipeline) -> None:
+    """Test that multiple redactions produce correctly shifted final offsets (#1527)."""
+    # "John Doe met Jane Doe."
+    # E1: John Doe (0, 8), length 8
+    # E2: Jane Doe (13, 21), length 8
+    mock_pipeline.return_value = lambda text: [
+        {"entity_group": "PER", "score": 0.95, "start": 0, "end": 8, "word": "John Doe"},
+        {"entity_group": "PER", "score": 0.95, "start": 13, "end": 21, "word": "Jane Doe"},
+    ]
+
+    text = "John Doe met Jane Doe."
+    result = anonymize_document(text)
+
+    # placeholder is [REDACTED_NAME] which is 15 chars
+    # "John Doe" (len 8) replaced by len 15 -> shift = +7
+    # Original E2 start = 13. New start should be 13 + 7 = 20.
+    
+    assert result.entity_count == 2
+    assert result.redacted_spans[0].start == 0
+    assert result.redacted_spans[1].start == 20
+    assert result.anonymized_text[20:35] == "[REDACTED_NAME]"
+
+
+
+@patch("pii_ner._get_ner_pipeline")
 def test_anonymize_entity_type_filter(mock_pipeline) -> None:
     """entity_types filter should only redact selected types."""
     mock_pipeline.return_value = lambda text: []
