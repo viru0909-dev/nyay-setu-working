@@ -193,14 +193,29 @@ public class HearingController {
         }
     }
     
-    @GetMapping("/{hearingId}")
-    public ResponseEntity<Hearing> getHearing(@PathVariable UUID hearingId) {
+@GetMapping("/{hearingId}")
+    public ResponseEntity<Hearing> getHearing(
+            @PathVariable UUID hearingId,
+            Authentication authentication
+    ) {
+        User user = authService.findByEmail(authentication.getName());
         Hearing hearing = hearingService.getHearing(hearingId);
+        if (hearing.getCaseEntity() != null) {
+            caseAccessService.requireCaseAccess(hearing.getCaseEntity().getId(), user);
+        }
         return ResponseEntity.ok(hearing);
     }
-    
+
     @GetMapping("/{hearingId}/participants")
-    public ResponseEntity<List<HearingParticipant>> getParticipants(@PathVariable UUID hearingId) {
+    public ResponseEntity<List<HearingParticipant>> getParticipants(
+            @PathVariable UUID hearingId,
+            Authentication authentication
+    ) {
+        User user = authService.findByEmail(authentication.getName());
+        Hearing hearing = hearingService.getHearing(hearingId);
+        if (hearing.getCaseEntity() != null) {
+            caseAccessService.requireCaseAccess(hearing.getCaseEntity().getId(), user);
+        }
         List<HearingParticipant> participants = hearingService.getHearingParticipants(hearingId);
         return ResponseEntity.ok(participants);
     }
