@@ -205,18 +205,6 @@ public class SecurityConfig {
                         // ── WebSocket endpoints ───────────────────────────────────────────
                         .requestMatchers("/api/ws/**").permitAll()
 
-                        // ── AI endpoints (open for now; restrict if misuse detected) ──────
-                        .requestMatchers(
-                                "/ai/summarize",
-                                "/ai/chat",
-                                "/ai/chat/ollama",
-                                "/ai/constitution/qa",
-                                "/ai/ollama/status",
-                                "/ai/ollama/models",
-                                "/api/v1/brain/analyze-case",
-                                "/api/v1/brain/suggest-documents"
-                        ).permitAll()
-
                         // ── Auth-only: any authenticated user ─────────────────────────────
                         .requestMatchers(
                                 "/api/v1/auth/face/enroll",
@@ -229,8 +217,14 @@ public class SecurityConfig {
                                 "/profile/**"
                         ).authenticated()
 
-                        // ── Brain / AI (authenticated) ────────────────────────────────────
-                        .requestMatchers("/api/v1/brain/**").authenticated()
+                        // ── Brain / AI (authenticated & secured from public access) ───────
+                        .requestMatchers(
+                                "/ai/**",
+                                "/api/v1/brain/**",
+                                "/ai/chat",
+                                "/ai/summarize",
+                                "/ai/constitution/qa"
+                        ).authenticated()
 
                         // ── Judge-only endpoints ──────────────────────────────────────────
                         .requestMatchers(
@@ -304,3 +298,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+
