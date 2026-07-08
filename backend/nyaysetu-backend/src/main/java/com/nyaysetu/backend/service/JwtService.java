@@ -20,6 +20,11 @@ public class JwtService {
 
     private static final long ACCESS_TOKEN_EXPIRY = 1000 * 60 * 15;
     private static final long REFRESH_TOKEN_EXPIRY = 1000 * 60 * 60 * 24 * 7;
+    
+    // Security Claims Constant Tokens
+    private static final String CLAIM_TOKEN_TYPE = "token_type";
+    private static final String TYPE_ACCESS = "ACCESS";
+    private static final String TYPE_REFRESH = "REFRESH";
 
     private final JwtSigningKeyService jwtSigningKeyService;
     private final ObjectMapper objectMapper;
@@ -31,6 +36,10 @@ public class JwtService {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String extractTokenType(String token) {
+        return extractClaim(token, claims -> claims.get(CLAIM_TOKEN_TYPE, String.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
@@ -103,6 +112,7 @@ public class JwtService {
                 .keyId(jwtSigningKeyService.getCurrentKeyId())
                 .and()
                 .claims(extraClaims)
+                .claim(CLAIM_TOKEN_TYPE, TYPE_ACCESS) // Security Fix: Explicit ACCESS context scope signature flag
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
@@ -115,6 +125,7 @@ public class JwtService {
                 .header()
                 .keyId(jwtSigningKeyService.getCurrentKeyId())
                 .and()
+                .claim(CLAIM_TOKEN_TYPE, TYPE_REFRESH) // Security Fix: Explicit REFRESH context scope signature flag
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
@@ -122,9 +133,27 @@ public class JwtService {
                 .compact();
     }
 
+    @Deprecated
     public boolean isTokenValid(String token, UserDetails userDetails) {
+        return isAccessTokenValid(token, userDetails);
+    }
+
+    // Security Fix: Specialized validation gate isolating Short-Lived Access payloads
+    public boolean isAccessTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        String tokenType = extractTokenType(token);
+        return username.equals(userDetails.getUsername()) 
+                && TYPE_ACCESS.equalsIgnoreCase(tokenType) 
+                && !isTokenExpired(token);
+    }
+
+    // Security Fix: Specialized validation gate isolating Long-Lived Refresh payloads
+    public boolean isRefreshTokenValid(String token, UserDetails userDetails) {
+        String username = extractUsername(token);
+        String tokenType = extractTokenType(token);
+        return username.equals(userDetails.getUsername()) 
+                && TYPE_REFRESH.equalsIgnoreCase(tokenType) 
+                && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
@@ -135,3 +164,5 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 }
+
+
