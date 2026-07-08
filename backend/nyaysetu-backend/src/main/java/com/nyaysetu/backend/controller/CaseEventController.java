@@ -1,10 +1,14 @@
 package com.nyaysetu.backend.controller;
 
 import com.nyaysetu.backend.entity.CaseEvent;
+import com.nyaysetu.backend.entity.Role;
+import com.nyaysetu.backend.entity.User;
+import com.nyaysetu.backend.service.AuthService;
 import com.nyaysetu.backend.service.CaseEventService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,10 +22,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/cases")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CaseEventController {
 
     private final CaseEventService caseEventService;
+    private final AuthService authService;
 
     /**
      * Get timeline events for a case (ordered chronologically for display).
@@ -46,7 +50,14 @@ public class CaseEventController {
      * Get events for a judge's assigned cases.
      */
     @GetMapping("/judge/{judgeId}/events")
-    public ResponseEntity<List<CaseEvent>> getJudgeEvents(@PathVariable Long judgeId) {
+    public ResponseEntity<List<CaseEvent>> getJudgeEvents(
+            @PathVariable Long judgeId,
+            Authentication authentication
+    ) {
+        User user = authService.findByEmail(authentication.getName());
+        if (!user.getId().equals(judgeId) && user.getRole() != Role.ADMIN && user.getRole() != Role.SUPER_JUDGE) {
+            return ResponseEntity.status(403).build();
+        }
         List<CaseEvent> events = caseEventService.getEventsForJudge(judgeId);
         return ResponseEntity.ok(events);
     }
