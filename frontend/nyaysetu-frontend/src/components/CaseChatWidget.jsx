@@ -164,13 +164,9 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                     background: 'var(--color-primary)',
                     color: 'white',
                     border: 'none',
-
-    
                     boxShadow: '0 4px 20px rgba(30, 42, 68, 0.4)',
-
                     cursor: 'pointer',
                     zIndex: 9999,
-
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -200,27 +196,16 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                 right: '2rem',
                 width: isMinimized ? '300px' : '400px',
                 height: isMinimized ? 'auto' : '600px',
-
-                
                 maxHeight: '80vh',
-
                 background: 'var(--bg-glass-strong)',
-
-                
                 backdropFilter: 'var(--glass-blur)',
                 border: 'var(--border-glass-strong)',
-
                 borderRadius: '1rem',
-
-                
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-
                 zIndex: 9999,
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-
-                
                 transition: 'all 0.3s ease'
             }}
         >
@@ -383,7 +368,6 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                                         fontSize: '0.9rem',
                                         lineHeight: '1.5',
 
-                                        /* RESTORED */
                                         boxShadow:
                                             '0 2px 4px rgba(0,0,0,0.05)',
 
@@ -440,7 +424,6 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                                     borderRadius: '1rem',
                                     borderBottomLeftRadius: '0.25rem',
 
-                                    /* RESTORED */
                                     boxShadow:
                                         '0 2px 4px rgba(0,0,0,0.05)'
                                 }}
@@ -468,64 +451,72 @@ export default function CaseChatWidget({ caseId, caseTitle }) {
                             borderTop: 'var(--border-glass)',
                             background: 'var(--bg-glass-strong)',
                             display: 'flex',
-                            gap: '0.5rem'
+                            flexDirection: 'column',
+                            gap: '0.25rem'
                         }}
                     >
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input
+                                type="text"
+                                value={inputMessage}
+                                onChange={(e) =>
+                                    setInputMessage(e.target.value)
+                                }
+                                onKeyPress={handleKeyPress}
+                                placeholder="Ask about this case..."
+                                disabled={isLoading || isStarting}
 
-                        <input
-                            type="text"
-                            value={inputMessage}
-                            onChange={(e) =>
-                                setInputMessage(e.target.value)
-                            }
-                            onKeyPress={handleKeyPress}
-                            placeholder="Ask about this case..."
-                            disabled={isLoading || isStarting}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem',
+                                    borderRadius: '0.5rem',
+                                    border: 'var(--border-glass)',
+                                    background: 'var(--bg-white)',
+                                    color: 'var(--text-main)',
+                                    outline: 'none'
+                                }}
+                            />
 
-                            style={{
-                                flex: 1,
-                                padding: '0.75rem',
-                                borderRadius: '0.5rem',
-                                border: 'var(--border-glass)',
-                                background: 'var(--bg-white)',
-                                color: 'var(--text-main)',
-                                outline: 'none'
-                            }}
-                        />
+                            <button
+                                onClick={sendMessage}
+                                disabled={
+                                    isLoading ||
+                                    isStarting ||
+                                    !inputMessage.trim()
+                                }
 
-                        <button
-                            onClick={sendMessage}
-                            disabled={
-                                isLoading ||
-                                isStarting ||
-                                !inputMessage.trim()
-                            }
-
-                            style={{
-                                background: 'var(--color-accent)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '0.5rem',
-                                padding: '0.75rem',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                opacity:
-                                    (
-                                        isLoading ||
-                                        isStarting ||
-                                        !inputMessage.trim()
-                                    )
-                                        ? 0.5
-                                        : 1
-                            }}
-                        >
-                            <Send size={18} />
-                        </button>
+                                style={{
+                                    background: 'var(--color-accent)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '0.5rem',
+                                    padding: '0.75rem',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    opacity:
+                                        (
+                                            isLoading ||
+                                            isStarting ||
+                                            !inputMessage.trim()
+                                        )
+                                            ? 0.5
+                                            : 1
+                                }}
+                            >
+                                <Send size={18} />
+                            </button>
+                        </div>
+                        
+                        {/* Live Character Counter */}
+                        <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.45)', textAlign: 'right', marginTop: '4px', paddingRight: '8px' }}>
+                            {inputMessage.length} / 1000
+                        </div>
                     </div>
                 </>
             )}
         </div>
     );
 }
+
