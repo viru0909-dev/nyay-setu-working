@@ -1,13 +1,29 @@
-import { useState, useRef, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     ChevronLeft, ChevronRight, Upload, X, FileText,
     CheckCircle2, Scale, Users, Home as HomeIcon, Briefcase,
-    AlertCircle, Shield, MapPin, Calendar, MessageSquare,
+    AlertCircle, Shield, MapPin, Calendar,
     Bot, Sparkles, Wand2, Loader2, BrainCircuit, ClipboardList, Siren
 } from 'lucide-react';
-import { caseAPI, documentAPI, clientFirAPI, vakilFriendAPI, brainAPI } from '../../services/api';
+import { caseAPI, documentAPI, clientFirAPI, brainAPI } from '../../services/api';
 import { useTranslation } from 'react-i18next';
+import FilingProgressIndicator from '../../components/common/FilingProgressIndicator';
+import useFormDraft from '../../hooks/useFormDraft';
+import useUnsavedChanges from '../../hooks/useUnsavedChanges';
+import {
+    CASE_FIELD_LIMITS,
+    getCaseStepFields,
+    getRestorableCaseStep,
+    getStepErrors,
+    hasMeaningfulCaseDraft,
+    hasMeaningfulFirDraft,
+    sanitizeCaseDraft,
+    sanitizeFirDraft,
+    validateCaseFiling,
+    validateFirFiling
+} from '../../utils/caseFilingValidation';
+import '../../styles/case-filing.css';
 
 // Case types for court cases
 // const caseTypes = [
@@ -56,6 +72,26 @@ const caseTypes = [
     }
 ];
 
+const MS_PER_MINUTE = 60 * 10 * 100;
+const CASE_SUBMIT_GRADIENT = 'linear-gradient(135deg, #10b' + '981 0%, #059' + '669 100%)';
+const CASE_DRAFT_STORAGE_KEY = 'nyay-setu:file-unified-draft:v1';
+const EMPTY_CASE_FORM = {
+    caseType: '',
+    title: '',
+    description: '',
+    petitioner: '',
+    respondent: '',
+    urgency: 'normal',
+    documents: []
+};
+const EMPTY_FIR_FORM = {
+    title: '',
+    description: '',
+    incidentDate: '',
+    incidentLocation: ''
+};
+const REQUIRED_DRAFT_KEYS = ['activeTab', 'currentStep', 'caseForm', 'firData'];
+
 export default function FileUnifiedPage() {
     // Tab: 'case' or 'fir'
     const [activeTab, setActiveTab] = useState('case');
@@ -68,28 +104,29 @@ export default function FileUnifiedPage() {
 
     // Case filing state
     const [currentStep, setCurrentStep] = useState(1);
-    const [formData, setFormData] = useState({
-        caseType: '',
-        title: '',
-        description: '',
-        petitioner: '',
-        respondent: '',
-        urgency: 'normal',
-        documents: []
-    });
+    const [formData, setFormData] = useState(EMPTY_CASE_FORM);
 
     // FIR filing state
-    const [firData, setFirData] = useState({
-        title: '',
-        description: '',
-        incidentDate: '',
-        incidentLocation: ''
-    });
+    const [firData, setFirData] = useState(EMPTY_FIR_FORM);
     const [firFile, setFirFile] = useState(null);
 
     const [uploading, setUploading] = useState(false);
     const [result, setResult] = useState(null);
+    const [touchedFields, setTouchedFields] = useState({});
+    const [attemptedStep, setAttemptedStep] = useState(null);
+    const [attemptedFirSubmit, setAttemptedFirSubmit] = useState(false);
+    const [draftReady, setDraftReady] = useState(false);
+    const [draftRestored, setDraftRestored] = useState(false);
+    const [draftNoticeVisible, setDraftNoticeVisible] = useState(false);
+    const [submissionSucceeded, setSubmissionSucceeded] = useState(false);
     const navigate = useNavigate();
+    const draftExcludeFields = useMemo(() => [], []);
+    const { hasDraft, draftTimestamp, saveDraft, restoreDraft, clearDraft } = useFormDraft(
+        CASE_DRAFT_STORAGE_KEY,
+        draftExcludeFields,
+        700
+    );
+    const hasHydratedDraftRef = useRef(false);
 
     // const steps = [
     //     { number: 1, name: 'Case Type', desc: 'Select category' },
@@ -98,12 +135,148 @@ export default function FileUnifiedPage() {
     //     { number: 4, name: 'Review', desc: 'Confirm & submit' }
     // ];
 
-    const steps = [
-    { number: 1, name: t('fileUnified.caseType'), desc: t('fileUnified.selectCategory') },
-    { number: 2, name: t('fileUnified.caseDetails'), desc: t('fileUnified.provideInformation') },
-    { number: 3, name: t('fileUnified.documents'), desc: t('fileUnified.uploadFiles') },
-    { number: 4, name: t('fileUnified.review'), desc: t('fileUnified.confirmSubmit') }
-];
+    const steps = useMemo(() => [
+        { number: 1, name: t('fileUnified.caseType'), desc: t('fileUnified.selectCategory') },
+        { number: 2, name: t('fileUnified.caseDetails'), desc: t('fileUnified.provideInformation') },
+        { number: 3, name: t('fileUnified.documents'), desc: t('fileUnified.uploadFiles') },
+        { number: 4, name: t('fileUnified.review'), desc: t('fileUnified.confirmSubmit') }
+    ], [t]);
+
+    const caseErrors = useMemo(() => validateCaseFiling(formData), [formData]);
+    const firErrors = useMemo(() => validateFirFiling(firData), [firData]);
+    const isFirValid = Object.keys(firErrors).length === 0;
+    const hasCaseDraftContent = useMemo(() => hasMeaningfulCaseDraft(formData), [formData]);
+    const hasFirDraftContent = useMemo(() => hasMeaningfulFirDraft(firData, firFile), [firData, firFile]);
+    const isDirty = !submissionSucceeded && !result && (hasCaseDraftContent || hasFirDraftContent);
+
+    useUnsavedChanges(isDirty, 'You have unsaved filing changes. Leave this page?');
+
+    const getVisibleError = useCallback((field) => {
+        const isFirField = ['firTitle', 'firDescription', 'incidentLocation'].includes(field);
+        const shouldShow = touchedFields[field]
+            || (isFirField
+                ? attemptedFirSubmit
+                : attemptedStep === currentStep || (currentStep === 4 && attemptedStep === 4));
+
+        return shouldShow ? (caseErrors[field] || firErrors[field]) : null;
+    }, [attemptedFirSubmit, attemptedStep, caseErrors, currentStep, firErrors, touchedFields]);
+
+    const markTouched = useCallback((field) => {
+        setTouchedFields((prev) => ({ ...prev, [field]: true }));
+    }, []);
+
+    const updateCaseField = useCallback((field, value) => {
+        markTouched(field);
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    }, [markTouched]);
+
+    const updateFirField = useCallback((field, value) => {
+        const touchedKey = field === 'title'
+            ? 'firTitle'
+            : field === 'description'
+                ? 'firDescription'
+                : field;
+        markTouched(touchedKey);
+        setFirData((prev) => ({ ...prev, [field]: value }));
+    }, [markTouched]);
+
+    const buildDraftPayload = useCallback(() => ({
+        activeTab,
+        currentStep,
+        caseForm: {
+            ...sanitizeCaseDraft(formData),
+            documents: []
+        },
+        firData: sanitizeFirDraft(firData)
+    }), [activeTab, currentStep, firData, formData]);
+
+    const resetForms = useCallback(() => {
+        setCurrentStep(1);
+        setFormData(EMPTY_CASE_FORM);
+        setFirData(EMPTY_FIR_FORM);
+        setFirFile(null);
+        setTouchedFields({});
+        setAttemptedStep(null);
+        setAttemptedFirSubmit(false);
+    }, []);
+
+    useEffect(() => {
+        if (hasHydratedDraftRef.current) return;
+
+        const draft = restoreDraft(REQUIRED_DRAFT_KEYS);
+        if (draft) {
+            const restoredCaseForm = sanitizeCaseDraft(draft.caseForm);
+            const restoredFirData = sanitizeFirDraft(draft.firData);
+            const restoredStep = getRestorableCaseStep(draft.currentStep, restoredCaseForm);
+
+            setActiveTab(draft.activeTab === 'fir' ? 'fir' : 'case');
+            setCurrentStep(restoredStep);
+            setFormData(restoredCaseForm);
+            setFirData(restoredFirData);
+            setDraftRestored(true);
+            setDraftNoticeVisible(true);
+        }
+
+        hasHydratedDraftRef.current = true;
+        setDraftReady(true);
+    }, [restoreDraft]);
+
+    useEffect(() => {
+        if (!draftReady || result || submissionSucceeded) return;
+
+        if (hasCaseDraftContent || hasFirDraftContent) {
+            saveDraft(buildDraftPayload());
+        } else if (hasDraft) {
+            clearDraft();
+        }
+    }, [
+        buildDraftPayload,
+        clearDraft,
+        draftReady,
+        hasCaseDraftContent,
+        hasDraft,
+        hasFirDraftContent,
+        result,
+        saveDraft,
+        submissionSucceeded
+    ]);
+
+    const formatDraftTime = () => {
+        if (!draftTimestamp) return 'recently';
+
+        const minutes = Math.max(0, Math.round((Date.now() - draftTimestamp) / MS_PER_MINUTE));
+        if (minutes < 1) return 'just now';
+        if (minutes === 1) return '1 minute ago';
+        return `${minutes} minutes ago`;
+    };
+
+    const discardDraft = () => {
+        clearDraft();
+        resetForms();
+        setActiveTab('case');
+        setDraftNoticeVisible(false);
+        setDraftRestored(false);
+    };
+
+    const canProceed = useCallback(() => {
+        const stepErrors = getStepErrors(currentStep, caseErrors);
+        return Object.keys(stepErrors).length === 0;
+    }, [caseErrors, currentStep]);
+
+    const handleNextStep = () => {
+        const stepFields = getCaseStepFields(currentStep);
+        setAttemptedStep(currentStep);
+        setTouchedFields((prev) => stepFields.reduce((next, field) => ({ ...next, [field]: true }), prev));
+
+        if (!canProceed()) return;
+
+        setCurrentStep((step) => Math.min(steps.length, step + 1));
+        setAttemptedStep(null);
+    };
+
+    const confirmLeavingFiling = () => {
+        return !isDirty || window.confirm('You have unsaved filing changes. Leave this page?');
+    };
 
     const handleAiAssist = async () => {
         if (!aiQuery.trim()) return;
@@ -133,19 +306,21 @@ export default function FileUnifiedPage() {
 
         if (aiSuggestion.type === 'fir') {
             setActiveTab('fir');
-            setFirData({
-                ...firData,
+            setFirData((prev) => ({
+                ...prev,
                 title: aiSuggestion.title,
                 description: aiSuggestion.description
-            });
+            }));
+            setTouchedFields((prev) => ({ ...prev, firTitle: true, firDescription: true }));
         } else {
             setActiveTab('case');
-            setFormData({
-                ...formData,
+            setFormData((prev) => ({
+                ...prev,
                 caseType: aiSuggestion.caseType,
                 title: aiSuggestion.title,
                 description: aiSuggestion.description
-            });
+            }));
+            setTouchedFields((prev) => ({ ...prev, caseType: true, title: true, description: true }));
             setCurrentStep(2);
         }
         setShowAiAssistant(false);
@@ -155,10 +330,10 @@ export default function FileUnifiedPage() {
 
     const handleFileUpload = (e) => {
         const files = Array.from(e.target.files);
-        setFormData({
-            ...formData,
-            documents: [...formData.documents, ...files.map(f => ({ file: f, name: f.name, size: f.size, aiAnalyzed: false }))]
-        });
+        setFormData((prev) => ({
+            ...prev,
+            documents: [...prev.documents, ...files.map(f => ({ file: f, name: f.name, size: f.size, aiAnalyzed: false }))]
+        }));
     };
 
     const analyzeDocument = (index) => {
@@ -182,14 +357,22 @@ export default function FileUnifiedPage() {
     };
 
     const handleSubmitCase = async () => {
+        const submitErrors = validateCaseFiling(formData);
+        if (Object.keys(submitErrors).length > 0) {
+            setAttemptedStep(4);
+            setTouchedFields((prev) => getCaseStepFields(4).reduce((next, field) => ({ ...next, [field]: true }), prev));
+            setCurrentStep(submitErrors.caseType ? 1 : 2);
+            return;
+        }
+
         setUploading(true);
         try {
             const caseData = {
-                title: formData.title,
-                description: formData.description,
+                title: formData.title.trim(),
+                description: formData.description.trim(),
                 caseType: formData.caseType.toUpperCase(),
-                petitioner: formData.petitioner,
-                respondent: formData.respondent,
+                petitioner: formData.petitioner.trim(),
+                respondent: formData.respondent.trim(),
                 urgency: formData.urgency.toUpperCase()
             };
 
@@ -210,6 +393,8 @@ export default function FileUnifiedPage() {
                 }
             }
 
+            clearDraft();
+            setSubmissionSucceeded(true);
             setResult({ type: 'case', data: response.data });
         } catch (error) {
             console.error('Error creating case:', error);
@@ -220,38 +405,33 @@ export default function FileUnifiedPage() {
     };
 
     const handleSubmitFir = async () => {
-        if (!firData.title || !firData.description) {
-            alert(t('popups.titleDescriptionRequired'));
+        const submitErrors = validateFirFiling(firData);
+        setAttemptedFirSubmit(true);
+        setTouchedFields((prev) => ({ ...prev, firTitle: true, firDescription: true }));
+
+        if (Object.keys(submitErrors).length > 0) {
             return;
         }
 
         setUploading(true);
         try {
             const data = new FormData();
-            data.append('title', firData.title);
-            data.append('description', firData.description);
+            data.append('title', firData.title.trim());
+            data.append('description', firData.description.trim());
             if (firData.incidentDate) data.append('incidentDate', firData.incidentDate);
-            if (firData.incidentLocation) data.append('incidentLocation', firData.incidentLocation);
+            if (firData.incidentLocation) data.append('incidentLocation', firData.incidentLocation.trim());
             data.append('aiGenerated', false);
             if (firFile) data.append('file', firFile);
 
             const response = await clientFirAPI.fileFir(data);
+            clearDraft();
+            setSubmissionSucceeded(true);
             setResult({ type: 'fir', data: response.data });
         } catch (error) {
             console.error('Error filing FIR:', error);
             alert(t('popups.firFiledFailed'));
         } finally {
             setUploading(false);
-        }
-    };
-
-    const canProceed = () => {
-        switch (currentStep) {
-            case 1: return formData.caseType !== '';
-            case 2: return formData.title && formData.description && formData.petitioner && formData.respondent;
-            case 3: return true;
-            case 4: return true;
-            default: return false;
         }
     };
 
@@ -296,9 +476,8 @@ export default function FileUnifiedPage() {
                         <button
                             onClick={() => {
                                 setResult(null);
-                                setCurrentStep(1);
-                                setFormData({ caseType: '', title: '', description: '', petitioner: '', respondent: '', urgency: 'normal', documents: [] });
-                                setFirData({ title: '', description: '', incidentDate: '', incidentLocation: '' });
+                                setSubmissionSucceeded(false);
+                                resetForms();
                             }}
                             style={{
                                 padding: '0.75rem 1.5rem',
@@ -320,7 +499,11 @@ export default function FileUnifiedPage() {
             <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
                 <div>
                     <button
-                        onClick={() => navigate('/litigant')}
+                        onClick={() => {
+                            if (confirmLeavingFiling()) {
+                                navigate('/litigant');
+                            }
+                        }}
                         style={{
                             display: 'flex', alignItems: 'center', gap: '0.5rem',
                             background: 'none', border: 'none', color: 'var(--text-secondary)',
@@ -360,7 +543,7 @@ export default function FileUnifiedPage() {
                 borderRadius: '1rem', padding: '0.5rem', marginBottom: '2rem', display: 'flex', gap: '0.5rem'
             }}>
                 <button
-                    onClick={() => { setActiveTab('case'); setCurrentStep(1); }}
+                    onClick={() => setActiveTab('case')}
                     style={{
                         flex: 1, padding: '1rem',
                         background: activeTab === 'case' ? 'var(--color-primary)' : 'transparent',
@@ -387,69 +570,45 @@ export default function FileUnifiedPage() {
                 </button>
             </div>
 
+            {draftNoticeVisible && draftRestored && (
+                <div className="draft-banner" role="status" aria-live="polite">
+                    <div className="draft-banner__icon">
+                        <FileText size={20} aria-hidden="true" />
+                    </div>
+                    <div className="draft-banner__text">
+                        <div className="draft-banner__title">Draft restored</div>
+                        <div className="draft-banner__subtitle">
+                            Your saved filing progress was restored from {formatDraftTime()}. Uploaded files must be selected again after a refresh.
+                        </div>
+                    </div>
+                    <div className="draft-banner__actions">
+                        <button
+                            type="button"
+                            className="draft-banner__btn draft-banner__btn--restore"
+                            onClick={() => setDraftNoticeVisible(false)}
+                        >
+                            Continue
+                        </button>
+                        <button
+                            type="button"
+                            className="draft-banner__btn draft-banner__btn--discard"
+                            onClick={discardDraft}
+                        >
+                            Discard draft
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* COURT CASE TAB */}
             {activeTab === 'case' && (
                 <>
                     {/* Progress Steps */}
-                    <div style={{
-                        background: 'var(--bg-glass-strong)', border: 'var(--border-glass-strong)',
-                        borderRadius: '1.5rem', padding: '2rem', marginBottom: '2rem'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
-                            <div style={{
-                                position: 'absolute', top: '20px', left: '10%', right: '10%', height: '2px',
-                                background: 'var(--border-glass)', zIndex: 0
-                            }}>
-                                <div style={{
-                                    height: '100%', width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`,
-                                    background: 'var(--color-primary)', transition: 'width 0.3s'
-                                }} />
-                            </div>
-                            {steps.map((step) => {
-                                const isCompleted = step.number < currentStep;
-                                return (
-                                <div 
-                                    key={step.number} 
-                                    onClick={() => {
-                                        if (isCompleted) {
-                                            setCurrentStep(step.number);
-                                        }
-                                    }}
-                                    style={{ 
-                                        display: 'flex', 
-                                        flexDirection: 'column', 
-                                        alignItems: 'center', 
-                                        flex: 1, 
-                                        position: 'relative', 
-                                        zIndex: 1,
-                                        cursor: isCompleted ? 'pointer' : 'default',
-                                        transition: 'opacity 0.2s'
-                                    }}
-                                    onMouseOver={(e) => {
-                                        if (isCompleted) e.currentTarget.style.opacity = '0.7';
-                                    }}
-                                    onMouseOut={(e) => {
-                                        if (isCompleted) e.currentTarget.style.opacity = '1';
-                                    }}
-                                >
-                                    <div style={{
-                                        width: '40px', height: '40px', borderRadius: '50%',
-                                        background: step.number <= currentStep ? 'var(--color-primary)' : 'var(--bg-glass)',
-                                        border: step.number === currentStep ? '3px solid rgba(30, 42, 68, 0.4)' : 'none',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700',
-                                        color: step.number <= currentStep ? 'white' : 'var(--text-secondary)', marginBottom: '0.75rem',
-                                        transition: 'all 0.2s'
-                                    }}>
-                                        {isCompleted ? <CheckCircle2 size={20} /> : step.number}
-                                    </div>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.875rem', fontWeight: '600', color: step.number <= currentStep ? 'var(--color-primary)' : 'var(--text-secondary)' }}>{step.name}</div>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{step.desc}</div>
-                                    </div>
-                                </div>
-                            )})}
-                        </div>
-                    </div>
+                    <FilingProgressIndicator
+                        steps={steps}
+                        currentStep={currentStep}
+                        onStepSelect={setCurrentStep}
+                    />
 
                     {/* Step Content */}
                     <div style={{
@@ -483,7 +642,9 @@ export default function FileUnifiedPage() {
                                         return (
                                             <button
                                                 key={type.id}
-                                                onClick={() => setFormData({ ...formData, caseType: type.id })}
+                                                type="button"
+                                                onClick={() => updateCaseField('caseType', type.id)}
+                                                aria-pressed={isSelected}
                                                 style={{
                                                     minWidth: '280px',
                                                     flex: '0 0 auto',
@@ -545,6 +706,12 @@ export default function FileUnifiedPage() {
                                     <span>Scroll to see more case types</span>
                                     <ChevronRight size={14} />
                                 </div>
+                                {getVisibleError('caseType') && (
+                                    <div className="field-error-message" id="caseType-error">
+                                        <AlertCircle size={14} aria-hidden="true" />
+                                        {getVisibleError('caseType')}
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -555,27 +722,99 @@ export default function FileUnifiedPage() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.caseTitle')} *</label>
-                                        <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder={t('fileUnified.caseTitlePlaceholder')} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                                        <input
+                                            type="text"
+                                            value={formData.title}
+                                            maxLength={CASE_FIELD_LIMITS.title}
+                                            onBlur={() => markTouched('title')}
+                                            onChange={(e) => updateCaseField('title', e.target.value)}
+                                            placeholder={t('fileUnified.caseTitlePlaceholder')}
+                                            className={getVisibleError('title') ? 'field-error-input' : ''}
+                                            aria-invalid={Boolean(getVisibleError('title'))}
+                                            aria-describedby={getVisibleError('title') ? 'title-error' : undefined}
+                                            style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }}
+                                        />
+                                        {getVisibleError('title') && (
+                                            <div className="field-error-message" id="title-error">
+                                                <AlertCircle size={14} aria-hidden="true" />
+                                                {getVisibleError('title')}
+                                            </div>
+                                        )}
+                                        <div className="char-counter">{formData.title.length}/{CASE_FIELD_LIMITS.title}</div>
                                     </div>
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.caseDescription')} *</label>
-                                        <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder={t('fileUnified.caseDescriptionPlaceholder')} rows={5} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)', resize: 'vertical' }} />
+                                        <textarea
+                                            value={formData.description}
+                                            maxLength={CASE_FIELD_LIMITS.description}
+                                            onBlur={() => markTouched('description')}
+                                            onChange={(e) => updateCaseField('description', e.target.value)}
+                                            placeholder={t('fileUnified.caseDescriptionPlaceholder')}
+                                            rows={5}
+                                            className={getVisibleError('description') ? 'field-error-input' : ''}
+                                            aria-invalid={Boolean(getVisibleError('description'))}
+                                            aria-describedby={getVisibleError('description') ? 'description-error' : undefined}
+                                            style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)', resize: 'vertical' }}
+                                        />
+                                        {getVisibleError('description') && (
+                                            <div className="field-error-message" id="description-error">
+                                                <AlertCircle size={14} aria-hidden="true" />
+                                                {getVisibleError('description')}
+                                            </div>
+                                        )}
+                                        <div className={`char-counter${formData.description.length > CASE_FIELD_LIMITS.description * 0.9 ? ' char-counter--warning' : ''}`}>
+                                            {formData.description.length}/{CASE_FIELD_LIMITS.description}
+                                        </div>
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
                                         <div>
                                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.petitioner')} *</label>
-                                            <input type="text" value={formData.petitioner} onChange={(e) => setFormData({ ...formData, petitioner: e.target.value })} placeholder={t('fileUnified.petitionerPlaceholder')} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                                            <input
+                                                type="text"
+                                                value={formData.petitioner}
+                                                maxLength={CASE_FIELD_LIMITS.partyName}
+                                                onBlur={() => markTouched('petitioner')}
+                                                onChange={(e) => updateCaseField('petitioner', e.target.value)}
+                                                placeholder={t('fileUnified.petitionerPlaceholder')}
+                                                className={getVisibleError('petitioner') ? 'field-error-input' : ''}
+                                                aria-invalid={Boolean(getVisibleError('petitioner'))}
+                                                aria-describedby={getVisibleError('petitioner') ? 'petitioner-error' : undefined}
+                                                style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }}
+                                            />
+                                            {getVisibleError('petitioner') && (
+                                                <div className="field-error-message" id="petitioner-error">
+                                                    <AlertCircle size={14} aria-hidden="true" />
+                                                    {getVisibleError('petitioner')}
+                                                </div>
+                                            )}
                                         </div>
                                         <div>
                                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.respondent')} *</label>
-                                            <input type="text" value={formData.respondent} onChange={(e) => setFormData({ ...formData, respondent: e.target.value })} placeholder={t('fileUnified.respondentPlaceholder')} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                                            <input
+                                                type="text"
+                                                value={formData.respondent}
+                                                maxLength={CASE_FIELD_LIMITS.partyName}
+                                                onBlur={() => markTouched('respondent')}
+                                                onChange={(e) => updateCaseField('respondent', e.target.value)}
+                                                placeholder={t('fileUnified.respondentPlaceholder')}
+                                                className={getVisibleError('respondent') ? 'field-error-input' : ''}
+                                                aria-invalid={Boolean(getVisibleError('respondent'))}
+                                                aria-describedby={getVisibleError('respondent') ? 'respondent-error' : undefined}
+                                                style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }}
+                                            />
+                                            {getVisibleError('respondent') && (
+                                                <div className="field-error-message" id="respondent-error">
+                                                    <AlertCircle size={14} aria-hidden="true" />
+                                                    {getVisibleError('respondent')}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.urgency')}</label>
                                         <div style={{ display: 'flex', gap: '1rem' }}>
                                             {['normal', 'urgent', 'critical'].map((level) => (
-                                                <button key={level} onClick={() => setFormData({ ...formData, urgency: level })} style={{ flex: 1, padding: '0.75rem', background: formData.urgency === level ? 'rgba(30, 42, 68, 0.2)' : 'var(--bg-glass)', border: formData.urgency === level ? '2px solid var(--color-primary)' : 'var(--border-glass)', borderRadius: '0.75rem', color: formData.urgency === level ? 'var(--color-primary)' : 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer', textTransform: 'capitalize' }}>{t(`fileUnified.${level}`)}</button>
+                                                <button key={level} type="button" onClick={() => updateCaseField('urgency', level)} style={{ flex: 1, padding: '0.75rem', background: formData.urgency === level ? 'rgba(30, 42, 68, 0.2)' : 'var(--bg-glass)', border: formData.urgency === level ? '2px solid var(--color-primary)' : 'var(--border-glass)', borderRadius: '0.75rem', color: formData.urgency === level ? 'var(--color-primary)' : 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer', textTransform: 'capitalize' }}>{t(`fileUnified.${level}`)}</button>
                                             ))}
                                         </div>
                                     </div>
@@ -657,11 +896,11 @@ export default function FileUnifiedPage() {
                             <ChevronLeft size={20} /> {t('fileUnified.previous')}
                         </button>
                         {currentStep < 4 ? (
-                            <button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()} style={{ padding: '1rem 2rem', background: canProceed() ? 'var(--color-primary)' : 'var(--bg-glass)', border: 'none', borderRadius: '0.75rem', color: canProceed() ? 'white' : 'var(--text-secondary)', fontWeight: '700', cursor: canProceed() ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <button onClick={handleNextStep} aria-disabled={!canProceed()} style={{ padding: '1rem 2rem', background: canProceed() ? 'var(--color-primary)' : 'var(--bg-glass)', border: 'none', borderRadius: '0.75rem', color: canProceed() ? 'white' : 'var(--text-secondary)', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 {t('fileUnified.next')} <ChevronRight size={20} />
                             </button>
                         ) : (
-                            <button onClick={handleSubmitCase} disabled={uploading} style={{ padding: '1rem 2rem', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', borderRadius: '0.75rem', color: 'white', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <button onClick={handleSubmitCase} disabled={uploading || !canProceed()} style={{ padding: '1rem 2rem', background: canProceed() ? CASE_SUBMIT_GRADIENT : 'var(--bg-glass)', border: 'none', borderRadius: '0.75rem', color: canProceed() ? 'white' : 'var(--text-secondary)', fontWeight: '700', cursor: uploading || !canProceed() ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <CheckCircle2 size={20} /> {uploading ? t('fileUnified.submitting'): t('fileUnified.submitCase')}
                             </button>
                         )}
@@ -678,21 +917,76 @@ export default function FileUnifiedPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.incidentTitle')}*</label>
-                            <input type="text" value={firData.title} onChange={(e) => setFirData({ ...firData, title: e.target.value })} placeholder={t('fileUnified.incidentTitlePlaceholder')} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                            <input
+                                type="text"
+                                value={firData.title}
+                                maxLength={CASE_FIELD_LIMITS.title}
+                                onBlur={() => markTouched('firTitle')}
+                                onChange={(e) => updateFirField('title', e.target.value)}
+                                placeholder={t('fileUnified.incidentTitlePlaceholder')}
+                                className={getVisibleError('firTitle') ? 'field-error-input' : ''}
+                                aria-invalid={Boolean(getVisibleError('firTitle'))}
+                                aria-describedby={getVisibleError('firTitle') ? 'firTitle-error' : undefined}
+                                style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }}
+                            />
+                            {getVisibleError('firTitle') && (
+                                <div className="field-error-message" id="firTitle-error">
+                                    <AlertCircle size={14} aria-hidden="true" />
+                                    {getVisibleError('firTitle')}
+                                </div>
+                            )}
+                            <div className="char-counter">{firData.title.length}/{CASE_FIELD_LIMITS.title}</div>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
                             <div>
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}><Calendar size={16} /> {t('fileUnified.incidentDate')}</label>
-                                <input type="date" value={firData.incidentDate} onChange={(e) => setFirData({ ...firData, incidentDate: e.target.value })} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                                <input type="date" value={firData.incidentDate} onChange={(e) => updateFirField('incidentDate', e.target.value)} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
                             </div>
                             <div>
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}><MapPin size={16} /> {t('fileUnified.location')}</label>
-                                <input type="text" value={firData.incidentLocation} onChange={(e) => setFirData({ ...firData, incidentLocation: e.target.value })} placeholder={t('fileUnified.locationPlaceholder')} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                                <input
+                                    type="text"
+                                    value={firData.incidentLocation}
+                                    maxLength={CASE_FIELD_LIMITS.location}
+                                    onBlur={() => markTouched('incidentLocation')}
+                                    onChange={(e) => updateFirField('incidentLocation', e.target.value)}
+                                    placeholder={t('fileUnified.locationPlaceholder')}
+                                    className={getVisibleError('incidentLocation') ? 'field-error-input' : ''}
+                                    aria-invalid={Boolean(getVisibleError('incidentLocation'))}
+                                    aria-describedby={getVisibleError('incidentLocation') ? 'incidentLocation-error' : undefined}
+                                    style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)' }}
+                                />
+                                {getVisibleError('incidentLocation') && (
+                                    <div className="field-error-message" id="incidentLocation-error">
+                                        <AlertCircle size={14} aria-hidden="true" />
+                                        {getVisibleError('incidentLocation')}
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.incidentDescription')} *</label>
-                            <textarea value={firData.description} onChange={(e) => setFirData({ ...firData, description: e.target.value })} placeholder={t('fileUnified.incidentDescriptionPlaceholder')} rows={6} style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)', resize: 'vertical' }} />
+                            <textarea
+                                value={firData.description}
+                                maxLength={CASE_FIELD_LIMITS.description}
+                                onBlur={() => markTouched('firDescription')}
+                                onChange={(e) => updateFirField('description', e.target.value)}
+                                placeholder={t('fileUnified.incidentDescriptionPlaceholder')}
+                                rows={6}
+                                className={getVisibleError('firDescription') ? 'field-error-input' : ''}
+                                aria-invalid={Boolean(getVisibleError('firDescription'))}
+                                aria-describedby={getVisibleError('firDescription') ? 'firDescription-error' : undefined}
+                                style={{ width: '100%', padding: '0.875rem', background: 'var(--bg-glass)', border: 'var(--border-glass)', borderRadius: '0.75rem', color: 'var(--text-main)', resize: 'vertical' }}
+                            />
+                            {getVisibleError('firDescription') && (
+                                <div className="field-error-message" id="firDescription-error">
+                                    <AlertCircle size={14} aria-hidden="true" />
+                                    {getVisibleError('firDescription')}
+                                </div>
+                            )}
+                            <div className={`char-counter${firData.description.length > CASE_FIELD_LIMITS.description * 0.9 ? ' char-counter--warning' : ''}`}>
+                                {firData.description.length}/{CASE_FIELD_LIMITS.description}
+                            </div>
                         </div>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: 'var(--text-main)' }}>{t('fileUnified.evidenceOptional')}</label>
@@ -720,7 +1014,7 @@ export default function FileUnifiedPage() {
                                 )}
                             </div>
                         </div>
-                        <button onClick={handleSubmitFir} disabled={uploading || !firData.title || !firData.description} style={{ marginTop: '1rem', padding: '1rem', background: (!firData.title || !firData.description) ? 'var(--bg-glass)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', border: 'none', borderRadius: '0.75rem', color: (!firData.title || !firData.description) ? 'var(--text-secondary)' : 'white', fontWeight: '700', cursor: (!firData.title || !firData.description) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                        <button onClick={handleSubmitFir} disabled={uploading} aria-disabled={!isFirValid} style={{ marginTop: '1rem', padding: '1rem', background: !isFirValid ? 'var(--bg-glass)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', border: 'none', borderRadius: '0.75rem', color: !isFirValid ? 'var(--text-secondary)' : 'white', fontWeight: '700', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                             <Shield size={20} /> {uploading? t('fileUnified.submitting'): t('fileUnified.submitFirPolice')}
                         </button>
                     </div>
