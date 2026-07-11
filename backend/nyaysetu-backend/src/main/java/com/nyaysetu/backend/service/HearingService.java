@@ -5,6 +5,7 @@ import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.HearingParticipantRepository;
 import com.nyaysetu.backend.repository.HearingRepository;
 import com.nyaysetu.backend.repository.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -221,5 +222,116 @@ public class HearingService {
 
     public boolean canUserJoinHearing(UUID hearingId, Long userId) {
         return participantRepository.existsByHearingIdAndUserId(hearingId, userId);
+    }
+
+    /**
+     * Checks whether a user is authorized to view a hearing's details (including videoRoomId).
+     * Access is granted if the user is any of:
+     *   1. An admin/tech-admin (global access)
+     *   2. The judge assigned to the hearing's parent case
+     *   3. The client (litigant) of the hearing's parent case
+     *   4. The lawyer of the hearing's parent case
+     *   5. A registered participant of the hearing
+     *
+     * This prevents any authenticated user from enumerating hearing IDs
+     * to extract videoRoomId values and eavesdrop on WebRTC sessions.
+     */
+    public boolean canUserAccessHearing(UUID hearingId, Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return false;
+        }
+
+        // Admins can access all hearings
+        if (user.getRole() == Role.ADMIN || user.getRole() == Role.TECH_ADMIN) {
+            return true;
+        }
+
+        Hearing hearing = hearingRepository.findById(hearingId).orElse(null);
+        if (hearing == null) {
+            return false;
+        }
+
+        CaseEntity caseEntity = hearing.getCaseEntity();
+
+        // Judge assigned to the case can access
+        if (user.getRole() == Role.JUDGE || user.getRole() == Role.SUPER_JUDGE) {
+            if (caseEntity.getAssignedJudge() != null
+                    && caseEntity.getAssignedJudge().equals(user.getName())) {
+                return true;
+            }
+        }
+
+        // Client (litigant) of the case can access
+        if (caseEntity.getClient() != null && caseEntity.getClient().getId().equals(userId)) {
+            return true;
+        }
+
+        // Lawyer of the case can access
+        if (caseEntity.getLawyer() != null && caseEntity.getLawyer().getId().equals(userId)) {
+            return true;
+        }
+
+        // Registered participant of the hearing can access
+        if (participantRepository.existsByHearingIdAndUserId(hearingId, userId)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether a user is authorized to view a case's hearing list.
+     * Same rules as canUserAccessHearing() but operates on the case level.
+     */
+    public boolean canUserAccessCase(UUID caseId, Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return false;
+        }
+
+        // Admins can access all cases
+        if (user.getRole() == Role.ADMIN || user.getRole() == Role.TECH_ADMIN) {
+            return true;
+        }
+
+        CaseEntity caseEntity = caseRepository.findById(caseId).orElse(null);
+        if (caseEntity == null) {
+            return false;
+        }
+
+        // Judge assigned to the case
+        if (user.getRole() == Role.JUDGE || user.getRole() == Role.SUPER_JUDGE) {
+            if (caseEntity.getAssignedJudge() != null
+                    && caseEntity.getAssignedJudge().equals(user.getName())) {
+                return true;
+            }
+        }
+
+        // Client of the case
+        if (caseEntity.getClient() != null && caseEntity.getClient().getId().equals(userId)) {
+            return true;
+        }
+
+        // Lawyer of the case
+        if (caseEntity.getLawyer() != null && caseEntity.getLawyer().getId().equals(userId)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /** Throws AccessDeniedException if the user cannot access the hearing. */
+    public void enforceHearingAccess(UUID hearingId, Long userId) {
+        if (!canUserAccessHearing(hearingId, userId)) {
+            throw new AccessDeniedException("You do not have access to this hearing");
+        }
+    }
+
+    /** Throws AccessDeniedException if the user cannot access the case. */
+    public void enforceCaseAccess(UUID caseId, Long userId) {
+        if (!canUserAccessCase(caseId, userId)) {
+            throw new AccessDeniedException("You do not have access to this case");
+        }
     }
 }

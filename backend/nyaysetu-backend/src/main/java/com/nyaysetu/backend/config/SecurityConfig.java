@@ -238,7 +238,6 @@ public class SecurityConfig {
                                 "/api/v1/hearings/schedule",
                                 "/api/v1/hearings/*/complete",
                                 "/api/v1/hearings/*/outcome",
-                                "/api/v1/hearings/*/participants",
                                 "/api/v1/orders",
                                 "/api/v1/orders/*",
                                 "/api/v1/orders/my-orders",
