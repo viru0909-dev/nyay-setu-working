@@ -2,6 +2,7 @@ package com.nyaysetu.backend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -33,6 +34,8 @@ class JwtServiceTest {
     private static final String UNKNOWN_SECRET =
             "unknown-secret-key-for-jwt-rotation-tests-minimum-256-bits";
 
+    private static final long TEST_ACCESS_TOKEN_EXPIRATION_MS = 120_000L;
+
     private JwtService jwtService;
     private UserDetails userDetails;
     private ObjectMapper objectMapper;
@@ -53,6 +56,7 @@ class JwtServiceTest {
 
         objectMapper = new ObjectMapper();
         jwtService = new JwtService(signingKeyService, objectMapper);
+        ReflectionTestUtils.setField(jwtService, "jwtExpirationMs", TEST_ACCESS_TOKEN_EXPIRATION_MS);
 
         userDetails = User.withUsername("test@example.com")
                 .password("password")
@@ -67,6 +71,31 @@ class JwtServiceTest {
         assertEquals(CURRENT_KEY_ID, extractKid(token));
         assertTrue(jwtService.isTokenValid(token, userDetails));
         assertEquals("test@example.com", jwtService.extractUsername(token));
+    }
+
+    @Test
+    void generateToken_shouldUseConfiguredExpiration() {
+        long configuredExpirationMs = 300_000L;
+        ReflectionTestUtils.setField(jwtService, "jwtExpirationMs", configuredExpirationMs);
+
+        String token = jwtService.generateToken(Map.of(), userDetails);
+
+        Date issuedAt = jwtService.extractClaim(token, Claims::getIssuedAt);
+        Date expiration = jwtService.extractClaim(token, Claims::getExpiration);
+
+        assertEquals(configuredExpirationMs, expiration.getTime() - issuedAt.getTime());
+    }
+
+    @Test
+    void validateJwtExpirationConfiguration_shouldRejectNonPositiveExpiration() {
+        ReflectionTestUtils.setField(jwtService, "jwtExpirationMs", 0L);
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> jwtService.validateJwtExpirationConfiguration()
+        );
+
+        assertEquals("jwt.expiration must be greater than 0 milliseconds", exception.getMessage());
     }
 
     @Test

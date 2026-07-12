@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -18,15 +20,24 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private static final long ACCESS_TOKEN_EXPIRY = 1000 * 60 * 15;
     private static final long REFRESH_TOKEN_EXPIRY = 1000 * 60 * 60 * 24 * 7;
 
     private final JwtSigningKeyService jwtSigningKeyService;
     private final ObjectMapper objectMapper;
 
+    @Value("${jwt.expiration}")
+    private long jwtExpirationMs;
+
     public JwtService(JwtSigningKeyService jwtSigningKeyService, ObjectMapper objectMapper) {
         this.jwtSigningKeyService = jwtSigningKeyService;
         this.objectMapper = objectMapper;
+    }
+
+    @PostConstruct
+    void validateJwtExpirationConfiguration() {
+        if (jwtExpirationMs <= 0) {
+            throw new IllegalStateException("jwt.expiration must be greater than 0 milliseconds");
+        }
     }
 
     public String extractUsername(String token) {
@@ -98,26 +109,30 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        long now = System.currentTimeMillis();
+
         return Jwts.builder()
                 .header()
                 .keyId(jwtSigningKeyService.getCurrentKeyId())
                 .and()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+                .issuedAt(new Date(now))
+                .expiration(new Date(now + jwtExpirationMs))
                 .signWith(jwtSigningKeyService.getCurrentSigningKey())
                 .compact();
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
+        long now = System.currentTimeMillis();
+
         return Jwts.builder()
                 .header()
                 .keyId(jwtSigningKeyService.getCurrentKeyId())
                 .and()
                 .subject(userDetails.getUsername())
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
+                .issuedAt(new Date(now))
+                .expiration(new Date(now + REFRESH_TOKEN_EXPIRY))
                 .signWith(jwtSigningKeyService.getCurrentSigningKey())
                 .compact();
     }
