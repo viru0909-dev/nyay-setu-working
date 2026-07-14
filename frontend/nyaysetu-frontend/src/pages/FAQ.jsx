@@ -6,7 +6,8 @@ import FAQAccordion from "../components/FAQAccordion";
 import SearchBar from "../components/SearchBar";
 import { faqData } from "../utils/faqData";
 import "../styles/faq.css";
-
+import Header from "../components/landing/Header";
+import Footer from "../components/landing/Footer";
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   visible: (delay = 0) => ({
@@ -42,6 +43,8 @@ export default function FAQ() {
   const hasResults = filteredData.length > 0;
 
   return (
+  <>
+    <Header />
     <main style={{ minHeight: "100vh", background: "var(--bg-main)" }}>
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section
@@ -324,6 +327,8 @@ export default function FAQ() {
           </motion.div>
         )}
       </div>
-    </main>
-  );
-}
+       </main>
+       <Footer />
+     </>
+     );
+   }
