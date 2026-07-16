@@ -19,6 +19,7 @@ import java.util.UUID;
 public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
     List<CaseEntity> findByJudgeId(Long judgeId);
     List<CaseEntity> findByClient(User client);
+    List<CaseEntity> findBySummonsStatus(String summonsStatus);
     
     // Paginated queries
     Page<CaseEntity> findByClientOrRespondentEmail(User client, String respondentEmail, Pageable pageable);
