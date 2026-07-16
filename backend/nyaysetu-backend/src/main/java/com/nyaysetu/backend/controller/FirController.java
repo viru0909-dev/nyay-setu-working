@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,13 +31,12 @@ public class FirController {
     /**
      * Get pending summons delivery tasks for police
      */
+    @PreAuthorize("hasAnyRole('POLICE', 'JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @GetMapping("/summons/pending")
     public ResponseEntity<?> getSummonsTasks() {
         try {
             // Find cases where summons status is IN_TRANSIT
-            List<com.nyaysetu.backend.entity.CaseEntity> cases = caseRepository.findAll().stream()
-                .filter(c -> "IN_TRANSIT".equals(c.getSummonsStatus()))
-                .collect(java.util.stream.Collectors.toList());
+            List<com.nyaysetu.backend.entity.CaseEntity> cases = caseRepository.findBySummonsStatus("IN_TRANSIT");
                 
             List<Map<String, Object>> tasks = cases.stream().map(c -> {
                 Map<String, Object> task = new java.util.HashMap<>();
