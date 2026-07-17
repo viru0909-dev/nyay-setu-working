@@ -66,7 +66,7 @@ class AuditChainServiceTest {
         entry3.setPreviousHash(entry2.getEntryHash());
         entry3.setEntryHash(chainService.computeHash(entry3, entry2.getEntryHash()));
 
-        when(repository.findAllByOrderByTimestampAsc()).thenReturn(List.of(entry1, entry2, entry3));
+        when(repository.findAllByOrderByTimestampAscIdAsc()).thenReturn(List.of(entry1, entry2, entry3));
 
         List<Map<String, Object>> broken = chainService.verifyChain();
 
@@ -106,14 +106,14 @@ class AuditChainServiceTest {
         e3.setPreviousHash(e2.getEntryHash());
         e3.setEntryHash(chainService.computeHash(e3, e2.getEntryHash()));
 
-        when(repository.findAllByOrderByTimestampAsc()).thenReturn(List.of(e1, e2, e3));
+        when(repository.findAllByOrderByTimestampAscIdAsc()).thenReturn(List.of(e1, e2, e3));
 
         assertTrue(chainService.verifyChain().isEmpty(), "Intact chain must return no broken links");
     }
 
     @Test
     void appendEntry_setsGenesisHashWhenChainIsEmpty() {
-        when(repository.findTopByOrderByTimestampDesc()).thenReturn(Optional.empty());
+        when(repository.findTopByOrderByTimestampDescIdDesc()).thenReturn(Optional.empty());
         when(repository.save(any(AuditLog.class))).thenAnswer(inv -> inv.getArgument(0));
 
         AuditLog log = new AuditLog();
