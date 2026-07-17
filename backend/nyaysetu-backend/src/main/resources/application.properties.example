@@ -47,7 +47,10 @@ spring.flyway.ignore-missing-migrations=true
 
 # JWT Configuration
 jwt.secret=${JWT_SECRET:nyaysetu-2024-secure-jwt-signing-key-minimum-256-bits-required}
+# Access token lifetime in milliseconds. Default: 86400000 (24 hours)
 jwt.expiration=${JWT_EXPIRATION_MS:86400000}
+# Refresh token lifetime in milliseconds. Default: 604800000 (7 days)
+jwt.refresh-expiration=${JWT_REFRESH_EXPIRATION_MS:604800000}
 
 # CORS Configuration
 # Ensure no trailing slashes in your environment variables if possible, though Spring usually handles it
