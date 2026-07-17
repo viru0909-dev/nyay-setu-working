@@ -1,4 +1,4 @@
-# Contributing to Nyay Saarthi
+﻿# Contributing to Nyay Saarthi
 
 Thank you for your interest in contributing to Nyay Saarthi. We appreciate your time, effort, and dedication to helping us build a more accessible digital judiciary platform. 
 
@@ -68,6 +68,55 @@ Each issue is tagged with a difficulty level that maps to GSSoC points:
 
 > **Tip:** Start with `level-1` or `good first issue` to get familiar with
 > the codebase before attempting higher-level tasks.
+
+### Understanding Issue Labels (Label Legend)
+
+New to the project? Here's a quick guide to the labels you'll see on issues and pull requests. These labels help you pick the right issue based on your skill level, interest area, and confidence.
+
+#### `level:*` - Difficulty Level
+
+Indicates how challenging an issue is. Great for filtering by your comfort zone.
+
+| Label | Meaning |
+|-------|---------|
+| `level-1` | Beginner-friendly. Small changes like docs, typos, or minor UI tweaks. |
+| `level-2` | Intermediate. Bug fixes, small features, or adding test coverage. |
+| `level-3` | Advanced. New features, major UI work, or complex backend logic. |
+
+#### `type:*` - Nature of the Work
+
+Tells you what **kind** of change the issue involves.
+
+| Label | Meaning |
+|-------|---------|
+| `type:docs` | Documentation updates (README, guides, comments). |
+| `type:bug` | Something is broken and needs fixing. |
+| `type:feature` | A new feature or enhancement to add. |
+| `type:refactor` | Code cleanup or restructuring without changing behavior. |
+| `type:test` | Adding or improving tests. |
+| `type:chore` | Maintenance tasks (dependencies, build tools, configs). |
+
+#### `quality:*` - Contribution Quality Focus
+
+Highlights issues where a specific quality attribute is the main goal.
+
+| Label | Meaning |
+|-------|---------|
+| `quality:performance` | Improves speed, memory, or efficiency. |
+| `quality:security` | Fixes or improves security-related concerns. |
+| `quality:accessibility` | Makes the product usable by more people (a11y). |
+| `quality:ux` | Improves user experience or UI polish. |
+
+#### Other Common Labels
+
+| Label | Meaning |
+|-------|---------|
+| `good first issue` | Perfect starting point for first-time contributors. |
+| `help wanted` | Maintainers are actively seeking contributors for this. |
+| `gssoc` / `gssoc'26` | Part of the GirlScript Summer of Code program. |
+
+> **Tip:** An issue can have **multiple labels** - for example, a `level-1` +
+> `type:docs` + `good first issue` combo is ideal for your very first PR.
 
 <hr/>
 
