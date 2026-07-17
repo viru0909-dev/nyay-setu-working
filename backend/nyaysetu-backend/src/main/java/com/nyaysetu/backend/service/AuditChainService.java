@@ -38,7 +38,7 @@ public class AuditChainService {
      */
     @Transactional
     public synchronized AuditLog appendEntry(AuditLog log) {
-        String previousHash = repository.findTopByOrderByTimestampDesc()
+        String previousHash = repository.findTopByOrderByTimestampDescIdDesc()
                 .map(AuditLog::getEntryHash)
                 .orElse(GENESIS_HASH);
 
@@ -54,7 +54,7 @@ public class AuditChainService {
      *   - the stored previousHash does not equal the preceding entry's entryHash.
      */
     public List<Map<String, Object>> verifyChain() {
-        List<AuditLog> entries = repository.findAllByOrderByTimestampAsc();
+        List<AuditLog> entries = repository.findAllByOrderByTimestampAscIdAsc();
         List<Map<String, Object>> broken = new ArrayList<>();
         String expectedPreviousHash = GENESIS_HASH;
 
