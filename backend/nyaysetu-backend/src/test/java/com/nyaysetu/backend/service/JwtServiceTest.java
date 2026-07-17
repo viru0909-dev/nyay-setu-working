@@ -33,6 +33,11 @@ class JwtServiceTest {
     private static final String UNKNOWN_SECRET =
             "unknown-secret-key-for-jwt-rotation-tests-minimum-256-bits";
 
+    // Preserve the original hardcoded values so all existing test assertions
+    // (which rely on tokens being valid for a reasonable window) continue to hold.
+    private static final long TEST_ACCESS_TOKEN_EXPIRY_MS = 1000L * 60 * 15;         // 15 minutes
+    private static final long TEST_REFRESH_TOKEN_EXPIRY_MS = 1000L * 60 * 60 * 24 * 7; // 7 days
+
     private JwtService jwtService;
     private UserDetails userDetails;
     private ObjectMapper objectMapper;
@@ -53,6 +58,12 @@ class JwtServiceTest {
 
         objectMapper = new ObjectMapper();
         jwtService = new JwtService(signingKeyService, objectMapper);
+
+        // Inject expiration values that would normally come from @Value in a Spring context.
+        // Without these, the fields would default to 0 and every generated token would be
+        // instantly expired, breaking every test below.
+        ReflectionTestUtils.setField(jwtService, "accessTokenExpiryMs", TEST_ACCESS_TOKEN_EXPIRY_MS);
+        ReflectionTestUtils.setField(jwtService, "refreshTokenExpiryMs", TEST_REFRESH_TOKEN_EXPIRY_MS);
 
         userDetails = User.withUsername("test@example.com")
                 .password("password")
@@ -128,6 +139,27 @@ class JwtServiceTest {
 
         assertEquals(CURRENT_KEY_ID, extractKid(refreshToken));
         assertTrue(jwtService.isTokenValid(refreshToken, userDetails));
+    }
+
+    @Test
+    void generatedAccessTokenExpiresAfterConfiguredExpiry() {
+        // Verifies the fix for issue #1599: expiration should reflect the configured
+        // value (injected via @Value in production, via reflection in this test)
+        // rather than any hardcoded constant inside JwtService.
+        long beforeGeneration = System.currentTimeMillis();
+        String token = jwtService.generateToken(Map.of(), userDetails);
+        long afterGeneration = System.currentTimeMillis();
+
+        Date expiration = jwtService.extractClaim(token, io.jsonwebtoken.Claims::getExpiration);
+
+        long expectedMinExpiry = beforeGeneration + TEST_ACCESS_TOKEN_EXPIRY_MS;
+        long expectedMaxExpiry = afterGeneration + TEST_ACCESS_TOKEN_EXPIRY_MS;
+
+        assertTrue(
+                expiration.getTime() >= expectedMinExpiry
+                        && expiration.getTime() <= expectedMaxExpiry,
+                "Access token expiration should honour the configured jwt.expiration value"
+        );
     }
 
     private String createToken(
