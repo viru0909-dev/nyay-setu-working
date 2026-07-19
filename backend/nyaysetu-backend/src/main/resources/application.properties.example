@@ -89,8 +89,10 @@ ollama.model=${OLLAMA_MODEL:gemma3:1b}
 ai.provider=${AI_PROVIDER:ollama}
 
 # Actuator Configuration
-management.endpoints.web.exposure.include=health,info
+management.endpoints.web.exposure.include=health,info,prometheus
 management.endpoint.health.show-details=always
+management.endpoint.prometheus.enabled=true
+management.prometheus.metrics.export.enabled=true
 
 # Logging
 logging.level.com.nyaysetu=INFO

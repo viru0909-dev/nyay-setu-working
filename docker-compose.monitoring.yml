@@ -1,0 +1,44 @@
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: nyaysetu-prometheus
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./infra/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - default
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    container_name: nyaysetu-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    ports:
+      - "127.0.0.1:3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - default
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: app-network
+    external: true

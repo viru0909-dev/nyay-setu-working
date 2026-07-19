@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: nyaysetu-backend
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - spring-service:8080
+        labels:
+          service: backend-spring
