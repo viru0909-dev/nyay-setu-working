@@ -12,6 +12,10 @@ import com.nyaysetu.backend.service.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -43,6 +47,10 @@ public class AuthController {
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final RedisRateLimitService redisRateLimitService;
+
+    @Value("${security.rate-limit.auth.login.trust-forwarded-headers:false}")
+    private boolean trustForwardedHeaders;
 
     @SecurityRequirements
     @PostMapping("/register")
@@ -91,7 +99,39 @@ public class AuthController {
 
     @SecurityRequirements
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
+    public ResponseEntity<?> login(
+            @Valid @RequestBody LoginRequest req,
+            HttpServletRequest request
+    ) {
+        String clientIp = resolveClientIp(request);
+
+        RedisRateLimitService.RateLimitResult rateLimit =
+                redisRateLimitService.consumeLoginAttempt(
+                        clientIp,
+                        req.getEmail()
+                );
+
+        if (!rateLimit.isAllowed()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .header(
+                            HttpHeaders.RETRY_AFTER,
+                            String.valueOf(rateLimit.getRetryAfterSeconds())
+                    )
+                    .header(
+                            "X-RateLimit-Limit",
+                            String.valueOf(rateLimit.getLimit())
+                    )
+                    .header(
+                            "X-RateLimit-Remaining",
+                            String.valueOf(rateLimit.getRemaining())
+                    )
+                    .body(Map.of(
+                            "message",
+                            "Too many login attempts. Please try again later.",
+                            "retryAfter",
+                            rateLimit.getRetryAfterSeconds()
+                    ));
+        }
         log.debug("Login endpoint reached for email: {}", req.getEmail());
         try {
             User user1 = userRepository.findByEmail(req.getEmail())
@@ -299,6 +339,22 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
         }
+    }
+
+    private String resolveClientIp(HttpServletRequest request) {
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+
+        if (trustForwardedHeaders && forwardedFor != null && !forwardedFor.isBlank()) {
+            return forwardedFor.split(",")[0].trim();
+        }
+
+        String realIp = request.getHeader("X-Real-IP");
+
+        if (trustForwardedHeaders && realIp != null && !realIp.isBlank()) {
+            return realIp.trim();
+        }
+
+        return request.getRemoteAddr();
     }
 
     @GetMapping("/test")
