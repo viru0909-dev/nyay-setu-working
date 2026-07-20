@@ -354,6 +354,27 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Update language preference", description = "Persist user preferred UI/AI language (en, hi, mr, ta, te)")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Language preference saved successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid language code")
+    })
+    @PutMapping("/language-preference")
+    public ResponseEntity<?> updateLanguagePreference(Authentication auth, @RequestBody Map<String, String> body) {
+        try {
+            String lang = body.getOrDefault("language", "en");
+            if (!java.util.List.of("en", "hi", "mr", "ta", "te", "gu", "kn", "bn", "ml", "pa").contains(lang)) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Unsupported language code"));
+            }
+            User user = authService.findByEmail(auth.getName());
+            user.setPreferredLanguage(lang);
+            userRepository.save(user);
+            return ResponseEntity.ok(Map.of("message", "Language preference saved", "preferredLanguage", lang));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
+        }
+    }
+
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("ok");
