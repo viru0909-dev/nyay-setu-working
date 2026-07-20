@@ -121,6 +121,13 @@ export const caseAPI = {
     startJudgment: (id) => api.post(`/api/v1/cases/${id}/start-judgment`),
     deliverVerdict: (id, verdictDetails) => api.post(`/api/v1/cases/${id}/deliver-verdict`, { verdictDetails }),
     orderNotice: (id) => api.post(`/api/v1/cases/${id}/order-notice`),
+    uploadDocument: (caseId, file, category = 'CASE_DOCUMENT', description = '') => {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (category) formData.append('category', category);
+        if (description) formData.append('description', description);
+        return api.post(`/api/v1/cases/${caseId}/documents`, formData);
+    },
 };
 
 // Document API
