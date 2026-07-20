@@ -27,6 +27,27 @@ public interface CaseRepository extends JpaRepository<CaseEntity, UUID> {
     Page<CaseEntity> findByLawyer(User lawyer, Pageable pageable);
 
     Page<CaseEntity> findByAssignedJudge(String judgeName, Pageable pageable);
+
+    @Query("""
+        SELECT c FROM CaseEntity c
+        WHERE (c.judgeId IS NOT NULL AND c.judgeId = :judgeId)
+           OR (c.assignedJudge IS NOT NULL AND (c.assignedJudge = :judgeName OR c.assignedJudge = :judgeEmail))
+    """)
+    Page<CaseEntity> findByAssignedJudgeOrJudgeId(
+            @org.springframework.data.repository.query.Param("judgeId") Long judgeId,
+            @org.springframework.data.repository.query.Param("judgeName") String judgeName,
+            @org.springframework.data.repository.query.Param("judgeEmail") String judgeEmail,
+            Pageable pageable);
+
+    @Query("""
+        SELECT c FROM CaseEntity c
+        WHERE (c.judgeId IS NOT NULL AND c.judgeId = :judgeId)
+           OR (c.assignedJudge IS NOT NULL AND (c.assignedJudge = :judgeName OR c.assignedJudge = :judgeEmail))
+    """)
+    List<CaseEntity> findByAssignedJudgeOrJudgeId(
+            @org.springframework.data.repository.query.Param("judgeId") Long judgeId,
+            @org.springframework.data.repository.query.Param("judgeName") String judgeName,
+            @org.springframework.data.repository.query.Param("judgeEmail") String judgeEmail);
     
     // For auto-assignment - find cases without judge
     List<CaseEntity> findByJudgeIdIsNull();

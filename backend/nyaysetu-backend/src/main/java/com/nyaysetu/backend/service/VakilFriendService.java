@@ -236,6 +236,69 @@ public class VakilFriendService {
         
         return chatSessionRepository.save(session);
     }
+
+    /**
+     * Get active or latest session history for the user
+     */
+    public List<Map<String, String>> getLatestSessionHistory(User user) {
+        List<ChatSession> sessions = getUserSessions(user);
+        if (sessions.isEmpty()) {
+            return new ArrayList<>();
+        }
+        ChatSession latestSession = sessions.get(0);
+        try {
+            if (latestSession.getConversationData() != null) {
+                return objectMapper.readValue(
+                    latestSession.getConversationData(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class)
+                );
+            }
+        } catch (Exception e) {
+            log.error("Failed to parse latest session conversation data", e);
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Append a message to user's active session
+     */
+    @Transactional
+    public ChatSession saveChatMessage(User user, String role, String content) {
+        List<ChatSession> sessions = getUserSessions(user);
+        ChatSession session;
+        if (sessions.isEmpty()) {
+            session = startSession(user);
+        } else {
+            session = sessions.get(0);
+        }
+
+        List<Map<String, String>> conversation;
+        try {
+            if (session.getConversationData() != null) {
+                conversation = objectMapper.readValue(
+                    session.getConversationData(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class)
+                );
+            } else {
+                conversation = new ArrayList<>();
+            }
+        } catch (Exception e) {
+            conversation = new ArrayList<>();
+        }
+
+        Map<String, String> msg = new HashMap<>();
+        msg.put("role", role != null ? role : "user");
+        msg.put("content", content);
+        conversation.add(msg);
+
+        try {
+            session.setConversationData(objectMapper.writeValueAsString(conversation));
+        } catch (Exception e) {
+            log.error("Failed to serialize chat message", e);
+        }
+        session.setUpdatedAt(LocalDateTime.now());
+        return chatSessionRepository.save(session);
+    }
  
     /**
      * Send a message to Vakil-Friend and get response
@@ -634,6 +697,9 @@ public class VakilFriendService {
                     + "\n\nUse this law to guide the user accurately.";
         }
         
+        finalSystemPrompt += "\n\n### MULTILINGUAL RESPONSE GUIDANCE ###\n" +
+                "Respond in clear, accessible, and empathetic language. If the user query is in Marathi (mr), Tamil (ta), Telugu (te), or Hindi (hi), answer in that respective regional Indian language with accurate legal terminology.";
+
         systemMsg.put("content", finalSystemPrompt);
         messagesArray.add(systemMsg);
         

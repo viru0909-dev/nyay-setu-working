@@ -108,59 +108,76 @@ const {
         }
     }, [messages, isLoading]);
 
+    // Cache messages to localStorage (up to last 50 messages)
     useEffect(() => {
-        loadSessions();
-        startSession();
-    }, []);
-
-    // Derive avatar state from chat lifecycle
-    useEffect(() => {
-        if (isRecording) {
-            setAvatarState('listening');
-        } else if (isLoading) {
-            setAvatarState('thinking');
-        } else {
-            // Don't immediately reset — let 'talking' state linger after response
-            if (avatarState === 'thinking') {
-                setAvatarState('talking');
-                // Clear any existing timeout
-                if (avatarTalkingTimeoutRef.current) clearTimeout(avatarTalkingTimeoutRef.current);
-                avatarTalkingTimeoutRef.current = setTimeout(() => setAvatarState('idle'), 3000);
-            } else if (avatarState !== 'talking') {
-                setAvatarState('idle');
+        if (messages && messages.length > 0) {
+            try {
+                localStorage.setItem('vakil_friend_cached_messages', JSON.stringify(messages.slice(-50)));
+            } catch (e) {
+                console.warn('Failed to cache messages to localStorage:', e);
             }
         }
-        return () => {
-            if (avatarTalkingTimeoutRef.current) clearTimeout(avatarTalkingTimeoutRef.current);
-        };
-    }, [isLoading, isRecording]);
+    }, [messages]);
 
-    // Handle Hologram Avatar Open Event (Auto-Greeting)
     useEffect(() => {
-        if (showAvatar) {
-            const greeting = t('vakilFriend.avatarGreeting');
-            speakText(greeting, -1);
+        const initSession = async () => {
+            setIsStarting(true);
+            try {
+                const fetchedSessions = await loadSessions();
+                const activeId = localStorage.getItem('vakil_friend_active_session_id');
+                const cached = localStorage.getItem('vakil_friend_cached_messages');
 
-            // Auto-start recording after greeting (delayed to avoid recording TTS)
-            const timer = setTimeout(() => {
-                if (!isRecording) startRecording();
-            }, 5000);
+                if (activeId) {
+                    const loaded = await loadSession(activeId);
+                    if (loaded) {
+                        setIsStarting(false);
+                        return;
+                    }
+                }
 
-            return () => clearTimeout(timer);
-        } else {
-            // Cleanup on close
-            stopRecording();
-            setIsListeningForCommand(false);
-        }
-    }, [showAvatar]);
+                if (fetchedSessions && fetchedSessions.length > 0) {
+                    const loaded = await loadSession(fetchedSessions[0].sessionId);
+                    if (loaded) {
+                        setIsStarting(false);
+                        return;
+                    }
+                }
+
+                if (cached) {
+                    try {
+                        const parsed = JSON.parse(cached);
+                        if (parsed && parsed.length > 0) {
+                            setMessages(parsed);
+                            setIsStarting(false);
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse cached messages:', e);
+                    }
+                }
+
+                await startSession();
+            } catch (err) {
+                console.error('Session initialization error:', err);
+                await startSession();
+            } finally {
+                setIsStarting(false);
+            }
+        };
+
+        initSession();
+    }, []);
 
     // Load all chat sessions for history
     const loadSessions = async () => {
         try {
             const response = await vakilFriendAPI.getSessions();
-            setSessions(response.data || []);
+            const list = response.data || [];
+            setSessions(list);
+            return list;
         } catch (err) {
             console.error('Failed to load sessions:', err);
+            return [];
         }
     };
 
@@ -168,24 +185,26 @@ const {
     const loadSession = async (historySessionId) => {
         try {
             setIsLoading(true);
-            shouldAutoScrollRef.current = false; // Don't auto-scroll when loading history
+            shouldAutoScrollRef.current = false;
             const response = await vakilFriendAPI.getSession(historySessionId);
             const data = response.data;
             setSessionId(historySessionId);
+            localStorage.setItem('vakil_friend_active_session_id', historySessionId);
 
-            // Parse conversation data
             if (data.conversationData) {
                 try {
                     const parsedMessages = JSON.parse(data.conversationData);
                     setMessages(parsedMessages);
+                    return true;
                 } catch (e) {
                     setMessages([{ role: 'assistant', content: 'Session loaded but conversation data is corrupted.' }]);
                 }
             }
             setShowHistory(false);
+            return true;
         } catch (err) {
             console.error('Failed to load session:', err);
-            setError('Failed to load session');
+            return false;
         } finally {
             setIsLoading(false);
         }
@@ -193,25 +212,31 @@ const {
 
     // Start a new session
     const startNewSession = async () => {
+        localStorage.removeItem('vakil_friend_active_session_id');
+        localStorage.removeItem('vakil_friend_cached_messages');
         setMessages([]);
         clearDocumentContext();
         setSessionId(null);
         setReadyToFile(false);
         await startSession();
-        await loadSessions(); // Refresh session list
+        await loadSessions();
     };
 
     const startSession = async () => {
         try {
             setIsStarting(true);
             setError(null);
-            shouldAutoScrollRef.current = true; // Auto-scroll for new session
+            shouldAutoScrollRef.current = true;
             const response = await vakilFriendAPI.startSession();
-            setSessionId(response.data.sessionId);
-            setMessages([{
+            const newSessionId = response.data.sessionId;
+            setSessionId(newSessionId);
+            localStorage.setItem('vakil_friend_active_session_id', newSessionId);
+            const initialMsgs = [{
                 role: 'assistant',
                 content: response.data.message || t('vakilFriend.welcome')
-            }]);
+            }];
+            setMessages(initialMsgs);
+            localStorage.setItem('vakil_friend_cached_messages', JSON.stringify(initialMsgs));
         } catch (err) {
             console.error('Failed to start session:', err);
             setError(t('vakilFriend.connectError'));
