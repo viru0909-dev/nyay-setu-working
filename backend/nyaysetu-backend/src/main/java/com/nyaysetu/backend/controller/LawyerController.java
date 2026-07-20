@@ -112,6 +112,56 @@ public class LawyerController {
         Map<String, Object> response = new HashMap<>(stats);
         response.put("upcomingHearings", upcomingHearings);
 
-        return ResponseEntity.ok(response);
+    private final com.nyaysetu.backend.service.LawyerAvailabilityService availabilityService;
+
+    @Operation(summary = "Set lawyer availability", description = "Mark dates as available or unavailable with reason")
+    @PostMapping("/availability")
+    public ResponseEntity<Map<String, Object>> setAvailability(
+            @RequestBody Map<String, Object> request,
+            Authentication authentication) {
+        User lawyer = authService.findByEmail(authentication.getName());
+        String dateStr = (String) request.get("date");
+        Boolean isAvailable = request.get("isAvailable") != null ? (Boolean) request.get("isAvailable") : false;
+        String reason = (String) request.get("reason");
+
+        java.time.LocalDate date = java.time.LocalDate.parse(dateStr);
+        com.nyaysetu.backend.entity.LawyerAvailability record = availabilityService.setAvailability(lawyer, date, isAvailable, reason);
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("id", record.getId());
+        resp.put("date", record.getDate().toString());
+        resp.put("isAvailable", record.getIsAvailable());
+        resp.put("reason", record.getReason());
+        resp.put("message", "Availability updated");
+        return ResponseEntity.ok(resp);
+    }
+
+    @Operation(summary = "Get lawyer availability calendar", description = "Retrieve availability records for a lawyer for a month")
+    @GetMapping("/availability")
+    public ResponseEntity<List<Map<String, Object>>> getMyAvailability(
+            @org.springframework.web.bind.annotation.RequestParam(value = "month", required = false) String month,
+            Authentication authentication) {
+        User lawyer = authService.findByEmail(authentication.getName());
+        List<Map<String, Object>> list = availabilityService.getAvailability(lawyer.getId(), month);
+        return ResponseEntity.ok(list);
+    }
+
+    @Operation(summary = "Get specific lawyer availability", description = "Public/Judge endpoint to fetch a lawyer's availability")
+    @GetMapping("/lawyer-availability/{lawyerId}")
+    public ResponseEntity<List<Map<String, Object>>> getLawyerAvailability(
+            @org.springframework.web.bind.annotation.PathVariable Long lawyerId,
+            @org.springframework.web.bind.annotation.RequestParam(value = "month", required = false) String month) {
+        List<Map<String, Object>> list = availabilityService.getAvailability(lawyerId, month);
+        return ResponseEntity.ok(list);
+    }
+
+    @Operation(summary = "Delete availability entry", description = "Remove an availability record for a lawyer")
+    @org.springframework.web.bind.annotation.DeleteMapping("/availability/{id}")
+    public ResponseEntity<Void> deleteAvailability(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            Authentication authentication) {
+        User lawyer = authService.findByEmail(authentication.getName());
+        availabilityService.deleteAvailability(id, lawyer);
+        return ResponseEntity.ok().build();
     }
 }

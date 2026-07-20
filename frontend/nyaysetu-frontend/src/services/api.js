@@ -176,7 +176,8 @@ export const hearingAPI = {
     join: (id) => api.post(`/api/v1/hearings/${id}/join`),
     leave: (id) => api.post(`/api/v1/hearings/${id}/leave`),
     complete: (id, notes) => api.put(`/api/v1/hearings/${id}/complete`, { judgeNotes: notes }),
-    getParticipants: (id) => api.get(`/api/v1/hearings/${id}/participants`)
+    getParticipants: (id) => api.get(`/api/v1/hearings/${id}/participants`),
+    checkConflict: (lawyerId, date) => api.get('/api/v1/hearings/check-conflict', { params: { lawyerId, date } })
 };
 
 // Meeting API
@@ -282,6 +283,10 @@ export const lawyerAPI = {
     getStats: () => api.get('/api/v1/lawyer/stats'),
     generateDraft: (caseId, template) => api.post('/api/v1/lawyer/draft', { caseId, template }),
     saveDraft: (caseId, draft) => api.post('/api/v1/lawyer/draft/save', { caseId, draft }),
+    setAvailability: (payload) => api.post('/api/v1/lawyer/availability', payload),
+    getAvailability: (month) => api.get('/api/v1/lawyer/availability', { params: { month } }),
+    getLawyerAvailability: (lawyerId, month) => api.get(`/api/v1/lawyer/lawyer-availability/${lawyerId}`, { params: { month } }),
+    deleteAvailability: (id) => api.delete(`/api/v1/lawyer/availability/${id}`)
 };
 
 // Central Brain API
