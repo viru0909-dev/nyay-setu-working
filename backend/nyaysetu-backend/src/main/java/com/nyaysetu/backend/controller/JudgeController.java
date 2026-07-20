@@ -44,7 +44,9 @@ public class JudgeController {
             @PageableDefault(size = 10) Pageable pageable
     ) {
         User judge = authService.findByEmail(authentication.getName());
-        Page<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName(), pageable);
+        Page<CaseEntity> judgeCases = caseRepository.findByAssignedJudgeOrJudgeId(
+            judge.getId(), judge.getName(), judge.getEmail(), pageable
+        );
         return ResponseEntity.ok(judgeCases);
     }
 
@@ -124,7 +126,7 @@ public class JudgeController {
     @GetMapping("/analytics")
     public ResponseEntity<?> getJudgeAnalytics(Authentication authentication) {
         User judge = authService.findByEmail(authentication.getName());
-        List<CaseEntity> myCases = caseRepository.findByAssignedJudge(judge.getName());
+        List<CaseEntity> myCases = caseRepository.findByAssignedJudgeOrJudgeId(judge.getId(), judge.getName(), judge.getEmail());
         long assignedCount = myCases.size();
         long unassignedCount = caseRepository.findByJudgeIdIsNull().size();
         
@@ -163,7 +165,7 @@ public class JudgeController {
     @GetMapping("/hearings/today")
     public ResponseEntity<?> getTodaysHearings(Authentication authentication) {
         User judge = authService.findByEmail(authentication.getName());
-        List<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName());
+        List<CaseEntity> judgeCases = caseRepository.findByAssignedJudgeOrJudgeId(judge.getId(), judge.getName(), judge.getEmail());
         
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
@@ -210,7 +212,7 @@ public class JudgeController {
             }
 
             User judge = authService.findByEmail(authentication.getName());
-            List<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName());
+            List<CaseEntity> judgeCases = caseRepository.findByAssignedJudgeOrJudgeId(judge.getId(), judge.getName(), judge.getEmail());
 
             if (judgeCases.isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "No cases assigned to you"));
