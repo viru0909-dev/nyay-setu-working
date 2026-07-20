@@ -634,6 +634,9 @@ public class VakilFriendService {
                     + "\n\nUse this law to guide the user accurately.";
         }
         
+        finalSystemPrompt += "\n\n### MULTILINGUAL RESPONSE GUIDANCE ###\n" +
+                "Respond in clear, accessible, and empathetic language. If the user query is in Marathi (mr), Tamil (ta), Telugu (te), or Hindi (hi), answer in that respective regional Indian language with accurate legal terminology.";
+
         systemMsg.put("content", finalSystemPrompt);
         messagesArray.add(systemMsg);
         
