@@ -681,9 +681,11 @@ public class VakilFriendService {
         ObjectNode systemMsg = objectMapper.createObjectNode();
         systemMsg.put("role", "system");
         
-        String finalSystemPrompt = SYSTEM_PROMPT;
+        boolean isRagUnavailable = ragContext != null && ragContext.startsWith("RAG_UNAVAILABLE");
         boolean hasRagContext = ragContext != null && !ragContext.isEmpty()
-                && !ragContext.equals("No specific legal context found.");
+                && !ragContext.equals("No specific legal context found.")
+                && !isRagUnavailable;
+
         List<String> contentToSanitize = new ArrayList<>();
         if (hasRagContext) {
             contentToSanitize.add(ragContext);
@@ -691,10 +693,18 @@ public class VakilFriendService {
         conversation.forEach(message -> contentToSanitize.add(message.get("content")));
         List<String> sanitizedContent = piiSanitizer.sanitizeBatchForGroq(contentToSanitize);
         int contentIndex = 0;
+
         if (hasRagContext) {
             finalSystemPrompt += "\n\n### CRITICAL INDIAN LEGAL CONTEXT RELEVANT TO THIS USER ###\n"
                     + sanitizedContent.get(contentIndex++)
                     + "\n\nUse this law to guide the user accurately.";
+        } else if (isRagUnavailable) {
+            finalSystemPrompt += "\n\n### CRITICAL SAFETY NOTICE: LEGAL RAG DATABASE UNAVAILABLE ###\n"
+                    + "The verified legal reference microservice (LawGPT) is currently offline or unreachable.\n"
+                    + "You MUST strictly adhere to the following rules:\n"
+                    + "1. Clearly state to the user in your opening sentence: \"I'm unable to retrieve verified legal references right now.\"\n"
+                    + "2. DO NOT cite specific IPC/BNS section numbers, statute section clauses, or fabricated case citations without verified grounded retrieval.\n"
+                    + "3. Provide high-level general legal concepts only, and explicitly advise the user to consult official legal sources or a verified lawyer.";
         }
         
         finalSystemPrompt += "\n\n### MULTILINGUAL RESPONSE GUIDANCE ###\n" +
