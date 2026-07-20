@@ -1,10 +1,7 @@
-import { scheduleHearingReminder } from "../../utils/HearingReminder";
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { hearingAPI } from '../../services/api';
+import { judgeAPI, hearingAPI } from '../../services/api';
 import {
     Calendar, Clock, Video, ChevronRight, Loader2, ArrowLeft,
-    CheckCircle, AlertCircle, CalendarDays, Filter, Search
+    CheckCircle, AlertCircle, CalendarDays, Filter, Search, Plus, AlertTriangle, X
 } from 'lucide-react';
 
 export default function JudgeHearingsPage() {
@@ -14,9 +11,64 @@ export default function JudgeHearingsPage() {
     const [filter, setFilter] = useState('all'); // all, today, upcoming, past
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Schedule modal state
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [myCases, setMyCases] = useState([]);
+    const [selectedCaseId, setSelectedCaseId] = useState('');
+    const [lawyerIdInput, setLawyerIdInput] = useState('');
+    const [hearingDateInput, setHearingDateInput] = useState('');
+    const [durationInput, setDurationInput] = useState(30);
+    const [conflictInfo, setConflictInfo] = useState({ hasConflict: false, reason: null });
+    const [scheduling, setScheduling] = useState(false);
+    const [scheduleSuccess, setScheduleSuccess] = useState(null);
+
     useEffect(() => {
         fetchAllHearings();
+        fetchJudgeCases();
     }, []);
+
+    const fetchJudgeCases = async () => {
+        try {
+            const res = await judgeAPI.getCases();
+            const list = res.data?.content || res.data || [];
+            setMyCases(list);
+        } catch (e) {
+            console.error('Failed to fetch judge cases:', e);
+        }
+    };
+
+    const handleCheckConflict = async (lawyerId, dateStr) => {
+        if (!lawyerId || !dateStr) return;
+        try {
+            const res = await hearingAPI.checkConflict(lawyerId, dateStr);
+            setConflictInfo(res.data || { hasConflict: false, reason: null });
+        } catch (e) {
+            console.error('Failed to check conflict:', e);
+        }
+    };
+
+    const handleScheduleHearingSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedCaseId || !hearingDateInput) return;
+        setScheduling(true);
+        try {
+            await hearingAPI.schedule({
+                caseId: selectedCaseId,
+                scheduledDate: hearingDateInput,
+                durationMinutes: Number(durationInput) || 30
+            });
+            setScheduleSuccess('Hearing scheduled successfully!');
+            setShowScheduleModal(false);
+            setSelectedCaseId('');
+            setHearingDateInput('');
+            setConflictInfo({ hasConflict: false, reason: null });
+            await fetchAllHearings();
+        } catch (err) {
+            console.error('Failed to schedule hearing:', err);
+        } finally {
+            setScheduling(false);
+        }
+    };
 
     const fetchAllHearings = async () => {
         try {
@@ -153,6 +205,24 @@ export default function JudgeHearingsPage() {
                     >
                         <ArrowLeft size={18} /> Back to Overview
                     </button>
+                    <button
+                        onClick={() => setShowScheduleModal(true)}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            background: 'linear-gradient(135deg, #6366f1 0%, #4338ca 100%)',
+                            border: 'none',
+                            borderRadius: '0.75rem',
+                            color: 'white',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)'
+                        }}
+                    >
+                        <Plus size={18} /> Schedule New Hearing
+                    </button>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1.5rem' }}>
@@ -246,6 +316,194 @@ export default function JudgeHearingsPage() {
                     <div style={{ fontSize: '2rem', fontWeight: '800', color: '#3b82f6' }}>{groupedHearings.upcoming.length}</div>
                 </div>
             </div>
+
+            {/* Schedule Hearing Modal */}
+            {showScheduleModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.7)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                    padding: '1.5rem'
+                }}>
+                    <div style={{
+                        background: 'var(--bg-glass-strong)',
+                        border: 'var(--border-glass-strong)',
+                        borderRadius: '1.5rem',
+                        padding: '2rem',
+                        maxWidth: '550px',
+                        width: '100%',
+                        boxShadow: 'var(--shadow-glass-strong)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
+                                🗓️ Schedule Court Hearing
+                            </h2>
+                            <button
+                                onClick={() => setShowScheduleModal(false)}
+                                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleScheduleHearingSubmit}>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                    Select Case *
+                                </label>
+                                <select
+                                    value={selectedCaseId}
+                                    onChange={(e) => {
+                                        const cId = e.target.value;
+                                        setSelectedCaseId(cId);
+                                        const selectedObj = myCases.find(c => String(c.id) === String(cId));
+                                        if (selectedObj && selectedObj.lawyer) {
+                                            const lId = selectedObj.lawyer.id;
+                                            setLawyerIdInput(String(lId));
+                                            if (hearingDateInput) handleCheckConflict(lId, hearingDateInput);
+                                        }
+                                    }}
+                                    required
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem 1rem',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
+                                        borderRadius: '0.5rem',
+                                        color: 'var(--text-main)'
+                                    }}
+                                >
+                                    <option value="">-- Choose Assigned Case --</option>
+                                    {myCases.map(c => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.title} (#{String(c.id).substring(0, 8)})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                    Assigned Lawyer ID (for conflict check)
+                                </label>
+                                <input
+                                    type="number"
+                                    placeholder="Enter Lawyer User ID"
+                                    value={lawyerIdInput}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setLawyerIdInput(val);
+                                        if (val && hearingDateInput) handleCheckConflict(val, hearingDateInput);
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem 1rem',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
+                                        borderRadius: '0.5rem',
+                                        color: 'var(--text-main)'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                    Hearing Date & Time *
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    value={hearingDateInput}
+                                    onChange={(e) => {
+                                        const dateVal = e.target.value;
+                                        setHearingDateInput(dateVal);
+                                        if (lawyerIdInput && dateVal) handleCheckConflict(lawyerIdInput, dateVal);
+                                    }}
+                                    required
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem 1rem',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
+                                        borderRadius: '0.5rem',
+                                        color: 'var(--text-main)'
+                                    }}
+                                />
+                            </div>
+
+                            {/* Real-time Conflict Warning Banner */}
+                            {conflictInfo.hasConflict && (
+                                <div style={{
+                                    background: 'rgba(239, 68, 68, 0.15)',
+                                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                                    borderRadius: '0.75rem',
+                                    padding: '1rem',
+                                    marginBottom: '1.25rem',
+                                    display: 'flex',
+                                    gap: '0.75rem',
+                                    alignItems: 'flex-start'
+                                }}>
+                                    <AlertTriangle size={20} color="#ef4444" style={{ flexShrink: 0, marginTop: '2px' }} />
+                                    <div>
+                                        <h4 style={{ color: '#ef4444', margin: '0 0 0.25rem 0', fontWeight: '700', fontSize: '0.9rem' }}>
+                                            ⚠️ Scheduling Conflict Warning
+                                        </h4>
+                                        <p style={{ color: 'var(--text-main)', margin: 0, fontSize: '0.825rem' }}>
+                                            Assigned lawyer is marked <b>Unavailable</b> on this date: <i>"{conflictInfo.reason}"</i>.
+                                        </p>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginTop: '0.25rem' }}>
+                                            As a Judge, you have override authority to proceed if required.
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                    Duration (Minutes)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={durationInput}
+                                    onChange={(e) => setDurationInput(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem 1rem',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
+                                        borderRadius: '0.5rem',
+                                        color: 'var(--text-main)'
+                                    }}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={scheduling || !selectedCaseId || !hearingDateInput}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.9rem',
+                                    background: conflictInfo.hasConflict
+                                        ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                                        : 'linear-gradient(135deg, #6366f1 0%, #4338ca 100%)',
+                                    border: 'none',
+                                    borderRadius: '0.75rem',
+                                    color: 'white',
+                                    fontWeight: '800',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {scheduling
+                                    ? 'Scheduling...'
+                                    : (conflictInfo.hasConflict ? 'Override Conflict & Schedule Hearing' : 'Schedule Hearing')}
+                            </button>
+                    </div>
+                </div>
+            )}
 
             {/* Hearings List */}
             {filteredHearings.length === 0 ? (

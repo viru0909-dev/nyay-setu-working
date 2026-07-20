@@ -16,11 +16,11 @@ const ROLES = [
 ];
 
 const LANGUAGES = [
-    { code: 'en', label: 'English', flag: 'EN' },
-    { code: 'hi', label: 'हिंदी', flag: 'HI' },
-    { code: 'mr', label: 'मराठी', flag: 'MR' },
-    { code: 'ta', label: 'தமிழ்', flag: 'TA' },
-    { code: 'te', label: 'తెలుగు', flag: 'TE' }
+    { code: 'en', label: 'English', flag: '🇬🇧' },
+    { code: 'hi', label: 'हिंदी', flag: '🇮🇳' },
+    { code: 'mr', label: 'मराठी', flag: '🚩' },
+    { code: 'ta', label: 'தமிழ்', flag: '🏛️' },
+    { code: 'te', label: 'తెలుగు', flag: '📜' }
 ];
 
 export default function Header({ hideAuthButtons = false }) {
