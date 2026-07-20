@@ -33,18 +33,21 @@ export default function MyFirsPage() {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'SEALED': return '#10b981';
-            case 'LINKED_TO_CASE': return '#8b5cf6';
-            case 'VERIFIED': return '#3b82f6';
+            case 'DRAFT': return '#6b7280';
+            case 'FILED': case 'PENDING_POLICE_REVIEW': return '#f59e0b';
+            case 'ACCEPTED': case 'REGISTERED': case 'SEALED': return '#10b981';
+            case 'LINKED_TO_CASE': case 'COURT_REVIEW_PENDING': return '#8b5cf6';
+            case 'CLOSED': return '#64748b';
             default: return 'var(--text-secondary)';
         }
     };
 
     const getStatusIcon = (status) => {
         switch (status) {
-            case 'SEALED': return Shield;
+            case 'SEALED': case 'REGISTERED': case 'ACCEPTED': return Shield;
             case 'LINKED_TO_CASE': return ExternalLink;
             case 'VERIFIED': return CheckCircle2;
+            case 'CLOSED': return CheckCircle2;
             default: return Clock;
         }
     };
@@ -167,12 +170,13 @@ export default function MyFirsPage() {
                                     e.currentTarget.style.transform = 'translateY(0)';
                                 }}
                             >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                                     <div>
                                         <span style={{
-                                            fontSize: '0.75rem',
-                                            color: 'var(--color-accent)',
-                                            fontWeight: '600',
+                                            fontSize: '0.8rem',
+                                            color: '#3b82f6',
+                                            fontWeight: '700',
+                                            fontFamily: 'monospace',
                                             marginBottom: '0.25rem',
                                             display: 'block'
                                         }}>
@@ -198,7 +202,49 @@ export default function MyFirsPage() {
                                     </span>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+                                {/* FIR Status Pipeline Tracker */}
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    marginBottom: '1rem',
+                                    padding: '0.5rem 0.75rem',
+                                    background: 'rgba(255,255,255,0.03)',
+                                    borderRadius: '0.5rem',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--text-secondary)'
+                                }}>
+                                    <span style={{ fontWeight: '600' }}>Status Pipeline:</span>
+                                    {['DRAFT', 'FILED', 'ACCEPTED', 'LINKED_TO_CASE', 'CLOSED'].map((step, idx) => {
+                                        const isCurrent = fir.status === step || (step === 'ACCEPTED' && fir.status === 'REGISTERED') || (step === 'FILED' && fir.status === 'PENDING_POLICE_REVIEW');
+                                        return (
+                                            <span key={step} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                <span style={{
+                                                    padding: '0.15rem 0.5rem',
+                                                    borderRadius: '4px',
+                                                    fontWeight: isCurrent ? '700' : '500',
+                                                    background: isCurrent ? 'var(--color-primary)' : 'transparent',
+                                                    color: isCurrent ? '#fff' : 'var(--text-secondary)',
+                                                }}>
+                                                    {step.replace(/_/g, ' ')}
+                                                </span>
+                                                {idx < 4 && <span>→</span>}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                                    <div>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Offence Sections</p>
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: '600' }}>{fir.offenceSections || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Court Case Linkage</p>
+                                        <p style={{ fontSize: '0.85rem', color: fir.caseId ? '#8b5cf6' : 'var(--text-secondary)', fontWeight: '600' }}>
+                                            {fir.caseId ? `Linked: #${String(fir.caseId).substring(0, 8)}` : 'Not Linked'}
+                                        </p>
+                                    </div>
                                     <div>
                                         <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Digital Fingerprint</p>
                                         <code style={{
@@ -208,10 +254,6 @@ export default function MyFirsPage() {
                                         }}>
                                             {truncateHash(fir.fileHash)}
                                         </code>
-                                    </div>
-                                    <div>
-                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>File</p>
-                                        <p style={{ fontSize: '0.875rem', color: 'var(--text-main)' }}>{fir.fileName}</p>
                                     </div>
                                     <div>
                                         <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Uploaded</p>

@@ -18,17 +18,33 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
         navigate('/login');
     };
     const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'hi', label: 'हिंदी' },
-    { code: 'mr', label: 'मराठी' },
-    { code: 'ta', label: 'தமிழ்' },
-    { code: 'te', label: 'తెలుగు' },
-    { code: 'gu', label: 'ગુજરાતી' },
-    { code: 'kn', label: 'ಕನ್ನಡ' },
-    { code: 'bn', label: 'বাংলা' },
-    { code: 'ml', label: 'മലയാളം' },
-    { code: 'pa', label: 'ਪੰਜਾਬੀ' }
-];
+        { code: 'en', label: 'English', flag: '🇬🇧' },
+        { code: 'hi', label: 'हिंदी', flag: '🇮🇳' },
+        { code: 'mr', label: 'मराठी', flag: '🚩' },
+        { code: 'ta', label: 'தமிழ்', flag: '🏛️' },
+        { code: 'te', label: 'తెలుగు', flag: '📜' }
+    ];
+
+    const handleLanguageChange = async (langCode) => {
+        i18n.changeLanguage(langCode);
+        localStorage.setItem('i18nextLng', langCode);
+        setShowProfileMenu(false);
+        try {
+            const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+            if (token) {
+                await fetch('/api/v1/auth/language-preference', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ language: langCode })
+                });
+            }
+        } catch (e) {
+            // silent catch
+        }
+    };
     return (
         <header
             className="navbar"
@@ -245,17 +261,15 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                         gap: '0.5rem',
                                         padding: '0 0.5rem',
                                         maxHeight: '240px',
-                                        overflowY: 'auto'
-                            }}>
-                                {languages.map((lang) => (
+                                                     {languages.map((lang) => (
                                 <button
                                     key={lang.code}
-                                    onClick={() => {
-                                        i18n.changeLanguage(lang.code);
-                                        setShowProfileMenu(false);
-                                    }}
+                                    onClick={() => handleLanguageChange(lang.code)}
                                     style={{
                                         padding: '0.5rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.35rem',
                                         background:
                                             i18n.language === lang.code
                                             ? 'rgba(63, 93, 204, 0.1)'
@@ -275,6 +289,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                         cursor: 'pointer',
                                         transition: 'all 0.2s'
                                 }}>
+                                    <span>{lang.flag}</span>
                                     {lang.label}
                                 </button>))}
                             </div>

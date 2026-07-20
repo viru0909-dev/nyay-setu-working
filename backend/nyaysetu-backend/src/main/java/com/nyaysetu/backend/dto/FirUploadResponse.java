@@ -26,6 +26,10 @@ public class FirUploadResponse {
     private String filedByName;
     private LocalDate incidentDate;
     private String incidentLocation;
+    private String complainantDetails;
+    private String accusedDetails;
+    private String offenceSections;
+    private String policeStationCode;
     private Boolean aiGenerated;
     private String reviewNotes;
     private boolean verified;

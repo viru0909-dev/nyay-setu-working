@@ -36,6 +36,17 @@ public class HearingController {
     private final NotificationService notificationService;
     private final com.nyaysetu.backend.service.AuthService authService;
     private final com.nyaysetu.backend.service.CaseAccessService caseAccessService;
+    private final com.nyaysetu.backend.service.LawyerAvailabilityService availabilityService;
+
+    @io.swagger.v3.oas.annotations.Operation(summary = "Check lawyer hearing conflict", description = "Check if proposed hearing date conflicts with lawyer availability")
+    @GetMapping("/check-conflict")
+    public ResponseEntity<Map<String, Object>> checkHearingConflict(
+            @RequestParam("lawyerId") Long lawyerId,
+            @RequestParam("date") String dateStr) {
+        java.time.LocalDate date = java.time.LocalDate.parse(dateStr.contains("T") ? dateStr.split("T")[0] : dateStr);
+        Map<String, Object> conflict = availabilityService.checkConflict(lawyerId, date);
+        return ResponseEntity.ok(conflict);
+    }
     
     @PreAuthorize("hasAnyRole('JUDGE', 'SUPER_JUDGE', 'ADMIN')")
     @PostMapping("/schedule")
