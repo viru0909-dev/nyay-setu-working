@@ -72,12 +72,17 @@ public class FirController {
         }
     }
 
-    @Operation(summary = "Upload FIR document", description = "Upload FIR document with SHA-256 digital stamping")
+    @Operation(summary = "Upload & File FIR document", description = "Upload FIR document with complainant/accused details, BNS/IPC sections, and SHA-256 digital stamping")
     @PostMapping(value = "/fir/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FirUploadResponse> uploadFir(
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
             @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "complainantDetails", required = false) String complainantDetails,
+            @RequestParam(value = "accusedDetails", required = false) String accusedDetails,
+            @RequestParam(value = "offenceSections", required = false) String offenceSections,
+            @RequestParam(value = "policeStationCode", required = false) String policeStationCode,
+            @RequestParam(value = "incidentLocation", required = false) String incidentLocation,
             @RequestParam(value = "caseId", required = false) String caseIdStr,
             Authentication auth) {
 
@@ -95,6 +100,11 @@ public class FirController {
         FirUploadRequest request = FirUploadRequest.builder()
                 .title(title)
                 .description(description)
+                .complainantDetails(complainantDetails)
+                .accusedDetails(accusedDetails)
+                .offenceSections(offenceSections)
+                .policeStationCode(policeStationCode)
+                .incidentLocation(incidentLocation)
                 .caseId(caseId)
                 .build();
 
@@ -102,6 +112,15 @@ public class FirController {
         
         log.info("FIR uploaded successfully: {} with hash {}", response.getFirNumber(), response.getFileHash());
         
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Link FIR to Court Case", description = "Link an existing FIR to a court case UUID upon cognizance")
+    @PostMapping("/fir/{id}/link-case")
+    public ResponseEntity<FirUploadResponse> linkFirToCase(
+            @PathVariable Long id,
+            @RequestParam("caseId") UUID caseId) {
+        FirUploadResponse response = firService.linkFirToCase(id, caseId);
         return ResponseEntity.ok(response);
     }
 
