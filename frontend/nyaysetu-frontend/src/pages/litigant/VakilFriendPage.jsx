@@ -4,7 +4,7 @@ import { useResilientStream } from '../../hooks/useResilientStream';
 import StreamFallbackBanner from '../../components/stream/StreamFallbackBanner';
 import { downloadPartialStreamContent } from '../../utils/streamResilience';
 import { Send, Bot, User, CheckCircle, ArrowLeft, Loader2, History, Plus, MessageSquare, Paperclip, Scan, FileText, X, Mic, StopCircle, Volume2, Shield, AlertTriangle, CheckCircle2, Eye, UserCircle2 } from 'lucide-react';
-import { vakilFriendAPI, documentAPI } from '../../services/api';
+import { vakilFriendAPI, chatAPI, documentAPI } from '../../services/api';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -141,6 +141,18 @@ const {
                         setIsStarting(false);
                         return;
                     }
+                }
+
+                // Try fetching chat history from /api/chat/history endpoint
+                try {
+                    const historyRes = await chatAPI.getHistory();
+                    if (historyRes.data && Array.isArray(historyRes.data) && historyRes.data.length > 0) {
+                        setMessages(historyRes.data);
+                        setIsStarting(false);
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Direct chat history fetch failed:', e);
                 }
 
                 if (cached) {

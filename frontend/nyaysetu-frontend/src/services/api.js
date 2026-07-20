@@ -205,6 +205,13 @@ export const vakilFriendAPI = {
     getSessions: () => api.get('/api/v1/vakil-friend/sessions'),
     getChatHistory: () => api.get('/api/v1/vakil-friend/chat/history'),
     saveChatMessage: (payload) => api.post('/api/v1/vakil-friend/chat/messages', payload),
+};
+
+// Chat Persistence API
+export const chatAPI = {
+    getHistory: () => api.get('/api/chat/history'),
+    saveMessage: (message, role = 'user') => api.post('/api/chat/messages', { message, role }),
+};
 
     // Document Analysis with AI & SHA-256 protection
     analyzeDocument: (caseId, file, sessionId = null) => {
