@@ -236,6 +236,69 @@ public class VakilFriendService {
         
         return chatSessionRepository.save(session);
     }
+
+    /**
+     * Get active or latest session history for the user
+     */
+    public List<Map<String, String>> getLatestSessionHistory(User user) {
+        List<ChatSession> sessions = getUserSessions(user);
+        if (sessions.isEmpty()) {
+            return new ArrayList<>();
+        }
+        ChatSession latestSession = sessions.get(0);
+        try {
+            if (latestSession.getConversationData() != null) {
+                return objectMapper.readValue(
+                    latestSession.getConversationData(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class)
+                );
+            }
+        } catch (Exception e) {
+            log.error("Failed to parse latest session conversation data", e);
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Append a message to user's active session
+     */
+    @Transactional
+    public ChatSession saveChatMessage(User user, String role, String content) {
+        List<ChatSession> sessions = getUserSessions(user);
+        ChatSession session;
+        if (sessions.isEmpty()) {
+            session = startSession(user);
+        } else {
+            session = sessions.get(0);
+        }
+
+        List<Map<String, String>> conversation;
+        try {
+            if (session.getConversationData() != null) {
+                conversation = objectMapper.readValue(
+                    session.getConversationData(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class)
+                );
+            } else {
+                conversation = new ArrayList<>();
+            }
+        } catch (Exception e) {
+            conversation = new ArrayList<>();
+        }
+
+        Map<String, String> msg = new HashMap<>();
+        msg.put("role", role != null ? role : "user");
+        msg.put("content", content);
+        conversation.add(msg);
+
+        try {
+            session.setConversationData(objectMapper.writeValueAsString(conversation));
+        } catch (Exception e) {
+            log.error("Failed to serialize chat message", e);
+        }
+        session.setUpdatedAt(LocalDateTime.now());
+        return chatSessionRepository.save(session);
+    }
  
     /**
      * Send a message to Vakil-Friend and get response
@@ -618,9 +681,11 @@ public class VakilFriendService {
         ObjectNode systemMsg = objectMapper.createObjectNode();
         systemMsg.put("role", "system");
         
-        String finalSystemPrompt = SYSTEM_PROMPT;
+        boolean isRagUnavailable = ragContext != null && ragContext.startsWith("RAG_UNAVAILABLE");
         boolean hasRagContext = ragContext != null && !ragContext.isEmpty()
-                && !ragContext.equals("No specific legal context found.");
+                && !ragContext.equals("No specific legal context found.")
+                && !isRagUnavailable;
+
         List<String> contentToSanitize = new ArrayList<>();
         if (hasRagContext) {
             contentToSanitize.add(ragContext);
@@ -628,12 +693,23 @@ public class VakilFriendService {
         conversation.forEach(message -> contentToSanitize.add(message.get("content")));
         List<String> sanitizedContent = piiSanitizer.sanitizeBatchForGroq(contentToSanitize);
         int contentIndex = 0;
+
         if (hasRagContext) {
             finalSystemPrompt += "\n\n### CRITICAL INDIAN LEGAL CONTEXT RELEVANT TO THIS USER ###\n"
                     + sanitizedContent.get(contentIndex++)
                     + "\n\nUse this law to guide the user accurately.";
+        } else if (isRagUnavailable) {
+            finalSystemPrompt += "\n\n### CRITICAL SAFETY NOTICE: LEGAL RAG DATABASE UNAVAILABLE ###\n"
+                    + "The verified legal reference microservice (LawGPT) is currently offline or unreachable.\n"
+                    + "You MUST strictly adhere to the following rules:\n"
+                    + "1. Clearly state to the user in your opening sentence: \"I'm unable to retrieve verified legal references right now.\"\n"
+                    + "2. DO NOT cite specific IPC/BNS section numbers, statute section clauses, or fabricated case citations without verified grounded retrieval.\n"
+                    + "3. Provide high-level general legal concepts only, and explicitly advise the user to consult official legal sources or a verified lawyer.";
         }
         
+        finalSystemPrompt += "\n\n### MULTILINGUAL RESPONSE GUIDANCE ###\n" +
+                "Respond in clear, accessible, and empathetic language. If the user query is in Marathi (mr), Tamil (ta), Telugu (te), or Hindi (hi), answer in that respective regional Indian language with accurate legal terminology.";
+
         systemMsg.put("content", finalSystemPrompt);
         messagesArray.add(systemMsg);
         

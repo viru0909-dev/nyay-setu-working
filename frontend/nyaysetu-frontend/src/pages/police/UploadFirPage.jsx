@@ -14,6 +14,11 @@ export default function UploadFirPage() {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        complainantDetails: '',
+        accusedDetails: '',
+        offenceSections: '',
+        policeStationCode: 'PS01',
+        incidentLocation: '',
         caseId: ''
     });
     const [file, setFile] = useState(null);
@@ -61,16 +66,16 @@ export default function UploadFirPage() {
             const data = new FormData();
             data.append('file', file);
             data.append('title', formData.title);
-            if (formData.description) {
-                data.append('description', formData.description);
-            }
-            if (formData.caseId) {
-                data.append('caseId', formData.caseId);
-            }
+            if (formData.description) data.append('description', formData.description);
+            if (formData.complainantDetails) data.append('complainantDetails', formData.complainantDetails);
+            if (formData.accusedDetails) data.append('accusedDetails', formData.accusedDetails);
+            if (formData.offenceSections) data.append('offenceSections', formData.offenceSections);
+            if (formData.policeStationCode) data.append('policeStationCode', formData.policeStationCode);
+            if (formData.incidentLocation) data.append('incidentLocation', formData.incidentLocation);
+            if (formData.caseId) data.append('caseId', formData.caseId);
 
             const response = await policeAPI.uploadFir(data);
             setResult(response.data);
-          //  console.log('FIR Uploaded Successfully:', response.data);
         } catch (err) {
             console.error('Upload error:', err);
             setError(err.response?.data?.message || 'Failed to upload FIR. Please try again.');
@@ -357,9 +362,117 @@ export default function UploadFirPage() {
                         />
                     </div>
 
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.5rem' }}>
+                                Police Station Code *
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.policeStationCode}
+                                onChange={(e) => setFormData({ ...formData, policeStationCode: e.target.value })}
+                                placeholder="e.g. PS01, PS-MUMBAI-04"
+                                required
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem 1rem',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
+                                    borderRadius: '0.5rem',
+                                    color: 'var(--text-main)',
+                                    fontSize: '1rem'
+                                }}
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.5rem' }}>
+                                Offence Sections (BNS / IPC) *
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.offenceSections}
+                                onChange={(e) => setFormData({ ...formData, offenceSections: e.target.value })}
+                                placeholder="e.g. BNS Section 303 / IPC Section 379"
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem 1rem',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
+                                    borderRadius: '0.5rem',
+                                    color: 'var(--text-main)',
+                                    fontSize: '1rem'
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.5rem' }}>
+                                Complainant Details
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.complainantDetails}
+                                onChange={(e) => setFormData({ ...formData, complainantDetails: e.target.value })}
+                                placeholder="Full Name, Phone & Address of Complainant"
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem 1rem',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
+                                    borderRadius: '0.5rem',
+                                    color: 'var(--text-main)',
+                                    fontSize: '1rem'
+                                }}
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.5rem' }}>
+                                Accused Details
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.accusedDetails}
+                                onChange={(e) => setFormData({ ...formData, accusedDetails: e.target.value })}
+                                placeholder="Full Name / Identification of Accused"
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem 1rem',
+                                    background: 'var(--bg-glass)',
+                                    border: 'var(--border-glass)',
+                                    borderRadius: '0.5rem',
+                                    color: 'var(--text-main)',
+                                    fontSize: '1rem'
+                                }}
+                            />
+                        </div>
+                    </div>
+
                     <div style={{ marginBottom: '1rem' }}>
                         <label style={{ display: 'block', color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.5rem' }}>
-                            Description
+                            Incident Location
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.incidentLocation}
+                            onChange={(e) => setFormData({ ...formData, incidentLocation: e.target.value })}
+                            placeholder="Exact location or landmark of incident"
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem 1rem',
+                                background: 'var(--bg-glass)',
+                                border: 'var(--border-glass)',
+                                borderRadius: '0.5rem',
+                                color: 'var(--text-main)',
+                                fontSize: '1rem'
+                            }}
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.5rem' }}>
+                            Description / Facts of Case
                         </label>
                         <textarea
                             value={formData.description}
@@ -381,13 +494,13 @@ export default function UploadFirPage() {
 
                     <div>
                         <label style={{ display: 'block', color: 'var(--text-main)', fontWeight: '600', marginBottom: '0.5rem' }}>
-                            Link to Case ID (Optional)
+                            Link to Court Case ID (Optional)
                         </label>
                         <input
                             type="text"
                             value={formData.caseId}
                             onChange={(e) => setFormData({ ...formData, caseId: e.target.value })}
-                            placeholder="Enter Case UUID if linking to existing case"
+                            placeholder="Enter Case UUID if linking to existing court case"
                             style={{
                                 width: '100%',
                                 padding: '0.75rem 1rem',

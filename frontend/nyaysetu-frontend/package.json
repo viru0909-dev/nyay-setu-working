@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest",
+    "test:e2e": "playwright test",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
@@ -41,6 +42,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^14.0.0",
     "@types/react": "^18.2.43",
