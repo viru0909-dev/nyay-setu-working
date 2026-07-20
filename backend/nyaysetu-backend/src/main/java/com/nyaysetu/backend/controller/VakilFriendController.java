@@ -319,6 +319,35 @@ public class VakilFriendController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get active chat conversation history", description = "Retrieve current/latest active session history for user")
+    @GetMapping("/chat/history")
+    public ResponseEntity<List<Map<String, String>>> getChatHistory(Authentication auth) {
+        User user = getCurrentUser(auth);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        List<Map<String, String>> history = vakilFriendService.getLatestSessionHistory(user);
+        return ResponseEntity.ok(history);
+    }
+
+    @Operation(summary = "Persist chat message", description = "Append user/assistant message to active chat session")
+    @PostMapping("/chat/messages")
+    public ResponseEntity<Map<String, Object>> saveChatMessage(
+            @RequestBody Map<String, String> payload,
+            Authentication auth) {
+        User user = getCurrentUser(auth);
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        String message = payload.get("message");
+        String role = payload.getOrDefault("role", "user");
+        ChatSession session = vakilFriendService.saveChatMessage(user, role, message);
+        return ResponseEntity.ok(Map.of(
+            "sessionId", session.getId(),
+            "status", "SAVED"
+        ));
+    }
+
     // ===== DOCUMENT ANALYSIS ENDPOINTS =====
 
     /**

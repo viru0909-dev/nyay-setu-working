@@ -195,6 +195,8 @@ export const vakilFriendAPI = {
     completeSession: (sessionId) => api.post(`/api/v1/vakil-friend/complete/${sessionId}`),
     getSession: (sessionId) => api.get(`/api/v1/vakil-friend/session/${sessionId}`),
     getSessions: () => api.get('/api/v1/vakil-friend/sessions'),
+    getChatHistory: () => api.get('/api/v1/vakil-friend/chat/history'),
+    saveChatMessage: (payload) => api.post('/api/v1/vakil-friend/chat/messages', payload),
 
     // Document Analysis with AI & SHA-256 protection
     analyzeDocument: (caseId, file, sessionId = null) => {
