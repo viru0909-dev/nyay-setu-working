@@ -9,7 +9,6 @@ import com.nyaysetu.backend.service.HearingService;
 import com.nyaysetu.backend.notification.service.NotificationService;
 import com.nyaysetu.backend.notification.entity.Notification;
 import com.nyaysetu.backend.entity.CaseEntity;
-import com.nyaysetu.backend.entity.User;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -83,7 +82,6 @@ public class HearingController {
         response.put("id", hearing.getId());
         response.put("scheduledDate", hearing.getScheduledDate());
         response.put("status", hearing.getStatus().name());
-        response.put("videoRoomId", hearing.getVideoRoomId());
         response.put("durationMinutes", hearing.getDurationMinutes());
         if (hearing.getCaseEntity() != null) {
             response.put("caseId", hearing.getCaseEntity().getId());
@@ -133,22 +131,11 @@ public class HearingController {
             @PathVariable UUID hearingId,
             Authentication authentication
     ) {
-        Long userId = getCurrentUserId(authentication);
-        
-        if (!hearingService.canUserJoinHearing(hearingId, userId)) {
-            return ResponseEntity.status(403).body(Map.of("error", "Not authorized"));
-        }
-        
-        hearingService.joinHearing(hearingId, userId);
-        Hearing hearing = hearingService.getHearing(hearingId);
-        
-        return ResponseEntity.ok(Map.of(
-                "videoRoomId", hearing.getVideoRoomId(),
-                "hearingId", hearingId,
-                "status", hearing.getStatus()
+        return ResponseEntity.status(410).body(Map.of(
+                "error",
+                "Direct joining is disabled. Use the waiting-room join-request endpoint."
         ));
     }
-    
     @PostMapping("/{hearingId}/leave")
     public ResponseEntity<Void> leaveHearing(
             @PathVariable UUID hearingId,
@@ -218,7 +205,6 @@ public class HearingController {
             dto.put("scheduledDate", h.getScheduledDate());
             dto.put("durationMinutes", h.getDurationMinutes());
             dto.put("status", h.getStatus());
-            dto.put("videoRoomId", h.getVideoRoomId());
             dto.put("judgeNotes", h.getJudgeNotes());
             dto.put("createdAt", h.getCreatedAt());
             return dto;
@@ -239,7 +225,6 @@ public class HearingController {
                 hearingData.put("scheduledDate", h.getScheduledDate());
                 hearingData.put("durationMinutes", h.getDurationMinutes());
                 hearingData.put("status", h.getStatus().name());
-                hearingData.put("videoRoomId", h.getVideoRoomId());
                 hearingData.put("createdAt", h.getCreatedAt());
                 
                 if (h.getCaseEntity() != null) {

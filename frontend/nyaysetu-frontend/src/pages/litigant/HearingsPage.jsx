@@ -16,13 +16,23 @@ import {
     BookOpen
 } from 'lucide-react';
 import { hearingAPI } from '../../services/api';
+import { useHearingAdmission } from '../../hooks/useHearingAdmission';
 import { useTranslation } from 'react-i18next';
 
 export default function HearingsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [hearings, setHearings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeCall, setActiveCall] = useState(null);
+    const {
+        activeCall,
+        waitingHearingId,
+        admissionStatus,
+        admissionError,
+        requesting,
+        requestJoin,
+        endCall,
+        cancelWaiting
+    } = useHearingAdmission();
     const [reminders, setReminders] = useState(() => {
     return JSON.parse(localStorage.getItem('hearingReminders') || '{}');
 });
@@ -69,17 +79,6 @@ export default function HearingsPage() {
         const start = new Date(date);
         const diffMinutes = (start - now) / (1000 * 60);
         return diffMinutes <= 15 && diffMinutes > -120; // 15 mins before up to 2 hours late
-    };
-
-    const joinHearing = (hearing) => {
-        setActiveCall({
-            ...hearing,
-            room: hearing.videoRoomId || `nyaysetu-${hearing.id.substring(0, 8)}`
-        });
-    };
-
-    const endCall = () => {
-        setActiveCall(null);
     };
 
 const handleReminder = async (hearing) => {
@@ -198,6 +197,72 @@ const handleReminder = async (hearing) => {
                 </div>
             </div>
 
+            {(admissionStatus || admissionError) && (
+                <div
+                    role="status"
+                    style={{
+                        marginBottom: '1.5rem',
+                        padding: '1rem 1.25rem',
+                        borderRadius: '1rem',
+                        background:
+                            admissionStatus === 'REJECTED' ||
+                            admissionStatus === 'EXPIRED' ||
+                            admissionStatus === 'ERROR'
+                                ? 'rgba(239, 68, 68, 0.1)'
+                                : 'rgba(59, 130, 246, 0.1)',
+                        border:
+                            admissionStatus === 'REJECTED' ||
+                            admissionStatus === 'EXPIRED' ||
+                            admissionStatus === 'ERROR'
+                                ? '1px solid rgba(239, 68, 68, 0.3)'
+                                : '1px solid rgba(59, 130, 246, 0.3)',
+                        color: 'var(--text-main)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '1rem'
+                    }}
+                >
+                    <div>
+                        <strong>
+                            {admissionStatus === 'REJECTED'
+                                ? 'Admission rejected'
+                                : admissionStatus === 'EXPIRED'
+                                    ? 'Hearing access expired'
+                                    : admissionStatus === 'ERROR'
+                                        ? 'Unable to join'
+                                        : admissionStatus === 'REQUESTING'
+                                            ? 'Requesting admission'
+                                            : 'Waiting room'}
+                        </strong>
+
+                        <div
+                            style={{
+                                marginTop: '0.35rem',
+                                color: 'var(--text-secondary)'
+                            }}
+                        >
+                            {admissionError ||
+                                'Your request has been sent. The hearing will open only after the judge admits you.'}
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={cancelWaiting}
+                        style={{
+                            border: 'var(--border-glass)',
+                            background: 'var(--bg-glass)',
+                            color: 'var(--text-main)',
+                            borderRadius: '0.75rem',
+                            padding: '0.6rem 1rem',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Dismiss
+                    </button>
+                </div>
+            )}
             <div className="hearings-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '2rem' }}>
                 {/* List Column */}
                 <div className="hearings-list-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -270,12 +335,25 @@ const handleReminder = async (hearing) => {
 
                                     <div className="hearing-action">
                                         {hearing.canJoin ? (
-                                            <button onClick={() => joinHearing(hearing)} style={{
+                                            <button
+                                                onClick={() => requestJoin(hearing)}
+                                                disabled={
+                                                    requesting ||
+                                                    waitingHearingId === hearing.id
+                                                }
+                                                style={{
                                                 background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '0.75rem',
                                                 padding: '0.75rem 1.5rem', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
                                                 boxShadow: '0 4px 12px rgba(30, 42, 68, 0.3)'
                                             }}>
-                                                <Video size={18} /> {t('hearings.joinNow')}
+                                                <Video size={18} />
+                                                {
+                                                    waitingHearingId === hearing.id
+                                                        ? 'Waiting for judge'
+                                                        : requesting
+                                                            ? 'Requesting...'
+                                                            : 'Request to Join'
+                                                }
                                             </button>
                                         ) : (
                                             <div style={{

@@ -13,13 +13,22 @@ import {
     ArrowLeft
 } from 'lucide-react';
 import { hearingAPI } from '../../services/api';
+import { useHearingAdmission } from '../../hooks/useHearingAdmission';
 
 export default function LawyerHearingsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [hearings, setHearings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [inCall, setInCall] = useState(false);
-    const [activeHearing, setActiveHearing] = useState(null);
+    const {
+        activeCall: activeHearing,
+        waitingHearingId,
+        admissionStatus,
+        admissionError,
+        requesting,
+        requestJoin,
+        endCall,
+        cancelWaiting
+    } = useHearingAdmission();
 
     useEffect(() => {
         loadHearings();
@@ -37,8 +46,7 @@ export default function LawyerHearingsPage() {
                     date: scheduledDate ? scheduledDate.toLocaleDateString([], { month: 'short', day: '2-digit' }) : 'TBD',
                     fullDate: scheduledDate,
                     type: 'Virtual', // Most hearings in system are virtual for MVP
-                    room: h.videoRoomId || 'N/A',
-                    party: 'Client', // Placeholder as backend doesn't send it yet
+party: 'Client', // Placeholder as backend doesn't send it yet
                     status: h.status || 'Scheduled'
                 };
             });
@@ -48,16 +56,6 @@ export default function LawyerHearingsPage() {
         } finally {
             setLoading(false);
         }
-    };
-
-    const joinHearing = (hearing) => {
-        setActiveHearing(hearing);
-        setInCall(true);
-    };
-
-    const endCall = () => {
-        setInCall(false);
-        setActiveHearing(null);
     };
 
     const glassStyle = {
@@ -90,7 +88,7 @@ export default function LawyerHearingsPage() {
     );
 
     // Render Active Call View
-    if (inCall && activeHearing) {
+    if (activeHearing) {
         return (
             <div style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {/* Video Header Area */}
@@ -205,6 +203,72 @@ export default function LawyerHearingsPage() {
                     </div>
                 </div>
             </div>
+            {(admissionStatus || admissionError) && (
+                <div
+                    role="status"
+                    style={{
+                        marginBottom: '1.5rem',
+                        padding: '1rem 1.25rem',
+                        borderRadius: '1rem',
+                        background:
+                            admissionStatus === 'REJECTED' ||
+                            admissionStatus === 'EXPIRED' ||
+                            admissionStatus === 'ERROR'
+                                ? 'rgba(239, 68, 68, 0.1)'
+                                : 'rgba(59, 130, 246, 0.1)',
+                        border:
+                            admissionStatus === 'REJECTED' ||
+                            admissionStatus === 'EXPIRED' ||
+                            admissionStatus === 'ERROR'
+                                ? '1px solid rgba(239, 68, 68, 0.3)'
+                                : '1px solid rgba(59, 130, 246, 0.3)',
+                        color: 'var(--text-main)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '1rem'
+                    }}
+                >
+                    <div>
+                        <strong>
+                            {admissionStatus === 'REJECTED'
+                                ? 'Admission rejected'
+                                : admissionStatus === 'EXPIRED'
+                                    ? 'Hearing access expired'
+                                    : admissionStatus === 'ERROR'
+                                        ? 'Unable to join'
+                                        : admissionStatus === 'REQUESTING'
+                                            ? 'Requesting admission'
+                                            : 'Waiting room'}
+                        </strong>
+
+                        <div
+                            style={{
+                                marginTop: '0.35rem',
+                                color: 'var(--text-secondary)'
+                            }}
+                        >
+                            {admissionError ||
+                                'Your request has been sent. The hearing will open only after the judge admits you.'}
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={cancelWaiting}
+                        style={{
+                            border: 'var(--border-glass)',
+                            background: 'var(--bg-glass)',
+                            color: 'var(--text-main)',
+                            borderRadius: '0.75rem',
+                            padding: '0.6rem 1rem',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Dismiss
+                    </button>
+                </div>
+            )}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '2rem' }}>
                 {/* Main: Hearings List */}
@@ -299,7 +363,11 @@ export default function LawyerHearingsPage() {
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                         {hearing.type === 'Virtual' && isToday ? (
                                             <button
-                                                onClick={() => joinHearing(hearing)}
+                                                onClick={() => requestJoin(hearing)}
+                                                disabled={
+                                                    requesting ||
+                                                    waitingHearingId === hearing.id
+                                                }
                                                 style={{
                                                     background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
                                                     color: 'white', border: 'none', borderRadius: '0.75rem',
@@ -307,7 +375,14 @@ export default function LawyerHearingsPage() {
                                                     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
                                                     boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)'
                                                 }}>
-                                                <Video size={16} /> Join Session
+                                                <Video size={16} />
+                                                    {
+                                                        waitingHearingId === hearing.id
+                                                            ? 'Waiting for judge'
+                                                            : requesting
+                                                                ? 'Requesting...'
+                                                                : 'Request to Join'
+                                                    }
                                             </button>
                                         ) : hearing.type === 'Virtual' ? (
                                             <button

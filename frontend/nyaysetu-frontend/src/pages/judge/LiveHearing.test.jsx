@@ -32,6 +32,19 @@ const renderComponent = () => {
     );
 };
 
+const { mockNavigate } = vi.hoisted(() => ({
+    mockNavigate: vi.fn()
+}));
+
+vi.mock('react-router-dom', async () => {
+    const actual =
+        await vi.importActual('react-router-dom');
+
+    return {
+        ...actual,
+        useNavigate: () => mockNavigate
+    };
+});
 describe('LiveHearing Accessibility Verification', () => {
     test('Dashboard layout structure matches basic screen reader role expectations', async () => {
         renderComponent();
@@ -45,20 +58,15 @@ describe('LiveHearing Accessibility Verification', () => {
         expect(searchInput).toBeInTheDocument();
     });
 
-    test('Active hearing workspace contains accessible navigation controls', async () => {
+    test('Join Now routes to the secured conduct page', async () => {
         renderComponent();
 
-        // Click the "Join Now" button to switch to the active hearing viewport layout
+        // Click Join Now and verify routing through the secured hearing page.
         const joinButton = await screen.findByRole('button', { name: /join now/i });
         fireEvent.click(joinButton);
+        expect(mockNavigate).toHaveBeenCalledWith(
+            '/judge/conduct'
+        );
 
-        // 3. Verify upper back navigation button has a valid descriptive aria-label
-        const backButton = screen.getByRole('button', { name: /leave hearing/i });
-        expect(backButton).toBeInTheDocument();
-        expect(backButton).toHaveAttribute('aria-label', 'Leave hearing');
-
-        // 4. Verify major session closure button is discoverable by role matching
-        const endSessionButton = screen.getByRole('button', { name: /end session/i });
-        expect(endSessionButton).toBeInTheDocument();
     });
 });

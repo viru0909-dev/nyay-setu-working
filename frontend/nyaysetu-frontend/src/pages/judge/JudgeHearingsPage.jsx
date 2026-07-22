@@ -108,9 +108,9 @@ export default function JudgeHearingsPage() {
         });
     };
 
-    const joinHearing = (hearing) => {
-        // Navigate to the case workspace and auto-join
-        navigate(`/judge/case/${hearing.caseId}`);
+    const joinHearing = () => {
+        // All hearing sessions must use the secured conduct page.
+        navigate('/judge/conduct');
     };
 
     if (loading) {

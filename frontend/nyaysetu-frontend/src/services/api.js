@@ -176,7 +176,36 @@ export const hearingAPI = {
     join: (id) => api.post(`/api/v1/hearings/${id}/join`),
     leave: (id) => api.post(`/api/v1/hearings/${id}/leave`),
     complete: (id, notes) => api.put(`/api/v1/hearings/${id}/complete`, { judgeNotes: notes }),
-    getParticipants: (id) => api.get(`/api/v1/hearings/${id}/participants`)
+    getParticipants: (id) => api.get(`/api/v1/hearings/${id}/participants`),
+
+    start: (id) =>
+        api.post(`/api/v1/hearings/${id}/start`),
+
+    requestJoin: (id) =>
+        api.post(`/api/v1/hearings/${id}/join-request`),
+
+    getJoinAccess: (id, token) =>
+        api.get(`/api/v1/hearings/${id}/join-access`, {
+            headers: {
+                'X-Hearing-Access-Token': token
+            }
+        }),
+
+    getWaitingRoom: (id) =>
+        api.get(`/api/v1/hearings/${id}/waiting-room`),
+
+    admitParticipant: (hearingId, participantId) =>
+        api.post(
+            `/api/v1/hearings/${hearingId}/participants/${participantId}/admit`
+        ),
+
+    rejectParticipant: (hearingId, participantId) =>
+        api.post(
+            `/api/v1/hearings/${hearingId}/participants/${participantId}/reject`
+        ),
+
+    end: (id) =>
+        api.post(`/api/v1/hearings/${id}/end`)
 };
 
 // Meeting API

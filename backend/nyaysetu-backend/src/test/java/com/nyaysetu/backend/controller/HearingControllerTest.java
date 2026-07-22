@@ -20,24 +20,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class HearingControllerTest {
 
     @Test
-    void joinHearingResolvesEmailPrincipalToUserId() {
+    void directJoinEndpointIsDisabled() {
         UUID hearingId = UUID.randomUUID();
-        FakeHearingService hearingService = new FakeHearingService(hearingId);
+
         HearingController controller = new HearingController(
-                hearingService,
+                new FakeHearingService(hearingId),
                 new FakeNotificationService(),
                 new FakeAuthService(),
                 new FakeCaseAccessService()
         );
 
-        ResponseEntity<Map<String, Object>> response = controller.joinHearing(
-                hearingId,
-                new TestingAuthenticationToken("litigant@example.com", null)
-        );
+        ResponseEntity<Map<String, Object>> response =
+                controller.joinHearing(
+                        hearingId,
+                        new TestingAuthenticationToken(
+                                "litigant@example.com",
+                                null
+                        )
+                );
 
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(42L, hearingService.authorizedUserId);
-        assertEquals(42L, hearingService.joinedUserId);
+        assertEquals(410, response.getStatusCode().value());
+        assertEquals(
+                "Direct joining is disabled. Use the waiting-room join-request endpoint.",
+                response.getBody().get("error")
+        );
     }
 
     @Test
