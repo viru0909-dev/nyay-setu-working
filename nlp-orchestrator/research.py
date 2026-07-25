@@ -425,5 +425,15 @@ async def run_parallel_research(
             execute_with_fallback(question, kanoon_context, primary_provider=model)
         )
 
-    results = await asyncio.gather(*tasks, return_exceptions=False)
-    return list(results)
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    return [
+        r if not isinstance(r, BaseException) else {
+            "question": routed_questions[i]["question"],
+            "answer": "Research for this question failed.",
+            "source": "error",
+            "grounded": False,
+            "error": str(r),
+            "is_fallback": True,
+        }
+        for i, r in enumerate(results)
+    ]

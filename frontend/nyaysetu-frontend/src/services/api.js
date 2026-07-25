@@ -297,9 +297,7 @@ export const policeAPI = {
     verifyFir: (id, formData) => api.post(`/api/v1/police/fir/${id}/verify`, formData),
     getStats: () => api.get('/api/v1/police/stats'),
     getPendingFirs: () => api.get('/api/v1/police/fir/pending'),
-    updateFirStatus: (id, status, reviewNotes) => api.put(`/api/v1/police/fir/${id}/status`, null, {
-        params: { status, reviewNotes }
-    }),
+    updateFirStatus: (id, status, reviewNotes) => api.put(`/api/v1/police/fir/${id}/status`, { status, reviewNotes }),
     health: () => api.get('/api/v1/police/health'),
     startInvestigation: (id) => api.post(`/api/v1/police/investigation/${id}/start`),
     submitInvestigation: (id, findings) => api.post(`/api/v1/police/investigation/${id}/submit`, { findings }),
