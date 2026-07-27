@@ -150,7 +150,7 @@ export const clearOfflineQueue = () => {
  */
 export const canInstallPWA = () => {
     // This will be set by the beforeinstallprompt event
-    return window.deferredPrompt !== undefined;
+    return window.deferredPrompt != null;
 };
 
 /**

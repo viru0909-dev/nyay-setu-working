@@ -255,5 +255,5 @@ export const downloadPartialStreamContent = (
     anchor.download = filename;
     anchor.click();
 
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
 };
