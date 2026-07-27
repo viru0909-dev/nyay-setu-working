@@ -366,6 +366,37 @@ At a high level, the platform consists of three services that need to run concur
 | Backend | `backend/nyaysetu-backend/` | `mvn spring-boot:run` |
 | NLP Orchestrator | `nlp-orchestrator/` | `uvicorn main:app --reload` |
 
+### Local Startup Order
+
+For manual local development, start the services in the following order:
+
+1. **Database** — Ensure PostgreSQL is running on port `5432`.
+
+2. **NLP Orchestrator** — Start the NLP service:
+
+   ```bash
+   cd nlp-orchestrator
+   uvicorn main:app --reload --port 8001
+   ```
+
+3. **Backend** — In a separate terminal, start the Spring Boot backend:
+
+   ```bash
+   cd backend/nyaysetu-backend
+   mvn spring-boot:run
+   ```
+
+4. **Frontend** — In another terminal, start the frontend:
+
+   ```bash
+   cd frontend/nyaysetu-frontend
+   npm install
+   npm run dev
+   ```
+
+For detailed setup instructions and environment configuration, see the [Manual Local Setup](./docs/setup.md#option-b-manual-local-setup) guide.
+
+
 > **Prerequisites:** Node.js >= 20, Java 17, Maven 3.9+, PostgreSQL 15+, Python 3.12+
 
 For environment variables, copy `.env.example` to `.env` and fill in your values. A full reference of all required variables is documented in the [Setup Guide](./docs/setup.md#environment-variables).
