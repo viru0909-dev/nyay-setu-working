@@ -231,7 +231,7 @@ export const assignmentAPI = {
 // Message API
 export const messageAPI = {
     send: (caseId, messageOrPayload) => {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const (function(){ try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } })();
         const senderId = user?.id;
 
         // Handle both string messages and full payload objects
