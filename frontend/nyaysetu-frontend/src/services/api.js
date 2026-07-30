@@ -369,8 +369,8 @@ export const caseTransitionAPI = {
 // Profile API — interface language is stored per account so the choice
 // survives a new device or cleared browser storage.
 export const profileAPI = {
-    getLanguage: () => api.get('/profile/language'),
-    updateLanguage: (language) => api.put('/profile/language', { language }),
+    getLanguage: () => api.get('/api/v1/profile/language'),
+    updateLanguage: (language) => api.put('/api/v1/profile/language', { language }),
 };
 
 export default api;
