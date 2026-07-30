@@ -1,6 +1,8 @@
 package com.nyaysetu.backend.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nyaysetu.backend.service.JwtService;
+import com.nyaysetu.backend.service.JwtSigningKeyService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -23,7 +25,6 @@ import java.util.Date;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
 class JwtAuthFilterTest {
 
@@ -36,8 +37,18 @@ class JwtAuthFilterTest {
     void setUp() {
         SecurityContextHolder.clearContext();
 
-        jwtService = mock(JwtService.class);
-        ReflectionTestUtils.setField(jwtService, "secretKey", TEST_SECRET_KEY);
+        // A real JwtService, not a mock. These tests assert that the filter answers
+        // 401 for a malformed or expired token and authenticates a valid one, which
+        // only happens when extractUsername actually parses and throws. Against a
+        // bare mock every call returned null, so the filter fell through to 200 and
+        // the security guarantee under test was never exercised.
+        JwtSigningKeyService signingKeyService = new JwtSigningKeyService();
+        ReflectionTestUtils.setField(signingKeyService, "currentSecret", TEST_SECRET_KEY);
+        ReflectionTestUtils.setField(signingKeyService, "currentKeyId", "test-key");
+        ReflectionTestUtils.setField(signingKeyService, "previousKeys", "");
+        ReflectionTestUtils.invokeMethod(signingKeyService, "init");
+
+        jwtService = new JwtService(signingKeyService, new ObjectMapper());
 
         userDetailsService = Mockito.mock(UserDetailsService.class);
         filter = new JwtAuthFilter(jwtService, userDetailsService);

@@ -1,0 +1,67 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://nyaysetu.in/schema/vakil_response_schema.json",
+    "title": "Vakil-Friend extracted case data",
+    "description": "Structured case-filing data extracted from a Vakil-Friend conversation. GroqResponseValidator loads this at startup and VakilFriendGroqValidatorService validates against it before anything is written to CaseEntity or FirRecord; a payload that fails goes through a bounded Groq repair loop and, failing that, is flagged for manual correction. Field names and allowed values must stay in step with VakilFriendGroqValidatorService#toSchemaNode and the repair prompt it sends.",
+    "type": "object",
+    "required": [
+        "title",
+        "description",
+        "caseType",
+        "petitioner",
+        "respondent",
+        "urgency",
+        "target"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Short case title. toSchemaNode substitutes an empty string when extraction found nothing, so minLength 1 is what routes an incomplete extraction into the repair loop."
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Narrative of the dispute as collected from the litigant."
+        },
+        "caseType": {
+            "type": "string",
+            "enum": [
+                "CIVIL",
+                "CRIMINAL",
+                "FAMILY",
+                "PROPERTY",
+                "COMMERCIAL"
+            ],
+            "description": "The five categories the Vakil-Friend system prompt asks the litigant to choose from."
+        },
+        "petitioner": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full name of the person filing."
+        },
+        "respondent": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Party the case is filed against."
+        },
+        "urgency": {
+            "type": "string",
+            "enum": [
+                "NORMAL",
+                "URGENT",
+                "CRITICAL"
+            ]
+        },
+        "target": {
+            "type": "string",
+            "enum": [
+                "POLICE",
+                "COURT"
+            ],
+            "description": "POLICE routes the filing to an FIR record, COURT to a case."
+        }
+    }
+}
