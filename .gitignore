@@ -103,6 +103,14 @@ coverage/
 nlp-orchestrator/.env
 
 *.json
+# ...but JSON that is application data, not build output, must be tracked. The
+# blanket rule above is why schema/vakil_response_schema.json was never
+# committed: GroqResponseValidator loads it in @PostConstruct, so its absence
+# stopped the whole Spring context from starting. Keep these negations in step
+# with any new JSON resource directory.
+!backend/nyaysetu-backend/src/main/resources/**/*.json
+!frontend/nyaysetu-frontend/public/locales/**/*.json
+!nlp-orchestrator/data/**/*.json
 input_videos/
 output_frames/
 

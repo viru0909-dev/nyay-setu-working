@@ -239,6 +239,14 @@
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
 
+        <!-- JSON Schema validation for Vakil-Friend structured output.
+             GroqResponseValidator imports com.networknt.schema and fails class
+             introspection without this, which stops the whole context starting. -->
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.5.4</version>
+        </dependency>
     </dependencies>
 
     <build>
