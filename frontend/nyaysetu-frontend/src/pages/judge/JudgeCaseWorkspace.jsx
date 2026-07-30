@@ -1833,7 +1833,7 @@ function HearingsTab({ caseId, caseData }) {
                                 <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Duration</label>
                                 <select
                                     value={hearingData.durationMinutes}
-                                    onChange={e => setHearingData({ ...hearingData, durationMinutes: parseInt(e.target.value) })}
+                                    onChange={e => setHearingData({ ...hearingData, durationMinutes: parseInt(e.target.value, 10) })}
                                     style={{
                                         width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
                                         background: 'var(--bg-glass)', border: 'var(--border-glass)',
