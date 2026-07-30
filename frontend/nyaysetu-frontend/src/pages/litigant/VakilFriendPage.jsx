@@ -13,9 +13,10 @@ import AvatarPanel from '../../components/avatar/AvatarPanel';
 import { useTranslation } from 'react-i18next';
 import useChatStore from '../../store/chatStore';
 import CaseSummaryViewer from '../../components/Summary/CaseSummaryViewer';
+import { LANGUAGES, getLanguage, getSpeechLocale } from '../../config/languages';
 
 export default function VakilFriendChat() {
-    const { t } = useTranslation('litigant');
+    const { t, i18n } = useTranslation('litigant');
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [sessionId, setSessionId] = useState(null);
@@ -34,7 +35,10 @@ export default function VakilFriendChat() {
     const [isScanningDocument, setIsScanningDocument] = useState(false);
     const {documentContext, setDocumentContext, clearDocumentContext} = useChatStore();
     const [showAnalysisModal, setShowAnalysisModal] = useState(false); // Show analysis modal
-    const [language, setLanguage] = useState('en'); // Default language
+    // Start the conversation in the language the user reads the site in.
+    // Vakil Friend replies are machine-translated by Bhashini at request time,
+    // so it can speak languages the interface itself is not yet translated into.
+    const [language, setLanguage] = useState(() => getLanguage(i18n.language)?.code || 'en');
     const [isRecording, setIsRecording] = useState(false);
     const [isListeningForCommand, setIsListeningForCommand] = useState(false); // New wake word state
     const [speakingIndex, setSpeakingIndex] = useState(null); // Track which message is speaking
@@ -72,18 +76,10 @@ const {
     const navigate = useNavigate();
 
     // Supported Languages
-    const languages = [
-        { code: 'en', name: 'English' },
-        { code: 'hi', name: 'Hindi (हिंदी)' },
-        { code: 'mr', name: 'Marathi (मराठी)' },
-        { code: 'ta', name: 'Tamil (தமிழ்)' },
-        { code: 'te', name: 'Telugu (తెలుగు)' },
-        { code: 'gu', name: 'Gujarati (ગુજરાતી)' },
-        { code: 'kn', name: 'Kannada (ಕನ್ನಡ)' },
-        { code: 'bn', name: 'Bengali (বাংলা)' },
-        { code: 'ml', name: 'Malayalam (മലയാളം)' },
-        { code: 'pa', name: 'Punjabi (ਪੰਜਾਬੀ)' }
-    ];
+    const languages = LANGUAGES.map(({ code, englishName, nativeName }) => ({
+        code,
+        name: englishName === nativeName ? englishName : `${englishName} (${nativeName})`,
+    }));
 
     // Scroll to bottom of messages container only (not the page)
     const scrollToBottom = (behavior = 'auto') => {
@@ -112,6 +108,12 @@ const {
         loadSessions();
         startSession();
     }, []);
+
+    // Keep the chat in step if the user switches interface language mid-session.
+    useEffect(() => {
+        const code = getLanguage(i18n.language)?.code;
+        if (code) setLanguage(code);
+    }, [i18n.language]);
 
     // Derive avatar state from chat lifecycle
     useEffect(() => {
@@ -500,20 +502,7 @@ const startDeepResearch = async (query) => {
         const recognition = new SpeechRecognition();
 
         // Map our language codes to browser locales
-        const langMap = {
-            'en': 'en-IN',
-            'hi': 'hi-IN',
-            'mr': 'mr-IN',
-            'ta': 'ta-IN',
-            'te': 'te-IN',
-            'gu': 'gu-IN',
-            'kn': 'kn-IN',
-            'bn': 'bn-IN',
-            'ml': 'ml-IN',
-            'pa': 'pa-IN'
-        };
-
-        recognition.lang = langMap[language] || 'en-IN';
+        recognition.lang = getSpeechLocale(language);
         recognition.interimResults = true; // Enable real-time transcription
         recognition.maxAlternatives = 1;
         recognition.continuous = true; // Keep listening until explicitly stopped
@@ -664,9 +653,9 @@ const startDeepResearch = async (query) => {
             );
 
             // Priority: 1. Premium Indian accent, 2. Premium any English, 3. Any Indian accent
-            const targetVoice = preferredVoices.find(v => v.lang === (language === 'en' ? 'en-IN' : language + '-IN'))
+            const targetVoice = preferredVoices.find(v => v.lang === getSpeechLocale(language))
                 || preferredVoices.find(v => v.lang.startsWith('en'))
-                || voices.find(v => v.lang === (language === 'en' ? 'en-IN' : language + '-IN'))
+                || voices.find(v => v.lang === getSpeechLocale(language))
                 || voices[0];
 
             if (targetVoice) {
@@ -674,7 +663,7 @@ const startDeepResearch = async (query) => {
             }
         }
 
-        utterance.lang = language === 'en' ? 'en-IN' : language + '-IN';
+        utterance.lang = getSpeechLocale(language);
         utterance.pitch = 1.05; // Slightly higher pitch for natural feel
         utterance.rate = 1.0;   // Normal speed
 
@@ -1278,6 +1267,8 @@ const startDeepResearch = async (query) => {
                         }}>
                             <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.75rem' }}>{t('vakilFriend.aiSummary')}</div>
                             <p style={{ color: '#334155', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
+                                {documentAnalysis.summary || t('vakilFriend.summaryPending')}
+                            </p>
                         </div>
 
                         {/* Case Summary Viewer */}
