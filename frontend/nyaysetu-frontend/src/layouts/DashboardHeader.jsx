@@ -247,7 +247,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                         maxHeight: '240px',
                                         overflowY: 'auto'
                             }}>
-                                {languages.map((lang) => (
+                                {(languages ?? []).map((lang) => (
                                 <button
                                     key={lang.code}
                                     onClick={() => {
