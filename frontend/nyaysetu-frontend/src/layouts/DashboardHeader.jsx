@@ -165,7 +165,7 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                             color: 'white',
                             boxShadow: '0 2px 8px rgba(30, 42, 68, 0.2)'
                         }}>
-                            {user?.name?.charAt(0).toUpperCase() || 'U'}
+                            {user?.name?[0].toUpperCase() || 'U'}
                         </div>
                         {!isMobile && (
                             <>
