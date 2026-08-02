@@ -803,7 +803,7 @@ const startDeepResearch = async (query) => {
                 const analysis = response.data;
 
                 // Update file status with analysis results
-                setAttachedFiles(prev => prev.map(f =>
+                setAttachedFiles(prev => (prev ?? []).map(f =>
                     f.name === file.name && f.status === 'pending'
                         ? {
                             ...f,

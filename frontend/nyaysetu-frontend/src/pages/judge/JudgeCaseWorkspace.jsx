@@ -60,7 +60,7 @@ const CaseLifecycleStepper = ({ currentStage }) => {
     return (
         <div style={{ marginTop: '2rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', minWidth: '800px' }}>
-                {stages.map((stage, index) => (
+                {(stages ?? []).map((stage, index) => (
                     <div key={stage} style={{ display: 'flex', alignItems: 'center', flex: index === stages.length - 1 ? 0 : 1 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
                             <div style={{
