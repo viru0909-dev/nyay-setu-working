@@ -789,7 +789,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
 
             // Normalize and merge
             const merged = [
-                ...docs.map(d => ({ ...d, type: 'DOCUMENT', source: 'docs' })),
+                ...(docs ?? []).map(d => ({ ...d, type: 'DOCUMENT', source: 'docs' })),
                 ...evidence.map(e => ({
                     id: e.id,
                     fileName: e.title,
