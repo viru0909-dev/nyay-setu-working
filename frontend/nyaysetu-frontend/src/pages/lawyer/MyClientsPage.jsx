@@ -142,7 +142,7 @@ export default function MyClientsPage() {
                 gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
                 gap: '1.5rem'
             }}>
-                {clients.map(client => (
+                {(clients ?? []).map(client => (
                     <div key={client.id} style={{
                         ...glassStyle,
                         transition: 'transform 0.2s',
