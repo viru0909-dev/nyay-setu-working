@@ -546,7 +546,7 @@ function TabEvidence({ caseId }) {
                     <div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '700', marginBottom: '0.5rem' }}>EXTRACTED ENTITIES</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            {analysisResult.entities.map((e, i) => (
+                            {analysisResult.(entities ?? []).map((e, i) => (
                                 <span key={i} style={{
                                     padding: '0.25rem 0.6rem', borderRadius: '4px', background: 'var(--bg-glass)',
                                     border: 'var(--border-glass)', color: 'var(--color-accent)', fontSize: '0.75rem'
