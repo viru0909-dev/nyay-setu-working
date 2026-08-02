@@ -355,7 +355,7 @@ export default function CaseDetailPage() {
                                 </div>
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {availableLawyers.map(lawyer => (
+                                    {(availableLawyers ?? []).map(lawyer => (
                                         <div key={lawyer.id} style={{
                                             background: 'var(--bg-glass)', border: 'var(--border-glass)',
                                             borderRadius: '1rem', padding: '1.25rem',
@@ -789,7 +789,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
 
             // Normalize and merge
             const merged = [
-                ...docs.map(d => ({ ...d, type: 'DOCUMENT', source: 'docs' })),
+                ...(docs ?? []).map(d => ({ ...d, type: 'DOCUMENT', source: 'docs' })),
                 ...evidence.map(e => ({
                     id: e.id,
                     fileName: e.title,
@@ -969,7 +969,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
                         <AnimatePresence>
-                            {suggestions.length > 0 ? suggestions.map((doc, idx) => {
+                            {suggestionsArray.isArray(suggestions) ? suggestions.map((doc, idx) => {
                                 const isUploaded = isDocumentPresent(doc, files);
 
                                 return (
