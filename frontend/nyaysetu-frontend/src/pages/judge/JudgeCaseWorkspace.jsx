@@ -60,7 +60,7 @@ const CaseLifecycleStepper = ({ currentStage }) => {
     return (
         <div style={{ marginTop: '2rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', minWidth: '800px' }}>
-                {stages.map((stage, index) => (
+                {(stages ?? []).map((stage, index) => (
                     <div key={stage} style={{ display: 'flex', alignItems: 'center', flex: index === stages.length - 1 ? 0 : 1 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
                             <div style={{
@@ -1833,7 +1833,7 @@ function HearingsTab({ caseId, caseData }) {
                                 <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Duration</label>
                                 <select
                                     value={hearingData.durationMinutes}
-                                    onChange={e => setHearingData({ ...hearingData, durationMinutes: parseInt(e.target.value) })}
+                                    onChange={e => setHearingData({ ...hearingData, durationMinutes: parseInt(e.target.value, 10) })}
                                     style={{
                                         width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
                                         background: 'var(--bg-glass)', border: 'var(--border-glass)',

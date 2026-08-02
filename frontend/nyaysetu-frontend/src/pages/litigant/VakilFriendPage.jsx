@@ -335,7 +335,7 @@ const {
         } catch (err) {
             console.error('Failed to send message:', err);
             if (err.response?.status === 429) {
-                const retryAfter = parseInt(err.response.headers['retry-after'] || '60');
+                const retryAfter = parseInt(err.response.headers['retry-after'] || '60', 10);
                 startCooldown(retryAfter);
                 setMessages(prev => [...prev, {
                     role: 'assistant',
@@ -803,7 +803,7 @@ const startDeepResearch = async (query) => {
                 const analysis = response.data;
 
                 // Update file status with analysis results
-                setAttachedFiles(prev => prev.map(f =>
+                setAttachedFiles(prev => (prev ?? []).map(f =>
                     f.name === file.name && f.status === 'pending'
                         ? {
                             ...f,
