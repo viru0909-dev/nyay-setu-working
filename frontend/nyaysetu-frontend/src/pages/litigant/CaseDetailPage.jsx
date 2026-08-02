@@ -969,7 +969,7 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
                         <AnimatePresence>
-                            {suggestions.length > 0 ? suggestions.map((doc, idx) => {
+                            {suggestionsArray.isArray(suggestions) ? suggestions.map((doc, idx) => {
                                 const isUploaded = isDocumentPresent(doc, files);
 
                                 return (
