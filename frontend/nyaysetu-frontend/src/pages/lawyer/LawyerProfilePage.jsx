@@ -69,7 +69,7 @@ export default function LawyerProfilePage() {
                                 color: 'var(--text-main)', fontSize: '3rem', fontWeight: '800',
                                 boxShadow: 'var(--shadow-glass)'
                             }}>
-                                {user?.name?.charAt(0) || 'L'}
+                                {user?.name?[0] || 'L'}
                             </div>
                             <button style={{
                                 position: 'absolute', bottom: -5, right: -5,
