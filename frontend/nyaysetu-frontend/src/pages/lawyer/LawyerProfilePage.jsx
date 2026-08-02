@@ -69,7 +69,7 @@ export default function LawyerProfilePage() {
                                 color: 'var(--text-main)', fontSize: '3rem', fontWeight: '800',
                                 boxShadow: 'var(--shadow-glass)'
                             }}>
-                                {user?.name?.charAt(0) || 'L'}
+                                {user?.name?[0] || 'L'}
                             </div>
                             <button style={{
                                 position: 'absolute', bottom: -5, right: -5,
@@ -177,7 +177,7 @@ export default function LawyerProfilePage() {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                        {sections.map((sec, i) => (
+                        {(sections ?? []).map((sec, i) => (
                             <div key={i} style={glassStyle}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                                     <div style={{ color: 'var(--color-accent)' }}><sec.icon size={20} /></div>

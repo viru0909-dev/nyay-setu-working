@@ -142,7 +142,7 @@ export default function MyClientsPage() {
                 gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
                 gap: '1.5rem'
             }}>
-                {clients.map(client => (
+                {(clients ?? []).map(client => (
                     <div key={client.id} style={{
                         ...glassStyle,
                         transition: 'transform 0.2s',
@@ -158,7 +158,7 @@ export default function MyClientsPage() {
                                     fontSize: '1.25rem', fontWeight: '800', color: 'var(--color-accent)',
                                     border: 'var(--border-glass-subtle)'
                                 }}>
-                                    {client.name.charAt(0)}
+                                    {client.name[0]}
                                 </div>
                                 <div>
                                     <h3 style={{ color: 'var(--text-main)', margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>{client.name}</h3>

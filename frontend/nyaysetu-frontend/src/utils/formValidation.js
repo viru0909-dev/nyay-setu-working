@@ -27,7 +27,7 @@ export const validateEmail = (email) => {
 };
 
 export const validateRequired = (value, fieldName = 'Field') => {
-  if (!value || String(value).trim() === '') {
+  if (!value || String(value).trim().length === 0) {
     return `${fieldName} is required`;
   }
   return null;
