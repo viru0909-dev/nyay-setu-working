@@ -421,9 +421,9 @@ function TabEvidence({ caseId }) {
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                        {documents.map(doc => {
+                        {(documents ?? []).map(doc => {
                             const dateStr = doc.uploadDate || doc.createdAt || new Date().toISOString();
-                            const isValidDate = !isNaN(new Date(dateStr).getTime());
+                            const isValidDate = !Number.isNaN(new Date(dateStr).getTime());
 
                             return (
                                 <div key={doc.id} style={{
