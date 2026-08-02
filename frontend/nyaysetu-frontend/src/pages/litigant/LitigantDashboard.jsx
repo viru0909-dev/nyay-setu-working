@@ -78,7 +78,7 @@ export default function LitigantDashboard() {
                     new Date(b.filedDate || b.createdAt) - new Date(a.filedDate || a.createdAt)
                 ).slice(0, 3);
                 // ... existing code ...
-                setRecentCases(sortedCases.map(c => ({
+                setRecentCases((sortedCases ?? []).map(c => ({
                     id: c.id?.substring(0, 8) || 'CS-' + Math.random().toString(36).substr(2, 6),
                     fullId: c.id,
                     title: c.title || 'Untitled Case',

@@ -172,7 +172,7 @@ export default function CasePreparationPage() {
                             />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            {templates.map(t => (
+                            {(templates ?? []).map(t => (
                                 <div
                                     key={t.id}
                                     onClick={() => setSelectedTemplate(t)}
