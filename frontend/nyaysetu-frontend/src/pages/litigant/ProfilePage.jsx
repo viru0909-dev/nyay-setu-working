@@ -135,7 +135,7 @@ export default function ProfilePage() {
                                 border: '4px solid rgba(139, 92, 246, 0.3)',
                                 boxShadow: 'var(--shadow-glass-strong)'
                             }}>
-                                {profileData.name.charAt(0).toUpperCase()}
+                                {profileData.name[0].toUpperCase()}
                             </div>
                             <button
                                 style={{
