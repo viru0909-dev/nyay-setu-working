@@ -477,3 +477,5 @@ function QuickStat({ icon, label, value, color }) {
         </div>
     );
 }
+
+.catch(err => console.error("Promise.all failed:", err));
