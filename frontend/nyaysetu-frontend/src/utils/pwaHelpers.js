@@ -12,7 +12,7 @@ export const isPWAInstalled = () => {
         return true;
     }
     // Check for iOS standalone mode
-    if (window.navigator.standalone === true) {
+    if (window.navigator.standalone ) {
         return true;
     }
     // Check if launched from home screen
