@@ -230,3 +230,5 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+.catch(err => console.error("Promise.all failed:", err));
