@@ -116,7 +116,7 @@ export default function ClientChatPage() {
             const response = await messageAPI.getMessages(caseId);
             const fetchedMessages = response.data.map(msg => ({
                 id: msg.id,
-                sender: (msg.senderId == selectedContact?.id) ? 'client' : (msg.senderId === myId ? 'me' : 'client'), // Fallback to client if not me
+                sender: (msg.senderId === selectedContact?.id) ? 'client' : (msg.senderId === myId ? 'me' : 'client'), // Fallback to client if not me
                 text: msg.message,
                 time: new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 attachments: msg.attachments || []

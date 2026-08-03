@@ -2211,7 +2211,7 @@ function PartiesTab({ caseData, caseId, onUpdate }) {
         }
     };
 
-    const respondentEmailMissing = !caseData.respondentEmail || caseData.respondentEmail.trim() === '';
+    const respondentEmailMissing = !caseData.respondentEmail || caseData.respondentEmail.trim().length === 0;
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
