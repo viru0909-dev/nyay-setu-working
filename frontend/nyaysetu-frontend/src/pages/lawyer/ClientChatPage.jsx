@@ -114,7 +114,7 @@ export default function ClientChatPage() {
             const user = JSON.parse(localStorage.getItem('user'));
             const myId = user?.id;
             const response = await messageAPI.getMessages(caseId);
-            const fetchedMessages = response.data.map(msg => ({
+            const fetchedMessages = response.(data ?? []).map(msg => ({
                 id: msg.id,
                 sender: (msg.senderId == selectedContact?.id) ? 'client' : (msg.senderId === myId ? 'me' : 'client'), // Fallback to client if not me
                 text: msg.message,
