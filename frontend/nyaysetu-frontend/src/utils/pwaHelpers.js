@@ -167,3 +167,5 @@ export const formatBytes = (bytes, decimals = 2) => {
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
+
+.catch(err => console.error("Promise.all failed:", err));
