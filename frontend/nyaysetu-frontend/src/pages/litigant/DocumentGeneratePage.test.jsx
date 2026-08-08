@@ -101,7 +101,7 @@ describe('DocumentGeneratePage', () => {
     fireEvent.change(screen.getByPlaceholderText(/What outcome or remedy/i), { target: { value: 'Relief' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Generate Preview/i }));
-    await waitFor(() => expect(screen.getByText(/Document generated successfully/i)).toBeInTheDocument());
+    await screen.findByRole('button', { name: /Download DOCX/i,});
 
     fireEvent.click(screen.getByRole('button', { name: /Copy to clipboard/i }));
     await waitFor(() => expect(writeText).toHaveBeenCalledWith('My generated document'));
@@ -145,7 +145,7 @@ describe('DocumentGeneratePage', () => {
 
     // Trigger generate preview so state is consistent
     fireEvent.click(screen.getByRole('button', { name: /Generate Preview/i }));
-    await waitFor(() => expect(screen.getByText(/Document generated successfully/i)).toBeInTheDocument());
+    await screen.findByRole('button', { name: /Download PDF/i,});
 
     // Click Download PDF and assert flows
     const appendSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((el) => { appendedEl = el; return el; });
