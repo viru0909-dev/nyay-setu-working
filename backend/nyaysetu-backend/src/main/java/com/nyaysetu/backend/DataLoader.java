@@ -32,21 +32,27 @@ public class DataLoader implements CommandLineRunner {
 
     private void updateOrCreate(String email, String name, String pass, Role role) {
         var optionalUser = userRepository.findByEmail(email);
-        
+
         if (optionalUser.isPresent()) {
-            // User exists - UPDATE password
             User user = optionalUser.get();
-            user.setPassword(encoder.encode(pass));
-            userRepository.save(user);
-            log.debug("User already exists, password updated: {}", email);
+
+            // DO NOT overwrite password if already set
+            if (user.getPassword() == null || user.getPassword().isBlank()) {
+                user.setPassword(encoder.encode(pass));
+                userRepository.save(user);
+                log.debug("Password initialized for existing user: {}", email);
+            } else {
+                log.debug("User exists, not modifying password: {}", email);
+            }
+
         } else {
-            // User doesn't exist - CREATE
             User u = User.builder()
                     .email(email)
                     .name(name)
                     .password(encoder.encode(pass))
                     .role(role)
                     .build();
+
             userRepository.save(u);
             log.info("New user created: {}", email);
         }
