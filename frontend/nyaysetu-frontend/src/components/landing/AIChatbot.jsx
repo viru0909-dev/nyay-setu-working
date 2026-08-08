@@ -83,6 +83,7 @@ export default function AIChatbot() {
 
     recognition.lang = "en-IN";
     recognition.interimResults = false;
+    recognition.lang = "en-US";
 
     recognition.onstart = () => {
       setIsRecording(true);
