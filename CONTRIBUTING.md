@@ -10,7 +10,7 @@ Whether you are a seasoned open-source contributor or participating in programs 
 > 2. Create a branch: `git checkout -b feat/your-feature`
 > 3. Set up with: `docker-compose up -d` 
 > 4. Make changes and test locally
-> 5. Commit with clear messages (see [Conventional Commits](#commit-message-examples))
+> 5. Commit with clear messages (see [Conventional Commits](#commit-message-conventions))
 > 6. Push and open a PR with issue link
 > 7. Respond to review feedback
 > 8. Merge! 🎉
@@ -21,15 +21,16 @@ Whether you are a seasoned open-source contributor or participating in programs 
 
 ## Table of Contents
 - [Community Guidelines](#community-guidelines)
+- [Reporting Bugs](#reporting-bugs)
 - [Finding an Issue](#finding-an-issue)
 - [Development Workflow](#development-workflow)
 - [Project Setup](#project-setup)
 - [Making Changes](#making-changes)
 - [Code Style Guidelines](#code-style-guidelines)
 - [Testing](#testing)
-- [Pull Request Requirements](#pull-request-requirements)
+- [Commit Message Conventions](#commit-message-conventions)
+- [Pull Request Process](#pull-request-process)
 - [Best Practices for Contributors](#best-practices-for-contributors)
-- [Commit Message Examples](#commit-message-examples)
 - [Troubleshooting](#troubleshooting)
 - [Getting Help](#getting-help)
 
@@ -41,6 +42,55 @@ We expect all contributors to maintain a professional, respectful, and collabora
 - Be respectful and considerate of other contributors.
 - Provide constructive feedback during code reviews.
 - Focus on the project's mission of making justice accessible.
+
+<hr/>
+
+## Reporting Bugs
+
+Good bug reports save maintainers significant time. Before opening one, please:
+
+1. **Search existing issues** — check the [Issues tab](https://github.com/viru0909-dev/nyay-setu-working/issues) to make sure it hasn't already been reported or fixed.
+2. **Reproduce it** — confirm the bug is consistently reproducible and not caused by a local misconfiguration.
+3. **Use the bug report template** — click **New Issue** and select **Bug Report**. Fill out every section.
+
+### What to include in a bug report
+
+| Field | What to write |
+|---|---|
+| **Title** | Short, specific summary — e.g. `Case filing fails with 500 when description exceeds 500 chars` |
+| **Environment** | OS, browser/runtime, Java/Node/Python version, Docker or manual setup |
+| **Steps to reproduce** | Numbered steps that reliably trigger the bug |
+| **Expected behaviour** | What should happen |
+| **Actual behaviour** | What actually happens — include the full error message or stack trace |
+| **Screenshots / logs** | Attach relevant console output, screenshots, or log snippets |
+
+### Example bug report
+
+```
+**Title:** POST /api/cases returns 500 when `description` field exceeds 500 characters
+
+**Environment:**
+- OS: Ubuntu 22.04
+- Java 17, Spring Boot 3.2
+- PostgreSQL 15 (Docker)
+- Backend version: main branch @ commit abc1234
+
+**Steps to reproduce:**
+1. Log in as a litigant
+2. Submit a new case with the `description` field set to a 501-character string
+3. Observe the response
+
+**Expected:** 400 Bad Request with a validation error message
+**Actual:** 500 Internal Server Error — no message body
+
+**Logs:**
+java.lang.IllegalArgumentException: Value too long for column "description"
+    at com.nyaysetu.backend.service.CaseService.createCase(CaseService.java:87)
+```
+
+### Security vulnerabilities
+
+Do **not** open a public issue for security bugs. Follow the process in [SECURITY.md](./SECURITY.md) to report them privately.
 
 <hr/>
 
@@ -106,8 +156,17 @@ git checkout -b feat/your-feature-name
 - **Java** JDK 17
 - **Python** 3.12+
 - **Docker** & **Docker Compose** (recommended for easy setup)
-- **PostgreSQL** (if running locally without Docker)
+- **PostgreSQL** 15+ (if running locally without Docker)
 - **Git**
+
+> **Verify your versions before starting:**
+> ```bash
+> node --version    # v20+
+> java -version     # 17
+> mvn -version      # 3.9+
+> python --version  # 3.12+
+> docker --version
+> ```
 
 ### Quick Setup with Docker (Recommended)
 
@@ -156,12 +215,12 @@ mvn spring-boot:run
 # Backend runs on http://localhost:8080
 ```
 
-#### Frontend Setup (React)
+#### Frontend Setup (React/Vite)
 ```bash
 cd frontend/nyaysetu-frontend
 npm install
 npm run dev
-# Frontend runs on http://localhost:3000
+# Frontend runs on http://localhost:5173
 ```
 
 #### LawGPT Service Setup (Python)
@@ -276,7 +335,7 @@ mvn test
 #### Run Frontend Tests
 ```bash
 cd frontend/nyaysetu-frontend
-npm test
+npx vitest run
 ```
 
 #### Run Python Tests
@@ -472,7 +531,7 @@ public class CaseServiceTest {
 }
 ```
 
-#### Frontend (Jest/React Testing Library)
+#### Frontend (Vitest/React Testing Library)
 ```javascript
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CaseList } from '../CaseList';
@@ -484,14 +543,14 @@ describe('CaseList Component', () => {
             { id: '2', title: 'Case 2' }
         ];
         
-        render(<CaseList cases={cases} onSelectCase={jest.fn()} />);
+        render(<CaseList cases={cases} onSelectCase={vi.fn()} />);
         
         expect(screen.getByText('Case 1')).toBeInTheDocument();
         expect(screen.getByText('Case 2')).toBeInTheDocument();
     });
     
     it('calls onSelectCase when item is clicked', () => {
-        const onSelectCase = jest.fn();
+        const onSelectCase = vi.fn();
         render(<CaseList cases={[{ id: '1', title: 'Case 1' }]} onSelectCase={onSelectCase} />);
         
         fireEvent.click(screen.getByText('Case 1'));
@@ -527,8 +586,8 @@ def test_get_case_by_id_not_found(case_service):
 # Backend
 cd backend/nyaysetu-backend && mvn test
 
-# Frontend
-cd frontend/nyaysetu-frontend && npm test
+# Frontend (single run, no watch mode)
+cd frontend/nyaysetu-frontend && npx vitest run
 
 # Python services
 cd nlp-orchestrator && python -m pytest
@@ -536,65 +595,73 @@ cd nlp-orchestrator && python -m pytest
 
 <hr/>
 
-## Pull Request Requirements
+## Pull Request Process
 
-Before submitting a pull request, ensure the following:
+### Before you open a PR
 
-### Prerequisites
-- [ ] Your branch is up-to-date with `main`
-- [ ] All tests pass locally
+- [ ] Your branch is rebased on the latest `main`
+- [ ] All tests pass locally (`mvn test`, `npx vitest run`, `pytest`)
 - [ ] Code follows the project's style guidelines
 - [ ] No merge conflicts exist
-- [ ] You've signed the Contributor License Agreement (if required)
+- [ ] The PR is linked to an open issue that was assigned to you
 
-### PR Description Checklist
-- [ ] **Issue Link:** Reference the issue with `Closes #123` or `Fixes #456`
-- [ ] **Description:** Clearly describe what changes you made and why
-- [ ] **Screenshots/Videos:** For UI changes, include visual proof
-- [ ] **Testing:** Describe how you tested the changes
-- [ ] **Breaking Changes:** Highlight any breaking changes
+### Opening the PR
 
-### Example PR Description
+1. Push your branch to your fork:
+   ```bash
+   git push -u origin feat/your-feature-name
+   ```
+2. Open a Pull Request against the `main` branch of the upstream repo.
+3. Use the PR template — it auto-populates when you open the PR. Fill in every section:
+
+| Section | What to write |
+|---|---|
+| `Closes #` | The issue number this PR resolves, e.g. `Closes #862` |
+| **Type of change** | Tick the applicable box (bug fix / new feature / breaking change / docs) |
+| **Description** | What changed and why |
+| **Screenshots** | Required for any UI-visible changes |
+| **How to test** | Steps a reviewer can follow to verify your changes |
+| **Checklist** | Every box must be ticked before requesting review |
+
+### Example PR description
+
 ```markdown
 ## Description
-This PR implements JWT token refresh functionality for improved session management.
+Adds a dedicated "Reporting Bugs" section to CONTRIBUTING.md so new contributors
+know what information to include when filing a bug report.
 
-## Issue Resolved
-Closes #456
+Closes #862
 
-## Changes Made
-- Added refresh token endpoint at POST /auth/refresh
-- Implemented token rotation mechanism
-- Added unit tests for token refresh logic
+## Type of change
+- [x] This change requires a documentation update
 
-## Screenshots
-[Attach screenshots if UI changes]
-
-## How to Test
-1. Login with valid credentials
-2. Wait for token to expire (or manually invalidate)
-3. Attempt API call - should be automatically refreshed
-4. Verify user remains logged in
-
-## Testing Completed
-- [x] Unit tests pass
-- [x] Integration tests pass
-- [x] Manual testing completed
+## Checklist
+- [x] My code follows the style guidelines of this project
+- [x] I have performed a self-review of my own code
+- [x] I have made corresponding changes to the documentation
+- [x] My changes generate no new warnings
 ```
 
-### Automated Checks
-Your PR must pass all of these checks before merging:
-- ✅ Build passes
-- ✅ All tests pass
-- ✅ Code quality checks pass (lint, sonarqube)
-- ✅ No merge conflicts
-- ✅ Branch is up-to-date with main
+### Review process
 
-### Code Review Process
-1. At least 2 maintainers must review and approve your PR
-2. Respond to review comments promptly
-3. Make requested changes in new commits
-4. Request re-review after making changes
+1. At least **one maintainer** must review and approve your PR.
+2. Respond to review comments promptly — unaddressed PRs may be closed after 7 days of inactivity.
+3. Push follow-up commits to address feedback; **do not force-push** after a review has started.
+4. Request a re-review once you've addressed all comments.
+5. Once approved and all CI checks are green, a maintainer will merge your PR.
+
+### Automated CI checks
+
+Every PR must pass the following before it can be merged:
+
+- ✅ Build compiles without errors
+- ✅ All unit tests pass
+- ✅ No merge conflicts with `main`
+- ✅ Branch is up-to-date with `main`
+
+> 💡 **GSSoC'26 Note:** Your PR will only be counted for points once it is
+> **merged** — not when it is opened. Make sure it meets all the checklist
+> items above to speed up the review process.
 
 > 💡 **GSSoC'26 Note:** Your PR will only be counted for points once it is
 > **merged** — not when it is opened. Make sure it meets all the checklist
@@ -620,7 +687,7 @@ Your PR must pass all of these checks before merging:
 ### 3. Commits and History
 - **Small commits:** Make focused, logical commits
 - **Frequent commits:** Commit often to avoid losing work
-- **Meaningful messages:** Write descriptive commit messages
+- **Meaningful messages:** Write descriptive commit messages following the [conventions below](#commit-message-conventions)
 - **Atomic changes:** Each commit should be a complete, working change
 - **No merge commits:** Use rebase to keep history clean
 
@@ -664,50 +731,64 @@ Your PR must pass all of these checks before merging:
 
 <hr/>
 
-## Commit Message Examples
+## Commit Message Conventions
 
-### Good Commit Messages
+This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification. Every commit message must have this structure:
 
-```bash
-# Feature - clear and descriptive
-git commit -m "feat: add JWT token refresh endpoint
+```
+<type>(<optional scope>): <short summary>
 
-- Implement POST /auth/refresh endpoint
-- Add token rotation mechanism
-- Include tests for refresh logic"
-
-# Bug fix - identifies what was broken
-git commit -m "fix: resolve null pointer in case service when party is undefined"
-
-# Documentation - specific about what changed
-git commit -m "docs: update API documentation for authentication endpoints"
-
-# Refactoring - explains why change was made
-git commit -m "refactor: extract case retrieval logic into separate method
-
-Improves code reusability across multiple endpoints"
-
-# Tests - descriptive about coverage
-git commit -m "test: add unit tests for case service
-
-- Test case creation with valid data
-- Test validation for missing fields
-- Test error handling"
+<optional body — explain what and why, not how>
 ```
 
-### Conventional Commit Types
+The summary line must be **under 72 characters** and written in the imperative mood ("add", not "added" or "adds").
 
-| Type | Usage | Example |
-|------|-------|---------|
-| `feat` | New feature | `feat: add password reset functionality` |
-| `fix` | Bug fix | `fix: correct case status update logic` |
-| `docs` | Documentation changes | `docs: update setup instructions` |
-| `style` | Formatting (no logic changes) | `style: format code with prettier` |
-| `refactor` | Code restructuring | `refactor: simplify authentication service` |
-| `perf` | Performance improvements | `perf: optimize database query` |
-| `test` | Add or update tests | `test: add test coverage for auth` |
-| `chore` | Build, deps, etc. | `chore: update dependencies` |
-| `ci` | CI/CD changes | `ci: add GitHub Actions workflow` |
+### Commit types
+
+| Type | When to use | Example |
+|------|-------------|---------|
+| `feat` | New feature or capability | `feat: add password reset endpoint` |
+| `fix` | Bug fix | `fix: resolve null pointer in case service` |
+| `docs` | Documentation only | `docs: add bug reporting guide to CONTRIBUTING` |
+| `style` | Formatting, whitespace — no logic change | `style: reformat CaseController with google-java-format` |
+| `refactor` | Code restructure with no behaviour change | `refactor: extract token validation into helper` |
+| `perf` | Performance improvement | `perf: batch evidence hash verification` |
+| `test` | Add or update tests | `test: cover edge cases in case status transitions` |
+| `chore` | Build config, dependency updates | `chore: bump spring-boot to 3.2.5` |
+| `ci` | CI/CD workflow changes | `ci: add vitest step to GitHub Actions` |
+
+### Examples
+
+```bash
+# Single-line — simple change
+git commit -m "fix: correct HTTP status code for duplicate case filing"
+
+# Multi-line — complex change with context
+git commit -m "feat: add JWT token refresh endpoint
+
+Implements POST /api/auth/refresh using token rotation.
+Old refresh tokens are invalidated on use to prevent replay attacks.
+Includes unit tests for success, expiry, and reuse scenarios."
+
+# Docs change
+git commit -m "docs: add reporting bugs section to CONTRIBUTING.md"
+
+# Test-only change
+git commit -m "test: add vitest coverage for CaseList component"
+```
+
+### What makes a bad commit message
+
+```bash
+# Too vague
+git commit -m "fix stuff"
+git commit -m "update"
+git commit -m "WIP"
+
+# Wrong tense / not imperative
+git commit -m "fixed the bug"
+git commit -m "adding new feature"
+```
 
 <hr/>
 
@@ -749,9 +830,9 @@ docker-compose logs db
 #### Tests Failing Unexpectedly
 ```bash
 # Run with verbose output
-mvn test -X              # Backend
-npm test -- --verbose   # Frontend
-pytest -v tests/        # Python
+mvn test -X                    # Backend
+npx vitest run --reporter=verbose  # Frontend
+pytest -v tests/               # Python
 
 # Check for environment variables
 echo $DATABASE_URL
