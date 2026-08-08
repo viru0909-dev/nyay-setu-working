@@ -95,15 +95,34 @@ export default function UpcomingFeatures() {
         }
     ];
 
-    const PHASES = t('upcomingFeatures.phases',{
+    const PHASES = t('upcomingFeatures.phases', {
         returnObjects: true,
     });
+
+    // i18next can return a string (or undefined) when translation keys are missing.
+    // Ensure we always have arrays so .map() never fails and the section never collapses.
+    const phasesArray = Array.isArray(PHASES) ? PHASES : [];
+
 
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', position: 'relative' }}>
             <Header />
 
             <main style={{ paddingTop: '80px' }}>
+                <div style={{ padding: '0 2rem', maxWidth: '1200px', margin: '0 auto' }}>
+                    {/* If translations fail to load, show at least the section structure */}
+                    {(!phasesArray || phasesArray.length === 0) && (
+                        <div style={{
+                            color: 'var(--text-secondary)',
+                            textAlign: 'center',
+                            padding: '1.5rem 0',
+                            opacity: 0.9,
+                        }}>
+                            {t('upcomingFeatures.phasesFallback', 'Roadmap will be available soon.')}
+                        </div>
+                    )}
+                </div>
+
                 {/* Hero Section */}
                 <section style={{
                     padding: '6rem 2rem 4rem',
@@ -172,7 +191,7 @@ export default function UpcomingFeatures() {
                             gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
                             gap: '1.5rem',
                         }}>
-                            {PHASES.map((phase, i) => (
+                            {phasesArray.map((phase, i) => (
                                 <motion.div
                                     key={phase.num}
                                     initial={{ opacity: 0, y: 20 }}
@@ -212,7 +231,7 @@ export default function UpcomingFeatures() {
                 <section style={{ padding: '2rem 2rem 6rem' }}>
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <div style={{ display: 'grid', gap: '2rem' }}>
-                            {FEATURES.map((feature, i) => {
+                            {(Array.isArray(FEATURES) && FEATURES.length ? FEATURES : FEATURES).map((feature, i) => {
                                 const Icon = feature.icon;
                                 const isEven = i % 2 === 0;
                                 
