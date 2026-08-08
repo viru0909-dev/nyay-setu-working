@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import { caseAPI, lawyerAPI } from '../../services/api';
+import useUpcomingHearings from '../../hooks/useUpcomingHearings';
+import HearingReminderCard from '../../components/dashboard/HearingReminderCard';
 import {
     Briefcase,
     Users,
@@ -18,7 +20,8 @@ import {
     CheckCircle2,
     AlertCircle,
     Loader2,
-    X
+    X,
+    Bell
 } from 'lucide-react';
 
 export default function LawyerDashboard() {
@@ -30,6 +33,9 @@ export default function LawyerDashboard() {
     const [newCase, setNewCase] = useState({ title: '', description: '', caseType: 'CIVIL' });
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // Fetch upcoming hearings
+    const { upcomingHearings, nearestHearing, loading: hearingsLoading, error: hearingsError } = useUpcomingHearings();
 
     useEffect(() => {
         loadData();
@@ -69,6 +75,12 @@ export default function LawyerDashboard() {
     const handleLogout = () => {
         logout();
         navigate('/login');
+    };
+
+    const handleViewHearing = (hearing) => {
+        if (hearing.caseId) {
+            navigate(`/lawyer/case/${hearing.caseId}`);
+        }
     };
 
     const filteredCases = cases.filter(c =>
@@ -170,6 +182,107 @@ export default function LawyerDashboard() {
                 <QuickStat icon={<CheckCircle2 size={22} />} label="Resolved" value={stats.resolvedCases} color="var(--color-success)" />
                 <QuickStat icon={<Users size={22} />} label="Total Clients" value={stats.activeClients} color="var(--color-secondary)" />
             </div>
+
+            {/* Hearing Reminders Section */}
+            {!hearingsLoading && upcomingHearings.length > 0 && (
+                <div style={{
+                    background: 'var(--bg-glass-strong)',
+                    backdropFilter: 'var(--glass-blur)',
+                    border: 'var(--border-glass-strong)',
+                    borderRadius: '1.5rem',
+                    padding: '1.5rem',
+                    boxShadow: 'var(--shadow-glass)',
+                    marginBottom: '2.5rem'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <div style={{
+                            width: '44px', height: '44px', borderRadius: '12px',
+                            background: 'var(--bg-glass)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                            <Bell size={24} color="var(--color-accent)" />
+                        </div>
+                        <div>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                Upcoming Hearings
+                                <span style={{
+                                    background: 'var(--color-accent)',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    width: '28px',
+                                    height: '28px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.8rem',
+                                    fontWeight: '700'
+                                }}>
+                                    {upcomingHearings.length}
+                                </span>
+                            </h3>
+                            <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0 0', fontSize: '0.9rem' }}>
+                                {nearestHearing && `Next hearing: ${nearestHearing.formattedDate}`}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Hearing Cards Grid */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                        gap: '1.25rem'
+                    }}>
+                        {upcomingHearings.map((hearing, idx) => (
+                            <HearingReminderCard
+                                key={hearing.id || idx}
+                                hearing={hearing}
+                                isNearest={nearestHearing?.id === hearing.id}
+                                onViewDetails={handleViewHearing}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Empty State - No Upcoming Hearings */}
+            {!hearingsLoading && upcomingHearings.length === 0 && !hearingsError && (
+                <div style={{
+                    background: 'var(--bg-glass-strong)',
+                    backdropFilter: 'var(--glass-blur)',
+                    border: 'var(--border-glass-strong)',
+                    borderRadius: '1.5rem',
+                    padding: '2rem',
+                    boxShadow: 'var(--shadow-glass)',
+                    marginBottom: '2.5rem',
+                    textAlign: 'center'
+                }}>
+                    <Bell size={48} color="var(--text-secondary)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>No Upcoming Hearings</h3>
+                    <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontSize: '0.95rem' }}>
+                        You have no scheduled hearings at the moment. New hearings will appear here when scheduled.
+                    </p>
+                </div>
+            )}
+
+            {/* Error State - Failed to Load Hearings */}
+            {hearingsError && (
+                <div style={{
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    borderRadius: '1rem',
+                    padding: '1.5rem',
+                    marginBottom: '2.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem'
+                }}>
+                    <AlertCircle size={24} color="var(--color-error)" style={{ flexShrink: 0 }} />
+                    <div>
+                        <p style={{ fontWeight: '700', color: 'var(--color-error)', margin: 0 }}>Error Loading Hearings</p>
+                        <p style={{ color: 'var(--text-secondary)', margin: '0.25rem 0 0 0', fontSize: '0.9rem' }}>{hearingsError}</p>
+                    </div>
+                </div>
+            )}
 
             {/* Cases List Area */}
             <div style={{
