@@ -8,11 +8,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
 import FaceCapture from '../../components/auth/FaceCapture';
 import { useFaceRecognition } from '../../hooks/useFaceRecognition';
+import { profileAPI } from '../../services/api';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
 export default function ProfilePage() {
     const { t } = useTranslation('litigant');
     const { user, token } = useAuthStore();
+    const { themePreference, setThemePreference } = useTheme();
     const [editing, setEditing] = useState(false);
     const [showFaceEnrollment, setShowFaceEnrollment] = useState(false);
     const { enrollFace, deleteFace } = useFaceRecognition();
@@ -61,6 +64,35 @@ export default function ProfilePage() {
         confirm: ''
     });
 
+    useEffect(() => {
+        if (!user?.id) {
+            return;
+        }
+
+        let cancelled = false;
+
+        const loadThemePreference = async () => {
+            try {
+                const response = await profileAPI.getByUserId(user.id);
+                const storedPreference = response.data?.themePreference;
+
+                if (!cancelled && ['light', 'dark', 'system'].includes(storedPreference)) {
+                    setThemePreference(storedPreference);
+                }
+            } catch (error) {
+                if (error?.response?.status !== 404) {
+                    console.error('Failed to load profile theme preference:', error);
+                }
+            }
+        };
+
+        loadThemePreference();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [setThemePreference, user?.id]);
+
     const handleEnrollFace = async (descriptor) => {
         try {
             await enrollFace(descriptor, token);
@@ -81,6 +113,27 @@ export default function ProfilePage() {
             } catch (err) {
                 alert(`${t('profile.deleteFaceFailed')}: ${err.message}`);
             }
+        }
+    };
+
+    const handleThemeChange = async (nextTheme) => {
+        if (!['light', 'dark', 'system'].includes(nextTheme)) {
+            return;
+        }
+
+        setThemePreference(nextTheme);
+
+        if (!user?.id) {
+            return;
+        }
+
+        try {
+            await profileAPI.createOrUpdate({
+                userId: user.id,
+                themePreference: nextTheme,
+            });
+        } catch (error) {
+            console.error('Failed to save theme preference:', error);
         }
     };
 
@@ -400,11 +453,11 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
-                        <div style={{ marginTop: '1.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                                {t('profile.address')}
-                            </label>
-                            <div style={{
+                    <div style={{ marginTop: '1.5rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
+                            {t('profile.address')}
+                        </label>
+                        <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.75rem',
@@ -432,6 +485,72 @@ export default function ProfilePage() {
                                     <span style={{ color: 'var(--text-main)', fontSize: '1rem' }}>{profileData.address}</span>
                                 )}
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Theme Preference */}
+                    <div style={{
+                        background: 'var(--bg-glass-strong)',
+                        backdropFilter: 'var(--glass-blur)',
+                        border: 'var(--border-glass-strong)',
+                        borderRadius: '1.5rem',
+                        padding: '2rem',
+                        boxShadow: 'var(--shadow-glass)'
+                    }}>
+                        <div style={{ marginBottom: '1.25rem' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.35rem' }}>
+                                Theme
+                            </h3>
+                            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                                Choose how NyaySetu should appear across your devices.
+                            </p>
+                        </div>
+
+                        <div
+                            role="radiogroup"
+                            aria-label="Theme preference"
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                                gap: '0.75rem',
+                            }}
+                        >
+                            {[
+                                { value: 'light', label: 'Light' },
+                                { value: 'dark', label: 'Dark' },
+                                { value: 'system', label: 'System' },
+                            ].map((option) => {
+                                const isActive = themePreference === option.value;
+
+                                return (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={isActive}
+                                        onClick={() => handleThemeChange(option.value)}
+                                        style={{
+                                            padding: '0.95rem 0.9rem',
+                                            borderRadius: '1rem',
+                                            border: isActive ? '1px solid var(--color-primary)' : 'var(--border-glass)',
+                                            background: isActive ? 'rgba(99, 102, 241, 0.12)' : 'var(--bg-glass)',
+                                            color: isActive ? 'var(--color-primary)' : 'var(--text-main)',
+                                            fontSize: '0.95rem',
+                                            fontWeight: '700',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s ease',
+                                            boxShadow: isActive ? '0 8px 24px rgba(99, 102, 241, 0.12)' : 'none'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-start' }}>
+                                            <span>{option.label}</span>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: '600', color: isActive ? 'var(--color-primary)' : 'var(--text-secondary)' }}>
+                                                {option.value === 'system' ? 'Follow device preference' : 'Always use this theme'}
+                                            </span>
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 

@@ -8,13 +8,45 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
 import FaceCapture from '../../components/auth/FaceCapture';
 import { useFaceRecognition } from '../../hooks/useFaceRecognition';
+import { profileAPI } from '../../services/api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function LawyerProfilePage() {
     const { user, token, logout } = useAuthStore();
+    const { themePreference, setThemePreference } = useTheme();
     const [isEditing, setIsEditing] = useState(false);
     const [showFaceEnrollment, setShowFaceEnrollment] = useState(false);
     const { enrollFace, deleteFace } = useFaceRecognition();
     const [faceEnabled, setFaceEnabled] = useState(false);
+
+    useEffect(() => {
+        if (!user?.id) {
+            return;
+        }
+
+        let cancelled = false;
+
+        const loadThemePreference = async () => {
+            try {
+                const response = await profileAPI.getByUserId(user.id);
+                const storedPreference = response.data?.themePreference;
+
+                if (!cancelled && ['light', 'dark', 'system'].includes(storedPreference)) {
+                    setThemePreference(storedPreference);
+                }
+            } catch (error) {
+                if (error?.response?.status !== 404) {
+                    console.error('Failed to load lawyer profile theme preference:', error);
+                }
+            }
+        };
+
+        loadThemePreference();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [setThemePreference, user?.id]);
 
     const handleEnrollFace = async (descriptor) => {
         try {
@@ -36,6 +68,27 @@ export default function LawyerProfilePage() {
             } catch (err) {
                 alert('Failed to delete face data: ' + err.message);
             }
+        }
+    };
+
+    const handleThemeChange = async (nextTheme) => {
+        if (!['light', 'dark', 'system'].includes(nextTheme)) {
+            return;
+        }
+
+        setThemePreference(nextTheme);
+
+        if (!user?.id) {
+            return;
+        }
+
+        try {
+            await profileAPI.createOrUpdate({
+                userId: user.id,
+                themePreference: nextTheme,
+            });
+        } catch (error) {
+            console.error('Failed to save lawyer theme preference:', error);
         }
     };
 
@@ -186,6 +239,50 @@ export default function LawyerProfilePage() {
                                 <div style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '1.1rem' }}>{sec.value}</div>
                             </div>
                         ))}
+                    </div>
+
+                    <div style={glassStyle}>
+                        <div style={{ marginBottom: '1.25rem' }}>
+                            <h3 style={{ color: 'var(--text-main)', margin: '0 0 0.35rem', fontSize: '1.25rem', fontWeight: '800' }}>Theme</h3>
+                            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                                Pick how the dashboard should look on this device.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '0.75rem' }}>
+                            {[
+                                { value: 'light', label: 'Light' },
+                                { value: 'dark', label: 'Dark' },
+                                { value: 'system', label: 'System' },
+                            ].map((option) => {
+                                const isActive = themePreference === option.value;
+
+                                return (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() => handleThemeChange(option.value)}
+                                        style={{
+                                            padding: '0.95rem 0.9rem',
+                                            borderRadius: '1rem',
+                                            border: isActive ? '1px solid var(--color-accent-light)' : 'var(--border-glass-subtle)',
+                                            background: isActive ? 'rgba(139, 92, 246, 0.12)' : 'var(--bg-glass-subtle)',
+                                            color: isActive ? 'var(--color-accent-light)' : 'var(--text-main)',
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            fontWeight: '700'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                            <span>{option.label}</span>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: '600', color: isActive ? 'var(--color-accent-light)' : 'var(--text-secondary)' }}>
+                                                {option.value === 'system' ? 'Follow device preference' : 'Always use this theme'}
+                                            </span>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
 
                     <div style={glassStyle}>

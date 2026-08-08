@@ -1,18 +1,45 @@
 // global theme context — handles light/dark mode for the whole app
-// stores preference in localStorage, reads system pref on first visit
+// stores the user's preference in localStorage and resolves "system" via OS settings
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 
 const ThemeContext = createContext(null);
 const STORAGE_KEY = 'nyaysetu_theme';
+const VALID_PREFERENCES = new Set(['light', 'dark', 'system']);
+
+const getSystemTheme = () => {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+        return 'light';
+    }
+
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
+const normalizePreference = (value) => (VALID_PREFERENCES.has(value) ? value : 'system');
+
+const resolveTheme = (preference, systemTheme) => (preference === 'system' ? systemTheme : preference);
+
+const getStoredPreference = () => {
+    try {
+        return normalizePreference(localStorage.getItem(STORAGE_KEY));
+    } catch {
+        return 'system';
+    }
+};
 
 export function ThemeProvider({ children }) {
-    const [theme, setTheme] = useState(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) return saved;
-        // fallback to OS preference on first load
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    });
+    const [themePreference, setThemePreferenceState] = useState(getStoredPreference);
+    const [systemTheme, setSystemTheme] = useState(getSystemTheme);
+    const theme = resolveTheme(themePreference, systemTheme);
+
+    const setThemePreference = useCallback((nextPreference) => {
+        const normalized = normalizePreference(nextPreference);
+        setThemePreferenceState(normalized);
+
+        if (normalized === 'system') {
+            setSystemTheme(getSystemTheme());
+        }
+    }, []);
 
     // set data-theme on <html> so CSS variables switch automatically
     useEffect(() => {
@@ -22,25 +49,41 @@ export function ThemeProvider({ children }) {
         } else {
             root.removeAttribute('data-theme');
         }
-        localStorage.setItem(STORAGE_KEY, theme);
-    }, [theme]);
+        root.style.colorScheme = theme;
 
-    // follow OS changes only if user hasn't picked manually
+        try {
+            localStorage.setItem(STORAGE_KEY, themePreference);
+        } catch {
+            // ignore storage write failures
+        }
+    }, [theme, themePreference]);
+
     useEffect(() => {
+        if (typeof window === 'undefined' || !window.matchMedia) {
+            return undefined;
+        }
+
         const mq = window.matchMedia('(prefers-color-scheme: dark)');
         const handler = (e) => {
-            if (!localStorage.getItem(STORAGE_KEY)) {
-                setTheme(e.matches ? 'dark' : 'light');
-            }
+            setSystemTheme(e.matches ? 'dark' : 'light');
         };
+
+        setSystemTheme(mq.matches ? 'dark' : 'light');
         mq.addEventListener('change', handler);
         return () => mq.removeEventListener('change', handler);
     }, []);
 
-    const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+    const toggleTheme = useCallback(() => setThemePreference(theme === 'dark' ? 'light' : 'dark'), [setThemePreference, theme]);
+
+    const contextValue = useMemo(() => ({
+        theme,
+        themePreference,
+        setThemePreference,
+        toggleTheme,
+    }), [theme, themePreference, setThemePreference, toggleTheme]);
 
     return (
-        <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ThemeContext.Provider value={contextValue}>
             {children}
         </ThemeContext.Provider>
     );

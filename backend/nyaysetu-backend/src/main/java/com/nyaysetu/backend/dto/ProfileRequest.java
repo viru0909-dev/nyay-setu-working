@@ -14,6 +14,9 @@ public class ProfileRequest {
     private String city;    // optional
     private String state;   // optional
     private String country; // optional
+    
+    @Pattern(regexp = "^(light|dark|system)$", message = "Theme preference must be light, dark, or system")
+    private String themePreference; // optional
 
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits")
     private String phone;   // optional but validated if provided
