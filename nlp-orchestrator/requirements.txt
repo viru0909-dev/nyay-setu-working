@@ -25,7 +25,7 @@ torchvision
 uvicorn[standard]==0.27.1
  
 # ─── RAG retrieval (new in this PR) ───────────────────────────────────────────
-sentence-transformers>=2.7.0   # bi-encoder embeddings + cross-encoder rerank
+sentence-transformers>=5.5.1   # bi-encoder embeddings + cross-encoder rerank
 chromadb>=1.5.9                # persistent vector store (file-backed)
 tiktoken>=0.13.0                # token-aware chunking
 opencv-python-headless>=4.8.0
