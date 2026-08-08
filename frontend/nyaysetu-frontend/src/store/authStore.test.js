@@ -13,6 +13,27 @@ const createMemoryStorage = () => {
     };
 };
 
+// Polyfill globalThis.localStorage for Node 20+ JSDOM test environments
+if (typeof window !== 'undefined' && window.localStorage) {
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: window.localStorage,
+    writable: true,
+    configurable: true
+  });
+} else {
+  const store = {};
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: {
+      getItem: (key) => store[key] || null,
+      setItem: (key, value) => { store[key] = String(value); },
+      removeItem: (key) => { delete store[key]; },
+      clear: () => { for (const key in store) { delete store[key]; } }
+    },
+    writable: true,
+    configurable: true
+  });
+}
+
 describe('authStore', () => {
     let storage;
     let ls;
