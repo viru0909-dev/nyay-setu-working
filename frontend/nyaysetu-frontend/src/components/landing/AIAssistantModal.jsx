@@ -69,6 +69,29 @@ const sendMessage = async (text, { appendUserMessage = true } = {}) => {
         const userMessage = { role: 'user', content: text };
         setMessages(prev => [...prev, userMessage]);
         setInputMessage('');
+        setIsLoading(true);
+        try {
+            const response = await brainAPI.chat(text, sessionId);
+            const aiMessage = { role: 'ai', content: response.data.message };
+            setMessages(prev => [...prev, aiMessage]);
+            if (response.data.sessionId) setSessionId(response.data.sessionId);
+        } catch (error) {
+            const isNetworkError = !error.response;
+            const errorMessage = {
+                role: 'ai',
+                content: isNetworkError
+                    ? (language === 'en'
+                        ? 'The AI service is temporarily unavailable. Please try again later.'
+                        : 'AI सेवा अस्थायी रूप से अनुपलब्ध है। कृपया बाद में पुनः प्रयास करें।')
+                    : (language === 'en'
+                        ? 'Sorry, I encountered an error. Please try again.'
+                        : 'क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।')
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
     }
 
     setIsLoading(true);
