@@ -80,9 +80,11 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
     const menuItems =
         roleMenuItems[normalizedRole] || [];
 
-    console.log('User Role:', userRole);
-    console.log('Normalized Role:', normalizedRole);
-    console.log('Menu Items:', menuItems);
+    if (import.meta.env.DEV) {
+        console.log('User Role:', userRole);
+        console.log('Normalized Role:', normalizedRole);
+        console.log('Menu Items:', menuItems);
+    }
 
 
     // Listen for window resize to detect mobile/desktop
@@ -208,7 +210,7 @@ export default function Sidebar({ userRole, isMobileOpen, onMobileClose }) {
                                 key={index}
                                 to={item.path || '#'}
                                 onClick={() => {
-                                    console.log('Navigating to:', item.path);
+                                    if (import.meta.env.DEV) console.log('Navigating to:', item.path);
                                     if (isMobile) onMobileClose?.();
                                 }}
 

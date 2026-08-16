@@ -7,7 +7,7 @@ export function useOfflineSync() {
     useEffect(() => {
         const handleOnline = async () => {
             setIsOffline(false);
-            console.log('App is online. Attempting to sync offline data...');
+            if (import.meta.env.DEV) console.log('App is online. Attempting to sync offline data...');
             
             try {
                 // Fetch all unsynced outbox items
@@ -29,7 +29,7 @@ export function useOfflineSync() {
                             console.error('Failed to sync item:', item, err);
                         }
                     }
-                    console.log('Sync completed.');
+                    if (import.meta.env.DEV) console.log('Sync completed.');
                 }
             } catch (err) {
                 console.error('Error accessing IndexedDB for sync:', err);
