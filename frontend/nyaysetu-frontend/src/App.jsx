@@ -59,6 +59,7 @@ const UpcomingFeatures = retryLazy(() => import('./pages/UpcomingFeatures'));
 const FAQ = retryLazy(() => import('./pages/FAQ'));
 const Contact = retryLazy(() => import('./pages/Contact'));
 import OAuthSuccess from './pages/OAuthSuccess';
+import UnauthorizedPage from './pages/Unauthorized';
 
 // Dashboard Layout
 const DashboardLayout = retryLazy(() => import('./layouts/DashboardLayout'));
@@ -182,12 +183,6 @@ function KeyboardAccessibilityProvider({ user }) {
 }
 
 // Fixed-Reference Fallback Views
-const UnauthorizedView = () => (
-    <div style={{ textAlign: 'center', padding: '3rem' }}>
-        <h1>Unauthorized</h1>
-        <p>You don't have permission to access this page.</p>
-    </div>
-);
 
 const NotFoundView = () => (
     <div style={{ textAlign: 'center', padding: '3rem' }}>
@@ -337,7 +332,7 @@ function App({ swRegistration }) {
                                 </Route>
                                 
                                 {/* Core Catch-All Directives */}
-                                <Route path="/unauthorized" element={<UnauthorizedView />} />
+                                <Route path="/unauthorized" element={<UnauthorizedPage />} />
                                 <Route path="*" element={<NotFoundView />} />
                             </Routes>
                         </Suspense>
