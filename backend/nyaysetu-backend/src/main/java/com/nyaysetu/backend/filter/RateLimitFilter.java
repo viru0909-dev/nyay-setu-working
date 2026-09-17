@@ -1,82 +1,39 @@
 package com.nyaysetu.backend.filter;
 
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.ConsumptionProbe;
-import io.github.bucket4j.Refill;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import java.util.concurrent.TimeUnit;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import java.util.concurrent.TimeUnit;
 
 /**
  * RateLimitFilter
  *
- * Protects authentication endpoints from:
- * - Brute-force attacks
- * - Credential stuffing attacks
- *
- * Strategy:
- * - IP-based rate limiting
- * - Bucket4j token bucket algorithm
- * - 5 requests per minute per IP
- *
- * Protected endpoints:
- * - /api/v1/auth/login
- * - /api/v1/auth/register
- * - /api/v1/auth/forgot-password
+ * Distributed Redis-based Rate Limiter to protect endpoints from abuse, credential stuffing,
+ * and high resource usage (DoS).
  */
 @Component
 @Slf4j
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    /**
-     * Stores token buckets for each client IP.
-     * Caffeine cache with automatic expiry.
-     */
-    private final Cache<String, Bucket> cache = Caffeine.newBuilder()
-            .maximumSize(100_000)
-            .expireAfterAccess(2, TimeUnit.MINUTES)
-            .build();
+    @Autowired(required = false)
+    private StringRedisTemplate redisTemplate;
 
-    /**
-     * Maximum allowed requests per minute.
-     */
-    private static final int REQUESTS_PER_MINUTE = 5;
+    @Value("${rate.limit.enabled:true}")
+    private boolean rateLimitEnabled;
 
-    /**
-     * Refill duration in minutes.
-     */
-    private static final long REFILL_DURATION_MINUTES = 1;
-
-    /**
-     * Rate limits for AI endpoints (per authenticated user).
-     */
-    private static final int AI_CHAT_REQUESTS_PER_MINUTE = 20;
-    private static final int AI_DOC_REQUESTS_PER_MINUTE = 5;
-
-    /**
-     * Separate per-user buckets for AI endpoints.
-     */
-    private final Map<String, Bucket> chatBucketCache = new ConcurrentHashMap<>();
-    private final Map<String, Bucket> docBucketCache = new ConcurrentHashMap<>();
+    private static final int AUTH_LIMIT = 5;
+    private static final int AI_CHAT_LIMIT = 20;
+    private static final int AI_DOC_LIMIT = 5;
 
     @Override
     protected void doFilterInternal(
@@ -85,147 +42,104 @@ public class RateLimitFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        if (!rateLimitEnabled || redisTemplate == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String requestPath = request.getRequestURI();
 
-        // --- Existing: Auth endpoint rate limiting (IP-based) ---
-        if (isRateLimitedEndpoint(requestPath)) {
-
+        if (isAuthEndpoint(requestPath)) {
             String clientIp = getClientIp(request);
-
-            // Use Caffeine's get(key, mappingFunction) — NOT computeIfAbsent
-            Bucket bucket = cache.get(clientIp, ip -> createNewBucket());
-
-            ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
-
-            if (probe.isConsumed()) {
-                long remainingTokens = probe.getRemainingTokens();
-                response.setHeader("X-RateLimit-Limit", String.valueOf(REQUESTS_PER_MINUTE));
-                response.setHeader("X-RateLimit-Remaining", String.valueOf(remainingTokens));
-                response.setHeader("X-RateLimit-Reset", String.valueOf(System.currentTimeMillis() + 60000));
-                log.debug("Rate limit passed for IP: {} on endpoint: {} | Remaining tokens: {}", clientIp, requestPath, remainingTokens);
-                filterChain.doFilter(request, response);
-
-            } else {
-                long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-                log.warn("Rate limit exceeded for IP: {} on endpoint: {}", clientIp, requestPath);
-                writeRateLimitResponse(response, waitForRefill, REQUESTS_PER_MINUTE);
-            }
-
-        // --- NEW: AI endpoint rate limiting (per authenticated user) ---
-        } else if (isAiChatEndpoint(requestPath) || isAiDocEndpoint(requestPath)) {
-
-            String userId = extractUserId(request);
-
-            Map<String, Bucket> bucketCache = isAiChatEndpoint(requestPath) ? chatBucketCache : docBucketCache;
-            int limit = isAiChatEndpoint(requestPath) ? AI_CHAT_REQUESTS_PER_MINUTE : AI_DOC_REQUESTS_PER_MINUTE;
-
-            Bucket bucket = bucketCache.computeIfAbsent(userId, id -> createBucketWithLimit(limit));
-            ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
-
-            if (probe.isConsumed()) {
-                response.setHeader("X-RateLimit-Limit", String.valueOf(limit));
-                response.setHeader("X-RateLimit-Remaining", String.valueOf(probe.getRemainingTokens()));
-                log.debug("AI rate limit passed for user: {} on endpoint: {}", userId, requestPath);
-                filterChain.doFilter(request, response);
-            } else {
-                long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-                log.warn("AI rate limit exceeded for user: {} on endpoint: {}", userId, requestPath);
-                writeRateLimitResponse(response, waitForRefill, limit);
-            }
-
+            String key = "ratelimit:auth:ip:" + clientIp;
+            checkRateLimit(key, AUTH_LIMIT, response, filterChain, request);
+        } else if (isAiChatEndpoint(requestPath)) {
+            String identifier = getUserIdentifier(request);
+            String key = "ratelimit:aichat:" + identifier;
+            checkRateLimit(key, AI_CHAT_LIMIT, response, filterChain, request);
+        } else if (isAiDocOrExpensiveEndpoint(requestPath)) {
+            String identifier = getUserIdentifier(request);
+            String key = "ratelimit:aidoc:" + identifier;
+            checkRateLimit(key, AI_DOC_LIMIT, response, filterChain, request);
         } else {
-            // Non-rate-limited endpoints pass through
             filterChain.doFilter(request, response);
         }
     }
 
-    /**
-     * Creates a token bucket with:
-     * - Capacity: 5 requests
-     * - Refill: every 1 minute
-     */
-    private Bucket createNewBucket() {
-        Bandwidth limit = Bandwidth.classic(
-                REQUESTS_PER_MINUTE,
-                Refill.intervally(
-                        REQUESTS_PER_MINUTE,
-                        Duration.ofMinutes(REFILL_DURATION_MINUTES)
-                )
-        );
-        return Bucket.builder()
-                .addLimit(limit)
-                .build();
+    private void checkRateLimit(
+            String key,
+            int limit,
+            HttpServletResponse response,
+            FilterChain filterChain,
+            HttpServletRequest request
+    ) throws ServletException, IOException {
+        try {
+            Long count = redisTemplate.opsForValue().increment(key);
+            if (count == null) {
+                // If Redis fails to increment, fail-open to not block users, but log a warning.
+                log.warn("Redis rate limit increment returned null for key: {}. Bypassing rate limiting.", key);
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            if (count == 1) {
+                redisTemplate.expire(key, Duration.ofMinutes(1));
+            }
+
+            if (count <= limit) {
+                response.setHeader("X-RateLimit-Limit", String.valueOf(limit));
+                response.setHeader("X-RateLimit-Remaining", String.valueOf(limit - count));
+                response.setHeader("X-RateLimit-Reset", String.valueOf(System.currentTimeMillis() + 60000));
+                filterChain.doFilter(request, response);
+            } else {
+                Long expire = redisTemplate.getExpire(key);
+                long retryAfter = (expire != null && expire > 0) ? expire : 60;
+                log.warn("Rate limit exceeded for key: {} on endpoint: {}", key, request.getRequestURI());
+                writeRateLimitResponse(response, retryAfter, limit);
+            }
+        } catch (Exception e) {
+            // Fail-open: if Redis connection is down, allow request but log the error
+            log.error("Redis rate limiting error for key: {}. Bypassing rate limiting.", key, e);
+            filterChain.doFilter(request, response);
+        }
     }
 
-    /**
-     * Checks whether current endpoint
-     * should be protected by rate limiting.
-     */
-    private boolean isRateLimitedEndpoint(String path) {
+    private boolean isAuthEndpoint(String path) {
         return path.matches("^/api/v1/auth/(login|register|forgot-password)$");
     }
 
-    /**
-     * Extracts client IP address.
-     *
-     * Supports:
-     * - X-Forwarded-For
-     * - X-Real-IP
-     */
+    private boolean isAiChatEndpoint(String path) {
+        return path.startsWith("/api/v1/vakil-friend/chat")
+                || path.startsWith("/api/v1/brain/chat");
+    }
+
+    private boolean isAiDocOrExpensiveEndpoint(String path) {
+        return path.contains("/analyze-document")
+                || path.startsWith("/api/v1/documents/generate")
+                || path.startsWith("/api/v1/police/fir/upload")
+                || path.startsWith("/api/v1/brain/analyze-case")
+                || path.startsWith("/api/v1/brain/suggest-documents");
+    }
+
     private String getClientIp(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
             return xForwardedFor.split(",")[0].trim();
         }
-
         String xRealIp = request.getHeader("X-Real-IP");
         if (xRealIp != null && !xRealIp.isEmpty()) {
             return xRealIp;
         }
-
         return request.getRemoteAddr();
     }
 
-    /**
-     * Checks if endpoint is the Vakil Friend chat endpoint.
-     */
-    private boolean isAiChatEndpoint(String path) {
-        return path.startsWith("/api/vakil-friend/chat");
-    }
-
-    /**
-     * Checks if endpoint is a document analysis endpoint.
-     */
-    private boolean isAiDocEndpoint(String path) {
-        return path.startsWith("/api/vakil-friend/analyze")
-                || path.startsWith("/api/evidence/upload");
-    }
-
-    /**
-     * Creates a bucket with a custom per-minute limit.
-     */
-    private Bucket createBucketWithLimit(int requestsPerMinute) {
-        Bandwidth limit = Bandwidth.classic(
-                requestsPerMinute,
-                Refill.intervally(requestsPerMinute, Duration.ofMinutes(1))
-        );
-        return Bucket.builder().addLimit(limit).build();
-    }
-
-    /**
-     * Extracts authenticated user ID from JWT principal.
-     * Falls back to IP address if user is not authenticated.
-     */
-    private String extractUserId(HttpServletRequest request) {
+    private String getUserIdentifier(HttpServletRequest request) {
         if (request.getUserPrincipal() != null) {
             return "user:" + request.getUserPrincipal().getName();
         }
         return "ip:" + getClientIp(request);
     }
 
-    /**
-     * Writes a standard HTTP 429 JSON response.
-     */
     private void writeRateLimitResponse(HttpServletResponse response, long waitSeconds, int limit) throws IOException {
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         response.setContentType("application/json");
@@ -240,5 +154,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
         );
         response.getWriter().write(errorResponse);
         response.getWriter().flush();
+    }
+
+    // Package-private setter for unit testing
+    void setRedisTemplate(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
+    void setRateLimitEnabled(boolean rateLimitEnabled) {
+        this.rateLimitEnabled = rateLimitEnabled;
     }
 }
