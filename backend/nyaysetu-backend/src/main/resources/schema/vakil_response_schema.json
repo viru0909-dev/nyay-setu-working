@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VakilFriend Case Data Schema",
+  "description": "Validates the structured case data extracted from a Vakil-Friend conversation before it is persisted as a CaseEntity or FirRecord.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 255,
+      "description": "Short title describing the case or FIR."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Full narrative description of the incident or complaint."
+    },
+    "caseType": {
+      "type": "string",
+      "enum": ["CIVIL", "CRIMINAL", "FAMILY", "PROPERTY", "LABOUR", "CONSUMER", "OTHER"],
+      "description": "Legal category of the case."
+    },
+    "petitioner": {
+      "type": "string",
+      "minLength": 2,
+      "description": "Name of the person filing the case."
+    },
+    "respondent": {
+      "type": "string",
+      "minLength": 2,
+      "description": "Name of the opposing party."
+    },
+    "urgency": {
+      "type": "string",
+      "enum": ["LOW", "NORMAL", "HIGH", "CRITICAL"],
+      "description": "Urgency level of the case."
+    },
+    "target": {
+      "type": "string",
+      "enum": ["COURT", "POLICE", "FIR"],
+      "description": "Destination system for the case — court filing or FIR."
+    }
+  },
+  "required": ["title", "description", "caseType"],
+  "additionalProperties": true
+}

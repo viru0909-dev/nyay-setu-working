@@ -1,14 +1,14 @@
 package com.nyaysetu.backend.config;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-import java.time.Duration;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,49 +26,43 @@ public class HttpClientConfig {
     private int maxRetries;
 
     /**
-     * Forges a globally managed, centralized RestTemplate bean configured with 
-     * strict connection/read timeouts and an interceptor layer for safe retries.
+     * Provides a centralized RestTemplate bean with explicit timeouts
+     * and a retry interceptor for transient network errors.
+     *
+     * Note: RestTemplateBuilder injection was removed in Spring Boot 4.
+     * RestTemplate is constructed directly via SimpleClientHttpRequestFactory.
      */
     @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        RestTemplate restTemplate = builder
-                .connectTimeout(Duration.ofMillis(connectTimeout))
-                .readTimeout(Duration.ofMillis(readTimeout))
-                .build();
+    public RestTemplate restTemplate() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(connectTimeout);
+        factory.setReadTimeout(readTimeout);
 
-        // Enforce fallback request factory properties explicitly
-        if (restTemplate.getRequestFactory() instanceof SimpleClientHttpRequestFactory) {
-            SimpleClientHttpRequestFactory factory = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
-            factory.setConnectTimeout(connectTimeout);
-            factory.setReadTimeout(readTimeout);
-        }
+        RestTemplate restTemplate = new RestTemplate(factory);
 
-        // Wire up an atomic retry interceptor loop for transient network errors
-        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
-        if (interceptors == null) {
-            interceptors = new ArrayList<>();
-        }
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
         interceptors.add((request, body, execution) -> {
             int attempt = 0;
-            org.springframework.http.client.ClientHttpResponse response = null;
+            ClientHttpResponse response = null;
             while (attempt < maxRetries) {
                 try {
                     response = execution.execute(request, body);
-                    boolean isIdempotent = isIdempotentMethod(request.getMethod());
-                    if (response.getStatusCode().is2xxSuccessful() || !isIdempotent) {
+                    boolean idempotent = isIdempotentMethod(request.getMethod());
+                    if (response.getStatusCode().is2xxSuccessful() || !idempotent) {
                         return response;
                     }
                 } catch (Exception e) {
                     attempt++;
                     if (attempt >= maxRetries) {
-                        throw new RuntimeException("External service client communication fatal breakdown after " + attempt + " retry attempts.", e);
+                        throw new RuntimeException(
+                                "HTTP client fatal breakdown after " + attempt + " retry attempts.", e);
                     }
                 }
+                attempt++;
             }
             return response;
         });
         restTemplate.setInterceptors(interceptors);
-
         return restTemplate;
     }
 
