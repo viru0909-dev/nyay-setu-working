@@ -10,6 +10,7 @@ import com.nyaysetu.backend.entity.VisibilityLevel;
 import com.nyaysetu.backend.repository.CaseRepository;
 import com.nyaysetu.backend.repository.DocumentRepository;
 import com.nyaysetu.backend.repository.UserRepository;
+import com.nyaysetu.backend.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ public class DocumentManagementService {
     private final FileStorageService fileStorageService;
     private final DocumentAnalysisService documentAnalysisService;
     private final BlockchainService blockchainService;
+    private final AuditService auditService;
 
     @Transactional
     public DocumentDto uploadDocument(MultipartFile file, UploadDocumentRequest request, User uploader, String uploadIp) {
@@ -139,9 +141,20 @@ public class DocumentManagementService {
         return convertToDto(document);
     }
 
-    public Resource downloadDocument(UUID id) {
+    public Resource downloadDocument(UUID id, User user) {
         DocumentEntity document = documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
+        if (!canAccessDocument(document, user)) {
+            throw new com.nyaysetu.backend.exception.AccessDeniedException("You do not have access to this document");
+        }
+        // Log the file access to the audit trail
+        auditService.logCaseAction(
+                document.getCaseId(),
+                user.getId(),
+                user.getRole().name(),
+                "DOWNLOAD_DOCUMENT",
+                "Downloaded document: " + document.getFileName() + " (ID: " + document.getId() + ")"
+        );
         return fileStorageService.loadFileAsResource(document.getFileUrl());
     }
 

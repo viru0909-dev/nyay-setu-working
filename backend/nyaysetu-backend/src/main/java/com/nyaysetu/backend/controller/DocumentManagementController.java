@@ -234,7 +234,7 @@ public class DocumentManagementController {
         try {
             User user = authService.findByEmail(authentication.getName());
             DocumentDto metadata = documentManagementService.getDocumentById(id, user);
-            Resource resource = documentManagementService.downloadDocument(id);
+            Resource resource = documentManagementService.downloadDocument(id, user);
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(metadata.getContentType()))
