@@ -38,6 +38,10 @@ public class User {
 
     @Column(unique = true)
     private String providerId;
+
+    @Builder.Default
+    @Column(name = "preferred_language")
+    private String preferredLanguage = "en";
     @org.springframework.data.annotation.CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
