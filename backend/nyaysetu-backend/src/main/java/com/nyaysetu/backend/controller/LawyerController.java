@@ -8,6 +8,9 @@ import com.nyaysetu.backend.service.AuthService;
 import com.nyaysetu.backend.service.CaseManagementService;
 import com.nyaysetu.backend.service.HearingService;
 import com.nyaysetu.backend.service.LawyerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +44,7 @@ public class LawyerController {
     private final HearingService hearingService;
     private final LawyerService lawyerService;
 
+    @Operation(summary = "Generate AI legal document draft", description = "Generate draft document for case based on selected template")
     @PostMapping("/draft")
     public ResponseEntity<Map<String, String>> generateDraft(
             @RequestBody Map<String, String> request,
@@ -52,6 +56,7 @@ public class LawyerController {
         return ResponseEntity.ok(Map.of("draft", draft));
     }
 
+    @Operation(summary = "Save legal document draft", description = "Save edited draft text for a case")
     @PostMapping("/draft/save")
     public ResponseEntity<Void> saveDraft(
             @RequestBody Map<String, String> request,
@@ -63,6 +68,7 @@ public class LawyerController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Get lawyer cases", description = "Retrieve paginated list of cases represented by the lawyer")
     @GetMapping("/cases")
     public ResponseEntity<Page<CaseDTO>> getMyCases(
             Authentication authentication,
@@ -73,6 +79,7 @@ public class LawyerController {
         return ResponseEntity.ok(cases);
     }
 
+    @Operation(summary = "Get lawyer clients", description = "List unique clients associated with lawyer's active cases")
     @GetMapping("/clients")
     public ResponseEntity<List<Map<String, Object>>> getMyClients(Authentication authentication) {
         User lawyer = authService.findByEmail(authentication.getName());
@@ -94,17 +101,67 @@ public class LawyerController {
         return ResponseEntity.ok(clients);
     }
 
+    @Operation(summary = "Get lawyer stats", description = "Get statistical overview for lawyer dashboard")
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats(Authentication authentication) {
         User lawyer = authService.findByEmail(authentication.getName());
         Map<String, Object> stats = lawyerService.getLawyerStats(lawyer);
         
-        // Mocking upcoming hearings count for now or fetching from hearingService
         int upcomingHearings = hearingService.getHearingsForUser(lawyer.getEmail()).size();
         
         Map<String, Object> response = new HashMap<>(stats);
         response.put("upcomingHearings", upcomingHearings);
 
-        return ResponseEntity.ok(response);
+    private final com.nyaysetu.backend.service.LawyerAvailabilityService availabilityService;
+
+    @Operation(summary = "Set lawyer availability", description = "Mark dates as available or unavailable with reason")
+    @PostMapping("/availability")
+    public ResponseEntity<Map<String, Object>> setAvailability(
+            @RequestBody Map<String, Object> request,
+            Authentication authentication) {
+        User lawyer = authService.findByEmail(authentication.getName());
+        String dateStr = (String) request.get("date");
+        Boolean isAvailable = request.get("isAvailable") != null ? (Boolean) request.get("isAvailable") : false;
+        String reason = (String) request.get("reason");
+
+        java.time.LocalDate date = java.time.LocalDate.parse(dateStr);
+        com.nyaysetu.backend.entity.LawyerAvailability record = availabilityService.setAvailability(lawyer, date, isAvailable, reason);
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("id", record.getId());
+        resp.put("date", record.getDate().toString());
+        resp.put("isAvailable", record.getIsAvailable());
+        resp.put("reason", record.getReason());
+        resp.put("message", "Availability updated");
+        return ResponseEntity.ok(resp);
+    }
+
+    @Operation(summary = "Get lawyer availability calendar", description = "Retrieve availability records for a lawyer for a month")
+    @GetMapping("/availability")
+    public ResponseEntity<List<Map<String, Object>>> getMyAvailability(
+            @org.springframework.web.bind.annotation.RequestParam(value = "month", required = false) String month,
+            Authentication authentication) {
+        User lawyer = authService.findByEmail(authentication.getName());
+        List<Map<String, Object>> list = availabilityService.getAvailability(lawyer.getId(), month);
+        return ResponseEntity.ok(list);
+    }
+
+    @Operation(summary = "Get specific lawyer availability", description = "Public/Judge endpoint to fetch a lawyer's availability")
+    @GetMapping("/lawyer-availability/{lawyerId}")
+    public ResponseEntity<List<Map<String, Object>>> getLawyerAvailability(
+            @org.springframework.web.bind.annotation.PathVariable Long lawyerId,
+            @org.springframework.web.bind.annotation.RequestParam(value = "month", required = false) String month) {
+        List<Map<String, Object>> list = availabilityService.getAvailability(lawyerId, month);
+        return ResponseEntity.ok(list);
+    }
+
+    @Operation(summary = "Delete availability entry", description = "Remove an availability record for a lawyer")
+    @org.springframework.web.bind.annotation.DeleteMapping("/availability/{id}")
+    public ResponseEntity<Void> deleteAvailability(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            Authentication authentication) {
+        User lawyer = authService.findByEmail(authentication.getName());
+        availabilityService.deleteAvailability(id, lawyer);
+        return ResponseEntity.ok().build();
     }
 }
