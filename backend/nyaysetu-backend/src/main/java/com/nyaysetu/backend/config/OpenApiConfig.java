@@ -36,7 +36,7 @@ public class OpenApiConfig {
         public GroupedOpenApi publicApi() {
                 return GroupedOpenApi.builder()
                         .group("nyaysetu-backend")
-                        .packagesToScan("com.nyaysetu.backend.controller")
+                        .packagesToScan("com.nyaysetu.backend")
                         .build();
         }
 }

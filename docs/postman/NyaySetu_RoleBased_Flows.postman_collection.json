@@ -1,0 +1,454 @@
+{
+  "info": {
+    "_postman_id": "a9b8c7d6-e5f4-4321-8765-123456789abc",
+    "name": "NyaySetu Role-Based Workflows API Collection",
+    "description": "Pre-configured Postman Collection covering full role-based flows for Litigants, Lawyers, Judges, Police Officers, and System Administrators in NyaySetu.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "caseId",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "type": "string"
+    },
+    {
+      "key": "firId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Litigant Flow",
+      "item": [
+        {
+          "name": "Register Litigant Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ramesh Kumar\",\n  \"email\": \"litigant@nyaysetu.in\",\n  \"password\": \"Pass@1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login Litigant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) { pm.collectionVariables.set('authToken', jsonData.token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"litigant@nyaysetu.in\",\n  \"password\": \"Pass@1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "File Client FIR (Manual / AI)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Vehicle Theft Incident", "type": "text" },
+                { "key": "description", "value": "Two-wheeler stolen from station parking lot", "type": "text" },
+                { "key": "incidentLocation", "value": "Central Railway Station", "type": "text" },
+                { "key": "incidentDate", "value": "2024-11-15", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/client/fir",
+              "host": ["{{baseUrl}}"],
+              "path": ["client", "fir"]
+            }
+          }
+        },
+        {
+          "name": "File New Case",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Kumar vs. Property Developer\",\n  \"caseType\": \"CIVIL\",\n  \"description\": \"Delay in possession of flat beyond agreed date\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cases",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cases"]
+            }
+          }
+        },
+        {
+          "name": "View My Filed FIRs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/client/fir/list",
+              "host": ["{{baseUrl}}"],
+              "path": ["client", "fir", "list"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Lawyer Flow",
+      "item": [
+        {
+          "name": "Login Lawyer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"lawyer@nyaysetu.in\",\n  \"password\": \"Pass@1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Lawyer Assigned Cases",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/lawyer/cases?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["lawyer", "cases"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate AI Legal Document Draft",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"caseId\": \"{{caseId}}\",\n  \"template\": \"BAIL_APPLICATION\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lawyer/draft",
+              "host": ["{{baseUrl}}"],
+              "path": ["lawyer", "draft"]
+            }
+          }
+        },
+        {
+          "name": "Save Legal Draft",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"caseId\": \"{{caseId}}\",\n  \"draft\": \"IN THE COURT OF SESSIONS JUDGE...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lawyer/draft/save",
+              "host": ["{{baseUrl}}"],
+              "path": ["lawyer", "draft", "save"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Judge Flow",
+      "item": [
+        {
+          "name": "Login Judge",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"judge@nyaysetu.in\",\n  \"password\": \"Pass@1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Unassigned Cases Pool",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/judge/unassigned",
+              "host": ["{{baseUrl}}"],
+              "path": ["judge", "unassigned"]
+            }
+          }
+        },
+        {
+          "name": "Claim Case & Take Cognizance",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/judge/cases/{{caseId}}/claim",
+              "host": ["{{baseUrl}}"],
+              "path": ["judge", "cases", "{{caseId}}", "claim"]
+            }
+          }
+        },
+        {
+          "name": "Generate AI Case Summary for Judge",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/judge/case/{{caseId}}/ai-summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["judge", "case", "{{caseId}}", "ai-summary"]
+            }
+          }
+        },
+        {
+          "name": "Issue Digital Summons (Assign Police Task)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/judge/cases/{{caseId}}/issue-summons",
+              "host": ["{{baseUrl}}"],
+              "path": ["judge", "cases", "{{caseId}}", "issue-summons"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Police Flow",
+      "item": [
+        {
+          "name": "Login Police Officer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"police@nyaysetu.in\",\n  \"password\": \"Pass@1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Pending Summons Delivery Tasks",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/police/summons/pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["police", "summons", "pending"]
+            }
+          }
+        },
+        {
+          "name": "Mark Summons Served",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/police/summons/{{caseId}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["police", "summons", "{{caseId}}", "complete"]
+            }
+          }
+        },
+        {
+          "name": "Start Investigation on FIR",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/police/investigation/{{firId}}/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["police", "investigation", "{{firId}}", "start"]
+            }
+          }
+        },
+        {
+          "name": "Submit Charge Sheet to Court",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"findings\": \"Investigation complete. Sufficient evidence against accused.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/police/investigation/{{firId}}/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["police", "investigation", "{{firId}}", "submit"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Admin Flow",
+      "item": [
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@nyaysetu.in\",\n  \"password\": \"Pass@1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get System Health Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        },
+        {
+          "name": "Get Admin Dashboard Stats",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "stats"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -38,6 +38,7 @@ public class DocumentManagementController {
     private final com.nyaysetu.backend.service.DocumentAnalysisService documentAnalysisService;
     private final com.nyaysetu.backend.service.CertificateService certificateService;
 
+    @Operation(summary = "Upload a document", description = "Upload a case or evidence document with automatic SHA-256 fingerprinting")
     @PostMapping("/upload")
     public ResponseEntity<?> uploadDocument(
             @RequestParam("file") MultipartFile file,
@@ -50,7 +51,6 @@ public class DocumentManagementController {
         try {
             User user = authService.findByEmail(authentication.getName());
             
-            // Extract client IP address for audit trail
             String uploadIp = getClientIp(request);
             
             UUID caseId = null;
@@ -58,7 +58,6 @@ public class DocumentManagementController {
                 try {
                     caseId = UUID.fromString(caseIdStr);
                 } catch (Exception e) {
-                    // Invalid UUID, ignore
                 }
             }
             
@@ -70,11 +69,9 @@ public class DocumentManagementController {
 
             DocumentDto document = documentManagementService.uploadDocument(file, uploadRequest, user, uploadIp);
             
-            // Auto-trigger AI verification
             try {
                 documentManagementService.triggerAnalysis(document.getId());
             } catch (Exception e) {
-                // Log but don't fail upload if analysis fails
                 log.warn("AI analysis trigger failed: {}", e.getMessage());
             }
             
@@ -84,9 +81,6 @@ public class DocumentManagementController {
         }
     }
     
-    /**
-     * Extract client IP address from request
-     */
     private String getClientIp(jakarta.servlet.http.HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
@@ -95,23 +89,19 @@ public class DocumentManagementController {
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
-        // Handle multiple IPs in X-Forwarded-For
         if (ip != null && ip.contains(",")) {
             ip = ip.split(",")[0].trim();
         }
         return ip;
     }
 
-    /**
-     * Trigger AI analysis for a document
-     */
+    @Operation(summary = "Trigger AI analysis on document", description = "Asynchronously trigger AI legal analysis for an uploaded document")
     @PostMapping("/{id}/analyze")
     public ResponseEntity<?> analyzeDocument(@PathVariable UUID id, Authentication authentication) {
         try {
             User user = authService.findByEmail(authentication.getName());
             documentManagementService.ensureDocumentAccess(id, user.getId(), user.getRole().name());
 
-            // Trigger async analysis
             documentManagementService.triggerAnalysis(id);
             return ResponseEntity.ok(Map.of(
                 "message", "Analysis started",
@@ -122,9 +112,7 @@ public class DocumentManagementController {
         }
     }
 
-    /**
-     * Get AI analysis for a document
-     */
+    @Operation(summary = "Get AI document analysis", description = "Fetch existing AI analysis report for document")
     @GetMapping("/{id}/analysis")
     public ResponseEntity<?> getDocumentAnalysis(@PathVariable UUID id, Authentication authentication) {
         try {
@@ -144,9 +132,7 @@ public class DocumentManagementController {
         }
     }
 
-    /**
-     * Check if document has analysis
-     */
+    @Operation(summary = "Check if document has AI analysis", description = "Verify whether document analysis exists")
     @GetMapping("/{id}/has-analysis")
     public ResponseEntity<?> checkAnalysis(@PathVariable UUID id, Authentication authentication) {
         try {
@@ -163,6 +149,7 @@ public class DocumentManagementController {
         }
     }
 
+    @Operation(summary = "Get current user documents", description = "Retrieve paginated list of documents uploaded by current user")
     @GetMapping
     public ResponseEntity<Page<DocumentDto>> getUserDocuments(
             Authentication authentication,
@@ -173,6 +160,7 @@ public class DocumentManagementController {
         return ResponseEntity.ok(documents);
     }
 
+    @Operation(summary = "Get user case summaries", description = "Retrieve cases associated with user for document attachment")
     @GetMapping("/user/cases")
     public ResponseEntity<Page<CaseSummaryDto>> getUserCases(
             Authentication authentication,
@@ -183,6 +171,7 @@ public class DocumentManagementController {
         return ResponseEntity.ok(cases);
     }
 
+    @Operation(summary = "Get case documents", description = "Fetch documents attached to a specific case with role-based access control")
     @GetMapping("/case/{caseId}")
     public ResponseEntity<List<DocumentDto>> getCaseDocuments(
             @PathVariable UUID caseId,
@@ -190,11 +179,9 @@ public class DocumentManagementController {
     ) {
         User user = authService.findByEmail(authentication.getName());
         
-        // Get the case to determine user's role
         com.nyaysetu.backend.dto.CaseDTO caseData = caseManagementService.getCaseById(caseId);
         
-        // Determine user's role in this case
-        String userRole = "VISITOR"; // Default
+        String userRole = "VISITOR";
         if (user.getRole() == com.nyaysetu.backend.entity.Role.JUDGE) {
             userRole = "JUDGE";
         } else if (caseData.getLawyerId() != null && caseData.getLawyerId().equals(user.getId())) {
@@ -211,13 +198,13 @@ public class DocumentManagementController {
 
         boolean isCaseLawyer = caseData.getLawyerId() != null && caseData.getLawyerId().equals(user.getId());
         
-        // Get filtered documents based on role
         List<DocumentDto> documents = documentManagementService.getCaseDocumentsWithAccessControl(
             caseId, user.getId(), userRole, isCaseLawyer
         );
         return ResponseEntity.ok(documents);
     }
 
+    @Operation(summary = "Get document metadata", description = "Fetch metadata for a specific document by ID")
     @GetMapping("/{id}")
     public ResponseEntity<DocumentDto> getDocument(
             @PathVariable UUID id,
@@ -227,6 +214,7 @@ public class DocumentManagementController {
         return ResponseEntity.ok(document);
     }
 
+    @Operation(summary = "Download document binary", description = "Download raw file content of document")
     @GetMapping("/{id}/download")
     public ResponseEntity<?> downloadDocument(
             @PathVariable UUID id,
@@ -251,6 +239,7 @@ public class DocumentManagementController {
         }
     }
 
+    @Operation(summary = "Delete document", description = "Remove document file and metadata")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteDocument(
             @PathVariable UUID id,
@@ -261,9 +250,7 @@ public class DocumentManagementController {
         return ResponseEntity.ok(Map.of("message", "Document deleted successfully"));
     }
 
-    /**
-     * Download Section 63(4) Evidence Certificate for a document
-     */
+    @Operation(summary = "Download Section 63(4) evidence certificate", description = "Generate and download BSA Section 63(4) digital certificate PDF")
     @GetMapping("/{id}/certificate")
     public ResponseEntity<?> downloadCertificate(@PathVariable UUID id, Authentication authentication) {
         try {
@@ -282,9 +269,8 @@ public class DocumentManagementController {
             return ResponseEntity.status(500).body(Map.of("error", "Certificate generation failed: " + e.getMessage()));
         }
     }
-    /**
-     * Verify document hash (SHA-256) againts stored fingerprint
-     */
+
+    @Operation(summary = "Verify document SHA-256 fingerprint", description = "Re-hash file on disk against recorded SHA-256 fingerprint")
     @GetMapping("/{id}/verify-hash")
     public ResponseEntity<?> verifyHash(@PathVariable UUID id, Authentication authentication) {
         User user = authService.findByEmail(authentication.getName());

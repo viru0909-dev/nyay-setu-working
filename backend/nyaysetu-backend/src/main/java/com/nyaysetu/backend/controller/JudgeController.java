@@ -37,9 +37,7 @@ public class JudgeController {
     private final com.nyaysetu.backend.service.AuditService auditService;
     private final com.nyaysetu.backend.notification.service.NotificationService notificationService;
 
-    /**
-     * Get all cases assigned to the logged-in judge
-     */
+    @Operation(summary = "Get judge assigned cases", description = "Retrieve paginated list of cases assigned to the authenticated judge")
     @GetMapping("/cases")
     public ResponseEntity<Page<CaseEntity>> getJudgeCases(
             Authentication authentication,
@@ -50,6 +48,7 @@ public class JudgeController {
         return ResponseEntity.ok(judgeCases);
     }
 
+    @Operation(summary = "Claim an unassigned case", description = "Take cognizance and claim an unassigned case")
     @PostMapping("/cases/{id}/claim")
     public ResponseEntity<?> claimCase(@PathVariable UUID id, Authentication authentication) {
         try {
@@ -63,12 +62,9 @@ public class JudgeController {
             
             caseEntity.setAssignedJudge(judge.getName());
             caseEntity.setJudgeId(judge.getId());
-            // Step 2: Unassigned Pool Logic - COGNIZANCE_PERIOD
             caseEntity.setStatus(CaseStatus.COGNIZANCE_PERIOD);
             caseRepository.save(caseEntity);
             
-            // Trigger WebSocket/Notification to Litigant
-             // Notify Client
             if (caseEntity.getClient() != null) {
                 com.nyaysetu.backend.notification.entity.Notification notif = com.nyaysetu.backend.notification.entity.Notification.builder()
                     .userId(caseEntity.getClient().getId())
@@ -87,9 +83,7 @@ public class JudgeController {
         }
     }
     
-    /**
-     * Issue Summons (Step 4)
-     */
+    @Operation(summary = "Issue digital summons", description = "Issue digital summons for a case, creating a police delivery task")
     @PostMapping("/cases/{id}/issue-summons")
     public ResponseEntity<?> issueSummons(@PathVariable UUID id, Authentication authentication) {
         try {
@@ -97,21 +91,12 @@ public class JudgeController {
             CaseEntity caseEntity = caseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
             
-            // Logic: Update summons_status to IN_TRANSIT
             caseEntity.setSummonsStatus("IN_TRANSIT");
-            caseEntity.setStatus(CaseStatus.SUMMONS_SERVED); // Or keep current? "update the summons_status to IN_TRANSIT"
-            // The prompt says "Update summons_status to IN_TRANSIT on the Litigant's dashboard."
-            // Also "Clicking this must create a new task on the Police Dashboard to deliver the notice".
-            
+            caseEntity.setStatus(CaseStatus.SUMMONS_SERVED);
             caseRepository.save(caseEntity);
             
-            // Create Police Task (Simulated via Audit/Notif for now as Police logic is separate)
-            // "If a Police Officer uploads an FIR, the Judge's timeline...".
-            // Here we are Judge issuing summons. Needs to go to Police.
-            // We'll log it as a Task.
             auditService.logCaseAction(id, judge.getId(), "JUDGE", "SUMMONS_ISSUED", "Digital Summons issued. Task assigned to Police.");
             
-            // Notify Litigant
             if (caseEntity.getClient() != null) {
                 notificationService.save(com.nyaysetu.backend.notification.entity.Notification.builder()
                     .userId(caseEntity.getClient().getId())
@@ -128,11 +113,14 @@ public class JudgeController {
              return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    @Operation(summary = "Get unassigned cases", description = "Retrieve pool of cases awaiting judge assignment")
     @GetMapping("/unassigned")
     public ResponseEntity<?> getUnassignedCases() {
         return ResponseEntity.ok(caseRepository.findByAssignedJudgeIsNull());
     }
 
+    @Operation(summary = "Get judge dashboard analytics", description = "Analytical metrics on case load, statuses, and monthly trends")
     @GetMapping("/analytics")
     public ResponseEntity<?> getJudgeAnalytics(Authentication authentication) {
         User judge = authService.findByEmail(authentication.getName());
@@ -140,27 +128,23 @@ public class JudgeController {
         long assignedCount = myCases.size();
         long unassignedCount = caseRepository.findByJudgeIdIsNull().size();
         
-        // Compute real stats from myCases
         long pending = myCases.stream().filter(c -> "NEW".equals(c.getStatus().toString())).count();
         long active = myCases.stream().filter(c -> "IN_PROGRESS".equals(c.getStatus().toString())).count();
         long closed = myCases.stream().filter(c -> "CLOSED".equals(c.getStatus().toString())).count();
         
-        // Group by Status
         Map<String, Long> byStatus = myCases.stream()
             .collect(Collectors.groupingBy(c -> c.getStatus().toString(), Collectors.counting()));
             
-        // Group by Type
         Map<String, Long> byType = myCases.stream()
             .collect(Collectors.groupingBy(CaseEntity::getCaseType, Collectors.counting()));
 
-        // Monthly Trend (Dummy for now as we don't have created date easily accessible or populated for all)
         Map<String, Long> monthlyTrend = new LinkedHashMap<>();
         monthlyTrend.put("AUG", 2L);
         monthlyTrend.put("SEP", 4L);
         monthlyTrend.put("OCT", 1L);
         monthlyTrend.put("NOV", 6L);
         monthlyTrend.put("DEC", 3L);
-        monthlyTrend.put("JAN", assignedCount); // Current month
+        monthlyTrend.put("JAN", assignedCount);
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalCases", assignedCount);
@@ -175,9 +159,7 @@ public class JudgeController {
         return ResponseEntity.ok(stats);
     }
 
-    /**
-     * Get hearings scheduled for today
-     */
+    @Operation(summary = "Get today's scheduled hearings", description = "Fetch all hearings scheduled for the current date")
     @GetMapping("/hearings/today")
     public ResponseEntity<?> getTodaysHearings(Authentication authentication) {
         User judge = authService.findByEmail(authentication.getName());
@@ -193,33 +175,15 @@ public class JudgeController {
         return ResponseEntity.ok(todayHearings);
     }
     
-    /**
-     * AI Case Summary for Judge (Digital Court Master)
-     */
+    @Operation(summary = "Generate AI case summary", description = "Use Groq AI to generate executive brief for judge")
     @GetMapping("/case/{id}/ai-summary")
     public ResponseEntity<?> getAICaseSummary(@PathVariable UUID id) {
         try {
             CaseEntity caseEntity = caseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
 
-            // If summary exists, return it (simple caching)
-            // Unless user requests regen? For now, we rely on empty check.
-            // The Frontend "Regenerate" button can pass a query param ?force=true if needed, 
-            // but for now, let's keep it simple: always return DB value or generate if missing.
-            // Wait, proper "Regenerate" button implementation in frontend just calls this API. 
-            // If the summary is already there, it will just return the old one.
-            // So we should probably allow re-generation if needed.
-            // Let's check if the frontend sends a param. The current frontend doesn't send params.
-            // So for now, we generate if missing.
-            
-            // To support "Regenerate", we'll just generate if null OR if existing text is "AI summary unavailable..." (error state)
-            // But to support the explicit button click, usually we want to force it.
-            // Since we can't change frontend easily without re-bundling, let's assume the user calls this when they want the summary.
-            // To make "Regenerate" work, maybe we should just ALWAYS generate? No, that's expensive/slow.
-            
             String summary = caseEntity.getJudgeSummaryJson();
             
-            // If summary is missing, empty, has error, or has markdown artifacts, regenerate it.
             if (summary == null || summary.isEmpty() || summary.contains("unavailable") || summary.contains("not configured") || summary.contains("couldn't process") || summary.contains("**")) {
                 summary = groqService.generateCaseBrief(caseEntity);
                 caseEntity.setJudgeSummaryJson(summary);
@@ -233,10 +197,7 @@ public class JudgeController {
         }
     }
 
-    /**
-     * AI-Assisted Hearing Scheduling
-     * Parses natural language request to schedule a hearing
-     */
+    @Operation(summary = "AI-assisted hearing scheduling", description = "Parse natural language prompt to schedule hearing")
     @PostMapping("/hearings/schedule-ai")
     public ResponseEntity<?> scheduleHearingAI(
             @RequestBody Map<String, String> request,
@@ -252,13 +213,9 @@ public class JudgeController {
             List<CaseEntity> judgeCases = caseRepository.findByAssignedJudge(judge.getName());
 
             if (judgeCases.isEmpty()) {
-                // If judge has no cases, try global search or just return error
-                 // For demo, let's allow scheduling for ANY case if prompt mentions it? 
-                 // No, strict security.
                 return ResponseEntity.badRequest().body(Map.of("error", "No cases assigned to you"));
             }
 
-            // Build context for AI
             StringBuilder context = new StringBuilder();
             context.append("You are a legal assistant scheduling hearings. Parse the user's request into specific hearing details.\n");
             context.append("Current Date: ").append(LocalDateTime.now()).append("\n");
@@ -278,10 +235,8 @@ public class JudgeController {
 
             String aiResponse = groqService.chatWithAI(context.toString());
 
-            // Clean response
             String jsonStr = aiResponse.replaceAll("```json", "").replaceAll("```", "").trim();
 
-            // Parse JSON
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(jsonStr);
 
@@ -289,7 +244,6 @@ public class JudgeController {
             LocalDateTime date = LocalDateTime.parse(root.get("scheduledDate").asText());
             int duration = root.get("durationMinutes").asInt(60);
 
-            // Schedule the hearing
             Hearing hearing = hearingService.scheduleHearing(caseId, date, duration);
 
             return ResponseEntity.ok(Map.of(
