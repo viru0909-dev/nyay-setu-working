@@ -29,6 +29,15 @@ public class RagService {
         log.info("🔗 RagService configured to use LawGPT at: {}", lawgptUrl);
     }
 
+    public boolean isServiceAvailable() {
+        try {
+            ResponseEntity<Map> response = restTemplate.getForEntity(lawgptUrl + "/health", Map.class);
+            return response.getStatusCode() == HttpStatus.OK;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public String findRelevantContext(String query, int maxResults) {
         log.info("🔍 Querying LawGPT RAG service for: '{}'", query);
         try {
@@ -50,12 +59,13 @@ public class RagService {
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 String context = (String) response.getBody().get("context");
                 log.info("✅ RAG context retrieved from LawGPT service");
-                return context != null ? context : "No specific legal context found.";
+                return (context != null && !context.trim().isEmpty()) ? context : "No specific legal context found.";
             }
         } catch (Exception e) {
-            log.warn("⚠️ LawGPT service unavailable, falling back to empty context: {}", e.getMessage());
+            log.warn("⚠️ LawGPT service unavailable, returning RAG_UNAVAILABLE fallback: {}", e.getMessage());
+            return "RAG_UNAVAILABLE: LawGPT microservice is unreachable.";
         }
-        return "No specific legal context found.";
+        return "RAG_UNAVAILABLE: LawGPT microservice returned no valid response.";
     }
 
     public java.util.List<java.util.Map<String, Object>> searchPrecedents(String query, int maxResults) {

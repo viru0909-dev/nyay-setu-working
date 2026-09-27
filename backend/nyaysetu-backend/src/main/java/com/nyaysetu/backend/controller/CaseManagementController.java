@@ -287,4 +287,54 @@ public class CaseManagementController {
             "message", "Respondent details updated successfully"
         ));
     }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.nyaysetu.backend.service.DocumentManagementService documentManagementService;
+
+    @Operation(summary = "Upload supporting document for case", description = "Upload supporting documents (PDF, JPG, PNG up to 10MB) attached to a specific case")
+    @PostMapping("/{id}/documents")
+    public ResponseEntity<?> uploadCaseDocument(
+            @PathVariable UUID id,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(value = "category", defaultValue = "CASE_DOCUMENT") String category,
+            @RequestParam(value = "description", required = false, defaultValue = "") String description,
+            Authentication authentication,
+            jakarta.servlet.http.HttpServletRequest request
+    ) {
+        try {
+            User user = authService.findByEmail(authentication.getName());
+            caseAccessService.requireCaseAccess(id, user);
+
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Uploaded file cannot be empty"));
+            }
+
+            if (file.getSize() > 10 * 1024 * 1024) {
+                return ResponseEntity.badRequest().body(Map.of("error", "File size exceeds maximum limit of 10MB"));
+            }
+
+            String contentType = file.getContentType();
+            String fileName = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+            if (contentType != null && !contentType.equals("application/pdf") &&
+                !contentType.startsWith("image/") && !fileName.endsWith(".pdf") &&
+                !fileName.endsWith(".jpg") && !fileName.endsWith(".jpeg") && !fileName.endsWith(".png")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Only PDF, JPG, and PNG file formats are supported"));
+            }
+
+            String uploadIp = request.getHeader("X-Forwarded-For");
+            if (uploadIp == null || uploadIp.isEmpty()) uploadIp = request.getRemoteAddr();
+
+            com.nyaysetu.backend.dto.UploadDocumentRequest uploadRequest = com.nyaysetu.backend.dto.UploadDocumentRequest.builder()
+                    .category(category)
+                    .description(description)
+                    .caseId(id)
+                    .build();
+
+            com.nyaysetu.backend.dto.DocumentDto document = documentManagementService.uploadDocument(file, uploadRequest, user, uploadIp);
+            return ResponseEntity.ok(document);
+        } catch (Exception e) {
+            log.error("Failed to upload document for case {}", id, e);
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
 }

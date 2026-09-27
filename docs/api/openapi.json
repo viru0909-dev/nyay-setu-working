@@ -1,0 +1,371 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "NyaySetu API Specification",
+    "description": "Comprehensive OpenAPI documentation for NyaySetu Unified Spring Boot Backend, covering user auth, case management, document verification, digital evidence, judge/lawyer/police portals, and AI integration.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "NyaySetu Core Team",
+      "email": "support@nyaysetu.in"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://staging.nyaysetu.in",
+      "description": "Staging Environment"
+    },
+    {
+      "url": "https://nyaysetu.in",
+      "description": "Production Server"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Register, login, JWT refresh, face biometrics and password reset"
+    },
+    {
+      "name": "Case Management",
+      "description": "Filing, status tracking, paginated case lists, and appeals"
+    },
+    {
+      "name": "Documents",
+      "description": "Document upload, SHA-256 fingerprinting, AI legal analysis and BSA Section 63(4) certificates"
+    },
+    {
+      "name": "Evidence",
+      "description": "Digital evidence chain of custody and blockchain verification"
+    },
+    {
+      "name": "FIR (Police)",
+      "description": "Police FIR upload, digital stamping, summons delivery and investigation"
+    },
+    {
+      "name": "Client FIR",
+      "description": "Litigant manual & AI-assisted FIR filing"
+    },
+    {
+      "name": "Judge Portal",
+      "description": "Judge docket management, case claiming, digital summons and AI briefs"
+    },
+    {
+      "name": "Lawyer Portal",
+      "description": "Lawyer dashboard, AI draft generation, client list and hearing schedule"
+    },
+    {
+      "name": "Notifications",
+      "description": "Real-time user notification system"
+    },
+    {
+      "name": "Forensics",
+      "description": "AI multi-frame video analysis and report SSE streaming"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register user",
+        "description": "Register a new litigant account",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "name", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "litigant@nyaysetu.in" },
+                  "name": { "type": "string", "example": "Ramesh Kumar" },
+                  "password": { "type": "string", "format": "password", "example": "Pass@1234" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Registration successful with JWT token" },
+          "400": { "description": "Invalid password or email already registered" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login user",
+        "description": "Authenticate user credentials and receive JWT access token and refresh token",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "user@nyaysetu.in" },
+                  "password": { "type": "string", "format": "password", "example": "Pass@1234" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Refresh JWT access token",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["refreshToken"],
+                "properties": {
+                  "refreshToken": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "New access token generated" },
+          "401": { "description": "Invalid or expired refresh token" }
+        }
+      }
+    },
+    "/api/cases": {
+      "get": {
+        "tags": ["Case Management"],
+        "summary": "Get all cases (paginated)",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 0 } },
+          { "name": "size", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "Page of case entities retrieved" }
+        }
+      },
+      "post": {
+        "tags": ["Case Management"],
+        "summary": "Create a new legal case",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "caseType", "description"],
+                "properties": {
+                  "title": { "type": "string", "example": "Property Dispute vs State" },
+                  "caseType": { "type": "string", "example": "CIVIL" },
+                  "description": { "type": "string", "example": "Claim over agricultural land boundaries" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Case created successfully" }
+        }
+      }
+    },
+    "/api/cases/{id}": {
+      "get": {
+        "tags": ["Case Management"],
+        "summary": "Get case details by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Case details retrieved" },
+          "404": { "description": "Case not found" }
+        }
+      }
+    },
+    "/documents/upload": {
+      "post": {
+        "tags": ["Documents"],
+        "summary": "Upload a document",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": { "type": "string", "format": "binary" },
+                  "category": { "type": "string", "example": "EVIDENCE" },
+                  "description": { "type": "string", "example": "Signed Sale Deed copy" },
+                  "caseId": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Document uploaded and fingerprinted successfully" }
+        }
+      }
+    },
+    "/documents/{id}/certificate": {
+      "get": {
+        "tags": ["Documents"],
+        "summary": "Download Section 63(4) evidence certificate",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "PDF certificate binary" }
+        }
+      }
+    },
+    "/police/fir/upload": {
+      "post": {
+        "tags": ["FIR (Police)"],
+        "summary": "Upload FIR document",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file", "title"],
+                "properties": {
+                  "file": { "type": "string", "format": "binary" },
+                  "title": { "type": "string", "example": "FIR No. 204/2024" },
+                  "description": { "type": "string", "example": "Robbery investigation report" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "FIR uploaded with SHA-256 digital stamp" }
+        }
+      }
+    },
+    "/judge/cases": {
+      "get": {
+        "tags": ["Judge Portal"],
+        "summary": "Get judge assigned cases",
+        "responses": {
+          "200": { "description": "Assigned cases list" }
+        }
+      }
+    },
+    "/judge/case/{id}/ai-summary": {
+      "get": {
+        "tags": ["Judge Portal"],
+        "summary": "Generate AI case summary",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "AI-generated executive brief" }
+        }
+      }
+    },
+    "/lawyer/cases": {
+      "get": {
+        "tags": ["Lawyer Portal"],
+        "summary": "Get lawyer cases",
+        "responses": {
+          "200": { "description": "Lawyer active cases" }
+        }
+      }
+    },
+    "/lawyer/draft": {
+      "post": {
+        "tags": ["Lawyer Portal"],
+        "summary": "Generate AI legal document draft",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["caseId", "template"],
+                "properties": {
+                  "caseId": { "type": "string", "format": "uuid" },
+                  "template": { "type": "string", "example": "BAIL_APPLICATION" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Generated document draft string" }
+        }
+      }
+    },
+    "/notifications/user/{userId}": {
+      "get": {
+        "tags": ["Notifications"],
+        "summary": "Get user notifications",
+        "parameters": [
+          { "name": "userId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Notifications array" }
+        }
+      }
+    },
+    "/forensics/upload": {
+      "post": {
+        "tags": ["Forensics"],
+        "summary": "Upload video for forensic analysis",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["videos"],
+                "properties": {
+                  "videos": { "type": "array", "items": { "type": "string", "format": "binary" } },
+                  "description": { "type": "string", "example": "Intersection CCTV footage" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Job ID returned for analysis task" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter JWT bearer token received from /auth/login"
+      }
+    }
+  }
+}

@@ -121,6 +121,13 @@ export const caseAPI = {
     startJudgment: (id) => api.post(`/api/v1/cases/${id}/start-judgment`),
     deliverVerdict: (id, verdictDetails) => api.post(`/api/v1/cases/${id}/deliver-verdict`, { verdictDetails }),
     orderNotice: (id) => api.post(`/api/v1/cases/${id}/order-notice`),
+    uploadDocument: (caseId, file, category = 'CASE_DOCUMENT', description = '') => {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (category) formData.append('category', category);
+        if (description) formData.append('description', description);
+        return api.post(`/api/v1/cases/${caseId}/documents`, formData);
+    },
 };
 
 // Document API
@@ -176,7 +183,8 @@ export const hearingAPI = {
     join: (id) => api.post(`/api/v1/hearings/${id}/join`),
     leave: (id) => api.post(`/api/v1/hearings/${id}/leave`),
     complete: (id, notes) => api.put(`/api/v1/hearings/${id}/complete`, { judgeNotes: notes }),
-    getParticipants: (id) => api.get(`/api/v1/hearings/${id}/participants`)
+    getParticipants: (id) => api.get(`/api/v1/hearings/${id}/participants`),
+    checkConflict: (lawyerId, date) => api.get('/api/v1/hearings/check-conflict', { params: { lawyerId, date } })
 };
 
 // Meeting API
@@ -195,6 +203,15 @@ export const vakilFriendAPI = {
     completeSession: (sessionId) => api.post(`/api/v1/vakil-friend/complete/${sessionId}`),
     getSession: (sessionId) => api.get(`/api/v1/vakil-friend/session/${sessionId}`),
     getSessions: () => api.get('/api/v1/vakil-friend/sessions'),
+    getChatHistory: () => api.get('/api/v1/vakil-friend/chat/history'),
+    saveChatMessage: (payload) => api.post('/api/v1/vakil-friend/chat/messages', payload),
+};
+
+// Chat Persistence API
+export const chatAPI = {
+    getHistory: () => api.get('/api/chat/history'),
+    saveMessage: (message, role = 'user') => api.post('/api/chat/messages', { message, role }),
+};
 
     // Document Analysis with AI & SHA-256 protection
     analyzeDocument: (caseId, file, sessionId = null) => {
@@ -280,6 +297,10 @@ export const lawyerAPI = {
     getStats: () => api.get('/api/v1/lawyer/stats'),
     generateDraft: (caseId, template) => api.post('/api/v1/lawyer/draft', { caseId, template }),
     saveDraft: (caseId, draft) => api.post('/api/v1/lawyer/draft/save', { caseId, draft }),
+    setAvailability: (payload) => api.post('/api/v1/lawyer/availability', payload),
+    getAvailability: (month) => api.get('/api/v1/lawyer/availability', { params: { month } }),
+    getLawyerAvailability: (lawyerId, month) => api.get(`/api/v1/lawyer/lawyer-availability/${lawyerId}`, { params: { month } }),
+    deleteAvailability: (id) => api.delete(`/api/v1/lawyer/availability/${id}`)
 };
 
 // Central Brain API

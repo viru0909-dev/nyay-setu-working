@@ -5,6 +5,9 @@ import com.nyaysetu.backend.dto.FirUploadResponse;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.FirService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-@Tag(name = "FIR (Police)", description = "Police-facing FIR creation, upload and case submission")
+@Tag(name = "FIR (Police)", description = "Police-facing FIR creation, upload, investigation and case submission")
 @RestController
 @RequestMapping("/police")
 @RequiredArgsConstructor
@@ -28,13 +31,10 @@ public class FirController {
     private final UserRepository userRepository;
     private final com.nyaysetu.backend.repository.CaseRepository caseRepository;
 
-    /**
-     * Get pending summons delivery tasks for police
-     */
+    @Operation(summary = "Get pending summons delivery tasks", description = "Retrieve pending summons delivery tasks for police officers")
     @GetMapping("/summons/pending")
     public ResponseEntity<?> getSummonsTasks() {
         try {
-            // Find cases where summons status is IN_TRANSIT
             List<com.nyaysetu.backend.entity.CaseEntity> cases = caseRepository.findAll().stream()
                 .filter(c -> "IN_TRANSIT".equals(c.getSummonsStatus()))
                 .collect(java.util.stream.Collectors.toList());
@@ -55,9 +55,7 @@ public class FirController {
         }
     }
 
-    /**
-     * Mark summons as served
-     */
+    @Operation(summary = "Mark summons task completed", description = "Mark summons delivery status as SERVED for a case")
     @PostMapping("/summons/{caseId}/complete")
     public ResponseEntity<?> completeSummonsTask(@PathVariable UUID caseId, Authentication auth) {
         try {
@@ -74,14 +72,17 @@ public class FirController {
         }
     }
 
-    /**
-     * Upload FIR document with SHA-256 digital stamping
-     */
+    @Operation(summary = "Upload & File FIR document", description = "Upload FIR document with complainant/accused details, BNS/IPC sections, and SHA-256 digital stamping")
     @PostMapping(value = "/fir/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FirUploadResponse> uploadFir(
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
             @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "complainantDetails", required = false) String complainantDetails,
+            @RequestParam(value = "accusedDetails", required = false) String accusedDetails,
+            @RequestParam(value = "offenceSections", required = false) String offenceSections,
+            @RequestParam(value = "policeStationCode", required = false) String policeStationCode,
+            @RequestParam(value = "incidentLocation", required = false) String incidentLocation,
             @RequestParam(value = "caseId", required = false) String caseIdStr,
             Authentication auth) {
 
@@ -99,6 +100,11 @@ public class FirController {
         FirUploadRequest request = FirUploadRequest.builder()
                 .title(title)
                 .description(description)
+                .complainantDetails(complainantDetails)
+                .accusedDetails(accusedDetails)
+                .offenceSections(offenceSections)
+                .policeStationCode(policeStationCode)
+                .incidentLocation(incidentLocation)
                 .caseId(caseId)
                 .build();
 
@@ -109,9 +115,16 @@ public class FirController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Get all FIRs uploaded by the current officer
-     */
+    @Operation(summary = "Link FIR to Court Case", description = "Link an existing FIR to a court case UUID upon cognizance")
+    @PostMapping("/fir/{id}/link-case")
+    public ResponseEntity<FirUploadResponse> linkFirToCase(
+            @PathVariable Long id,
+            @RequestParam("caseId") UUID caseId) {
+        FirUploadResponse response = firService.linkFirToCase(id, caseId);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get FIRs uploaded by current officer", description = "List all FIRs uploaded by the authenticated police officer")
     @GetMapping("/fir/list")
     public ResponseEntity<List<FirUploadResponse>> getMyFirs(Authentication auth) {
         User user = getCurrentUser(auth);
@@ -119,18 +132,14 @@ public class FirController {
         return ResponseEntity.ok(firs);
     }
 
-    /**
-     * Get FIR details by ID
-     */
+    @Operation(summary = "Get FIR details by ID", description = "Retrieve specific FIR metadata and hash information")
     @GetMapping("/fir/{id}")
     public ResponseEntity<FirUploadResponse> getFirById(@PathVariable Long id) {
         FirUploadResponse fir = firService.getFirById(id);
         return ResponseEntity.ok(fir);
     }
 
-    /**
-     * Verify FIR integrity by re-hashing uploaded file
-     */
+    @Operation(summary = "Verify FIR integrity", description = "Re-hash uploaded file against recorded SHA-256 hash")
     @PostMapping(value = "/fir/{id}/verify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FirUploadResponse> verifyFir(
             @PathVariable Long id,
@@ -140,9 +149,7 @@ public class FirController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Get police dashboard statistics
-     */
+    @Operation(summary = "Get police dashboard statistics", description = "Summary statistics of FIRs handled by the officer")
     @GetMapping("/stats")
     public ResponseEntity<FirService.FirStatsResponse> getStats(Authentication auth) {
         User user = getCurrentUser(auth);
@@ -150,9 +157,7 @@ public class FirController {
         return ResponseEntity.ok(stats);
     }
 
-    /**
-     * Health check endpoint
-     */
+    @Operation(summary = "Health check for Police portal", description = "Health status of FIR service")
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
         return ResponseEntity.ok(Map.of(
@@ -162,18 +167,14 @@ public class FirController {
         ));
     }
 
-    /**
-     * Get all FIRs pending police review (client-filed FIRs)
-     */
+    @Operation(summary = "Get pending FIRs for review", description = "Retrieve litigant-filed FIRs awaiting police verification")
     @GetMapping("/fir/pending")
     public ResponseEntity<List<FirUploadResponse>> getPendingFirs() {
         List<FirUploadResponse> firs = firService.getPendingReviewFirs();
         return ResponseEntity.ok(firs);
     }
 
-    /**
-     * Update FIR status (REGISTERED or REJECTED)
-     */
+    @Operation(summary = "Update FIR status", description = "Register or reject a pending FIR")
     @PutMapping("/fir/{id}/status")
     public ResponseEntity<FirUploadResponse> updateFirStatus(
             @PathVariable Long id,
@@ -193,9 +194,7 @@ public class FirController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Start investigation on an FIR
-     */
+    @Operation(summary = "Start investigation on FIR", description = "Change FIR state to under investigation")
     @PostMapping("/investigation/{id}/start")
     public ResponseEntity<FirUploadResponse> startInvestigation(
             @PathVariable Long id,
@@ -206,9 +205,7 @@ public class FirController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Submit investigation findings to court
-     */
+    @Operation(summary = "Submit investigation to court", description = "Submit final investigation findings to court")
     @PostMapping("/investigation/{id}/submit")
     public ResponseEntity<FirUploadResponse> submitInvestigation(
             @PathVariable Long id,
@@ -226,18 +223,14 @@ public class FirController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Get FIRs currently under investigation
-     */
+    @Operation(summary = "Get FIRs under investigation", description = "Retrieve list of FIRs currently investigated")
     @GetMapping("/investigation/list")
     public ResponseEntity<List<FirUploadResponse>> getFirsUnderInvestigation() {
         List<FirUploadResponse> firs = firService.getFirsUnderInvestigation();
         return ResponseEntity.ok(firs);
     }
 
-    /**
-     * Upload additional evidence to FIR
-     */
+    @Operation(summary = "Upload investigation evidence", description = "Add evidence document to an FIR under investigation")
     @PostMapping(value = "/investigation/{id}/evidence", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FirUploadResponse> uploadeEvidence(
             @PathVariable Long id,
@@ -250,18 +243,14 @@ public class FirController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Generate AI Summary using Groq
-     */
+    @Operation(summary = "Generate AI summary of FIR", description = "Use Groq AI to generate executive summary of FIR")
     @GetMapping("/investigation/{id}/summary")
     public ResponseEntity<Map<String, String>> generateSummary(@PathVariable Long id) {
         String summary = firService.generateSummary(id);
         return ResponseEntity.ok(Map.of("summary", summary));
     }
 
-    /**
-     * Draft Court Submission using Groq (Charge Sheet)
-     */
+    @Operation(summary = "Draft court submission (Charge Sheet)", description = "Use Groq AI to draft charge sheet for court")
     @GetMapping("/investigation/{id}/draft-submission")
     public ResponseEntity<Map<String, String>> draftSubmission(@PathVariable Long id) {
         String draft = firService.draftCourtSubmission(id);

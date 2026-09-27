@@ -5,6 +5,9 @@ import com.nyaysetu.backend.dto.FirUploadResponse;
 import com.nyaysetu.backend.entity.User;
 import com.nyaysetu.backend.repository.UserRepository;
 import com.nyaysetu.backend.service.FirService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +31,7 @@ public class ClientFirController {
     private final FirService firService;
     private final UserRepository userRepository;
 
-    /**
-     * Client files an FIR (Manual or AI-assisted)
-     */
+    @Operation(summary = "File a new FIR (Litigant)", description = "File a manual or AI-assisted FIR from client dashboard")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FirUploadResponse> fileFir(
             @RequestParam("title") String title,
@@ -80,9 +81,7 @@ public class ClientFirController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Get all FIRs filed by the current client
-     */
+    @Operation(summary = "Get FIRs filed by authenticated client", description = "List all FIRs submitted by current litigant")
     @GetMapping("/list")
     public ResponseEntity<List<FirUploadResponse>> getMyFirs(Authentication auth) {
         User user = getCurrentUser(auth);
@@ -90,18 +89,14 @@ public class ClientFirController {
         return ResponseEntity.ok(firs);
     }
 
-    /**
-     * Get FIR details by ID
-     */
+    @Operation(summary = "Get client FIR details by ID", description = "Fetch details of a specific FIR submitted by client")
     @GetMapping("/{id}")
     public ResponseEntity<FirUploadResponse> getFirById(@PathVariable Long id) {
         FirUploadResponse fir = firService.getFirById(id);
         return ResponseEntity.ok(fir);
     }
 
-    /**
-     * Get client FIR stats for dashboard
-     */
+    @Operation(summary = "Get client FIR stats", description = "Summary statistics of FIRs submitted by litigant")
     @GetMapping("/stats")
     public ResponseEntity<FirService.ClientFirStatsResponse> getStats(Authentication auth) {
         User user = getCurrentUser(auth);
