@@ -103,6 +103,8 @@ coverage/
 nlp-orchestrator/.env
 
 *.json
+!docs/**/*.json
+!**/package.json
 input_videos/
 output_frames/
 

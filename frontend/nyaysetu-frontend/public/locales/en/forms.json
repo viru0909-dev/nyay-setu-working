@@ -1,3 +1,12 @@
 {
-    "placeholder": "Form translations will be added during component migration"
+  "title": "Case Title",
+  "caseType": "Case Type",
+  "description": "Detailed Description",
+  "petitioner": "Petitioner Name",
+  "respondent": "Respondent Name",
+  "urgency": "Urgency Level",
+  "evidence": "Evidence & Documents",
+  "submit": "File Case",
+  "cancel": "Cancel",
+  "success": "Case filed successfully"
 }

@@ -42,10 +42,18 @@ public class CaseAccessService {
         if (caseEntity.getJudgeId() != null && caseEntity.getJudgeId().equals(user.getId())) {
             return true;
         }
+        if (caseEntity.getAssignedJudge() != null && !caseEntity.getAssignedJudge().isEmpty() &&
+            (caseEntity.getAssignedJudge().equals(user.getName()) || caseEntity.getAssignedJudge().equals(user.getEmail()))) {
+            return true;
+        }
         if (user.getEmail() != null && user.getEmail().equals(caseEntity.getRespondentEmail())) {
             return true;
         }
-        if (user.getRole() == Role.JUDGE || user.getRole() == Role.POLICE) {
+        if (user.getRole() == Role.JUDGE) {
+            // Allow access to unassigned cases for cognizance / claiming
+            return caseEntity.getJudgeId() == null && (caseEntity.getAssignedJudge() == null || caseEntity.getAssignedJudge().trim().isEmpty());
+        }
+        if (user.getRole() == Role.POLICE) {
             return true;
         }
         return false;

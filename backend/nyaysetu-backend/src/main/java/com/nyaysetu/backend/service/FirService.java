@@ -70,14 +70,24 @@ public class FirService {
             String fileHash = blockchainService.calculateFileHash(filePath.toFile());
             log.info("FIR Digital Fingerprint (SHA-256): {}", fileHash);
 
-            // Generate unique FIR number
-            String firNumber = generateFirNumber();
+            // Generate unique FIR number format PS-CODE/YYYY/NNNN
+            String firNumber = generateFirNumber(request.getPoliceStationCode());
+
+            String initialStatus = request.getStatus() != null && !request.getStatus().isBlank() 
+                    ? request.getStatus() 
+                    : (request.getCaseId() != null ? "LINKED_TO_CASE" : "ACCEPTED");
 
             // Create FIR record
             FirRecord firRecord = FirRecord.builder()
                     .firNumber(firNumber)
                     .title(request.getTitle())
                     .description(request.getDescription())
+                    .complainantDetails(request.getComplainantDetails())
+                    .accusedDetails(request.getAccusedDetails())
+                    .offenceSections(request.getOffenceSections())
+                    .policeStationCode(request.getPoliceStationCode())
+                    .incidentLocation(request.getIncidentLocation())
+                    .incidentDate(request.getIncidentDate())
                     .fileHash(fileHash)
                     .filePath(filePath.toString())
                     .fileName(originalFilename)
@@ -86,11 +96,11 @@ public class FirService {
                     .uploadedBy(uploadedBy)
                     .uploadedAt(LocalDateTime.now())
                     .caseId(request.getCaseId())
-                    .status(request.getCaseId() != null ? "LINKED_TO_CASE" : "SEALED")
+                    .status(initialStatus)
                     .build();
 
             FirRecord saved = firRecordRepository.save(firRecord);
-            log.info("FIR {} sealed with hash {} by officer {}", firNumber, fileHash.substring(0, 16) + "...", uploadedBy.getName());
+            log.info("FIR {} created with hash {} by officer {}", firNumber, fileHash.substring(0, 16) + "...", uploadedBy.getName());
 
             return mapToResponse(saved);
 
@@ -508,10 +518,26 @@ public class FirService {
                 .build();
     }
 
-    private String generateFirNumber() {
-        String datePrefix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String randomSuffix = String.format("%06d", (int) (Math.random() * 1000000));
-        return "FIR-" + datePrefix + "-" + randomSuffix;
+    public String generateFirNumber(String psCode) {
+        String code = (psCode != null && !psCode.trim().isEmpty()) ? psCode.trim().toUpperCase() : "PS01";
+        String year = String.valueOf(LocalDateTime.now().getYear());
+        String seq = String.format("%04d", (int) (Math.random() * 9000) + 1000);
+        return code + "/" + year + "/" + seq;
+    }
+
+    public String generateFirNumber() {
+        return generateFirNumber("PS01");
+    }
+
+    @Transactional
+    public FirUploadResponse linkFirToCase(Long firId, UUID caseId) {
+        FirRecord fir = firRecordRepository.findById(firId)
+                .orElseThrow(() -> new RuntimeException("FIR not found with ID: " + firId));
+        fir.setCaseId(caseId);
+        fir.setStatus("LINKED_TO_CASE");
+        FirRecord saved = firRecordRepository.save(fir);
+        log.info("FIR {} linked to court case ID {}", fir.getFirNumber(), caseId);
+        return mapToResponse(saved);
     }
 
     private FirUploadResponse mapToResponse(FirRecord fir) {
@@ -520,6 +546,10 @@ public class FirService {
                 .firNumber(fir.getFirNumber())
                 .title(fir.getTitle())
                 .description(fir.getDescription())
+                .complainantDetails(fir.getComplainantDetails())
+                .accusedDetails(fir.getAccusedDetails())
+                .offenceSections(fir.getOffenceSections())
+                .policeStationCode(fir.getPoliceStationCode())
                 .fileHash(fir.getFileHash())
                 .fileName(fir.getFileName())
                 .fileSize(fir.getFileSize())

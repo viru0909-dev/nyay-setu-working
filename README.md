@@ -381,15 +381,22 @@ For environment variables, copy `.env.example` to `.env` and fill in your values
 | [Setup Guide](./docs/setup.md) | Full database setup, environment variables, and Docker configuration |
 | [Architecture Overview](./docs/architecture/overview.md) | System design, component diagrams, and data flow |
 
+### API Reference
+- **Interactive Swagger UI**: `http://localhost:8080/swagger-ui.html` (auto-available in development mode)
+- **OpenAPI 3.0 JSON Specification**: [docs/api/openapi.json](./docs/api/openapi.json)
+- **Role-Based Postman Collection**: [docs/postman/NyaySetu_RoleBased_Flows.postman_collection.json](./docs/postman/NyaySetu_RoleBased_Flows.postman_collection.json)
+
 ### API Documentation & Integration
 | Document | Description |
 |---|---|
-| [OpenAPI/Swagger Spec](./openapi.yaml) | Complete API specification in OpenAPI 3.0 format |
+| [Swagger UI Endpoint](http://localhost:8080/swagger-ui.html) | Interactive Swagger UI API console (Dev mode) |
+| [OpenAPI JSON Spec](./docs/api/openapi.json) | Complete OpenAPI 3.0 JSON specification for all backend services |
+| [Role-Based Postman Collection](./docs/postman/NyaySetu_RoleBased_Flows.postman_collection.json) | Postman collection with litigant, lawyer, judge, police, admin flows |
+| [OpenAPI/Swagger Spec](./openapi.yaml) | Complete API specification in OpenAPI 3.0 YAML format |
 | [API Testing Guide](./API_TESTING_GUIDE.md) | Comprehensive guide for testing APIs with Postman, cURL, Python, JavaScript |
 | [API Endpoints Reference](./API_ENDPOINTS_COMPREHENSIVE.md) | Detailed documentation of all 100+ endpoints with request/response schemas |
 | [API Quick Reference](./API_QUICK_REFERENCE.md) | Quick lookup table for endpoints by user role and service |
 | [API Integration Checklist](./API_INTEGRATION_CHECKLIST.md) | Step-by-step checklist for integrating APIs into applications |
-| [Postman Collection](./Nyay_Setu_API_Collection.postman_collection.json) | Ready-to-import Postman collection with all endpoints and examples |
 
 ### Additional Resources
 | Document | Description |
