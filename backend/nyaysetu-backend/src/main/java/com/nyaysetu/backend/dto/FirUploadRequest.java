@@ -13,5 +13,13 @@ public class FirUploadRequest {
     @NotBlank(message = "Description is required")
     private String description;
 
+    private String complainantDetails;
+    private String accusedDetails;
+    private String offenceSections;
+    private String policeStationCode;
+    private String incidentLocation;
+    private java.time.LocalDate incidentDate;
+    private String status;
+
     private UUID caseId; // optional
 }

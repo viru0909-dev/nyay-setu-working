@@ -12,7 +12,7 @@ import {
     Phone,
     ArrowLeft
 } from 'lucide-react';
-import { hearingAPI } from '../../services/api';
+import { lawyerAPI, hearingAPI } from '../../services/api';
 
 export default function LawyerHearingsPage() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -21,9 +21,56 @@ export default function LawyerHearingsPage() {
     const [inCall, setInCall] = useState(false);
     const [activeHearing, setActiveHearing] = useState(null);
 
+    // Availability state
+    const [activeTab, setActiveTab] = useState('hearings'); // 'hearings' | 'availability'
+    const [availabilities, setAvailabilities] = useState([]);
+    const [newDate, setNewDate] = useState('');
+    const [newReason, setNewReason] = useState('');
+    const [isAvailableToggle, setIsAvailableToggle] = useState(false); // default false = unavailable
+    const [savingAvail, setSavingAvail] = useState(false);
+
     useEffect(() => {
         loadHearings();
+        loadAvailability();
     }, []);
+
+    const loadAvailability = async () => {
+        try {
+            const res = await lawyerAPI.getAvailability();
+            setAvailabilities(res.data || []);
+        } catch (err) {
+            console.error('Failed to load availability:', err);
+        }
+    };
+
+    const handleSaveAvailability = async (e) => {
+        e.preventDefault();
+        if (!newDate) return;
+        setSavingAvail(true);
+        try {
+            await lawyerAPI.setAvailability({
+                date: newDate,
+                isAvailable: isAvailableToggle,
+                reason: newReason || (isAvailableToggle ? 'Available' : 'Unavailable / Out of Station')
+            });
+            setNewDate('');
+            setNewReason('');
+            await loadAvailability();
+        } catch (err) {
+            console.error('Failed to save availability:', err);
+        } finally {
+            setSavingAvail(false);
+        }
+    };
+
+    const handleDeleteAvailability = async (id) => {
+        try {
+            await lawyerAPI.deleteAvailability(id);
+            await loadAvailability();
+        } catch (err) {
+            console.error('Failed to delete availability:', err);
+        }
+    };
 
     const loadHearings = async () => {
         try {
@@ -185,7 +232,7 @@ export default function LawyerHearingsPage() {
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             {/* Header */}
-            <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{
                         width: '56px', height: '56px', borderRadius: '16px',
@@ -197,14 +244,197 @@ export default function LawyerHearingsPage() {
                     </div>
                     <div>
                         <h1 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
-                            Hearing Schedule
+                            Hearing & Availability
                         </h1>
                         <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', margin: 0 }}>
-                            Upcoming court dates and virtual sessions
+                            Court schedule and availability calendar for conflict prevention
                         </p>
                     </div>
                 </div>
+
+                {/* Tab Switcher */}
+                <div style={{ display: 'flex', background: 'var(--bg-glass-strong)', padding: '0.35rem', borderRadius: '1rem', border: 'var(--border-glass)' }}>
+                    <button
+                        onClick={() => setActiveTab('hearings')}
+                        style={{
+                            padding: '0.6rem 1.25rem',
+                            background: activeTab === 'hearings' ? 'var(--color-primary)' : 'transparent',
+                            border: 'none',
+                            borderRadius: '0.75rem',
+                            color: activeTab === 'hearings' ? '#fff' : 'var(--text-secondary)',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        🗓️ Hearings Schedule
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('availability')}
+                        style={{
+                            padding: '0.6rem 1.25rem',
+                            background: activeTab === 'availability' ? 'var(--color-primary)' : 'transparent',
+                            border: 'none',
+                            borderRadius: '0.75rem',
+                            color: activeTab === 'availability' ? '#fff' : 'var(--text-secondary)',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        ⛔ Manage Availability
+                    </button>
+                </div>
             </div>
+
+            {activeTab === 'availability' ? (
+                /* Availability Management Panel */
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                    {/* Form to Mark Availability */}
+                    <div style={glassStyle}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem' }}>
+                            Mark Date Availability
+                        </h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+                            Mark dates when you are on vacation, at another court, or unavailable so judges see conflict warnings when scheduling hearings.
+                        </p>
+                        <form onSubmit={handleSaveAvailability}>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                    Select Date *
+                                </label>
+                                <input
+                                    type="date"
+                                    value={newDate}
+                                    onChange={(e) => setNewDate(e.target.value)}
+                                    required
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem 1rem',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
+                                        borderRadius: '0.5rem',
+                                        color: 'var(--text-main)'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                    Status
+                                </label>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: 'var(--text-main)' }}>
+                                        <input
+                                            type="radio"
+                                            name="availStatus"
+                                            checked={!isAvailableToggle}
+                                            onChange={() => setIsAvailableToggle(false)}
+                                        />
+                                        ⛔ Unavailable (Blocked)
+                                    </label>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: 'var(--text-main)' }}>
+                                        <input
+                                            type="radio"
+                                            name="availStatus"
+                                            checked={isAvailableToggle}
+                                            onChange={() => setIsAvailableToggle(true)}
+                                        />
+                                        ✅ Available
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+                                    Reason / Note
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Vacation, Supreme Court Appearance, Out of Station"
+                                    value={newReason}
+                                    onChange={(e) => setNewReason(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem 1rem',
+                                        background: 'var(--bg-glass)',
+                                        border: 'var(--border-glass)',
+                                        borderRadius: '0.5rem',
+                                        color: 'var(--text-main)'
+                                    }}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={savingAvail || !newDate}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.85rem',
+                                    background: 'linear-gradient(135deg, #6366f1 0%, #4338ca 100%)',
+                                    border: 'none',
+                                    borderRadius: '0.75rem',
+                                    color: '#fff',
+                                    fontWeight: '700',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {savingAvail ? 'Saving...' : 'Save Availability Record'}
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Existing Marked Records */}
+                    <div style={glassStyle}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1rem' }}>
+                            Marked Availability Entries
+                        </h3>
+                        {availabilities.length === 0 ? (
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                No availability entries set yet. All dates are currently open for hearings.
+                            </p>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {availabilities.map((item) => (
+                                    <div key={item.id} style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '0.75rem 1rem',
+                                        background: 'rgba(255,255,255,0.03)',
+                                        borderRadius: '0.75rem',
+                                        border: item.isAvailable ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)'
+                                    }}>
+                                        <div>
+                                            <span style={{ fontWeight: '700', color: 'var(--text-main)', display: 'block' }}>
+                                                {item.date}
+                                            </span>
+                                            <span style={{ fontSize: '0.8rem', color: item.isAvailable ? '#10b981' : '#ef4444', fontWeight: '600' }}>
+                                                {item.isAvailable ? '✅ Available' : `⛔ ${item.reason || 'Unavailable'}`}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteAvailability(item.id)}
+                                            style={{
+                                                background: 'rgba(239, 68, 68, 0.1)',
+                                                border: 'none',
+                                                color: '#ef4444',
+                                                padding: '0.4rem 0.75rem',
+                                                borderRadius: '0.5rem',
+                                                cursor: 'pointer',
+                                                fontSize: '0.8rem',
+                                                fontWeight: '600'
+                                            }}
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            ) : (
 
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '2rem' }}>
                 {/* Main: Hearings List */}
