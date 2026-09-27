@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.regex.Pattern;
 
 @Tag(name = "Authentication", description = "Register, login, password reset and face login")
@@ -44,6 +47,11 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
+    @Operation(summary = "Register user", description = "Register a new litigant user account")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Registration successful"),
+        @ApiResponse(responseCode = "400", description = "Validation failed or user already exists")
+    })
     @SecurityRequirements
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
@@ -84,11 +92,18 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Ping auth service", description = "Health check endpoint for authentication service")
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
         return ResponseEntity.ok("pong");
     }
 
+    @Operation(summary = "Login user", description = "Authenticate user with email and password to obtain JWT access and refresh tokens")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Login successful"),
+        @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+        @ApiResponse(responseCode = "400", description = "Bad request or Google Sign-In user")
+    })
     @SecurityRequirements
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
@@ -131,6 +146,11 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Refresh JWT access token", description = "Generate a new access token using a valid refresh token")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Token refreshed successfully"),
+        @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token")
+    })
     @SecurityRequirements
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest req) {
@@ -166,6 +186,10 @@ public class AuthController {
     private static final String PASSWORD_RESET_GENERIC_MESSAGE =
         "If an account with that email exists, a password reset link has been sent.";
 
+    @Operation(summary = "Forgot password", description = "Send a password reset link to user email")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Password reset email sent if account exists")
+    })
     @SecurityRequirements
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
@@ -182,6 +206,11 @@ public class AuthController {
         ));
     }
 
+    @Operation(summary = "Verify password reset token", description = "Check if password reset token is valid and not expired")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Token valid"),
+        @ApiResponse(responseCode = "400", description = "Token invalid or expired")
+    })
     @GetMapping("/verify-reset-token")
     public ResponseEntity<?> verifyResetToken(@RequestParam String token) {
         try {
@@ -203,6 +232,11 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Reset password", description = "Set a new password using a valid reset token")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Password reset successful"),
+        @ApiResponse(responseCode = "400", description = "Token invalid or password policy mismatch")
+    })
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
         try {
@@ -242,6 +276,11 @@ public class AuthController {
 
     // ==================== FACE LOGIN ENDPOINTS ====================
 
+    @Operation(summary = "Enroll face descriptor", description = "Register face biometric vector for authenticated user")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Face enrolled successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid face descriptor")
+    })
     @PostMapping("/face/enroll")
     public ResponseEntity<?> enrollFace(@Valid @RequestBody FaceEnrollRequest req, Authentication auth) {
         try {
@@ -254,6 +293,11 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Login with face recognition", description = "Authenticate using face biometric descriptor")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Face verification successful"),
+        @ApiResponse(responseCode = "401", description = "Face verification failed")
+    })
     @PostMapping("/face/login")
     public ResponseEntity<?> loginWithFace(@Valid @RequestBody FaceLoginRequest req) {
         try {
@@ -279,6 +323,11 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Disable face login", description = "Remove enrolled face recognition biometrics")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Face login disabled"),
+        @ApiResponse(responseCode = "400", description = "Error disabling face login")
+    })
     @DeleteMapping("/face/disable")
     public ResponseEntity<?> disableFaceLogin(Authentication auth) {
         try {
@@ -290,6 +339,10 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Get face login enrollment status", description = "Check whether authenticated user has enrolled face biometrics")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Status retrieved successfully")
+    })
     @GetMapping("/face/status")
     public ResponseEntity<?> getFaceLoginStatus(Authentication auth) {
         try {
