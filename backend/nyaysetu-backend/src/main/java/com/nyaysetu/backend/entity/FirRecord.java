@@ -53,10 +53,20 @@ public class FirRecord {
     @Column(nullable = false)
     private LocalDateTime uploadedAt;
     
-    // Incident details for client FIRs
+    // Incident & Parties details
     private LocalDate incidentDate;
     
     private String incidentLocation;
+
+    @Column(columnDefinition = "TEXT")
+    private String complainantDetails;
+
+    @Column(columnDefinition = "TEXT")
+    private String accusedDetails;
+
+    private String offenceSections; // BNS / IPC sections
+
+    private String policeStationCode; // e.g. PS-01
     
     // AI integration
     private Boolean aiGenerated;

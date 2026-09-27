@@ -719,9 +719,38 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
     const [certUrl, setCertUrl] = useState(null);
     const [certLoading, setCertLoading] = useState(false);
 
+    // Document Preview Modal State (PDF Viewer & Image Lightbox)
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [previewDoc, setPreviewDoc] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [previewType, setPreviewType] = useState('pdf'); // 'pdf' | 'image' | 'other'
+
     // AI Suggestions State
     const [suggestions, setSuggestions] = useState([]);
     const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
+    const previewDocument = async (doc) => {
+        try {
+            if (doc.source === 'evidence') {
+                alert('Preview unavailable for blockhash evidence entries.');
+                return;
+            }
+            const res = await documentAPI.download(doc.id);
+            const contentType = doc.contentType || (doc.fileName && doc.fileName.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
+            const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: contentType }));
+            
+            const isImage = doc.fileName && (doc.fileName.match(/\.(jpg|jpeg|png)$/i) || contentType.startsWith('image/'));
+            const isPdf = doc.fileName && (doc.fileName.match(/\.pdf$/i) || contentType.includes('pdf'));
+            
+            setPreviewType(isImage ? 'image' : (isPdf ? 'pdf' : 'other'));
+            setPreviewUrl(blobUrl);
+            setPreviewDoc(doc);
+            setShowPreviewModal(true);
+        } catch (e) {
+            console.error('Preview load failed:', e);
+            alert('Failed to load document preview');
+        }
+    };
 
     useEffect(() => {
         fetchAllFiles();
@@ -1106,6 +1135,12 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                                                 ) : null
                                             )}
 
+                                            {doc.source === 'docs' && (
+                                                <button onClick={() => previewDocument(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '0.5rem', color: '#3b82f6', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                    <Eye size={14} /> Preview
+                                                </button>
+                                            )}
+
                                             {showCertificate && (
                                                 <button onClick={() => viewCertificate(doc)} style={{ padding: '0.5rem 0.75rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '0.5rem', color: '#10b981', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
                                                     <FileCheck size={14} /> {t('caseDetail.certificate')}
@@ -1120,6 +1155,72 @@ function CaseFilesTab({ caseId, caseType, caseDescription }) {
                                 )
                             })}
                         </div>}
+
+                {/* In-Browser Document Preview Modal (PDF Viewer & Image Lightbox) */}
+                {showPreviewModal && previewDoc && (
+                    <div style={{
+                        position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)',
+                        backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2500, padding: '1.5rem'
+                    }} onClick={() => setShowPreviewModal(false)}>
+                        <div style={{
+                            background: '#1e1e1e', width: '95%', maxWidth: '1000px', height: '85vh',
+                            borderRadius: '1rem', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)'
+                        }} onClick={e => e.stopPropagation()}>
+                            <div style={{
+                                padding: '1rem 1.5rem', background: '#2d2d2d', borderBottom: '1px solid #404040',
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                            }}>
+                                <div>
+                                    <h3 style={{ margin: 0, color: 'white', fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <Eye size={20} color="#3b82f6" /> {previewDoc.fileName}
+                                    </h3>
+                                    <span style={{ fontSize: '0.75rem', color: '#a0a0a0' }}>
+                                        In-Browser Secure Document Preview ({previewType.toUpperCase()})
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                                    <button onClick={() => downloadDoc(previewDoc)} style={{
+                                        padding: '0.5rem 1rem', background: '#3b82f6', color: 'white', borderRadius: '0.5rem',
+                                        border: 'none', fontWeight: 'bold', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                                    }}>
+                                        <Download size={14} /> Download
+                                    </button>
+                                    <button onClick={() => setShowPreviewModal(false)} style={{
+                                        background: 'none', border: 'none', color: '#a0a0a0', cursor: 'pointer', fontSize: '1.5rem'
+                                    }}>
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                            <div style={{ flex: 1, background: '#121212', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', padding: '1rem' }}>
+                                {previewType === 'image' ? (
+                                    <img
+                                        src={previewUrl}
+                                        alt={previewDoc.fileName}
+                                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '0.5rem' }}
+                                    />
+                                ) : previewType === 'pdf' ? (
+                                    <iframe
+                                        src={previewUrl}
+                                        title="PDF Document Preview"
+                                        width="100%"
+                                        height="100%"
+                                        style={{ border: 'none' }}
+                                    />
+                                ) : (
+                                    <div style={{ textAlign: 'center', color: '#a0a0a0' }}>
+                                        <FileText size={48} style={{ marginBottom: '1rem' }} />
+                                        <p>Preview not directly supported for this file type.</p>
+                                        <button onClick={() => downloadDoc(previewDoc)} style={{ padding: '0.5rem 1rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}>
+                                            Download File
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {showAnalysisModal && selectedAnalysis && (
                     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }} onClick={() => setShowAnalysisModal(false)}>

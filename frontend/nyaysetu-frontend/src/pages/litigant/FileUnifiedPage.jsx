@@ -155,10 +155,37 @@ export default function FileUnifiedPage() {
 
     const handleFileUpload = (e) => {
         const files = Array.from(e.target.files);
-        setFormData({
-            ...formData,
-            documents: [...formData.documents, ...files.map(f => ({ file: f, name: f.name, size: f.size, aiAnalyzed: false }))]
-        });
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+        const allowedExts = ['.pdf', '.jpg', '.jpeg', '.png'];
+        const maxSizeBytes = 10 * 1024 * 1024; // 10MB
+        const maxFileCount = 5;
+
+        if (formData.documents.length + files.length > maxFileCount) {
+            alert(`Maximum ${maxFileCount} supporting documents allowed per case filing.`);
+            return;
+        }
+
+        const validFiles = [];
+        for (const file of files) {
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            const isValidType = allowedTypes.includes(file.type) || allowedExts.includes(ext);
+            if (!isValidType) {
+                alert(`File "${file.name}" format not supported. Only PDF, JPG, and PNG are allowed.`);
+                continue;
+            }
+            if (file.size > maxSizeBytes) {
+                alert(`File "${file.name}" exceeds the maximum limit of 10MB.`);
+                continue;
+            }
+            validFiles.push(file);
+        }
+
+        if (validFiles.length > 0) {
+            setFormData({
+                ...formData,
+                documents: [...formData.documents, ...validFiles.map(f => ({ file: f, name: f.name, size: f.size, aiAnalyzed: false }))]
+            });
+        }
     };
 
     const analyzeDocument = (index) => {
