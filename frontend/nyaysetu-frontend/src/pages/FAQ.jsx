@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Scale, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import Header from "../components/landing/Header";
+import Footer from "../components/landing/Footer";
 import FAQAccordion from "../components/FAQAccordion";
 import SearchBar from "../components/SearchBar";
 import { faqData } from "../utils/faqData";
@@ -42,7 +44,9 @@ export default function FAQ() {
   const hasResults = filteredData.length > 0;
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--bg-main)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-main)", display: "flex", flexDirection: "column" }}>
+      <Header />
+      <main style={{ flex: "1 0 auto" }}>
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section
         aria-label="FAQ page header"
@@ -324,6 +328,9 @@ export default function FAQ() {
           </motion.div>
         )}
       </div>
-    </main>
+      </main>
+      <Footer />
+    </div>
+
   );
 }
