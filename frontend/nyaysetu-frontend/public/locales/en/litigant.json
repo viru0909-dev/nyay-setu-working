@@ -517,7 +517,9 @@
     "hideAvatar": "Hide AI Avatar",
     "showAvatar": "Show AI Avatar",
     "avatarGreeting": "Namaste. I am your AI Legal Assistant. You can speak to me anytime.",
-    "history": "History"
+    "history": "History",
+    "injectionAdvisory": "Your message contains phrasing that may not produce useful legal results. Please describe your legal question directly.",
+    "inputTooLong": "Your message is too long. Please shorten it to {{limit}} characters or fewer."
   },
 
   "common": {

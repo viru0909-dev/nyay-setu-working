@@ -17,7 +17,7 @@ import json
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 import time
 import uuid
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -173,6 +173,16 @@ except Exception as e:
 # ─── Models ───────────────────────────────────────────────────────────────────
 
 
+# Sanitized queries are capped at the same limit the Vakil Friend chat input
+# enforces in the browser.
+MAX_QUERY_LENGTH = 2000
+
+# Hard ceiling applied to the raw payload before sanitization. A client that
+# bypasses the frontend counter gets an explicit 400 instead of an oversized
+# prompt reaching Groq/Gemini and burning the shared token quota.
+MAX_RAW_QUERY_LENGTH = 3000
+
+
 class LegalQuery(BaseModel):
     query: str
     language: str = "en"
@@ -183,8 +193,10 @@ class LegalQuery(BaseModel):
         v = sanitize_user_input(v)
         if not v:
             raise ValueError("Query cannot be empty")
-        if len(v) > 2000:
-            raise ValueError("Query exceeds maximum length of 2000 characters")
+        if len(v) > MAX_QUERY_LENGTH:
+            raise ValueError(
+                f"Query exceeds maximum length of {MAX_QUERY_LENGTH} characters"
+            )
         return v
 
     @field_validator("language")
@@ -194,6 +206,33 @@ class LegalQuery(BaseModel):
         if v not in allowed:
             raise ValueError(f"Language must be one of: {allowed}")
         return v
+
+
+async def enforce_raw_query_limit(request: Request) -> None:
+    """
+    Reject oversized payloads with 400 Bad Request before model validation.
+
+    FastAPI solves route dependencies before it validates the request body, so
+    this runs ahead of LegalQuery and answers a bypassed frontend limit with an
+    explicit status code instead of a generic 422 validation error.
+    """
+    try:
+        payload = await request.json()
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        # Empty or malformed bodies are already reported by FastAPI's own
+        # request validation — there is no length to measure here.
+        return
+
+    query = payload.get("query") if isinstance(payload, dict) else None
+
+    if isinstance(query, str) and len(query) > MAX_RAW_QUERY_LENGTH:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Query exceeds the maximum length of {MAX_RAW_QUERY_LENGTH} "
+                f"characters (received {len(query)})."
+            ),
+        )
 
 
 # ─── SSE Event Builder ────────────────────────────────────────────────────────
@@ -763,14 +802,15 @@ async def deep_research_pipeline(query: str, language: str):
         yield sse_event("done", {"message": "Error occurred"})
 
 
-@app.post("/research/deep")
+@app.post("/research/deep", dependencies=[Depends(enforce_raw_query_limit)])
 async def deep_research(body: LegalQuery, request: Request):
     """
     Deep Research SSE endpoint — streams 5-stage legal reasoning with
     Indian Kanoon context. Frontend connects directly to this for
     the reasoning panel + avatar speech updates.
     """
-    # Input validation and sanitization is handled by the LegalQuery Pydantic model.
+    # Oversized payloads are rejected with 400 by enforce_raw_query_limit;
+    # sanitization and the 2000-character cap come from the LegalQuery model.
     logger.info(f"[Deep Research] New query: {body.query[:80]}")
 
     async def event_generator():

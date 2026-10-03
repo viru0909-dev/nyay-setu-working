@@ -13,6 +13,14 @@ import AvatarPanel from '../../components/avatar/AvatarPanel';
 import { useTranslation } from 'react-i18next';
 import useChatStore from '../../store/chatStore';
 import CaseSummaryViewer from '../../components/Summary/CaseSummaryViewer';
+import {
+    MAX_CHAT_INPUT_LENGTH,
+    formatCharacterCount,
+    hasPromptInjectionPattern,
+    isChatInputNearLimit,
+    isChatInputOverLimit,
+    sanitizeChatInput,
+} from '../../utils/chatInputSafety';
 
 export default function VakilFriendChat() {
     const { t } = useTranslation('litigant');
@@ -268,7 +276,20 @@ const {
         const textToSend = overrideText || inputMessage;
         if ((!textToSend.trim() && !audioData) || isLoading || isStarting) return;
 
-        const userMessage = textToSend.trim();
+        // The send button is already disabled past the limit, but voice input and
+        // the wake-word buffer call sendMessage() directly, so re-check here.
+        if (isChatInputOverLimit(textToSend)) {
+            setError(t('vakilFriend.inputTooLong', {
+                limit: MAX_CHAT_INPUT_LENGTH.toLocaleString('en-IN')
+            }));
+            return;
+        }
+
+        // Strip tags and control characters before the text reaches the AI prompt
+        const userMessage = sanitizeChatInput(textToSend);
+        if (!userMessage && !audioData) return;
+
+        setError(null);
         // Only clear the input message box if we aren't overriding it (standard UI flow)
         if (!overrideText) setInputMessage('');
 
@@ -972,6 +993,12 @@ const startDeepResearch = async (query) => {
         return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     };
 
+    // Input safety state derived from the current draft message
+    const inputOverLimit = isChatInputOverLimit(inputMessage);
+    const inputNearLimit = isChatInputNearLimit(inputMessage);
+    const showInjectionAdvisory = hasPromptInjectionPattern(inputMessage);
+    const sendDisabled = !inputMessage.trim() || inputOverLimit || isLoading || isStarting || rateLimited;
+
     return (
         <div style={{ maxWidth: '100%', position: 'relative' }}>
             {/* History Sidebar - Full screen modal */}
@@ -1278,6 +1305,8 @@ const startDeepResearch = async (query) => {
                         }}>
                             <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.75rem' }}>{t('vakilFriend.aiSummary')}</div>
                             <p style={{ color: '#334155', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
+                                {documentAnalysis.summary || t('vakilFriend.summaryPending')}
+                            </p>
                         </div>
 
                         {/* Case Summary Viewer */}
@@ -1612,15 +1641,33 @@ const startDeepResearch = async (query) => {
                                                 : '1rem 1rem 1rem 0.25rem',
                                             boxShadow: msg.role === 'user' ? 'none' : '0 4px 12px rgba(30, 42, 68, 0.04)'
                                         }}>
-                                            <div className="markdown-content" style={{
-                                                color: 'var(--text-main)',
-                                                fontSize: '0.95rem',
-                                                lineHeight: '1.6',
-                                            }}>
-                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            {/*
+                                              * User text is rendered as a plain React text child rather than
+                                              * as Markdown. React HTML-entity-encodes text children, so any
+                                              * tags a user types are displayed literally instead of being
+                                              * interpreted by the renderer.
+                                              */}
+                                            {msg.role === 'user' ? (
+                                                <div style={{
+                                                    color: 'var(--text-main)',
+                                                    fontSize: '0.95rem',
+                                                    lineHeight: '1.6',
+                                                    whiteSpace: 'pre-wrap',
+                                                    overflowWrap: 'anywhere'
+                                                }}>
                                                     {msg.content}
-                                                </ReactMarkdown>
-                                            </div>
+                                                </div>
+                                            ) : (
+                                                <div className="markdown-content" style={{
+                                                    color: 'var(--text-main)',
+                                                    fontSize: '0.95rem',
+                                                    lineHeight: '1.6',
+                                                }}>
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                        {msg.content}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            )}
                                             {msg.role === 'assistant' && (
                                                 <button
                                                     onClick={() => speakText(msg.content, index)}
@@ -1827,11 +1874,15 @@ const startDeepResearch = async (query) => {
                             placeholder={t('vakilFriend.placeholder')}
                             disabled={isLoading || isStarting}
                             rows={2}
+                            aria-invalid={inputOverLimit}
+                            aria-describedby="vakil-friend-character-counter"
                             style={{
                                 flex: 1,
                                 padding: '0.75rem 1rem',
                                 background: 'var(--bg-glass)',
-                                border: 'var(--border-glass)',
+                                border: inputOverLimit
+                                    ? '1px solid var(--color-error)'
+                                    : 'var(--border-glass)',
                                 borderRadius: '0.625rem',
                                 color: 'var(--text-main)',
                                 fontSize: '0.9rem',
@@ -1840,8 +1891,8 @@ const startDeepResearch = async (query) => {
                                 fontFamily: 'inherit',
                                 transition: 'all 0.2s'
                             }}
-                            onFocus={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
-                            onBlur={e => e.currentTarget.style.borderColor = 'var(--border-glass)'}
+                            onFocus={e => e.currentTarget.style.borderColor = inputOverLimit ? 'var(--color-error)' : 'var(--color-primary)'}
+                            onBlur={e => e.currentTarget.style.borderColor = inputOverLimit ? 'var(--color-error)' : 'var(--border-glass)'}
                         />
 
                         {/* Mic Button */}
@@ -1905,20 +1956,23 @@ const startDeepResearch = async (query) => {
 
                         <button
                             onClick={() => sendMessage()}
-                            disabled={!inputMessage.trim() || isLoading || isStarting || rateLimited}
+                            disabled={sendDisabled}
+                            title={inputOverLimit
+                                ? t('vakilFriend.inputTooLong', { limit: MAX_CHAT_INPUT_LENGTH.toLocaleString('en-IN') })
+                                : undefined}
                             style={{
                                 padding: '0.75rem 1rem',
-                                background: (!inputMessage.trim() || isLoading || isStarting || rateLimited)
+                                background: sendDisabled
                                     ? 'var(--bg-glass-strong)'
                                     : 'var(--color-primary)',
                                 border: 'none',
                                 borderRadius: '0.625rem',
-                                color: (!inputMessage.trim() || isLoading || isStarting || rateLimited) ? 'var(--text-secondary)' : 'white',
-                                cursor: (!inputMessage.trim() || isLoading || isStarting || rateLimited) ? 'not-allowed' : 'pointer',
+                                color: sendDisabled ? 'var(--text-secondary)' : 'white',
+                                cursor: sendDisabled ? 'not-allowed' : 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                boxShadow: (!inputMessage.trim() || isLoading || isStarting || rateLimited)
+                                boxShadow: sendDisabled
                                     ? 'none'
                                     : '0 4px 15px rgba(30, 42, 68, 0.4)',
                                 transition: 'all 0.2s'
@@ -1926,6 +1980,52 @@ const startDeepResearch = async (query) => {
                         >
                             {rateLimited ? <span style={{fontSize:'0.75rem', fontWeight:'700'}}>{cooldown}s</span> : <Send size={20} />}
                         </button>
+                    </div>
+
+                    {/* Prompt injection advisory + live character counter */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'space-between',
+                        gap: '1rem',
+                        marginTop: '0.6rem'
+                    }}>
+                        {showInjectionAdvisory ? (
+                            <div
+                                role="status"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: '0.5rem',
+                                    padding: '0.5rem 0.75rem',
+                                    background: 'rgba(245, 158, 11, 0.1)',
+                                    border: '1px solid rgba(245, 158, 11, 0.25)',
+                                    borderRadius: '0.5rem',
+                                    color: '#b45309',
+                                    fontSize: '0.78rem',
+                                    lineHeight: '1.5'
+                                }}
+                            >
+                                <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: '2px' }} />
+                                <span>{t('vakilFriend.injectionAdvisory')}</span>
+                            </div>
+                        ) : (
+                            <span />
+                        )}
+
+                        <span
+                            id="vakil-friend-character-counter"
+                            aria-live="polite"
+                            style={{
+                                flexShrink: 0,
+                                fontSize: '0.75rem',
+                                fontWeight: inputNearLimit ? '700' : '500',
+                                color: inputNearLimit ? 'var(--color-error)' : 'var(--text-secondary)',
+                                fontVariantNumeric: 'tabular-nums'
+                            }}
+                        >
+                            {formatCharacterCount(inputMessage.length)}
+                        </span>
                     </div>
                 </div>
             </div>
