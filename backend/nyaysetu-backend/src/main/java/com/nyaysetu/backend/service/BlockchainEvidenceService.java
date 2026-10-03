@@ -27,10 +27,17 @@ public class BlockchainEvidenceService {
     private final EvidenceAnchoringService anchoringService;
 
     /**
-     * Upload new evidence with blockchain security
+     * Upload new evidence with blockchain security.
+     * <p>
+     * Synchronized to prevent duplicate {@code blockIndex} assignment when two
+     * uploads to the same case arrive concurrently. A database-level unique
+     * constraint on {@code (case_id, block_index)} (added in V54) provides a
+     * safety net; this guard prevents the race in the first place.
+     *
+     * @see AuditChainService#appendEntry which uses the same pattern
      */
     @Transactional
-    public EvidenceRecord uploadEvidence(UUID caseId, MultipartFile file, 
+    public synchronized EvidenceRecord uploadEvidence(UUID caseId, MultipartFile file, 
                                           String title, String description,
                                           String evidenceType, User uploadedBy, String uploadIp) {
         log.info("Uploading blockchain-secured evidence '{}' for case {}", title, caseId);
