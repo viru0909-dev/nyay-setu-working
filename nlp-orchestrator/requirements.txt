@@ -17,7 +17,7 @@ pytest-mock==3.15.1
 python-dotenv==1.2.2
 python-multipart==0.0.32
 sentencepiece
-sqlalchemy==2.0.26
+sqlalchemy==2.0.50
 sse-starlette==3.4.4
 tenacity==9.1.4
 torch
