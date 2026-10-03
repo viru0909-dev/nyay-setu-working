@@ -2,9 +2,10 @@
 routers/context.py — API endpoints for Nyay Setu LawGPT microservice.
 
 Provides:
-    POST /context  — RAG retrieval (called by Java RagService proxy)
-    POST /chat     — Standalone chat with LLM + RAG (for testing / future use)
-    GET  /health   — Service health check
+    POST /context        — RAG retrieval (called by Java RagService)
+    POST /context/filter — Statute-scoped retrieval (NEW)
+    POST /chat           — Standalone chat with LLM + RAG
+    GET  /health         — Service health check with available statutes
 """
 
 import logging
@@ -16,7 +17,14 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from lawgpt.retriever import retrieve, is_index_loaded, get_chunk_count, retrieve_with_scores
+from lawgpt.retriever import (
+    retrieve,
+    retrieve_by_statute,
+    is_index_loaded,
+    get_chunk_count,
+    retrieve_with_scores,
+    get_available_statutes,
+)
 
 load_dotenv()
 logger = logging.getLogger("lawgpt")
@@ -24,10 +32,14 @@ logger = logging.getLogger("lawgpt")
 router = APIRouter()
 
 
-# ── Request / Response models ──────────────────────────────────────────────────
-
 class ContextRequest(BaseModel):
     question: str
+    max_results: int = Field(default=3, ge=1, le=20)
+
+
+class FilteredContextRequest(BaseModel):
+    question: str
+    statute: str = Field(..., description="Statute code (e.g., 'BNS', 'Constitution', 'IPC')")
     max_results: int = Field(default=3, ge=1, le=20)
 
 
@@ -53,16 +65,26 @@ class HealthResponse(BaseModel):
     index_loaded: bool
     model: str
     chunk_count: Optional[int]
+    available_statutes: List[str]
 
 
-# ── LLM resolution (lazy, for /chat only) ─────────────────────────────────────
+class SearchItem(BaseModel):
+    page_content: str
+    source: str
+    page: int
+    relevance: float
+
+
+class SearchRequest(BaseModel):
+    query: str
+    k: int = Field(default=5, ge=1, le=20)
+
 
 _llm = None
 _llm_label: str = "none"
 
 
 def _resolve_llm_label() -> str:
-    """Determine which LLM backend will be used, without instantiating it."""
     if os.getenv("GROQ_API_KEY"):
         return "groq"
     elif os.getenv("GEMINI_API_KEY"):
@@ -72,47 +94,31 @@ def _resolve_llm_label() -> str:
 
 
 def get_llm():
-    """Lazy-initialise and return the LLM instance."""
     global _llm, _llm_label
-
     if _llm is not None:
         return _llm
 
-    groq_key: Optional[str] = os.getenv("GROQ_API_KEY")
-    gemini_key: Optional[str] = os.getenv("GEMINI_API_KEY")
+    groq_key = os.getenv("GROQ_API_KEY")
+    gemini_key = os.getenv("GEMINI_API_KEY")
 
     if groq_key:
         from langchain_groq import ChatGroq
-        _llm = ChatGroq(
-            model="llama-3.3-70b-versatile",
-            temperature=0.2,
-            groq_api_key=groq_key,
-        )
+        _llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.2, groq_api_key=groq_key)
         _llm_label = "groq"
-        logger.info("🤖 LLM backend: Groq (llama-3.3-70b-versatile)")
+        logger.info("LLM backend: Groq (llama-3.3-70b-versatile)")
     elif gemini_key:
         from langchain_google_genai import ChatGoogleGenerativeAI
-        _llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-pro",
-            temperature=0.2,
-            google_api_key=gemini_key,
-        )
+        _llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.2, google_api_key=gemini_key)
         _llm_label = "gemini"
-        logger.info("🤖 LLM backend: Google Gemini (gemini-1.5-pro)")
+        logger.info("LLM backend: Google Gemini (gemini-1.5-pro)")
     else:
         from langchain_community.llms import Ollama
-        _llm = Ollama(
-            model="llama3",
-            base_url="http://localhost:11434",
-            temperature=0.2,
-        )
+        _llm = Ollama(model="llama3", base_url="http://localhost:11434", temperature=0.2)
         _llm_label = "ollama"
-        logger.info("🤖 LLM backend: Ollama (llama3, local)")
+        logger.info("LLM backend: Ollama (llama3, local)")
 
     return _llm
 
-
-# ── Legal prompt template ──────────────────────────────────────────────────────
 
 LEGAL_PROMPT_TEMPLATE: str = """You are Vakil Friend, the AI legal assistant of Nyay Setu.
 You help Indian citizens understand their legal rights and navigate the judiciary.
@@ -133,154 +139,112 @@ Answer:
 """
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# POST /context — PRIMARY endpoint (called by Java RagService proxy)
-# ══════════════════════════════════════════════════════════════════════════════
-
 @router.post("/context", response_model=ContextResponse)
 async def get_context(request: ContextRequest) -> ContextResponse:
-    """
-    Retrieve top-k relevant legal chunks from the FAISS vector store.
-    Does NOT call any LLM — returns raw retrieved context.
-    """
+    """Retrieve top-k relevant legal chunks from ChromaDB."""
     try:
         results = retrieve(query=request.question, k=request.max_results)
     except FileNotFoundError:
-        raise HTTPException(
-            status_code=503,
-            detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.",
-        )
+        raise HTTPException(status_code=503, detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.")
     except Exception as e:
         logger.error("Context retrieval error: %s", e, exc_info=True)
         raise HTTPException(status_code=502, detail=str(e))
 
     if not results:
-        return ContextResponse(
-            context="No specific legal context found.",
-            sources=[],
-        )
+        return ContextResponse(context="No specific legal context found.", sources=[])
 
-    context_parts: List[str] = []
-    sources: List[str] = []
-
+    context_parts = []
+    sources = []
     for doc in results:
         context_parts.append(f"- {doc.page_content}")
-        source_name: str = doc.metadata.get("source", "unknown")
-        page_num: int = doc.metadata.get("page", 0)
-        source_label: str = f"{source_name} — page {page_num}"
+        source_name = doc.metadata.get("source", "unknown")
+        page_num = doc.metadata.get("page", 0)
+        source_label = f"{source_name} - page {page_num}"
         if source_label not in sources:
             sources.append(source_label)
 
-    context: str = "\n\n".join(context_parts)
-    return ContextResponse(context=context, sources=sources)
+    return ContextResponse(context="\n\n".join(context_parts), sources=sources)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# POST /chat — STANDALONE endpoint (for direct testing / future use)
-# ══════════════════════════════════════════════════════════════════════════════
+@router.post("/context/filter", response_model=ContextResponse)
+async def get_filtered_context(request: FilteredContextRequest) -> ContextResponse:
+    """Retrieve context filtered to a specific statute (e.g., 'BNS', 'Constitution')."""
+    try:
+        results = retrieve_by_statute(query=request.question, statute=request.statute, k=request.max_results)
+    except FileNotFoundError:
+        raise HTTPException(status_code=503, detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.")
+    except Exception as e:
+        logger.error("Filtered retrieval error: %s", e, exc_info=True)
+        raise HTTPException(status_code=502, detail=str(e))
+
+    if not results:
+        return ContextResponse(context=f"No results found in {request.statute}.", sources=[])
+
+    context_parts = []
+    sources = []
+    for doc in results:
+        context_parts.append(f"- {doc.page_content}")
+        source_name = doc.metadata.get("source", "unknown")
+        page_num = doc.metadata.get("page", 0)
+        source_label = f"{source_name} - page {page_num}"
+        if source_label not in sources:
+            sources.append(source_label)
+
+    return ContextResponse(context="\n\n".join(context_parts), sources=sources)
+
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
-    """
-    Retrieve context from FAISS, call an LLM with the legal prompt,
-    and return a grounded answer with citations.
-    """
-    session_id: str = request.session_id or str(uuid.uuid4())
+    """Retrieve context from ChromaDB, call LLM with legal prompt, return grounded answer."""
+    session_id = request.session_id or str(uuid.uuid4())
 
-    # Retrieve context
     try:
         results = retrieve(query=request.question, k=5)
     except FileNotFoundError:
-        raise HTTPException(
-            status_code=503,
-            detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.",
-        )
+        raise HTTPException(status_code=503, detail="Legal database not initialized. Run 'python lawgpt/ingest.py' first.")
     except Exception as e:
         logger.error("Chat retrieval error: %s", e, exc_info=True)
         raise HTTPException(status_code=502, detail=str(e))
 
-    # Build context string
-    context_parts: List[str] = []
-    sources: List[str] = []
-
+    context_parts = []
+    sources = []
     for doc in results:
         context_parts.append(f"- {doc.page_content}")
-        source_name: str = doc.metadata.get("source", "unknown")
-        page_num: int = doc.metadata.get("page", 0)
-        source_label: str = f"{source_name} — page {page_num}"
+        source_name = doc.metadata.get("source", "unknown")
+        page_num = doc.metadata.get("page", 0)
+        source_label = f"{source_name} - page {page_num}"
         if source_label not in sources:
             sources.append(source_label)
 
-    context: str = "\n\n".join(context_parts) if context_parts else "No context available."
+    context = "\n\n".join(context_parts) if context_parts else "No context available."
+    prompt = LEGAL_PROMPT_TEMPLATE.format(context=context, question=request.question)
 
-    # Call LLM
-    prompt: str = LEGAL_PROMPT_TEMPLATE.format(context=context, question=request.question)
-    
-    from utils.query_cache import get_cached_response, set_cached_response, is_static_query
-    
-    cached_answer = None
-    if is_static_query(request.question):
-        cached_answer = get_cached_response(request.question)
-        if cached_answer:
-            logger.info("Cache hit for legal query")
-            answer = cached_answer
-        else:
-            logger.info("Cache miss for legal query")
-            
-    if not cached_answer:
-        try:
-            llm = get_llm()
-            answer_raw = llm.invoke(prompt)
-            # LangChain LLMs may return AIMessage or str
-            if hasattr(answer_raw, "content"):
-                answer = answer_raw.content
-            else:
-                answer = answer_raw
-                
-            if is_static_query(request.question):
-                set_cached_response(request.question, answer)
-        except Exception as e:
-            logger.error("LLM invocation error: %s", e, exc_info=True)
-            raise HTTPException(status_code=502, detail=f"LLM error: {e}")
+    try:
+        llm = get_llm()
+        answer_raw = llm.invoke(prompt)
+        answer = answer_raw.content if hasattr(answer_raw, "content") else answer_raw
+    except Exception as e:
+        logger.error("LLM invocation error: %s", e, exc_info=True)
+        raise HTTPException(status_code=502, detail=f"LLM error: {e}")
 
-    return ChatResponse(
-        answer=str(answer),
-        sources=sources,
-        session_id=session_id,
-        model_used=_llm_label,
-    )
+    return ChatResponse(answer=str(answer), sources=sources, session_id=session_id, model_used=_llm_label)
 
-
-# ══════════════════════════════════════════════════════════════════════════════
-# GET /health — Service health check
-# ══════════════════════════════════════════════════════════════════════════════
 
 @router.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
-    """Return service status including index availability and LLM backend."""
+    """Return service status including index availability and available statutes."""
     return HealthResponse(
         status="ok",
         index_loaded=is_index_loaded(),
         model=_resolve_llm_label(),
         chunk_count=get_chunk_count(),
+        available_statutes=get_available_statutes(),
     )
-
-
-class SearchItem(BaseModel):
-    page_content: str
-    source: str
-    page: int
-    relevance: float
-
-
-class SearchRequest(BaseModel):
-    query: str
-    k: int = Field(default=5, ge=1, le=20)
 
 
 @router.post("/search", response_model=List[SearchItem])
 async def search_precedents(request: SearchRequest) -> List[SearchItem]:
-    """Perform advanced semantic search over legal precedents returning matches with scores."""
+    """Perform advanced semantic search over legal precedents with relevance scores."""
     try:
         results = retrieve_with_scores(query=request.query, k=request.k)
         return [SearchItem(**item) for item in results]

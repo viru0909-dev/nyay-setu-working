@@ -1,9 +1,8 @@
 """
-main.py — Nyay Setu LawGPT Service entrypoint.
+main.py — Nyay Setu LawGPT Service entrypoint (ChromaDB backend).
 
-A standalone FastAPI microservice providing RAG retrieval over Indian
-legal documents. Spring Boot's RagService.java calls POST /context
-to get relevant chunks; the LLM call remains in VakilFriendService.java.
+Persistent RAG microservice over Indian legal documents with
+instant startup and statute-scoped metadata filtering.
 
 Usage:
     uvicorn main:app --reload --port 8001
@@ -20,44 +19,36 @@ from routers.context import router as context_router
 from routers.document import router as document_router
 from routers.summarize import router as summarize_router
 
-# ── Logging ────────────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s │ %(levelname)-7s │ %(name)s │ %(message)s",
+    format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger("lawgpt")
 
 
-# ── Lifespan (startup / shutdown) ─────────────────────────────────────────────
-
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Attempt to load the FAISS index at startup."""
+    """Load ChromaDB index at startup (instant due to disk persistence)."""
     try:
         load_vectorstore()
         count = get_chunk_count()
-        logger.info("✅ FAISS index loaded — RAG ready (%s vectors)", count)
+        logger.info("ChromaDB index loaded - RAG ready (%s vectors)", count)
     except FileNotFoundError:
-        logger.warning("⚠️ FAISS index not found — run ingest.py")
+        logger.warning("ChromaDB not found - run ingest.py")
     except Exception as e:
-        logger.error("❌ Failed to load FAISS index: %s", e)
+        logger.error("Failed to load ChromaDB index: %s", e)
+    yield
+    logger.info("LawGPT service shutting down")
 
-    yield  # application runs here
-
-    logger.info("🛑 LawGPT service shutting down")
-
-
-# ── App ────────────────────────────────────────────────────────────────────────
 
 app = FastAPI(
     title="Nyay Setu LawGPT Service",
-    version="0.1.0",
-    description="RAG microservice for Vakil Friend legal AI",
+    version="0.2.0",
+    description="RAG microservice for Vakil Friend legal AI (ChromaDB backend)",
     lifespan=lifespan,
 )
 
-# Mount at root so endpoints are /context, /chat, /health, /generate, /generate/pdf
 app.include_router(context_router)
 app.include_router(document_router)
 app.include_router(summarize_router)
