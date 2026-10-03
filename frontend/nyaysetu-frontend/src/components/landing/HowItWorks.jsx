@@ -1,6 +1,7 @@
 // fixed window.innerWidth checks (unreliable at render time) — replaced with CSS media queries
 // also fixed a broken JSX structure that was causing blank space below the steps grid
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { UserPlus, FileSearch, Gavel, CheckCircle, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -241,24 +242,22 @@ export default function HowItWorks() {
                     }}>
                         {t('landing:howItWorks.ctaText')}
                     </p>
-                    <motion.button
+                    <Link
+                        to="/signup"
                         className="btn btn-primary"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
                         style={{
                             padding: '1.25rem 3rem',
                             fontSize: '1.125rem',
                             borderRadius: '12px',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '0.75rem'
+                            gap: '0.75rem',
+                            textDecoration: 'none'
                         }}
-                        onClick={() => window.location.href = '/signup'}
                     >
                         {t('landing:howItWorks.ctaButton')}
                         <ArrowRight size={20} />
-                    </motion.button>
+                    </Link>
                 </motion.div>
             </div>
             <style>{`
