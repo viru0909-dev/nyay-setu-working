@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import useAuthStore from '../../store/authStore';
 import AIAssistantModal from './AIAssistantModal';
+import { UI_LANGUAGES, getLanguage } from '../../config/languages';
+import { changeLanguage } from '../../services/languagePreference';
 
 // role links for the portal dropdown
 const ROLES = [
@@ -15,13 +17,6 @@ const ROLES = [
     { id: 'judge', label: 'header.nav.roles.judge', href: '/judge' },
 ];
 
-const LANGUAGES = [
-    { code: 'en', label: 'English', flag: 'EN' },
-    { code: 'hi', label: 'हिंदी', flag: 'HI' },
-    { code: 'mr', label: 'मराठी', flag: 'MR' },
-    { code: 'ta', label: 'தமிழ்', flag: 'TA' },
-    { code: 'te', label: 'తెలుగు', flag: 'TE' }
-];
 
 export default function Header({ hideAuthButtons = false }) {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -144,18 +139,6 @@ export default function Header({ hideAuthButtons = false }) {
             />
         );
 
-        const currentPathWithHash = location.pathname + location.hash;
-        let isActive = false;
-        if (item.href === '/') {
-            // Home is only active if we are on '/' AND there is no hash
-            isActive = location.pathname === '/' && !location.hash;
-        } else if (item.href) {
-            // Other tabs are active if they match the exact path+hash OR just the path
-            isActive = currentPathWithHash === item.href || location.pathname === item.href;
-        }
-        // -------------------------------------------------------------
-
-        const baseStyle = navLinkStyle(isActive);
         // Fallback to labelKey directly if translation returns the exact key
 
         
@@ -434,7 +417,7 @@ export default function Header({ hideAuthButtons = false }) {
                                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border-medium)'; }}
                             >
                                 <Globe size={14} />
-                                {LANGUAGES.find(l => l.code === i18n.language)?.label ?? 'EN'}
+                                {getLanguage(i18n.language)?.nativeName ?? 'English'}
                                 <ChevronDown size={12} style={{ transform: langOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
                             </button>
 
@@ -458,10 +441,10 @@ export default function Header({ hideAuthButtons = false }) {
                                             zIndex: 100,
                                         }}
                                     >
-                                        {LANGUAGES.map(lang => (
+                                        {UI_LANGUAGES.map(lang => (
                                             <button
                                                 key={lang.code}
-                                                onClick={() => { i18n.changeLanguage(lang.code); setLangOpen(false); }}
+                                                onClick={() => { changeLanguage(lang.code); setLangOpen(false); }}
                                                 style={{
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -491,9 +474,9 @@ export default function Header({ hideAuthButtons = false }) {
                                                     letterSpacing: '0.03em',
                                                     flexShrink: 0,
                                                 }}>
-                                                    {lang.flag}
+                                                    {lang.shortCode}
                                                 </span>
-                                                {lang.label}
+                                                {lang.nativeName}
                                             </button>
                                         ))}
                                     </motion.div>
@@ -755,10 +738,10 @@ export default function Header({ hideAuthButtons = false }) {
                                         {isDark ? <><Sun size={16} /> Light Mode</> : <><Moon size={16} /> Dark Mode</>}
                                     </button>
                                     <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                                        {LANGUAGES.map(lang => (
+                                        {UI_LANGUAGES.map(lang => (
                                             <button
                                                 key={lang.code}
-                                                onClick={() => i18n.changeLanguage(lang.code)}
+                                                onClick={() => changeLanguage(lang.code)}
                                                 style={{
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -785,9 +768,9 @@ export default function Header({ hideAuthButtons = false }) {
                                                     letterSpacing: '0.03em',
                                                     flexShrink: 0,
                                                 }}>
-                                                    {lang.flag}
+                                                    {lang.shortCode}
                                                 </span>
-                                                {lang.label}
+                                                {lang.nativeName}
                                             </button>
                                         ))}
                                     </div>

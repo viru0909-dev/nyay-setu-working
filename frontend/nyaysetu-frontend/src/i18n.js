@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import HttpBackend from 'i18next-http-backend';
+import { UI_LANGUAGE_CODES } from './config/languages';
 
 i18n
     // Load translations using http backend
@@ -15,8 +16,10 @@ i18n
         fallbackLng: 'en',
         debug: import.meta.env.DEV, // Only in development
 
-        // Supported languages
-        supportedLngs: ['en', 'hi', 'mr', 'ta', 'te', 'gu', 'kn', 'bn', 'ml', 'pa'],
+        // Supported languages — only those with a complete locale bundle under
+        // public/locales. Listing a language without one makes i18next request
+        // files that 404 and silently fall back to English.
+        supportedLngs: UI_LANGUAGE_CODES,
 
         // Namespaces for organizing translations
         ns: ['common', 'landing', 'auth', 'dashboard', 'forms', 'notifications','constitution', 'aiAssistant'],

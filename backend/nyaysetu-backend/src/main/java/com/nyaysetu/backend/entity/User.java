@@ -48,4 +48,14 @@ public class User {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    /**
+     * Interface language chosen by the user, as a BCP-47 base code.
+     *
+     * <p>Null means the user has never picked one, in which case the frontend
+     * keeps using browser detection. Persisting it here is what carries the
+     * choice across devices and cleared browser storage.
+     */
+    @Column(name = "preferred_language", length = 8)
+    private String preferredLanguage;
 }

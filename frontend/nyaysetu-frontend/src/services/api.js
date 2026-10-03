@@ -366,4 +366,11 @@ export const caseTransitionAPI = {
     getCaseHealth: (caseId) => api.get(`/api/v1/cases/transition/${caseId}/health`),
 };
 
+// Profile API — interface language is stored per account so the choice
+// survives a new device or cleared browser storage.
+export const profileAPI = {
+    getLanguage: () => api.get('/api/v1/profile/language'),
+    updateLanguage: (language) => api.put('/api/v1/profile/language', { language }),
+};
+
 export default api;

@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import useAuthStore from '../store/authStore';
 import NotificationBell from '../components/NotificationBell';
 import useThemeStore from '../store/themeStore';
+import { PENDING_UI_LANGUAGES, UI_LANGUAGES } from '../config/languages';
+import { changeLanguage } from '../services/languagePreference';
 
 export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -17,18 +19,8 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
         logout();
         navigate('/login');
     };
-    const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'hi', label: 'हिंदी' },
-    { code: 'mr', label: 'मराठी' },
-    { code: 'ta', label: 'தமிழ்' },
-    { code: 'te', label: 'తెలుగు' },
-    { code: 'gu', label: 'ગુજરાતી' },
-    { code: 'kn', label: 'ಕನ್ನಡ' },
-    { code: 'bn', label: 'বাংলা' },
-    { code: 'ml', label: 'മലയാളം' },
-    { code: 'pa', label: 'ਪੰਜਾਬੀ' }
-];
+    const activeLanguage = i18n.language?.split('-')[0];
+
     return (
         <header
             className="navbar"
@@ -247,36 +239,89 @@ export default function DashboardHeader({ user, isMobile, onMobileMenuToggle }) 
                                         maxHeight: '240px',
                                         overflowY: 'auto'
                             }}>
-                                {languages.map((lang) => (
-                                <button
-                                    key={lang.code}
-                                    onClick={() => {
-                                        i18n.changeLanguage(lang.code);
-                                        setShowProfileMenu(false);
-                                    }}
-                                    style={{
-                                        padding: '0.5rem',
-                                        background:
-                                            i18n.language === lang.code
-                                            ? 'rgba(63, 93, 204, 0.1)'
-                                            : 'transparent',
-                                        border:
-                                            i18n.language === lang.code
-                                            ? '1px solid var(--color-secondary)'
-                                            : '1px solid #E5E7EB',
-                                        borderRadius: '6px',
-                                        color:
-                                            i18n.language === lang.code
-                                            ? 'var(--color-secondary)'
-                                            : 'var(--color-primary)',
-                                        fontSize: '0.8rem',
-                                        fontWeight:
-                                            i18n.language === lang.code ? '700' : '600',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s'
+                                {UI_LANGUAGES.map((lang) => {
+                                    const isActive = activeLanguage === lang.code;
+                                    return (
+                                        <button
+                                            key={lang.code}
+                                            lang={lang.code}
+                                            aria-current={isActive ? 'true' : undefined}
+                                            title={lang.englishName}
+                                            onClick={() => {
+                                                changeLanguage(lang.code);
+                                                setShowProfileMenu(false);
+                                            }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.4rem',
+                                                padding: '0.5rem',
+                                                background: isActive
+                                                    ? 'rgba(63, 93, 204, 0.1)'
+                                                    : 'transparent',
+                                                border: isActive
+                                                    ? '1px solid var(--color-secondary)'
+                                                    : '1px solid #E5E7EB',
+                                                borderRadius: '6px',
+                                                color: isActive
+                                                    ? 'var(--color-secondary)'
+                                                    : 'var(--color-primary)',
+                                                fontSize: '0.8rem',
+                                                fontWeight: isActive ? '700' : '600',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <span aria-hidden="true" style={{
+                                                minWidth: '1.4em',
+                                                textAlign: 'center',
+                                                fontWeight: '700',
+                                                opacity: isActive ? 1 : 0.65
+                                            }}>
+                                                {lang.shortCode}
+                                            </span>
+                                            {lang.nativeName}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Languages without a locale bundle yet. Shown so the
+                                roadmap is visible, disabled so selecting one cannot
+                                silently drop the user back into English. */}
+                            <div style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '0.35rem',
+                                padding: '0.6rem 0.5rem 0',
+                                alignItems: 'center'
+                            }}>
+                                <span style={{
+                                    fontSize: '0.65rem',
+                                    color: '#94A3B8',
+                                    fontWeight: '600',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.04em',
+                                    width: '100%'
                                 }}>
-                                    {lang.label}
-                                </button>))}
+                                    {t('common.languageComingSoon', 'Coming soon')}
+                                </span>
+                                {PENDING_UI_LANGUAGES.map((lang) => (
+                                    <span
+                                        key={lang.code}
+                                        lang={lang.code}
+                                        title={`${lang.englishName} — ${t('common.languageComingSoon', 'Coming soon')}`}
+                                        style={{
+                                            fontSize: '0.72rem',
+                                            color: '#94A3B8',
+                                            border: '1px dashed #E5E7EB',
+                                            borderRadius: '6px',
+                                            padding: '0.2rem 0.4rem'
+                                        }}
+                                    >
+                                        {lang.nativeName}
+                                    </span>
+                                ))}
                             </div>
 
                             <div style={{

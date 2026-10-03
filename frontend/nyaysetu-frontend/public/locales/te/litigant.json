@@ -460,6 +460,7 @@
   "vakilFriend": {
     "welcome": "🙏 నమస్కారం! నేను న్యాయ సారథి, మీ AI న్యాయ సహాయకుడిని. నేను ఈరోజు మీకు ఎలా సహాయపడగలను?",
     "offlineMessage": "🙏 నమస్కారం! నేను న్యాయ సారథి (offline mode). Backend Server స్పందించడం లేదు. Backend ప్రారంభించి పేజీని refresh చేయండి.",
+    "connectError": "న్యాయ సారథితో కనెక్ట్ కాలేకపోతోంది. దయచేసి మీ ఇంటర్నెట్ తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.",
     "deepResearchError": "లోతైన పరిశోధన విఫలమైంది.",
     "speechNotSupported": "మీ Browser speech recognition కు మద్దతు ఇవ్వదు. Chrome లేదా Edge ఉపయోగించండి.",
     "noSession": "⚠️ చురుకైన సెషన్ లేదు. పేజీని refresh చేయండి.",

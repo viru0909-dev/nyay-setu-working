@@ -9,6 +9,7 @@ import FaceLoginModal from '../components/auth/FaceLoginModal';
 import ForgotPasswordModal from '../components/auth/ForgotPasswordModal';
 import ContinueAsGuestButton from '../components/guest/ContinueAsGuestButton';
 import { resolvePostAuthPath } from '../utils/authRedirect';
+import { applyStoredLanguagePreference } from '../services/languagePreference';
 
 export default function Login() {
     const { t } = useTranslation('auth');
@@ -85,6 +86,10 @@ export default function Login() {
             }
 
             setAuth(user, token);
+
+            // Adopt the language saved on the account so the choice follows the
+            // user to a new device. Best-effort: never blocks the redirect.
+            await applyStoredLanguagePreference();
 
             navigate(resolvePostAuthPath(user.role, location.state));
         } catch (err) {

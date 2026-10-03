@@ -51,4 +51,31 @@ public class ProfileService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         userRepository.delete(user);
     }
+
+    /**
+     * Read the interface language stored against an account.
+     *
+     * @param email authenticated user's email
+     * @return the saved language code, or empty if the user never chose one
+     */
+    public Optional<String> getPreferredLanguage(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return Optional.ofNullable(user.getPreferredLanguage());
+    }
+
+    /**
+     * Persist the interface language so it follows the user to a new device.
+     *
+     * @param email    authenticated user's email
+     * @param language BCP-47 base code already validated by the request DTO
+     * @return the stored language code
+     */
+    public String updatePreferredLanguage(String email, String language) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setPreferredLanguage(language);
+        userRepository.save(user);
+        return language;
+    }
 }

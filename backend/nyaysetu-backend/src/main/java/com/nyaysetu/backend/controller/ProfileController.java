@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.controller;
 
+import com.nyaysetu.backend.dto.LanguagePreferenceRequest;
 import com.nyaysetu.backend.dto.ProfileRequest;
 import com.nyaysetu.backend.entity.UserProfile;
 import com.nyaysetu.backend.service.ProfileService;
@@ -42,5 +43,28 @@ public class ProfileController {
     public ResponseEntity<?> deleteAccount(Authentication auth) {
         profileService.deleteUserAccount(auth.getName());
         return ResponseEntity.ok(java.util.Map.of("message", "User account deleted successfully"));
+    }
+
+    /**
+     * Interface language stored against the signed-in account.
+     *
+     * <p>{@code language} is null when the user has never chosen one, which tells
+     * the frontend to fall back to browser detection.
+     */
+    @GetMapping("/language")
+    public ResponseEntity<?> getLanguage(Authentication auth) {
+        String language = profileService.getPreferredLanguage(auth.getName()).orElse(null);
+        return ResponseEntity.ok(java.util.Collections.singletonMap("language", language));
+    }
+
+    /**
+     * Save the interface language for the signed-in account so the choice
+     * survives a new device or cleared browser storage.
+     */
+    @PutMapping("/language")
+    public ResponseEntity<?> updateLanguage(@Valid @RequestBody LanguagePreferenceRequest request,
+                                            Authentication auth) {
+        String saved = profileService.updatePreferredLanguage(auth.getName(), request.getLanguage());
+        return ResponseEntity.ok(java.util.Collections.singletonMap("language", saved));
     }
 }
