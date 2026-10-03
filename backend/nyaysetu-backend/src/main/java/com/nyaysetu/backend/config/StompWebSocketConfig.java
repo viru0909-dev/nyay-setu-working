@@ -17,18 +17,17 @@ public class StompWebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic", "/queue");
+        config.enableSimpleBroker("/topic");
         config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/api/ws/stomp")
+        registry.addEndpoint("/ws/case-notifications")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
-        registry.addEndpoint("/api/ws/stomp")
-                .setAllowedOriginPatterns("*");
     }
+}
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
