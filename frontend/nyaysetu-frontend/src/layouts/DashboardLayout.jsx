@@ -51,8 +51,10 @@ export default function DashboardLayout() {
     }, [token, user, navigate]);
 
     useEffect(() => {
-        console.log('Current User:', user);
-        console.log('Current Role:', user?.role);
+        if (import.meta.env.DEV) {
+            console.log('Current User:', user);
+            console.log('Current Role:', user?.role);
+        }
     }, [user]);
 
 

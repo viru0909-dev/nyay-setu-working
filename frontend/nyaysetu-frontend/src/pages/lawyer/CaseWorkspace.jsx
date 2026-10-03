@@ -299,7 +299,7 @@ function TabEvidence({ caseId }) {
     }, [caseId]);
 
     const refreshDocuments = () => {
-        documentAPI.getByCase(caseId).then(res => setDocuments(res.data || [])).catch(err => console.log(err));
+        documentAPI.getByCase(caseId).then(res => setDocuments(res.data || [])).catch(err => { if (import.meta.env.DEV) console.error(err); });
     };
 
     const handleAnalyze = async (docId) => {

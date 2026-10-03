@@ -130,7 +130,7 @@ export default function JudgeChatWidget({
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
-      console.log("Copied to clipboard");
+      if (import.meta.env.DEV) console.log("Copied to clipboard");
     } catch (err) {
       console.error("Copy failed:", err);
     }

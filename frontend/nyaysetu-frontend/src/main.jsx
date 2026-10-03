@@ -31,11 +31,11 @@ const Root = () => {
         if (!import.meta.env.DEV) {
             const updateSW = registerSW({
                 onNeedRefresh() {
-                    console.log('🔄 New update found! Reloading to clear cache...');
+                    if (import.meta.env.DEV) console.log('New update found! Reloading to clear cache...');
                     updateSW(true);
                 },
                 onOfflineReady() {
-                    console.log('✅ App is ready to work offline');
+                    if (import.meta.env.DEV) console.log('App is ready to work offline');
                 },
             });
         }
