@@ -1,3 +1,8 @@
+if (typeof window !== 'undefined') {
+  window.URL.createObjectURL = vi.fn(() => 'mock-url');
+  window.URL.revokeObjectURL = vi.fn();
+}
+
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
