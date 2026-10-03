@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -43,7 +45,13 @@ public class FileStorageService {
             Files.createDirectories(categoryPath);
 
             // Copy file to the target location
-            Path targetLocation = categoryPath.resolve(fileName);
+            Path targetLocation = categoryPath.resolve(fileName).normalize();
+            
+            // Security Check: Prevent Path Traversal
+            if (!targetLocation.toAbsolutePath().normalize().startsWith(this.fileStorageLocation)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid file path");
+            }
+
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
             return category + "/" + fileName;
@@ -55,6 +63,12 @@ public class FileStorageService {
     public Resource loadFileAsResource(String filePath) {
         try {
             Path file = this.fileStorageLocation.resolve(filePath).normalize();
+            
+            // Security Check: Prevent Path Traversal
+            if (!file.toAbsolutePath().normalize().startsWith(this.fileStorageLocation)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid file path");
+            }
+            
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists()) {
                 return resource;
@@ -69,6 +83,12 @@ public class FileStorageService {
     public void deleteFile(String filePath) {
         try {
             Path file = this.fileStorageLocation.resolve(filePath).normalize();
+            
+            // Security Check: Prevent Path Traversal
+            if (!file.toAbsolutePath().normalize().startsWith(this.fileStorageLocation)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid file path");
+            }
+            
             Files.deleteIfExists(file);
         } catch (IOException ex) {
             throw new RuntimeException("Could not delete file: " + filePath, ex);
@@ -80,6 +100,12 @@ public class FileStorageService {
      */
     public java.io.File getFile(String filePath) {
         Path file = this.fileStorageLocation.resolve(filePath).normalize();
+        
+        // Security Check: Prevent Path Traversal
+        if (!file.toAbsolutePath().normalize().startsWith(this.fileStorageLocation)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid file path");
+        }
+        
         if (!Files.exists(file)) {
             throw new RuntimeException("File not found: " + filePath);
         }
