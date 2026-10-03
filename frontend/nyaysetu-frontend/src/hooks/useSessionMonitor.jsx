@@ -41,6 +41,8 @@ export const useSessionMonitor = (token) => {
     }, [token]);
     const handleLogout = () => {
         localStorage.removeItem('token');
+        // Also clear refresh token to avoid stale credentials
+        localStorage.removeItem('refreshToken');
         setShowWarning(false);
         // Redirects to login with a special parameter so we can show a nice message later
         window.location.href = '/login?reason=session_expired';

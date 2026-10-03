@@ -66,9 +66,12 @@ export const useAuthStore = create((set, get) => ({
     isAuthenticated: false,
     isGuest: false,
 
-    setAuth: (user, token) => {
+    setAuth: (user, token, refreshToken = null) => {
         storage.setItem('token', token);
         storage.setItem('user', JSON.stringify(user));
+        if (refreshToken) {
+            storage.setItem('refreshToken', refreshToken);
+        }
         clearGuestStorage(storage);
         storage.removeItem(GUEST_INTENT_KEY);
         set({ user, token, isAuthenticated: true, isGuest: false });
@@ -87,6 +90,8 @@ export const useAuthStore = create((set, get) => ({
 
         storage.removeItem('token');
         storage.removeItem('user');
+        // Clear any persisted refresh token when creating a guest session
+        storage.removeItem('refreshToken');
         storage.setItem(GUEST_SESSION_ID_KEY, sessionId);
         storage.setItem(GUEST_USER_KEY, JSON.stringify(guestUser));
         storage.setItem(GUEST_CREATED_AT_KEY, new Date().toISOString());
@@ -107,6 +112,7 @@ export const useAuthStore = create((set, get) => ({
     logout: () => {
         storage.removeItem('token');
         storage.removeItem('user');
+        storage.removeItem('refreshToken');
         clearGuestStorage(storage);
         storage.removeItem(GUEST_INTENT_KEY);
         set({ user: null, token: null, isAuthenticated: false, isGuest: false });
@@ -161,6 +167,8 @@ export const useAuthStore = create((set, get) => ({
                 if (isTokenExpired(token)) {
                     storage.removeItem('token');
                     storage.removeItem('user');
+                    // Ensure refresh token is also cleared when access token expired
+                    storage.removeItem('refreshToken');
 
                     set({
                         token: null,
