@@ -32,10 +32,6 @@ PROVIDER_ORDER: list[str] = ["gemini", "groq", "ollama"]
 OLLAMA_API_URL: str = os.getenv("OLLAMA_API_URL", "http://localhost:11434")
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama-3-8b")
 
-# ─── Model names ──────────────────────────────────────────────────────────────
-GROQ_MODEL_FAST: str = "llama-3.3-70b-versatile"
-GEMINI_MODEL: str = "gemini-1.5-flash"
-
 # ─── OCR (viru's additions) ───────────────────────────────────────────────────
 TROCR_MODEL_NAME: str = os.getenv("TROCR_MODEL_NAME", "Piyush3142/trocr-sanskrit-ocr")
 TROCR_DEVICE: str = os.getenv("TROCR_DEVICE", "")
