@@ -332,16 +332,20 @@ Base URL: `http://localhost:8080/api`
 
 **Controller:** `HearingController`
 
-| Method | Endpoint | Description | Request Body | Response |
-|--------|----------|-------------|--------------|----------|
-| POST | `/hearings` | Schedule new hearing | `{caseId, hearingDate, type}` | `Hearing` |
-| GET | `/hearings/case/{caseId}` | Get all hearings for a case | - | `List<Hearing>` |
-| GET | `/hearings/{id}` | Get hearing details | - | `Hearing` |
-| PUT | `/hearings/{id}` | Update hearing | `Hearing` | Updated `Hearing` |
-| DELETE | `/hearings/{id}` | Cancel hearing | - | Success message |
-| POST | `/hearings/{id}/start` | Start hearing (video call) | - | Meeting link |
-| POST | `/hearings/{id}/complete` | Complete hearing | `{notes, outcome}` | Updated `Hearing` |
-| GET | `/hearings/upcoming` | Get upcoming hearings | - | `List<Hearing>` |
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/hearings/schedule` | Schedule new hearing | JUDGE, SUPER_JUDGE, ADMIN |
+| POST | `/hearings/{id}/participants` | Add participant to hearing | Case/client, lawyer, assigned judge, or admin |
+| POST | `/hearings/{id}/join` | Join hearing room | Registered hearing participant |
+| POST | `/hearings/{id}/leave` | Leave hearing room | Registered hearing participant |
+| PUT | `/hearings/{id}/complete` | Complete hearing and record notes | JUDGE, SUPER_JUDGE, ADMIN |
+| POST | `/hearings/{id}/outcome` | Record hearing outcome | JUDGE, SUPER_JUDGE, ADMIN |
+| GET | `/hearings/{id}` | Get hearing details | Case/client, lawyer, assigned judge, hearing participant, or admin |
+| GET | `/hearings/{id}/participants` | Get all hearing participants | Case/client, lawyer, assigned judge, hearing participant, or admin |
+| GET | `/hearings/case/{caseId}` | Get all hearings for a case | Case/client, lawyer, assigned judge, or admin |
+| GET | `/hearings/my` | Get current user's hearings | Any authenticated user (filtered to own cases) |
+
+> **Authorization:** Hearing data endpoints (`GET /hearings/{id}`, `GET /hearings/{id}/participants`, `GET /hearings/case/{caseId}`) enforce case-membership checks via `HearingService.enforceHearingAccess()` and `enforceCaseAccess()`. Access is restricted to: the case client (litigant), case lawyer, assigned judge, registered hearing participants, or admins. Unrelated users receive `403 Forbidden`.
 
 ---
 

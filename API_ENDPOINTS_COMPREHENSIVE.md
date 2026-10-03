@@ -151,18 +151,20 @@ Blockchain-secured evidence management with SHA-256 hashing and immutability cha
 
 Virtual court hearing management with WebRTC integration.
 
-| HTTP | Endpoint | Request Body | Response | Description |
-|------|----------|--------------|----------|-------------|
-| POST | `/hearings/schedule` | `ScheduleHearingRequest` (caseId, scheduledDate, durationMinutes) | `{id, scheduledDate, status, videoRoomId, message}` | Schedule new hearing. Triggers notifications. |
-| POST | `/hearings/{hearingId}/participants` | `AddParticipantRequest` (userId, role) | `{id, hearingId, role, joinedAt, message}` | Add participant to hearing |
-| POST | `/hearings/{hearingId}/join` | - | `{videoRoomId, hearingId, status}` | Join hearing room (auth required) |
-| POST | `/hearings/{hearingId}/leave` | - | 200 OK | Leave hearing room |
-| PUT | `/hearings/{hearingId}/complete` | `CompleteHearingRequest` (judgeNotes) | `Hearing` entity | Complete hearing and record notes |
-| POST | `/hearings/{hearingId}/outcome` | `HearingOutcomeRequest` (outcome, details) | `{message, hearingId, status}` | Record hearing outcome/decision |
-| GET | `/hearings/{hearingId}` | - | `Hearing` | Get hearing details |
-| GET | `/hearings/{hearingId}/participants` | - | `List<HearingParticipant>` | Get all hearing participants |
-| GET | `/hearings/case/{caseId}` | - | `List<Map>` with hearing details | Get all hearings for a case |
-| GET | `/hearings/my` | - | User's hearings | Get current user's scheduled hearings |
+| HTTP | Endpoint | Request Body | Response | Description | Access |
+|------|----------|--------------|----------|-------------|--------|
+| POST | `/hearings/schedule` | `ScheduleHearingRequest` (caseId, scheduledDate, durationMinutes) | `{id, scheduledDate, status, videoRoomId, message}` | Schedule new hearing. Triggers notifications. | JUDGE, SUPER_JUDGE, ADMIN |
+| POST | `/hearings/{hearingId}/participants` | `AddParticipantRequest` (userId, role) | `{id, hearingId, role, joinedAt, message}` | Add participant to hearing | Case/client, lawyer, assigned judge, or admin |
+| POST | `/hearings/{hearingId}/join` | - | `{videoRoomId, hearingId, status}` | Join hearing room (auth required) | Registered hearing participant |
+| POST | `/hearings/{hearingId}/leave` | - | 200 OK | Leave hearing room | Registered hearing participant |
+| PUT | `/hearings/{hearingId}/complete` | `CompleteHearingRequest` (judgeNotes) | `Hearing` entity | Complete hearing and record notes | JUDGE, SUPER_JUDGE, ADMIN |
+| POST | `/hearings/{hearingId}/outcome` | `HearingOutcomeRequest` (outcome, details) | `{message, hearingId, status}` | Record hearing outcome/decision | JUDGE, SUPER_JUDGE, ADMIN |
+| GET | `/hearings/{hearingId}` | - | `Hearing` | Get hearing details (includes videoRoomId) | Case/client, lawyer, assigned judge, hearing participant, or admin |
+| GET | `/hearings/{hearingId}/participants` | - | `List<HearingParticipant>` | Get all hearing participants | Case/client, lawyer, assigned judge, hearing participant, or admin |
+| GET | `/hearings/case/{caseId}` | - | `List<Map>` with hearing details | Get all hearings for a case | Case/client, lawyer, assigned judge, or admin |
+| GET | `/hearings/my` | - | User's hearings | Get current user's scheduled hearings | Any authenticated user (filtered to own cases) |
+
+> **Authorization for hearing data endpoints:** `GET /hearings/{hearingId}`, `GET /hearings/{hearingId}/participants`, and `GET /hearings/case/{caseId}` enforce case-membership checks. A user may access a hearing if they are: the case client (litigant), the case lawyer, the assigned judge, a registered participant of the hearing, or an admin/tech-admin. Unrelated users receive `403 Forbidden`.
 
 **Hearing Status:** SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED, POSTPONED  
 **Participant Roles:** JUDGE, PETITIONER, RESPONDENT, LAWYER, WITNESS
