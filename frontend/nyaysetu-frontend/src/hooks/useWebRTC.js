@@ -6,6 +6,7 @@ const SIGNALING_SERVER = 'http://localhost:3001';
 
 export const useWebRTC = (roomId, userId, userName) => {
     const [peers, setPeers] = useState({});
+    const [participants, setParticipants] = useState([]);
     const [localStream, setLocalStream] = useState(null);
     const [isAudioOn, setIsAudioOn] = useState(true);
     const [isVideoOn, setIsVideoOn] = useState(true);
@@ -28,6 +29,18 @@ export const useWebRTC = (roomId, userId, userName) => {
 
                 setLocalStream(stream);
                 localStreamRef.current = stream;
+                setParticipants([
+                    {
+                        id: userId,
+                        name: userName,
+                        online: true,
+                        micOn: true,
+                        cameraOn: true,
+                        speaking: false,
+                        connection: "good",
+                        reconnecting: false
+                    }
+                ]);
 
                 // Connect to signaling server
                 socketRef.current = io(SIGNALING_SERVER);
@@ -47,8 +60,20 @@ export const useWebRTC = (roomId, userId, userName) => {
 
                 // Handle new user joining
                 socketRef.current.on('user-connected', (remoteUserId, remoteUserName) => {
-                 //   console.log(`User connected: ${remoteUserName}`);
-                });
+    setParticipants(prev => [
+        ...prev,
+        {
+            id: remoteUserId,
+            name: remoteUserName || "Participant",
+            online: true,
+            micOn: true,
+            cameraOn: true,
+            speaking: false,
+            connection: "good",
+            reconnecting: false
+        }
+    ]);
+});
 
                 // Handle WebRTC signaling
                 socketRef.current.on('signal', ({ signal, from, userName: senderName }) => {
@@ -65,6 +90,13 @@ export const useWebRTC = (roomId, userId, userName) => {
                     if (peersRef.current[userId]) {
                         peersRef.current[userId].destroy();
                         delete peersRef.current[userId];
+                        setParticipants(prev =>
+    prev.map(user =>
+        user.id === userId
+            ? { ...user, online: false }
+            : user
+    )
+);
                         setPeers(prev => {
                             const updated = { ...prev };
                             delete updated[userId];
@@ -75,18 +107,40 @@ export const useWebRTC = (roomId, userId, userName) => {
 
                 // Handle audio/video toggles
                 socketRef.current.on('user-audio-toggle', (userId, isOn) => {
-                    setPeers(prev => ({
-                        ...prev,
-                        [userId]: { ...prev[userId], isAudioOn: isOn }
-                    }));
-                });
+    setParticipants(prev =>
+        prev.map(user =>
+            user.id === userId
+                ? { ...user, micOn: isOn }
+                : user
+        )
+    );
+
+    setPeers(prev => ({
+        ...prev,
+        [userId]: {
+            ...prev[userId],
+            isAudioOn: isOn
+        }
+    }));
+});
 
                 socketRef.current.on('user-video-toggle', (userId, isOn) => {
-                    setPeers(prev => ({
-                        ...prev,
-                        [userId]: { ...prev[userId], isVideoOn: isOn }
-                    }));
-                });
+    setParticipants(prev =>
+        prev.map(user =>
+            user.id === userId
+                ? { ...user, cameraOn: isOn }
+                : user
+        )
+    );
+
+    setPeers(prev => ({
+        ...prev,
+        [userId]: {
+            ...prev[userId],
+            isVideoOn: isOn
+        }
+    }));
+});
 
             } catch (error) {
                 console.error('Error accessing media devices:', error);
@@ -159,6 +213,13 @@ export const useWebRTC = (roomId, userId, userName) => {
             if (audioTrack) {
                 audioTrack.enabled = !audioTrack.enabled;
                 setIsAudioOn(audioTrack.enabled);
+                setParticipants(prev =>
+    prev.map(user =>
+        user.id === userId
+            ? { ...user, micOn: audioTrack.enabled }
+            : user
+    )
+);
                 socketRef.current.emit('toggle-audio', roomId, audioTrack.enabled);
             }
         }
@@ -170,6 +231,13 @@ export const useWebRTC = (roomId, userId, userName) => {
             if (videoTrack) {
                 videoTrack.enabled = !videoTrack.enabled;
                 setIsVideoOn(videoTrack.enabled);
+                setParticipants(prev =>
+    prev.map(user =>
+        user.id === userId
+            ? { ...user, cameraOn: videoTrack.enabled }
+            : user
+    )
+);
                 socketRef.current.emit('toggle-video', roomId, videoTrack.enabled);
             }
         }
@@ -184,6 +252,7 @@ export const useWebRTC = (roomId, userId, userName) => {
     return {
         localStream,
         peers,
+        participants,
         isAudioOn,
         isVideoOn,
         toggleAudio,
