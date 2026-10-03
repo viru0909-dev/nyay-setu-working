@@ -32,12 +32,13 @@ class HealthControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    void healthEndpoint_shouldReturnExpectedFields() throws Exception {
-        mockMvc.perform(get("/api/v1/health"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("UP"))
-                .andExpect(jsonPath("$.service").value("nyaysetu-backend"))
-                .andExpect(jsonPath("$.uptime").exists());
+@Test
+void healthEndpoint_shouldReturnExpectedFields() throws Exception {
+    mockMvc.perform(get("/api/v1/health"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("UP"))
+            .andExpect(jsonPath("$.service").value("nyaysetu-backend"))
+            .andExpect(jsonPath("$.uptime").exists())
+            .andExpect(jsonPath("$.timestamp").exists());
     }
 }
