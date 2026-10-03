@@ -71,6 +71,80 @@ Each issue is tagged with a difficulty level that maps to GSSoC points:
 
 <hr/>
 
+## Label Legend
+
+When you open an issue or submit a Pull Request (PR), GitHub Actions automatically applies labels. Here is what they mean.
+
+### Difficulty — `level:*` (on PRs)
+
+| Label | What it means |
+|---|---|
+| `level:beginner` | Small, low-risk change — ≤3 files, ≤50 lines. Great place to start. |
+| `level:intermediate` | Medium-sized feature or fix — ≤10 files, ≤250 lines. |
+| `level:advanced` | Large feature or broad change — ≤25 files, ≤800 lines. |
+| `level:critical` | Major / core-repository change — touches critical infrastructure. |
+
+These are calculated automatically from your PR diff. You do **not** need to add them yourself.
+
+### Type — `type:*` (on issues and PRs)
+
+Tells you *what kind of change* the issue or PR is about.
+
+| Label | Meaning |
+|---|---|
+| `type:bug` | Something is broken or incorrect |
+| `type:feature` | New feature or enhancement |
+| `type:docs` | Documentation improvements |
+| `type:design` | UI/UX design changes (CSS, layout, colors) |
+| `type:testing` | Tests added or improved |
+| `type:refactor` | Code restructuring with no behavior change |
+| `type:performance` | Speed or optimization improvements |
+| `type:security` | Security fix or improvement |
+| `type:devops` | CI/CD, infrastructure, or tooling |
+| `type:accessibility` | Accessibility improvements |
+
+### Quality — `quality:*` (on PRs)
+
+Auto-scored on a 10-point scale based on description, checklist, tests, linked issue, and more.
+
+| Label | Score | What it means |
+|---|---|---|
+| `quality:clean` | ≥ 2 | Well-structured, readable, and maintainable |
+| `quality:exceptional` | ≥ 5 | Outstanding — thorough, well-tested, exemplary |
+
+### GSSoC — `gssoc` labels
+
+| Label | Meaning |
+|---|---|
+| `gssoc` | Auto-added to every new issue (signals this repo participates in GSSoC) |
+| `gssoc:approved` | Your PR is approved as a valid GSSoC contribution |
+
+### PR Size — `size/*` (on PRs)
+
+Based on the total lines changed (diff size).
+
+| Label | Meaning |
+|---|---|
+| `size/XS` | Extra small |
+| `size/S` | Small |
+| `size/M` | Medium |
+| `size/L` | Large |
+| `size/XL` | Extra large |
+
+### Other labels
+
+| Label | Meaning |
+|---|---|
+| `good first issue` | Beginner-friendly — manually added by maintainers |
+| `help wanted` | Extra help needed on this issue |
+| `triage` | Needs initial review by a maintainer |
+| `hacktoberfest-accepted` | Accepted for Hacktoberfest (October only) |
+| `dependencies` | Automated dependency update (Dependabot) |
+
+> **Tip:** If you are new, filter issues by `good first issue` + `level:beginner` for the easiest starting point.
+
+<hr/>
+
 ## Development Workflow
 
 Follow these steps to set up your environment and submit your contributions:
