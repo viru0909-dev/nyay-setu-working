@@ -34,6 +34,15 @@ updates:
       - "dependencies"
       - "security"
 
+  - package-ecosystem: "pip"
+    directory: "/lawgpt-service"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
