@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
     List<AuditLog> findByCaseIdOrderByTimestampAsc(UUID caseId);
     /** Returns the most recently persisted entry — used to retrieve its hash for chaining. */
-    Optional<AuditLog> findTopByOrderByTimestampDesc();
+    Optional<AuditLog> findTopByOrderByTimestampDescIdDesc();
     /** Returns all entries in insertion order — used by the chain verification walk. */
-    List<AuditLog> findAllByOrderByTimestampAsc();
+    List<AuditLog> findAllByOrderByTimestampAscIdAsc();
 }
