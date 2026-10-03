@@ -271,7 +271,7 @@ useEffect(() => {
             <div style={{ maxWidth: '1600px', width: '100%', margin: '0 auto', padding: '6rem 2rem 4rem', position: 'relative', zIndex: 1, flex: '1 0 auto' }}>
                 {/* Page Header */}
                 <div style={{
-                    padding: '3rem',
+padding: 'clamp(1.25rem, 4vw, 3rem)',
                     background: 'var(--bg-glass)',
                     backgroundImage: "url('/assets/constitution.png')",
                     backgroundPosition: 'center',
@@ -285,7 +285,7 @@ useEffect(() => {
                     boxShadow: 'var(--shadow-glass)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', minWidth: 0 }}>
                             <div style={{
                                 padding: '1rem',
                                 background: 'var(--color-primary)',
@@ -294,7 +294,7 @@ useEffect(() => {
                                 <BookOpen size={48} color="white" />
                             </div>
                             <div>
-                                <h1 style={{ color: 'var(--color-primary)', fontSize: '2.5rem', fontWeight: '900', margin: '0 0 0.5rem 0' }}>
+                                <h1 style={{ color: 'var(--color-primary)', fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: '900', margin: '0 0 0.5rem 0' }}>
                                     {t('constitution:title')}
                                 </h1>
                                 <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: 0 }}>
@@ -456,9 +456,9 @@ useEffect(() => {
                                 </button>
 
                                 <div style={{
-                                    padding: '3rem',
-                                    background: 'var(--bg-surface)',
-                                    borderRadius: '2rem',
+    padding: '3rem',
+    background: 'var(--bg-surface)',
+    borderRadius: '2rem',
                                     border: '1px solid var(--border-light)',
                                     boxShadow: 'var(--shadow-glass)'
                                 }}>
