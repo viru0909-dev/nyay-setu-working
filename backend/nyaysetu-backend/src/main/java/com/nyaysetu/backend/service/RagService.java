@@ -15,10 +15,52 @@ import java.util.Map;
 @Slf4j
 public class RagService {
 
+    /** Placeholder returned to callers that only care about the context text. */
+    public static final String NO_CONTEXT_PLACEHOLDER = "No specific legal context found.";
+
     @Value("${lawgpt.service.url:http://localhost:8001}")
     private String lawgptUrl;
 
     private RestTemplate restTemplate;
+
+    /**
+     * Why a retrieval produced no usable legal context.
+     *
+     * <p>Callers must be able to tell "the corpus has nothing on this" apart from
+     * "the retrieval service never answered" — an answer built on the second case
+     * has no grounding at all and must not carry section numbers or citations.
+     */
+    public enum RetrievalStatus {
+        /** LawGPT answered and returned usable legal context. */
+        GROUNDED,
+        /** LawGPT answered, but has nothing relevant for this query. */
+        NO_MATCH,
+        /** LawGPT could not be reached, timed out, or returned an error status. */
+        UNAVAILABLE
+    }
+
+    /**
+     * Retrieved legal context together with the outcome of the retrieval attempt.
+     */
+    public record RagContext(String context, RetrievalStatus status) {
+
+        public static RagContext grounded(String context) {
+            return new RagContext(context, RetrievalStatus.GROUNDED);
+        }
+
+        public static RagContext noMatch() {
+            return new RagContext(NO_CONTEXT_PLACEHOLDER, RetrievalStatus.NO_MATCH);
+        }
+
+        public static RagContext unavailable() {
+            return new RagContext(NO_CONTEXT_PLACEHOLDER, RetrievalStatus.UNAVAILABLE);
+        }
+
+        /** True only when a verified legal corpus actually backed this answer. */
+        public boolean isGrounded() {
+            return status == RetrievalStatus.GROUNDED;
+        }
+    }
 
     @PostConstruct
     public void init() {
@@ -29,7 +71,14 @@ public class RagService {
         log.info("🔗 RagService configured to use LawGPT at: {}", lawgptUrl);
     }
 
-    public String findRelevantContext(String query, int maxResults) {
+    /**
+     * Query the LawGPT RAG service for legal context backing a user question.
+     *
+     * <p>Never throws: an unreachable LawGPT service yields
+     * {@link RetrievalStatus#UNAVAILABLE} so the caller can degrade safely
+     * instead of letting the LLM answer from memory alone.
+     */
+    public RagContext retrieveContext(String query, int maxResults) {
         log.info("🔍 Querying LawGPT RAG service for: '{}'", query);
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -48,14 +97,22 @@ public class RagService {
             );
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                String context = (String) response.getBody().get("context");
-                log.info("✅ RAG context retrieved from LawGPT service");
-                return context != null ? context : "No specific legal context found.";
+                Object context = response.getBody().get("context");
+                if (context instanceof String text && !text.isBlank()
+                        && !NO_CONTEXT_PLACEHOLDER.equals(text.trim())) {
+                    log.info("✅ RAG context retrieved from LawGPT service");
+                    return RagContext.grounded(text);
+                }
+                log.info("ℹ️ LawGPT returned no legal context for this query");
+                return RagContext.noMatch();
             }
+
+            log.warn("⚠️ LawGPT service returned {}, treating context as unavailable",
+                    response.getStatusCode());
         } catch (Exception e) {
-            log.warn("⚠️ LawGPT service unavailable, falling back to empty context: {}", e.getMessage());
+            log.warn("⚠️ LawGPT service unavailable, answering without legal context: {}", e.getMessage());
         }
-        return "No specific legal context found.";
+        return RagContext.unavailable();
     }
 
     public java.util.List<java.util.Map<String, Object>> searchPrecedents(String query, int maxResults) {

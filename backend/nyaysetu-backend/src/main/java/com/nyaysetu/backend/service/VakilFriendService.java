@@ -306,17 +306,20 @@ public class VakilFriendService {
         userMsg.put("content", englishMessage); // Storing English
         conversation.add(userMsg);
  
-        // Retrieve relevant legal context from Vector Database using English query
+        // Retrieve relevant legal context from Vector Database using English query.
         // RagService is optional (disabled by default via rag.enabled property).
-        String ragContext = "";
+        // Default to UNAVAILABLE: with no RagService bean, and with LawGPT down, the
+        // answer has no verified corpus behind it and must not be treated as grounded.
+        RagService.RagContext ragContext = RagService.RagContext.unavailable();
         if (ragService != null) {
             try {
-                ragContext = ragService.findRelevantContext(englishMessage, 3);
-                log.info("RAG Context retrieved for query: {}", englishMessage);
+                ragContext = ragService.retrieveContext(englishMessage, 3);
             } catch (Exception e) {
-                log.warn("RAG context retrieval skipped: {}", e.getMessage());
+                log.warn("RAG context retrieval failed, answering without legal grounding: {}", e.getMessage());
+                ragContext = RagService.RagContext.unavailable();
             }
         }
+        log.info("RAG retrieval status for this turn: {}", ragContext.status());
  
         // Get AI response (English)
         String aiResponseEnglish = getAIResponse(conversation, ragContext);
@@ -586,7 +589,7 @@ public class VakilFriendService {
         return caseRepository.save(caseEntity);
     }
  
-    private String getAIResponse(List<Map<String, String>> conversation, String ragContext) {
+    private String getAIResponse(List<Map<String, String>> conversation, RagService.RagContext ragContext) {
         // Log key presence (safely)
         if (groqApiKey == null || groqApiKey.trim().isEmpty()) {
             log.warn("⚠️ Groq API key is missing or empty. Falling back to scripted responses.");
@@ -595,7 +598,11 @@ public class VakilFriendService {
                 String groqResponse = callGroqAPI(conversation, ragContext);
                 if (groqResponse != null && !groqResponse.trim().isEmpty()) {
                     log.info("✅ Groq AI response received successfully.");
-                    return groqResponse;
+                    // Without verified retrieval the model has no source for a section
+                    // number or precedent, so strip any it produced regardless.
+                    return ragContext != null && ragContext.isGrounded()
+                            ? groqResponse
+                            : LegalGroundingGuard.sanitizeUngroundedResponse(groqResponse);
                 }
             } catch (Exception e) {
                 log.error("❌ Groq API error: {}. Falling back to basic assistance.", e.getMessage());
@@ -608,32 +615,46 @@ public class VakilFriendService {
     }
     
     /**
-     * Call Groq API for full conversational AI (OpenAI-compatible format)
+     * Completion for internal machinery — chat titles and JSON extraction.
+     *
+     * <p>These are never shown to a citizen as legal advice, so neither the
+     * retrieved-context block nor the ungrounded guardrail applies. Injecting the
+     * guardrail here would make the model prefix titles with a disclaimer and
+     * break the strict-JSON contract the title extractor depends on.
      */
-    private String callGroqAPI(List<Map<String, String>> conversation, String ragContext) throws Exception {
+    private String callGroqAPIForUtility(List<Map<String, String>> conversation) throws Exception {
+        return callGroqAPI(conversation, null);
+    }
+
+    /**
+     * Call Groq API for full conversational AI (OpenAI-compatible format)
+     *
+     * @param ragContext retrieval outcome for this turn, or {@code null} for utility
+     *                   completions that are not legal answers
+     */
+    private String callGroqAPI(List<Map<String, String>> conversation, RagService.RagContext ragContext) throws Exception {
         // Build messages array
         ArrayNode messagesArray = objectMapper.createArrayNode();
-        
+
         // Add system message
         ObjectNode systemMsg = objectMapper.createObjectNode();
         systemMsg.put("role", "system");
-        
-        String finalSystemPrompt = SYSTEM_PROMPT;
-        boolean hasRagContext = ragContext != null && !ragContext.isEmpty()
-                && !ragContext.equals("No specific legal context found.");
+
+        boolean hasRagContext = ragContext != null && ragContext.isGrounded()
+                && ragContext.context() != null && !ragContext.context().isBlank();
         List<String> contentToSanitize = new ArrayList<>();
         if (hasRagContext) {
-            contentToSanitize.add(ragContext);
+            contentToSanitize.add(ragContext.context());
         }
         conversation.forEach(message -> contentToSanitize.add(message.get("content")));
         List<String> sanitizedContent = piiSanitizer.sanitizeBatchForGroq(contentToSanitize);
         int contentIndex = 0;
-        if (hasRagContext) {
-            finalSystemPrompt += "\n\n### CRITICAL INDIAN LEGAL CONTEXT RELEVANT TO THIS USER ###\n"
-                    + sanitizedContent.get(contentIndex++)
-                    + "\n\nUse this law to guide the user accurately.";
-        }
-        
+        String sanitizedRagContext = hasRagContext ? sanitizedContent.get(contentIndex++) : null;
+
+        // Either hand the model the verified law, or tell it plainly that it has none.
+        String finalSystemPrompt = SYSTEM_PROMPT
+                + LegalGroundingGuard.buildGroundingInstruction(ragContext, sanitizedRagContext);
+
         systemMsg.put("content", finalSystemPrompt);
         messagesArray.add(systemMsg);
         
@@ -951,7 +972,7 @@ public class VakilFriendService {
                 return null; // Don't generate title for empty sessions
             }
             
-            String title = callGroqAPI(shortConversation, "");
+            String title = callGroqAPIForUtility(shortConversation);
             String trimmedTitle = (title != null && !title.trim().isEmpty()) ? title.trim() : "Legal Discussion";
             
             // Safety truncate to ensure it fits even if DB wasn't updated or for other constraints
@@ -1007,7 +1028,7 @@ public class VakilFriendService {
             prompt.add(userMsg);
             
             // Call AI
-            String jsonResponse = callGroqAPI(prompt, "");
+            String jsonResponse = callGroqAPIForUtility(prompt);
             
             // Parse JSON Response
             try {
