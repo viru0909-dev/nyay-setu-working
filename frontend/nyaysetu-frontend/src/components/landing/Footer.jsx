@@ -16,7 +16,7 @@ export default function Footer() {
     const socialLinks = [
         {
             icon: <FaEnvelope size={20} />,
-            href: 'mailto:gadekarvidera4@gmail.com',
+            href: 'mailto:gadekarvirendra@gmail.com',
             label: 'Email',
             color: '#ea4335'
         },
@@ -486,7 +486,7 @@ export default function Footer() {
                                 {t('common:header.nav.contact')}
                             </Link>
                             <a
-                                href="mailto:gadekarvidera4@gmail.com"
+                                href="mailto:gadekarvirendra@gmail.com"
                                 style={{
                                     color: 'rgba(255, 255, 255, 0.7)',
                                     textDecoration: 'none',
@@ -526,7 +526,7 @@ export default function Footer() {
                                 }}>
                                     <FaEnvelope size={16} />
                                 </span>
-                                gadekarvidera4@gmail.com              </a>
+                                gadekarvirendra@gmail.com              </a>
                             <a
                                 href="https://github.com/viru0909-dev/nyay-setu-working"
                                 target="_blank"
