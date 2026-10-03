@@ -492,49 +492,64 @@ export default function JudgeChatWidget({
               borderTop: 'var(--border-glass)',
               background: 'var(--bg-glass-strong)',
               display: 'flex',
+              flexDirection: 'column',
               gap: '0.5rem'
             }}
           >
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about case details..."
-              disabled={isLoading || isStarting}
-              style={{
-                flex: 1,
-                padding: '0.75rem',
-                borderRadius: '0.5rem',
-                border: 'var(--border-glass)',
-                background: 'var(--bg-white)',
-                color: 'var(--text-main)',
-                outline: 'none',
-                fontSize: '0.9rem'
-              }}
-            />
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about case details..."
+                disabled={isLoading || isStarting}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  borderRadius: '0.5rem',
+                  border: 'var(--border-glass)',
+                  background: 'var(--bg-white)',
+                  color: 'var(--text-main)',
+                  outline: 'none',
+                  fontSize: '0.9rem'
+                }}
+              />
 
-            <button
-              onClick={sendMessage}
-              disabled={isLoading || isStarting || !inputMessage.trim()}
-              style={{
-                background: 'var(--color-accent)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.5rem',
-                padding: '0.75rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: (isLoading || isStarting || !inputMessage.trim()) ? 0.5 : 1
+              <button
+                onClick={sendMessage}
+                disabled={isLoading || isStarting || !inputMessage.trim()}
+                style={{
+                  background: 'var(--color-accent)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  padding: '0.75rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: (isLoading || isStarting || !inputMessage.trim()) ? 0.5 : 1
+                }}
+              >
+                <Send size={18} />
+              </button>
+            </div>
+            <div 
+              style={{ 
+                fontSize: '11px', 
+                color: 'rgba(255, 255, 255, 0.45)', 
+                textAlign: 'right', 
+                marginTop: '4px', 
+                paddingRight: '8px' 
               }}
             >
-              <Send size={18} />
-            </button>
+              {inputMessage.length} / 1000
+            </div>
           </div>
         </>
       )}
     </div>
   );
 }
+
