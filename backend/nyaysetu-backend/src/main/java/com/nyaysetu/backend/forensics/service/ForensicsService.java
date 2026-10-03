@@ -17,6 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,7 +61,9 @@ public class ForensicsService {
             }
             
             for (MultipartFile video : videos) {
-                String filename = UUID.randomUUID() + "_" + video.getOriginalFilename();
+                String rawName = video.getOriginalFilename() != null ? video.getOriginalFilename() : "video";
+                String safeName = new File(rawName).getName(); // strips all path separators
+                String filename = UUID.randomUUID() + "_" + safeName;
                 Path filePath = uploadPath.resolve(filename);
                 Files.copy(video.getInputStream(), filePath);
                 // For local fastAPI to access, we can give absolute paths
