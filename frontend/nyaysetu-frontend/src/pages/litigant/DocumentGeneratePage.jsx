@@ -8,7 +8,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { documentGenerateAPI } from '../../services/api';
-
+import styles from './DocumentGeneratePage.module.css';
 const DOC_TYPES = [
     {
         id: 'affidavit',
@@ -43,7 +43,8 @@ const DOC_TYPES = [
         bgColor: 'rgba(239, 68, 68, 0.08)',
     },
 ];
-
+const CLIPBOARD_TIMEOUT = 3000;
+const SUCCESS_GREEN = '#059669';
 const DocumentGeneratePage = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
@@ -235,7 +236,9 @@ const DocumentGeneratePage = () => {
             setClipboardStatus('Failed to copy to clipboard');
         } finally {
             setIsCopying(false);
-            window.setTimeout(() => setClipboardStatus(''), 3000);
+         setTimeout(() => {
+    setClipboardStatus('');
+}, CLIPBOARD_TIMEOUT);
         }
     };
 
@@ -722,7 +725,7 @@ const DocumentGeneratePage = () => {
                                 marginBottom: '1rem',
                             }}>
                                 <CheckCircle size={20} color="#10B981" />
-                                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#059669' }}>
+                                <span className={styles.successText}>
                                     Document generated successfully
                                 </span>
                             </div>
@@ -734,7 +737,7 @@ const DocumentGeneratePage = () => {
                                 border: '1px solid #FDE68A', borderRadius: '0.75rem',
                                 marginBottom: '1rem',
                             }}>
-                                <AlertTriangle size={18} color="#D97706" style={{ flexShrink: 0, marginTop: '2px' }} />
+<AlertTriangle size={18} color="#D97706" className={styles.warningIcon} />
                                 <p style={{ fontSize: '0.82rem', color: '#92400E', margin: 0, lineHeight: 1.5 }}>
                                     This document is AI-generated. Please review with a qualified lawyer before submission.
                                 </p>
@@ -870,7 +873,7 @@ const DocumentGeneratePage = () => {
                                         disabled={isDownloading}
                                         style={{
                                             ...btnPrimary,
-                                            background: '#059669',
+                                            background: SUCCESS_GREEN,
                                             opacity: isDownloading ? 0.6 : 1,
                                             cursor: isDownloading ? 'not-allowed' : 'pointer',
                                             minWidth: '180px',
