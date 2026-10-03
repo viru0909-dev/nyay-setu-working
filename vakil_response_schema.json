@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org",
+  "title": "VakilResponseSchema",
+  "type": "object",
+  "properties": {
+    "petition_type": {
+      "type": "string",
+      "description": "The formalized classification of the legal case petition file mapping context."
+    },
+    "section_numbers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "An array list mapping containing the specific relevant legal section citation numbers code records."
+    },
+    "factual_summary": {
+      "type": "string",
+      "description": "The precise, granular text string summarizing the core undisputed case factual overview context parameters."
+    }
+  },
+  "required": [
+    "petition_type",
+    "section_numbers",
+    "factual_summary"
+  ],
+  "additionalProperties": false
+}
