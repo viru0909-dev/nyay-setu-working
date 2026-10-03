@@ -121,3 +121,5 @@ __pycache__/
 backend/nyaysetu-backend/src/main/resources/application.properties
 
 *.zip
+.vscode/
+.idea/
