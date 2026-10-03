@@ -8,6 +8,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { documentGenerateAPI } from '../../services/api';
+import { SkeletonLoader } from '../../components/LoadingSpinner';
 
 const DOC_TYPES = [
     {
@@ -43,6 +44,33 @@ const DOC_TYPES = [
         bgColor: 'rgba(239, 68, 68, 0.08)',
     },
 ];
+
+const DocumentSkeleton = () => (
+    <div style={{ maxWidth: '800px' }}>
+        <SkeletonLoader count={1} />
+
+        <div
+            style={{
+                marginTop: '1rem',
+                padding: '1rem',
+                background: 'var(--bg-surface)',
+                borderRadius: '0.75rem',
+                border: '1px solid var(--color-border)',
+            }}
+        >
+            <div
+                style={{
+                    height: '350px',
+                    background:
+                        'linear-gradient(90deg, rgba(203,213,225,0.4) 0%, rgba(203,213,225,0.6) 50%, rgba(203,213,225,0.4) 100%)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 1.5s infinite',
+                    borderRadius: '8px',
+                }}
+            />
+        </div>
+    </div>
+);
 
 const DocumentGeneratePage = () => {
     const navigate = useNavigate();
@@ -134,9 +162,12 @@ const DocumentGeneratePage = () => {
                 pioName: form.pioName,
             };
 
-            const response = await documentGenerateAPI.preview(payload);
-            setGeneratedDoc(response.data);
             setStep(3);
+
+            const response = await documentGenerateAPI.preview(payload);
+
+            setGeneratedDoc(response.data);
+            
         } catch (err) {
             handleApiError(err);
         } finally {
@@ -452,7 +483,7 @@ const DocumentGeneratePage = () => {
                     )}
 
                     {/* ─── Step 2: Dynamic Form ──────────────────────────── */}
-                    {step === 2 && (
+                    {step === 2 && !isGenerating && (
                         <motion.div
                             key="step2"
                             initial={{ opacity: 0, x: -20 }}
@@ -701,6 +732,15 @@ const DocumentGeneratePage = () => {
                                     </button>
                                 </div>
                             </div>
+                        </motion.div>
+                    )}
+
+                    {isGenerating && !generatedDoc && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                        >
+                            <DocumentSkeleton />
                         </motion.div>
                     )}
 
