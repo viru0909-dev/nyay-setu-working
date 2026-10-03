@@ -1570,8 +1570,8 @@ function HearingsTab({ caseId, caseData }) {
         setShowOutcomeModal(true);
     };
 
-    const joinHearing = (hearing) => {
-        setActiveHearing(hearing);
+    const joinHearing = () => {
+        window.location.assign('/judge/conduct');
     };
 
     const endCall = () => {
@@ -1758,7 +1758,7 @@ function HearingsTab({ caseId, caseData }) {
                     </div>
                     <div style={{ flex: 1 }}>
                         <iframe
-                            src={`https://meet.jit.si/${activeHearing.videoRoomId || 'nyaysetu-hearing-' + activeHearing.id}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","closedcaptions","desktop","fullscreen","fodeviceselection","hangup","chat","recording","raisehand","videoquality","filmstrip","tileview","settings"]`}
+                            src="about:blank"
                             style={{ width: '100%', height: '100%', border: 'none' }}
                             allow="camera; microphone; fullscreen; display-capture; autoplay"
                             title="Court Hearing - NyaySetu"

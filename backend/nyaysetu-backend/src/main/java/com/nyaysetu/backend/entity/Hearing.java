@@ -1,5 +1,6 @@
 package com.nyaysetu.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -34,6 +35,7 @@ public class Hearing {
     @Column(name = "duration_minutes")
     private Integer durationMinutes = 60;
     
+    @JsonIgnore
     @Column(name = "video_room_id", unique = true, nullable = false)
     private String videoRoomId;
     

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { judgeAPI, hearingAPI } from '../../services/api';
 import {
     Video,
@@ -23,6 +23,12 @@ export default function ConductHearingPage() {
     const [aiPrompt, setAiPrompt] = useState('');
     const [aiLoading, setAiLoading] = useState(false);
     const [showAiScheduler, setShowAiScheduler] = useState(false);
+    const [waitingParticipants, setWaitingParticipants] = useState([]);
+    const [waitingRoomLoading, setWaitingRoomLoading] = useState(false);
+    const [hearingActionError, setHearingActionError] = useState('');
+    const [startingHearingId, setStartingHearingId] = useState(null);
+    const [participantActionId, setParticipantActionId] = useState(null);
+    const [endingHearing, setEndingHearing] = useState(false);
 
     const handleAiSchedule = async (e) => {
         e.preventDefault();
@@ -63,16 +69,225 @@ export default function ConductHearingPage() {
         }
     };
 
-    const joinHearing = (hearing) => {
-        setActiveHearing(hearing);
-        setInCall(true);
+    const getActionError = (error, fallback) =>
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        error.response?.data?.error ||
+        error.message ||
+        fallback;
+
+    const fetchWaitingParticipants = useCallback(
+        async (hearingId, showLoading = false) => {
+            if (!hearingId) {
+                return;
+            }
+
+            if (showLoading) {
+                setWaitingRoomLoading(true);
+            }
+
+            try {
+                const response =
+                    await hearingAPI.getWaitingRoom(hearingId);
+
+                setWaitingParticipants(
+                    Array.isArray(response.data)
+                        ? response.data
+                        : []
+                );
+
+                setHearingActionError('');
+            } catch (error) {
+                setHearingActionError(
+                    getActionError(
+                        error,
+                        'Unable to load the waiting room.'
+                    )
+                );
+            } finally {
+                if (showLoading) {
+                    setWaitingRoomLoading(false);
+                }
+            }
+        },
+        []
+    );
+
+    const startHearing = async (hearing) => {
+        setStartingHearingId(hearing.id);
+        setHearingActionError('');
+
+        try {
+            const response =
+                await hearingAPI.start(hearing.id);
+
+            const videoRoomId =
+                response.data?.videoRoomId;
+
+            if (!videoRoomId) {
+                throw new Error(
+                    'The server did not return the judge room.'
+                );
+            }
+
+            const startedHearing = {
+                ...hearing,
+                status:
+                    response.data?.status ||
+                    'IN_PROGRESS',
+                videoRoomId
+            };
+
+            setActiveHearing(startedHearing);
+            setInCall(true);
+
+            setHearings(current =>
+                current.map(item =>
+                    item.id === hearing.id
+                        ? {
+                            ...item,
+                            status: 'IN_PROGRESS'
+                        }
+                        : item
+                )
+            );
+        } catch (error) {
+            setHearingActionError(
+                getActionError(
+                    error,
+                    'Unable to start this hearing.'
+                )
+            );
+        } finally {
+            setStartingHearingId(null);
+        }
     };
 
-    const endCall = () => {
+    const admitParticipant = async (participantId) => {
+        if (!activeHearing) {
+            return;
+        }
+
+        setParticipantActionId(participantId);
+        setHearingActionError('');
+
+        try {
+            await hearingAPI.admitParticipant(
+                activeHearing.id,
+                participantId
+            );
+
+            await fetchWaitingParticipants(
+                activeHearing.id
+            );
+        } catch (error) {
+            setHearingActionError(
+                getActionError(
+                    error,
+                    'Unable to admit this participant.'
+                )
+            );
+        } finally {
+            setParticipantActionId(null);
+        }
+    };
+
+    const rejectParticipant = async (participantId) => {
+        if (!activeHearing) {
+            return;
+        }
+
+        setParticipantActionId(participantId);
+        setHearingActionError('');
+
+        try {
+            await hearingAPI.rejectParticipant(
+                activeHearing.id,
+                participantId
+            );
+
+            await fetchWaitingParticipants(
+                activeHearing.id
+            );
+        } catch (error) {
+            setHearingActionError(
+                getActionError(
+                    error,
+                    'Unable to reject this participant.'
+                )
+            );
+        } finally {
+            setParticipantActionId(null);
+        }
+    };
+
+    const leaveHearingView = () => {
         setInCall(false);
         setActiveHearing(null);
+        setWaitingParticipants([]);
+        setHearingActionError('');
     };
 
+    const endHearing = async () => {
+        if (!activeHearing) {
+            return;
+        }
+
+        setEndingHearing(true);
+        setHearingActionError('');
+
+        try {
+            await hearingAPI.end(activeHearing.id);
+
+            setHearings(current =>
+                current.map(item =>
+                    item.id === activeHearing.id
+                        ? {
+                            ...item,
+                            status: 'COMPLETED'
+                        }
+                        : item
+                )
+            );
+
+            leaveHearingView();
+        } catch (error) {
+            setHearingActionError(
+                getActionError(
+                    error,
+                    'Unable to end this hearing.'
+                )
+            );
+        } finally {
+            setEndingHearing(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!inCall || !activeHearing?.id) {
+            return undefined;
+        }
+
+        fetchWaitingParticipants(
+            activeHearing.id,
+            true
+        );
+
+        const intervalId = window.setInterval(
+            () =>
+                fetchWaitingParticipants(
+                    activeHearing.id
+                ),
+            3000
+        );
+
+        return () =>
+            window.clearInterval(intervalId);
+    }, [
+        inCall,
+        activeHearing?.id,
+        fetchWaitingParticipants
+    ]);
     const canJoin = (scheduledDate) => {
         const now = new Date();
         const hearingTime = new Date(scheduledDate);
@@ -133,7 +348,7 @@ export default function ConductHearingPage() {
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <button
-                            onClick={endCall}
+                            onClick={leaveHearingView}
                             aria-label="Leave hearing"
                             style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer' }}
                         >
@@ -159,20 +374,322 @@ export default function ConductHearingPage() {
                     </div>
                 </div>
 
-                {/* Jitsi Video Container */}
-                <div style={{ flex: 1, position: 'relative', borderRadius: '1.5rem', overflow: 'hidden', border: 'var(--border-glass-strong)', boxShadow: 'var(--shadow-glass)' }}>
-                    <iframe
-                        src={`https://meet.jit.si/${activeHearing.videoRoomId}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","closedcaptions","desktop","embedmeeting","fullscreen","fodeviceselection","hangup","profile","chat","recording","livestreaming","etherpad","sharedvideo","settings","raisehand","videoquality","filmstrip","invite","feedback","stats","shortcuts","tileview","videobackgroundblur","download","help","mute-everyone","security"]`}
+                {/* Secure hearing room and judge waiting-room controls */}
+                <div
+                    style={{
+                        flex: 1,
+                        minHeight: 0,
+                        display: 'grid',
+                        gridTemplateColumns:
+                            'minmax(0, 1fr) 340px',
+                        gap: '1rem'
+                    }}
+                >
+                    <div
                         style={{
-                            width: '100%',
-                            height: '100%',
-                            border: 'none'
+                            position: 'relative',
+                            minHeight: 0,
+                            borderRadius: '1.5rem',
+                            overflow: 'hidden',
+                            border:
+                                'var(--border-glass-strong)',
+                            boxShadow:
+                                'var(--shadow-glass)'
                         }}
-                        allow="camera; microphone; fullscreen; display-capture; autoplay"
-                        title="Court Hearing"
-                    />
-                </div>
+                    >
+                        <iframe
+                            src={`https://meet.jit.si/${activeHearing.videoRoomId}#config.prejoinConfig.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","closedcaptions","desktop","embedmeeting","fullscreen","fodeviceselection","hangup","profile","chat","recording","livestreaming","etherpad","sharedvideo","settings","raisehand","videoquality","filmstrip","invite","feedback","stats","shortcuts","tileview","videobackgroundblur","download","help","mute-everyone","security"]`}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                border: 'none'
+                            }}
+                            allow="camera; microphone; fullscreen; display-capture; autoplay"
+                            title="Court Hearing"
+                        />
+                    </div>
 
+                    <aside
+                        style={{
+                            ...glassStyle,
+                            padding: '1rem',
+                            minHeight: 0,
+                            overflowY: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '1rem'
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent:
+                                    'space-between',
+                                alignItems: 'center',
+                                gap: '0.75rem'
+                            }}
+                        >
+                            <div>
+                                <h3
+                                    style={{
+                                        margin: 0,
+                                        color:
+                                            'var(--text-main)',
+                                        fontSize: '1rem'
+                                    }}
+                                >
+                                    Waiting Room
+                                </h3>
+
+                                <div
+                                    style={{
+                                        marginTop: '0.25rem',
+                                        color:
+                                            'var(--text-secondary)',
+                                        fontSize: '0.8rem'
+                                    }}
+                                >
+                                    {
+                                        waitingParticipants.length
+                                    } participant
+                                    {
+                                        waitingParticipants.length ===
+                                        1
+                                            ? ''
+                                            : 's'
+                                    } waiting
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    fetchWaitingParticipants(
+                                        activeHearing.id,
+                                        true
+                                    )
+                                }
+                                disabled={waitingRoomLoading}
+                                style={{
+                                    border:
+                                        'var(--border-glass)',
+                                    background:
+                                        'var(--bg-glass)',
+                                    color:
+                                        'var(--text-main)',
+                                    borderRadius: '0.6rem',
+                                    padding: '0.5rem',
+                                    cursor:
+                                        waitingRoomLoading
+                                            ? 'wait'
+                                            : 'pointer'
+                                }}
+                            >
+                                {waitingRoomLoading
+                                    ? '...'
+                                    : 'Refresh'}
+                            </button>
+                        </div>
+
+                        {hearingActionError && (
+                            <div
+                                role="alert"
+                                style={{
+                                    padding: '0.75rem',
+                                    borderRadius:
+                                        '0.75rem',
+                                    background:
+                                        'rgba(239, 68, 68, 0.1)',
+                                    border:
+                                        '1px solid rgba(239, 68, 68, 0.3)',
+                                    color: '#ef4444',
+                                    fontSize: '0.85rem'
+                                }}
+                            >
+                                {hearingActionError}
+                            </div>
+                        )}
+
+                        {waitingRoomLoading &&
+                        waitingParticipants.length === 0 ? (
+                            <div
+                                style={{
+                                    padding: '2rem 1rem',
+                                    textAlign: 'center',
+                                    color:
+                                        'var(--text-secondary)'
+                                }}
+                            >
+                                <Loader2
+                                    size={24}
+                                    className="spin"
+                                    style={{
+                                        margin:
+                                            '0 auto 0.75rem'
+                                    }}
+                                />
+
+                                Loading waiting room...
+                            </div>
+                        ) : waitingParticipants.length === 0 ? (
+                            <div
+                                style={{
+                                    padding: '2rem 1rem',
+                                    textAlign: 'center',
+                                    color:
+                                        'var(--text-secondary)',
+                                    border:
+                                        '1px dashed var(--border-glass)',
+                                    borderRadius: '0.75rem'
+                                }}
+                            >
+                                <Users
+                                    size={28}
+                                    style={{
+                                        margin:
+                                            '0 auto 0.75rem',
+                                        opacity: 0.6
+                                    }}
+                                />
+
+                                No participants are waiting.
+                            </div>
+                        ) : (
+                            waitingParticipants.map(
+                                participant => (
+                                    <div
+                                        key={
+                                            participant.participantId
+                                        }
+                                        style={{
+                                            padding: '0.85rem',
+                                            borderRadius:
+                                                '0.75rem',
+                                            border:
+                                                'var(--border-glass)',
+                                            background:
+                                                'var(--bg-glass)',
+                                            display: 'flex',
+                                            flexDirection:
+                                                'column',
+                                            gap: '0.75rem'
+                                        }}
+                                    >
+                                        <div>
+                                            <div
+                                                style={{
+                                                    color:
+                                                        'var(--text-main)',
+                                                    fontWeight:
+                                                        '700'
+                                                }}
+                                            >
+                                                {
+                                                    participant.name ||
+                                                    participant.email ||
+                                                    'Participant'
+                                                }
+                                            </div>
+
+                                            <div
+                                                style={{
+                                                    color:
+                                                        'var(--text-secondary)',
+                                                    fontSize:
+                                                        '0.75rem',
+                                                    marginTop:
+                                                        '0.2rem'
+                                                }}
+                                            >
+                                                {
+                                                    participant.role
+                                                }
+                                                {
+                                                    participant.email
+                                                        ? ` • ${participant.email}`
+                                                        : ''
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            style={{
+                                                display: 'grid',
+                                                gridTemplateColumns:
+                                                    '1fr 1fr',
+                                                gap: '0.5rem'
+                                            }}
+                                        >
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    admitParticipant(
+                                                        participant.participantId
+                                                    )
+                                                }
+                                                disabled={
+                                                    participantActionId ===
+                                                    participant.participantId
+                                                }
+                                                style={{
+                                                    border: 'none',
+                                                    borderRadius:
+                                                        '0.6rem',
+                                                    padding:
+                                                        '0.55rem',
+                                                    background:
+                                                        '#16a34a',
+                                                    color: 'white',
+                                                    fontWeight:
+                                                        '700',
+                                                    cursor:
+                                                        participantActionId ===
+                                                        participant.participantId
+                                                            ? 'wait'
+                                                            : 'pointer'
+                                                }}
+                                            >
+                                                Admit
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    rejectParticipant(
+                                                        participant.participantId
+                                                    )
+                                                }
+                                                disabled={
+                                                    participantActionId ===
+                                                    participant.participantId
+                                                }
+                                                style={{
+                                                    border: 'none',
+                                                    borderRadius:
+                                                        '0.6rem',
+                                                    padding:
+                                                        '0.55rem',
+                                                    background:
+                                                        '#dc2626',
+                                                    color: 'white',
+                                                    fontWeight:
+                                                        '700',
+                                                    cursor:
+                                                        participantActionId ===
+                                                        participant.participantId
+                                                            ? 'wait'
+                                                            : 'pointer'
+                                                }}
+                                            >
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                )
+                            )
+                        )}
+                    </aside>
+                </div>
                 {/* Bottom Control Bar */}
                 <div style={{
                     display: 'flex',
@@ -181,7 +698,8 @@ export default function ConductHearingPage() {
                     padding: '0.5rem'
                 }}>
                     <button
-                        onClick={endCall}
+                        onClick={endHearing}
+                        disabled={endingHearing}
                         style={{
                             padding: '1rem 2.5rem',
                             background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
@@ -366,8 +884,8 @@ export default function ConductHearingPage() {
                                     </div>
 
                                     <button
-                                        onClick={() => joinHearing(hearing)}
-                                        disabled={!canJoinNow}
+                                        onClick={() => startHearing(hearing)}
+                                        disabled={!canJoinNow || startingHearingId === hearing.id}
                                         style={{
                                             ...primaryButtonStyle,
                                             padding: '1rem 2rem',
@@ -380,7 +898,15 @@ export default function ConductHearingPage() {
                                         onMouseOut={e => canJoinNow && (e.currentTarget.style.transform = 'translateY(0)')}
                                     >
                                         <Video size={20} />
-                                        {canJoinNow ? 'START SESSION' : 'COMING UP'}
+                                        {
+                                            startingHearingId === hearing.id
+                                                ? 'STARTING...'
+                                                : canJoinNow
+                                                    ? hearing.status === 'IN_PROGRESS'
+                                                        ? 'REJOIN SESSION'
+                                                        : 'START SESSION'
+                                                    : 'COMING UP'
+                                        }
                                     </button>
                                 </div>
                             </div>

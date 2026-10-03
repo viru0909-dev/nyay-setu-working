@@ -82,6 +82,7 @@ public class HearingService {
                 .hearing(hearing)
                 .user(User.builder().id(userId).build())
                 .role(role)
+                .admissionStatus(ParticipantAdmissionStatus.INVITED)
                 .canSpeak(true)
                 .isVideoOn(true)
                 .isAudioOn(true)
@@ -94,18 +95,33 @@ public class HearingService {
     public void joinHearing(UUID hearingId, Long userId) {
         HearingParticipant participant = participantRepository
                 .findByHearingIdAndUserId(hearingId, userId)
-                .orElseThrow(() -> new RuntimeException("User not authorized for this hearing"));
-        
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "User not authorized for this hearing"
+                        )
+                );
+
+        Hearing hearing = hearingRepository.findById(hearingId)
+                .orElseThrow(() ->
+                        new RuntimeException("Hearing not found")
+                );
+
+        if (participant.getAdmissionStatus() !=
+                ParticipantAdmissionStatus.ADMITTED) {
+            throw new RuntimeException(
+                    "Participant has not been admitted"
+            );
+        }
+
+        if (hearing.getStatus() != HearingStatus.IN_PROGRESS) {
+            throw new RuntimeException(
+                    "The judge has not started the hearing"
+            );
+        }
+
         participant.setJoinedAt(LocalDateTime.now());
         participantRepository.save(participant);
-        
-        Hearing hearing = hearingRepository.findById(hearingId).orElseThrow();
-        if (hearing.getStatus() == HearingStatus.SCHEDULED) {
-            hearing.setStatus(HearingStatus.IN_PROGRESS);
-            hearingRepository.save(hearing);
-        }
     }
-    
     @Transactional
     public void leaveHearing(UUID hearingId, Long userId) {
         HearingParticipant participant = participantRepository
@@ -220,6 +236,19 @@ public class HearingService {
     }
 
     public boolean canUserJoinHearing(UUID hearingId, Long userId) {
-        return participantRepository.existsByHearingIdAndUserId(hearingId, userId);
+        HearingParticipant participant = participantRepository
+                .findByHearingIdAndUserId(hearingId, userId)
+                .orElse(null);
+
+        if (participant == null ||
+                participant.getAdmissionStatus() !=
+                        ParticipantAdmissionStatus.ADMITTED) {
+            return false;
+        }
+
+        Hearing hearing = participant.getHearing();
+
+        return hearing != null &&
+                hearing.getStatus() == HearingStatus.IN_PROGRESS;
     }
 }
