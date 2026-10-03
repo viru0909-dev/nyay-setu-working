@@ -21,14 +21,14 @@ public class MessageService {
     private final CaseMessageRepository messageRepository;
     private final CaseTimelineService timelineService;
 
-    public CaseMessage sendMessage(UUID caseId, SendMessageRequest dto) {
+    public CaseMessage sendMessage(UUID caseId, Long senderId, SendMessageRequest dto) {
 
         CaseEntity caseEntity = caseRepository.findById(caseId)
                 .orElseThrow(() -> new NotFoundException("Case not found: " + caseId));
 
         CaseMessage msg = CaseMessage.builder()
                 .legalCaseId(caseId)
-                .senderId(dto.getSenderId())
+                .senderId(senderId)
                 .message(dto.getMessage())
                 .type(dto.getType() != null ? dto.getType() : "TEXT")
                 .attachmentUrl(dto.getAttachmentUrl())
