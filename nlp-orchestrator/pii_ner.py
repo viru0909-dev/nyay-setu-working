@@ -221,25 +221,33 @@ def anonymize_document(
             deduped.append(ent)
             cursor = ent.end
 
-    # Build redacted spans (right-to-left replacement)
+    # Build redacted spans (left-to-right replacement to track offset shifts)
     result = text
     redacted_spans: list[RedactedSpan] = []
+    shift = 0
 
-    for ent in reversed(deduped):
+    for ent in deduped:
         placeholder = _PLACEHOLDER.get(ent.type, "[REDACTED]")
-        original_slice = result[ent.start:ent.end]
+        original_slice = text[ent.start:ent.end]
         if not original_slice.strip():
             continue
-        result = result[: ent.start] + placeholder + result[ent.end :]
+            
+        new_start = ent.start + shift
+        new_end = new_start + len(placeholder)
+        
+        result = result[:new_start] + placeholder + result[new_start + len(original_slice):]
+        
         redacted_spans.append(
             RedactedSpan(
                 original=original_slice,
                 replacement=placeholder,
                 entity_type=ent.type,
-                start=ent.start,
-                end=ent.start + len(placeholder),
+                start=new_start,
+                end=new_end,
             )
         )
+        
+        shift += len(placeholder) - len(original_slice)
 
     # Return spans in document order
     redacted_spans.sort(key=lambda s: s.start)
