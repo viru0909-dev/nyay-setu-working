@@ -32,6 +32,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+                 <!-- JSON Schema validation for Groq AI responses -->
+<dependency>
+    <groupId>com.networknt</groupId>
+    <artifactId>json-schema-validator</artifactId>
+    <version>1.5.6</version>
+</dependency>
 
             <!-- Spring Cloud BOM -->
             <dependency>
@@ -42,12 +48,14 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- JSON Schema validation for Vakil-Friend AI output -->
-            <dependency>
-                <groupId>com.networknt</groupId>
-                <artifactId>json-schema-validator</artifactId>
-                <version>1.0.87</version>
-            </dependency>
+                 <!-- JSON Schema validation for Groq AI responses -->
+<dependency>
+    <groupId>com.networknt</groupId>
+    <artifactId>json-schema-validator</artifactId>
+    <version>1.5.6</version>
+</dependency>
+
+           
 
             <!-- Optional: spring-ai BOM if present (not always available) -->
             <!-- if you don't have a BOM, explicit versions are used in ai-service -->
