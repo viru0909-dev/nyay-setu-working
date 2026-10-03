@@ -14,7 +14,7 @@
     "@react-three/drei": "^9.117.3",
     "@react-three/fiber": "^8.17.10",
     "aos": "^2.3.4",
-    "axios": "^1.6.2",
+    "axios": "^1.18.0",
     "dexie": "^4.4.3",
     "dexie-react-hooks": "^4.2.0",
     "face-api.js": "^0.22.2",
