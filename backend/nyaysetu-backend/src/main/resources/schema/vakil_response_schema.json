@@ -1,0 +1,49 @@
+﻿{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VakilFriend Case Data",
+  "description": "JSON Schema for validating structured case-filing data extracted from Vakil-Friend AI conversations.",
+  "type": "object",
+  "required": ["title", "description", "caseType", "petitioner", "respondent", "urgency", "target"],
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Short descriptive title for the legal case."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 5000,
+      "description": "Detailed description of the legal issue."
+    },
+    "caseType": {
+      "type": "string",
+      "enum": ["CIVIL", "CRIMINAL", "FAMILY", "PROPERTY", "COMMERCIAL"],
+      "description": "Category of the legal case."
+    },
+    "petitioner": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Name of the person filing the case."
+    },
+    "respondent": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Name of the opposing party."
+    },
+    "urgency": {
+      "type": "string",
+      "enum": ["NORMAL", "URGENT", "CRITICAL"],
+      "description": "Urgency level of the case."
+    },
+    "target": {
+      "type": "string",
+      "enum": ["POLICE", "COURT"],
+      "description": "Whether the case should be filed with the police or the court."
+    }
+  }
+}

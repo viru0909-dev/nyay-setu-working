@@ -196,6 +196,13 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
+        <!-- JSON Schema Validator (used by GroqResponseValidator and VakilFriendGroqValidatorService) -->
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.5.8</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
