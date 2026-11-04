@@ -196,7 +196,10 @@ public class SecurityConfig {
                                 "/api/v1/auth/test",
                                 "/api/v1/health",
                                 "/api/v1/police/health",
+                                // ── Swagger UI & OpenAPI documentation ──────────────────
+                                "/v3/api-docs",
                                 "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/actuator/**"
