@@ -41,6 +41,8 @@ export default function VakilFriendChat() {
     const [audioData, setAudioData] = useState(null); // Add audioData state for 3D Avatar lip sync
     const [avatarState, setAvatarState] = useState('idle');
     const [showAvatar, setShowAvatar] = useState(false);
+    const [validationError, setValidationError] = useState(''); // Input validation error
+    const MAX_MESSAGE_LENGTH = 2000; // Maximum character limit
 
     // Deep Research State
     const [isDeepResearching, setIsDeepResearching] = useState(false);
@@ -264,13 +266,78 @@ const {
         }, 1000);
     };
 
+    // Client-side input sanitization to prevent XSS
+    const sanitizeInput = (input) => {
+        if (!input) return '';
+        
+        // Remove script tags
+        let sanitized = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+        
+        // Remove event handlers
+        sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
+        sanitized = sanitized.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '');
+        
+        // Remove javascript: protocol
+        sanitized = sanitized.replace(/javascript:/gi, '');
+        
+        // Remove data URIs
+        sanitized = sanitized.replace(/data:text\/html[^,]*,/gi, '');
+        
+        // Remove potentially dangerous tags
+        sanitized = sanitized.replace(/<(iframe|embed|object)[^>]*>.*?<\/\1>/gi, '');
+        sanitized = sanitized.replace(/<(iframe|embed|object)[^>]*\/>/gi, '');
+        
+        return sanitized;
+    };
+
+    // Validate message input
+    const validateMessage = (message) => {
+        if (!message || message.trim().length === 0) {
+            return 'Message cannot be empty';
+        }
+        
+        if (message.trim().length > MAX_MESSAGE_LENGTH) {
+            return `Message must not exceed ${MAX_MESSAGE_LENGTH} characters`;
+        }
+        
+        return null;
+    };
+
+    // Handle input change with validation
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setInputMessage(value);
+        
+        // Clear validation error when user starts typing valid content
+        if (value.trim().length > 0 && value.length <= MAX_MESSAGE_LENGTH) {
+            setValidationError('');
+        } else if (value.length > MAX_MESSAGE_LENGTH) {
+            setValidationError(`Message exceeds ${MAX_MESSAGE_LENGTH} characters`);
+        }
+    };
+
     const sendMessage = async (audioData = null, overrideText = null) => {
         const textToSend = overrideText || inputMessage;
+        
+        // Validate message
+        if (!audioData) {
+            const validationErr = validateMessage(textToSend);
+            if (validationErr) {
+                setValidationError(validationErr);
+                return;
+            }
+        }
+        
         if ((!textToSend.trim() && !audioData) || isLoading || isStarting) return;
 
-        const userMessage = textToSend.trim();
+        // Sanitize input
+        const userMessage = sanitizeInput(textToSend.trim());
+        
         // Only clear the input message box if we aren't overriding it (standard UI flow)
-        if (!overrideText) setInputMessage('');
+        if (!overrideText) {
+            setInputMessage('');
+            setValidationError(''); // Clear validation error on successful send
+        }
 
         shouldAutoScrollRef.current = true; // Enable auto-scroll for new messages
 
@@ -1820,29 +1887,57 @@ const startDeepResearch = async (query) => {
                         >
                         <Scan size={18} />
                     </button>
-                        <textarea
-                            value={inputMessage}
-                            onChange={(e) => setInputMessage(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            placeholder={t('vakilFriend.placeholder')}
-                            disabled={isLoading || isStarting}
-                            rows={2}
-                            style={{
-                                flex: 1,
-                                padding: '0.75rem 1rem',
-                                background: 'var(--bg-glass)',
-                                border: 'var(--border-glass)',
-                                borderRadius: '0.625rem',
-                                color: 'var(--text-main)',
-                                fontSize: '0.9rem',
-                                resize: 'none',
-                                outline: 'none',
-                                fontFamily: 'inherit',
-                                transition: 'all 0.2s'
-                            }}
-                            onFocus={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
-                            onBlur={e => e.currentTarget.style.borderColor = 'var(--border-glass)'}
-                        />
+                        <div style={{ flex: 1, position: 'relative' }}>
+                            <textarea
+                                value={inputMessage}
+                                onChange={handleInputChange}
+                                onKeyPress={handleKeyPress}
+                                placeholder={t('vakilFriend.placeholder')}
+                                disabled={isLoading || isStarting}
+                                rows={2}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem 1rem',
+                                    paddingBottom: '1.75rem',
+                                    background: 'var(--bg-glass)',
+                                    border: validationError ? '1px solid #ef4444' : 'var(--border-glass)',
+                                    borderRadius: '0.625rem',
+                                    color: 'var(--text-main)',
+                                    fontSize: '0.9rem',
+                                    resize: 'none',
+                                    outline: 'none',
+                                    fontFamily: 'inherit',
+                                    transition: 'all 0.2s',
+                                    boxSizing: 'border-box'
+                                }}
+                                onFocus={e => e.currentTarget.style.borderColor = validationError ? '#ef4444' : 'var(--color-primary)'}
+                                onBlur={e => e.currentTarget.style.borderColor = validationError ? '#ef4444' : 'var(--border-glass)'}
+                            />
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '0.5rem',
+                                right: '1rem',
+                                fontSize: '0.75rem',
+                                color: inputMessage.length > MAX_MESSAGE_LENGTH ? '#ef4444' : 
+                                       inputMessage.length > MAX_MESSAGE_LENGTH * 0.9 ? '#f59e0b' : 
+                                       'var(--text-secondary)',
+                                fontWeight: inputMessage.length > MAX_MESSAGE_LENGTH * 0.9 ? '600' : '400'
+                            }}>
+                                {inputMessage.length} / {MAX_MESSAGE_LENGTH}
+                            </div>
+                            {validationError && (
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: '-1.5rem',
+                                    left: '0',
+                                    fontSize: '0.75rem',
+                                    color: '#ef4444',
+                                    fontWeight: '500'
+                                }}>
+                                    ⚠️ {validationError}
+                                </div>
+                            )}
+                        </div>
 
                         {/* Mic Button */}
                         <button
@@ -1905,20 +2000,20 @@ const startDeepResearch = async (query) => {
 
                         <button
                             onClick={() => sendMessage()}
-                            disabled={!inputMessage.trim() || isLoading || isStarting || rateLimited}
+                            disabled={!inputMessage.trim() || isLoading || isStarting || rateLimited || validationError || inputMessage.length > MAX_MESSAGE_LENGTH}
                             style={{
                                 padding: '0.75rem 1rem',
-                                background: (!inputMessage.trim() || isLoading || isStarting || rateLimited)
+                                background: (!inputMessage.trim() || isLoading || isStarting || rateLimited || validationError || inputMessage.length > MAX_MESSAGE_LENGTH)
                                     ? 'var(--bg-glass-strong)'
                                     : 'var(--color-primary)',
                                 border: 'none',
                                 borderRadius: '0.625rem',
-                                color: (!inputMessage.trim() || isLoading || isStarting || rateLimited) ? 'var(--text-secondary)' : 'white',
-                                cursor: (!inputMessage.trim() || isLoading || isStarting || rateLimited) ? 'not-allowed' : 'pointer',
+                                color: (!inputMessage.trim() || isLoading || isStarting || rateLimited || validationError || inputMessage.length > MAX_MESSAGE_LENGTH) ? 'var(--text-secondary)' : 'white',
+                                cursor: (!inputMessage.trim() || isLoading || isStarting || rateLimited || validationError || inputMessage.length > MAX_MESSAGE_LENGTH) ? 'not-allowed' : 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                boxShadow: (!inputMessage.trim() || isLoading || isStarting || rateLimited)
+                                boxShadow: (!inputMessage.trim() || isLoading || isStarting || rateLimited || validationError || inputMessage.length > MAX_MESSAGE_LENGTH)
                                     ? 'none'
                                     : '0 4px 15px rgba(30, 42, 68, 0.4)',
                                 transition: 'all 0.2s'

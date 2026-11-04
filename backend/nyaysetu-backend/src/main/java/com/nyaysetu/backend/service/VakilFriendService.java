@@ -258,6 +258,9 @@ public class VakilFriendService {
  
         String userLang = request.getLanguage() != null ? request.getLanguage() : "en";
         String userMessage = request.getMessage();
+        
+        // INPUT SANITIZATION: Remove potential XSS threats while preserving legitimate content
+        userMessage = sanitizeUserInput(userMessage);
  
         // 1. Handle Audio Input (ASR)
         if (request.getAudioData() != null && !request.getAudioData().isEmpty()) {
@@ -267,6 +270,8 @@ public class VakilFriendService {
             if (userMessage.isEmpty()) {
                 userMessage = "[Audio unintelligible]";
             }
+            // Sanitize transcribed input as well
+            userMessage = sanitizeUserInput(userMessage);
         }
  
         // 2. Translate to English if needed (for better AI reasoning)
@@ -1077,5 +1082,45 @@ public class VakilFriendService {
         String datePrefix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String randomSuffix = String.format("%06d", (int) (Math.random() * 1000000));
         return "FIR-" + datePrefix + "-" + randomSuffix;
+    }
+    
+    /**
+     * Sanitize user input to prevent XSS attacks while preserving legitimate content.
+     * This method removes or escapes potentially dangerous HTML/JavaScript patterns
+     * while allowing normal text, punctuation, Unicode characters, and Indian languages.
+     * 
+     * @param input raw user input
+     * @return sanitized input safe for storage and display
+     */
+    private String sanitizeUserInput(String input) {
+        if (input == null || input.isBlank()) {
+            return input;
+        }
+        
+        // Remove script tags and their content
+        String sanitized = input.replaceAll("(?i)<script[^>]*>.*?</script>", "");
+        
+        // Remove event handlers (onclick, onerror, etc.)
+        sanitized = sanitized.replaceAll("(?i)\\s*on\\w+\\s*=\\s*[\"'][^\"']*[\"']", "");
+        sanitized = sanitized.replaceAll("(?i)\\s*on\\w+\\s*=\\s*[^\\s>]*", "");
+        
+        // Remove javascript: protocol
+        sanitized = sanitized.replaceAll("(?i)javascript:", "");
+        
+        // Remove data: URIs that could contain scripts
+        sanitized = sanitized.replaceAll("(?i)data:text/html[^,]*,", "");
+        
+        // Remove iframe, embed, and object tags
+        sanitized = sanitized.replaceAll("(?i)<(iframe|embed|object)[^>]*>.*?</\\1>", "");
+        sanitized = sanitized.replaceAll("(?i)<(iframe|embed|object)[^>]*/>", "");
+        
+        // Remove style tags with expressions
+        sanitized = sanitized.replaceAll("(?i)<style[^>]*>.*?</style>", "");
+        
+        // Escape remaining angle brackets to prevent HTML injection
+        // Note: We preserve the text content but neutralize HTML structure
+        sanitized = sanitized.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+        
+        return sanitized.trim();
     }
 }
