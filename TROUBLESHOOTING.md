@@ -134,3 +134,57 @@ Additionally, handle downstream timeouts gracefully to avoid deadlocks:
 spring.mail.properties.mail.smtp.connectiontimeout=5000
 spring.mail.properties.mail.smtp.timeout=5000
 ```
+## Local Frontend Development Issues
+
+### 1. Vite dependency scanning or compilation errors
+
+**Symptom:** Running `npm run dev` starts the Vite server but reports errors while scanning frontend dependencies.
+
+**Possible causes:**
+- Duplicate variable declarations in React components.
+- Invalid JSX syntax, such as mismatched or unclosed HTML/JSX tags.
+
+**Resolution:**
+1. Check the file path and line number displayed in the terminal.
+2. For duplicate declaration errors, check whether the same variable is declared more than once in the same scope.
+3. For JSX errors, verify that every opening tag has a matching closing tag.
+4. Check nearby code when the compiler reports an additional syntax error, as one earlier syntax issue can cause cascading errors.
+5. If the errors exist in a fresh checkout, report them to the maintainers with the relevant error messages.
+
+### 2. Local development service ports
+
+**Default development ports:**
+
+| Service | Port |
+|---|---:|
+| React/Vite frontend | 5173 |
+| Spring Boot backend | 8080 |
+| Python NLP service | 8001 |
+| PostgreSQL database | 5432 |
+
+**Symptom:** The application reports that a port is already in use.
+
+**Resolution:**
+1. Check which process is using the port.
+2. Stop the conflicting process if it is no longer needed.
+3. Restart the affected service.
+
+On Windows PowerShell, check a port using:
+
+```powershell
+Get-NetTCPConnection -LocalPort 5173 -State Listen
+```
+
+Replace `5173` with the port you need to check.
+
+### 3. Java and Maven version requirements
+
+**Symptom:** The backend build fails with a Java compatibility error, or PowerShell does not recognize the `mvn` command.
+
+**Cause:** The backend is configured to target Java 17 and requires Maven.
+
+**Resolution:**
+1. Check the installed Java version using `java -version`.
+2. Check which Java version Maven uses with `mvn -version`.
+3. Install and configure the required JDK and Maven versions listed in the project setup instructions.
+4. If `mvn` is not recognized, install Maven, add its `bin` directory to PATH, and reopen PowerShell.

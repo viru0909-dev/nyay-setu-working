@@ -1,6 +1,7 @@
 package com.nyaysetu.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChatMessageRequest {
 
-    @NotBlank(message = "Message cannot be empty")
+    @NotBlank(message = "Message cannot be empty or contain only whitespace")
+    @Size(max = 2000, message = "Message must not exceed 2000 characters")
     private String message;
 
     private String ocrContext;  // optional
