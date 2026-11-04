@@ -432,7 +432,6 @@ Browse [open issues](https://github.com/viru0909-dev/nyay-setu-working/issues) a
 <hr/>
 
 ## Troubleshooting
-
 ### Common Setup Issues
 
 #### 1. npm install fails
@@ -487,9 +486,43 @@ Stop conflicting processes or use different ports.
 
 Example:
 
+
 ```bash
 npx kill-port 3000
 ```
+
+### 7. Frontend Vite compilation errors
+
+**Problem:** Running `npm run dev` reports duplicate declarations or JSX syntax errors.
+
+**Solution:**
+- Check the file and line number shown in the terminal.
+- Look for duplicate variable declarations.
+- Check that JSX opening and closing tags match.
+- If the errors are present in a fresh clone, report them to the maintainers.
+
+### 8. How do I run all services together?
+
+The project has three main application services and a PostgreSQL database:
+
+| Service | Development port |
+|---|---:|
+| React/Vite frontend | 5173 |
+| Spring Boot backend | 8080 |
+| Python NLP service | 8001 |
+| PostgreSQL database | 5432 |
+When using Docker Compose, the frontend is served through Nginx on port 80 instead of the Vite development server on port 5173.
+
+You can start each application service separately using its setup instructions.
+
+Alternatively, the root `docker-compose.yml` defines all four services. To start them together:
+
+```bash
+docker compose up --build
+```
+
+Make sure Docker Desktop is running and the required environment variables are configured in the root `.env` file before starting Docker Compose.
+
 
 ## Contributors
 
