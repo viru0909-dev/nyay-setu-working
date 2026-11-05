@@ -1277,7 +1277,7 @@ const startDeepResearch = async (query) => {
                             marginBottom: '1.5rem'
                         }}>
                             <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.75rem' }}>{t('vakilFriend.aiSummary')}</div>
-                            <p style={{ color: '#334155', fontSize: '1rem', lineHeight: '1.6', margin: 0 }}>
+                            <p style={{ color: '#334155', fontSize: '1rem', lineHeight: '1.6', margin: 0 }} />
                         </div>
 
                         {/* Case Summary Viewer */}
